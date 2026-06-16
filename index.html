@@ -33,6 +33,32 @@
         
         /* Tinh chỉnh nhỏ để Choices.js hiển thị đẹp với Tailwind */
         .choices__inner { background-color: white; border-radius: 0.5rem; }
+		
+		/* Dán đoạn CSS mới của bạn vào đây: */
+        @media (max-width: 600px) {
+            .dashboard-container {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .dashboard-card {
+                padding: 10px;
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .table-responsive {
+                width: 100%;
+                overflow-x: auto;
+                display: block;
+            }
+            table {
+                width: 100%;
+                min-width: 500px;
+                font-size: 12px;
+            }
+        }
     </style>
     
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -89,70 +115,61 @@
     <main class="flex-1 p-8">
         
         <!-- PHẦN 1: TRANG CHỦ -->
- <div id="page-home" class="p-8 space-y-8 bg-slate-50 min-h-screen">
+ <div id="page-home" class="p-4 md:p-8 space-y-8 bg-slate-50 min-h-screen">
     <div class="flex justify-between items-end">
         <div>
-            <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">BẢNG ĐIỀU KHIỂN</h2>
-            <p class="text-slate-500">Tổng quan tình hình kinh doanh</p>
+            <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">BẢNG ĐIỀU KHIỂN</h2>
+            <p class="text-slate-500 text-sm">Tổng quan tình hình kinh doanh</p>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-blue-500 p-6 rounded-3xl text-white shadow-lg shadow-blue-200 transition hover:scale-[1.02]">
-            <p class="text-xs font-bold uppercase opacity-80">Doanh Thu</p>
-            <h3 id="total-revenue" class="text-2xl font-black mt-1">0 đ</h3>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        <div class="bg-blue-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02]">
+            <p class="text-[10px] md:text-xs font-bold uppercase opacity-80">Doanh Thu</p>
+            <h3 id="total-revenue" class="text-lg md:text-2xl font-black mt-1">0 đ</h3>
         </div>
-        <div class="bg-emerald-500 p-6 rounded-3xl text-white shadow-lg shadow-emerald-200 transition hover:scale-[1.02]">
-            <p class="text-xs font-bold uppercase opacity-80">Đơn Hàng</p>
-            <h3 id="total-orders" class="text-2xl font-black mt-1">0</h3>
+        <div class="bg-emerald-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02]">
+            <p class="text-[10px] md:text-xs font-bold uppercase opacity-80">Đơn Hàng</p>
+            <h3 id="total-orders" class="text-lg md:text-2xl font-black mt-1">0</h3>
         </div>
-        <div class="bg-amber-500 p-6 rounded-3xl text-white shadow-lg shadow-amber-200 transition hover:scale-[1.02]">
-            <p class="text-xs font-bold uppercase opacity-80">Tồn Kho</p>
-            <h3 id="total-items" class="text-2xl font-black mt-1">0</h3>
+        <div class="bg-amber-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02]">
+            <p class="text-[10px] md:text-xs font-bold uppercase opacity-80">Tồn Kho</p>
+            <h3 id="total-items" class="text-lg md:text-2xl font-black mt-1">0</h3>
         </div>
-        <div class="bg-rose-500 p-6 rounded-3xl text-white shadow-lg shadow-rose-200 transition hover:scale-[1.02]">
-            <p class="text-xs font-bold uppercase opacity-80">Cần Nhập</p>
-            <h3 id="low-stock-count" class="text-2xl font-black mt-1">0</h3>
+        <div class="bg-rose-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02]">
+            <p class="text-[10px] md:text-xs font-bold uppercase opacity-80">Cần Nhập</p>
+            <h3 id="low-stock-count" class="text-lg md:text-2xl font-black mt-1">0</h3>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div class="lg:col-span-1 space-y-8">
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                <h3 class="text-xs font-bold text-slate-400 mb-6 uppercase tracking-widest">Biểu đồ doanh thu</h3>
-                <div class="h-64">
-                    <canvas id="revenueChart"></canvas>
-                </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    
+    <div class="space-y-8">
+        <div class="bg-gray-200 p-6 rounded-3xl border border-slate-200">
+            <h3 class="text-xs font-bold text-slate-500 mb-6 uppercase tracking-widest flex items-center">
+                <i data-lucide="bar-chart-3" class="w-4 h-4 mr-2 text-blue-600"></i> Biểu đồ doanh thu
+            </h3>
+            <div class="h-64">
+                <canvas id="revenueChart"></canvas>
             </div>
-
-            <<div class="bg-gray-200 p-6 rounded-3xl border border-slate-200">
-    <h3 class="text-xs font-bold text-slate-500 mb-6 uppercase tracking-widest flex items-center">
-        <i data-lucide="flame" class="w-4 h-4 mr-2 text-rose-500"></i> SP Bán Chạy
-    </h3>
-    <div id="top-products-list" class="space-y-3">
         </div>
+
+        <div class="bg-gray-200 p-6 rounded-3xl border border-slate-200">
+            <h3 class="text-xs font-bold text-slate-500 mb-6 uppercase tracking-widest flex items-center">
+                <i data-lucide="flame" class="w-4 h-4 mr-2 text-rose-600"></i> SP Bán Chạy
+            </h3>
+            <div id="top-products-list" class="space-y-3"></div>
+        </div>
+    </div>
+
+    <div class="bg-gray-200 p-6 rounded-3xl border border-slate-200 h-fit">
+        <h3 class="text-xs font-bold text-slate-500 mb-6 uppercase tracking-widest flex items-center">
+            <i data-lucide="package" class="w-4 h-4 mr-2 text-amber-600"></i> Chi tiết tồn kho
+        </h3>
+        <div id="home-inventory-list" class="space-y-3">
+        </div>
+    </div>
 </div>
-        </div>
-
-        <div class="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-slate-100 h-fit">
-            <h3 class="text-xs font-bold text-slate-400 mb-6 uppercase tracking-widest">Chi tiết tồn kho</h3>
-            <div class="overflow-x-auto border border-slate-200 rounded-2xl">
-                <table class="w-full text-sm border-collapse">
-                    <thead>
-                        <tr class="bg-slate-50 border-b border-slate-200 text-slate-400">
-                            <th class="p-4 text-left font-medium border-r border-slate-200">Tên SP</th>
-                            <th class="p-4 text-center font-medium border-r border-slate-200">Tồn</th>
-                            <th class="p-4 text-center font-medium border-r border-slate-200">Nhập</th>
-                            <th class="p-4 text-center font-medium border-r border-slate-200">Xuất</th>
-                            <th class="p-4 text-center font-medium text-indigo-600">Cuối</th>
-                        </tr>
-                    </thead>
-                    <tbody id="home-inventory-body" class="divide-y divide-slate-200">
-                        </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
 </div>
  <!-- NHẬP KHO -->
 <div id="page-import" class="hidden space-y-6">
@@ -782,29 +799,42 @@ async function loadDashboard() {
     if (totalOrdersEl) totalOrdersEl.innerText = snapshotXuat.size;
     if (totalItemsEl) totalItemsEl.innerText = Object.keys(inventoryMap).length;
 
-    // 4. Bảng Tồn kho
-    let invRows = '', lowStockRows = '', lowStockCount = 0;
+    // 4. Danh sách Tồn kho (Dạng Cards)
+    const invListEl = document.getElementById('home-inventory-list');
+    let inventoryCardsHtml = '';
+    let lowStockCount = 0;
+
     Object.keys(inventoryMap).forEach(name => {
         const item = inventoryMap[name];
         const total = item.tonDau + item.nhap + item.change - item.out;
         
-        // DÁN ĐOẠN CODE MỚI VÀO ĐÂY:
-        invRows += `<tr>
-            <td class="p-4 border-r border-slate-100">${name}</td>
-            <td class="p-4 text-center border-r border-slate-100">${item.tonDau}</td>
-            <td class="p-4 text-center border-r border-slate-100">${item.nhap + item.change}</td>
-            <td class="p-4 text-center border-r border-slate-100">${item.out}</td>
-            <td class="p-4 text-center font-bold ${total < 5 ? 'text-red-600' : 'text-blue-600'}">${total}</td>
-        </tr>`;
+        // Thay đoạn render cũ bằng đoạn code này:
+		inventoryCardsHtml += `
+			<div class="flex items-center justify-between p-4 bg-white rounded-3xl border border-slate-100 shadow-sm transition-all hover:shadow-md">
+				<div class="flex-1 overflow-hidden">
+					<p class="text-sm font-bold text-slate-800 truncate">${name}</p>
+					
+					<div class="flex gap-3 mt-1 text-[11px] text-slate-500">
+						<span>Tồn: <span class="font-semibold text-slate-700">${item.tonDau}</span></span>
+						<span>Nhập: <span class="font-semibold text-slate-700">${item.nhap + item.change}</span></span>
+						<span>Xuất: <span class="font-semibold text-slate-700">${item.out}</span></span>
+					</div>
+				</div>
+				
+				<div class="ml-4">
+					<span class="text-indigo-600 font-black text-sm">
+						${total}
+					</span>
+				</div>
+			</div>`;
         
-        // Phần còn lại của lowStock giữ nguyên...
+        // Vẫn giữ logic đếm hàng cần nhập
         if (total <= 5 && total >= 0) {
             lowStockCount++;
-            lowStockRows += `<div class="flex justify-between p-2 text-sm text-red-600 font-bold">${name}: ${total}</div>`;
         }
     });
-    if (invBody) invBody.innerHTML = invRows;
-    if (lowStockListEl) lowStockListEl.innerHTML = lowStockRows;
+
+    if (invListEl) invListEl.innerHTML = inventoryCardsHtml || '<p class="p-4 text-center text-slate-400 text-sm">Chưa có dữ liệu tồn kho</p>';
     if (lowStockCountEl) lowStockCountEl.innerText = lowStockCount;
 
     // 5. Hóa đơn gần nhất (Lọc bỏ doc không có date hợp lệ)
