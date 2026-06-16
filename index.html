@@ -778,23 +778,30 @@ async function loadDashboard() {
     if (invBody) invBody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-500">Đang tải...</td></tr>';
 
     const [snapshotNhap, snapshotXuat] = await Promise.all([
-        db.collection('receipts').get(),
+        db.collection('receipts').orderBy('date', 'asc').get(), // Đảm bảo lấy dữ liệu theo thứ tự thời gian
         db.collection('sales').get()
     ]);
 
-    snapshotXuatGlobal = snapshotXuat; // Lưu vào biến toàn cục
+    snapshotXuatGlobal = snapshotXuat; 
 
     const now = new Date();
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const firstDayStr = firstDayOfMonth.toISOString().split('T')[0];
 
     let inventoryMap = {}; 
+    let orderList = []; // MẢNG LƯU THỨ TỰ SẢN PHẨM
     let productSalesCount = {};
 
     const processItem = (name, qty, type, dDate, isReceipt) => {
         if (!name || typeof name !== 'string') return;
         const cleanName = name.trim();
-        if (!inventoryMap[cleanName]) inventoryMap[cleanName] = { tonDau: 0, nhap: 0, change: 0, out: 0 };
+        
+        // Nếu là sản phẩm mới, thêm vào mảng orderList để giữ thứ tự
+        if (!inventoryMap[cleanName]) {
+            inventoryMap[cleanName] = { tonDau: 0, nhap: 0, change: 0, out: 0 };
+            orderList.push(cleanName);
+        }
+        
         const q = parseInt(qty) || 0;
         if (dDate < firstDayStr) {
             if (isReceipt) inventoryMap[cleanName].tonDau += q;
@@ -826,15 +833,14 @@ async function loadDashboard() {
         });
     });
 
-    // Cập nhật biểu đồ và KPI lần đầu
     await updateDashboardData('week');
 
-    // 4. Danh sách Tồn kho
+    // 4. Danh sách Tồn kho (Duyệt theo orderList thay vì Object.keys)
     const invListEl = document.getElementById('home-inventory-list');
     let inventoryCardsHtml = '';
     let lowStockCount = 0;
 
-    Object.keys(inventoryMap).forEach(name => {
+    orderList.forEach(name => {
         const item = inventoryMap[name];
         const total = item.tonDau + item.nhap + item.change - item.out;
         
@@ -857,35 +863,52 @@ async function loadDashboard() {
     });
 
     if (invListEl) {
-        // Thêm col-span-2 để thông báo không bị lệch khi không có dữ liệu
         invListEl.innerHTML = inventoryCardsHtml || '<p class="col-span-2 p-4 text-center text-slate-400 text-sm">Chưa có dữ liệu tồn kho</p>';
     }
     
     if (lowStockCountEl) lowStockCountEl.innerText = lowStockCount;
-    if (totalItemsEl) totalItemsEl.innerText = Object.keys(inventoryMap).length;
+    if (totalItemsEl) totalItemsEl.innerText = orderList.length;
 
     // 5. Hóa đơn gần nhất
+
     if (recentInvoicesEl) {
+
         const sortedSales = snapshotXuat.docs
+
             .filter(d => d.data().date)
+
             .sort((a, b) => b.data().date.toDate() - a.data().date.toDate())
+
             .slice(0, 5);
+
         recentInvoicesEl.innerHTML = sortedSales.map(doc => {
+
             const d = doc.data();
+
             return `<div class="flex justify-between p-2 border-b"><span>${d.customer || 'Khách lẻ'}</span><span class="font-bold">${Number(d.total || 0).toLocaleString()}đ</span></div>`;
+
         }).join('');
+
     }
+
+
 
     // 6. Top sản phẩm
+
     if (topProductsEl) {
+
         const topProductsArray = Object.entries(productSalesCount)
+
             .map(([name, qty]) => ({ name: name, sold: qty }))
+
             .sort((a, b) => b.sold - a.sold)
+
             .slice(0, 5);
+
         window.renderTopProducts(topProductsArray);
+
     }
 
-    // Gọi 1 lần duy nhất ở cuối hàm
     lucide.createIcons();
 }
 
