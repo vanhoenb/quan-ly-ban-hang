@@ -143,33 +143,38 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-    
-    <div class="space-y-8">
-        <div class="bg-gray-200 p-6 rounded-3xl border border-slate-200">
-            <h3 class="text-xs font-bold text-slate-500 mb-6 uppercase tracking-widest flex items-center">
-                <i data-lucide="bar-chart-3" class="w-4 h-4 mr-2 text-blue-600"></i> Biểu đồ doanh thu
-            </h3>
-            <div class="h-64">
-                <canvas id="revenueChart"></canvas>
+        <div class="space-y-8">
+            <div class="bg-gray-200 p-6 rounded-3xl border border-slate-200">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center">
+                        <i data-lucide="bar-chart-3" class="w-4 h-4 mr-2 text-blue-600"></i> Biểu đồ doanh thu
+                    </h3>
+                    <select id="time-filter" class="text-[10px] bg-white/50 border border-slate-300 rounded-lg px-2 py-1 text-slate-600 font-bold outline-none cursor-pointer">
+                        <option value="today">Hôm nay</option>
+                        <option value="week" selected>Tuần này</option>
+                        <option value="month">Tháng này</option>
+                    </select>
+                </div>
+                <div class="h-64">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-gray-200 p-6 rounded-3xl border border-slate-200">
+                <h3 class="text-xs font-bold text-slate-500 mb-6 uppercase tracking-widest flex items-center">
+                    <i data-lucide="flame" class="w-4 h-4 mr-2 text-rose-600"></i> SP Bán Chạy
+                </h3>
+                <div id="top-products-list" class="space-y-3"></div>
             </div>
         </div>
 
-        <div class="bg-gray-200 p-6 rounded-3xl border border-slate-200">
+        <div class="bg-gray-200 p-6 rounded-3xl border border-slate-200 h-fit">
             <h3 class="text-xs font-bold text-slate-500 mb-6 uppercase tracking-widest flex items-center">
-                <i data-lucide="flame" class="w-4 h-4 mr-2 text-rose-600"></i> SP Bán Chạy
+                <i data-lucide="package" class="w-4 h-4 mr-2 text-amber-600"></i> Chi tiết tồn kho
             </h3>
-            <div id="top-products-list" class="space-y-3"></div>
+            <div id="home-inventory-list" class="space-y-3"></div>
         </div>
     </div>
-
-    <div class="bg-gray-200 p-6 rounded-3xl border border-slate-200 h-fit">
-        <h3 class="text-xs font-bold text-slate-500 mb-6 uppercase tracking-widest flex items-center">
-            <i data-lucide="package" class="w-4 h-4 mr-2 text-amber-600"></i> Chi tiết tồn kho
-        </h3>
-        <div id="home-inventory-list" class="space-y-3">
-        </div>
-    </div>
-</div>
 </div>
  <!-- NHẬP KHO -->
 <div id="page-import" class="hidden space-y-6">
@@ -317,9 +322,9 @@
     <div class="grid grid-cols-2 md:grid-cols-12 gap-3 bg-blue-50 p-6 rounded-2xl border border-blue-100 shadow-sm">
         <div class="col-span-2 md:col-span-3">
             <label class="block text-xs font-bold text-blue-800 mb-1 uppercase">Tên SP</label>
-            <select id="sell-name" class="product-select w-full border border-blue-200 p-2.5 rounded-xl outline-none" onkeydown="handleEnter(event, 'sell-unit')">
-                <option value="">-- Chọn sản phẩm --</option>
-            </select>
+            <select id="sell-name" class="product-select w-full border border-blue-200 p-2.5 rounded-xl outline-none">
+				<option value="">-- Chọn sản phẩm --</option>
+			</select>
         </div>
         <div class="col-span-1 md:col-span-1">
             <label class="block text-xs font-bold text-blue-800 mb-1 uppercase">ĐVT</label>
@@ -725,20 +730,32 @@ function fillUnitAutomatically(name) {
     }
 }
 
-    // --- BIẾN TOÀN CỤC ---
+   // --- BIẾN TOÀN CỤC ---
 let cart = [];
 let sellCart = [];
-let currentProductData = null; // Lưu dữ liệu tạm để lấy giá
-let currentStock = 0;          // BIẾN MỚI: Để lưu số lượng tồn kho hiện tại
+let currentProductData = null; 
+let currentStock = 0;          
+let snapshotXuatGlobal;
+let myChart; 
+let allInventoryData = [];
+let isResetting = false; // Biến này dùng để khóa autoFill khi đang reset
+
+// --- KHỞI TẠO SỰ KIỆN KHI TRANG TẢI XONG ---
+document.addEventListener('DOMContentLoaded', () => {
+    const timeFilter = document.getElementById('time-filter');
+    if (timeFilter) {
+        timeFilter.addEventListener('change', async (e) => {
+            await updateDashboardData(e.target.value);
+        });
+    }
+});
 
 // ==== TRANG CHỦ =====
-
 async function loadDashboard() {
     const invBody = document.getElementById('home-inventory-body');
     const totalRevEl = document.getElementById('total-revenue');
     const totalOrdersEl = document.getElementById('total-orders');
     const totalItemsEl = document.getElementById('total-items');
-    const lowStockListEl = document.getElementById('low-stock-list');
     const lowStockCountEl = document.getElementById('low-stock-count');
     const recentInvoicesEl = document.getElementById('recent-invoices-list');
     const topProductsEl = document.getElementById('top-products-list');
@@ -750,11 +767,12 @@ async function loadDashboard() {
         db.collection('sales').get()
     ]);
 
+    snapshotXuatGlobal = snapshotXuat; // Lưu vào biến toàn cục
+
     const now = new Date();
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const firstDayStr = firstDayOfMonth.toISOString().split('T')[0];
 
-    let totalRev = 0;
     let inventoryMap = {}; 
     let productSalesCount = {};
 
@@ -786,7 +804,6 @@ async function loadDashboard() {
     snapshotXuat.forEach(doc => {
         const data = doc.data();
         if (!data.items || !data.date) return;
-        totalRev += Number(data.total || 0);
         const dDate = data.date.toDate().toISOString().split('T')[0];
         data.items.forEach(i => {
             processItem(i.name, i.qty, null, dDate, false);
@@ -794,12 +811,10 @@ async function loadDashboard() {
         });
     });
 
-    // 3. KPI
-    if (totalRevEl) totalRevEl.innerText = totalRev.toLocaleString('vi-VN') + " đ";
-    if (totalOrdersEl) totalOrdersEl.innerText = snapshotXuat.size;
-    if (totalItemsEl) totalItemsEl.innerText = Object.keys(inventoryMap).length;
+    // Cập nhật biểu đồ và KPI lần đầu
+    await updateDashboardData('week');
 
-    // 4. Danh sách Tồn kho (Dạng Cards)
+    // 4. Danh sách Tồn kho
     const invListEl = document.getElementById('home-inventory-list');
     let inventoryCardsHtml = '';
     let lowStockCount = 0;
@@ -807,37 +822,26 @@ async function loadDashboard() {
     Object.keys(inventoryMap).forEach(name => {
         const item = inventoryMap[name];
         const total = item.tonDau + item.nhap + item.change - item.out;
-        
-        // Thay đoạn render cũ bằng đoạn code này:
-		inventoryCardsHtml += `
-			<div class="flex items-center justify-between p-4 bg-white rounded-3xl border border-slate-100 shadow-sm transition-all hover:shadow-md">
-				<div class="flex-1 overflow-hidden">
-					<p class="text-sm font-bold text-slate-800 truncate">${name}</p>
-					
-					<div class="flex gap-3 mt-1 text-[11px] text-slate-500">
-						<span>Tồn: <span class="font-semibold text-slate-700">${item.tonDau}</span></span>
-						<span>Nhập: <span class="font-semibold text-slate-700">${item.nhap + item.change}</span></span>
-						<span>Xuất: <span class="font-semibold text-slate-700">${item.out}</span></span>
-					</div>
-				</div>
-				
-				<div class="ml-4">
-					<span class="text-indigo-600 font-black text-sm">
-						${total}
-					</span>
-				</div>
-			</div>`;
-        
-        // Vẫn giữ logic đếm hàng cần nhập
-        if (total <= 5 && total >= 0) {
-            lowStockCount++;
-        }
+        inventoryCardsHtml += `
+            <div class="flex items-center justify-between p-4 bg-white rounded-3xl border border-slate-100 shadow-sm transition-all hover:shadow-md">
+                <div class="flex-1 overflow-hidden">
+                    <p class="text-sm font-bold text-slate-800 truncate">${name}</p>
+                    <div class="flex gap-3 mt-1 text-[11px] text-slate-500">
+                        <span>Tồn: <span class="font-semibold text-slate-700">${item.tonDau}</span></span>
+                        <span>Nhập: <span class="font-semibold text-slate-700">${item.nhap + item.change}</span></span>
+                        <span>Xuất: <span class="font-semibold text-slate-700">${item.out}</span></span>
+                    </div>
+                </div>
+                <div class="ml-4"><span class="text-indigo-600 font-black text-sm">${total}</span></div>
+            </div>`;
+        if (total <= 5 && total >= 0) lowStockCount++;
     });
 
     if (invListEl) invListEl.innerHTML = inventoryCardsHtml || '<p class="p-4 text-center text-slate-400 text-sm">Chưa có dữ liệu tồn kho</p>';
     if (lowStockCountEl) lowStockCountEl.innerText = lowStockCount;
+    if (totalItemsEl) totalItemsEl.innerText = Object.keys(inventoryMap).length;
 
-    // 5. Hóa đơn gần nhất (Lọc bỏ doc không có date hợp lệ)
+    // 5. Hóa đơn gần nhất
     if (recentInvoicesEl) {
         const sortedSales = snapshotXuat.docs
             .filter(d => d.data().date)
@@ -849,17 +853,108 @@ async function loadDashboard() {
         }).join('');
     }
 
-    // 6. Top sản phẩm (Sử dụng hàm render mới)
+    // 6. Top sản phẩm
     if (topProductsEl) {
         const topProductsArray = Object.entries(productSalesCount)
             .map(([name, qty]) => ({ name: name, sold: qty }))
             .sort((a, b) => b.sold - a.sold)
             .slice(0, 5);
-
-        // Gọi hàm render chuyên biệt để có hiệu ứng bo góc/màu nền
         window.renderTopProducts(topProductsArray);
     }
+
+    // Gọi 1 lần duy nhất ở cuối hàm
+    lucide.createIcons();
 }
+
+
+
+// Hàm cập nhật dữ liệu lọc thời gian
+async function updateDashboardData(filter) {
+    if (!snapshotXuatGlobal) return;
+
+    const now = new Date();
+    let startDate = new Date();
+
+    if (filter === 'today') {
+        startDate.setHours(0, 0, 0, 0);
+    } else if (filter === 'week') {
+        const day = startDate.getDay();
+        startDate.setDate(startDate.getDate() - day + (day === 0 ? -6 : 1));
+        startDate.setHours(0, 0, 0, 0);
+    } else if (filter === 'month') {
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    }
+
+    const filteredDocs = snapshotXuatGlobal.docs.filter(doc => {
+        const dDate = doc.data().date.toDate();
+        return dDate >= startDate;
+    });
+
+    const newTotal = filteredDocs.reduce((sum, doc) => sum + Number(doc.data().total || 0), 0);
+    const totalRevEl = document.getElementById('total-revenue');
+    const totalOrdersEl = document.getElementById('total-orders');
+    
+    if (totalRevEl) totalRevEl.innerText = newTotal.toLocaleString('vi-VN') + " đ";
+    if (totalOrdersEl) totalOrdersEl.innerText = filteredDocs.length;
+
+    renderRevenueChart(filteredDocs);
+}
+
+
+// 1. Khởi tạo biểu đồ
+function renderRevenueChart(filteredDocs) {
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    
+    if (myChart) {
+        myChart.destroy();
+    }
+
+    // 1. Khởi tạo mảng 7 ngày (0đ)
+    // T2, T3, T4, T5, T6, T7, CN
+    let labels = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+    let dailyRevenue = [0, 0, 0, 0, 0, 0, 0];
+
+    // 2. Tính toán doanh thu từ filteredDocs
+    filteredDocs.forEach(doc => {
+        const data = doc.data();
+        if (!data.date || !data.total) return;
+        
+        const dateObj = data.date.toDate();
+        // Lấy thứ trong tuần (0: CN, 1: T2, ..., 6: T7)
+        let dayIndex = dateObj.getDay(); 
+        
+        // Chuyển đổi về index để khớp với mảng labels của bạn (T2=0, T3=1... CN=6)
+        let index = dayIndex === 0 ? 6 : dayIndex - 1;
+        
+        dailyRevenue[index] += Number(data.total);
+    });
+
+    // 3. Vẽ biểu đồ với dữ liệu thực tế
+    myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Doanh thu (VNĐ)',
+                data: dailyRevenue, // Dữ liệu đã được tính toán
+                borderColor: '#3b82f6',
+                tension: 0.4,
+                fill: true,
+                backgroundColor: 'rgba(59, 130, 246, 0.1)'
+            }]
+        },
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true } // Đảm bảo biểu đồ bắt đầu từ số 0
+            }
+        }
+    });
+}
+    
+	
 
     // --- NHẬP KHO =================
 	
@@ -1200,17 +1295,14 @@ async function updateProductDropdowns() {
             optionsHtml += `<option value="${p.name}">${p.name}</option>`;
         });
 
-        // Danh sách các ID dropdown cần áp dụng Choices.js
         const dropdownIds = ['imp-name', 'sell-name']; 
 
         dropdownIds.forEach(id => {
             const selectEl = document.getElementById(id);
-            if (!selectEl) return; // Nếu không tìm thấy ID này thì bỏ qua
+            if (!selectEl) return;
 
-            // Cập nhật nội dung HTML
             selectEl.innerHTML = optionsHtml;
 
-            // Hủy instance cũ nếu đã tồn tại
             if (window.choicesInstances[id]) {
                 window.choicesInstances[id].destroy();
             }
@@ -1218,18 +1310,24 @@ async function updateProductDropdowns() {
             // Khởi tạo mới
             window.choicesInstances[id] = new Choices(selectEl, {
                 searchEnabled: true,
-                itemSelectText: 'Nhấn để chọn',
+                itemSelectText: '', // Để trống cho gọn
                 noResultsText: 'Không tìm thấy sản phẩm',
                 shouldSort: false,
                 searchPlaceholderValue: 'Gõ tên sản phẩm...',
             });
 
-            // Gắn sự kiện thay đổi cho từng dropdown tương ứng
-            selectEl.addEventListener('change', function() {
+            // GẮN SỰ KIỆN QUA THƯ VIỆN CHOICES (ĐẢM BẢO KHÔNG XUNG ĐỘT)
+            selectEl.addEventListener('change', function(event) {
+                // Kiểm tra nếu đang reset giỏ hàng thì không chạy hàm autofill
+                if (window.isResetting) return;
+
+                const value = this.value;
+                if (!value) return;
+
                 if (id === 'imp-name') {
-                    fillUnitAutomatically(this.value);
+                    fillUnitAutomatically(value);
                 } else if (id === 'sell-name') {
-                    autoFillDetails(this.value);
+                    autoFillDetails(value);
                 }
             });
         });
@@ -1241,16 +1339,26 @@ async function updateProductDropdowns() {
 }
 
 function autoFillDetails(productName) {
-    // 1. Tìm sản phẩm dựa trên tên đã chọn
+    // 1. CHẶN LỖI: Nếu đang trong quá trình reset giỏ hàng, thoát ngay.
+    // Điều này ngăn chặn việc hàm tự chạy lại khi bạn dùng setChoiceByValue('')
+    if (window.isResetting) {
+        console.log("autoFillDetails: Đang reset, bỏ qua.");
+        return;
+    }
+
+    // 2. CHẶN LỖI: Nếu tên rỗng, không làm gì cả
+    if (!productName || productName.trim() === "") {
+        return;
+    }
+
+    // 3. Tìm sản phẩm dựa trên tên đã chọn
     const product = window.allProducts.find(p => p.name === productName);
     
-    // 2. Định nghĩa các ô ĐVT theo ID thực tế trong HTML của bạn
-    // Trang Bán hàng dùng 'sell-unit', trang Nhập kho dùng 'imp-unit'
+    // 4. Định nghĩa các ô ĐVT theo ID thực tế trong HTML
     const sellUnit = document.getElementById('sell-unit');
     const impUnit = document.getElementById('imp-unit');
     
     // --- XỬ LÝ CHO TRANG BÁN HÀNG (Dùng <input>) ---
-	
     if (sellUnit) {
         sellUnit.value = product ? product.unit : '';
     }
@@ -1266,14 +1374,17 @@ function autoFillDetails(productName) {
                     break;
                 }
             }
-            // Nếu không tìm thấy ĐVT trong danh sách <option>, bạn có thể log cảnh báo
             if (!found) console.warn("Không tìm thấy ĐVT: " + product.unit + " trong danh sách chọn.");
         } else {
             impUnit.selectedIndex = 0; // Reset về lựa chọn đầu tiên
         }
     }
+    
+    // 5. Cập nhật thêm nếu có hàm tính giá/tồn kho liên quan
+    if (typeof updatePriceFromType === 'function') {
+        updatePriceFromType();
+    }
 }
-
 async function addProduct() {
     // Lấy giá trị từ trang "Cấu hình" (bạn cần có 2 ô input để nhập tên và đơn vị)
     const name = document.getElementById('new-prod-name').value;
@@ -1501,39 +1612,77 @@ window.renderTopProducts = function(products) {
 
     // 2. Cập nhật hàm autoFillDetails
 async function autoFillDetails(name) {
-    // Reset tồn kho
-    currentStock = 0;
+    // 1. CHẶN LỖI: Kiểm tra cờ isResetting để không chạy khi đang xóa giỏ hàng
+    // Điều này ngăn chặn việc điền lại tên cũ khi bạn đã nhấn "Thêm vào giỏ"
+    if (window.isResetting) {
+        console.log("autoFillDetails: Đang reset, bỏ qua.");
+        return;
+    }
 
-    // Lấy dữ liệu cả Nhập và Xuất
-    const snapshotNhap = await db.collection('receipts').get();
-    const snapshotXuat = await db.collection('sales').get();
-    
-    let nhap = 0, xuat = 0;
-    
-    // Tính tổng nhập
-    snapshotNhap.forEach(doc => {
-        (doc.data().items || []).forEach(i => { if(i.name === name) nhap += parseInt(i.qty || 0); });
-    });
-    // Tính tổng xuất
-    snapshotXuat.forEach(doc => {
-        (doc.data().items || []).forEach(i => { if(i.name === name) xuat += parseInt(i.qty || 0); });
-    });
-    
-    currentStock = nhap - xuat;
-    console.log("Tồn kho hiện tại của " + name + ": " + currentStock);
+    // 1. CHẶN LỖI: Nếu tên rỗng hoặc không có, dừng lại ngay lập tức
+    if (!name || name.trim() === "") {
+        console.log("autoFillDetails: Tên rỗng, bỏ qua.");
+        return;
+    }
 
-    // Phần code tự điền thông tin cũ của bạn
-    db.collection('receipts').get().then(snapshot => {
-        snapshot.forEach(doc => {
-            const items = doc.data().items || [];
-            const found = items.find(i => i.name === name);
-            if (found) {
-                currentProductData = found;
-                document.getElementById('sell-unit').value = found.unit;
-                updatePriceFromType();
-            }
+    const cleanName = name.trim();
+
+    // 2. Tìm thông tin SP trong cache (Có sẵn, rất nhanh)
+    const found = window.allProductCache.find(i => i.name && i.name.trim() === cleanName);
+    
+    if (found) {
+        currentProductData = found;
+        const unitEl = document.getElementById('sell-unit');
+        if (unitEl) unitEl.value = found.unit || '';
+        updatePriceFromType();
+    } else {
+        console.warn("Không tìm thấy sản phẩm trong cache:", cleanName);
+        return;
+    }
+
+    // 3. TÍNH TỒN KHO TỐI ƯU
+    try {
+        const snapshotNhap = await db.collection('receipts').get();
+        const snapshotXuat = await db.collection('sales').get();
+        
+        let nhap = 0, xuat = 0;
+        
+        snapshotNhap.forEach(doc => {
+            (doc.data().items || []).forEach(i => { 
+                if(i.name && i.name.trim() === cleanName) nhap += parseInt(i.qty || 0); 
+            });
+        });
+        
+        snapshotXuat.forEach(doc => {
+            (doc.data().items || []).forEach(i => { 
+                if(i.name && i.name.trim() === cleanName) xuat += parseInt(i.qty || 0); 
+            });
+        });
+        
+        currentStock = nhap - xuat;
+        
+        console.log(`Kết quả tồn kho cho ${cleanName}: Nhập=${nhap}, Xuất=${xuat}, Còn=${currentStock}`);
+        
+        if (currentStock <= 0) {
+            console.warn("Sản phẩm hết hàng hoặc chưa có dữ liệu nhập!");
+        }
+    } catch (err) {
+        console.error("Lỗi khi tính tồn kho:", err);
+    }
+}
+
+// Gọi hàm này 1 lần duy nhất khi trang web vừa mở
+async function loadAllProductsForCache() {
+    const snapshot = await db.collection('receipts').get(); // Hoặc collection chứa danh sách SP của bạn
+    // Gom tất cả sản phẩm vào 1 mảng duy nhất để tra cứu nhanh
+    let tempMap = new Map();
+    snapshot.forEach(doc => {
+        (doc.data().items || []).forEach(i => {
+            tempMap.set(i.name, i); // Lưu lại thông tin mới nhất của sản phẩm
         });
     });
+    allProductCache = Array.from(tempMap.values());
+    console.log("Đã tải xong dữ liệu sản phẩm vào bộ nhớ!");
 }
 
     function updatePriceFromType() {
@@ -1543,26 +1692,29 @@ async function autoFillDetails(name) {
         document.getElementById('sell-price').value = price || '';
     }
 
-    async function addSellToCart() {
-    // Lấy tên sản phẩm từ instance của Choices
-    const name = window.sellNameChoices ? window.sellNameChoices.getValue(true) : document.getElementById('sell-name').value;
+  async function addSellToCart() {
+    // 1. BẬT KHÓA NGAY LẬP TỨC
+    window.isResetting = true; 
+
+    // Lấy tên sản phẩm - Ưu tiên lấy từ instance Choices nếu có
+    const sellNameInstance = window.choicesInstances ? window.choicesInstances['sell-name'] : null;
+    const name = sellNameInstance ? sellNameInstance.getValue(true) : document.getElementById('sell-name').value;
+    
     const qty = parseInt(document.getElementById('sell-qty').value) || 0;
     const price = parseFloat(document.getElementById('sell-price').value) || 0;
     const vatPercent = parseInt(document.getElementById('sell-vat').value) || 0;
     const note = document.getElementById('sell-note').value || ""; 
 
-    // Kiểm tra tên sản phẩm và số lượng
     if (!name || qty <= 0) {
+        window.isResetting = false; 
         Swal.fire({ icon: 'warning', title: 'Thông báo', text: 'Vui lòng chọn tên sản phẩm và nhập số lượng hợp lệ!' });
         return;
     }
 
-
-
     // 1. KIỂM TRA TỒN KHO
     const stockCheck = typeof currentStock !== 'undefined' ? currentStock : 0;
-
     if (qty > stockCheck) {
+        window.isResetting = false; 
         Swal.fire({
             icon: 'error',
             title: 'Hết hàng!',
@@ -1572,7 +1724,7 @@ async function autoFillDetails(name) {
         return; 
     }
     
-    // Tính toán:
+    // Tính toán
     const subTotal = qty * price;
     const taxAmount = subTotal * vatPercent / 100;
     const total = subTotal + taxAmount;
@@ -1592,37 +1744,47 @@ async function autoFillDetails(name) {
     sellCart.push(item);
     renderSellCart();
     
-    // --- PHẦN RESET ---
-    // 1. Reset tên sản phẩm về trống bằng Choices.js
-    if (window.sellNameChoices) {
-        window.sellNameChoices.setChoiceByValue('');
+    // --- PHẦN RESET TỐI ƯU ---
+    // Sử dụng đúng instance từ window.choicesInstances
+    if (sellNameInstance) {
+        sellNameInstance.removeActiveItems();
+        sellNameInstance.clearInput();
+        sellNameInstance.setChoiceByValue('');
     }
     
-    // 2. Reset các ô nhập khác
+    const sellNameSelect = document.getElementById('sell-name');
+    if (sellNameSelect) {
+        sellNameSelect.value = '';
+    }
+
+    // Reset các ô input liên quan
     document.getElementById('sell-qty').value = '';
     document.getElementById('sell-price').value = '';
     document.getElementById('sell-note').value = '';
+    document.getElementById('sell-unit').value = '';
     
-    // 3. Focus lại vào ô chọn sản phẩm để người dùng chọn món tiếp theo
-    if (window.sellNameChoices) {
-        window.sellNameChoices.input.element.focus();
-    }
+    // Reset biến trạng thái
+    currentProductData = null;
+    currentStock = 0;
+
+    // Mở khóa sau 500ms
+    setTimeout(() => {
+        window.isResetting = false;
+        if (sellNameInstance) {
+            sellNameInstance.input.element.focus();
+        }
+    }, 500);
     
-    // Hiển thị thông báo thành công
     const Toast = Swal.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 1500,
-        timerProgressBar: true
+        toast: true, position: 'top-end', showConfirmButton: false, timer: 1500, timerProgressBar: true
     });
     Toast.fire({ icon: 'success', title: 'Đã thêm vào giỏ' });
 }
 
-    function renderSellCart() {
+function renderSellCart() {
     const body = document.getElementById('sell-cart-body');
+    if (!body) return;
     
-    // Nếu giỏ hàng trống, hiển thị dòng thông báo
     if (sellCart.length === 0) {
         body.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-gray-400 italic">Giỏ hàng đang trống</td></tr>`;
         return;
@@ -1638,9 +1800,7 @@ async function autoFillDetails(name) {
             <td class="p-3 text-right font-bold text-green-700">${i.total.toLocaleString('vi-VN')}</td>
             <td class="p-3 italic text-gray-600 text-sm">${i.note || ''}</td>
             <td class="p-3 text-center">
-                <button onclick="removeSellItem(${index})" 
-                        class="text-red-500 hover:text-red-700 transition-all font-bold p-1"
-                        title="Xóa món này">
+                <button onclick="removeSellItem(${index})" class="text-red-500 hover:text-red-700 transition-all font-bold p-1">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -1657,10 +1817,7 @@ async function saveAndPrint() {
         return;
     }
 
-    // 1. Lấy tham chiếu nút bấm (bạn nhớ đặt id="btn-save-print" cho nút trong HTML)
     const btn = document.getElementById('btn-save-print');
-    
-    // Khóa nút ngay khi bắt đầu
     if (btn) {
         btn.disabled = true;
         btn.innerText = "Đang xử lý...";
@@ -1673,7 +1830,6 @@ async function saveAndPrint() {
     const phone = document.getElementById('sell-phone') ? document.getElementById('sell-phone').value : '';
 
     try {
-        // 1. Tính toán giá trị
         let subTotalAll = 0;
         let taxTotalAll = 0;
 
@@ -1684,7 +1840,6 @@ async function saveAndPrint() {
 
         const grandTotal = subTotalAll + taxTotalAll;
 
-        // 2. Lưu vào Firestore
         const saleData = {
             id: receiptId,
             customer: customer,
@@ -1697,7 +1852,7 @@ async function saveAndPrint() {
         await db.collection('sales').add(saleData);
         alert("Lưu thành công!");
 
-        // 3. Điền dữ liệu vào các thẻ in
+        // Điền dữ liệu vào các thẻ in
         const now = new Date();
         const fields = {
             'print-customer': customer,
@@ -1715,7 +1870,6 @@ async function saveAndPrint() {
             if (el) el.innerText = value;
         }
 
-        // 4. Render nội dung bảng in
         const elItems = document.getElementById('print-items');
         if (elItems) {
             elItems.innerHTML = sellCart.map((i, index) => {
@@ -1735,7 +1889,6 @@ async function saveAndPrint() {
             }).join('');
         }
 
-        // 5. Điền tổng tiền
         if (document.getElementById('print-subtotal')) 
             document.getElementById('print-subtotal').innerText = subTotalAll.toLocaleString('vi-VN');
         if (document.getElementById('print-tax-total')) 
@@ -1748,53 +1901,50 @@ async function saveAndPrint() {
 
         window.print();
         
-        // 6. Reset giỏ hàng và các ô nhập liệu
+        // --- RESET TỐI ƯU ---
         sellCart = [];
         document.getElementById('sell-customer').value = '';
         if (document.getElementById('sell-address')) document.getElementById('sell-address').value = '';
         if (document.getElementById('sell-phone')) document.getElementById('sell-phone').value = '';
         
-        // Reset Choices.js cho tên sản phẩm
+        // Reset Choices.js an toàn
         if (window.sellNameChoices) {
-            window.sellNameChoices.setChoiceByValue('');
+            window.sellNameChoices.removeActiveItems();
+            window.sellNameChoices.clearStore();
             window.sellNameChoices.input.element.focus();
         } else {
             document.getElementById('sell-name').value = '';
         }
         
-        // --- ĐOẠN BỔ SUNG ĐỂ RESET CÁC Ô KHÁC ---
         document.getElementById('sell-qty').value = '';
         document.getElementById('sell-price').value = '';
         document.getElementById('sell-note').value = '';
         
-        // Reset VAT về giá trị mặc định (ví dụ là 0 hoặc 10)
         const vatInput = document.getElementById('sell-vat');
         if (vatInput) vatInput.value = '0'; 
-
-        // Reset đơn vị tính (nếu có ô chọn unit)
         const unitInput = document.getElementById('sell-unit');
         if (unitInput) unitInput.value = '';
-        
-        // Reset loại giá (nếu có)
         const typeInput = document.getElementById('price-type');
         if (typeInput) typeInput.value = '';
-        // ----------------------------------------
         
         const totalDisplay = document.getElementById('total-payment');
         if (totalDisplay) totalDisplay.innerText = "0";
 
         renderSellCart();
-        updateSellReceiptNum();
-        loadSalesList();
+        
+        // Dùng setTimeout để không làm nghẽn luồng xử lý chính sau khi in
+        setTimeout(() => {
+            updateSellReceiptNum();
+            loadSalesList();
+        }, 500);
         
     } catch (error) {
         console.error("Lỗi chi tiết: ", error);
         alert("Có lỗi xảy ra: " + error.message);
     } finally {
-        // Mở khóa nút sau khi hoàn tất (thành công hay thất bại đều mở)
         if (btn) {
             btn.disabled = false;
-            btn.innerText = "Lưu & Xuất Hóa Đơn"; // Bạn sửa lại tên nút ở đây cho khớp
+            btn.innerText = "Lưu & Xuất Hóa Đơn";
             btn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
     }
@@ -2273,28 +2423,40 @@ async function exportInvoiceToExcel() {
     }
 }
 
-window.onload = function() {
-    const now = new Date();
+window.onload = async function() {
+    // --- BỔ SUNG: TẢI DỮ LIỆU SẢN PHẨM MỘT LẦN DUY NHẤT ---
+    window.allProductCache = []; // Biến toàn cục để lưu cache
     
-    // 1. Định dạng tháng hiện tại (YYYY-MM)
+    try {
+        const snapshot = await db.collection('receipts').get();
+        // Dùng Map để lấy thông tin sản phẩm mới nhất (không bị trùng)
+        let tempMap = new Map();
+        snapshot.forEach(doc => {
+            (doc.data().items || []).forEach(i => {
+                tempMap.set(i.name, i); 
+            });
+        });
+        window.allProductCache = Array.from(tempMap.values());
+        console.log("Đã load xong dữ liệu sản phẩm vào RAM!");
+    } catch (e) {
+        console.error("Lỗi tải cache sản phẩm:", e);
+    }
+    // ----------------------------------------------------
+
+    const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const today = String(now.getDate()).padStart(2, '0');
     
-    // Gán cho ô "Tháng"
     const monthInput = document.getElementById('filterMonth');
-    if (monthInput) {
-        monthInput.value = `${year}-${month}`;
-    }
+    if (monthInput) monthInput.value = `${year}-${month}`;
     
-    // 2. Gán cho ô "Từ ngày" và "Đến ngày" là ngày hôm nay
     const dateFrom = document.getElementById('dateFrom');
     const dateTo = document.getElementById('dateTo');
     
     if (dateFrom) dateFrom.value = `${year}-${month}-${today}`;
     if (dateTo) dateTo.value = `${year}-${month}-${today}`;
     
-    // Gọi hàm filter để hiển thị dữ liệu ngay khi vừa mở trang
     if (typeof filterSales === 'function') {
         filterSales();
     }
@@ -2848,30 +3010,7 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-// 1. Khởi tạo biểu đồ
-    const ctx = document.getElementById('revenueChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
-            datasets: [{
-                label: 'Doanh thu (VNĐ)',
-                data: [120000, 190000, 300000, 500000, 200000, 300000, 750000],
-                borderColor: '#3b82f6',
-                tension: 0.4,
-                fill: true,
-                backgroundColor: 'rgba(59, 130, 246, 0.1)'
-            }]
-        },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } }
-        }
-    });
 
-    // 2. Khởi tạo Lucide Icons
-    lucide.createIcons();
 
 // --- KHỞI TẠO ---
 lucide.createIcons();
@@ -2881,8 +3020,8 @@ updateProductDropdowns();
 loadSalesList();
 loadCustomers(); 
 
-    // 2. Khởi tạo Lucide Icons
-    lucide.createIcons();
+// 2. Khởi tạo Lucide Icons
+lucide.createIcons();
 
 // THÊM DÒNG NÀY VÀO ĐÂY:
 loadReceipts(); 
