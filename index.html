@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>POS Pro - Hệ thống quản lý</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+   
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
@@ -230,7 +230,7 @@
                 <h3 class="text-xs font-bold text-slate-500 mb-6 uppercase tracking-widest flex items-center">
                     <i data-lucide="flame" class="w-4 h-4 mr-2 text-rose-600"></i> SP Bán Chạy
                 </h3>
-                <div id="top-products-list" class="space-y-3"></div>
+                <div id="top-products-list"></div>
             </div>
         </div>
 
@@ -238,8 +238,8 @@
     <h3 class="text-xs font-bold text-slate-500 mb-6 uppercase tracking-widest flex items-center">
         <i data-lucide="package" class="w-4 h-4 mr-2 text-amber-600"></i> Chi tiết tồn kho
     </h3>
-    <div id="home-inventory-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        </div>
+    <div id="home-inventory-list" class="grid grid-cols-1 md:grid-cols-2 gap-2">
+    </div>
 </div>
     </div>
 </div>
@@ -299,24 +299,30 @@
 
     <h3 class="font-bold text-gray-700 mt-6">DANH SÁCH PHIẾU NHẬP</h3>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
-        <div class="overflow-x-auto border border-gray-100 rounded-2xl bg-gray-50 p-4">
-            <table class="w-full text-sm">
-                <thead class="bg-white border-b">
-                    <tr><th class="p-3 text-left">Số phiếu</th><th class="p-3 text-left">Ngày nhập</th><th class="p-3 text-left">Số SP</th><th class="p-3 text-left">Thao tác</th></tr>
-                </thead>
-                <tbody id="list-receipts-left"></tbody>
-            </table>
-        </div>
-        <div class="overflow-x-auto border border-gray-100 rounded-2xl bg-gray-50 p-4">
-            <table class="w-full text-sm">
-                <thead class="bg-white border-b">
-                    <tr><th class="p-3 text-left">Số phiếu</th><th class="p-3 text-left">Ngày nhập</th><th class="p-3 text-left">Số SP</th><th class="p-3 text-left">Thao tác</th></tr>
-                </thead>
-                <tbody id="list-receipts-right"></tbody>
-            </table>
-        </div>
+<div class="mt-4 mb-4">
+    <input type="text" id="searchReceiptInput" onkeyup="searchReceipts()" 
+           placeholder="Tìm kiếm theo số phiếu..." 
+           class="w-full md:w-1/3 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+    <div class="overflow-x-auto border border-gray-100 rounded-2xl bg-gray-50 p-4">
+        <table class="w-full text-sm">
+            <thead class="bg-white border-b">
+                <tr><th class="p-3 text-left">Số phiếu</th><th class="p-3 text-left">Ngày nhập</th><th class="p-3 text-left">Số SP</th><th class="p-3 text-left">Thao tác</th></tr>
+            </thead>
+            <tbody id="list-receipts-left"></tbody>
+        </table>
     </div>
+    <div class="overflow-x-auto border border-gray-100 rounded-2xl bg-gray-50 p-4">
+        <table class="w-full text-sm">
+            <thead class="bg-white border-b">
+                <tr><th class="p-3 text-left">Số phiếu</th><th class="p-3 text-left">Ngày nhập</th><th class="p-3 text-left">Số SP</th><th class="p-3 text-left">Thao tác</th></tr>
+            </thead>
+            <tbody id="list-receipts-right"></tbody>
+        </table>
+    </div>
+</div>
 	
 
     <div id="modal-receipt" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -663,100 +669,109 @@
 
 <!-- PHẦN 6: SẢN XUẤT -->
 
-<div id="page-SanXuat" class="page-content hidden">
-  <div class="container-fluid py-4">
-    <h3 class="mb-4 fw-bold text-dark">THEO DÕI SẢN XUẤT</h3>
+<div id="page-SanXuat" class="page-content hidden p-6 bg-gray-50">
+  <div class="max-w-7xl mx-auto">
+    <h3 class="mb-6 font-bold text-2xl text-gray-800">THEO DÕI SẢN XUẤT</h3>
 
-    <div class="card border-0 shadow-sm p-4 mb-4">
-      <div class="row mb-4">
-        <div class="col-md-3">
-          <label class="form-label text-muted small fw-bold">SỐ PHIẾU HIỆN TẠI</label>
-          <input type="text" id="sxSoPhieu" class="form-control bg-light fw-bold text-primary" readonly>
+    <div class="flex flex-col-reverse lg:flex-row -mx-4">
+      <div class="w-full lg:w-2/3 px-4 mb-6">
+        <div class="bg-white border border-gray-200 shadow-sm p-6 rounded-xl h-full">
+          <h5 class="mb-4 font-bold text-gray-600">DANH SÁCH PHIẾU SẢN XUẤT</h5>
+          
+          <div class="relative mb-4">
+				<input type="text" id="searchInput" 
+       class="w-full pl-4 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" 
+       placeholder="Tìm kiếm...">
+			</div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-gray-50 border-b border-gray-200">
+                  <th class="p-3 text-sm font-semibold text-gray-700">Ngày</th>
+                  <th class="p-3 text-sm font-semibold text-gray-700">Số phiếu</th>
+                  <th class="p-3 text-sm font-semibold text-gray-700">Sản phẩm</th>
+                  <th class="p-3 text-sm font-semibold text-gray-700">SL</th>
+                  <th class="p-3 text-sm font-semibold text-gray-700">Mới mua</th>
+                  <th class="p-3 text-sm font-semibold text-gray-700">Chờ đóng</th>
+                  <th class="p-3 text-sm font-semibold text-gray-700">Đóng xong</th>
+                  <th class="p-3 text-sm font-semibold text-gray-700 text-center">Xóa</th>
+                </tr>
+              </thead>
+              <tbody id="list-sanxuat" class="text-sm text-gray-600 divide-y divide-gray-100"></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <div class="row g-3 mb-4">
-        <div class="col-md-4">
-          <label class="form-label text-muted">Tên sản phẩm</label>
-          <select id="sxTenSP" class="form-select" onchange="tinhSoKgThanhPham()">
-            <option value="">-- Chọn sản phẩm --</option>
-            <option>TCMT 450g Thuỷ tinh</option>
-            <option>TCMT 450g Nhựa</option>
-            <option>TCMT 275g Thuỷ tinh tròn</option>
-            <option>TCMT 275g Thuỷ tinh Lăng</option>
-            <option>TCMT 275g Nhựa</option>
-            <option>TCMT 180g Thuỷ tinh</option>
-            <option>TCMT 180g Túi Zip</option>
-            <option>TCMT 150g Thuỷ tinh</option>
-            <option>TCMT 90g Khay Nhôm</option>
-            <option>Mắm bếp</option>
-			<option>Mới mua (Chưa nấu)</option>
-            <option>Chờ đóng (Đã nấu)</option>
-          </select>
-        </div>
-        <div class="col-md-2">
-          <label class="form-label text-muted">ĐVT</label>
-          <select id="sxDVT" class="form-select">
-            <option>Hũ</option><option>Túi</option><option>Khay</option><option>Kg</option><option>Mẻ</option>
-          </select>
-        </div>
-        <div class="col-md-2">
-          <label class="form-label text-muted">Tồn đầu</label>
-          <input type="number" id="sxTonDau" class="form-control" placeholder="0" oninput="tinhTonCuoi()">
-        </div>
-        <div class="col-md-2">
-          <label class="form-label text-muted">SL Thành phẩm</label>
-          <input type="number" id="sxSL" class="form-control" placeholder="0" oninput="tinhSoKgThanhPham(); tinhTonCuoi();">
-        </div>
-        <div class="col-md-2">
-          <label class="form-label text-muted">Tồn cuối</label>
-          <input type="text" id="sxTonCuoi" class="form-control bg-light" readonly>
+      <div class="w-full lg:w-1/3 px-4 mb-6">
+        <div class="bg-white border border-gray-200 shadow-sm p-5 rounded-xl">
+          <div class="mb-3">
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Số phiếu hiện tại</label>
+            <input type="text" id="sxSoPhieu" class="w-full p-2 border border-gray-300 rounded bg-gray-50 font-bold text-blue-600" readonly>
+          </div>
+
+          <div class="mb-3">
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Tên sản phẩm</label>
+            <select id="sxTenSP" class="w-full p-2 border border-gray-300 rounded bg-white" onchange="tinhSoKgThanhPham()">
+              <option value="">-- Chọn sản phẩm --</option>
+              <option>TCMT 450g Thuỷ tinh</option><option>TCMT 450g Nhựa</option>
+              <option>TCMT 275g Thuỷ tinh tròn</option><option>TCMT 275g Thuỷ tinh Lăng</option>
+              <option>TCMT 275g Nhựa</option><option>TCMT 180g Thuỷ tinh</option>
+              <option>TCMT 180g Túi Zip</option><option>TCMT 150g Thuỷ tinh</option>
+              <option>TCMT 90g Khay Nhôm</option><option>Mắm bếp</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 mb-3">
+            <div>
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">ĐVT</label>
+              <select id="sxDVT" class="w-full p-2 border border-gray-300 rounded">
+                <option>Hũ</option><option>Túi</option><option>Khay</option><option>Kg</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Tồn đầu</label>
+              <input type="number" id="sxTonDau" class="w-full p-2 border border-gray-300 rounded" placeholder="0" oninput="tinhTonCuoi()">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 mb-3">
+            <div>
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">SL Sản phẩm</label>
+              <input type="number" id="sxSL" class="w-full p-2 border border-gray-300 rounded" placeholder="0" oninput="tinhSoKgThanhPham(); tinhTonCuoi();">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Tồn Cuối</label>
+              <input type="text" id="sxTonCuoi" class="w-full p-2 border border-gray-300 rounded bg-gray-50" readonly>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Số KG Đã Đóng</label>
+            <input type="number" id="sxSoKg" class="w-full p-2 border border-gray-300 rounded" placeholder="0.00">
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 mb-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Mẻ Xong</label>
+              <input type="number" id="sxSoMe" class="w-full p-2 border border-gray-300 rounded" placeholder="0">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Mẻ Chờ</label>
+              <input type="number" id="sxMeChuaDong" class="w-full p-2 border border-gray-300 rounded" placeholder="0">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Mẻ Mới</label>
+              <input type="number" id="sxMeChuaNau" class="w-full p-2 border border-gray-300 rounded" placeholder="0">
+            </div>
+          </div>
+
+          <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition-all shadow-md" onclick="luuSanXuat()">
+            LƯU SẢN XUẤT
+          </button>
         </div>
       </div>
-
-      <div class="row g-3 mb-4">
-        <div class="col-md-3">
-          <label class="form-label text-muted">Số KG (Thành phẩm)</label>
-          <input type="number" id="sxSoKg" class="form-control" placeholder="0.00">
-        </div>
-        <div class="col-md-3">
-          <label class="form-label text-muted">Mẻ đóng xong</label>
-          <input type="number" id="sxSoMe" class="form-control" placeholder="0">
-        </div>
-        <div class="col-md-3">
-          <label class="form-label text-muted">Chờ đóng (Đã nấu)</label>
-          <input type="number" id="sxMeChuaDong" class="form-control" placeholder="0">
-        </div>
-        <div class="col-md-3">
-          <label class="form-label text-muted">Mới mua (Chưa nấu)</label>
-          <input type="number" id="sxMeChuaNau" class="form-control" placeholder="0">
-        </div>
-      </div>
-
-      <div class="d-flex justify-content-end">
-        <button class="btn btn-primary px-5 py-2 shadow-sm" onclick="luuSanXuat()">
-            <i class="fas fa-save me-2"></i> LƯU SẢN XUẤT
-        </button>
-      </div>
-    </div>
-
-    <div class="card border-0 shadow-sm p-4">
-      <h5 class="mb-3 text-secondary">DANH SÁCH PHIẾU SẢN XUẤT</h5>
-      <table class="table table-hover align-middle">
-  <thead class="table-light">
-    <tr>
-      <th>Ngày</th>
-      <th>Số phiếu</th>
-      <th>Sản phẩm</th>
-      <th>SL</th>
-      <th>Mới mua</th>
-      <th>Chờ đóng</th>
-      <th>Đóng xong</th>
-      <th class="text-center">Xóa</th>
-    </tr>
-  </thead>
-  <tbody id="list-sanxuat"></tbody>
-</table>
     </div>
   </div>
 </div>
@@ -770,7 +785,7 @@
 </script>
 
 
-    		
+   		
 <style media="print">
     body * { visibility: hidden; }
     #print-area, #print-area * { visibility: visible; }
@@ -783,7 +798,7 @@
 
     </main>
 	</main> <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="script.js"></script>
+   <script src="script.js"></script>
 
     <script>
     // --- CẤU HÌNH KẾT NỐI VÀ KHỞI TẠO ---
@@ -999,26 +1014,27 @@ async function loadDashboard() {
     let lowStockCount = 0;
 
     orderList.forEach(name => {
-        const item = inventoryMap[name];
-        const total = item.tonDau + item.nhap + item.change - item.out;
-        
-        inventoryCardsHtml += `
-            <div class="flex items-center justify-between p-4 bg-white rounded-3xl border border-slate-100 shadow-sm transition-all hover:shadow-md">
-                <div class="flex-1 overflow-hidden">
-                    <p class="text-sm font-bold text-slate-800 truncate">${name}</p>
-                    <div class="flex gap-2 mt-1 text-[11px]">
-                        <span class="text-slate-500 font-bold">Tồn đầu: <span class="text-slate-700 font-bold">${item.tonDau}</span></span>
-                        <span class="text-emerald-600 font-bold">Nhập: <span class="text-emerald-600 font-bold">${item.nhap + item.change}</span></span>
-                        <span class="text-rose-600 font-bold">Xuất: <span class="text-rose-600 font-bold">${item.out}</span></span>
-                    </div>
-                </div>
-                <div class="ml-4">
-                    <span class="text-indigo-600 font-black text-sm">${total}</span>
-                </div>
-            </div>`;
-        
-        if (total <= 5 && total >= 0) lowStockCount++;
-    });
+    const item = inventoryMap[name];
+    const total = item.tonDau + item.nhap + item.change - item.out;
+    
+    // Đã sửa: p-4 -> p-2.5, bỏ mt-1, thêm mb-2 vào div
+    inventoryCardsHtml += `
+    <div class="flex items-center justify-between p-2 mb-1 bg-white rounded-xl border border-slate-100 shadow-sm transition-all hover:shadow-md">
+        <div class="flex-1 overflow-hidden">
+            <p class="text-[13px] font-bold text-slate-800 truncate">${name}</p>
+            <div class="flex gap-2 text-[9px]">
+                <span class="text-slate-500 font-bold">Tồn: <span class="text-slate-700">${item.tonDau}</span></span>
+                <span class="text-emerald-600 font-bold">Nhập: <span class="text-emerald-600">${item.nhap + item.change}</span></span>
+                <span class="text-rose-600 font-bold">Xuất: <span class="text-rose-600">${item.out}</span></span>
+            </div>
+        </div>
+        <div class="ml-2">
+            <span class="text-indigo-600 font-black text-sm">${total}</span>
+        </div>
+    </div>`;
+    
+    if (total <= 5 && total >= 0) lowStockCount++;
+});
 
     if (invListEl) {
         invListEl.innerHTML = inventoryCardsHtml || '<p class="col-span-2 p-4 text-center text-slate-400 text-sm">Chưa có dữ liệu tồn kho</p>';
@@ -1326,14 +1342,13 @@ function removeFromCart(index) {
     }
 
    function loadReceipts() {
-    console.log("Đang bắt đầu tải danh sách phiếu...");
-    
+    console.log("Đang tải danh sách phiếu...");
     const leftBody = document.getElementById('list-receipts-left');
     const rightBody = document.getElementById('list-receipts-right');
-    if (!leftBody || !rightBody) {
-        console.error("LỖI: Không tìm thấy ID bảng");
-        return;
-    }
+    if (!leftBody || !rightBody) return;
+
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
     db.collection('receipts').orderBy('date', 'desc').get()
     .then(snapshot => {
@@ -1341,42 +1356,38 @@ function removeFromCart(index) {
         rightBody.innerHTML = '';
         window.allReceipts = [];
 
-        snapshot.forEach(doc => {
-            // LƯU Ý: Lưu doc.id vào docId, doc.data().id vào displayId
-            window.allReceipts.push({ 
-                docId: doc.id, 
-                displayId: doc.data().id || '---', 
-                ...doc.data() 
-            });
-        });
-
-        const total = window.allReceipts.length;
+        // Chuyển snapshot thành mảng để dễ xử lý chia bảng
+        const docs = snapshot.docs;
+        const total = docs.length;
         const midPoint = Math.ceil(total / 2);
 
-        window.allReceipts.forEach((item, index) => {
-            try {
-                const date = item.date?.toDate ? item.date.toDate().toLocaleDateString('vi-VN') : '---';
-                const itemCount = Array.isArray(item.items) ? item.items.length : 0;
-                
-                const rowHtml = `
-                    <tr class="border-b hover:bg-gray-50 text-center">
-                        <td class="border p-2 font-bold">${item.displayId}</td>
-                        <td class="border p-2">${date}</td>
-                        <td class="border p-2">${itemCount} loại</td>
-                        <td class="border p-2 space-x-2">
-                            <button type="button" onclick="viewReceipt('${item.docId}')" class="text-blue-600 hover:text-blue-800 font-bold underline">Xem</button>
-                            <button type="button" onclick="event.preventDefault(); deleteReceipt('${item.docId}')" class="text-red-600 hover:text-red-800 font-bold">Xóa</button>
-                        </td>
-                    </tr>
-                `;
+        docs.forEach((doc, index) => {
+            const data = doc.data();
+            const itemDate = data.date?.toDate ? data.date.toDate() : null;
+            const isOld = itemDate && itemDate < oneWeekAgo;
+            
+            const dateStr = itemDate ? itemDate.toLocaleDateString('vi-VN') : '---';
+            const itemCount = Array.isArray(data.items) ? data.items.length : 0;
+            const displayId = data.id || '---';
 
-                if (index < midPoint) {
-                    leftBody.innerHTML += rowHtml;
-                } else {
-                    rightBody.innerHTML += rowHtml;
-                }
-            } catch (innerError) {
-                console.error("Lỗi khi render:", innerError);
+            // HTML của hàng, thêm class 'old-receipt' và ẩn nếu phiếu cũ
+            const rowHtml = `
+                <tr class="border-b hover:bg-gray-50 text-center ${isOld ? 'old-receipt' : ''}" ${isOld ? 'style="display:none"' : ''}>
+                    <td class="border p-2 font-bold">${displayId}</td>
+                    <td class="border p-2">${dateStr}</td>
+                    <td class="border p-2">${itemCount} loại</td>
+                    <td class="border p-2 space-x-2">
+                        <button type="button" onclick="viewReceipt('${doc.id}')" class="text-blue-600 hover:text-blue-800 font-bold underline">Xem</button>
+                        <button type="button" onclick="event.preventDefault(); deleteReceipt('${doc.id}')" class="text-red-600 hover:text-red-800 font-bold">Xóa</button>
+                    </td>
+                </tr>
+            `;
+
+            // Chia đều vào 2 bảng theo chỉ số index (phiếu mới nằm trên, phiếu cũ nằm dưới)
+            if (index < midPoint) {
+                leftBody.innerHTML += rowHtml;
+            } else {
+                rightBody.innerHTML += rowHtml;
             }
         });
     }).catch(err => {
@@ -1384,6 +1395,8 @@ function removeFromCart(index) {
         Swal.fire('Lỗi', 'Không thể tải danh sách!', 'error');
     });
 }
+
+
 
 window.deleteReceipt = function(docId) {
     Swal.fire({
@@ -1407,6 +1420,30 @@ window.deleteReceipt = function(docId) {
         }
     });
 };
+
+function searchReceipts() {
+    let input = document.getElementById("searchReceiptInput");
+    let filter = input.value.toLowerCase();
+    
+    // Lấy tất cả các dòng của cả 2 bảng
+    let allRows = document.querySelectorAll('#list-receipts-left tr, #list-receipts-right tr');
+
+    allRows.forEach(row => {
+        let idCell = row.getElementsByTagName("td")[0];
+        if (idCell) {
+            let txtValue = idCell.textContent || idCell.innerText;
+            let isOld = row.classList.contains('old-receipt');
+
+            if (filter === "") {
+                // Nếu ô tìm kiếm rỗng: Ẩn các phiếu cũ (old-receipt)
+                row.style.display = isOld ? "none" : "";
+            } else {
+                // Nếu đang tìm kiếm: Hiện tất cả các phiếu (cả mới và cũ) khớp từ khóa
+                row.style.display = txtValue.toLowerCase().indexOf(filter) > -1 ? "" : "none";
+            }
+        }
+    });
+}
 
     function updateProductList() {
     const datalist = document.getElementById('prod-list');
@@ -1792,11 +1829,11 @@ window.renderTopProducts = function(products) {
     list.innerHTML = ''; 
 
     products.forEach(product => {
-        // Đảm bảo class bg-white tồn tại ở đây để tạo độ tương phản với bg-slate-100
+        // Đã sửa: p-4 -> p-2.5, mb-2 (nếu có thẻ cha wrap), giảm padding thẻ span
         list.innerHTML += `
-            <div class="bg-white p-4 rounded-2xl flex justify-between items-center shadow-sm border border-slate-200 transition hover:scale-[1.02]">
+            <div class="bg-white p-2.5 mb-2 rounded-2xl flex justify-between items-center shadow-sm border border-slate-100 transition hover:bg-slate-50">
                 <span class="font-bold text-slate-700 text-sm truncate pr-2">${product.name}</span>
-                <span class="bg-rose-100 px-3 py-1 rounded-xl text-xs font-bold text-rose-600">
+                <span class="bg-rose-50 px-2 py-0.5 rounded-lg text-[11px] font-bold text-rose-600">
                     ${product.sold} bán
                 </span>
             </div>
@@ -2030,20 +2067,20 @@ function renderProductGrid() {
     if (!grid) return;
     grid.innerHTML = '';
     
-    const borderColors = ['border-t-blue-500', 'border-t-emerald-500', 'border-t-amber-500', 'border-t-rose-500', 'border-t-violet-500', 'border-t-cyan-500'];
+    // Mảng các màu cho viền trái
+    const borderColors = ['border-l-blue-500', 'border-l-emerald-500', 'border-l-amber-500', 'border-l-rose-500', 'border-l-violet-500', 'border-l-cyan-500'];
     
     window.allProductCache.forEach((p, index) => {
         const realStock = window.currentStockMap ? (window.currentStockMap[p.name] || 0) : 0;
-        
         const safeName = p.name.replace(/'/g, "\\'");
         const idName = p.name.replace(/ /g, '_');
         const isOutOfStock = realStock <= 0;
         
+        // Sử dụng index để chọn màu viền trái
         const borderColor = borderColors[index % borderColors.length];
         
-        // Loại bỏ w-full và max-w-[200px] để ô tự nhận kích thước từ grid
         grid.innerHTML += `
-            <div class="group bg-white p-3 rounded-xl border border-gray-100 ${borderColor} border-t-4 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-300 flex flex-col justify-between">
+            <div class="group bg-white p-3 rounded-lg border border-gray-200 ${borderColor} border-l-4 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between">
                 <div>
                     <p class="font-bold text-gray-800 text-xs leading-tight h-8 overflow-hidden line-clamp-2 mb-2" title="${p.name}">
                         ${p.name}
@@ -2058,15 +2095,13 @@ function renderProductGrid() {
                 </div>
                 
                 <div class="space-y-1.5">
-                    <select id="price-type-${idName}" class="w-full text-[10px] border border-gray-200 rounded-md p-1 bg-gray-50 outline-none focus:ring-1 focus:ring-blue-200">
+                    <select id="price-type-${idName}" class="w-full text-[10px] border border-gray-200 rounded-md p-1 bg-gray-50 outline-none">
                         <option value="retail">Lẻ: ${Number(p.retail || 0).toLocaleString()}đ</option>
                         <option value="wholesale">Sỉ: ${Number(p.wholesale || 0).toLocaleString()}đ</option>
                     </select>
                     
-                    <button onclick="${isOutOfStock ? `alert('Sản phẩm đã hết hàng/âm kho, cần nhập thêm!')` : `quickAdd('${safeName}')`}" 
-                            class="w-full ${isOutOfStock 
-                                ? 'bg-gray-100 text-gray-400' 
-                                : 'bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600'} 
+                    <button onclick="${isOutOfStock ? `alert('Hết hàng!')` : `quickAdd('${safeName}')`}" 
+                            class="w-full ${isOutOfStock ? 'bg-gray-100 text-gray-400' : 'bg-blue-600 text-white hover:bg-blue-700'} 
                                    text-[10px] py-1.5 rounded-lg font-bold transition-all">
                         ${isOutOfStock ? 'Hết hàng' : 'Chọn'}
                     </button>
@@ -2352,31 +2387,32 @@ async function viewInvoiceDetails(docId) {
     }
 }
 
-    function loadSalesList() {
+   function loadSalesList() {
     console.log("Đang bắt đầu hàm loadSalesList...");
     const body = document.getElementById('sales-list-body');
     
-    if (!body) {
-        console.error("Không tìm thấy ID 'sales-list-body'! Kiểm tra lại HTML.");
-        return;
-    }
+    if (!body) return;
+
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
     db.collection('sales').orderBy('date', 'desc').get().then(snapshot => {
-        // --- THÊM DÒNG NÀY VÀO ĐỂ LƯU DỮ LIỆU ---
         window.allSales = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        // --------------------------------------
-
-        console.log("Số lượng phiếu lấy được từ Firestore:", snapshot.size);
         body.innerHTML = '';
         
         snapshot.forEach(doc => {
             const data = doc.data();
-            const dateStr = data.date ? new Date(data.date.toDate()).toLocaleDateString('vi-VN') : '';
+            const dateObj = data.date?.toDate ? data.date.toDate() : null;
+            const dateStr = dateObj ? dateObj.toLocaleDateString('vi-VN') : '';
+            
+            // Kiểm tra xem phiếu có cũ hơn 7 ngày không
+            const isOld = dateObj && dateObj < oneWeekAgo;
             
             const totalAmount = data.grandTotal || data.total || 0;
             
+            // Nếu là phiếu cũ, thêm class 'old-invoice' và ẩn đi (style="display:none")
             body.innerHTML += `
-                <tr class="hover:bg-slate-50">
+                <tr class="hover:bg-slate-50 ${isOld ? 'old-invoice' : ''}" ${isOld ? 'style="display:none"' : ''}>
                     <td class="p-3 border">${data.id || 'N/A'}</td>
                     <td class="p-3 border">${data.customer || 'Khách lẻ'}</td>
                     <td class="p-3 border">${dateStr}</td>
@@ -2619,16 +2655,27 @@ function searchInvoice() {
     let tr = tbody.getElementsByTagName("tr");
 
     for (let i = 0; i < tr.length; i++) {
+        // Kiểm tra xem hàng này có phải là phiếu cũ không (dựa vào class)
+        let isOld = tr[i].classList.contains('old-invoice');
+        
         let td = tr[i].getElementsByTagName("td");
         let found = false;
-        // Kiểm tra trong cột Số phiếu (0) và Khách hàng (1)
+        
+        // Kiểm tra tìm kiếm trong cột Số phiếu (0) và Khách hàng (1)
         for (let j = 0; j < 2; j++) { 
             if (td[j] && td[j].innerText.toLowerCase().indexOf(filter) > -1) {
                 found = true;
                 break;
             }
         }
-        tr[i].style.display = found ? "" : "none";
+
+        if (filter === "") {
+            // Nếu ô tìm kiếm trống: Phiếu cũ (old-invoice) sẽ bị ẩn, phiếu mới hiện
+            tr[i].style.display = isOld ? "none" : "";
+        } else {
+            // Nếu đang tìm kiếm: Hiện tất cả các phiếu khớp, kể cả phiếu cũ
+            tr[i].style.display = found ? "" : "none";
+        }
     }
 }
 
@@ -3439,19 +3486,29 @@ function getRawNumber(id) {
 async function khoiTaoTrangSanXuat() {
     console.log("Đang khởi tạo trang sản xuất...");
     
-    // 1. Lấy số phiếu mới nhất từ Firestore (ví dụ: collection 'production_meta')
+    // 1. Lấy số phiếu mới nhất từ Firestore
     const snapshot = await db.collection('production').orderBy('soPhieu', 'desc').limit(1).get();
+    
     let nextNum = 1;
     if (!snapshot.empty) {
         const lastDoc = snapshot.docs[0].data();
-        const lastNum = parseInt(lastDoc.soPhieu.split('-')[1]);
-        nextNum = lastNum + 1;
+        // Cũ: split('-')[1] cho "SX-0001"
+        // Mới: dùng regex hoặc replace để lấy số từ "SX01", "SX02"...
+        const lastSoPhieu = lastDoc.soPhieu || "SX00"; 
+        const lastNum = parseInt(lastSoPhieu.replace('SX', ''));
+        
+        if (!isNaN(lastNum)) {
+            nextNum = lastNum + 1;
+        }
     }
-    document.getElementById('sxSoPhieu').value = "SX-" + nextNum.toString().padStart(4, '0');
+    
+    // Cập nhật giá trị vào ô input với định dạng SX01, SX02...
+    // padStart(2, '0') nghĩa là lấy 2 chữ số (VD: SX01, SX02, SX99, SX100...)
+    document.getElementById('sxSoPhieu').value = "SX" + nextNum.toString().padStart(2, '0');
 
-    // 2. Load danh sách phiếu đã lưu để hủy (nếu cần)
-    loadDanhSachHuy();
-	loadInitSX();
+    // 2. Load danh sách
+    
+    loadInitSX();
 }
 async function luuSanXuat() {
     const btn = document.querySelector('.btn-save') || document.querySelector('.btn-primary'); 
@@ -3496,7 +3553,8 @@ async function luuSanXuat() {
         document.getElementById('sxTonCuoi').value = "";
         
         if (typeof loadInitSX === 'function') await loadInitSX(); 
-        if (typeof khoiTaoTrangSanXuat === 'function') khoiTaoTrangSanXuat();
+        // Gọi lại khởi tạo để nhảy sang số phiếu tiếp theo (SX01 -> SX02...)
+        if (typeof khoiTaoTrangSanXuat === 'function') await khoiTaoTrangSanXuat();
         
     } catch (e) {
         console.error("Lỗi: ", e);
@@ -3504,7 +3562,8 @@ async function luuSanXuat() {
     } finally {
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-cloud-upload-alt me-2"></i> LƯU DỮ LIỆU SẢN XUẤT VÀO HỆ THỐNG';
+            // Khôi phục lại đúng text của nút như bạn đã để trong HTML
+            btn.innerHTML = '<i class="fas fa-save me-2"></i> LƯU SẢN XUẤT';
         }
     }
 }
@@ -3512,40 +3571,79 @@ async function luuSanXuat() {
 async function loadInitSX() {
     try {
         const listBody = document.getElementById('list-sanxuat');
-        if (!listBody) return; // Nếu không tìm thấy bảng thì thoát luôn, đừng chạy tiếp
+        if (!listBody) return;
+
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
         const snapshot = await db.collection('production')
                                  .orderBy('timestamp', 'desc')
-                                 .limit(20)
                                  .get();
         
         let htmlRows = "";
         snapshot.forEach(doc => {
             const data = doc.data();
             const id = doc.id;
-            const ngay = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleDateString('vi-VN') : "---";
+            const dateObj = data.timestamp ? new Date(data.timestamp.seconds * 1000) : null;
+            const ngay = dateObj ? dateObj.toLocaleDateString('vi-VN') : "---";
+            const isOld = dateObj && dateObj < sevenDaysAgo;
 
-            htmlRows += `<tr>
-                <td>${ngay}</td>
-                <td class="fw-bold">${data.soPhieu || "---"}</td>
-                <td>${data.tenSP || "---"}</td>
-                <td>${data.sl || 0}</td>              
-                <td class="text-primary">${data.meChuaNau || 0}</td>
-                <td class="text-warning">${data.meChuaDong || 0}</td>
-                <td class="text-success">${data.soMe || 0}</td>
-                <td class="text-center">
-                    <button class="btn btn-sm btn-outline-danger" onclick="huyPhieuSX('${id}')">
-                        <i class="fas fa-trash-alt"></i>
+            htmlRows += `<tr class="${isOld ? 'old-production' : ''}">
+                <td class="p-3">${ngay}</td>
+                <td class="p-3 fw-bold">${data.soPhieu || "---"}</td>
+                <td class="p-3">${data.tenSP || "---"}</td>
+                <td class="p-3">${data.sl || 0}</td>            
+                <td class="p-3 text-primary">${data.meChuaNau || 0}</td>
+                <td class="p-3 text-warning">${data.meChuaDong || 0}</td>
+                <td class="p-3 text-success">${data.soMe || 0}</td>
+                <td class="p-3 text-center">
+                    <button class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1 rounded-lg transition-colors" onclick="huyPhieuSX('${id}')">
+                        <i class="fas fa-trash-alt"></i> Xóa
                     </button>
                 </td>
             </tr>`;
         });
 
-        listBody.innerHTML = htmlRows || "<tr><td colspan='8' class='text-center'>Chưa có dữ liệu</td></tr>";
+        listBody.innerHTML = htmlRows || "<tr><td colspan='8' class='text-center'>Chưa có dữ liệu sản xuất</td></tr>";
+        
+        // --- THÊM ĐOẠN NÀY ĐỂ ÉP TRÌNH DUYỆT ẨN HÀNG CŨ MỘT LẦN NỮA ---
+        document.querySelectorAll('.old-production').forEach(row => {
+            row.style.setProperty('display', 'none', 'important');
+        });
+        
     } catch (e) {
         console.error("Lỗi tại loadInitSX: ", e);
     }
 }
+
+// Hàm tìm kiếm riêng cho trang Sản xuất
+    function locDuLieuMoi() {
+    const input = document.getElementById("searchInput");
+    const tbody = document.getElementById("list-sanxuat");
+    if (!input || !tbody) return;
+
+    const filter = input.value.toLowerCase().trim();
+    const rows = tbody.querySelectorAll('tr');
+
+    rows.forEach(row => {
+        // Dùng innerText để lấy nội dung chuẩn nhất của cả dòng
+        const text = row.innerText.toLowerCase();
+
+        if (filter === "") {
+            // Khi ô tìm kiếm rỗng, xóa bỏ mọi thuộc tính style để bảng hiển thị lại như ban đầu
+            row.style.removeProperty('display');
+        } else {
+            // Khi có từ khóa, dùng !important để ép buộc ẩn/hiện
+            if (text.includes(filter)) {
+                row.style.setProperty('display', '', 'important');
+            } else {
+                row.style.setProperty('display', 'none', 'important');
+            }
+        }
+    });
+}
+
+
 async function huyPhieuSX(id) {
     if (!id) {
         // Nếu không truyền id, lấy từ select box
@@ -3612,6 +3710,8 @@ function tinhSoKgThanhPham() {
     if (typeof tinhTonCuoi === 'function') tinhTonCuoi();
 }
 
+
+
 // --- KHỞI TẠO ---
 lucide.createIcons();
 updateReceiptNum();
@@ -3629,6 +3729,23 @@ loadReceipts();
 // Gọi hàm này để hiển thị trang chủ ngay khi tải xong
 showPage('page-home');
 
+</script>
+<script>
+    // Dùng querySelector trực tiếp để bắt sự kiện từ ô tìm kiếm
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        const filter = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#list-sanxuat tr');
+        
+        rows.forEach(row => {
+            // Kiểm tra nội dung cả dòng
+            const text = row.innerText.toLowerCase();
+            if (text.includes(filter)) {
+                row.style.display = ''; // Hiện
+            } else {
+                row.style.display = 'none'; // Ẩn
+            }
+        });
+    });
 </script>
 </body>
 </html>
