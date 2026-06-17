@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>POS Pro - Hệ thống quản lý</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
@@ -160,6 +160,11 @@
             <button onclick="showPage('page-products-manage'); loadProductManage(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3">
                 <i data-lucide="settings"></i> Danh mục SP
             </button>
+			<button onclick="showPage('page-SanXuat'); document.getElementById('sidebar').classList.remove('active')" 
+        class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3">
+    <i data-lucide="factory"></i> 
+    <span>Sản xuất</span>
+</button>
             <button onclick="showPage('page-report'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3">
                 <i data-lucide="bar-chart-3"></i> Báo cáo
             </button>
@@ -451,7 +456,7 @@
         <h2 style="margin: 0; font-size: 20px;">HỢP TÁC XÃ SẢN XUẤT KINH DOANH NÔNG SẢN THANH NGUYÊN</h2>
         <p style="margin: 2px 0;">Số 9, ngõ 456, đường Xuân Thành, Ninh Nhất, TP Hoa Lư, Ninh Bình</p>
         <p style="margin: 2px 0;">Điện thoại: 0982 998 474 - 0949 558 525</p>
-        <h1 style="margin: 20px 0; text-transform: uppercase; font-size: 24px; font-weight: 800;">HOÁ ĐƠN BÁN HÀNG</h1>
+        <h1 style="margin: 20px 0; text-transform: uppercase;">HOÁ ĐƠN BÁN HÀNG</h1>
     </div>
 
     <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
@@ -656,6 +661,106 @@
     </div>
 </div>
 
+<!-- PHẦN 6: SẢN XUẤT -->
+
+<div id="page-SanXuat" class="page-content hidden">
+  <div class="container-fluid py-4">
+    <h3 class="mb-4 fw-bold text-dark">THEO DÕI SẢN XUẤT</h3>
+
+    <div class="card border-0 shadow-sm p-4 mb-4">
+      <div class="row mb-4">
+        <div class="col-md-3">
+          <label class="form-label text-muted small fw-bold">SỐ PHIẾU HIỆN TẠI</label>
+          <input type="text" id="sxSoPhieu" class="form-control bg-light fw-bold text-primary" readonly>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <label class="form-label text-muted">Tên sản phẩm</label>
+          <select id="sxTenSP" class="form-select" onchange="tinhSoKgThanhPham()">
+            <option value="">-- Chọn sản phẩm --</option>
+            <option>TCMT 450g Thuỷ tinh</option>
+            <option>TCMT 450g Nhựa</option>
+            <option>TCMT 275g Thuỷ tinh tròn</option>
+            <option>TCMT 275g Thuỷ tinh Lăng</option>
+            <option>TCMT 275g Nhựa</option>
+            <option>TCMT 180g Thuỷ tinh</option>
+            <option>TCMT 180g Túi Zip</option>
+            <option>TCMT 150g Thuỷ tinh</option>
+            <option>TCMT 90g Khay Nhôm</option>
+            <option>Mắm bếp</option>
+			<option>Mới mua (Chưa nấu)</option>
+            <option>Chờ đóng (Đã nấu)</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label text-muted">ĐVT</label>
+          <select id="sxDVT" class="form-select">
+            <option>Hũ</option><option>Túi</option><option>Khay</option><option>Kg</option><option>Mẻ</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label text-muted">Tồn đầu</label>
+          <input type="number" id="sxTonDau" class="form-control" placeholder="0" oninput="tinhTonCuoi()">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label text-muted">SL Thành phẩm</label>
+          <input type="number" id="sxSL" class="form-control" placeholder="0" oninput="tinhSoKgThanhPham(); tinhTonCuoi();">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label text-muted">Tồn cuối</label>
+          <input type="text" id="sxTonCuoi" class="form-control bg-light" readonly>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-3">
+          <label class="form-label text-muted">Số KG (Thành phẩm)</label>
+          <input type="number" id="sxSoKg" class="form-control" placeholder="0.00">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label text-muted">Mẻ đóng xong</label>
+          <input type="number" id="sxSoMe" class="form-control" placeholder="0">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label text-muted">Chờ đóng (Đã nấu)</label>
+          <input type="number" id="sxMeChuaDong" class="form-control" placeholder="0">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label text-muted">Mới mua (Chưa nấu)</label>
+          <input type="number" id="sxMeChuaNau" class="form-control" placeholder="0">
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end">
+        <button class="btn btn-primary px-5 py-2 shadow-sm" onclick="luuSanXuat()">
+            <i class="fas fa-save me-2"></i> LƯU SẢN XUẤT
+        </button>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4">
+      <h5 class="mb-3 text-secondary">DANH SÁCH PHIẾU SẢN XUẤT</h5>
+      <table class="table table-hover align-middle">
+  <thead class="table-light">
+    <tr>
+      <th>Ngày</th>
+      <th>Số phiếu</th>
+      <th>Sản phẩm</th>
+      <th>SL</th>
+      <th>Mới mua</th>
+      <th>Chờ đóng</th>
+      <th>Đóng xong</th>
+      <th class="text-center">Xóa</th>
+    </tr>
+  </thead>
+  <tbody id="list-sanxuat"></tbody>
+</table>
+    </div>
+  </div>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const today = new Date().toISOString().split('T')[0];
@@ -727,26 +832,35 @@ function showPage(pageId) {
         case 'page-home':
             if (typeof loadDashboard === 'function') loadDashboard();
             break;
+            
         case 'page-import':
             if (typeof updateReceiptNum === 'function') updateReceiptNum();
             if (typeof loadReceipts === 'function') loadReceipts();
             break;
+            
         case 'page-inventory':
             if (typeof loadInventory === 'function') loadInventory();
             break;
+            
+        case 'page-SanXuat':
+            if (typeof khoiTaoTrangSanXuat === 'function') khoiTaoTrangSanXuat();
+            break;
+            
         case 'page-sell':
             // CẬP NHẬT TỒN KHO MỚI NHẤT MỖI KHI MỞ TRANG BÁN HÀNG
             if (typeof calculateAllStock === 'function') calculateAllStock();
-            
             if (typeof updateSellReceiptNum === 'function') updateSellReceiptNum();
             if (typeof loadCustomers === 'function') loadCustomers();
             break;
+            
         case 'page-customers':
             if (typeof loadCustomers === 'function') loadCustomers();
             break;
+            
         case 'page-products-manage':
             if (typeof loadProductManage === 'function') loadProductManage();
             break;
+            
         case 'page-history':
             if (typeof loadSalesList === 'function') loadSalesList();
             break;
@@ -2809,13 +2923,6 @@ async function getDocsByDate(collectionName, from, to) {
         .get();
 }
 
-// Hàm trợ giúp chuyển đổi định dạng ngày từ YYYY-MM-DD sang DD-MM-YYYY
-function formatDateDDMMYYYY(dateStr) {
-    if (!dateStr) return "";
-    const [year, month, day] = dateStr.split('-');
-    return `${day}-${month}-${year}`;
-}
-
 // 1. Xuất báo cáo Bán hàng
 async function exportSales() {
     let from = document.getElementById('date-from').value;
@@ -2835,7 +2942,7 @@ async function exportSales() {
     sheet.mergeCells('A1:H1');
     titleRow.alignment = { horizontal: 'center' };
 
-    sheet.addRow([`Từ ngày: ${formatDateDDMMYYYY(from)} - Đến ngày: ${formatDateDDMMYYYY(to)}`]);
+    sheet.addRow([`Từ ngày: ${from} - Đến ngày: ${to}`]);
     sheet.addRow([]); // Dòng trống
 
     // 3. Thêm Tiêu đề cột (Header)
@@ -2924,7 +3031,7 @@ async function exportInventory() {
         sheet.mergeCells('A1:D1');
         titleRow.alignment = { horizontal: 'center' };
 
-        sheet.addRow([`Từ ngày: ${formatDateDDMMYYYY(from)} - Đến ngày: ${formatDateDDMMYYYY(to)}`]);
+        sheet.addRow([`Từ ngày: ${from} - Đến ngày: ${to}`]);
         sheet.addRow([]); // Dòng trống
 
         // 3. Thêm Tiêu đề cột (Header)
@@ -2967,8 +3074,7 @@ async function exportInventory() {
         Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Không thể xuất báo cáo!' });
     }
 }
-
-// 3. Xuất báo cáo Tổng hợp
+// 3. Xuất báo cáo Tổng hợp (Đã cập nhật logic Style tự động)
 async function exportFullReport() {
     const fromVal = document.getElementById('date-from').value;
     const toVal = document.getElementById('date-to').value;
@@ -2979,15 +3085,18 @@ async function exportFullReport() {
     showLoading();
 
     try {
-        const [salesSnap, receiptsSnap] = await Promise.all([
+        const [salesSnap, receiptsSnap, prodSnap] = await Promise.all([
             db.collection('sales').get(),
-            db.collection('receipts').get()
+            db.collection('receipts').get(),
+            db.collection('production').get() // Thêm lấy dữ liệu sản xuất
         ]);
 
         // --- Logic tính toán dữ liệu ---
         let inventory = {};
         const initItem = (name) => { if (!inventory[name]) inventory[name] = { tonDau: 0, nhapMoi: 0, nhapDoi: 0, xuat: 0 }; };
         const fromDateObj = new Date(fromVal);
+        
+        // Tính toán tồn kho sản phẩm (Bán hàng & Nhập kho)
         receiptsSnap.forEach(doc => {
             const d = doc.data();
             if (!d.date) return;
@@ -3003,6 +3112,7 @@ async function exportFullReport() {
                 }
             });
         });
+        
         let salesData = [];
         salesSnap.forEach(doc => {
             const d = doc.data();
@@ -3017,10 +3127,29 @@ async function exportFullReport() {
                 if (dDateObj < fromDateObj) inventory[i.name].tonDau -= qty;
                 else if (dDateStr >= fromVal && dDateStr <= toVal) {
                     inventory[i.name].xuat += qty;
-                    salesData.push([formatDateDDMMYYYY(dDateStr), d.customer || 'Khách lẻ', i.name, qty, price, (qty * price + tax), i.note || ""]);
+                    salesData.push([dDateStr, d.customer || 'Khách lẻ', i.name, qty, price, (qty * price + tax), i.note || ""]);
                 }
             });
         });
+
+        // --- TÍNH TOÁN LŨY KẾ CHI TIẾT SẢN XUẤT ---
+        let tMoiMua = 0, tChoDong = 0, tDaDong = 0;
+        prodSnap.forEach(doc => {
+            const d = doc.data();
+            // Lấy timestamp từ phiếu để kiểm tra ngày
+            const dDate = d.timestamp ? d.timestamp.toDate() : new Date(0);
+            const dDateStr = dDate.toISOString().split('T')[0];
+            
+            // Cộng dồn toàn bộ dữ liệu từ đầu cho đến ngày 'toVal'
+            if (dDateStr <= toVal) {
+                tMoiMua += parseInt(d.meChuaNau || 0);
+                tChoDong += parseInt(d.meChuaDong || 0);
+                tDaDong += parseInt(d.soMe || 0);
+            }
+        });
+        // Tồn kho thực tế = Tổng đã nhập - Tổng đã đưa đi xử lý
+        const tonMoiMua = tMoiMua - tChoDong; 
+        const tonChoDong = tChoDong - tDaDong;
 
         // --- Xuất Excel bằng ExcelJS ---
         const workbook = new ExcelJS.Workbook();
@@ -3035,12 +3164,9 @@ async function exportFullReport() {
 
         // Header
         addStyledRow(["BÁO CÁO TỔNG HỢP"], true, 16, 'A1:G1').alignment = { horizontal: 'center' };
-        
-        // Căn giữa dòng ngày tháng và gộp ô A2:G2
-        const dateRow = sheet.addRow([`Từ ngày ${formatDateDDMMYYYY(fromVal)} đến ngày ${formatDateDDMMYYYY(toVal)}`]);
+        const dateRow = sheet.addRow([`Từ ngày ${fromVal} đến ngày ${toVal}`]);
         sheet.mergeCells('A2:G2');
         dateRow.alignment = { horizontal: 'center' };
-        
         sheet.addRow([]);
 
         // I. Bán hàng
@@ -3087,19 +3213,7 @@ async function exportFullReport() {
         
         Object.keys(inventory).forEach(name => {
             const item = inventory[name];
-            const tonCuoi = item.tonDau + item.nhapMoi + item.nhapDoi - item.xuat;
-            const formatVal = (val) => (val === 0 ? "" : val);
-
-            const row = sheet.addRow([
-                formatDateDDMMYYYY(toVal), 
-                name, 
-                formatVal(item.tonDau), 
-                formatVal(item.nhapMoi), 
-                formatVal(item.nhapDoi), 
-                formatVal(item.xuat), 
-                formatVal(tonCuoi)
-            ]);
-            
+            const row = sheet.addRow([toVal, name, item.tonDau, item.nhapMoi, item.nhapDoi, item.xuat, item.tonDau + item.nhapMoi + item.nhapDoi - item.xuat]);
             row.eachCell((c, colNumber) => {
                 c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
                 if (colNumber > 2) {
@@ -3109,14 +3223,14 @@ async function exportFullReport() {
             });
         });
 
-        // III. CHI TIẾT SẢN XUẤT
+     // III. CHI TIẾT SẢN XUẤT
         sheet.addRow([]);
         const rowIIIRow = sheet.addRow(["", "III. CHI TIẾT SẢN XUẤT"]);
-        const rowIIINum = rowIIIRow.number;
-        sheet.mergeCells(`B${rowIIINum}:F${rowIIINum}`);
+        sheet.mergeCells(`B${rowIIIRow.number}:F${rowIIIRow.number}`);
         rowIIIRow.font = { bold: true, size: 14 };
         rowIIIRow.alignment = { horizontal: 'center' };
         
+        // Header phần III
         const header3 = sheet.addRow(["", "Tên sản phẩm", "Tồn đầu", "Số lượng", "Số Kg", "Tồn cuối"]);
         header3.eachCell((c, colNumber) => {
             if (colNumber >= 2 && colNumber <= 6) { 
@@ -3125,40 +3239,89 @@ async function exportFullReport() {
                 c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
             }
         });
-        
-        const sanXuatItems = ["TCMT 450g Thuỷ tinh", "TCMT 450g Nhựa", "TCMT 275g Thuỷ tinh tròn", "TCMT 275g Thuỷ tinh Lăng", "TCMT 180g Thuỷ tinh", "TCMT 180g Túi Zip", "TCMT 150g Thuỷ tinh", "TCMT 90g Khay Nhôm", "Mắm bếp", "SỐ KG ĐÃ ĐÓNG", "CHƯA ĐÓNG", "CHƯA NẤU"];
-        
-        sanXuatItems.forEach(name => {
-            const row = sheet.addRow(["", name, "", "", "", ""]);
-            const isSpecialRow = ["SỐ KG ĐÃ ĐÓNG", "CHƯA ĐÓNG", "CHƯA NẤU"].includes(name);
 
-            if (isSpecialRow) {
-                sheet.mergeCells(`B${row.number}:C${row.number}`);
-                const cellBC = row.getCell(2); 
-                cellBC.font = { bold: true, size: 16 };
-                cellBC.alignment = { horizontal: 'center', vertical: 'middle' };
-                row.eachCell((c, colNumber) => {
-                    if (colNumber >= 2 && colNumber <= 6) {
-                        c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-                        if (colNumber >= 4) {
-                            c.alignment = { horizontal: 'center', vertical: 'middle' };
-                            c.font = { bold: true };
-                        }
-                    }
-                });
-            } else {
-                row.eachCell((c, colNumber) => {
-                    if (colNumber >= 2 && colNumber <= 6) {
-                        c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-                        if (colNumber >= 3) {
-                            c.font = { bold: true };
-                            c.alignment = { horizontal: 'center', vertical: 'middle' };
-                        }
-                    }
-                });
+        // 1. TÍNH TOÁN DỮ LIỆU
+        let spData = {}; // { "Tên SP": { sl: 0, kg: 0 } }
+        let totalKgDaDong = 0, totalMeDaDong = 0, totalMeChoDong = 0, totalMeChuaNau = 0;
+
+        prodSnap.forEach(doc => {
+            const d = doc.data();
+            // Lũy kế đến ngày kết thúc
+            const dDate = d.timestamp ? d.timestamp.toDate() : new Date(0);
+            if (dDate.toISOString().split('T')[0] <= toVal) {
+                // Cộng tổng cho các dòng tổng kết
+                totalKgDaDong += parseFloat(d.soKg || 0);
+                totalMeDaDong += parseInt(d.soMe || 0);
+                // Logic tồn mẻ:
+                totalMeChuaNau += parseInt(d.meChuaNau || 0);
+                totalMeChoDong += parseInt(d.meChuaDong || 0);
+
+                // Cộng cho từng sản phẩm
+                const name = d.tenSP;
+                if (name) {
+                    if (!spData[name]) spData[name] = { sl: 0, kg: 0 };
+                    spData[name].sl += parseInt(d.sl || 0); // Lấy từ field 'sl'
+                    spData[name].kg += parseFloat(d.soKg || 0);
+                }
             }
         });
 
+        // 2. GHI DÒNG SẢN PHẨM
+        Object.keys(spData).forEach(name => {
+            const item = spData[name];
+            // Dòng này tạo 6 ô: [Cột A(trống), Cột B(Tên), Cột C(trống), Cột D(SL), Cột E(Kg), Cột F(trống)]
+            const row = sheet.addRow(["", name, "", item.sl, item.kg, ""]);
+            
+            row.eachCell((c, colNumber) => {
+                // Chỉ kẻ bảng từ cột 2 (B) đến cột 6 (F)
+                if (colNumber >= 2 && colNumber <= 6) {
+                    c.border = { 
+                        top: {style:'thin'}, 
+                        left: {style:'thin'}, 
+                        bottom: {style:'thin'}, 
+                        right: {style:'thin'} 
+                    };
+                }
+                // Căn giữa cho các cột dữ liệu SL và Kg (cột 4 và 5)
+                if (colNumber >= 4 && colNumber <= 5) {
+                    c.alignment = { horizontal: 'center' };
+                }
+            });
+        });
+
+        // 3. CÁC DÒNG TỔNG KẾT
+        let finalTonMoiMua = tMoiMua - tChoDong; 
+        let finalTonChoDong = tChoDong - tDaDong;
+
+        // Mảng này đảm bảo dữ liệu rơi đúng cột: 
+        // B(2), C(3), D(4), E(5), F(6)
+        const summaryRows = [
+            ["SỐ KG ĐÃ ĐÓNG", "", totalMeDaDong, totalKgDaDong, totalMeDaDong], 
+            ["CHƯA ĐÓNG", "", "", "", finalTonChoDong],
+            ["CHƯA NẤU", "", "", "", finalTonMoiMua]
+        ];
+
+        summaryRows.forEach(rowData => {
+            // Thêm "" ở đầu để dòng này bắt đầu từ cột B (cột 2)
+            const row = sheet.addRow(["", ...rowData]);
+            
+            // Gộp cột B và C
+            sheet.mergeCells(`B${row.number}:C${row.number}`); 
+            
+            // Định dạng font đậm và cỡ 16
+            row.font = { bold: true, size: 16 };
+            
+            row.eachCell((c, colNumber) => {
+                // Kẻ bảng từ cột 2 (B) đến cột 6 (F)
+                if (colNumber >= 2 && colNumber <= 6) {
+                    c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+                }
+                // Căn giữa các cột số liệu (D, E, F)
+                if (colNumber >= 4) {
+                    c.alignment = { horizontal: 'center' };
+                }
+            });
+        });
         sheet.columns = [{ width: 15 }, { width: 20 }, { width: 25 }, { width: 10 }, { width: 15 }, { width: 15 }, { width: 20 }];
 
         const buffer = await workbook.xlsx.writeBuffer();
@@ -3185,15 +3348,13 @@ function updateDateDisplay() {
     let from = document.getElementById('date-from').value;
     let to = document.getElementById('date-to').value;
     if (from && to) {
-        let text = `Từ ${formatDateDDMMYYYY(from)} đến ${formatDateDDMMYYYY(to)}`;
+        let text = `Từ ${from} đến ${to}`;
         const salesEl = document.getElementById('date-range-sales');
         const invEl = document.getElementById('date-range-inventory');
         if(salesEl) { salesEl.innerText = text; salesEl.className = "text-xs text-indigo-600 mb-4 italic font-bold"; }
         if(invEl) { invEl.innerText = text; invEl.className = "text-xs text-indigo-600 mb-4 italic font-bold"; }
     }
 }
-
-
 
 // ========== QUẢN LÝ SẢN PHẨM========
 // 1. Hàm thêm sản phẩm mới
@@ -3268,6 +3429,188 @@ document.addEventListener('keydown', function(event) {
 });
 
 
+// ============SẢN XUẤT =============
+
+function getRawNumber(id) {
+  const val = document.getElementById(id).value;
+  return parseFloat(val.replace(/\./g, '').replace(',', '.')) || 0;
+}
+
+async function khoiTaoTrangSanXuat() {
+    console.log("Đang khởi tạo trang sản xuất...");
+    
+    // 1. Lấy số phiếu mới nhất từ Firestore (ví dụ: collection 'production_meta')
+    const snapshot = await db.collection('production').orderBy('soPhieu', 'desc').limit(1).get();
+    let nextNum = 1;
+    if (!snapshot.empty) {
+        const lastDoc = snapshot.docs[0].data();
+        const lastNum = parseInt(lastDoc.soPhieu.split('-')[1]);
+        nextNum = lastNum + 1;
+    }
+    document.getElementById('sxSoPhieu').value = "SX-" + nextNum.toString().padStart(4, '0');
+
+    // 2. Load danh sách phiếu đã lưu để hủy (nếu cần)
+    loadDanhSachHuy();
+	loadInitSX();
+}
+async function luuSanXuat() {
+    const btn = document.querySelector('.btn-save') || document.querySelector('.btn-primary'); 
+    
+    // Đảm bảo lấy đúng giá trị, nếu để trống thì trả về 0
+    const data = {
+        soPhieu: document.getElementById('sxSoPhieu').value || "",
+        tenSP: document.getElementById('sxTenSP').value || "",
+        dvt: document.getElementById('sxDVT').value || "",
+        tonDau: parseInt(document.getElementById('sxTonDau').value) || 0,
+        sl: parseInt(document.getElementById('sxSL').value) || 0, // Cột SL
+        tonCuoi: parseInt(document.getElementById('sxTonCuoi').value) || 0,
+        soKg: document.getElementById('sxSoKg').value || "0",
+        soMe: parseInt(document.getElementById('sxSoMe').value) || 0, // Đóng xong
+        meChuaDong: parseInt(document.getElementById('sxMeChuaDong').value) || 0, // Chờ đóng
+        meChuaNau: parseInt(document.getElementById('sxMeChuaNau').value) || 0, // Mới mua
+        timestamp: new Date()
+    };
+
+    // Kiểm tra: nếu là phiếu sp thì phải có tên, nếu là phiếu mẻ thì phải có ít nhất 1 giá trị mẻ
+    if (!data.tenSP && data.soMe === 0 && data.meChuaDong === 0 && data.meChuaNau === 0) {
+        alert("⚠️ Vui lòng chọn sản phẩm hoặc nhập thông số mẻ!");
+        return;
+    }
+
+    try {
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang lưu...';
+        }
+
+        await db.collection('production').add(data);
+        alert("✅ Đã lưu thành công!");
+        
+        // Reset form
+        document.getElementById('sxTenSP').value = "";
+        document.getElementById('sxSL').value = "";
+        document.getElementById('sxSoKg').value = "";
+        document.getElementById('sxSoMe').value = "";
+        document.getElementById('sxMeChuaDong').value = "";
+        document.getElementById('sxMeChuaNau').value = "";
+        document.getElementById('sxTonCuoi').value = "";
+        
+        if (typeof loadInitSX === 'function') await loadInitSX(); 
+        if (typeof khoiTaoTrangSanXuat === 'function') khoiTaoTrangSanXuat();
+        
+    } catch (e) {
+        console.error("Lỗi: ", e);
+        alert("Có lỗi: " + e.message);
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-cloud-upload-alt me-2"></i> LƯU DỮ LIỆU SẢN XUẤT VÀO HỆ THỐNG';
+        }
+    }
+}
+
+async function loadInitSX() {
+    try {
+        const listBody = document.getElementById('list-sanxuat');
+        if (!listBody) return; // Nếu không tìm thấy bảng thì thoát luôn, đừng chạy tiếp
+
+        const snapshot = await db.collection('production')
+                                 .orderBy('timestamp', 'desc')
+                                 .limit(20)
+                                 .get();
+        
+        let htmlRows = "";
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const id = doc.id;
+            const ngay = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleDateString('vi-VN') : "---";
+
+            htmlRows += `<tr>
+                <td>${ngay}</td>
+                <td class="fw-bold">${data.soPhieu || "---"}</td>
+                <td>${data.tenSP || "---"}</td>
+                <td>${data.sl || 0}</td>              
+                <td class="text-primary">${data.meChuaNau || 0}</td>
+                <td class="text-warning">${data.meChuaDong || 0}</td>
+                <td class="text-success">${data.soMe || 0}</td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-outline-danger" onclick="huyPhieuSX('${id}')">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>`;
+        });
+
+        listBody.innerHTML = htmlRows || "<tr><td colspan='8' class='text-center'>Chưa có dữ liệu</td></tr>";
+    } catch (e) {
+        console.error("Lỗi tại loadInitSX: ", e);
+    }
+}
+async function huyPhieuSX(id) {
+    if (!id) {
+        // Nếu không truyền id, lấy từ select box
+        id = document.getElementById('select_HuySX').value;
+    }
+    
+    if (!id) { alert("Vui lòng chọn phiếu!"); return; }
+    if (!confirm("Xóa phiếu này?")) return;
+
+    try {
+        await db.collection('production').doc(id).delete();
+        alert("Đã xóa!");
+        loadInitSX(); // Gọi lại để cập nhật bảng ngay
+    } catch (e) {
+        alert("Lỗi: " + e.message);
+    }
+}
+// Gắn sự kiện lắng nghe vào các ô input
+document.addEventListener('DOMContentLoaded', () => {
+    ['sxTonDau', 'sxSL', 'sxSoKg', 'sxSoMe', 'sxMeChuaNau', 'sxMeChuaDong'].forEach(id => {
+        document.getElementById(id).addEventListener('input', () => {
+            tinhTonCuoi();
+            tinhTruLui(); // Nếu bạn muốn tính trừ lùi mẻ
+        });
+    });
+});
+
+function tinhTonCuoi() {
+    const dau = getRawNumber('sxTonDau');
+    const sl = getRawNumber('sxSL');
+    const tong = dau + sl;
+    document.getElementById('sxTonCuoi').value = tong.toLocaleString('vi-VN');
+}
+
+// Logic Trừ lùi (Ví dụ: Mẻ còn lại = Mẻ cũ - Mẻ đã dùng)
+function tinhTruLui() {
+    // Giả sử bạn muốn tự động trừ lùi mẻ chưa nấu
+    // Bạn có thể tùy chỉnh logic này theo yêu cầu cụ thể của bạn
+    const meChuaNau = getRawNumber('sxMeChuaNau');
+    const meDaNau = getRawNumber('sxSoMe'); // Mẻ đóng xong coi như đã nấu
+    
+    // Ví dụ: Nếu người dùng nhập Mẻ đóng xong, tự động cập nhật Mẻ chưa nấu
+    // Đây là ví dụ logic, bạn hãy sửa lại theo cách tính của xưởng bạn nhé
+}
+
+function tinhSoKgThanhPham() {
+    const tenSP = document.getElementById('sxTenSP').value;
+    const sl = getRawNumber('sxSL');
+    const soKgInput = document.getElementById('sxSoKg');
+
+    // Chỉ tự động tính nếu có chọn sản phẩm và có số lượng
+    if (tenSP && sl > 0) {
+        const match = tenSP.match(/(\d+)g/);
+        if (match) {
+            const gramsPerUnit = parseInt(match[1]);
+            const totalKg = (gramsPerUnit * sl) / 1000;
+            
+            // Tự động điền giá trị
+            soKgInput.value = totalKg.toFixed(2);
+        }
+    }
+    
+    // Luôn tính tồn cuối
+    if (typeof tinhTonCuoi === 'function') tinhTonCuoi();
+}
 
 // --- KHỞI TẠO ---
 lucide.createIcons();
@@ -3276,7 +3619,7 @@ updateProductList();
 updateProductDropdowns();
 loadSalesList();
 loadCustomers(); 
-
+loadInitSX();
 // 2. Khởi tạo Lucide Icons
 lucide.createIcons();
 
