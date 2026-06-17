@@ -679,9 +679,10 @@
           <h5 class="mb-4 font-bold text-gray-600">DANH SÁCH PHIẾU SẢN XUẤT</h5>
           
           <div class="relative mb-4">
-				<input type="text" id="searchInput" 
-       class="w-full pl-4 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" 
-       placeholder="Tìm kiếm...">
+				<input type="text" id="searchInputSX" 
+       placeholder="🔍 Tìm kiếm theo số phiếu (VD: SX01)..." 
+       onkeyup="searchSanXuat()" 
+       class="w-full pl-4 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
 			</div>
 
           <div class="overflow-x-auto">
@@ -798,7 +799,7 @@
 
     </main>
 	</main> <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-   <script src="/script.js"></script>
+   <script src="script.js"></script>
 
     <script>
     // --- CẤU HÌNH KẾT NỐI VÀ KHỞI TẠO ---
@@ -3617,32 +3618,27 @@ async function loadInitSX() {
 }
 
 // Hàm tìm kiếm riêng cho trang Sản xuất
-    function locDuLieuMoi() {
-    const input = document.getElementById("searchInput");
-    const tbody = document.getElementById("list-sanxuat");
-    if (!input || !tbody) return;
+ function searchSanXuat() {
+    let input = document.getElementById("searchInputSX");
+    let filter = input.value.toUpperCase();
+    let tableBody = document.getElementById("list-sanxuat");
+    let rows = tableBody.getElementsByTagName("tr");
 
-    const filter = input.value.toLowerCase().trim();
-    const rows = tbody.querySelectorAll('tr');
-
-    rows.forEach(row => {
-        // Dùng innerText để lấy nội dung chuẩn nhất của cả dòng
-        const text = row.innerText.toLowerCase();
-
-        if (filter === "") {
-            // Khi ô tìm kiếm rỗng, xóa bỏ mọi thuộc tính style để bảng hiển thị lại như ban đầu
-            row.style.removeProperty('display');
-        } else {
-            // Khi có từ khóa, dùng !important để ép buộc ẩn/hiện
-            if (text.includes(filter)) {
-                row.style.setProperty('display', '', 'important');
+    for (let i = 0; i < rows.length; i++) {
+        // [1] đại diện cho cột thứ 2 (Số phiếu)
+        let td = rows[i].getElementsByTagName("td")[1]; 
+        
+        if (td) {
+            let txtValue = td.textContent || td.innerText;
+            // So sánh nội dung ô Số phiếu với từ khóa tìm kiếm
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                rows[i].style.display = ""; // Hiện dòng nếu khớp
             } else {
-                row.style.setProperty('display', 'none', 'important');
+                rows[i].style.display = "none"; // Ẩn dòng nếu không khớp
             }
         }
-    });
+    }
 }
-
 
 async function huyPhieuSX(id) {
     if (!id) {
@@ -3730,22 +3726,6 @@ loadReceipts();
 showPage('page-home');
 
 </script>
-<script>
-    // Dùng querySelector trực tiếp để bắt sự kiện từ ô tìm kiếm
-    document.getElementById('searchInput').addEventListener('input', function(e) {
-        const filter = e.target.value.toLowerCase();
-        const rows = document.querySelectorAll('#list-sanxuat tr');
-        
-        rows.forEach(row => {
-            // Kiểm tra nội dung cả dòng
-            const text = row.innerText.toLowerCase();
-            if (text.includes(filter)) {
-                row.style.display = ''; // Hiện
-            } else {
-                row.style.display = 'none'; // Ẩn
-            }
-        });
-    });
-</script>
+
 </body>
 </html>
