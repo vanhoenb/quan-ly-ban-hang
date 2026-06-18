@@ -2170,24 +2170,28 @@ function quickAdd(productName) {
     const p = window.allProductCache.find(i => i.name === productName);
     if (!p) return;
 
-    // Vẫn giữ tính toán tồn kho
+    // 1. Kiểm tra tồn kho từ biến toàn cục
     const stock = window.currentStockMap ? (window.currentStockMap[productName] || 0) : 0;
     
-    // ĐÃ BỎ CHẶN: Kiểm tra nếu hết hàng thì thông báo và dừng lại
     if (stock <= 0) {
         Swal.fire({ 
             icon: 'error', 
-            title: 'Hết hàng / Âm kho', 
-            text: `Sản phẩm ${productName} (Tồn: ${stock}). Vui lòng nhập thêm hàng trước khi bán!` 
+            title: 'Hết hàng!', 
+            text: `Sản phẩm ${productName} đã hết hàng.` 
         });
         return;
     }
 
-    // Lấy giá dựa trên loại đã chọn
+    // 2. TRỪ TỒN KHO NGAY LẬP TỨC TRONG BỘ NHỚ
+    window.currentStockMap[productName] -= 1;
+
+    // 3. Cập nhật lại giao diện lưới sản phẩm (để số tồn hiển thị giảm đi ngay)
+    renderProductGrid();
+
+    // Lấy giá và thêm vào giỏ
     const priceType = document.getElementById(`price-type-${productName.replace(/ /g, '_')}`).value;
     const price = priceType === 'wholesale' ? (p.wholesale || 0) : (p.retail || 0);
 
-    // Thêm vào giỏ
     const item = {
         name: p.name,
         unit: p.unit || 'Cái',
@@ -2322,15 +2326,20 @@ async function saveAndPrint() {
         alert("Lưu thành công!");
 
         // 1. Điền thông tin chung
-        const now = new Date();
-        const fields = {
-            'print-customer': customer,
-            'print-address': address,         
-            'print-phone': phone,             
-            'print-receipt-id': receiptId,  
-            'print-date': now.toLocaleDateString('vi-VN'),
-            'print-note-global': noteGlobal
-        };
+        // Thay đoạn cũ bằng đoạn này trong hàm saveAndPrint
+const now = new Date();
+const fields = {
+    'print-customer': customer,
+    'print-address': address,          
+    'print-phone': phone,              
+    'print-receipt-id': receiptId,  
+    'print-date': now.toLocaleDateString('vi-VN'),
+    // THÊM 3 DÒNG NÀY ĐỂ HIỆN NGÀY THÁNG NĂM RỜI
+    'print-day': now.getDate(),
+    'print-month': now.getMonth() + 1,
+    'print-year': now.getFullYear(),
+    'print-note-global': noteGlobal
+};
         for (const [id, value] of Object.entries(fields)) {
             const el = document.getElementById(id);
             if (el) el.innerText = value;
@@ -2568,7 +2577,7 @@ async function reprintSale(docId) {
     }
 }
 
-    async function deleteSale(docId) {
+   async function deleteSale(docId) {
     if (confirm("Xóa hóa đơn này sẽ cộng lại hàng vào kho. Bạn chắc chắn chứ?")) {
         try {
             // 1. Lấy thông tin hóa đơn để biết đã bán cái gì
@@ -2599,6 +2608,12 @@ async function reprintSale(docId) {
             await docRef.delete();
             
             alert("Đã xóa hóa đơn và hoàn lại kho thành công!");
+            
+            // --- CẬP NHẬT GIAO DIỆN NGAY LẬP TỨC ---
+            await calculateAllStock(); // Tính lại tồn kho mới nhất
+            if (typeof renderProductGrid === 'function') renderProductGrid(); // Vẽ lại lưới SP bán hàng
+            if (typeof loadDashboard === 'function') loadDashboard(); // Cập nhật lại trang chủ (nếu có)
+            
             loadSalesList();
             updateSellReceiptNum();
             
@@ -2764,9 +2779,25 @@ function removeSellItem(index) {
         cancelButtonText: 'Hủy'
     }).then((result) => {
         if (result.isConfirmed) {
+            // 1. Lấy thông tin món cần xóa để cộng lại kho
+            const item = sellCart[index];
+            
+            // 2. Cộng lại số lượng vào tồn kho tạm thời
+            if (window.currentStockMap && item.name) {
+                window.currentStockMap[item.name] = (window.currentStockMap[item.name] || 0) + item.qty;
+            }
+
+            // 3. Xóa khỏi giỏ
             sellCart.splice(index, 1);
+            
+            // 4. Cập nhật lại giao diện
             renderSellCart();
             updateGrandTotal();
+            
+            // 5. CẬP NHẬT LƯỚI SẢN PHẨM (Để số tồn hiển thị tăng lên ngay)
+            if (typeof renderProductGrid === 'function') {
+                renderProductGrid();
+            }
         }
     });
 }
