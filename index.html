@@ -1271,6 +1271,10 @@ function renderRevenueChart(filteredDocs) {
         resetImportFields();
         updateReceiptNum();
         loadReceipts();
+		// --- THÊM 2 DÒNG NÀY VÀO ĐỂ CẬP NHẬT TRANG BÁN HÀNG ---
+        await calculateAllStock(); 
+        if (typeof renderProductGrid === 'function') renderProductGrid();
+        // ----------------------------------------------------
         
     } catch (error) {
         console.error("Lỗi lưu phiếu nhập: ", error);
@@ -1430,9 +1434,16 @@ window.deleteReceipt = function(docId) {
     }).then((result) => {
         if (result.isConfirmed) {
             // Bây giờ docId chính là chuỗi mã hệ thống (ví dụ: EkVQfGh5...)
-            db.collection('receipts').doc(docId).delete().then(() => {
+            db.collection('receipts').doc(docId).delete().then(async () => {
                 console.log("Xóa thành công ID hệ thống:", docId);
                 if(typeof updateReceiptNum === 'function') updateReceiptNum();
+                
+                // --- THÊM CÁC DÒNG NÀY ĐỂ CẬP NHẬT TỒN KHO ---
+                await calculateAllStock();
+                if(typeof renderProductGrid === 'function') renderProductGrid();
+                if(typeof loadInventory === 'function') loadInventory();
+                // ---------------------------------------------
+                
                 loadReceipts(); 
             }).catch(err => {
                 console.error("Lỗi xóa từ Firebase:", err);
