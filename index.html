@@ -3395,7 +3395,7 @@ async function exportFullReport() {
         ];
         summary.forEach(data => { 
             const r = sheet.addRow(["", ...data]); 
-            r.font = { bold: true }; 
+            r.font = { bold: true, size: 16 }; 
             // Gộp ô B và C (cột 2 và 3)
             sheet.mergeCells(r.number, 2, r.number, 3);
             
