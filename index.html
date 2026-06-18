@@ -1916,13 +1916,16 @@ async function autoFillDetails(name) {
 // Gọi hàm này 1 lần duy nhất khi trang web vừa mở
 async function loadAllProductsForCache() {
     try {
-        // Giả sử bạn có collection 'products' chứa thông tin giá bán và tên SP
         const snapshot = await db.collection('products').get(); 
-        window.productList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        let products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        // Sắp xếp theo tên để cố định vị trí
+        products.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+        
+        window.productList = products;
         window.allProductCache = window.productList;
         
-        // Sau khi có dữ liệu, gọi hàm render ô vuông
-        renderProductGrid(); 
+        // XÓA DÒNG renderProductGrid() Ở ĐÂY
     } catch (err) {
         console.error("Lỗi tải cache SP:", err);
     }
@@ -2060,10 +2063,7 @@ async function calculateAllStock() {
         // 3. Gán vào biến toàn cục
         window.currentStockMap = inventory;
 
-        // 4. Render lại giao diện
-        if (typeof renderProductGrid === 'function') {
-            renderProductGrid();
-        }
+        // ĐÃ XÓA: renderProductGrid() được gọi tập trung tại window.onload
         
         console.log("Đã cập nhật tồn kho mới nhất:", window.currentStockMap);
         
@@ -2879,25 +2879,35 @@ window.onload = async function() {
     window.productList = []; 
     
     try {
-        const snapshot = await db.collection('receipts').get();
+        // Lấy tất cả phiếu nhập và sắp xếp theo ID tăng dần (cũ đến mới)
+        const snapshot = await db.collection('receipts').orderBy('date', 'asc').get();
         let tempMap = new Map();
+        
         snapshot.forEach(doc => {
             (doc.data().items || []).forEach(i => {
-                tempMap.set(i.name, i); 
+                // Nếu sản phẩm đã có rồi thì không ghi đè, để giữ lại lần nhập đầu tiên
+                if (!tempMap.has(i.name)) {
+                    tempMap.set(i.name, i); 
+                }
             });
         });
         
-        window.allProductCache = Array.from(tempMap.values());
+        // Chuyển sang mảng
+        let products = Array.from(tempMap.values());
+        
+        window.allProductCache = products;
         window.productList = window.allProductCache; 
         
-        console.log("Đã load xong dữ liệu sản phẩm vào RAM!");
+        console.log("Đã load xong dữ liệu sản phẩm theo thứ tự nhập!");
 
         // TÍNH TOÁN TỒN KHO TRƯỚC KHI RENDER
         if (typeof calculateAllStock === 'function') {
             await calculateAllStock(); 
-        } else {
-            // Nếu chưa có hàm tính tồn, gọi trực tiếp render
-            if (typeof renderProductGrid === 'function') renderProductGrid();
+        }
+        
+        // RENDER GIAO DIỆN SAU KHI ĐÃ CÓ DỮ LIỆU
+        if (typeof renderProductGrid === 'function') {
+            renderProductGrid();
         }
         
     } catch (e) {
@@ -3234,36 +3244,91 @@ async function exportFullReport() {
         sheet.addRow([]);
 
         // I. Bán hàng
-        sheet.addRow(["I. CHI TIẾT BÁN HÀNG"]).font = { bold: true, size: 14 };
+        // Thay thế dòng cũ bằng đoạn này:
+		const titleRow = sheet.addRow(["I. CHI TIẾT BÁN HÀNG"]);
+		titleRow.font = { bold: true, size: 14 };
+		sheet.mergeCells(titleRow.number, 1, titleRow.number, 7); // Gộp từ cột A (1) đến G (7)
+		titleRow.alignment = { horizontal: 'center' };
         const header1 = sheet.addRow(["Ngày tháng", "Khách hàng", "Tên sản phẩm", "SL", "Đơn giá", "Thành tiền", "Ghi chú"]);
         header1.eachCell(c => { c.font = { bold: true }; c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } }; c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; c.alignment = { horizontal: 'center' }; });
+        
         salesData.forEach(item => {
-            const row = sheet.addRow(item);
+            // TẠO BẢN SAO ĐỂ KHÔNG LÀM THAY ĐỔI DỮ LIỆU GỐC
+            let rowData = [...item]; 
+            
+            // Nếu cột 0 là ngày định dạng yyyy-mm-dd
+            if (rowData[0] && typeof rowData[0] === 'string' && rowData[0].includes('-')) {
+                const parts = rowData[0].split('-'); // Tách [yyyy, mm, dd]
+                if (parts.length === 3) {
+                    rowData[0] = `${parts[2]}-${parts[1]}-${parts[0]}`; // Đổi thành dd-mm-yyyy
+                }
+            }
+
+            const row = sheet.addRow(rowData);
             row.eachCell((c, col) => {
                 c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+                
+                // CĂN GIỮA VÀ BÔI ĐẬM CỘT SL (cột số 4)
+                if (col === 4) {
+                    c.alignment = { horizontal: 'center' };
+                    c.font = { bold: true };
+                }
+                
                 if (col === 5 || col === 6) c.numFmt = '#,##0';
             });
         });
         
         // II. NXT
         sheet.addRow([]); 
-        sheet.addRow(["II. BÁO CÁO NHẬP XUẤT TỒN"]).font = { bold: true, size: 14 };
-        const header2 = sheet.addRow(["Ngày", "Tên sản phẩm", "Tồn đầu", "Nhập mới", "Nhập đổi", "Xuất", "Tồn cuối"]);
+        // Gộp A-G và căn giữa
+		const titleRow2 = sheet.addRow(["II. BÁO CÁO NHẬP XUẤT TỒN"]);
+		titleRow2.font = { bold: true, size: 14 };
+		sheet.mergeCells(titleRow2.number, 1, titleRow2.number, 7); // Gộp từ cột 1 (A) đến 7 (G)
+		titleRow2.alignment = { horizontal: 'center' };
+        const header2 = sheet.addRow(["Ngày tháng", "Tên sản phẩm", "Tồn đầu", "Nhập mới", "Nhập đổi", "Xuất", "Tồn cuối"]);
         header2.eachCell(c => { c.font = { bold: true }; c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } }; c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; c.alignment = { horizontal: 'center' }; });
         Object.keys(inventory).forEach(name => {
             const item = inventory[name];
             const row = sheet.addRow([formatDateToDDMMYYYY(toVal), name, formatVal(item.tonDau), formatVal(item.nhapMoi), formatVal(item.nhapDoi), formatVal(item.xuat), formatVal(item.tonDau + item.nhapMoi + item.nhapDoi - item.xuat)]);
-            row.eachCell(c => c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} });
+            
+            row.eachCell((c, col) => { 
+                c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+                
+                // CĂN GIỮA VÀ BÔI ĐẬM TỪ CỘT C (3) ĐẾN G (7)
+                if (col >= 3 && col <= 7) {
+                    c.alignment = { horizontal: 'center' };
+                    c.font = { bold: true };
+                }
+            });
         });
 
         // III. CHI TIẾT SẢN XUẤT
         sheet.addRow([]);
-        sheet.addRow(["", "III. CHI TIẾT SẢN XUẤT"]).font = { bold: true, size: 14 };
+        // Gộp cột B (2) đến F (6) và căn giữa
+        const titleRow3 = sheet.addRow(["", "III. CHI TIẾT SẢN XUẤT"]);
+        titleRow3.font = { bold: true, size: 14 };
+        sheet.mergeCells(titleRow3.number, 2, titleRow3.number, 6); // Gộp từ cột 2 (B) đến 6 (F)
+        titleRow3.alignment = { horizontal: 'center' };
+        
         const header3 = sheet.addRow(["", "Tên sản phẩm", "Tồn đầu", "Số lượng", "Số Kg", "Tồn cuối"]);
-        header3.eachCell((c, col) => { if (col > 1) { c.font = { bold: true }; c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } }; c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; } });
+        header3.eachCell((c, col) => { 
+            if (col > 1) { 
+                c.font = { bold: true }; 
+                c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } }; 
+                c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; 
+                c.alignment = { horizontal: 'center' }; 
+            } 
+        });
+        
         Object.keys(spDataToday).forEach(name => {
             const row = sheet.addRow(["", name, "", formatVal(spDataToday[name].sl), formatVal(spDataToday[name].kg), ""]);
-            row.eachCell(c => c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} });
+            // Kẻ bảng và căn giữa từ cột B (2) đến F (6)
+            row.eachCell((c, col) => { 
+                if (col > 1) { 
+                    c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; 
+                    c.alignment = { horizontal: 'center' }; 
+                } 
+            });
         });
 
         // TỔNG KẾT
@@ -3272,7 +3337,20 @@ async function exportFullReport() {
             ["CHƯA ĐÓNG", "", "", "", totalMeChoDongLuyKe - totalMeDaDongLuyKe],
             ["CHƯA NẤU", "", "", "", totalMeChuaNauLuyKe - totalMeChoDongLuyKe]
         ];
-        summary.forEach(data => { const r = sheet.addRow(["", ...data]); r.font = { bold: true }; r.eachCell(c => c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }); });
+        summary.forEach(data => { 
+            const r = sheet.addRow(["", ...data]); 
+            r.font = { bold: true }; 
+            // Gộp ô B và C (cột 2 và 3)
+            sheet.mergeCells(r.number, 2, r.number, 3);
+            
+            r.eachCell((c, col) => { 
+                // Kẻ bảng và căn giữa từ cột B (2) đến F (6)
+                if (col > 1) { 
+                    c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; 
+                    c.alignment = { horizontal: 'center' }; 
+                } 
+            }); 
+        });
         
         sheet.columns = [{ width: 10 }, { width: 25 }, { width: 15 }, { width: 15 }, { width: 15 }, { width: 15 }, { width: 15 }];
         
@@ -3291,7 +3369,7 @@ async function exportFullReport() {
     }
 }
 
-// ... các hàm khác vẫn giữ nguyên như cũ ...
+
 
 document.getElementById('date-from').addEventListener('change', updateDateDisplay);
 document.getElementById('date-to').addEventListener('change', updateDateDisplay);
