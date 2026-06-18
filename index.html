@@ -2032,31 +2032,43 @@ async function calculateAllStock() {
     // Tạm thời tạo một map rỗng
     let inventory = {};
 
-    // 1. LẤY PHIẾU NHẬP (Giống hệt cách loadInventory làm)
-    const snapshotNhap = await db.collection('receipts').get();
-    snapshotNhap.forEach(doc => {
-        doc.data().items.forEach(item => {
-            const key = item.name; // Dùng tên làm khóa (hoặc kèm unit nếu cần)
-            inventory[key] = (inventory[key] || 0) + parseInt(item.qty || 0);
+    try {
+        // 1. LẤY PHIẾU NHẬP
+        const snapshotNhap = await db.collection('receipts').get();
+        snapshotNhap.forEach(doc => {
+            const data = doc.data();
+            if (data.items) {
+                data.items.forEach(item => {
+                    const key = item.name;
+                    inventory[key] = (inventory[key] || 0) + (parseInt(item.qty) || 0);
+                });
+            }
         });
-    });
 
-    // 2. LẤY PHIẾU XUẤT (BÁN HÀNG)
-    // Thay 'sales' bằng tên collection bạn dùng để lưu hóa đơn bán hàng
-    const snapshotXuat = await db.collection('sales').get(); 
-    snapshotXuat.forEach(doc => {
-        doc.data().items.forEach(item => {
-            const key = item.name;
-            inventory[key] = (inventory[key] || 0) - parseInt(item.qty || 0);
+        // 2. LẤY PHIẾU XUẤT (BÁN HÀNG)
+        const snapshotXuat = await db.collection('sales').get(); 
+        snapshotXuat.forEach(doc => {
+            const data = doc.data();
+            if (data.items) {
+                data.items.forEach(item => {
+                    const key = item.name;
+                    inventory[key] = (inventory[key] || 0) - (parseInt(item.qty) || 0);
+                });
+            }
         });
-    });
 
-    // 3. Gán vào biến toàn cục để các hàm khác sử dụng
-    window.currentStockMap = inventory;
+        // 3. Gán vào biến toàn cục
+        window.currentStockMap = inventory;
 
-    // 4. Render lại lưới sản phẩm để nút "Hết hàng" cập nhật
-    if (typeof renderProductGrid === 'function') {
-        renderProductGrid();
+        // 4. Render lại giao diện
+        if (typeof renderProductGrid === 'function') {
+            renderProductGrid();
+        }
+        
+        console.log("Đã cập nhật tồn kho mới nhất:", window.currentStockMap);
+        
+    } catch (error) {
+        console.error("Lỗi khi tính toán tồn kho:", error);
     }
 }
 function updateItemNote(index, value) {
@@ -2136,15 +2148,15 @@ function quickAdd(productName) {
     // Vẫn giữ tính toán tồn kho
     const stock = window.currentStockMap ? (window.currentStockMap[productName] || 0) : 0;
     
-    // ĐÃ BỎ CHẶN: Dùng // để comment từng dòng, sẽ không bao giờ bị lỗi kết thúc ghi chú
-    // if (stock <= 0) {
-    //     Swal.fire({ 
-    //         icon: 'error', 
-    //         title: 'Hết hàng / Âm kho', 
-    //         text: `Sản phẩm ${productName} (Tồn: ${stock}). Vui lòng nhập thêm hàng trước khi bán!` 
-    //     });
-    //     return;
-    // }
+    // ĐÃ BỎ CHẶN: Kiểm tra nếu hết hàng thì thông báo và dừng lại
+    if (stock <= 0) {
+        Swal.fire({ 
+            icon: 'error', 
+            title: 'Hết hàng / Âm kho', 
+            text: `Sản phẩm ${productName} (Tồn: ${stock}). Vui lòng nhập thêm hàng trước khi bán!` 
+        });
+        return;
+    }
 
     // Lấy giá dựa trên loại đã chọn
     const priceType = document.getElementById(`price-type-${productName.replace(/ /g, '_')}`).value;
@@ -2192,8 +2204,23 @@ function updateCartItem(index, field, value) {
     const item = sellCart[index];
     
     if (field === 'qty') {
-        // Cập nhật số lượng
-        item.qty = parseInt(value) || 1;
+        // Lấy tồn kho thực tế từ map đã tính toán
+        const stock = window.currentStockMap ? (window.currentStockMap[item.name] || 0) : 0;
+        const newQty = parseInt(value) || 1;
+
+        // KIỂM TRA: Nếu số lượng nhập mới lớn hơn tồn kho thì báo lỗi
+        if (newQty > stock) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Quá tồn kho!',
+                text: `Sản phẩm ${item.name} chỉ còn ${stock} trong kho.`,
+                confirmButtonColor: '#ef4444'
+            });
+            // Reset lại ô input về số lượng cũ hoặc giới hạn bằng mức tồn kho
+            renderSellCart(); 
+            return;
+        }
+        item.qty = newQty;
     } else if (field === 'price') {
         // Cập nhật giá bán mới do người dùng nhập
         item.price = parseFloat(value) || 0;
@@ -2216,6 +2243,20 @@ async function saveAndPrint() {
         return;
     }
 
+    // --- MỚI THÊM: KIỂM TRA TỒN KHO TRƯỚC KHI LƯU ---
+    // Cập nhật lại tồn kho mới nhất từ server để đảm bảo dữ liệu chuẩn
+    await calculateAllStock(); 
+
+    for (const item of sellCart) {
+        // Lấy tồn kho hiện tại từ map đã tính toán
+        const stock = window.currentStockMap ? (window.currentStockMap[item.name] || 0) : 0;
+        if (item.qty > stock) {
+            alert(`LỖI: Sản phẩm ${item.name} chỉ còn ${stock} trong kho, nhưng bạn xuất ${item.qty}. Vui lòng kiểm tra lại!`);
+            return; // Dừng hàm, không cho lưu
+        }
+    }
+    // -------------------------------------------------
+
     const btn = document.getElementById('btn-save-print');
     if (btn) {
         btn.disabled = true;
@@ -2227,10 +2268,8 @@ async function saveAndPrint() {
     const customer = document.getElementById('sell-customer').value;
     const address = document.getElementById('sell-address') ? document.getElementById('sell-address').value : '';
     const phone = document.getElementById('sell-phone') ? document.getElementById('sell-phone').value : '';
-    // Lấy ghi chú đơn hàng
     const noteGlobal = document.getElementById('sell-note-global') ? document.getElementById('sell-note-global').value : '';
     
-    // Lấy thuế từ ô global-vat
     const vatEl = document.getElementById('global-vat');
     const vatRate = vatEl ? parseFloat(vatEl.value) || 0 : 0;
 
@@ -2248,7 +2287,7 @@ async function saveAndPrint() {
             customer: customer,
             address: address, 
             phone: phone, 
-            note: noteGlobal, // Lưu ghi chú vào Firebase
+            note: noteGlobal, 
             items: sellCart,
             vatRate: vatRate,
             total: grandTotal, 
@@ -2261,11 +2300,11 @@ async function saveAndPrint() {
         const now = new Date();
         const fields = {
             'print-customer': customer,
-            'print-address': address,        
-            'print-phone': phone,            
+            'print-address': address,         
+            'print-phone': phone,             
             'print-receipt-id': receiptId,  
             'print-date': now.toLocaleDateString('vi-VN'),
-            'print-note-global': noteGlobal // Hiển thị ghi chú trên hóa đơn
+            'print-note-global': noteGlobal
         };
         for (const [id, value] of Object.entries(fields)) {
             const el = document.getElementById(id);
