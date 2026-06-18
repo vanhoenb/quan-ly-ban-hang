@@ -234,11 +234,11 @@
             </div>
         </div>
 
-        <div class="bg-gray-200 p-6 rounded-3xl border border-slate-200 h-fit">
+        <div class="bg-gray-200 p-6 rounded-3xl border border-slate-200 h-full flex flex-col">
     <h3 class="text-xs font-bold text-slate-500 mb-6 uppercase tracking-widest flex items-center">
         <i data-lucide="package" class="w-4 h-4 mr-2 text-amber-600"></i> Chi tiết tồn kho
     </h3>
-    <div id="home-inventory-list" class="grid grid-cols-1 md:grid-cols-2 gap-2">
+    <div id="home-inventory-list" class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-2 content-start">
     </div>
 </div>
     </div>
@@ -1187,7 +1187,7 @@ function renderRevenueChart(filteredDocs) {
     }
 
     function addToCart() {
-    // Lấy giá trị từ các ô nhập liệu (đã là select cho tên sản phẩm)
+    // Lấy giá trị từ các ô nhập liệu
     const item = {
         name: document.getElementById('imp-name').value,
         unit: document.getElementById('imp-unit').value,
@@ -1207,13 +1207,27 @@ function renderRevenueChart(filteredDocs) {
     // Gọi hàm render để cập nhật bảng
     renderCart();
 
-    // Reset các ô nhập liệu (ngoại trừ tên sản phẩm để bạn dễ nhập tiếp)
+    // --- PHẦN BỔ SUNG ĐỂ RESET VÀ FOCUS ---
+    
+    // 1. Reset các ô nhập liệu
     document.getElementById('imp-qty').value = '';
     document.getElementById('imp-retail').value = '';
     document.getElementById('imp-wholesale').value = '';
     
-    // Focus vào ô Số lượng để nhập tiếp cho nhanh
-    document.getElementById('imp-qty').focus();
+    // 2. Reset tên sản phẩm về rỗng bằng Choices.js
+    window.isResetting = true; // Bật cờ chặn để không chạy autofill
+    if (window.choicesInstances['imp-name']) {
+        window.choicesInstances['imp-name'].setChoiceByValue('');
+    }
+    
+    // 3. Mở lại cờ sau 300ms
+    setTimeout(() => { window.isResetting = false; }, 300);
+
+    // 4. Focus vào ô chọn tên sản phẩm để người dùng gõ tiếp ngay
+    if (window.choicesInstances['imp-name']) {
+        window.choicesInstances['imp-name'].showDropdown();
+    }
+    document.getElementById('imp-name').focus();
 }
    async function saveImport() {
     // 1. Lấy tham chiếu đến nút bấm
@@ -1355,15 +1369,24 @@ function removeFromCart(index) {
     .then(snapshot => {
         leftBody.innerHTML = '';
         rightBody.innerHTML = '';
-        window.allReceipts = [];
+        window.allReceipts = []; // Reset mảng
 
-        // Chuyển snapshot thành mảng để dễ xử lý chia bảng
         const docs = snapshot.docs;
         const total = docs.length;
         const midPoint = Math.ceil(total / 2);
 
         docs.forEach((doc, index) => {
             const data = doc.data();
+            
+            // --- CẬP NHẬT QUAN TRỌNG: Lưu phiếu vào mảng toàn cục ---
+            window.allReceipts.push({
+                docId: doc.id,
+                displayId: data.id || '---',
+                items: data.items || [],
+                date: data.date
+            });
+            // --------------------------------------------------------
+
             const itemDate = data.date?.toDate ? data.date.toDate() : null;
             const isOld = itemDate && itemDate < oneWeekAgo;
             
@@ -1371,7 +1394,6 @@ function removeFromCart(index) {
             const itemCount = Array.isArray(data.items) ? data.items.length : 0;
             const displayId = data.id || '---';
 
-            // HTML của hàng, thêm class 'old-receipt' và ẩn nếu phiếu cũ
             const rowHtml = `
                 <tr class="border-b hover:bg-gray-50 text-center ${isOld ? 'old-receipt' : ''}" ${isOld ? 'style="display:none"' : ''}>
                     <td class="border p-2 font-bold">${displayId}</td>
@@ -1384,7 +1406,6 @@ function removeFromCart(index) {
                 </tr>
             `;
 
-            // Chia đều vào 2 bảng theo chỉ số index (phiếu mới nằm trên, phiếu cũ nằm dưới)
             if (index < midPoint) {
                 leftBody.innerHTML += rowHtml;
             } else {
@@ -1396,7 +1417,6 @@ function removeFromCart(index) {
         Swal.fire('Lỗi', 'Không thể tải danh sách!', 'error');
     });
 }
-
 
 
 window.deleteReceipt = function(docId) {
@@ -1464,14 +1484,20 @@ function searchReceipts() {
 
     // Cập nhật hàm loadInventory trong index.html
 function loadInventory() {
-    // 1. Lấy toàn bộ phiếu nhập
-    db.collection('receipts').get().then(snapshotNhap => {
+    // 1. Lấy toàn bộ phiếu nhập - THÊM .orderBy('date', 'asc') ĐỂ SẮP XẾP
+    db.collection('receipts').orderBy('date', 'asc').get().then(snapshotNhap => {
         const inventory = {};
+        const orderList = []; // Mảng này giữ thứ tự sản phẩm xuất hiện lần đầu
+
         snapshotNhap.forEach(doc => {
             doc.data().items.forEach(item => {
                 const key = item.name + "_" + item.unit;
-                if (!inventory[key]) inventory[key] = { ...item, qty: parseInt(item.qty) };
-                else inventory[key].qty += parseInt(item.qty);
+                if (!inventory[key]) {
+                    inventory[key] = { ...item, qty: parseInt(item.qty) };
+                    orderList.push(key); // Ghi lại thứ tự lần đầu thấy sản phẩm
+                } else {
+                    inventory[key].qty += parseInt(item.qty);
+                }
             });
         });
 
@@ -1486,12 +1512,12 @@ function loadInventory() {
                 });
             });
 
-            // 3. Hiển thị kết quả sau khi đã trừ
+            // 3. Hiển thị kết quả theo thứ tự trong orderList
             const tbody = document.getElementById('inventory-data');
             tbody.innerHTML = '';
             
-            Object.values(inventory).forEach(item => {
-                // Đảm bảo giá tồn tại, nếu không có thì mặc định là 0
+            orderList.forEach(key => {
+                const item = inventory[key];
                 const retail = item.retail || 0;
                 const wholesale = item.wholesale || 0;
 
@@ -1507,7 +1533,6 @@ function loadInventory() {
             });
         }).catch(err => {
             console.error("Lỗi khi tải phiếu xuất: ", err);
-            // Swal.fire thay cho alert để đồng bộ giao diện nếu bạn có dùng
             if(typeof Swal !== 'undefined') Swal.fire('Lỗi', 'Không thể tải danh sách xuất', 'error');
             else alert("Không thể tải danh sách xuất");
         });
