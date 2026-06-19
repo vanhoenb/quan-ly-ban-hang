@@ -411,7 +411,7 @@
                         class="w-full p-3 border border-gray-300 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-blue-400">
                 
                 <div id="product-grid" 
-					 class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 h-[590px] overflow-y-auto p-1 md:p-2" 
+					 class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 h-[280px] md:h-[590px] overflow-y-auto p-1 md:p-2" 
 					 style="align-content: start;">
 				</div>
             </div>
@@ -2151,33 +2151,29 @@ function renderProductGrid() {
         
         const b = themeClasses[index % themeClasses.length];
         
-        // ĐÃ SỬA CLASS: Dùng p-2 cho điện thoại, md:p-3 cho máy tính
-        // Thu gọn chiều cao bằng cách chỉnh leading, margin và text-size
         grid.innerHTML += `
-            <div class="group ${b.bg} p-2 md:p-3 rounded-lg border-t border-b border-gray-200 ${b.l} ${b.r} border-l-4 border-r-4 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between">
+            <div class="group ${b.bg} p-1.5 md:p-3 rounded-lg border border-gray-200 ${b.l} ${b.r} border-l-4 border-r-4 shadow-sm flex flex-col justify-between">
                 <div>
-                    <p class="font-bold text-gray-800 text-[10px] md:text-xs leading-tight h-7 md:h-8 overflow-hidden line-clamp-2 mb-1 md:mb-2" title="${p.name}">
+                    <p class="font-bold text-gray-800 text-[10px] md:text-xs leading-tight h-6 md:h-8 overflow-hidden line-clamp-2 mb-0.5 md:mb-2" title="${p.name}">
                         ${p.name}
                     </p>
-                    
-                    <div class="flex items-center gap-1 mb-1 md:mb-2">
-                        <span class="text-[8px] md:text-[9px] uppercase font-bold text-gray-400">Tồn</span>
-                        <span class="text-[9px] md:text-[10px] font-black ${isOutOfStock ? 'text-red-600 bg-red-50' : 'text-blue-700 bg-blue-50'} px-1.5 py-0.5 rounded-md border border-current">
+                    <div class="flex items-center gap-1 mb-0.5 md:mb-2">
+                        <span class="text-[8px] uppercase font-bold text-gray-400">Tồn</span>
+                        <span class="text-[9px] md:text-[10px] font-black ${isOutOfStock ? 'text-red-600' : 'text-blue-700'}">
                             ${isOutOfStock ? 'HẾT' : realStock}
                         </span>
                     </div>
                 </div>
                 
-                <div class="space-y-1">
-                    <select id="price-type-${idName}" class="w-full text-[9px] md:text-[10px] border border-gray-200 rounded-md p-0.5 md:p-1 bg-white outline-none">
-                        <option value="retail">Lẻ: ${Number(p.retail || 0).toLocaleString()}đ</option>
-                        <option value="wholesale">Sỉ: ${Number(p.wholesale || 0).toLocaleString()}đ</option>
+                <div class="mt-auto">
+                    <select id="price-type-${idName}" class="w-full text-[9px] md:text-[10px] border border-gray-200 rounded p-0.5 mb-1 bg-white outline-none">
+                        <option value="retail">Lẻ: ${Number(p.retail || 0).toLocaleString()}</option>
+                        <option value="wholesale">Sỉ: ${Number(p.wholesale || 0).toLocaleString()}</option>
                     </select>
                     
                     <button onclick="${isOutOfStock ? `alert('Hết hàng!')` : `quickAdd('${safeName}')`}" 
-                            class="w-full ${isOutOfStock ? 'bg-gray-100 text-gray-400' : 'bg-blue-600 text-white hover:bg-blue-700'} 
-                                   text-[9px] md:text-[10px] py-1 md:py-1.5 rounded-lg font-bold transition-all shadow-sm">
-                        ${isOutOfStock ? 'Hết hàng' : 'Chọn'}
+                            class="w-full ${isOutOfStock ? 'bg-gray-200 text-gray-500' : 'bg-blue-600 text-white'} text-[9px] md:text-[10px] py-1 rounded font-bold transition-all">
+                        ${isOutOfStock ? 'Hết' : 'Chọn'}
                     </button>
                 </div>
             </div>
