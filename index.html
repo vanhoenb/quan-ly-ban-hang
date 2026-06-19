@@ -3603,10 +3603,10 @@ async function exportFullReport() {
             const r = sheet.addRow(["", ...data]); 
             
             // GIẢM CHIỀU CAO DÒNG (từ 30 xuống 20)
-            r.height = 20; 
+            r.height = 22; 
             
             // GIẢM CỠ CHỮ (từ 14 xuống 11 hoặc 12)
-            r.font = { bold: true, size: 12 }; 
+            r.font = { bold: true, size: 14 }; 
             
             // Gộp ô B và C (cột 2 và 3)
             sheet.mergeCells(r.number, 2, r.number, 3);
