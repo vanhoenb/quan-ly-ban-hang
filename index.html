@@ -2262,36 +2262,45 @@ function updateCartItem(index, field, value) {
     const item = sellCart[index];
     
     if (field === 'qty') {
-        // Lấy tồn kho thực tế từ map đã tính toán
-        const stock = window.currentStockMap ? (window.currentStockMap[item.name] || 0) : 0;
         const newQty = parseInt(value) || 1;
+        
+        // 1. TÍNH LẠI TỒN KHO THỰC TẾ
+        // Trước khi tính, ta phải trả lại số lượng cũ đã trừ vào kho
+        // Stock thực tế = (Stock hiện tại trong map) + (Số lượng cũ đang nằm trong giỏ)
+        const currentStockInMap = window.currentStockMap ? (window.currentStockMap[item.name] || 0) : 0;
+        const availableStock = currentStockInMap + item.qty;
 
-        // KIỂM TRA: Nếu số lượng nhập mới lớn hơn tồn kho thì báo lỗi
-        if (newQty > stock) {
+        // 2. KIỂM TRA TỒN KHO
+        if (newQty > availableStock) {
             Swal.fire({
                 icon: 'error',
                 title: 'Quá tồn kho!',
-                text: `Sản phẩm ${item.name} chỉ còn ${stock} trong kho.`,
+                text: `Sản phẩm ${item.name} chỉ còn ${availableStock} trong kho.`,
                 confirmButtonColor: '#ef4444'
             });
-            // Reset lại ô input về số lượng cũ hoặc giới hạn bằng mức tồn kho
             renderSellCart(); 
             return;
         }
+
+        // 3. CẬP NHẬT TỒN KHO VÀ GIỎ HÀNG
+        // Cập nhật lại map: trừ đi số lượng mới
+        window.currentStockMap[item.name] = availableStock - newQty;
         item.qty = newQty;
+
+        // 4. QUAN TRỌNG: Vẽ lại lưới sản phẩm để cập nhật số tồn kho mới nhất
+        renderProductGrid();
     } else if (field === 'price') {
-        // Cập nhật giá bán mới do người dùng nhập
         item.price = parseFloat(value) || 0;
     } else if (field === 'note') {
-        // Cập nhật ghi chú
         item.note = value;
     }
 
-    // TÍNH LẠI THÀNH TIỀN: Luôn nhân giá mới với số lượng
+    // TÍNH LẠI THÀNH TIỀN
     item.total = item.price * item.qty;
     
-    // Render lại giao diện để cập nhật cột thành tiền và tổng hoá đơn
+    // Render lại giỏ hàng và tổng tiền
     renderSellCart();
+    updateCartTotalDisplay(); // Nếu bạn có hàm này thì gọi để cập nhật tổng tiền
 }
 
     // Hàm lưu hóa đơn, in phiếu và trừ kho
@@ -3472,11 +3481,19 @@ function updateDateDisplay() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    const today = new Date().toISOString().split('T')[0];
+    // Lấy ngày hiện tại theo giờ Việt Nam (GMT+7)
+    const now = new Date();
+    const vietnamTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+    const today = vietnamTime.toISOString().split('T')[0];
+
     const dateFrom = document.getElementById('date-from');
     const dateTo = document.getElementById('date-to');
+    
     if (dateFrom && !dateFrom.value) dateFrom.value = today;
     if (dateTo && !dateTo.value) dateTo.value = today;
+
+    // Gọi luôn updateDateDisplay để hiển thị đúng ngay khi load trang
+    updateDateDisplay();
 });
 
 // ========== QUẢN LÝ SẢN PHẨM========
