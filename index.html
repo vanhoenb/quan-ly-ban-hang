@@ -2157,16 +2157,17 @@ function renderProductGrid() {
                     <p class="font-bold text-gray-800 text-[10px] md:text-xs leading-tight h-6 md:h-8 overflow-hidden line-clamp-2 mb-0.5 md:mb-2" title="${p.name}">
                         ${p.name}
                     </p>
+                    
                     <div class="flex items-center gap-1 mb-0.5 md:mb-2">
-                        <span class="text-[8px] uppercase font-bold text-gray-400">Tồn</span>
-                        <span class="text-[9px] md:text-[10px] font-black ${isOutOfStock ? 'text-red-600' : 'text-blue-700'}">
+                        <span class="text-[10px] md:text-xs font-bold ${isOutOfStock ? 'text-red-600' : 'text-blue-600'}">TỒN:</span>
+                        <span class="text-[10px] md:text-xs font-black ${isOutOfStock ? 'text-red-600' : 'text-blue-700'}">
                             ${isOutOfStock ? 'HẾT' : realStock}
                         </span>
                     </div>
                 </div>
                 
                 <div class="mt-auto">
-                    <select id="price-type-${idName}" class="w-full text-[9px] md:text-[10px] border border-gray-200 rounded p-0.5 mb-1 bg-white outline-none">
+                    <select id="price-type-${idName}" class="w-full text-[11px] md:text-xs font-bold border border-gray-200 rounded p-1 mb-1 bg-white outline-none">
                         <option value="retail">Lẻ: ${Number(p.retail || 0).toLocaleString()}</option>
                         <option value="wholesale">Sỉ: ${Number(p.wholesale || 0).toLocaleString()}</option>
                     </select>
