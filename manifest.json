@@ -1,16 +1,30 @@
-{
-  "name": "QUẢN LÝ KHO & BÁN HÀNG",
+ {
+
+  "name": "POS QUẢN LÝ KHO & BÁN HÀNG",
+
   "short_name": "POS Pro",
+
   "start_url": "./index.html",
+
   "display": "standalone",
+
   "background_color": "#ffffff",
+
   "theme_color": "#0f172a",
+
   "icons": [
+
     {
-      "src": "icon-app.png",
+
+      "src": "https://cdn-icons-png.flaticon.com/512/3081/3081986.png",
+
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+
+      "type": "image/png"
+
     }
+
   ]
-}
+
+} 
+
