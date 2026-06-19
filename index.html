@@ -913,27 +913,57 @@ function showPage(pageId) {
         // NẾU Ô HIỆN TẠI LÀ TÊN SẢN PHẨM (imp-name)
         if (event.target.id === 'imp-name') {
             const productName = event.target.value;
-            fillUnitAutomatically(productName); // Gọi hàm điền ĐVT
+            // Gọi hàm mới xử lý cả ĐVT và giá
+            fillProductDetails(productName); 
         }
 
         // Chuyển sang ô tiếp theo
-        document.getElementById(nextId).focus();
+        const nextEl = document.getElementById(nextId);
+        if (nextEl) nextEl.focus();
     }
 }
 
-// Hàm hỗ trợ điền ĐVT cho thẻ <select>
-function fillUnitAutomatically(name) {
-    const product = window.allProducts.find(p => p.name === name);
+// Hàm mới: Điền ĐVT và Tự động lấy giá gần nhất
+async function fillProductDetails(name) {
     const unitSelect = document.getElementById('imp-unit');
+    const retailInput = document.getElementById('imp-retail');
+    const wholesaleInput = document.getElementById('imp-wholesale');
     
+    // 1. Điền ĐVT (Logic cũ của bạn)
+    const product = window.allProducts.find(p => p.name === name);
     if (product && unitSelect) {
-        // Tìm option có text khớp với unit
         for (let i = 0; i < unitSelect.options.length; i++) {
             if (unitSelect.options[i].text === product.unit) {
                 unitSelect.selectedIndex = i;
                 break;
             }
         }
+    }
+
+    // 2. Tìm giá mới nhất từ lịch sử phiếu nhập
+    // Chúng ta lấy tất cả phiếu nhập, sắp xếp theo ngày mới nhất
+    try {
+        const snapshot = await db.collection('receipts').orderBy('date', 'desc').get();
+        let found = false;
+        
+        for (let doc of snapshot.docs) {
+            const item = doc.data().items.find(i => i.name === name);
+            if (item) {
+                // Đổ giá vào input (Người dùng vẫn có thể sửa lại sau đó)
+                if (retailInput) retailInput.value = item.retail || '';
+                if (wholesaleInput) wholesaleInput.value = item.wholesale || '';
+                found = true;
+                break; // Tìm thấy phiếu mới nhất rồi thì dừng
+            }
+        }
+        
+        // Nếu không tìm thấy lịch sử, reset giá về rỗng để nhập mới
+        if (!found) {
+            if (retailInput) retailInput.value = '';
+            if (wholesaleInput) wholesaleInput.value = '';
+        }
+    } catch (err) {
+        console.error("Lỗi khi tải giá từ lịch sử:", err);
     }
 }
 
@@ -1266,6 +1296,7 @@ function renderRevenueChart(filteredDocs) {
 
     try {
         // 1. CẬP NHẬT GIÁ VÀO DATABASE (products collection)
+        // Việc này đảm bảo giá bán mới nhất cho sản phẩm được lưu lại làm mặc định
         for (const item of cart) {
             const snapshot = await db.collection('products')
                 .where('name', '==', item.name)
@@ -1273,24 +1304,27 @@ function renderRevenueChart(filteredDocs) {
                 .get();
 
             if (!snapshot.empty) {
+                // Ép kiểu số cẩn thận, nếu không nhập giá thì giữ nguyên giá cũ hoặc mặc định 0
+                const newRetail = parseFloat(item.retail) || 0;
+                const newWholesale = parseFloat(item.wholesale) || 0;
+
                 await db.collection('products').doc(snapshot.docs[0].id).update({
-                    retail: parseFloat(item.retail) || 0,
-                    wholesale: parseFloat(item.wholesale) || 0
+                    retail: newRetail,
+                    wholesale: newWholesale
                 });
             }
         }
 
-        // 2. LƯU PHIẾU NHẬP
+        // 2. LƯU PHIẾU NHẬP (Lưu giá tại thời điểm nhập vào phiếu để đối soát sau này)
         const receipt = { 
             id: receiptNum, 
-            items: cart, 
+            items: cart, // cart chứa giá retail/wholesale tại lúc nhập
             date: firebase.firestore.FieldValue.serverTimestamp(), 
             type: typeValue 
         };
         await db.collection('receipts').add(receipt);
 
-        // 3. ĐỒNG BỘ CACHE BẰNG HÀM CHUNG
-        // Thay vì tải thủ công, dùng hàm này để đảm bảo cả thứ tự và giá đều chuẩn
+        // 3. ĐỒNG BỘ CACHE
         await refreshCache(); 
 
         Swal.fire({
@@ -1301,13 +1335,12 @@ function renderRevenueChart(filteredDocs) {
             showConfirmButton: false
         });
         
+        // 4. RESET GIAO DIỆN
         cart = []; 
         resetImportFields();
         updateReceiptNum();
         loadReceipts();
 
-        // 4. PHÁT TÍN HIỆU CẬP NHẬT GIAO DIỆN
-        // Khi này, listener 'dataChanged' đã được cấu hình gọi refreshCache và render lại
         if (typeof calculateAllStock === 'function') await calculateAllStock();
         window.dispatchEvent(new CustomEvent('dataChanged'));
         
@@ -1640,7 +1673,8 @@ async function updateProductDropdowns() {
                 if (!value) return;
 
                 if (id === 'imp-name') {
-                    fillUnitAutomatically(value);
+                    // Gọi hàm mới: vừa điền ĐVT, vừa tự động nạp giá cũ
+                    fillProductDetails(value);
                 } else if (id === 'sell-name') {
                     autoFillDetails(value);
                 }
