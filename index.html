@@ -143,7 +143,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 </head>
 <body class="bg-gray-100 flex h-screen">
@@ -267,6 +267,20 @@
 <div id="page-import" class="hidden space-y-4 px-2 md:px-6">
     <h2 class="text-xl font-bold text-gray-800">NHẬP KHO</h2>
     
+    <div class="bg-yellow-50 p-3 rounded-xl mb-4 border border-yellow-200">
+    <label class="block text-[10px] uppercase font-bold text-yellow-800 mb-1 tracking-wider">Quét mã sản phẩm</label>
+    <div class="flex gap-2">
+        <input type="text" id="search-by-barcode" 
+               class="w-full border border-yellow-200 p-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-yellow-500" 
+               placeholder="Quét mã...">
+        
+        <button type="button" onclick="startScanner('import')" 
+        class="bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-sm active:scale-95 transition-all">
+    📷 Quét
+</button>
+    </div>
+    <div id="reader" class="mt-2 w-full max-w-[300px] mx-auto hidden"></div>
+</div>
     <div class="grid grid-cols-2 md:grid-cols-6 gap-3 bg-blue-50 p-3 md:p-6 rounded-2xl shadow-sm border border-blue-100">
         <div class="md:col-span-1">
             <label class="block text-xs font-bold text-blue-800 mb-1">Số phiếu</label>
@@ -313,6 +327,7 @@
             Lưu nhập kho
         </button>
     </div>
+
 
 
     <h3 class="font-bold text-gray-700 mt-6">DANH SÁCH PHIẾU NHẬP</h3>
@@ -403,19 +418,42 @@
 <div id="page-sell" class="p-2 md:p-6 space-y-4 w-full">
     <h2 class="text-2xl font-bold text-gray-800">BÁN HÀNG / XUẤT HOÁ ĐƠN</h2>
 
-    <div class="flex flex-col lg:flex-row gap-4 w-full">
-        <div class="lg:w-1/2 w-full space-y-4">
-            <div class="bg-white p-3 md:p-4 rounded-2xl border border-gray-100 shadow-sm h-full">
-                <input type="text" id="product-search" placeholder="🔍 Tìm nhanh sản phẩm..." 
-                        onkeyup="filterProducts()" 
-                        class="w-full p-3 border border-gray-300 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-blue-400">
+   <div class="flex flex-col lg:flex-row gap-4 w-full">
+    <div class="lg:w-1/2 w-full space-y-4">
+        <div class="bg-white p-3 md:p-4 rounded-2xl border border-gray-100 shadow-sm h-full">
+            
+            <!-- KHUNG QUÉT MÃ VẠCH (Có thêm nút Camera) -->
+            <div class="mb-4 bg-yellow-50 p-2 rounded-xl border border-yellow-200 flex items-center gap-2">
+                <span class="text-xs font-bold text-yellow-700">SCAN:</span>
+                <input type="text" id="barcode-scanner-sell" 
+                       placeholder="Quét mã vạch tại đây..." 
+                       class="w-full bg-transparent outline-none text-sm font-bold text-yellow-800">
                 
-                <div id="product-grid" 
-					 class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 h-[280px] md:h-[590px] overflow-y-auto p-1 md:p-2" 
-					 style="align-content: start;">
-				</div>
+                <!-- Nút mở Camera -->
+                <button type="button" onclick="startScannerSell()" class="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition">
+                    📷
+                </button>
+            </div>
+
+            <!-- Khu vực ẩn hiển thị Camera -->
+            <div id="scanner-container" class="hidden fixed inset-0 z-50 bg-black bg-opacity-90 p-4 flex flex-col justify-center items-center">
+                <div id="reader" class="w-full max-w-md bg-white rounded-xl overflow-hidden"></div>
+                <button onclick="stopScannerSell()" class="mt-4 bg-red-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-red-700 transition">
+                    ĐÓNG CAMERA
+                </button>
+            </div>
+
+            <input type="text" id="product-search" placeholder="🔍 Tìm nhanh sản phẩm..." 
+                    onkeyup="filterProducts()" 
+                    class="w-full p-3 border border-gray-300 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-blue-400">
+            
+            <div id="product-grid" 
+                 class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 h-[280px] md:h-[590px] overflow-y-auto p-1 md:p-2" 
+                 style="align-content: start;">
             </div>
         </div>
+    </div>
+
 
         <div class="lg:w-1/2 w-full space-y-4">
             <div class="bg-blue-50 p-3 md:p-4 rounded-2xl border border-gray-300 shadow-sm space-y-3">
@@ -551,29 +589,40 @@
     </div>
 </div>
 
+
 <!-- QUẢN LÝ DANH MỤC SẢN PHẨM -->
 <div id="page-products-manage" class="hidden p-4 md:p-6 space-y-6">
-    <h2 class="text-2xl font-bold">QUẢN LÝ DANH MỤC SẢN PHẨM</h2>
+    <h2 class="text-2xl font-bold text-gray-800">QUẢN LÝ DANH MỤC SẢN PHẨM</h2>
     
-    <div class="bg-white p-4 md:p-6 rounded shadow border grid grid-cols-1 md:grid-cols-3 gap-4">
-        <input type="text" id="new-prod-name" placeholder="Tên sản phẩm" class="border p-3 rounded w-full">
-        <input type="text" id="new-prod-unit" placeholder="Đơn vị tính" class="border p-3 rounded w-full">
-        <button onclick="addProduct()" class="bg-blue-600 text-white p-3 rounded font-bold hover:bg-blue-700 w-full">Thêm sản phẩm</button>
+    <div class="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-4 gap-4">
+        <input type="text" id="new-prod-name" placeholder="Tên sản phẩm" class="border border-gray-200 p-3 rounded-xl w-full focus:ring-2 focus:ring-blue-500 outline-none">
+        <input type="text" id="new-prod-unit" placeholder="Đơn vị tính" class="border border-gray-200 p-3 rounded-xl w-full focus:ring-2 focus:ring-blue-500 outline-none">
+        
+        <div class="flex gap-2">
+            <input type="text" id="new-prod-barcode" placeholder="Mã vạch (Quét/Nhập)" class="border border-gray-200 p-3 rounded-xl w-full focus:ring-2 focus:ring-blue-500 outline-none">
+            <button type="button" onclick="startScanner('prod')" class="bg-green-600 text-white px-4 rounded-xl font-bold hover:bg-green-700 transition-all shadow-md">📷</button>
+        </div>
+        
+        <button onclick="addProduct()" class="bg-blue-600 text-white p-3 rounded-xl font-bold hover:bg-blue-700 w-full transition-all shadow-md">Thêm sản phẩm</button>
     </div>
 
-    <div class="overflow-x-auto shadow rounded">
+    <div id="reader-manage" class="hidden w-full max-w-[300px] mx-auto border-2 border-green-500 rounded-xl overflow-hidden"></div>
+
+    <div class="overflow-x-auto shadow-sm rounded-2xl border border-gray-100">
         <table class="w-full bg-white text-sm">
-            <thead class="bg-gray-100">
+            <thead class="bg-gray-50">
                 <tr>
-                    <th class="p-3 border text-left">Tên sản phẩm</th>
-                    <th class="p-3 border text-left">ĐVT</th>
-                    <th class="p-3 border text-center">Hành động</th>
+                    <th class="p-4 border-b text-left font-bold text-gray-600">Mã vạch</th>
+                    <th class="p-4 border-b text-left font-bold text-gray-600">Tên sản phẩm</th>
+                    <th class="p-4 border-b text-left font-bold text-gray-600">ĐVT</th>
+                    <th class="p-4 border-b text-center font-bold text-gray-600">Hành động</th>
                 </tr>
             </thead>
             <tbody id="prod-manage-body"></tbody>
         </table>
     </div>
 </div>
+
 
 <!-- LỊCH SỬ HOÁ ĐƠN BÁN HÀNG -->
 
@@ -1605,10 +1654,17 @@ function loadInventory() {
                 // Sử dụng Number() để định dạng số an toàn
                 const retail = Number(item.retail || 0).toLocaleString('vi-VN');
                 const wholesale = Number(item.wholesale || 0).toLocaleString('vi-VN');
+                
+                // TÌM MÃ VẠCH TỪ DỮ LIỆU SẢN PHẨM TOÀN CỤC
+                const productData = window.allProducts.find(p => p.name === item.name);
+                const barcode = (productData && productData.barcode) ? productData.barcode : '---';
 
                 tbody.innerHTML += `
                     <tr class="text-center border-b hover:bg-gray-50">
-                        <td class="p-2 text-left">${item.name}</td>
+                        <td class="p-2 text-left">
+                            <div class="font-medium">${item.name}</div>
+                            <div class="text-[10px] text-gray-400 font-mono">Mã: ${barcode}</div>
+                        </td>
                         <td class="p-2">${item.unit}</td>
                         <td class="p-2 font-bold ${item.qty < 0 ? 'text-red-600' : 'text-blue-600'}">${item.qty}</td>
                         <td class="p-2 price-cell">${retail}</td>
@@ -1949,6 +2005,150 @@ window.renderTopProducts = function(products) {
     });
 };
 
+// Hàm tìm sản phẩm và điền vào form
+let isProcessing = false; // Thêm biến này ở đầu file JS của bạn
+
+async function findAndFillProduct(decodedText) {
+    const scannedBarcode = String(decodedText).trim();
+    if (!scannedBarcode) return;
+
+    const matches = window.allProducts.filter(p => p.barcode && String(p.barcode).trim() === scannedBarcode);
+
+    if (matches.length === 0) {
+        Swal.fire({ icon: 'error', title: 'Không tìm thấy!', text: 'Mã ' + scannedBarcode + ' không tồn tại.' });
+        return;
+    }
+
+    // Nếu tìm thấy, chọn sản phẩm (nếu > 1 thì hiện bảng chọn)
+    let product;
+    if (matches.length > 1) {
+        const { value: selectedName } = await Swal.fire({
+            title: 'Tìm thấy ' + matches.length + ' sản phẩm',
+            input: 'select',
+            inputOptions: matches.reduce((acc, p) => ({ ...acc, [p.name]: p.name }), {}),
+            showCancelButton: true
+        });
+        if (!selectedName) return;
+        product = matches.find(p => p.name === selectedName);
+    } else {
+        product = matches[0];
+    }
+
+    // --- PHẦN ĐIỀN DỮ LIỆU ---
+    const selectBox = document.getElementById('imp-name');
+    
+    // Nếu dùng Choices.js
+    if (window.choicesInstances && window.choicesInstances['imp-name']) {
+        window.choicesInstances['imp-name'].removeActiveItems();
+        window.choicesInstances['imp-name'].setChoiceByValue(product.name);
+    } else {
+        selectBox.value = product.name;
+    }
+
+    selectBox.dispatchEvent(new Event('change', { bubbles: true }));
+    
+    // THÔNG BÁO DUY NHẤT
+    Swal.fire({ icon: 'success', title: 'Đã tìm thấy', text: product.name, timer: 1000, showConfirmButton: false });
+    
+    // Focus vào ô số lượng
+    document.getElementById('imp-qty').focus();
+}
+// Hàm điền dữ liệu "sạch"
+// Chỉ giữ lại 1 bản duy nhất này thôi
+function fillProductToForm(product) {
+    const targetId = 'imp-name';
+    const selectElement = document.getElementById(targetId);
+
+    // Cập nhật Choices.js hoặc Select thường
+    if (window.choicesInstances && window.choicesInstances[targetId]) {
+        window.choicesInstances[targetId].removeActiveItems();
+        window.choicesInstances[targetId].setChoiceByValue(product.name);
+    } else {
+        selectElement.value = product.name;
+    }
+    
+    // Trigger sự kiện để các hàm tính giá/ĐVT cập nhật theo
+    selectElement.dispatchEvent(new Event('change', { bubbles: true }));
+    
+    // Thông báo thành công (chỉ hiện 1 lần)
+    Swal.fire({ 
+        icon: 'success', 
+        title: 'Đã chọn!', 
+        text: product.name, 
+        timer: 1000, 
+        showConfirmButton: false 
+    });
+
+    // Focus vào ô số lượng để nhập nhanh
+    const qtyInput = document.getElementById('imp-qty');
+    if (qtyInput) qtyInput.focus();
+}
+
+
+// Hàm điền dữ liệu vào ô Tên sản phẩm
+function fillForm(productId) {
+    const selectBox = document.getElementById('imp-name');
+    selectBox.value = productId;
+    
+    // Gọi sự kiện change để các hàm khác (nếu có) tự cập nhật ĐVT/Giá
+    selectBox.dispatchEvent(new Event('change'));
+    
+    Swal.fire({ icon: 'success', title: 'Đã tìm thấy', timer: 1000, showConfirmButton: false });
+    document.getElementById('imp-qty').focus(); // Nhảy vào ô số lượng
+}
+
+// Xử lý khi quét bằng máy USB (Nhấn Enter)
+document.getElementById('search-by-barcode').addEventListener('keypress', async (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        // Chỉ gọi hàm này, không gọi thêm fillForm hay hàm nào khác
+        await findAndFillProduct(e.target.value);
+        e.target.value = '';
+    }
+});
+
+// Khai báo biến toàn cục ở đầu file JS để quản lý
+let html5QrCode;
+
+async function startScanner(pageType) {
+    // 1. Xác định ID thẻ DIV dựa vào trang đang gọi
+    const targetId = (pageType === 'prod') ? 'reader-manage' : 'reader';
+    const readerDiv = document.getElementById(targetId);
+    
+    if (!readerDiv) {
+        Swal.fire('Lỗi', 'Không tìm thấy khung quét camera trên trang này!', 'error');
+        return;
+    }
+
+    readerDiv.classList.remove('hidden');
+    
+    const html5QrCode = new Html5Qrcode(targetId);
+    
+    try {
+        await html5QrCode.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: 250 },
+            async (decodedText) => {
+                // 2. Xử lý logic theo trang
+                if (pageType === 'prod') {
+                    // Nếu ở trang Danh mục: Điền vào ô input mã vạch
+                    document.getElementById('new-prod-barcode').value = decodedText;
+                } else {
+                    // Nếu ở trang Nhập kho: Gọi hàm tìm sản phẩm
+                    await findAndFillProduct(decodedText);
+                }
+                
+                // 3. Dừng sau khi quét thành công
+                await html5QrCode.stop().catch(err => console.log(err));
+                readerDiv.classList.add('hidden');
+            }
+        );
+    } catch (err) {
+        console.error(err);
+        Swal.fire('Lỗi Camera', 'Hãy đảm bảo bạn đã cấp quyền truy cập Camera!', 'error');
+        readerDiv.classList.add('hidden');
+    }
+}
 //==================================================
     // --- BÁN HÀNG (MỚI THÊM) ---=====
 //====================================================	
@@ -2020,7 +2220,6 @@ async function autoFillDetails(name) {
     }
 }
 
-// Gọi hàm này 1 lần duy nhất khi trang web vừa mở
 async function loadAllProductsForCache() {
     try {
         const snapshot = await db.collection('products').get(); 
@@ -2828,6 +3027,100 @@ function loadCustomers() {
     return result.charAt(0).toUpperCase() + result.slice(1) + " đồng./.";
 }
 
+// =====QUÉT MÃ QR ============
+// ===== HÀM HỖ TRỢ TÌM KIẾM CHUẨN XÁC =====
+function getProductByBarcode(scannedCode) {
+    const code = String(scannedCode || "").trim();
+    if (!code) return null;
+
+    return window.allProductCache.find(p => {
+        // Kiểm tra mọi biến thể của trường barcode trong Database
+        const dbBarcode = String(p.barcode || p.Barcode || p.BARCODE || "").trim();
+        return dbBarcode === code;
+    });
+}
+
+// ===== QUÉT MÃ QR (CAMERA) =====
+async function startScannerSell() {
+    document.getElementById('scanner-container').classList.remove('hidden');
+    const html5QrcodeScanner = new Html5Qrcode("reader");
+    
+    html5QrcodeScanner.start(
+        { facingMode: "environment" }, 
+        { fps: 10, qrbox: 250 },
+        (decodedText) => {
+            const barcode = decodedText.toString().trim();
+            const product = getProductByBarcode(barcode); // Dùng hàm dùng chung
+            
+            if (product) {
+                quickAdd(product.name);
+                html5QrcodeScanner.stop().then(() => stopScannerSell());
+            } else {
+                console.log("Không tìm thấy mã trong Cache:", barcode); // Log để kiểm tra
+                Swal.fire({ icon: 'error', title: 'Không tìm thấy', text: 'Mã ' + barcode + ' không có trong hệ thống!' });
+            }
+        }
+    ).catch(err => { 
+        console.error("Lỗi Camera:", err);
+    });
+}
+
+// ===== QUÉT MÃ BẰNG MÁY QUÉT (INPUT) =====
+document.getElementById('barcode-scanner-sell').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        const scannedBarcode = this.value.trim();
+        this.value = ''; // Xóa ô nhập sau khi quét
+        
+        // Gọi hàm tìm kiếm, sau đó đặt focus lại vào ô nhập
+        findProductDirectly(scannedBarcode).then(() => {
+            document.getElementById('barcode-scanner-sell').focus();
+        });
+        
+        // Để đảm bảo focus dù có lỗi hay không, bạn cũng có thể để ở đây:
+        document.getElementById('barcode-scanner-sell').focus();
+    }
+});
+
+async function findProductDirectly(barcode) {
+    try {
+        // 1. Tìm tất cả sản phẩm có cùng mã vạch (dùng .where thay vì .limit)
+        const snapshot = await db.collection('products').where('barcode', '==', barcode).get();
+        
+        if (snapshot.empty) {
+            Swal.fire({ icon: 'error', title: 'Không tìm thấy', text: 'Mã không tồn tại!' });
+            return;
+        }
+
+        // 2. Nếu tìm thấy nhiều hơn 1 sản phẩm
+        if (snapshot.docs.length > 1) {
+            const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            // Hiện bảng chọn cho người dùng
+            let options = {};
+            products.forEach(p => { options[p.id] = p.name; });
+
+            const { value: selectedId } = await Swal.fire({
+                title: 'Chọn sản phẩm',
+                text: 'Mã này có nhiều sản phẩm, bạn chọn loại nào?',
+                input: 'select',
+                inputOptions: options,
+                inputPlaceholder: 'Chọn một sản phẩm',
+                showCancelButton: true
+            });
+
+            if (selectedId) {
+                const selectedProduct = products.find(p => p.id === selectedId);
+                quickAdd(selectedProduct.name); // Thêm loại đã chọn vào giỏ
+            }
+        } else {
+            // 3. Nếu chỉ có 1 sản phẩm thì thêm bình thường
+            quickAdd(snapshot.docs[0].data().name);
+        }
+    } catch (err) {
+        console.error("Lỗi:", err);
+    }
+}
+
 function searchInvoice() {
     let input = document.getElementById("searchInput");
     let filter = input.value.toLowerCase();
@@ -3027,23 +3320,39 @@ window.onload = async function() {
     window.productList = []; 
     
     try {
-        // Gọi hàm dùng chung để tải và đồng bộ dữ liệu
+        // 1. Tải dữ liệu sản phẩm cơ bản (cần thiết cho updateProductDropdowns và mã vạch)
+        // Đảm bảo updateProductDropdowns chạy trước để lấy đầy đủ window.allProducts
+        if (typeof updateProductDropdowns === 'function') {
+            await updateProductDropdowns();
+        }
+
+        // 2. GỌI HÀM DASHBOARD
+        if (typeof loadDashboard === 'function') {
+            await loadDashboard(); 
+        }
+
+        // 3. Refresh cache (nếu bạn có hàm này để đồng bộ dữ liệu)
         await refreshCache(); 
         
-        console.log("Đã load xong dữ liệu sản phẩm theo thứ tự nhập & giá mới nhất!");
+        console.log("Đã load xong dữ liệu hệ thống!");
 
-        // TÍNH TOÁN TỒN KHO TRƯỚC KHI RENDER
+        // 4. TÍNH TOÁN VÀ TẢI TỒN KHO 
+        // Sau khi updateProductDropdowns đã xong, thì loadInventory mới có mã vạch để hiển thị
         if (typeof calculateAllStock === 'function') {
             await calculateAllStock(); 
         }
         
-        // RENDER GIAO DIỆN
+        if (typeof loadInventory === 'function') {
+            await loadInventory(); 
+        }
+        
+        // 5. RENDER GIAO DIỆN KHÁC
         if (typeof renderProductGrid === 'function') {
             renderProductGrid();
         }
         
     } catch (e) {
-        console.error("Lỗi tải cache sản phẩm:", e);
+        console.error("Lỗi khi tải dữ liệu khởi tạo:", e);
     }
 
     // --- Các phần code cũ giữ nguyên ---
@@ -3694,18 +4003,24 @@ window.addEventListener('DOMContentLoaded', () => {
 async function addProduct() {
     const name = document.getElementById('new-prod-name').value;
     const unit = document.getElementById('new-prod-unit').value;
+    const barcode = document.getElementById('new-prod-barcode').value; // Lấy mã vạch từ ô input mới
+
     if (!name || !unit) return Swal.fire('Lỗi', 'Nhập đủ tên và ĐVT', 'error');
 
     await db.collection('products').add({ 
         name: name, 
-        unit: unit, 
-        createdAt: firebase.firestore.FieldValue.serverTimestamp() // Thêm dòng này
+        unit: unit,
+        barcode: barcode, // Lưu mã vạch vào Firestore
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     
     Swal.fire('Thành công', 'Đã thêm sản phẩm!', 'success');
     
+    // Reset các ô nhập bao gồm cả mã vạch
     document.getElementById('new-prod-name').value = '';
     document.getElementById('new-prod-unit').value = '';
+    document.getElementById('new-prod-barcode').value = ''; 
+    
     loadProductManage();
     updateProductDropdowns();
 }
@@ -3719,15 +4034,109 @@ async function loadProductManage() {
     
     snapshot.forEach(doc => {
         let p = doc.data();
+        // Kiểm tra nếu barcode không tồn tại (SP cũ) thì để trống và gợi ý Gán mã
+        let barcodeDisplay = p.barcode ? 
+            `<span class="bg-blue-100 text-blue-700 px-2 py-1 rounded font-bold">${p.barcode}</span>` : 
+            '<span class="text-gray-400 italic">Chưa có</span>';
+        
         tbody.innerHTML += `
-            <tr class="border-b">
+            <tr class="border-b hover:bg-gray-50">
+                <td class="p-3">${barcodeDisplay}</td>
                 <td class="p-3">${p.name}</td>
                 <td class="p-3">${p.unit}</td>
-                <td class="p-3">
-                    <button onclick="deleteProduct('${doc.id}')" class="text-red-500 hover:underline">Xóa</button>
+                <td class="p-3 text-center">
+                    <button onclick="editBarcode('${doc.id}', '${p.name}')" class="text-blue-600 font-bold hover:underline mr-3">Gán mã</button>
+                    <button onclick="deleteProduct('${doc.id}')" class="text-red-500 font-bold hover:underline">Xóa</button>
                 </td>
             </tr>`;
     });
+}
+
+// Hàm hỗ trợ để gán mã cho sản phẩm cũ
+async function editBarcode(id, name) {
+    const { value: barcode } = await Swal.fire({
+        title: 'Gán mã vạch cho: ' + name,
+        input: 'text',
+        inputPlaceholder: 'Quét hoặc nhập mã vạch...',
+        showCancelButton: true,
+        confirmButtonText: 'Lưu mã',
+        cancelButtonText: 'Hủy'
+    });
+
+    if (barcode) {
+        await db.collection('products').doc(id).update({
+            barcode: barcode
+        });
+        Swal.fire('Thành công', 'Đã cập nhật mã vạch!', 'success');
+        loadProductManage(); // Tải lại danh sách
+        updateProductDropdowns(); // Cập nhật lại dropdown ở trang Nhập kho
+    }
+}
+
+// Hàm tìm sản phẩm và điền vào form (Dùng chung cho cả Máy quét và Camera)
+async function searchProductInManage(barcode) {
+    const snapshot = await db.collection('products').where('barcode', '==', barcode).get();
+    
+    if (snapshot.empty) {
+        Swal.fire('Thông báo', 'Không tìm thấy sản phẩm nào với mã này!', 'info');
+        return;
+    }
+
+    // Nếu tìm thấy, bạn có thể highlight dòng đó hoặc cuộn trang đến đó
+    const doc = snapshot.docs[0];
+    Swal.fire('Tìm thấy', `Sản phẩm: ${doc.data().name}`, 'success');
+    
+    // Nếu muốn hiển thị chi tiết, bạn có thể gọi lại loadProductManage 
+    // hoặc filter danh sách đang hiển thị.
+}
+
+// 1. Cho máy quét chuyên dụng (Nhấn Enter)
+document.getElementById('search-by-barcode').addEventListener('keypress', async (e) => {
+    if (e.key === 'Enter') {
+        await findAndFillProduct(e.target.value);
+        e.target.value = '';
+    }
+});
+
+// 2. Cho Camera điện thoại (Dùng thư viện html5-qrcode)
+async function startScanner(pageType) {
+    // 1. Xác định ID thẻ DIV dựa vào trang đang gọi
+    const targetId = (pageType === 'prod') ? 'reader-manage' : 'reader';
+    const readerDiv = document.getElementById(targetId);
+    
+    if (!readerDiv) {
+        Swal.fire('Lỗi', 'Không tìm thấy khung quét camera trên trang này!', 'error');
+        return;
+    }
+
+    readerDiv.classList.remove('hidden');
+    
+    const html5QrCode = new Html5Qrcode(targetId);
+    
+    try {
+        await html5QrCode.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: 250 },
+            async (decodedText) => {
+                // 2. Xử lý logic theo trang
+                if (pageType === 'prod') {
+                    // Nếu ở trang Danh mục: Điền vào ô input mã vạch
+                    document.getElementById('new-prod-barcode').value = decodedText;
+                } else {
+                    // Nếu ở trang Nhập kho: Gọi hàm tìm sản phẩm
+                    await findAndFillProduct(decodedText);
+                }
+                
+                // 3. Dừng sau khi quét thành công
+                await html5QrCode.stop().catch(err => console.log(err));
+                readerDiv.classList.add('hidden');
+            }
+        );
+    } catch (err) {
+        console.error(err);
+        Swal.fire('Lỗi Camera', 'Hãy đảm bảo bạn đã cấp quyền truy cập Camera!', 'error');
+        readerDiv.classList.add('hidden');
+    }
 }
 
 // 3. Hàm xóa sản phẩm
