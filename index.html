@@ -136,15 +136,18 @@
     .grid {
         gap: 8px !important;
     }
-/* Ép khung hình camera hiện ra đè lên mọi thứ */
-    #reader video {
+
+/* Ép buộc video phải hiển thị */
+    #reader-sell video {
         display: block !important;
+        position: relative !important;
         width: 100% !important;
         height: 100% !important;
         object-fit: cover !important;
     }
-    /* Đảm bảo phần tử con của reader không bị ẩn */
-    #reader {
+    /* Đảm bảo thẻ chứa nó không bị ẩn/tràn */
+    #reader-sell {
+        display: block !important;
         background-color: black !important;
     }
 
@@ -3056,32 +3059,34 @@ function getProductByBarcode(scannedCode) {
 
 
 async function startScannerSell() {
-    document.getElementById('scanner-container').classList.remove('hidden');
-    
-    try {
-        const devices = await Html5Qrcode.getCameras();
-        // SỬA: Dùng "reader-sell" ở đây
-        window.html5QrCode = new Html5Qrcode("reader-sell");
-        
-        let cameraId = (devices && devices.length > 0) ? devices[devices.length - 1].id : { facingMode: "environment" };
+    const container = document.getElementById('scanner-container');
+    container.classList.remove('hidden');
+
+    // Chờ 300ms để trình duyệt kịp vẽ DIV ra trước khi khởi tạo Camera
+    setTimeout(async () => {
+        try {
+            window.html5QrCode = new Html5Qrcode("reader-sell");
             
-        await window.html5QrCode.start(
-            cameraId, 
-            { fps: 10, qrbox: 250 },
-            (decodedText) => {
-                const barcode = decodedText.toString().trim();
-                const product = getProductByBarcode(barcode);
-                if (product) {
-                    quickAdd(product.name);
-                    stopScannerSell();
+            const devices = await Html5Qrcode.getCameras();
+            let cameraId = (devices && devices.length > 0) ? devices[devices.length - 1].id : { facingMode: "environment" };
+                
+            await window.html5QrCode.start(
+                cameraId, 
+                { fps: 10, qrbox: 250 },
+                (decodedText) => {
+                    const barcode = decodedText.toString().trim();
+                    const product = getProductByBarcode(barcode);
+                    if (product) {
+                        quickAdd(product.name);
+                        stopScannerSell();
+                    }
                 }
-            }
-        );
-    } catch (err) {
-        console.error("Lỗi:", err);
-        // SỬA: Trỏ vào reader-sell để hiện thông báo lỗi đúng chỗ
-        document.getElementById('reader-sell').innerHTML = "Lỗi: " + err;
-    }
+            );
+        } catch (err) {
+            console.error("Lỗi Camera:", err);
+            document.getElementById('reader-sell').innerHTML = "Lỗi Camera: " + err;
+        }
+    }, 300);
 }
 
 async function stopScannerSell() {
