@@ -3055,28 +3055,53 @@ function getProductByBarcode(scannedCode) {
 async function startScannerSell() {
     document.getElementById('scanner-container').classList.remove('hidden');
     
-    // Thử cách khởi tạo đơn giản nhất
-    window.currentScanner = new Html5Qrcode("reader");
-    
-    // Thử với cấu hình tối giản
-    window.currentScanner.start(
-        { facingMode: "environment" }, 
-        { fps: 10, qrbox: 250 }, // Dùng số đơn giản
-        (decodedText) => {
-            const barcode = decodedText.toString().trim();
-            const product = getProductByBarcode(barcode);
-            if (product) {
-                quickAdd(product.name);
-                stopScannerSell();
-            }
+    // 1. Lấy danh sách camera trước để xem máy có bao nhiêu camera
+    try {
+        const devices = await Html5Qrcode.getCameras();
+        if (devices && devices.length > 0) {
+            // Lấy camera cuối cùng (thường là camera sau trên điện thoại)
+            const cameraId = devices[devices.length - 1].id;
+            
+            window.currentScanner = new Html5Qrcode("reader");
+            
+            // 2. Khởi tạo bằng ID camera thay vì dùng facingMode
+            await window.currentScanner.start(
+                cameraId, 
+                { fps: 10, qrbox: 250 },
+                (decodedText) => {
+                    const barcode = decodedText.toString().trim();
+                    const product = getProductByBarcode(barcode);
+                    if (product) {
+                        quickAdd(product.name);
+                        stopScannerSell();
+                    }
+                }
+            );
+        } else {
+            document.getElementById('reader').innerHTML = "Lỗi: Không tìm thấy camera nào!";
         }
-    ).catch(err => {
+    } catch (err) {
         console.error("Lỗi:", err);
-        // Nếu bị lỗi, in ra màn hình để biết tại sao
-        document.getElementById('reader').innerHTML = "Lỗi: " + err;
-    });
+        // Nếu không được, thử phương án dự phòng bằng cách để trình duyệt tự chọn
+        try {
+            window.currentScanner = new Html5Qrcode("reader");
+            await window.currentScanner.start(
+                { facingMode: { ideal: "environment" } }, 
+                { fps: 10, qrbox: 250 },
+                (decodedText) => {
+                    const barcode = decodedText.toString().trim();
+                    const product = getProductByBarcode(barcode);
+                    if (product) {
+                        quickAdd(product.name);
+                        stopScannerSell();
+                    }
+                }
+            );
+        } catch (err2) {
+            document.getElementById('reader').innerHTML = "Lỗi: " + err2;
+        }
+    }
 }
-
 async function stopScannerSell() {
     if (window.currentScanner) {
         try {
