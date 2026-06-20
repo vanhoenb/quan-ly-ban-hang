@@ -136,13 +136,17 @@
     .grid {
         gap: 8px !important;
     }
-}
-#reader video {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Giúp video tràn đầy khung */
-}
+/* Ép khung hình camera hiện ra đè lên mọi thứ */
+    #reader video {
+        display: block !important;
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+    }
+    /* Đảm bảo phần tử con của reader không bị ẩn */
+    #reader {
+        background-color: black !important;
+    }
 
     </style>
     
@@ -3049,36 +3053,27 @@ function getProductByBarcode(scannedCode) {
 
 
 async function startScannerSell() {
-    // 1. Kiểm tra nếu đã có camera đang chạy thì không mở thêm
-    if (window.currentScanner) {
-        console.log("Camera đã chạy rồi!");
-        return;
-    }
-
-    // 2. Hiện container
     document.getElementById('scanner-container').classList.remove('hidden');
     
-    // 3. Đảm bảo thẻ reader sạch sẽ trước khi khởi tạo
-    const readerDiv = document.getElementById('reader');
-    readerDiv.innerHTML = ""; 
-
-    // 4. Khởi tạo
+    // Thử cách khởi tạo đơn giản nhất
     window.currentScanner = new Html5Qrcode("reader");
     
+    // Thử với cấu hình tối giản
     window.currentScanner.start(
         { facingMode: "environment" }, 
-        { fps: 10, qrbox: { width: 250, height: 250 } },
+        { fps: 10, qrbox: 250 }, // Dùng số đơn giản
         (decodedText) => {
             const barcode = decodedText.toString().trim();
             const product = getProductByBarcode(barcode);
             if (product) {
                 quickAdd(product.name);
-                stopScannerSell(); // Dừng và dọn sạch
+                stopScannerSell();
             }
         }
     ).catch(err => {
-        console.error("Lỗi Camera:", err);
-        stopScannerSell(); // Có lỗi thì đóng luôn
+        console.error("Lỗi:", err);
+        // Nếu bị lỗi, in ra màn hình để biết tại sao
+        document.getElementById('reader').innerHTML = "Lỗi: " + err;
     });
 }
 
