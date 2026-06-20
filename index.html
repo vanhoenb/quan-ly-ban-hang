@@ -445,12 +445,12 @@
 				</div>
 
 				<div id="scanner-container" class="hidden fixed inset-0 z-50 bg-black bg-opacity-90 p-4 flex flex-col justify-center items-center">
-					<div id="reader" class="w-full max-w-md bg-white rounded-xl overflow-hidden" style="min-height: 300px; display: flex; align-items: center; justify-content: center;"></div>
-					
-					<button onclick="stopScannerSell()" class="mt-4 bg-red-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-red-700 transition">
-						ĐÓNG CAMERA
-					</button>
-				</div>
+    <div id="reader-sell" class="w-full max-w-md bg-white rounded-xl overflow-hidden" style="min-height: 300px; display: flex; align-items: center; justify-content: center;"></div>
+    
+    <button onclick="stopScannerSell()" class="mt-4 bg-red-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-red-700 transition">
+        ĐÓNG CAMERA
+    </button>
+</div>
 
             <input type="text" id="product-search" placeholder="🔍 Tìm nhanh sản phẩm..." 
                     onkeyup="filterProducts()" 
@@ -3060,8 +3060,8 @@ async function startScannerSell() {
     
     try {
         const devices = await Html5Qrcode.getCameras();
-        // Dùng window.html5QrCode thay vì window.currentScanner
-        window.html5QrCode = new Html5Qrcode("reader");
+        // SỬA: Dùng "reader-sell" ở đây
+        window.html5QrCode = new Html5Qrcode("reader-sell");
         
         let cameraId = (devices && devices.length > 0) ? devices[devices.length - 1].id : { facingMode: "environment" };
             
@@ -3079,7 +3079,8 @@ async function startScannerSell() {
         );
     } catch (err) {
         console.error("Lỗi:", err);
-        document.getElementById('reader').innerHTML = "Lỗi: " + err;
+        // SỬA: Trỏ vào reader-sell để hiện thông báo lỗi đúng chỗ
+        document.getElementById('reader-sell').innerHTML = "Lỗi: " + err;
     }
 }
 
