@@ -137,7 +137,12 @@
         gap: 8px !important;
     }
 }
-
+#reader video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Giúp video tràn đầy khung */
+}
 
     </style>
     
@@ -429,19 +434,19 @@
     <input type="text" id="barcode-scanner-sell" 
             placeholder="Quét mã vạch tại đây..." 
             class="w-full bg-transparent outline-none text-sm font-bold text-yellow-800">
-    
-    <button type="button" onclick="startScannerSell()" class="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition">
-        📷
-    </button>
-</div>
+					
+				<button type="button" onclick="startScannerSell()" class="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition">
+						📷
+					</button>
+				</div>
 
-<div id="scanner-container" class="hidden fixed inset-0 z-50 bg-black bg-opacity-90 p-4 flex flex-col justify-center items-center">
-    <div id="reader" class="w-full max-w-md bg-white rounded-xl overflow-hidden" style="min-height: 300px; display: flex; align-items: center; justify-content: center;"></div>
-    
-    <button onclick="stopScannerSell()" class="mt-4 bg-red-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-red-700 transition">
-        ĐÓNG CAMERA
-    </button>
-</div>
+				<div id="scanner-container" class="hidden fixed inset-0 z-50 bg-black bg-opacity-90 p-4 flex flex-col justify-center items-center">
+					<div id="reader" class="w-full max-w-md bg-white rounded-xl overflow-hidden" style="min-height: 300px; display: flex; align-items: center; justify-content: center;"></div>
+					
+					<button onclick="stopScannerSell()" class="mt-4 bg-red-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-red-700 transition">
+						ĐÓNG CAMERA
+					</button>
+				</div>
 
             <input type="text" id="product-search" placeholder="🔍 Tìm nhanh sản phẩm..." 
                     onkeyup="filterProducts()" 
