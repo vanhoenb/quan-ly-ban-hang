@@ -3455,7 +3455,7 @@ document.addEventListener('keydown', function(event) {
 
 
 // TRANG KHÁCH HÀNG =====
-// Thêm khách hàng mới
+
 function loadCustomers() {
     console.log("Đang tải danh sách đại lý...");
     const body = document.getElementById('customer-list-body');
@@ -3772,7 +3772,7 @@ async function exportFullReport() {
         header1.height = 25;
 
         header1.eachCell(c => { 
-            c.font = { bold: true }; 
+           c.font = { bold: true, size: 12 }; 
             // Màu nền hồng nhạt
             c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFCDD2' } }; 
             c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; 
@@ -3797,13 +3797,14 @@ async function exportFullReport() {
             const row = sheet.addRow(rowData);
             row.eachCell((c, col) => {
                 c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+				c.font = { size: 12 };
                 
                 // CĂN GIỮA CÁC CỘT CẦN THIẾT
                 if (col === 1 || col === 4) { // Cột ngày (1) và SL (4) căn giữa
                     c.alignment = { horizontal: 'center' };
                 }
                 
-                if (col === 4) c.font = { bold: true };
+                if (col === 4) c.font = { bold: true, size: 12 };
                 
                 // Định dạng số tiền
                 if (col === 5 || col === 6) c.numFmt = '#,##0';
@@ -3824,7 +3825,7 @@ async function exportFullReport() {
         header2.height = 25;
 
         header2.eachCell(c => { 
-            c.font = { bold: true }; 
+            c.font = { bold: true, size: 12 };
             // Đổi màu nền sang xanh nhạt (FFB3E5FC)
             c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFB3E5FC' } }; 
             c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; 
@@ -3854,11 +3855,12 @@ async function exportFullReport() {
             
             row.eachCell((c, col) => { 
                 c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+				c.font = { size: 12 };
                 
                 // CĂN GIỮA VÀ BÔI ĐẬM TỪ CỘT C (3) ĐẾN G (7)
                 if (col >= 3 && col <= 7) {
                     c.alignment = { horizontal: 'center' };
-                    c.font = { bold: true };
+                    c.font = { bold: true, size: 12 };
                 }
             });
         });
@@ -3878,7 +3880,7 @@ async function exportFullReport() {
 
         header3.eachCell((c, col) => { 
             if (col > 1) { 
-                c.font = { bold: true }; 
+                c.font = { bold: true, size: 12 }; 
                 c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } }; 
                 c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; 
                 
@@ -3894,6 +3896,7 @@ async function exportFullReport() {
                 if (col > 1) { 
                     c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; 
                     c.alignment = { horizontal: 'center' }; 
+					c.font = { size: 12 };
                 } 
             });
         });
