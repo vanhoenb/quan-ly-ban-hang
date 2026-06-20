@@ -3052,36 +3052,42 @@ function getProductByBarcode(scannedCode) {
 
 
 async function startScannerSell() {
-    const container = document.getElementById('scanner-container');
-    container.classList.remove('hidden');
+    document.getElementById('scanner-container').classList.remove('hidden');
+    
+    // Cấu hình để ép nó quét cả mã vạch (EAN-13)
+    const config = {
+        fps: 10,
+        qrbox: 250,
+        formatsToSupport: [ 
+            Html5QrcodeSupportedFormats.QR_CODE, 
+            Html5QrcodeSupportedFormats.EAN_13, 
+            Html5QrcodeSupportedFormats.EAN_8, 
+            Html5QrcodeSupportedFormats.CODE_128 
+        ]
+    };
 
-    // Khởi tạo instance mới vào biến toàn cục window.html5QrCode
     window.html5QrCode = new Html5Qrcode("reader-sell");
     
     try {
         await window.html5QrCode.start(
             { facingMode: "environment" },
-            { fps: 10, qrbox: 250 },
-            async (decodedText) => {
-                const product = getProductByBarcode(decodedText.trim());
+            config, // Dùng config đã ép kiểu quét ở trên
+            (decodedText) => {
+                const barcode = decodedText.toString().trim();
+                console.log("Mã quét được từ Camera:", barcode); // Kiểm tra xem nó có hiện mã ở đây không
+                
+                const product = getProductByBarcode(barcode);
                 if (product) {
                     quickAdd(product.name);
-                    // Dừng và dọn dẹp sau khi quét thành công
-                    await stopScannerSell();
+                    stopScannerSell();
+                } else {
+                    // Nếu đã nhận được mã mà vẫn không chạy, chứng tỏ hàm tìm sp bị lỗi
+                    console.log("Không tìm thấy sản phẩm này trong kho");
                 }
             }
         );
-        
-        // --- THỦ THUẬT MÀN HÌNH ĐEN ---
-        // Ép các thẻ video của thư viện phải hiển thị nếu nó bị ẩn
-        const videoElement = document.querySelector('#reader-sell video');
-        if (videoElement) {
-            videoElement.style.display = 'block';
-        }
     } catch (err) {
-        console.error("Lỗi Camera:", err);
-        Swal.fire('Lỗi', 'Không thể mở camera: ' + err, 'error');
-        stopScannerSell();
+        console.error(err);
     }
 }
 
