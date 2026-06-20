@@ -137,6 +137,8 @@
         gap: 8px !important;
     }
 }
+
+
     </style>
     
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -3042,12 +3044,23 @@ function getProductByBarcode(scannedCode) {
 
 
 async function startScannerSell() {
+    // 1. Kiểm tra nếu đã có camera đang chạy thì không mở thêm
+    if (window.currentScanner) {
+        console.log("Camera đã chạy rồi!");
+        return;
+    }
+
+    // 2. Hiện container
     document.getElementById('scanner-container').classList.remove('hidden');
     
-    // Khởi tạo instance và lưu vào biến toàn cục
-    currentScanner = new Html5Qrcode("reader");
+    // 3. Đảm bảo thẻ reader sạch sẽ trước khi khởi tạo
+    const readerDiv = document.getElementById('reader');
+    readerDiv.innerHTML = ""; 
+
+    // 4. Khởi tạo
+    window.currentScanner = new Html5Qrcode("reader");
     
-    currentScanner.start(
+    window.currentScanner.start(
         { facingMode: "environment" }, 
         { fps: 10, qrbox: { width: 250, height: 250 } },
         (decodedText) => {
@@ -3055,27 +3068,26 @@ async function startScannerSell() {
             const product = getProductByBarcode(barcode);
             if (product) {
                 quickAdd(product.name);
-                stopScannerSell(); // Dừng khi quét thành công
+                stopScannerSell(); // Dừng và dọn sạch
             }
         }
     ).catch(err => {
-        console.error(err);
-        alert("Không thể mở camera: " + err);
-        stopScannerSell();
+        console.error("Lỗi Camera:", err);
+        stopScannerSell(); // Có lỗi thì đóng luôn
     });
 }
 
 async function stopScannerSell() {
-    // 1. Dừng và xóa instance camera
-    if (currentScanner) {
+    if (window.currentScanner) {
         try {
-            await currentScanner.stop();
-            await currentScanner.clear(); // Xóa sạch HTML bên trong #reader
+            // Phải dừng trước khi clear
+            await window.currentScanner.stop();
+            await window.currentScanner.clear();
         } catch (e) {
-            console.log("Camera đã dừng hoặc chưa khởi tạo");
+            console.log("Camera đã dừng");
         }
+        window.currentScanner = null; // Reset biến về null
     }
-    // 2. Ẩn container
     document.getElementById('scanner-container').classList.add('hidden');
 }
 
