@@ -137,18 +137,12 @@
         gap: 8px !important;
     }
 
-/* Ép buộc video phải hiển thị */
+/* Ép khung hình camera hiển thị */
     #reader-sell video {
         display: block !important;
-        position: relative !important;
         width: 100% !important;
         height: 100% !important;
         object-fit: cover !important;
-    }
-    /* Đảm bảo thẻ chứa nó không bị ẩn/tràn */
-    #reader-sell {
-        display: block !important;
-        background-color: black !important;
     }
 
     </style>
@@ -3062,35 +3056,37 @@ async function startScannerSell() {
     const container = document.getElementById('scanner-container');
     container.classList.remove('hidden');
 
-    // Chờ 300ms để trình duyệt kịp vẽ DIV ra trước khi khởi tạo Camera
-    setTimeout(async () => {
-        try {
-            window.html5QrCode = new Html5Qrcode("reader-sell");
-            
-            const devices = await Html5Qrcode.getCameras();
-            let cameraId = (devices && devices.length > 0) ? devices[devices.length - 1].id : { facingMode: "environment" };
-                
-            await window.html5QrCode.start(
-                cameraId, 
-                { fps: 10, qrbox: 250 },
-                (decodedText) => {
-                    const barcode = decodedText.toString().trim();
-                    const product = getProductByBarcode(barcode);
-                    if (product) {
-                        quickAdd(product.name);
-                        stopScannerSell();
-                    }
+    // Khởi tạo instance mới vào biến toàn cục window.html5QrCode
+    window.html5QrCode = new Html5Qrcode("reader-sell");
+    
+    try {
+        await window.html5QrCode.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: 250 },
+            async (decodedText) => {
+                const product = getProductByBarcode(decodedText.trim());
+                if (product) {
+                    quickAdd(product.name);
+                    // Dừng và dọn dẹp sau khi quét thành công
+                    await stopScannerSell();
                 }
-            );
-        } catch (err) {
-            console.error("Lỗi Camera:", err);
-            document.getElementById('reader-sell').innerHTML = "Lỗi Camera: " + err;
+            }
+        );
+        
+        // --- THỦ THUẬT MÀN HÌNH ĐEN ---
+        // Ép các thẻ video của thư viện phải hiển thị nếu nó bị ẩn
+        const videoElement = document.querySelector('#reader-sell video');
+        if (videoElement) {
+            videoElement.style.display = 'block';
         }
-    }, 300);
+    } catch (err) {
+        console.error("Lỗi Camera:", err);
+        Swal.fire('Lỗi', 'Không thể mở camera: ' + err, 'error');
+        stopScannerSell();
+    }
 }
 
 async function stopScannerSell() {
-    // Dùng window.html5QrCode đồng nhất
     if (window.html5QrCode) {
         try {
             await window.html5QrCode.stop();
@@ -3098,7 +3094,7 @@ async function stopScannerSell() {
         } catch (e) {
             console.log("Camera đã dừng");
         }
-        window.html5QrCode = null; // Reset biến về null
+        window.html5QrCode = null;
     }
     document.getElementById('scanner-container').classList.add('hidden');
 }
