@@ -2116,8 +2116,7 @@ document.getElementById('search-by-barcode').addEventListener('keypress', async 
     }
 });
 
-// Khai báo biến toàn cục ở đầu file JS để quản lý
-let html5QrCode;
+
 
 async function startScanner(pageType) {
     // 1. Xác định ID thẻ DIV dựa vào trang đang gọi
@@ -2131,31 +2130,35 @@ async function startScanner(pageType) {
 
     readerDiv.classList.remove('hidden');
     
-    const html5QrCode = new Html5Qrcode(targetId);
+    // SỬA: Gán vào biến window toàn cục thay vì const cục bộ
+    window.html5QrCode = new Html5Qrcode(targetId);
     
     try {
-        await html5QrCode.start(
+        await window.html5QrCode.start(
             { facingMode: "environment" },
             { fps: 10, qrbox: 250 },
             async (decodedText) => {
                 // 2. Xử lý logic theo trang
                 if (pageType === 'prod') {
-                    // Nếu ở trang Danh mục: Điền vào ô input mã vạch
                     document.getElementById('new-prod-barcode').value = decodedText;
                 } else {
-                    // Nếu ở trang Nhập kho: Gọi hàm tìm sản phẩm
                     await findAndFillProduct(decodedText);
                 }
                 
-                // 3. Dừng sau khi quét thành công
-                await html5QrCode.stop().catch(err => console.log(err));
+                // 3. Dừng sau khi quét thành công bằng window.html5QrCode
+                await window.html5QrCode.stop().catch(err => console.log(err));
+                // Xóa sạch để lần sau khởi tạo không bị rác
+                await window.html5QrCode.clear().catch(err => console.log(err));
+                
                 readerDiv.classList.add('hidden');
+                window.html5QrCode = null; // Reset về null
             }
         );
     } catch (err) {
         console.error(err);
         Swal.fire('Lỗi Camera', 'Hãy đảm bảo bạn đã cấp quyền truy cập Camera!', 'error');
         readerDiv.classList.add('hidden');
+        window.html5QrCode = null;
     }
 }
 //==================================================
@@ -3051,44 +3054,45 @@ function getProductByBarcode(scannedCode) {
 
 // ===== QUÉT MÃ QR (CAMERA) =====
 
-// Dùng biến toàn cục này cho mọi hàm quét
-let html5QrCode; 
 
 async function startScannerSell() {
-    const readerDiv = document.getElementById('scanner-container');
-    readerDiv.classList.remove('hidden');
-    
-    // Đảm bảo tạo mới instance vào biến toàn cục đã khai báo ở đầu file
-    html5QrCode = new Html5Qrcode("reader");
+    document.getElementById('scanner-container').classList.remove('hidden');
     
     try {
-        await html5QrCode.start(
-            { facingMode: "environment" },
+        const devices = await Html5Qrcode.getCameras();
+        // Dùng window.html5QrCode thay vì window.currentScanner
+        window.html5QrCode = new Html5Qrcode("reader");
+        
+        let cameraId = (devices && devices.length > 0) ? devices[devices.length - 1].id : { facingMode: "environment" };
+            
+        await window.html5QrCode.start(
+            cameraId, 
             { fps: 10, qrbox: 250 },
             (decodedText) => {
-                const product = getProductByBarcode(decodedText.trim());
+                const barcode = decodedText.toString().trim();
+                const product = getProductByBarcode(barcode);
                 if (product) {
                     quickAdd(product.name);
-                    stopScannerSell(); // Gọi hàm dừng riêng của bán hàng
+                    stopScannerSell();
                 }
             }
         );
     } catch (err) {
-        console.error(err);
-        Swal.fire('Lỗi', 'Không thể mở camera: ' + err, 'error');
-        stopScannerSell();
+        console.error("Lỗi:", err);
+        document.getElementById('reader').innerHTML = "Lỗi: " + err;
     }
 }
 
 async function stopScannerSell() {
-    // Dừng instance toàn cục
-    if (html5QrCode) {
+    // Dùng window.html5QrCode đồng nhất
+    if (window.html5QrCode) {
         try {
-            await html5QrCode.stop();
-            await html5QrCode.clear();
+            await window.html5QrCode.stop();
+            await window.html5QrCode.clear();
         } catch (e) {
-            console.log("Camera đã tắt");
+            console.log("Camera đã dừng");
         }
+        window.html5QrCode = null; // Reset biến về null
     }
     document.getElementById('scanner-container').classList.add('hidden');
 }
@@ -4447,7 +4451,7 @@ lucide.createIcons();
 
 // THÊM ĐOẠN NÀY (Dùng window để tránh lỗi khai báo):
 window.isProcessing = false;
-window.currentScanner = null;
+window.html5QrCode = null;
 
 // THÊM DÒNG NÀY VÀO ĐÂY:
 loadReceipts(); 
