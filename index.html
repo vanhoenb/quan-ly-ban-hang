@@ -137,11 +137,10 @@
         gap: 8px !important;
     }
 
-/* Ép khung hình camera hiển thị */
-    #reader-sell video {
+#reader-sell video {
         display: block !important;
         width: 100% !important;
-        height: 100% !important;
+        height: auto !important;
         object-fit: cover !important;
     }
 
@@ -431,23 +430,23 @@
         <div class="bg-white p-3 md:p-4 rounded-2xl border border-gray-100 shadow-sm h-full">
             
             <div class="mb-4 bg-yellow-50 p-2 rounded-xl border border-yellow-200 flex items-center gap-2">
-    <span class="text-xs font-bold text-yellow-700">SCAN:</span>
-    <input type="text" id="barcode-scanner-sell" 
-            placeholder="Quét mã vạch tại đây..." 
-            class="w-full bg-transparent outline-none text-sm font-bold text-yellow-800">
-					
-				<button type="button" onclick="startScannerSell()" class="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition">
-						📷
-					</button>
-				</div>
+                <span class="text-xs font-bold text-yellow-700">SCAN:</span>
+                <input type="text" id="barcode-scanner-sell" 
+                       placeholder="Quét mã vạch tại đây..." 
+                       class="w-full bg-transparent outline-none text-sm font-bold text-yellow-800">
+                
+                <button type="button" onclick="startScannerSell()" class="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition">
+                    📷
+                </button>
+            </div>
 
-				<div id="scanner-container" class="hidden fixed inset-0 z-50 bg-black bg-opacity-90 p-4 flex flex-col justify-center items-center">
-    <div id="reader-sell" class="w-full max-w-md bg-white rounded-xl overflow-hidden" style="min-height: 300px; display: flex; align-items: center; justify-content: center;"></div>
-    
-    <button onclick="stopScannerSell()" class="mt-4 bg-red-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-red-700 transition">
-        ĐÓNG CAMERA
-    </button>
-</div>
+            <div id="scanner-container" class="hidden fixed inset-0 z-[9999] bg-black bg-opacity-95 p-4 flex flex-col justify-center items-center">
+                <div id="reader-sell" class="w-full max-w-md bg-white rounded-xl overflow-hidden shadow-2xl"></div>
+                
+                <button onclick="stopScannerSell()" class="mt-6 bg-red-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-red-700 transition">
+                    ĐÓNG CAMERA
+                </button>
+            </div>
 
             <input type="text" id="product-search" placeholder="🔍 Tìm nhanh sản phẩm..." 
                     onkeyup="filterProducts()" 
