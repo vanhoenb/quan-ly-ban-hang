@@ -4428,18 +4428,19 @@ loadSalesList();
 loadCustomers(); 
 loadInitSX();
 
-// --- BIẾN ĐIỀU KHIỂN QUY TRÌNH QUÉT ---
-let isProcessing = false; 
-let currentScanner = null; // Thêm vào đây để quản lý Camera
-
 // 2. Khởi tạo Lucide Icons
 lucide.createIcons();
+
+// THÊM ĐOẠN NÀY (Dùng window để tránh lỗi khai báo):
+window.isProcessing = false;
+window.currentScanner = null;
 
 // THÊM DÒNG NÀY VÀO ĐÂY:
 loadReceipts(); 
 
 // Gọi hàm này để hiển thị trang chủ ngay khi tải xong
 showPage('page-home');
+
 </script>
 
 </body>
