@@ -3052,42 +3052,34 @@ function getProductByBarcode(scannedCode) {
 
 
 async function startScannerSell() {
-    document.getElementById('scanner-container').classList.remove('hidden');
-    
-    // Cấu hình để ép nó quét cả mã vạch (EAN-13)
-    const config = {
-        fps: 10,
-        qrbox: 250,
-        formatsToSupport: [ 
-            Html5QrcodeSupportedFormats.QR_CODE, 
-            Html5QrcodeSupportedFormats.EAN_13, 
-            Html5QrcodeSupportedFormats.EAN_8, 
-            Html5QrcodeSupportedFormats.CODE_128 
-        ]
-    };
+    const container = document.getElementById('scanner-container');
+    container.classList.remove('hidden');
 
     window.html5QrCode = new Html5Qrcode("reader-sell");
-    
+
     try {
         await window.html5QrCode.start(
             { facingMode: "environment" },
-            config, // Dùng config đã ép kiểu quét ở trên
-            (decodedText) => {
-                const barcode = decodedText.toString().trim();
-                console.log("Mã quét được từ Camera:", barcode); // Kiểm tra xem nó có hiện mã ở đây không
+            { fps: 20, qrbox: { width: 250, height: 100 } },
+            async (decodedText) => {
+                const barcode = decodedText.trim();
                 
-                const product = getProductByBarcode(barcode);
-                if (product) {
-                    quickAdd(product.name);
-                    stopScannerSell();
-                } else {
-                    // Nếu đã nhận được mã mà vẫn không chạy, chứng tỏ hàm tìm sp bị lỗi
-                    console.log("Không tìm thấy sản phẩm này trong kho");
-                }
+                // 1. Dừng Camera trước để không quét liên tục
+                await stopScannerSell();
+                
+                // 2. Ép vào ô input để giao diện cập nhật mã vạch (cho đẹp)
+                const input = document.getElementById('barcode-scanner-sell');
+                input.value = barcode;
+                
+                // 3. GỌI THẲNG HÀM TÌM KIẾM CỦA BẠN (Cái hàm mà máy quét cầm tay đang dùng)
+                console.log("Đang tìm mã từ camera:", barcode);
+                await findProductDirectly(barcode);
             }
         );
     } catch (err) {
-        console.error(err);
+        console.error("Lỗi Camera:", err);
+        Swal.fire('Lỗi', 'Không thể khởi động camera: ' + err, 'error');
+        stopScannerSell();
     }
 }
 
