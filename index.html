@@ -422,26 +422,24 @@
     <div class="lg:w-1/2 w-full space-y-4">
         <div class="bg-white p-3 md:p-4 rounded-2xl border border-gray-100 shadow-sm h-full">
             
-            <!-- KHUNG QUÉT MÃ VẠCH (Có thêm nút Camera) -->
             <div class="mb-4 bg-yellow-50 p-2 rounded-xl border border-yellow-200 flex items-center gap-2">
-                <span class="text-xs font-bold text-yellow-700">SCAN:</span>
-                <input type="text" id="barcode-scanner-sell" 
-                       placeholder="Quét mã vạch tại đây..." 
-                       class="w-full bg-transparent outline-none text-sm font-bold text-yellow-800">
-                
-                <!-- Nút mở Camera -->
-                <button type="button" onclick="startScannerSell()" class="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition">
-                    📷
-                </button>
-            </div>
+    <span class="text-xs font-bold text-yellow-700">SCAN:</span>
+    <input type="text" id="barcode-scanner-sell" 
+            placeholder="Quét mã vạch tại đây..." 
+            class="w-full bg-transparent outline-none text-sm font-bold text-yellow-800">
+    
+    <button type="button" onclick="startScannerSell()" class="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition">
+        📷
+    </button>
+</div>
 
-            <!-- Khu vực ẩn hiển thị Camera -->
-            <div id="scanner-container" class="hidden fixed inset-0 z-50 bg-black bg-opacity-90 p-4 flex flex-col justify-center items-center">
-                <div id="reader" class="w-full max-w-md bg-white rounded-xl overflow-hidden"></div>
-                <button onclick="stopScannerSell()" class="mt-4 bg-red-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-red-700 transition">
-                    ĐÓNG CAMERA
-                </button>
-            </div>
+<div id="scanner-container" class="hidden fixed inset-0 z-50 bg-black bg-opacity-90 p-4 flex flex-col justify-center items-center">
+    <div id="reader" class="w-full max-w-md bg-white rounded-xl overflow-hidden" style="min-height: 300px; display: flex; align-items: center; justify-content: center;"></div>
+    
+    <button onclick="stopScannerSell()" class="mt-4 bg-red-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-red-700 transition">
+        ĐÓNG CAMERA
+    </button>
+</div>
 
             <input type="text" id="product-search" placeholder="🔍 Tìm nhanh sản phẩm..." 
                     onkeyup="filterProducts()" 
@@ -3041,28 +3039,44 @@ function getProductByBarcode(scannedCode) {
 }
 
 // ===== QUÉT MÃ QR (CAMERA) =====
+
+
 async function startScannerSell() {
     document.getElementById('scanner-container').classList.remove('hidden');
-    const html5QrcodeScanner = new Html5Qrcode("reader");
     
-    html5QrcodeScanner.start(
+    // Khởi tạo instance và lưu vào biến toàn cục
+    currentScanner = new Html5Qrcode("reader");
+    
+    currentScanner.start(
         { facingMode: "environment" }, 
-        { fps: 10, qrbox: 250 },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
         (decodedText) => {
             const barcode = decodedText.toString().trim();
-            const product = getProductByBarcode(barcode); // Dùng hàm dùng chung
-            
+            const product = getProductByBarcode(barcode);
             if (product) {
                 quickAdd(product.name);
-                html5QrcodeScanner.stop().then(() => stopScannerSell());
-            } else {
-                console.log("Không tìm thấy mã trong Cache:", barcode); // Log để kiểm tra
-                Swal.fire({ icon: 'error', title: 'Không tìm thấy', text: 'Mã ' + barcode + ' không có trong hệ thống!' });
+                stopScannerSell(); // Dừng khi quét thành công
             }
         }
-    ).catch(err => { 
-        console.error("Lỗi Camera:", err);
+    ).catch(err => {
+        console.error(err);
+        alert("Không thể mở camera: " + err);
+        stopScannerSell();
     });
+}
+
+async function stopScannerSell() {
+    // 1. Dừng và xóa instance camera
+    if (currentScanner) {
+        try {
+            await currentScanner.stop();
+            await currentScanner.clear(); // Xóa sạch HTML bên trong #reader
+        } catch (e) {
+            console.log("Camera đã dừng hoặc chưa khởi tạo");
+        }
+    }
+    // 2. Ẩn container
+    document.getElementById('scanner-container').classList.add('hidden');
 }
 
 // ===== QUÉT MÃ BẰNG MÁY QUÉT (INPUT) =====
@@ -4413,6 +4427,11 @@ updateProductDropdowns();
 loadSalesList();
 loadCustomers(); 
 loadInitSX();
+
+// --- BIẾN ĐIỀU KHIỂN QUY TRÌNH QUÉT ---
+let isProcessing = false; 
+let currentScanner = null; // Thêm vào đây để quản lý Camera
+
 // 2. Khởi tạo Lucide Icons
 lucide.createIcons();
 
@@ -4421,7 +4440,6 @@ loadReceipts();
 
 // Gọi hàm này để hiển thị trang chủ ngay khi tải xong
 showPage('page-home');
-
 </script>
 
 </body>
