@@ -300,9 +300,10 @@ function toggleMoreMenu() {
 			<div id="reader" class="mt-2 w-full max-w-[300px] mx-auto hidden"></div>
 			
 			<button type="button" id="close-scanner-btn" onclick="stopScanner()" 
-            class="hidden mt-2 w-full bg-red-500 text-white py-1 rounded-lg font-bold text-xs shadow-sm hover:bg-red-600 transition-all">
-        ❌ Đóng Camera
-    </button>
+        style="display: none;" 
+        class="mt-2 w-full bg-red-500 text-white py-1 rounded-lg font-bold text-xs shadow-sm hover:bg-red-600 transition-all">
+    ❌ Đóng Camera
+	</button>
 		</div>
 		
 		<div class="grid grid-cols-2 md:grid-cols-6 gap-3 bg-blue-50 p-3 md:p-6 rounded-2xl shadow-sm border border-blue-100">
@@ -2219,9 +2220,13 @@ function stopScanner() {
     if (reader) reader.classList.add('hidden');
     if (readerManage) readerManage.classList.add('hidden');
     
-    // ẨN nút đóng
-    if (closeBtn) closeBtn.classList.add('hidden');
+    // ẨN nút đóng bằng cả class và style để đồng bộ với startScanner
+    if (closeBtn) {
+        closeBtn.classList.add('hidden');
+        closeBtn.style.display = 'none';
+    }
 }
+
 //==================================================
     // --- BÁN HÀNG (MỚI THÊM) ---=====
 //====================================================	
