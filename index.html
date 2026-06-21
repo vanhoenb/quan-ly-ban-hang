@@ -2139,10 +2139,12 @@ document.getElementById('search-by-barcode').addEventListener('keypress', async 
 
 
 async function startScanner(pageType) {
-    // 1. Xác định ID thẻ DIV dựa vào trang đang gọi
+    // 1. Xác định ID thẻ DIV và Nút đóng dựa vào trang đang gọi
     const targetId = (pageType === 'prod') ? 'reader-manage' : 'reader';
     const readerDiv = document.getElementById(targetId);
-    const closeBtn = document.getElementById('close-scanner-btn'); // Lấy nút đóng
+    
+    // Đảm bảo lấy nút đóng mới nhất tại thời điểm nhấn nút Quét
+    const closeBtn = document.getElementById('close-scanner-btn'); 
 
     if (!readerDiv) {
         Swal.fire('Lỗi', 'Không tìm thấy khung quét camera trên trang này!', 'error');
@@ -2150,8 +2152,12 @@ async function startScanner(pageType) {
     }
 
     readerDiv.classList.remove('hidden');
-    // THÊM: Hiện nút đóng khi mở camera
-    if (closeBtn) closeBtn.classList.remove('hidden'); 
+    
+    // THÊM: Hiện nút đóng và ép buộc hiển thị bằng style display
+    if (closeBtn) {
+        closeBtn.classList.remove('hidden');
+        closeBtn.style.display = 'block'; 
+    }
     
     // SỬA: Gán vào biến window toàn cục thay vì const cục bộ
     window.html5QrCode = new Html5Qrcode(targetId);
@@ -2168,24 +2174,31 @@ async function startScanner(pageType) {
                     await findAndFillProduct(decodedText);
                 }
                 
-                // 3. Dừng sau khi quét thành công bằng window.html5QrCode
+                // 3. Dừng sau khi quét thành công
                 await window.html5QrCode.stop().catch(err => console.log(err));
-                // Xóa sạch để lần sau khởi tạo không bị rác
                 await window.html5QrCode.clear().catch(err => console.log(err));
                 
                 readerDiv.classList.add('hidden');
-                // THÊM: Ẩn nút đóng sau khi quét thành công
-                if (closeBtn) closeBtn.classList.add('hidden');
                 
-                window.html5QrCode = null; // Reset về null
+                // THÊM: Ẩn nút đóng sau khi quét thành công
+                if (closeBtn) {
+                    closeBtn.classList.add('hidden');
+                    closeBtn.style.display = 'none';
+                }
+                
+                window.html5QrCode = null; 
             }
         );
     } catch (err) {
         console.error(err);
         Swal.fire('Lỗi Camera', 'Hãy đảm bảo bạn đã cấp quyền truy cập Camera!', 'error');
         readerDiv.classList.add('hidden');
+        
         // THÊM: Ẩn nút đóng nếu có lỗi
-        if (closeBtn) closeBtn.classList.add('hidden');
+        if (closeBtn) {
+            closeBtn.classList.add('hidden');
+            closeBtn.style.display = 'none';
+        }
         window.html5QrCode = null;
     }
 }
