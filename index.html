@@ -299,10 +299,10 @@ function toggleMoreMenu() {
 			
 			<div id="reader" class="mt-2 w-full max-w-[300px] mx-auto hidden"></div>
 			
-			<button type="button" onclick="stopScanner()" 
-            class="mt-2 w-full bg-red-500 text-white py-1 rounded-lg font-bold text-xs shadow-sm hover:bg-red-600 transition-all">
+			<button type="button" id="close-scanner-btn" onclick="stopScanner()" 
+            class="hidden mt-2 w-full bg-red-500 text-white py-1 rounded-lg font-bold text-xs shadow-sm hover:bg-red-600 transition-all">
         ❌ Đóng Camera
-			</button>
+    </button>
 		</div>
 		
 		<div class="grid grid-cols-2 md:grid-cols-6 gap-3 bg-blue-50 p-3 md:p-6 rounded-2xl shadow-sm border border-blue-100">
@@ -2142,13 +2142,16 @@ async function startScanner(pageType) {
     // 1. Xác định ID thẻ DIV dựa vào trang đang gọi
     const targetId = (pageType === 'prod') ? 'reader-manage' : 'reader';
     const readerDiv = document.getElementById(targetId);
-    
+    const closeBtn = document.getElementById('close-scanner-btn'); // Lấy nút đóng
+
     if (!readerDiv) {
         Swal.fire('Lỗi', 'Không tìm thấy khung quét camera trên trang này!', 'error');
         return;
     }
 
     readerDiv.classList.remove('hidden');
+    // THÊM: Hiện nút đóng khi mở camera
+    if (closeBtn) closeBtn.classList.remove('hidden'); 
     
     // SỬA: Gán vào biến window toàn cục thay vì const cục bộ
     window.html5QrCode = new Html5Qrcode(targetId);
@@ -2171,6 +2174,9 @@ async function startScanner(pageType) {
                 await window.html5QrCode.clear().catch(err => console.log(err));
                 
                 readerDiv.classList.add('hidden');
+                // THÊM: Ẩn nút đóng sau khi quét thành công
+                if (closeBtn) closeBtn.classList.add('hidden');
+                
                 window.html5QrCode = null; // Reset về null
             }
         );
@@ -2178,22 +2184,31 @@ async function startScanner(pageType) {
         console.error(err);
         Swal.fire('Lỗi Camera', 'Hãy đảm bảo bạn đã cấp quyền truy cập Camera!', 'error');
         readerDiv.classList.add('hidden');
+        // THÊM: Ẩn nút đóng nếu có lỗi
+        if (closeBtn) closeBtn.classList.add('hidden');
         window.html5QrCode = null;
     }
 }
 
 function stopScanner() {
     const reader = document.getElementById('reader');
-    // Nếu bạn đang dùng thư viện html5-qrcode
-    if (window.html5QrcodeScanner) {
-        window.html5QrcodeScanner.clear().catch(error => {
-            console.error("Lỗi khi dừng camera: ", error);
-        });
-    }
-    // Ẩn khung camera
-    reader.classList.add('hidden');
-}
+    const readerManage = document.getElementById('reader-manage');
+    const closeBtn = document.getElementById('close-scanner-btn');
 
+    // Dừng camera bằng đối tượng toàn cục đã khai báo
+    if (window.html5QrCode) {
+        window.html5QrCode.stop().catch(err => console.log(err));
+        window.html5QrCode.clear().catch(err => console.log(err));
+        window.html5QrCode = null;
+    }
+    
+    // Ẩn khung camera
+    if (reader) reader.classList.add('hidden');
+    if (readerManage) readerManage.classList.add('hidden');
+    
+    // ẨN nút đóng
+    if (closeBtn) closeBtn.classList.add('hidden');
+}
 //==================================================
     // --- BÁN HÀNG (MỚI THÊM) ---=====
 //====================================================	
