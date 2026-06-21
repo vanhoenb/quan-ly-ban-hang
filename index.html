@@ -292,19 +292,19 @@ function toggleMoreMenu() {
                placeholder="Quét mã...">
         
         <button type="button" onclick="startScanner('import')" 
-				class="bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-sm active:scale-95 transition-all">
-			📷 Quét
-		</button>
-			</div>
-			
-			<div id="reader" class="mt-2 w-full max-w-[300px] mx-auto hidden"></div>
-			
-			<button type="button" id="close-scanner-import" onclick="stopScanner('import')" 
-        style="display: none;" 
-        class="mt-2 w-full bg-red-500 ...">
-    ❌ Đóng Camera
-</button>
-		</div>
+                class="bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-sm active:scale-95 transition-all">
+            📷 Quét
+        </button>
+    </div>
+    
+    <div id="reader" class="mt-2 w-full max-w-[300px] mx-auto hidden"></div>
+    
+    <button type="button" id="close-scanner-import" onclick="stopScanner('import')" 
+            style="display: none;" 
+            class="mt-2 w-full bg-red-500 text-white py-1 rounded-lg font-bold text-xs shadow-sm hover:bg-red-600 transition-all">
+        ❌ Đóng Camera
+    </button>
+</div>
 		
 		<div class="grid grid-cols-2 md:grid-cols-6 gap-3 bg-blue-50 p-3 md:p-6 rounded-2xl shadow-sm border border-blue-100">
         <div class="md:col-span-1">
@@ -2143,9 +2143,8 @@ async function startScanner(pageType) {
     const targetId = (pageType === 'prod') ? 'reader-manage' : 'reader';
     const readerDiv = document.getElementById(targetId);
     
-    // Tự động chọn ID nút dựa trên pageType
-    const closeBtnId = (pageType === 'import') ? 'close-scanner-import' : 'close-scanner-btn';
-    const closeBtn = document.getElementById(closeBtnId);
+    // Tìm nút theo ID đặc thù của trang
+    const closeBtn = document.getElementById(pageType === 'import' ? 'close-scanner-import' : 'close-scanner-btn');
 
     if (!readerDiv) {
         Swal.fire('Lỗi', 'Không tìm thấy khung quét camera!', 'error');
@@ -2154,47 +2153,47 @@ async function startScanner(pageType) {
 
     readerDiv.classList.remove('hidden');
     
+    // Ép nút hiển thị
     if (closeBtn) {
-        closeBtn.classList.remove('hidden');
         closeBtn.style.display = 'block'; 
     }
     
     window.html5QrCode = new Html5Qrcode(targetId);
     
     try {
-        await window.html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, async (decodedText) => {
-            if (pageType === 'prod') {
-                document.getElementById('new-prod-barcode').value = decodedText;
-            } else {
-                await findAndFillProduct(decodedText);
+        await window.html5QrCode.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: 250 },
+            async (decodedText) => {
+                if (pageType === 'prod') {
+                    document.getElementById('new-prod-barcode').value = decodedText;
+                } else {
+                    await findAndFillProduct(decodedText);
+                }
+                stopScanner(pageType); // Truyền pageType để hàm dừng biết cần ẩn nút nào
             }
-            stopScanner(pageType); // Truyền pageType vào để hàm biết cần ẩn nút nào
-        });
+        );
     } catch (err) {
-        Swal.fire('Lỗi Camera', 'Hãy cấp quyền truy cập Camera!', 'error');
+        console.error(err);
         stopScanner(pageType);
     }
 }
 
-// Thêm tham số pageType vào đây
 function stopScanner(pageType = 'import') {
-    const reader = document.getElementById('reader');
-    const readerManage = document.getElementById('reader-manage');
-    // Tìm nút dựa trên ngữ cảnh
-    const closeBtnId = (pageType === 'import') ? 'close-scanner-import' : 'close-scanner-btn';
-    const closeBtn = document.getElementById(closeBtnId);
-
+    // 1. Dừng camera
     if (window.html5QrCode) {
         window.html5QrCode.stop().catch(err => console.log(err));
         window.html5QrCode.clear().catch(err => console.log(err));
         window.html5QrCode = null;
     }
     
-    if (reader) reader.classList.add('hidden');
-    if (readerManage) readerManage.classList.add('hidden');
+    // 2. Ẩn khung camera
+    document.getElementById('reader')?.classList.add('hidden');
+    document.getElementById('reader-manage')?.classList.add('hidden');
     
+    // 3. Ẩn nút đóng dựa vào ID trang
+    const closeBtn = document.getElementById(pageType === 'import' ? 'close-scanner-import' : 'close-scanner-btn');
     if (closeBtn) {
-        closeBtn.classList.add('hidden');
         closeBtn.style.display = 'none';
     }
 }
