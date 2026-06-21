@@ -284,7 +284,7 @@ function toggleMoreMenu() {
 <div id="page-import" class="hidden space-y-4 px-2 md:px-6">
     <h2 class="text-xl font-bold text-gray-800">NHẬP KHO</h2>
     
-    <div class="bg-yellow-50 p-3 rounded-xl mb-4 border border-yellow-200">
+   <div class="bg-yellow-50 p-3 rounded-xl mb-4 border border-yellow-200">
     <label class="block text-[10px] uppercase font-bold text-yellow-800 mb-1 tracking-wider">Quét mã sản phẩm</label>
     <div class="flex gap-2">
         <input type="text" id="search-by-barcode" 
@@ -299,8 +299,7 @@ function toggleMoreMenu() {
     
     <div id="reader" class="mt-2 w-full max-w-[300px] mx-auto hidden"></div>
     
-    <button type="button" id="close-scanner-import" onclick="stopScanner('import')" 
-            style="display: none;" 
+    <button type="button" id="close-scanner-btn" onclick="stopScanner()" 
             class="mt-2 w-full bg-red-500 text-white py-1 rounded-lg font-bold text-xs shadow-sm hover:bg-red-600 transition-all">
         ❌ Đóng Camera
     </button>
@@ -2142,21 +2141,14 @@ document.getElementById('search-by-barcode').addEventListener('keypress', async 
 async function startScanner(pageType) {
     const targetId = (pageType === 'prod') ? 'reader-manage' : 'reader';
     const readerDiv = document.getElementById(targetId);
-    
-    // Tìm nút theo ID đặc thù của trang
-    const closeBtn = document.getElementById(pageType === 'import' ? 'close-scanner-import' : 'close-scanner-btn');
 
     if (!readerDiv) {
         Swal.fire('Lỗi', 'Không tìm thấy khung quét camera!', 'error');
         return;
     }
 
+    // Chỉ hiện khung camera thôi
     readerDiv.classList.remove('hidden');
-    
-    // Ép nút hiển thị
-    if (closeBtn) {
-        closeBtn.style.display = 'block'; 
-    }
     
     window.html5QrCode = new Html5Qrcode(targetId);
     
@@ -2170,16 +2162,17 @@ async function startScanner(pageType) {
                 } else {
                     await findAndFillProduct(decodedText);
                 }
-                stopScanner(pageType); // Truyền pageType để hàm dừng biết cần ẩn nút nào
+                stopScanner('import'); 
             }
         );
     } catch (err) {
         console.error(err);
-        stopScanner(pageType);
+        Swal.fire('Lỗi Camera', 'Hãy cấp quyền truy cập!', 'error');
+        stopScanner('import');
     }
 }
 
-function stopScanner(pageType = 'import') {
+function stopScanner(pageType) {
     // 1. Dừng camera
     if (window.html5QrCode) {
         window.html5QrCode.stop().catch(err => console.log(err));
@@ -2187,17 +2180,12 @@ function stopScanner(pageType = 'import') {
         window.html5QrCode = null;
     }
     
-    // 2. Ẩn khung camera
+    // 2. Chỉ ẩn khung camera
     document.getElementById('reader')?.classList.add('hidden');
     document.getElementById('reader-manage')?.classList.add('hidden');
     
-    // 3. Ẩn nút đóng dựa vào ID trang
-    const closeBtn = document.getElementById(pageType === 'import' ? 'close-scanner-import' : 'close-scanner-btn');
-    if (closeBtn) {
-        closeBtn.style.display = 'none';
-    }
+    // KHÔNG CẦN ẨN NÚT ĐÓNG NỮA, NÓ SẼ LUÔN Ở ĐÓ
 }
-
 //==================================================
     // --- BÁN HÀNG (MỚI THÊM) ---=====
 //====================================================	
