@@ -155,49 +155,59 @@
 </head>
 <body class="bg-gray-100 flex h-screen">
 
-    <button onclick="toggleSidebar()" class="md:hidden p-3 fixed top-2 right-2 z-[999] bg-slate-800 text-white rounded-lg shadow-lg">
-    <i data-lucide="menu"></i>
-		</button>
+  <div class="md:hidden fixed bottom-0 left-0 w-full z-[800] bg-slate-900 border-t border-slate-700 shadow-[0_-2px_10px_rgba(0,0,0,0.3)]">
+    
+    <div id="more-menu-list" class="hidden absolute bottom-full right-0 w-35 bg-slate-800 border-t border-l border-slate-700 rounded-tl-lg shadow-xl flex flex-col p-1">
+        <button onclick="showPage('page-inventory'); toggleMoreMenu()" class="text-white text-xs p-3 hover:bg-slate-700 flex items-center gap-2 border-b border-slate-700"><i data-lucide="box" class="w-4 h-4"></i> Kho Hàng</button>
+        <button onclick="showPage('page-history'); toggleMoreMenu()" class="text-white text-xs p-3 hover:bg-slate-700 flex items-center gap-2 border-b border-slate-700"><i data-lucide="history" class="w-4 h-4"></i> Lịch sử HĐ</button>
+        <button onclick="showPage('page-customers'); toggleMoreMenu()" class="text-white text-xs p-3 hover:bg-slate-700 flex items-center gap-2 border-b border-slate-700"><i data-lucide="users" class="w-4 h-4"></i> Khách Hàng</button>
+        <button onclick="showPage('page-products-manage'); loadProductManage(); toggleMoreMenu()" class="text-white text-xs p-3 hover:bg-slate-700 flex items-center gap-2 border-b border-slate-700"><i data-lucide="settings" class="w-4 h-4"></i> Danh mục SP</button>
+        <button onclick="showPage('page-SanXuat'); toggleMoreMenu()" class="text-white text-xs p-3 hover:bg-slate-700 flex items-center gap-2"><i data-lucide="factory" class="w-4 h-4"></i> Sản xuất</button>
+    </div>
 
-    <aside id="sidebar" class="w-64 bg-slate-900 text-white p-4 md:relative md:translate-x-0">
-        <h1 class="text-xl font-bold mb-6 text-blue-400 flex items-center gap-2 mt-10 md:mt-0">
-            <i data-lucide="package"></i> QUẢN LÝ BÁN HÀNG
-        </h1>
-        <nav class="space-y-2">
-            <button onclick="showPage('page-home'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-700 flex items-center gap-3">
-                <i data-lucide="home"></i> Trang chủ
-            </button>
-            <button onclick="showPage('page-import'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3">
-                <i data-lucide="arrow-down-circle"></i> Nhập Kho
-            </button>
-            <button onclick="showPage('page-inventory'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3">
-                <i data-lucide="box"></i> Kho Hàng
-            </button>
-            <button onclick="showPage('page-sell'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3">
-                <i data-lucide="shopping-cart"></i> Bán Hàng
-            </button>
-            <button onclick="showPage('page-history'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3">
-                <i data-lucide="history"></i> Lịch sử HĐ
-            </button>
-            <button onclick="showPage('page-customers'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3">
-                <i data-lucide="users"></i> Khách Hàng
-            </button>
-            <button onclick="showPage('page-products-manage'); loadProductManage(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3">
-                <i data-lucide="settings"></i> Danh mục SP
-            </button>
-			<button onclick="showPage('page-SanXuat'); document.getElementById('sidebar').classList.remove('active')" 
-        class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3">
-    <i data-lucide="factory"></i> 
-    <span>Sản xuất</span>
-</button>
-            <button onclick="showPage('page-report'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3">
-                <i data-lucide="bar-chart-3"></i> Báo cáo
-            </button>
-        </nav>
-    </aside>
-	<div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div class="flex justify-around items-center px-2 py-2">
+        <button onclick="showPage('page-home')" class="flex flex-col items-center text-slate-300 p-1"><i data-lucide="home" class="w-5 h-5"></i><span class="text-[9px] font-bold">Home</span></button>
+        <button onclick="showPage('page-sell')" class="flex flex-col items-center text-slate-300 p-1"><i data-lucide="shopping-cart" class="w-5 h-5"></i><span class="text-[9px] font-bold">Bán hàng</span></button>
+        <button onclick="showPage('page-import')" class="flex flex-col items-center text-slate-300 p-1"><i data-lucide="arrow-down-circle" class="w-5 h-5"></i><span class="text-[9px] font-bold">Nhập Kho</span></button>
+        <button onclick="showPage('page-report')" class="flex flex-col items-center text-slate-300 p-1"><i data-lucide="bar-chart-3" class="w-5 h-5"></i><span class="text-[9px] font-bold">Báo cáo</span></button>
+        <button onclick="toggleMoreMenu()" class="flex flex-col items-center text-slate-300 p-1">
+            <i data-lucide="more-horizontal" class="w-5 h-5"></i>
+            <span class="text-[9px] font-bold">Khác</span>
+        </button>
+    </div>
+</div>
 
-    <main class="flex-1 overflow-y-auto">
+<script>
+function toggleMoreMenu() {
+    const menu = document.getElementById('more-menu-list');
+    menu.classList.toggle('hidden');
+    // Ép load lại icon khi mở menu
+    if (!menu.classList.contains('hidden') && typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+</script>
+
+<aside id="sidebar" class="fixed md:relative w-64 h-full bg-slate-900 text-white p-4 z-[999] transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+    <h1 class="text-xl font-bold mb-6 text-blue-400 flex items-center gap-2 mt-4 md:mt-0">
+        <i data-lucide="package"></i> MENU
+    </h1>
+    <nav class="space-y-2 overflow-y-auto max-h-[80vh]">
+        <button onclick="showPage('page-home'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-700 flex items-center gap-3"><i data-lucide="home"></i> Trang chủ</button>
+        <button onclick="showPage('page-import'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="arrow-down-circle"></i> Nhập Kho</button>
+        <button onclick="showPage('page-inventory'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="box"></i> Kho Hàng</button>
+        <button onclick="showPage('page-sell'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="shopping-cart"></i> Bán Hàng</button>
+        <button onclick="showPage('page-history'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="history"></i> Lịch sử HĐ</button>
+        <button onclick="showPage('page-customers'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="users"></i> Khách Hàng</button>
+        <button onclick="showPage('page-products-manage'); loadProductManage(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="settings"></i> Danh mục SP</button>
+        <button onclick="showPage('page-SanXuat'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="factory"></i> Sản xuất</button>
+        <button onclick="showPage('page-report'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="bar-chart-3"></i> Báo cáo</button>
+    </nav>
+</aside>
+
+<div id="sidebar-overlay" onclick="toggleSidebar()" class="md:hidden hidden fixed inset-0 bg-black/50 z-[998]"></div>
+
+<main class="flex-1 overflow-y-auto pb-16 md:pb-0">
 	
 
 
@@ -391,7 +401,7 @@
         
         <div class="flex flex-col gap-2 w-full">
             <input type="text" id="search-inventory" placeholder="Tìm tên SP..." 
-                   onkeyup="filterInventory()" class="border p-2 rounded-lg w-full">
+                    onkeyup="filterInventory()" class="border p-2 rounded-lg w-full">
             
             <div class="flex gap-2 w-full">
                 <button onclick="togglePrices()" class="flex-1 bg-gray-600 text-white py-2 rounded-lg text-xs font-bold hover:bg-gray-700">
@@ -404,10 +414,10 @@
         </div>
     </div>
 
-    <div class="w-full border rounded-lg shadow-sm overflow-x-auto bg-white">
+    <div class="w-full border rounded-lg shadow-sm bg-white overflow-y-auto max-h-[70vh] overflow-x-auto">
         <table id="kho-table" class="min-w-full text-left text-xs md:text-sm">
-            <thead>
-                <tr class="bg-gray-100 text-gray-700">
+            <thead class="sticky top-0 bg-gray-100 z-10">
+                <tr class="text-gray-700">
                     <th class="p-2 border-b">Tên SP</th>
                     <th class="p-2 border-b">ĐVT</th>
                     <th class="p-2 border-b">SL</th>
@@ -569,7 +579,7 @@
 </div>
 
        <!-- PHẦN 5: KHÁCH HÀNG -->
-       <div id="page-customers" class="space-y-6 p-4 md:p-6 hidden">
+      <div id="page-customers" class="space-y-6 p-4 md:p-6 hidden">
     <h2 class="text-2xl font-bold text-slate-800 border-b pb-2">DANH SÁCH ĐẠI LÝ</h2>
     
     <div class="bg-white p-4 md:p-6 rounded shadow border border-slate-200 grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -579,14 +589,14 @@
         <button onclick="addCustomer()" class="bg-blue-600 text-white p-3 rounded font-bold hover:bg-blue-700 w-full">Thêm Đại Lý</button>
     </div>
 
-    <div class="bg-white p-4 md:p-6 rounded shadow border border-slate-200 overflow-x-auto">
-        <table class="w-full text-sm border-collapse min-w-[500px]">
-            <thead>
+    <div class="bg-white p-4 md:p-6 rounded shadow border border-slate-200 relative overflow-y-auto max-h-[65vh] overflow-x-auto">
+        <table class="w-full text-sm border-separate border-spacing-0 min-w-[500px]">
+            <thead class="sticky top-0 z-20">
                 <tr class="bg-slate-100 text-left">
-                    <th class="p-3 border">Tên đại lý</th>
-                    <th class="p-3 border">Địa chỉ</th>
-                    <th class="p-3 border">Số điện thoại</th>
-                    <th class="p-3 border text-center">Thao tác</th>
+                    <th class="p-3 border-b border-r border-t border-slate-200">Tên đại lý</th>
+                    <th class="p-3 border-b border-r border-t border-slate-200">Địa chỉ</th>
+                    <th class="p-3 border-b border-r border-t border-slate-200">Số điện thoại</th>
+                    <th class="p-3 border-b border-t border-slate-200 text-center">Thao tác</th>
                 </tr>
             </thead>
             <tbody id="customer-list-body"></tbody>
@@ -613,9 +623,9 @@
 
     <div id="reader-manage" class="hidden w-full max-w-[300px] mx-auto border-2 border-green-500 rounded-xl overflow-hidden"></div>
 
-    <div class="overflow-x-auto shadow-sm rounded-2xl border border-gray-100">
+    <div class="shadow-sm rounded-2xl border border-gray-100 overflow-y-auto max-h-[65vh] overflow-x-auto">
         <table class="w-full bg-white text-sm">
-            <thead class="bg-gray-50">
+            <thead class="sticky top-0 bg-gray-50 z-10">
                 <tr>
                     <th class="p-4 border-b text-left font-bold text-gray-600">Mã vạch</th>
                     <th class="p-4 border-b text-left font-bold text-gray-600">Tên sản phẩm</th>
@@ -638,8 +648,8 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div class="md:col-span-4">
                 <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm (Số phiếu, KH)..." 
-                       onkeyup="searchInvoice()" 
-                       class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
+                        onkeyup="searchInvoice()" 
+                        class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
             </div>
             
             <div>
@@ -661,10 +671,10 @@
             </div>
         </div>
         
-        <div class="overflow-x-auto shadow-sm rounded-lg">
+        <div class="shadow-sm rounded-lg border border-slate-200 overflow-y-auto max-h-[60vh] overflow-x-auto">
             <table class="w-full text-sm border-collapse min-w-[600px]" id="invoiceTable">
-                <thead>
-                    <tr class="bg-slate-100 text-left border-b-2 border-slate-300">
+                <thead class="sticky top-0 bg-slate-100 z-10">
+                    <tr class="text-left border-b-2 border-slate-300">
                         <th class="p-4 border-r">Số phiếu</th>
                         <th class="p-4 border-r">Khách hàng</th>
                         <th class="p-4 border-r">Ngày xuất</th>
@@ -751,27 +761,27 @@
           <h5 class="mb-4 font-bold text-gray-600">DANH SÁCH PHIẾU SẢN XUẤT</h5>
           
           <div class="relative mb-4">
-				<input type="text" id="searchInputSX" 
-       placeholder="🔍 Tìm kiếm theo số phiếu (VD: SX01)..." 
-       onkeyup="searchSanXuat()" 
-       class="w-full pl-4 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-			</div>
+            <input type="text" id="searchInputSX" 
+                   placeholder="🔍 Tìm kiếm theo số phiếu (VD: SX01)..." 
+                   onkeyup="searchSanXuat()" 
+                   class="w-full pl-4 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
 
-          <div class="overflow-x-auto">
+          <div class="overflow-y-auto max-h-[60vh] overflow-x-auto border border-gray-100 rounded-lg">
             <table class="w-full text-left border-collapse">
-              <thead>
-                <tr class="bg-gray-50 border-b border-gray-200">
-                  <th class="p-3 text-sm font-semibold text-gray-700">Ngày</th>
-                  <th class="p-3 text-sm font-semibold text-gray-700">Số phiếu</th>
-                  <th class="p-3 text-sm font-semibold text-gray-700">Sản phẩm</th>
-                  <th class="p-3 text-sm font-semibold text-gray-700">SL</th>
-                  <th class="p-3 text-sm font-semibold text-gray-700">Mới mua</th>
-                  <th class="p-3 text-sm font-semibold text-gray-700">Chờ đóng</th>
-                  <th class="p-3 text-sm font-semibold text-gray-700">Đóng xong</th>
-                  <th class="p-3 text-sm font-semibold text-gray-700 text-center">Xóa</th>
+              <thead class="sticky top-0 bg-gray-100 z-10">
+                <tr class="border-b border-gray-200">
+                  <th class="p-3 text-xs md:text-sm font-semibold text-gray-700">Ngày</th>
+                  <th class="p-3 text-xs md:text-sm font-semibold text-gray-700">Số phiếu</th>
+                  <th class="p-3 text-xs md:text-sm font-semibold text-gray-700">Sản phẩm</th>
+                  <th class="p-3 text-xs md:text-sm font-semibold text-gray-700">SL</th>
+                  <th class="p-3 text-xs md:text-sm font-semibold text-gray-700">Mới mua</th>
+                  <th class="p-3 text-xs md:text-sm font-semibold text-gray-700">Chờ đóng</th>
+                  <th class="p-3 text-xs md:text-sm font-semibold text-gray-700">Đóng xong</th>
+                  <th class="p-3 text-xs md:text-sm font-semibold text-gray-700 text-center">Xóa</th>
                 </tr>
               </thead>
-              <tbody id="list-sanxuat" class="text-sm text-gray-600 divide-y divide-gray-100"></tbody>
+              <tbody id="list-sanxuat" class="text-xs md:text-sm text-gray-600 divide-y divide-gray-100"></tbody>
             </table>
           </div>
         </div>
