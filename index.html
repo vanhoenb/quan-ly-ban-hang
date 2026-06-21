@@ -7,7 +7,7 @@
 	<link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <script src="https://cdn.tailwindcss.com"></script>
-   
+   <link href="https://fonts.googleapis.com/css2?family=Goldman&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
@@ -529,11 +529,12 @@ function toggleMoreMenu() {
 </div>
 
 <div id="print-area" style="display: none; padding: 40px; font-family: 'Times New Roman', serif;">
-    <div style="text-align: center; margin-bottom: 20px;">
-        <h2 style="margin: 0; font-size: 20px;">HỢP TÁC XÃ SẢN XUẤT KINH DOANH NÔNG SẢN THANH NGUYÊN</h2>
-        <p style="margin: 2px 0;">Số 9, ngõ 456, đường Xuân Thành, Ninh Nhất, TP Hoa Lư, Ninh Bình</p>
-        <p style="margin: 2px 0;">Điện thoại: 0982 998 474 - 0949 558 525</p>
-        <h1 style="margin: 20px 0; text-transform: uppercase;">HOÁ ĐƠN BÁN HÀNG</h1>
+    <div style="text-align: center; margin-bottom: 20px; font-family: 'Goldman', sans-serif;">
+        <h2 style="margin: 0; font-size: 16px;">HỢP TÁC XÃ SẢN XUẤT KINH DOANH NÔNG SẢN THANH NGUYÊN</h2>
+        <p style="margin: 2px 0; font-size: 13px;">Số 9, ngõ 456, đường Xuân Thành, Ninh Nhất, TP Hoa Lư, Ninh Bình</p>
+        <p style="margin: 2px 0; font-size: 13px;">Điện thoại: 0982 998 474 - 0949 558 525</p>
+        
+        <h1 style="margin: 25px 0; font-size: 32px; text-transform: uppercase; letter-spacing: 2px;">HOÁ ĐƠN BÁN HÀNG</h1>
     </div>
 
     <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
@@ -543,18 +544,24 @@ function toggleMoreMenu() {
             <p style="margin: 2px 0;"><strong>SĐT:</strong> <span id="print-phone"></span></p>
         </div>
         <div style="text-align: right;">
-    <p style="margin: 2px 0;"><strong>Số phiếu:</strong> <span id="print-receipt-id"></span></p>
-    <p style="margin: 2px 0;"><strong>Ngày:</strong> <span id="print-date"></span></p>
-    <p style="margin: 2px 0;"><strong>Ghi chú:</strong> <span id="print-note-global"></span></p>
-</div>
+            <p style="margin: 2px 0;"><strong>Số phiếu:</strong> <span id="print-receipt-id"></span></p>
+            <p style="margin: 2px 0;"><strong>Ngày:</strong> <span id="print-date"></span></p>
+            <p style="margin: 2px 0;"><strong>Ghi chú:</strong> <span id="print-note-global"></span></p>
+        </div>
     </div>
 
-    <table border="1" style="width: 100%; border-collapse: collapse; text-align: center; margin-bottom: 10px;">
-        <thead>
-            <tr style="background: #f2f2f2;">
-                <th style="padding: 5px;">STT</th><th style="padding: 5px;">Tên hàng</th><th style="padding: 5px;">ĐVT</th>
-                <th style="padding: 5px;">SL</th><th style="padding: 5px;">Đơn giá</th><th style="padding: 5px;">Thành tiền</th>
-                <th style="padding: 5px;">Thuế GTGT</th><th style="padding: 5px;">Tiền thuế</th><th style="padding: 5px;">Ghi chú</th>
+    <table border="1" style="width: 100%; border-collapse: collapse; text-align: center; margin-bottom: 10px; font-size: 13px;">
+        <thead style="font-family: 'Goldman', sans-serif; background: #f2f2f2;">
+            <tr>
+                <th style="padding: 8px 4px; width: 5%;">STT</th>
+                <th style="padding: 8px 4px;">Tên hàng</th>
+                <th style="padding: 8px 4px; width: 7%;">ĐVT</th>
+                <th style="padding: 8px 4px; width: 7%;">SL</th>
+                <th style="padding: 8px 4px;">Đơn giá</th>
+                <th style="padding: 8px 4px;">Thành tiền</th>
+                <th style="padding: 8px 4px; width: 6%;">Thuế GTGT</th>
+                <th style="padding: 8px 4px;">Tiền thuế</th>
+                <th style="padding: 8px 4px;">Ghi chú</th>
             </tr>
         </thead>
         <tbody id="print-items"></tbody>
@@ -2830,12 +2837,17 @@ async function reprintSale(docId) {
         
         const data = doc.data();
         
-        // Lấy mức thuế đã lưu trong hóa đơn đó (nếu không có thì mặc định là 0)
+        // --- THÊM DÒNG NÀY ĐỂ HIỆN SỐ PHIẾU ---
+        if (document.getElementById('print-receipt-id')) {
+            document.getElementById('print-receipt-id').innerText = data.id || docId;
+        }
+        // -------------------------------------
+        
+        // Lấy mức thuế đã lưu...
         const vatRate = data.vatRate || 0; 
         
         // 1. Điền thông tin khách hàng, ngày và GHI CHÚ
         if (document.getElementById('print-customer')) document.getElementById('print-customer').innerText = data.customer || '';
-        // Điền ghi chú từ dữ liệu đã lưu trong DB
         if (document.getElementById('print-note-global')) document.getElementById('print-note-global').innerText = data.note || '';
         
         const date = data.date.toDate();
