@@ -250,11 +250,15 @@ function toggleMoreMenu() {
                     <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center">
                         <i data-lucide="bar-chart-3" class="w-4 h-4 mr-2 text-blue-600"></i> Biểu đồ doanh thu
                     </h3>
-                    <select id="time-filter" class="text-[10px] bg-white/50 border border-slate-300 rounded-lg px-2 py-1 text-slate-600 font-bold outline-none cursor-pointer">
-                        <option value="today">Hôm nay</option>
-                        <option value="week">Tuần này</option>
-                        <option value="month" selected>Tháng này</option>
-                    </select>
+                    <div class="flex gap-2">
+                        <input type="month" id="revenue-month-picker" class="hidden text-[10px] border border-slate-300 rounded-lg px-2 outline-none">
+                        <select id="time-filter" onchange="if(this.value==='custom') document.getElementById('revenue-month-picker').classList.remove('hidden'); else document.getElementById('revenue-month-picker').classList.add('hidden');" class="text-[10px] bg-white/50 border border-slate-300 rounded-lg px-2 py-1 text-slate-600 font-bold outline-none cursor-pointer">
+                            <option value="today">Hôm nay</option>
+                            <option value="week">Tuần này</option>
+                            <option value="month" selected>Tháng này</option>
+                            <option value="custom">Tháng khác...</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="h-64">
                     <canvas id="revenueChart"></canvas>
@@ -262,9 +266,20 @@ function toggleMoreMenu() {
             </div>
 
             <div class="bg-gray-200 p-6 rounded-3xl border border-slate-200">
-                <h3 class="text-xs font-bold text-slate-500 mb-6 uppercase tracking-widest flex items-center">
-                    <i data-lucide="flame" class="w-4 h-4 mr-2 text-rose-600"></i> TOP 10 SP BÁN CHẠY
-                </h3>
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center">
+                        <i data-lucide="flame" class="w-4 h-4 mr-2 text-rose-600"></i> TOP 10 SP BÁN CHẠY
+                    </h3>
+                    <div class="flex gap-2">
+                        <input type="month" id="top-month-picker" class="hidden text-[10px] border border-slate-300 rounded-lg px-2 outline-none">
+                        <select id="top-product-filter" onchange="if(this.value==='custom') document.getElementById('top-month-picker').classList.remove('hidden'); else document.getElementById('top-month-picker').classList.add('hidden');" class="text-[10px] bg-white/50 border border-slate-300 rounded-lg px-2 py-1 text-slate-600 font-bold outline-none cursor-pointer">
+                            <option value="today">Hôm nay</option>
+                            <option value="week">Tuần này</option>
+                            <option value="month" selected>Tháng này</option>
+                            <option value="custom">Tháng khác...</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="h-64">
                     <canvas id="topProductsChart"></canvas>
                 </div>
@@ -276,7 +291,7 @@ function toggleMoreMenu() {
                 <i data-lucide="package" class="w-4 h-4 mr-2 text-amber-600"></i> Chi tiết tồn kho
             </h3>
             <div id="home-inventory-list" class="flex-1 grid grid-cols-2 gap-2 content-start overflow-y-auto">
-                </div>
+            </div>
         </div>
     </div> 
 </div>
@@ -1073,12 +1088,40 @@ document.addEventListener('DOMContentLoaded', () => {
         autoFillDates(currentMonth); // Tự điền Từ ngày/Đến ngày
     }
 
-    // 2. Lắng nghe sự kiện cho Bộ lọc Dashboard
+    // 2. Lắng nghe sự kiện cho Bộ lọc Dashboard (Doanh thu & Top SP tách biệt)
     const timeFilter = document.getElementById('time-filter');
+    const topProductFilter = document.getElementById('top-product-filter');
+    const revMonthPicker = document.getElementById('revenue-month-picker');
+    const topMonthPicker = document.getElementById('top-month-picker');
+
     if (timeFilter) {
-        timeFilter.addEventListener('change', async (e) => {
-            await updateDashboardData(e.target.value);
+        timeFilter.addEventListener('change', (e) => {
+            if (e.target.value === 'custom') {
+                if (revMonthPicker) revMonthPicker.classList.remove('hidden');
+            } else {
+                if (revMonthPicker) revMonthPicker.classList.add('hidden');
+                updateDashboardData('revenue', e.target.value); // Chỉ cập nhật doanh thu
+            }
         });
+    }
+
+    if (revMonthPicker) {
+        revMonthPicker.addEventListener('change', (e) => updateDashboardData('revenue', 'custom', e.target.value));
+    }
+
+    if (topProductFilter) {
+        topProductFilter.addEventListener('change', (e) => {
+            if (e.target.value === 'custom') {
+                if (topMonthPicker) topMonthPicker.classList.remove('hidden');
+            } else {
+                if (topMonthPicker) topMonthPicker.classList.add('hidden');
+                updateDashboardData('topProducts', e.target.value); // Chỉ cập nhật Top SP
+            }
+        });
+    }
+
+    if (topMonthPicker) {
+        topMonthPicker.addEventListener('change', (e) => updateDashboardData('topProducts', 'custom', e.target.value));
     }
 
     // 3. Lắng nghe sự kiện cho Trang Sản Xuất
@@ -1161,7 +1204,7 @@ async function loadDashboard() {
         });
     });
 
-    await updateDashboardData('month');
+    await updateDashboardData('both', 'month');
 
     // 4. Danh sách Tồn kho (Duyệt theo orderList thay vì Object.keys)
     const invListEl = document.getElementById('home-inventory-list');
@@ -1266,62 +1309,96 @@ function renderTopProductsChart(dataArray) {
 
 
 // Hàm cập nhật dữ liệu lọc thời gian
-async function updateDashboardData(filter) {
+async function updateDashboardData(type, filter, customDate = null) {
     if (!snapshotXuatGlobal) return;
 
-    // 1. Cập nhật giá trị hiển thị cho select box nếu bạn thay đổi filter từ code
-    const filterEl = document.getElementById('time-filter');
-    if (filterEl) filterEl.value = filter;
+    // 1. Cập nhật UI cho các select box (chỉ cập nhật nếu đúng loại)
+    if (type === 'revenue' || type === 'both') {
+        const filterEl = document.getElementById('time-filter');
+        if (filterEl) filterEl.value = filter;
+    }
+    if (type === 'topProducts' || type === 'both') {
+        const topFilterEl = document.getElementById('top-product-filter');
+        if (topFilterEl) topFilterEl.value = filter;
+    }
 
     const now = new Date();
     let startDate = new Date();
+    let endDate = new Date();
 
-    // 2. Thiết lập khoảng thời gian dựa trên bộ lọc
-    if (filter === 'today') {
+    // 2. Thiết lập khoảng thời gian
+    if (customDate) {
+        const [year, month] = customDate.split('-');
+        startDate = new Date(year, month - 1, 1);
+        endDate = new Date(year, month, 0, 23, 59, 59);
+    } else if (filter === 'today') {
         startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 59, 999);
     } else if (filter === 'week') {
         const day = startDate.getDay();
         startDate.setDate(startDate.getDate() - day + (day === 0 ? -6 : 1));
         startDate.setHours(0, 0, 0, 0);
+        endDate = new Date(startDate);
+        endDate.setDate(endDate.getDate() + 6);
+        endDate.setHours(23, 59, 59, 999);
     } else if (filter === 'month') {
-        // Mặc định tháng: ngày 1 của tháng hiện tại
         startDate = new Date(now.getFullYear(), now.getMonth(), 1);
         startDate.setHours(0, 0, 0, 0);
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
     }
 
-    // 3. Lọc tài liệu theo thời gian
+    // 3. Lọc tài liệu theo khoảng [startDate, endDate]
     const filteredDocs = snapshotXuatGlobal.docs.filter(doc => {
         const data = doc.data();
         if (!data.date) return false;
         const dDate = data.date.toDate();
-        return dDate >= startDate;
+        return dDate >= startDate && dDate <= endDate;
     });
 
-    // 4. Tính toán doanh thu và số lượng đơn hàng
-    const newTotal = filteredDocs.reduce((sum, doc) => sum + Number(doc.data().total || 0), 0);
-    
-    const totalRevEl = document.getElementById('total-revenue');
-    const totalOrdersEl = document.getElementById('total-orders');
-    
-    // Cập nhật giao diện
-    if (totalRevEl) totalRevEl.innerText = newTotal.toLocaleString('vi-VN') + " đ";
-    if (totalOrdersEl) totalOrdersEl.innerText = filteredDocs.length;
+    // 4. Cập nhật Doanh thu & Đơn hàng (Chỉ làm khi type là 'revenue' hoặc 'both')
+    if (type === 'revenue' || type === 'both') {
+        const newTotal = filteredDocs.reduce((sum, doc) => sum + Number(doc.data().total || 0), 0);
+        const totalRevEl = document.getElementById('total-revenue');
+        const totalOrdersEl = document.getElementById('total-orders');
+        
+        if (totalRevEl) totalRevEl.innerText = newTotal.toLocaleString('vi-VN') + " đ";
+        if (totalOrdersEl) totalOrdersEl.innerText = filteredDocs.length;
+        renderRevenueChart(filteredDocs, filter);
+    }
 
-    // 5. Cập nhật biểu đồ doanh thu
-    renderRevenueChart(filteredDocs, filter);
+    // 5. Cập nhật TOP 10 sản phẩm (Chỉ làm khi type là 'topProducts' hoặc 'both')
+    if (type === 'topProducts' || type === 'both') {
+        let productSalesCount = {};
+        filteredDocs.forEach(doc => {
+            (doc.data().items || []).forEach(i => {
+                productSalesCount[i.name] = (productSalesCount[i.name] || 0) + (parseInt(i.qty) || 0);
+            });
+        });
+
+        const topProductsArray = Object.entries(productSalesCount)
+            .map(([name, qty]) => ({ name: name, sold: qty }))
+            .sort((a, b) => b.sold - a.sold)
+            .slice(0, 10);
+
+        renderTopProductsChart(topProductsArray);
+    }
 }
 
 
-// 1. Khởi tạo biểu đồ doanh thu (Tự thích nghi theo bộ lọc)
+// --- 1. Khởi tạo biểu đồ doanh thu (Tự thích nghi theo bộ lọc) ---
 function renderRevenueChart(filteredDocs, filter) {
     const ctx = document.getElementById('revenueChart').getContext('2d');
     
-    if (myChart) {
-        myChart.destroy();
+    // Đảm bảo myChart là biến riêng của biểu đồ doanh thu
+    if (typeof window.revenueChartInstance !== 'undefined' && window.revenueChartInstance) {
+        window.revenueChartInstance.destroy();
     }
 
     let labels = [];
     let dataValues = [];
+
+    // Xử lý 'custom' giống như 'month'
+    const isMonthlyView = (filter === 'month' || filter === 'custom');
 
     if (filter === 'today') {
         labels = ['Hôm nay'];
@@ -1334,18 +1411,19 @@ function renderRevenueChart(filteredDocs, filter) {
             const index = dayIndex === 0 ? 6 : dayIndex - 1;
             dataValues[index] += Number(doc.data().total || 0);
         });
-    } else { // Filter là 'month'
-        // Tạo nhãn cho 30 ngày hoặc chia theo tuần của tháng
+    } else if (isMonthlyView) {
+        // Gom dữ liệu theo tuần của tháng
         labels = ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'];
         dataValues = [0, 0, 0, 0];
         filteredDocs.forEach(doc => {
             const date = doc.data().date.toDate().getDate();
-            const weekIndex = Math.floor((date - 1) / 7);
-            if (weekIndex < 4) dataValues[weekIndex] += Number(doc.data().total || 0);
+            let weekIndex = Math.floor((date - 1) / 7);
+            if (weekIndex > 3) weekIndex = 3; // Gom ngày 29,30,31 vào tuần 4
+            dataValues[weekIndex] += Number(doc.data().total || 0);
         });
     }
 
-    myChart = new Chart(ctx, {
+    window.revenueChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
             labels: labels,
