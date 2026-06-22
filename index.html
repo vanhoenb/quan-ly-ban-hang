@@ -225,21 +225,32 @@ function toggleMoreMenu() {
     </div>
 
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <div class="bg-blue-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02]">
+        <div class="bg-blue-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02] flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
             <p class="text-[10px] md:text-xs font-bold uppercase opacity-80">Doanh Thu</p>
-            <h3 id="total-revenue" class="text-lg md:text-2xl font-black mt-1">0 đ</h3>
+            <div class="mt-1">
+                <h3 id="total-revenue" class="text-lg md:text-2xl font-black">0 đ</h3>
+                <p class="text-[9px] md:text-[10px] opacity-80 uppercase">Tổng doanh thu</p>
+            </div>
         </div>
-        <div class="bg-emerald-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02]">
+        <div class="bg-emerald-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02] flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
             <p class="text-[10px] md:text-xs font-bold uppercase opacity-80">Đơn Hàng</p>
-            <h3 id="total-orders" class="text-lg md:text-2xl font-black mt-1">0</h3>
+            <div class="mt-1">
+                <h3 id="total-orders" class="text-lg md:text-2xl font-black">0</h3>
+                <p class="text-[9px] md:text-[10px] opacity-80 uppercase">Đơn tháng này</p>
+            </div>
         </div>
-        <div class="bg-amber-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02]">
+        <div class="bg-amber-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02] flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
             <p class="text-[10px] md:text-xs font-bold uppercase opacity-80">Tồn Kho</p>
-            <h3 id="total-items" class="text-lg md:text-2xl font-black mt-1">0</h3>
+            <div class="mt-1">
+                <h3 id="total-items" class="text-lg md:text-2xl font-black">0</h3>
+                <p class="text-[9px] md:text-[10px] opacity-80 uppercase">Mã sản phẩm</p>
+            </div>
         </div>
-        <div class="bg-rose-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02]">
-            <p class="text-[10px] md:text-xs font-bold uppercase opacity-80">Cần Nhập</p>
-            <h3 id="low-stock-count" class="text-lg md:text-2xl font-black mt-1">0</h3>
+        <div class="bg-rose-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02] flex flex-col h-[100px] md:h-[120px]">
+            <p class="text-[10px] md:text-xs font-bold uppercase opacity-80 text-center">Cần Nhập</p>
+            <div id="low-stock-list" class="text-sm md:text-md font-bold mt-1 overflow-y-auto flex-1 custom-scrollbar">
+                -
+            </div>
         </div>
     </div>
 
@@ -1208,37 +1219,50 @@ async function loadDashboard() {
 
     // 4. Danh sách Tồn kho (Duyệt theo orderList thay vì Object.keys)
     const invListEl = document.getElementById('home-inventory-list');
+    const lowStockListEl = document.getElementById('low-stock-list'); // Thêm dòng này
     let inventoryCardsHtml = '';
-    let lowStockCount = 0;
+    let lowStockItems = []; // Thay vì đếm số, ta lưu danh sách tên
 
     orderList.forEach(name => {
-    const item = inventoryMap[name];
-    const total = item.tonDau + item.nhap + item.change - item.out;
+        const item = inventoryMap[name];
+        const total = item.tonDau + item.nhap + item.change - item.out;
     
-    // Đã sửa: p-4 -> p-2.5, bỏ mt-1, thêm mb-2 vào div
-    inventoryCardsHtml += `
-    <div class="flex items-center justify-between p-2 mb-1 bg-white rounded-xl border border-slate-100 shadow-sm transition-all hover:shadow-md">
-        <div class="flex-1 overflow-hidden">
-            <p class="text-[13px] font-bold text-slate-800 truncate">${name}</p>
-            <div class="flex gap-2 text-[9px]">
-                <span class="text-slate-500 font-bold">Tồn: <span class="text-slate-700">${item.tonDau}</span></span>
-                <span class="text-emerald-600 font-bold">Nhập: <span class="text-emerald-600">${item.nhap + item.change}</span></span>
-                <span class="text-rose-600 font-bold">Xuất: <span class="text-rose-600">${item.out}</span></span>
+        inventoryCardsHtml += `
+        <div class="flex items-center justify-between p-2 mb-1 bg-white rounded-xl border border-slate-100 shadow-sm transition-all hover:shadow-md">
+            <div class="flex-1 overflow-hidden">
+                <p class="text-[13px] font-bold text-slate-800 truncate">${name}</p>
+                <div class="flex gap-2 text-[9px]">
+                    <span class="text-slate-500 font-bold">Tồn: <span class="text-slate-700">${item.tonDau}</span></span>
+                    <span class="text-emerald-600 font-bold">Nhập: <span class="text-emerald-600">${item.nhap + item.change}</span></span>
+                    <span class="text-rose-600 font-bold">Xuất: <span class="text-rose-600">${item.out}</span></span>
+                </div>
             </div>
-        </div>
-        <div class="ml-2">
-            <span class="text-indigo-600 font-black text-sm">${total}</span>
-        </div>
-    </div>`;
+            <div class="ml-2">
+                <span class="text-indigo-600 font-black text-sm">${total}</span>
+            </div>
+        </div>`;
     
-    if (total <= 5 && total >= 0) lowStockCount++;
-});
+        if (total <= 5 && total >= 0) {
+            lowStockItems.push(name); // Lưu tên sản phẩm vào mảng
+        }
+    });
 
     if (invListEl) {
         invListEl.innerHTML = inventoryCardsHtml || '<p class="col-span-2 p-4 text-center text-slate-400 text-sm">Chưa có dữ liệu tồn kho</p>';
     }
     
-    if (lowStockCountEl) lowStockCountEl.innerText = lowStockCount;
+    // CẬP NHẬT GIAO DIỆN MỚI (CHIA 2 CỘT) CHO Ô "CẦN NHẬP"
+    if (lowStockListEl) {
+        lowStockListEl.innerHTML = lowStockItems.length > 0 
+            ? `<div class="grid grid-cols-2 gap-x-2 gap-y-0.5">` + 
+              lowStockItems.map(name => `<div class="truncate text-[10px] md:text-[11px]">• ${name}</div>`).join('') + 
+              `</div>`
+            : '<div class="text-xs opacity-70 mt-2">Đủ hàng</div>';
+    }
+    
+    // Nếu bạn vẫn muốn giữ số lượng sản phẩm cần nhập ở đâu đó (không bắt buộc)
+    if (lowStockCountEl) lowStockCountEl.innerText = lowStockItems.length;
+    
     if (totalItemsEl) totalItemsEl.innerText = orderList.length;
 
     // 5. Hóa đơn gần nhất
