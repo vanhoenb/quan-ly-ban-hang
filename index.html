@@ -298,24 +298,26 @@ function toggleMoreMenu() {
         </div>
 
 			   <div class="bg-gray-200 p-6 rounded-3xl border border-slate-200 h-full flex flex-col">
-			<div class="flex justify-between items-center mb-6">
-				<h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center">
-					<i data-lucide="package" class="w-4 h-4 mr-2 text-amber-600"></i> Chi tiết tồn kho
-				</h3>
-				<div class="flex gap-2">
-					<input type="month" id="inv-month-picker" onchange="handleInvFilterChange()" class="hidden text-[10px] border border-slate-300 rounded-lg px-2 outline-none">
-					
-					<select id="inv-time-filter" class="text-[10px] bg-white/50 border border-slate-300 rounded-lg px-2 py-1 text-slate-600 font-bold outline-none cursor-pointer">
-						<option value="today">Hôm nay</option>
-						<option value="week">Tuần này</option>
-						<option value="month" selected>Tháng này</option>
-						<option value="custom">Tháng khác...</option>
-					</select>
+				<div class="flex justify-between items-center mb-6">
+					<h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center">
+						<i data-lucide="package" class="w-4 h-4 mr-2 text-amber-600"></i> Chi tiết tồn kho
+					</h3>
+					<div class="flex gap-2">
+						<input type="month" id="inv-month-picker" onchange="updateDashboardData('inventory', 'custom', this.value)" class="hidden text-[10px] border border-slate-300 rounded-lg px-2 outline-none">
+						
+						<select id="inv-time-filter" 
+								onchange="if(this.value==='custom') document.getElementById('inv-month-picker').classList.remove('hidden'); else { document.getElementById('inv-month-picker').classList.add('hidden'); updateDashboardData('inventory', this.value); }" 
+								class="text-[10px] bg-white/50 border border-slate-300 rounded-lg px-2 py-1 text-slate-600 font-bold outline-none cursor-pointer">
+							<option value="today">Hôm nay</option>
+							<option value="week">Tuần này</option>
+							<option value="month" selected>Tháng này</option>
+							<option value="custom">Tháng khác...</option>
+						</select>
+					</div>
+				</div>
+				<div id="home-inventory-list" class="flex-1 grid grid-cols-2 gap-2 content-start overflow-y-auto custom-scrollbar">
 				</div>
 			</div>
-			<div id="home-inventory-list" class="flex-1 grid grid-cols-2 gap-2 content-start overflow-y-auto custom-scrollbar">
-			</div>
-		</div>
     </div> 
 </div>
 
@@ -1161,37 +1163,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 4. Khởi tạo bộ lọc Tồn kho (Cưỡng chế triệt để)
+    // 4. Khởi tạo bộ lọc Tồn kho (Tích hợp vào hệ thống chung)
     const invTimeFilter = document.getElementById('inv-time-filter');
     const invMonthPicker = document.getElementById('inv-month-picker');
 
     if (invTimeFilter) {
-        invTimeFilter.setAttribute('onchange', ''); 
-        invTimeFilter.onchange = null;
-
-        const runFilterLogic = async () => {
-            const isCustom = (invTimeFilter.value === 'custom');
-            if (invMonthPicker) invMonthPicker.classList.toggle('hidden', !isCustom);
-            
-            const filterToUse = isCustom ? (invMonthPicker.value || 'month') : invTimeFilter.value;
-            await loadDashboard(filterToUse, false);
-        };
-
-        invTimeFilter.value = 'month';
-        if (invMonthPicker) invMonthPicker.classList.add('hidden');
-        loadDashboard('month', false);
-
-        window.addEventListener('pageshow', (event) => {
-            invTimeFilter.value = 'month';
-            if (invMonthPicker) invMonthPicker.classList.add('hidden');
-            loadDashboard('month', false);
+        invTimeFilter.addEventListener('change', (e) => {
+            if (e.target.value === 'custom') {
+                if (invMonthPicker) invMonthPicker.classList.remove('hidden');
+            } else {
+                if (invMonthPicker) invMonthPicker.classList.add('hidden');
+                updateDashboardData('inventory', e.target.value);
+            }
         });
-
-        invTimeFilter.addEventListener('change', runFilterLogic);
-        if (invMonthPicker) {
-            invMonthPicker.addEventListener('change', runFilterLogic);
-        }
     }
+
+    if (invMonthPicker) {
+        invMonthPicker.addEventListener('change', (e) => updateDashboardData('inventory', 'custom', e.target.value));
+    }
+
+    // Load dữ liệu mặc định lần đầu
+    updateDashboardData('inventory', invTimeFilter ? invTimeFilter.value : 'month');
 });
 
 // ==== TRANG CHỦ =====
@@ -1359,13 +1351,10 @@ async function handleInvFilterChange() {
     const select = document.getElementById('inv-time-filter');
     const input = document.getElementById('inv-month-picker');
     
-    // Chỉ cập nhật hiển thị và load
-    const isCustom = (select.value === 'custom');
-    input.classList.toggle('hidden', !isCustom);
+    // Nếu chọn custom thì lấy giá trị từ input, không thì lấy từ select
+    const filter = (select.value === 'custom') ? input.value : select.value;
     
-    const filterToUse = isCustom ? input.value : select.value;
-    await loadDashboard(filterToUse, false); 
-    // TUYỆT ĐỐI KHÔNG GÁN LẠI SELECT.VALUE Ở ĐÂY
+    await loadDashboard(filter, false);
 }
 
 // --- 2. Thêm hàm vẽ biểu đồ cột ngang cho Top 10 ---
@@ -1413,11 +1402,16 @@ async function updateDashboardData(type, filter, customDate = null) {
         const topFilterEl = document.getElementById('top-product-filter');
         if (topFilterEl) topFilterEl.value = filter;
     }
+    // THÊM: Cập nhật UI cho Tồn kho
+    if (type === 'inventory' || type === 'both') {
+        const invFilterEl = document.getElementById('inv-time-filter');
+        if (invFilterEl) invFilterEl.value = filter;
+    }
 
     const now = new Date();
     let startDate, endDate;
 
-    // 2. Thiết lập khoảng thời gian theo giờ địa phương (SỬA Ở ĐÂY)
+    // 2. Thiết lập khoảng thời gian theo giờ địa phương
     if (customDate) {
         const [year, month] = customDate.split('-');
         startDate = new Date(year, month - 1, 1, 0, 0, 0);
@@ -1441,11 +1435,11 @@ async function updateDashboardData(type, filter, customDate = null) {
     const filteredDocs = snapshotXuatGlobal.docs.filter(doc => {
         const data = doc.data();
         if (!data.date) return false;
-        const dDate = data.date.toDate(); // Dữ liệu từ Firebase tự động hiểu là Date object
+        const dDate = data.date.toDate();
         return dDate >= startDate && dDate <= endDate;
     });
 
-    // 4 & 5. Giữ nguyên phần logic phía dưới của bạn...
+    // 4 & 5. Logic cập nhật
     if (type === 'revenue' || type === 'both') {
         const newTotal = filteredDocs.reduce((sum, doc) => sum + Number(doc.data().total || 0), 0);
         const totalRevEl = document.getElementById('total-revenue');
@@ -1470,6 +1464,12 @@ async function updateDashboardData(type, filter, customDate = null) {
             .slice(0, 10);
 
         renderTopProductsChart(topProductsArray);
+    }
+
+    // THÊM: Logic cập nhật Tồn kho
+    if (type === 'inventory' || type === 'both') {
+        // Gọi lại hàm loadDashboard với filter tương ứng
+        await loadDashboard(filter, false);
     }
 }
 
