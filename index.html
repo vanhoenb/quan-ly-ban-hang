@@ -308,10 +308,10 @@ function toggleMoreMenu() {
 						<select id="inv-time-filter" 
 								onchange="if(this.value==='custom') document.getElementById('inv-month-picker').classList.remove('hidden'); else { document.getElementById('inv-month-picker').classList.add('hidden'); updateDashboardData('inventory', this.value); }" 
 								class="text-[10px] bg-white/50 border border-slate-300 rounded-lg px-2 py-1 text-slate-600 font-bold outline-none cursor-pointer">
-							<option value="today">Hôm nay</option>
+							<option value="today" selected>Hôm nay</option>
 							<option value="week">Tuần này</option>
-							<option value="month" selected>Tháng này</option>
-							<option value="custom">Tháng khác...</option>
+							<option value="month">Tháng này</option>
+							<option value="custom">Chọn tháng</option>
 						</select>
 					</div>
 				</div>
@@ -1163,27 +1163,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 4. Khởi tạo bộ lọc Tồn kho (Tích hợp vào hệ thống chung)
-    const invTimeFilter = document.getElementById('inv-time-filter');
-    const invMonthPicker = document.getElementById('inv-month-picker');
+    // 4. Khởi tạo bộ lọc Tồn kho
+const invTimeFilter = document.getElementById('inv-time-filter');
+const invMonthPicker = document.getElementById('inv-month-picker');
 
-    if (invTimeFilter) {
-        invTimeFilter.addEventListener('change', (e) => {
-            if (e.target.value === 'custom') {
-                if (invMonthPicker) invMonthPicker.classList.remove('hidden');
-            } else {
-                if (invMonthPicker) invMonthPicker.classList.add('hidden');
-                updateDashboardData('inventory', e.target.value);
-            }
-        });
-    }
+if (invTimeFilter) {
+    // --- ÉP BUỘC GIÁ TRỊ VỀ TODAY ---
+    invTimeFilter.value = 'today';
+    
+    // Ẩn cái chọn tháng nếu đang là today
+    if (invMonthPicker) invMonthPicker.classList.add('hidden');
 
-    if (invMonthPicker) {
-        invMonthPicker.addEventListener('change', (e) => updateDashboardData('inventory', 'custom', e.target.value));
-    }
+    invTimeFilter.addEventListener('change', (e) => {
+        if (e.target.value === 'custom') {
+            if (invMonthPicker) invMonthPicker.classList.remove('hidden');
+        } else {
+            if (invMonthPicker) invMonthPicker.classList.add('hidden');
+            // Gọi load dữ liệu
+            updateDashboardData('inventory', e.target.value);
+        }
+    });
+}
 
-    // Load dữ liệu mặc định lần đầu
-    updateDashboardData('inventory', invTimeFilter ? invTimeFilter.value : 'month');
+if (invMonthPicker) {
+    invMonthPicker.addEventListener('change', (e) => updateDashboardData('inventory', 'custom', e.target.value));
+}
+
+// --- GỌI MỘT LẦN DUY NHẤT ---
+// Dùng setTimeOut để đảm bảo các thành phần đã load xong hết rồi mới ép load dữ liệu
+setTimeout(() => {
+    updateDashboardData('inventory', 'today');
+}, 500);
 });
 
 // ==== TRANG CHỦ =====
@@ -1350,9 +1360,10 @@ async function updateInventoryView() {
 async function handleInvFilterChange() {
     const select = document.getElementById('inv-time-filter');
     const input = document.getElementById('inv-month-picker');
-    
-    // Nếu chọn custom thì lấy giá trị từ input, không thì lấy từ select
     const filter = (select.value === 'custom') ? input.value : select.value;
+    
+    // Lưu lựa chọn cuối cùng vào bộ nhớ trình duyệt
+    sessionStorage.setItem('lastInvFilter', filter);
     
     await loadDashboard(filter, false);
 }
