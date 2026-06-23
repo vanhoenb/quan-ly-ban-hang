@@ -1095,9 +1095,12 @@ let isResetting = false; // Biến này dùng để khóa autoFill khi đang res
 
 // --- KHỞI TẠO SỰ KIỆN KHI TRANG TẢI XONG ---
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Cấu hình mặc định cho các ô ngày tháng (Bao gồm cả trang Kho hàng)
-    const today = new Date().toISOString().split('T')[0];
+    // 1. Cấu hình mặc định cho các ô ngày tháng (SỬA LỖI MÚI GIỜ)
     const now = new Date();
+    // Hàm lấy YYYY-MM-DD địa phương
+    const toLocalDateStr = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    
+    const today = toLocalDateStr(now);
     const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
     // Trang chủ / Hóa đơn
@@ -1158,49 +1161,42 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-// 4. Khởi tạo bộ lọc Tồn kho (Cưỡng chế triệt để)
-const invTimeFilter = document.getElementById('inv-time-filter');
-const invMonthPicker = document.getElementById('inv-month-picker');
+    // 4. Khởi tạo bộ lọc Tồn kho (Cưỡng chế triệt để)
+    const invTimeFilter = document.getElementById('inv-time-filter');
+    const invMonthPicker = document.getElementById('inv-month-picker');
 
-if (invTimeFilter) {
-    // TỰ GỠ BỎ MỌI HÀNH VI HTML CŨ
-    invTimeFilter.setAttribute('onchange', ''); 
-    invTimeFilter.onchange = null;
+    if (invTimeFilter) {
+        invTimeFilter.setAttribute('onchange', ''); 
+        invTimeFilter.onchange = null;
 
-    // Hàm thực hiện logic (Tách riêng để dùng chung)
-    const runFilterLogic = async () => {
-        const isCustom = (invTimeFilter.value === 'custom');
-        if (invMonthPicker) invMonthPicker.classList.toggle('hidden', !isCustom);
-        
-        const filterToUse = isCustom ? (invMonthPicker.value || 'month') : invTimeFilter.value;
-        await loadDashboard(filterToUse, false);
-    };
+        const runFilterLogic = async () => {
+            const isCustom = (invTimeFilter.value === 'custom');
+            if (invMonthPicker) invMonthPicker.classList.toggle('hidden', !isCustom);
+            
+            const filterToUse = isCustom ? (invMonthPicker.value || 'month') : invTimeFilter.value;
+            await loadDashboard(filterToUse, false);
+        };
 
-    // 1. Ép giá trị khi load lần đầu
-    invTimeFilter.value = 'month';
-    if (invMonthPicker) invMonthPicker.classList.add('hidden');
-    loadDashboard('month', false);
-
-    // 2. Chốt chặn quay lại trang (Pageshow)
-    window.addEventListener('pageshow', (event) => {
-        // Ép về tháng ngay khi vừa quay lại trang
         invTimeFilter.value = 'month';
         if (invMonthPicker) invMonthPicker.classList.add('hidden');
         loadDashboard('month', false);
-    });
 
-    // 3. Lắng nghe sự kiện change thuần túy (không dính dáng đến HTML)
-    invTimeFilter.addEventListener('change', runFilterLogic);
-    
-    if (invMonthPicker) {
-        invMonthPicker.addEventListener('change', runFilterLogic);
+        window.addEventListener('pageshow', (event) => {
+            invTimeFilter.value = 'month';
+            if (invMonthPicker) invMonthPicker.classList.add('hidden');
+            loadDashboard('month', false);
+        });
+
+        invTimeFilter.addEventListener('change', runFilterLogic);
+        if (invMonthPicker) {
+            invMonthPicker.addEventListener('change', runFilterLogic);
+        }
     }
-}
 });
 
 // ==== TRANG CHỦ =====
 async function loadDashboard(filter = 'month', updateCharts = true) {
-	console.log("Đang load dữ liệu với filter:", filter);
+    console.log("Đang load dữ liệu với filter:", filter);
     const invBody = document.getElementById('home-inventory-body');
     const totalRevEl = document.getElementById('total-revenue');
     const totalOrdersEl = document.getElementById('total-orders');
@@ -1208,6 +1204,9 @@ async function loadDashboard(filter = 'month', updateCharts = true) {
     const lowStockCountEl = document.getElementById('low-stock-count');
     const recentInvoicesEl = document.getElementById('recent-invoices-list');
     const topProductsEl = document.getElementById('top-products-list');
+
+    // Hàm hỗ trợ lấy ngày YYYY-MM-DD theo giờ địa phương
+    const getLocalDateStr = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
     if (invBody) invBody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-500">Đang tải...</td></tr>';
 
@@ -1226,15 +1225,14 @@ async function loadDashboard(filter = 'month', updateCharts = true) {
         const [year, month] = filter.split('-');
         startDate = new Date(year, month - 1, 1);
     } else if (filter === 'today') {
-        startDate = new Date(now.setHours(0, 0, 0, 0));
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     } else if (filter === 'week') {
         const day = now.getDay();
-        startDate = new Date(now.setDate(now.getDate() - day + (day === 0 ? -6 : 1)));
-        startDate.setHours(0, 0, 0, 0);
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day + (day === 0 ? -6 : 1));
     } else {
         startDate = new Date(now.getFullYear(), now.getMonth(), 1);
     }
-    const firstDayStr = startDate.toISOString().split('T')[0];
+    const firstDayStr = getLocalDateStr(startDate);
     // ------------------------------------
 
     let inventoryMap = {}; 
@@ -1267,21 +1265,20 @@ async function loadDashboard(filter = 'month', updateCharts = true) {
     snapshotNhap.forEach(doc => {
         const data = doc.data();
         if (!data.items || !data.date) return;
-        const dDateStr = data.date.toDate().toISOString().split('T')[0];
+        const dDateStr = getLocalDateStr(data.date.toDate());
         data.items.forEach(i => processItem(i.name, i.qty, data.type, dDateStr, true));
     });
 
     snapshotXuat.forEach(doc => {
         const data = doc.data();
         if (!data.items || !data.date) return;
-        const dDateStr = data.date.toDate().toISOString().split('T')[0];
+        const dDateStr = getLocalDateStr(data.date.toDate());
         data.items.forEach(i => {
             processItem(i.name, i.qty, null, dDateStr, false);
             productSalesCount[i.name] = (productSalesCount[i.name] || 0) + (parseInt(i.qty) || 0);
         });
     });
 
-    // Chỉ cập nhật biểu đồ khi updateCharts là true
     if (updateCharts) {
         await updateDashboardData('both', filter);
     }
@@ -1316,10 +1313,7 @@ async function loadDashboard(filter = 'month', updateCharts = true) {
         }
     });
 
-    if (invListEl) {
-        invListEl.innerHTML = inventoryCardsHtml || '<p class="col-span-2 p-4 text-center text-slate-400 text-sm">Chưa có dữ liệu tồn kho</p>';
-    }
-    
+    if (invListEl) invListEl.innerHTML = inventoryCardsHtml || '<p class="col-span-2 p-4 text-center text-slate-400 text-sm">Chưa có dữ liệu tồn kho</p>';
     if (lowStockListEl) {
         lowStockListEl.innerHTML = lowStockItems.length > 0 
             ? `<div class="grid grid-cols-2 gap-x-2 gap-y-0.5">` + 
@@ -1421,27 +1415,25 @@ async function updateDashboardData(type, filter, customDate = null) {
     }
 
     const now = new Date();
-    let startDate = new Date();
-    let endDate = new Date();
+    let startDate, endDate;
 
-    // 2. Thiết lập khoảng thời gian
+    // 2. Thiết lập khoảng thời gian theo giờ địa phương (SỬA Ở ĐÂY)
     if (customDate) {
         const [year, month] = customDate.split('-');
-        startDate = new Date(year, month - 1, 1);
+        startDate = new Date(year, month - 1, 1, 0, 0, 0);
         endDate = new Date(year, month, 0, 23, 59, 59);
     } else if (filter === 'today') {
-        startDate.setHours(0, 0, 0, 0);
-        endDate.setHours(23, 59, 59, 999);
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+        endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
     } else if (filter === 'week') {
-        const day = startDate.getDay();
-        startDate.setDate(startDate.getDate() - day + (day === 0 ? -6 : 1));
-        startDate.setHours(0, 0, 0, 0);
+        const day = now.getDay();
+        const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+        startDate = new Date(now.getFullYear(), now.getMonth(), diff, 0, 0, 0);
         endDate = new Date(startDate);
         endDate.setDate(endDate.getDate() + 6);
         endDate.setHours(23, 59, 59, 999);
-    } else if (filter === 'month') {
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        startDate.setHours(0, 0, 0, 0);
+    } else { // month
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
         endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
     }
 
@@ -1449,11 +1441,11 @@ async function updateDashboardData(type, filter, customDate = null) {
     const filteredDocs = snapshotXuatGlobal.docs.filter(doc => {
         const data = doc.data();
         if (!data.date) return false;
-        const dDate = data.date.toDate();
+        const dDate = data.date.toDate(); // Dữ liệu từ Firebase tự động hiểu là Date object
         return dDate >= startDate && dDate <= endDate;
     });
 
-    // 4. Cập nhật Doanh thu & Đơn hàng (Chỉ làm khi type là 'revenue' hoặc 'both')
+    // 4 & 5. Giữ nguyên phần logic phía dưới của bạn...
     if (type === 'revenue' || type === 'both') {
         const newTotal = filteredDocs.reduce((sum, doc) => sum + Number(doc.data().total || 0), 0);
         const totalRevEl = document.getElementById('total-revenue');
@@ -1464,7 +1456,6 @@ async function updateDashboardData(type, filter, customDate = null) {
         renderRevenueChart(filteredDocs, filter);
     }
 
-    // 5. Cập nhật TOP 10 sản phẩm (Chỉ làm khi type là 'topProducts' hoặc 'both')
     if (type === 'topProducts' || type === 'both') {
         let productSalesCount = {};
         filteredDocs.forEach(doc => {
