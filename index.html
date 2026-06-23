@@ -982,7 +982,15 @@ function showPage(pageId) {
     // 4. Gọi hàm tải dữ liệu tương ứng
     switch(pageId) {
         case 'page-home':
-            if (typeof loadDashboard === 'function') loadDashboard();
+            // Reset ô chọn về 'today'
+            const invFilterEl = document.getElementById('inv-time-filter');
+            if (invFilterEl) {
+                invFilterEl.value = 'today';
+                // Kích hoạt sự kiện change để giao diện tự cập nhật theo
+                invFilterEl.dispatchEvent(new Event('change'));
+            }
+            // Gọi loadDashboard với 'today'
+            if (typeof loadDashboard === 'function') loadDashboard('today', true);
             break;
             
         case 'page-import':
@@ -1282,7 +1290,12 @@ async function loadDashboard(filter = 'month', updateCharts = true) {
     });
 
     if (updateCharts) {
-        await updateDashboardData('both', filter);
+        // Tồn kho là 'today', nhưng Biểu đồ vẫn phải hiển thị dữ liệu tháng (hoặc filter hiện tại)
+        // Nếu filter là 'today', ta vẫn ép biểu đồ hiển thị 'month' để có dữ liệu xem
+        const chartFilter = (filter === 'today') ? 'month' : filter;
+        
+        await updateDashboardData('revenue', chartFilter);
+        await updateDashboardData('topProducts', chartFilter);
     }
 
     const invListEl = document.getElementById('home-inventory-list');
