@@ -144,6 +144,18 @@
         object-fit: cover !important;
     }
 
+/* Định nghĩa độ rộng cố định hoặc % cho các cột trong bảng */
+    #invoiceTable th:nth-child(1), #invoiceTable td:nth-child(1) { width: 10%; } /* Số phiếu */
+    #invoiceTable th:nth-child(2), #invoiceTable td:nth-child(2) { width: 30%; } /* Khách hàng */
+    #invoiceTable th:nth-child(3), #invoiceTable td:nth-child(3) { width: 15%; } /* Ngày xuất */
+    #invoiceTable th:nth-child(4), #invoiceTable td:nth-child(4) { width: 25%; } /* Tổng tiền */
+    #invoiceTable th:nth-child(5), #invoiceTable td:nth-child(5) { width: 20%; } /* Thao tác */
+    
+    /* Đảm bảo nội dung không bị vỡ và căn lề đúng */
+    #invoiceTable td {
+        vertical-align: middle;
+    }
+
     </style>
     
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -326,14 +338,13 @@ function toggleMoreMenu() {
 <div id="page-import" class="hidden space-y-4 px-2 md:px-6">
     <h2 class="text-xl font-bold text-gray-800">NHẬP KHO</h2>
     
-    <div class="bg-yellow-50 p-3 rounded-xl mb-4 border border-yellow-200">
-        <label class="block text-[10px] uppercase font-bold text-yellow-800 mb-1 tracking-wider">Quét mã sản phẩm</label>
-        <div class="flex gap-2">
-            <input type="text" id="search-by-barcode" class="w-full border border-yellow-200 p-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-yellow-500" placeholder="Quét mã...">
-            <button type="button" onclick="startScanner('import')" class="bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-sm active:scale-95 transition-all">📷 Quét</button>
+    <div class="bg-yellow-50 p-2 rounded-xl mb-4 border border-yellow-200">
+        <div class="flex gap-2 items-center">
+            <input type="text" id="search-by-barcode" class="w-full border border-yellow-200 p-2 rounded-lg text-sm outline-none" placeholder="Quét mã...">
+            <button type="button" onclick="startScanner('import')" class="bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-sm active:scale-95 transition-all whitespace-nowrap">📷 Quét</button>
         </div>
         <div id="reader" class="mt-2 w-full max-w-[300px] mx-auto hidden"></div>
-        <button type="button" id="close-scanner-btn" onclick="stopScanner()" class="mt-2 w-full bg-red-500 text-white py-1 rounded-lg font-bold text-xs shadow-sm hover:bg-red-600 transition-all">❌ Đóng Camera</button>
+        <button type="button" id="close-scanner-btn" onclick="stopScanner()" class="mt-2 w-full bg-red-500 text-white py-1 rounded-lg font-bold text-xs shadow-sm hidden">❌ Đóng Camera</button>
     </div>
 		
     <div class="grid grid-cols-2 md:grid-cols-6 gap-3 bg-blue-50 p-3 md:p-6 rounded-2xl shadow-sm border border-blue-100">
@@ -380,9 +391,10 @@ function toggleMoreMenu() {
     </div>
 
     <div class="bg-white p-4 md:p-6 rounded-2xl border border-slate-200 shadow-lg mt-10">
-        <h3 class="font-bold text-xl text-slate-800 mb-4 border-b pb-2">📋 DANH SÁCH PHIẾU NHẬP</h3>
-
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100 my-4">
+    <div class="flex items-center justify-between gap-4 mb-4 border-b pb-4">
+        <h3 class="font-bold text-xl text-slate-800 whitespace-nowrap">📋 DANH SÁCH PHIẾU NHẬP</h3>
+        
+        <div class="grid grid-cols-4 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100 flex-grow">
             <div>
                 <label class="block text-[10px] font-bold text-gray-500 uppercase">Tháng</label>
                 <input type="month" id="filter-month" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
@@ -399,90 +411,98 @@ function toggleMoreMenu() {
                 </div>
             </div>
 
-            <div>
+            <div class="col-span-2">
                 <label class="block text-[10px] font-bold text-gray-500 uppercase">Tìm theo số phiếu</label>
                 <input type="text" id="searchReceiptInput" onkeyup="filterReceipts()" placeholder="Nhập số phiếu..." class="w-full p-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
             </div>
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
-            <div class="overflow-x-auto border border-gray-100 rounded-xl bg-white p-2 md:p-4">
-                <table class="w-full text-sm">
-                    <thead class="bg-gray-50 border-b">
-                        <tr><th class="p-3 text-left">Số phiếu</th><th class="p-3 text-left">Ngày nhập</th><th class="p-3 text-left">Số SP</th><th class="p-3 text-left">Thao tác</th></tr>
-                    </thead>
-                    <tbody id="list-receipts-left"></tbody>
-                </table>
-            </div>
-            <div class="overflow-x-auto border border-gray-100 rounded-xl bg-white p-2 md:p-4">
-                <table class="w-full text-sm">
-                    <thead class="bg-gray-50 border-b">
-                        <tr><th class="p-3 text-left">Số phiếu</th><th class="p-3 text-left">Ngày nhập</th><th class="p-3 text-left">Số SP</th><th class="p-3 text-left">Thao tác</th></tr>
-                    </thead>
-                    <tbody id="list-receipts-right"></tbody>
-                </table>
-            </div>
-        </div>
     </div>
 
-    <div id="modal-receipt" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4 border-b pb-2">
-                <h3 class="text-lg font-bold">Chi tiết phiếu: <span id="modal-receipt-id"></span></h3>
-                <button onclick="document.getElementById('modal-receipt').classList.add('hidden')" class="text-gray-500 font-bold hover:text-red-500">Đóng (X)</button>
-            </div>
-            <table class="w-full border-collapse border border-gray-200 text-sm">
-                <thead>
-                    <tr class="bg-gray-50">
-                        <th class="border p-2">Sản phẩm</th><th class="border p-2">ĐVT</th><th class="border p-2">SL</th><th class="border p-2">Giá</th><th class="border p-2">Thao tác</th>
-                    </tr>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+        <div class="overflow-x-auto border border-gray-100 rounded-xl bg-white p-2 md:p-4">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 border-b">
+                    <tr><th class="p-3 text-left">Số phiếu</th><th class="p-3 text-left">Ngày nhập</th><th class="p-3 text-left">Số SP</th><th class="p-3 text-left">Thao tác</th></tr>
                 </thead>
-                <tbody id="modal-receipt-body"></tbody>
+                <tbody id="list-receipts-left"></tbody>
+            </table>
+        </div>
+        <div class="overflow-x-auto border border-gray-100 rounded-xl bg-white p-2 md:p-4">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 border-b">
+                    <tr><th class="p-3 text-left">Số phiếu</th><th class="p-3 text-left">Ngày nhập</th><th class="p-3 text-left">Số SP</th><th class="p-3 text-left">Thao tác</th></tr>
+                </thead>
+                <tbody id="list-receipts-right"></tbody>
             </table>
         </div>
     </div>
 </div>
 
+<div id="modal-receipt" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4 border-b pb-2">
+            <h3 class="text-lg font-bold">Chi tiết phiếu: <span id="modal-receipt-id"></span></h3>
+            <button onclick="document.getElementById('modal-receipt').classList.add('hidden')" class="text-gray-500 font-bold hover:text-red-500">Đóng (X)</button>
+        </div>
+        <table class="w-full border-collapse border border-gray-200 text-sm">
+            <thead>
+                <tr class="bg-gray-50">
+                    <th class="border p-2">Sản phẩm</th><th class="border p-2">ĐVT</th><th class="border p-2">SL</th><th class="border p-2">Giá</th><th class="border p-2">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody id="modal-receipt-body"></tbody>
+        </table>
+    </div>
+</div>
+</div>
+
         <!-- PHẦN 3: KHO HÀNG -->
 		
-       <div id="page-inventory" class="hidden space-y-4 p-2 w-full">
-    <div class="bg-slate-50 p-4 rounded-2xl shadow-sm border border-slate-200 w-full">
+       <div id="page-inventory" class="hidden space-y-4 p-2 md:p-6 w-full">
+    <div class="bg-white p-4 md:p-6 rounded-2xl shadow-lg border border-slate-200 w-full">
         
-        <h2 class="text-lg md:text-xl font-bold mb-4 text-slate-800">KHO HÀNG TỔNG HỢP</h2>
+        <h2 class="text-lg md:text-xl font-bold mb-4 text-slate-800 border-b pb-2">KHO HÀNG TỔNG HỢP</h2>
         
-        <div class="flex flex-col gap-3 w-full mb-4">
-            <input type="text" id="search-inventory" placeholder="🔍 Tìm tên SP..." 
-                    onkeyup="filterInventory()" class="border border-slate-200 p-3 rounded-xl w-full focus:ring-2 focus:ring-blue-500 outline-none">
-            
-            <div class="grid grid-cols-3 gap-2">
-                <input type="month" id="inv-month" onchange="autoFillDates(this.value)" class="border border-slate-200 p-2 rounded-lg text-xs" title="Chọn tháng">
-                <input type="date" id="inv-date-from" class="border border-slate-200 p-2 rounded-lg text-xs" title="Từ ngày">
-                <input type="date" id="inv-date-to" class="border border-slate-200 p-2 rounded-lg text-xs" title="Đến ngày">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 mb-6">
+            <div class="col-span-1 md:col-span-9">
+                <input type="text" id="search-inventory" placeholder="🔍 Tìm tên sản phẩm..." 
+                       onkeyup="filterInventory()" class="w-full border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            <div class="col-span-1 md:col-span-3">
+                <button onclick="togglePrices()" class="w-full bg-slate-800 text-white py-3 rounded-xl text-sm font-bold hover:bg-slate-900 transition">
+                    👁️ Ẩn/Hiện Giá
+                </button>
             </div>
 
-            <div class="flex gap-2 w-full">
-                <button onclick="togglePrices()" class="flex-1 bg-white border border-slate-300 text-slate-700 py-2 rounded-lg text-xs font-bold hover:bg-slate-100">
-                    Ẩn/Hiện Giá
-                </button>
-                <button onclick="exportToExcel()" class="flex-1 bg-green-600 text-white py-2 rounded-lg text-xs font-bold hover:bg-green-700">
-                    Xuất Excel
+            <div class="col-span-1 md:col-span-3">
+                <input type="month" id="inv-month" onchange="autoFillDates(this.value)" class="w-full border border-slate-200 p-3 rounded-xl text-sm" title="Chọn tháng">
+            </div>
+            <div class="col-span-1 md:col-span-3">
+                <input type="date" id="inv-date-from" class="w-full border border-slate-200 p-3 rounded-xl text-sm" title="Từ ngày">
+            </div>
+            <div class="col-span-1 md:col-span-3">
+                <input type="date" id="inv-date-to" class="w-full border border-slate-200 p-3 rounded-xl text-sm" title="Đến ngày">
+            </div>
+            <div class="col-span-1 md:col-span-3">
+                <button onclick="exportToExcel()" class="w-full bg-green-600 text-white py-3 rounded-xl text-sm font-bold hover:bg-green-700 transition">
+                    📊 Xuất Excel
                 </button>
             </div>
         </div>
 
-        <div class="w-full bg-white border border-slate-200 rounded-xl overflow-hidden shadow-inner">
-            <div class="max-h-[70vh] overflow-y-auto">
+        <div class="w-full bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+            <div class="max-h-[60vh] overflow-y-auto">
                 <table id="kho-table" class="min-w-full text-left text-xs md:text-sm border-collapse">
                     <thead class="sticky top-0 bg-slate-100 z-10 border-b border-slate-200">
-                        <tr class="text-slate-600 uppercase text-[10px] tracking-wider">
-                            <th class="p-3">Tên SP</th>
-                            <th class="p-3">ĐVT</th>
-                            <th class="p-3">SL</th>
-                            <th class="p-3 price-cell">Giá lẻ</th>
-                            <th class="p-3 price-cell">Giá sỉ</th>
+                        <tr class="text-slate-600 uppercase text-[11px] tracking-wider">
+                            <th class="p-4">Tên SP</th>
+                            <th class="p-4 text-center">ĐVT</th>
+                            <th class="p-4 text-center">SL</th>
+                            <th class="p-4 text-right price-cell">Giá lẻ</th>
+                            <th class="p-4 text-right price-cell">Giá sỉ</th>
                         </tr>
                     </thead>
-                    <tbody id="inventory-data" class="divide-y divide-slate-100">
+                    <tbody id="inventory-data" class="divide-y divide-slate-100 text-slate-700">
                         </tbody>
                 </table>
             </div>
@@ -715,32 +735,33 @@ function toggleMoreMenu() {
     <h2 class="text-2xl font-bold text-slate-800 border-b pb-2">LỊCH SỬ HOÁ ĐƠN</h2>
     
     <div class="bg-white p-4 md:p-6 rounded-2xl shadow-lg border border-slate-200">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="md:col-span-4">
-                <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm (Số phiếu, KH)..." 
-                        onkeyup="searchInvoice()" 
-                        class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
+        <div class="grid grid-cols-2 md:grid-cols-12 gap-3 items-end">
+            
+            <div class="col-span-2 md:col-span-4">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Tìm kiếm</label>
+                <input type="text" id="searchInput" placeholder="🔍 Số phiếu, KH..." 
+                       onkeyup="searchInvoice()" 
+                       class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
             </div>
             
-            <div>
+            <div class="col-span-1 md:col-span-2">
                 <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Tháng</label>
                 <input type="month" id="filterMonth" onchange="loadSalesList()" class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
 
-            <div class="grid grid-cols-2 gap-4 col-span-2">
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Từ ngày</label>
-                    <input type="date" id="dateFrom" onchange="loadSalesList()" class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Đến ngày</label>
-                    <input type="date" id="dateTo" onchange="loadSalesList()" class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                </div>
+            <div class="col-span-1 md:col-span-2">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Từ ngày</label>
+                <input type="date" id="dateFrom" onchange="loadSalesList()" class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            
+            <div class="col-span-1 md:col-span-2">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Đến ngày</label>
+                <input type="date" id="dateTo" onchange="loadSalesList()" class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
 
-            <div class="flex items-end">
-                <button type="button" onclick="exportInvoiceToExcel()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold p-2 rounded-lg transition h-[42px] shadow-sm">
-                    📊 Xuất Excel
+            <div class="col-span-1 md:col-span-2">
+                <button type="button" onclick="exportInvoiceToExcel()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold p-2 rounded-lg transition h-[40px] shadow-sm text-xs md:text-sm">
+                    📊 Xuất
                 </button>
             </div>
         </div>
@@ -749,18 +770,18 @@ function toggleMoreMenu() {
     <div class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
         <div class="overflow-y-auto max-h-[65vh] overflow-x-auto">
             <table class="w-full text-sm border-collapse" id="invoiceTable">
-                <thead class="sticky top-0 bg-slate-100 z-10 text-slate-700 font-bold uppercase text-[11px] tracking-wider">
-                    <tr>
-                        <th class="p-4 border-b border-slate-200">Số phiếu</th>
-                        <th class="p-4 border-b border-slate-200">Khách hàng</th>
-                        <th class="p-4 border-b border-slate-200">Ngày xuất</th>
-                        <th class="p-4 border-b border-slate-200">Tổng tiền</th>
-                        <th class="p-4 border-b border-slate-200 text-center">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody id="sales-list-body" class="divide-y divide-slate-100 text-slate-600">
-                    </tbody>
-            </table>
+				<thead class="sticky top-0 bg-slate-100 z-10 text-slate-700 font-bold uppercase text-[11px]">
+					<tr>
+						<th class="p-3 border-b text-left w-[10%]">Số phiếu</th>
+						<th class="p-3 border-b text-left w-[30%]">Khách hàng</th>
+						<th class="p-3 border-b text-center w-[15%]">Ngày xuất</th>
+						<th class="p-3 border-b text-right w-[25%]">Tổng tiền</th>
+						<th class="p-3 border-b text-center w-[20%]">Thao tác</th>
+					</tr>
+				</thead>
+				<tbody id="sales-list-body" class="divide-y divide-slate-100 text-slate-600">
+					</tbody>
+			</table>
         </div>
     </div>
 </div>
@@ -768,15 +789,15 @@ function toggleMoreMenu() {
 <table id="hidden-export-table" style="display:none;">
     <thead>
         <tr>
-            <th>Số phiếu</th>
-            <th>Ngày xuất</th>
-            <th>Khách hàng</th>
-            <th>Tên SP</th>
-            <th>ĐVT</th>
-            <th>SL</th>
-            <th>Đơn giá</th>
-            <th>Thuế (VAT)</th>
-            <th>Thành tiền</th>
+            <th style="text-align: left;">Số phiếu</th>
+            <th style="text-align: center;">Ngày xuất</th>
+            <th style="text-align: left;">Khách hàng</th>
+            <th style="text-align: left;">Tên SP</th>
+            <th style="text-align: center;">ĐVT</th>
+            <th style="text-align: right;">SL</th>
+            <th style="text-align: right;">Đơn giá</th>
+            <th style="text-align: right;">Thuế (VAT)</th>
+            <th style="text-align: right;">Thành tiền</th>
         </tr>
     </thead>
     <tbody id="export-body"></tbody>
@@ -1847,22 +1868,31 @@ function removeFromCart(index) {
 
             // Không còn dùng class old-receipt hay style display:none nữa
             const rowHtml = `
-                <tr class="border-b hover:bg-gray-50 text-center">
-                    <td class="border p-2 font-bold">${displayId}</td>
-                    <td class="border p-2">${dateStr}</td>
-                    <td class="border p-2">${itemCount} loại</td>
-                    <td class="border p-2 space-x-2">
-                        <button type="button" onclick="viewReceipt('${doc.id}')" class="text-blue-600 hover:text-blue-800 font-bold underline">Xem</button>
-                        <button type="button" onclick="event.preventDefault(); deleteReceipt('${doc.id}')" class="text-red-600 hover:text-red-800 font-bold">Xóa</button>
-                    </td>
-                </tr>
-            `;
+				<tr class="border-b hover:bg-gray-50 text-center">
+					<td class="border p-2 font-bold">${displayId}</td>
+					<td class="border p-2">${dateStr}</td>
+					<td class="border p-2">${itemCount} loại</td>
+					<td class="border p-2">
+						<div class="flex justify-center gap-4">
+							<button type="button" onclick="viewReceipt('${doc.id}')" title="Xem" 
+									class="text-blue-600 hover:text-blue-800 transition-transform hover:scale-110">
+								<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+							</button>
+							
+							<button type="button" onclick="event.preventDefault(); deleteReceipt('${doc.id}')" title="Xóa" 
+									class="text-red-600 hover:text-red-800 transition-transform hover:scale-110">
+								<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+							</button>
+						</div>
+					</td>
+				</tr>
+			`;
 
-            if (index < midPoint) {
-                leftBody.innerHTML += rowHtml;
-            } else {
-                rightBody.innerHTML += rowHtml;
-            }
+			if (index < midPoint) {
+				leftBody.innerHTML += rowHtml;
+			} else {
+				rightBody.innerHTML += rowHtml;
+			}
         });
     }).catch(err => {
         console.error("LỖI KẾT NỐI:", err);
@@ -2863,14 +2893,12 @@ function renderProductGrid() {
         { l: 'border-l-cyan-500', r: 'border-r-cyan-500', bg: 'bg-cyan-50' }
     ];
     
-    // Sử dụng window.allProductCache đã được sắp xếp từ window.onload
     window.allProductCache.forEach((p, index) => {
         const realStock = window.currentStockMap ? (window.currentStockMap[p.name] || 0) : 0;
         const safeName = p.name.replace(/'/g, "\\'");
         const idName = p.name.replace(/ /g, '_');
         const isOutOfStock = realStock <= 0;
         
-        // Đảm bảo ép kiểu số, nếu dữ liệu phiếu nhập không có giá thì dùng 0
         const retailPrice = Number(p.retail || 0);
         const wholesalePrice = Number(p.wholesale || 0);
         
@@ -2879,9 +2907,16 @@ function renderProductGrid() {
         grid.innerHTML += `
             <div class="group ${b.bg} p-1.5 md:p-3 rounded-lg border border-gray-200 ${b.l} ${b.r} border-l-4 border-r-4 shadow-sm flex flex-col justify-between">
                 <div>
-                    <p class="font-bold text-gray-800 text-[10px] md:text-xs leading-tight h-6 md:h-8 overflow-hidden line-clamp-2 mb-0.5 md:mb-2" title="${p.name}">
-                        ${p.name}
-                    </p>
+                    <div class="flex justify-between items-start gap-1">
+                        <p class="font-bold text-gray-800 text-[10px] md:text-xs leading-tight h-6 md:h-8 overflow-hidden line-clamp-2 mb-0.5" title="${p.name}">
+                            ${p.name}
+                        </p>
+                        <button onclick="quickAdd('${safeName}', {shiftKey: true})" 
+                                class="flex-shrink-0 w-5 h-5 flex items-center justify-center bg-emerald-500 text-white rounded-full hover:bg-emerald-600 transition-all text-xs font-bold shadow-sm"
+                                title="Thêm dòng mới">
+                            +
+                        </button>
+                    </div>
                     
                     <div class="flex items-center gap-1 mb-0.5 md:mb-2">
                         <span class="text-[10px] md:text-xs font-bold ${isOutOfStock ? 'text-red-600' : 'text-blue-600'}">TỒN:</span>
@@ -3285,27 +3320,35 @@ async function viewInvoiceDetails(docId) {
                 isVisible = (dateObj >= oneWeekAgo);
             }
 
-            // Render
-            if (isVisible) {
-                const dateStr = dateObj.toLocaleDateString('vi-VN');
-                const totalAmount = data.grandTotal || data.total || 0;
+						// Render
+				if (isVisible) {
+				const dateStr = dateObj.toLocaleDateString('vi-VN');
+				const totalAmount = data.grandTotal || data.total || 0;
 
-                body.innerHTML += `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-3 border">${data.id || 'N/A'}</td>
-                        <td class="p-3 border">${data.customer || 'Khách lẻ'}</td>
-                        <td class="p-3 border">${dateStr}</td>
-                        <td class="p-3 border font-semibold text-right">
-                            ${Number(totalAmount).toLocaleString('vi-VN')} VNĐ
-                        </td>
-                        <td class="p-3 border text-center">
-                            <button onclick="viewInvoiceDetails('${doc.id}')" class="text-green-600 font-bold hover:underline mr-4">Xem</button>
-                            <button onclick="reprintSale('${doc.id}')" class="text-blue-600 font-bold hover:underline mr-4">In lại</button>
-                            <button onclick="deleteSale('${doc.id}')" class="text-red-600 font-bold hover:underline">Xóa</button>
-                        </td>
-                    </tr>
-                `;
-            }
+				body.innerHTML += `
+					<tr class="hover:bg-slate-50 transition-colors">
+						<td class="p-3 border text-left w-[10%]">${data.id || 'N/A'}</td>
+						<td class="p-3 border text-left w-[30%] truncate">${data.customer || 'Khách lẻ'}</td>
+						<td class="p-3 border text-center w-[15%]">${dateStr}</td>
+						<td class="p-3 border font-semibold text-right w-[25%]">
+							${Number(totalAmount).toLocaleString('vi-VN')} VNĐ
+						</td>
+						<td class="p-3 border text-center w-[20%]">
+							<div class="flex justify-center gap-5">
+								<button onclick="viewInvoiceDetails('${doc.id}')" title="Xem" class="text-green-600 hover:text-green-800 transition-transform hover:scale-110">
+									<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+								</button>
+								<button onclick="reprintSale('${doc.id}')" title="In lại" class="text-blue-600 hover:text-blue-800 transition-transform hover:scale-110">
+									<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+								</button>
+								<button onclick="deleteSale('${doc.id}')" title="Xóa" class="text-red-600 hover:text-red-800 transition-transform hover:scale-110">
+									<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+								</button>
+							</div>
+						</td>
+					</tr>
+				`;
+			}
         });
     } catch (err) {
         console.error("Lỗi truy vấn Firestore:", err);
