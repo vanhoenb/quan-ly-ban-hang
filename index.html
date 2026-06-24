@@ -471,7 +471,7 @@ function toggleMoreMenu() {
         </div>
 
         <div class="w-full bg-white border border-slate-200 rounded-xl overflow-hidden shadow-inner">
-            <div class="max-h-[60vh] overflow-y-auto">
+            <div class="max-h-[70vh] overflow-y-auto">
                 <table id="kho-table" class="min-w-full text-left text-xs md:text-sm border-collapse">
                     <thead class="sticky top-0 bg-slate-100 z-10 border-b border-slate-200">
                         <tr class="text-slate-600 uppercase text-[10px] tracking-wider">
@@ -649,25 +649,28 @@ function toggleMoreMenu() {
       <div id="page-customers" class="space-y-6 p-4 md:p-6 hidden">
     <h2 class="text-2xl font-bold text-slate-800 border-b pb-2">DANH SÁCH ĐẠI LÝ</h2>
     
-    <div class="bg-white p-4 md:p-6 rounded shadow border border-slate-200 grid grid-cols-1 md:grid-cols-4 gap-4">
-        <input type="text" id="cust-name" placeholder="Tên đại lý" class="border p-3 rounded w-full">
-        <input type="text" id="cust-address" placeholder="Địa chỉ" class="border p-3 rounded w-full">
-        <input type="text" id="cust-phone" placeholder="Số điện thoại" class="border p-3 rounded w-full">
-        <button onclick="addCustomer()" class="bg-blue-600 text-white p-3 rounded font-bold hover:bg-blue-700 w-full">Thêm Đại Lý</button>
+    <div class="bg-white p-4 md:p-6 rounded-2xl shadow-lg border border-slate-200 grid grid-cols-1 md:grid-cols-4 gap-4">
+        <input type="text" id="cust-name" placeholder="Tên đại lý" class="border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none w-full">
+        <input type="text" id="cust-address" placeholder="Địa chỉ" class="border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none w-full">
+        <input type="text" id="cust-phone" placeholder="Số điện thoại" class="border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none w-full">
+        <button onclick="addCustomer()" class="bg-blue-600 text-white p-3 rounded-xl font-bold hover:bg-blue-700 transition w-full">Thêm Đại Lý</button>
     </div>
 
-    <div class="bg-white p-4 md:p-6 rounded shadow border border-slate-200 relative overflow-y-auto max-h-[70vh] overflow-x-auto">
-        <table class="w-full text-sm border-separate border-spacing-0 min-w-[500px]">
-            <thead class="sticky top-0 z-20">
-                <tr class="bg-slate-100 text-left">
-                    <th class="p-3 border-b border-r border-t border-slate-200">Tên đại lý</th>
-                    <th class="p-3 border-b border-r border-t border-slate-200">Địa chỉ</th>
-                    <th class="p-3 border-b border-r border-t border-slate-200">Số điện thoại</th>
-                    <th class="p-3 border-b border-t border-slate-200 text-center">Thao tác</th>
-                </tr>
-            </thead>
-            <tbody id="customer-list-body"></tbody>
-        </table>
+    <div class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+        <div class="max-h-[70vh] overflow-y-auto">
+            <table class="w-full text-sm text-left border-collapse">
+                <thead class="sticky top-0 z-20 bg-slate-100 text-slate-700 font-bold uppercase text-[11px] tracking-wider">
+                    <tr>
+                        <th class="p-4 border-b border-slate-200">Tên đại lý</th>
+                        <th class="p-4 border-b border-slate-200">Địa chỉ</th>
+                        <th class="p-4 border-b border-slate-200">Số điện thoại</th>
+                        <th class="p-4 border-b border-slate-200 text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="customer-list-body" class="divide-y divide-slate-100">
+                    </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -711,50 +714,52 @@ function toggleMoreMenu() {
 <div id="page-history" class="hidden p-4 md:p-6 space-y-6">
     <h2 class="text-2xl font-bold text-slate-800 border-b pb-2">LỊCH SỬ HOÁ ĐƠN</h2>
     
-   <div class="bg-white p-4 md:p-6 rounded-xl shadow-lg border border-slate-200">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="md:col-span-4">
-            <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm (Số phiếu, KH)..." 
-                    onkeyup="searchInvoice()" 
-                    class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
-        </div>
-        
-        <div>
-            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tháng</label>
-            <input type="month" id="filterMonth" onchange="loadSalesList()" class="w-full p-2 border border-slate-300 rounded-lg">
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-            <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Từ ngày</label>
-                <input type="date" id="dateFrom" onchange="loadSalesList()" class="w-full p-2 border border-slate-300 rounded-lg">
+    <div class="bg-white p-4 md:p-6 rounded-2xl shadow-lg border border-slate-200">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="md:col-span-4">
+                <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm (Số phiếu, KH)..." 
+                        onkeyup="searchInvoice()" 
+                        class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
             </div>
+            
             <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Đến ngày</label>
-                <input type="date" id="dateTo" onchange="loadSalesList()" class="w-full p-2 border border-slate-300 rounded-lg">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Tháng</label>
+                <input type="month" id="filterMonth" onchange="loadSalesList()" class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
-        </div>
 
-        <div class="flex items-end">
-            <button type="button" onclick="exportInvoiceToExcel()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold p-2 rounded-lg transition h-[42px]">
-                📊 Xuất Excel
-            </button>
+            <div class="grid grid-cols-2 gap-4 col-span-2">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Từ ngày</label>
+                    <input type="date" id="dateFrom" onchange="loadSalesList()" class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Đến ngày</label>
+                    <input type="date" id="dateTo" onchange="loadSalesList()" class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+            </div>
+
+            <div class="flex items-end">
+                <button type="button" onclick="exportInvoiceToExcel()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold p-2 rounded-lg transition h-[42px] shadow-sm">
+                    📊 Xuất Excel
+                </button>
+            </div>
         </div>
     </div>
-</div>
         
-        <div class="shadow-sm rounded-lg border border-slate-200 overflow-y-auto max-h-[60vh] overflow-x-auto">
-            <table class="w-full text-sm border-collapse min-w-[600px]" id="invoiceTable">
-                <thead class="sticky top-0 bg-slate-100 z-10">
-                    <tr class="text-left border-b-2 border-slate-300">
-                        <th class="p-4 border-r">Số phiếu</th>
-                        <th class="p-4 border-r">Khách hàng</th>
-                        <th class="p-4 border-r">Ngày xuất</th>
-                        <th class="p-4 border-r">Tổng tiền</th>
-                        <th class="p-4 text-center">Thao tác</th>
+    <div class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+        <div class="overflow-y-auto max-h-[65vh] overflow-x-auto">
+            <table class="w-full text-sm border-collapse" id="invoiceTable">
+                <thead class="sticky top-0 bg-slate-100 z-10 text-slate-700 font-bold uppercase text-[11px] tracking-wider">
+                    <tr>
+                        <th class="p-4 border-b border-slate-200">Số phiếu</th>
+                        <th class="p-4 border-b border-slate-200">Khách hàng</th>
+                        <th class="p-4 border-b border-slate-200">Ngày xuất</th>
+                        <th class="p-4 border-b border-slate-200">Tổng tiền</th>
+                        <th class="p-4 border-b border-slate-200 text-center">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody id="sales-list-body" class="divide-y divide-slate-200"></tbody>
+                <tbody id="sales-list-body" class="divide-y divide-slate-100 text-slate-600">
+                    </tbody>
             </table>
         </div>
     </div>
@@ -778,7 +783,7 @@ function toggleMoreMenu() {
 </table>
 
         <!-- PHẦN 6: BÁO CÁO -->
-    <div id="page-report" class="hidden p-4 md:p-8 space-y-6 md:space-y-8 bg-slate-50 min-h-screen">
+<div id="page-report" class="hidden p-4 md:p-8 space-y-6 md:space-y-8 bg-slate-50 min-h-screen">
     <div class="border-b pb-4 md:pb-6">
         <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900">Trung Tâm Báo Cáo</h2>
         <p class="text-slate-500 mt-1 text-sm md:text-base">Xuất dữ liệu chi tiết phục vụ đối soát và quản lý kho</p>
@@ -786,35 +791,35 @@ function toggleMoreMenu() {
 
     <div class="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-            <div>
+            <div class="border border-slate-100 p-4 rounded-2xl bg-slate-50">
                 <label class="block text-sm font-bold text-slate-700 mb-2">Từ ngày</label>
-                <input type="date" id="date-from" class="w-full border-slate-200 border p-3 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition">
+                <input type="date" id="date-from" class="w-full border-slate-300 border p-3 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition">
             </div>
-            <div>
+            <div class="border border-slate-100 p-4 rounded-2xl bg-slate-50">
                 <label class="block text-sm font-bold text-slate-700 mb-2">Đến ngày</label>
-                <input type="date" id="date-to" class="w-full border-slate-200 border p-3 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition">
+                <input type="date" id="date-to" class="w-full border-slate-300 border p-3 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition">
             </div>
         </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg transition-all">
             <h3 class="font-bold text-lg text-slate-800 mb-4 text-center">Báo cáo Tổng hợp</h3>
-            <button onclick="exportFullReport()" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition">
+            <button onclick="exportFullReport()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition shadow-md">
                 Xuất file (Tổng hợp)
             </button>
         </div>
 
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg transition-all">
             <h3 class="font-bold text-lg text-slate-800 mb-4 text-center">Báo cáo Bán hàng</h3>
-            <button onclick="exportSales()" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition">
+            <button onclick="exportSales()" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold hover:bg-green-700 transition shadow-md">
                 Tải file (Bán hàng)
             </button>
         </div>
 
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg transition-all">
             <h3 class="font-bold text-lg text-slate-800 mb-4 text-center">Báo cáo Tồn kho</h3>
-            <button onclick="exportInventory()" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition">
+            <button onclick="exportInventory()" class="w-full bg-orange-500 text-white py-4 rounded-xl font-bold hover:bg-orange-600 transition shadow-md">
                 Tải file (NXT)
             </button>
         </div>
@@ -829,14 +834,14 @@ function toggleMoreMenu() {
 
     <div class="flex flex-col-reverse lg:flex-row -mx-4">
       <div class="w-full lg:w-2/3 px-4 mb-6">
-        <div class="bg-white border border-gray-200 shadow-sm p-6 rounded-xl h-full">
+        <div class="bg-white border border-gray-200 shadow-lg p-6 rounded-xl h-full">
           <h5 class="mb-4 font-bold text-gray-600">DANH SÁCH PHIẾU SẢN XUẤT</h5>
           
           <div class="relative mb-4">
             <input type="text" id="searchInputSX" 
-                   placeholder="🔍 Tìm kiếm theo số phiếu (VD: SX01)..." 
-                   onkeyup="searchSanXuat()" 
-                   class="w-full pl-4 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    placeholder="🔍 Tìm kiếm theo số phiếu (VD: SX01)..." 
+                    onkeyup="searchSanXuat()" 
+                    class="w-full pl-4 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
 
           <div class="overflow-y-auto max-h-[65vh] overflow-x-auto border border-gray-100 rounded-lg">
@@ -860,7 +865,7 @@ function toggleMoreMenu() {
       </div>
 
       <div class="w-full lg:w-1/3 px-4 mb-6">
-        <div class="bg-white border border-gray-200 shadow-sm p-5 rounded-xl">
+        <div class="bg-blue-50 border border-blue-200 shadow-lg p-5 rounded-xl">
           <div class="mb-3">
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Số phiếu hiện tại</label>
             <input type="text" id="sxSoPhieu" class="w-full p-2 border border-gray-300 rounded bg-gray-50 font-bold text-blue-600" readonly>
