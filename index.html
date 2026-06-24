@@ -381,11 +381,13 @@ function toggleMoreMenu() {
 
     <h3 class="font-bold text-gray-700 mt-6">DANH SÁCH PHIẾU NHẬP</h3>
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100 my-4">
-        <div>
-            <label class="block text-[10px] font-bold text-gray-500 uppercase">Tháng</label>
-            <input type="month" id="filter-month" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
-        </div>
+   <div class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100 my-4">
+    <div>
+        <label class="block text-[10px] font-bold text-gray-500 uppercase">Tháng</label>
+        <input type="month" id="filter-month" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
         <div>
             <label class="block text-[10px] font-bold text-gray-500 uppercase">Từ Ngày</label>
             <input type="date" id="filter-date-from" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
@@ -394,11 +396,13 @@ function toggleMoreMenu() {
             <label class="block text-[10px] font-bold text-gray-500 uppercase">Đến Ngày</label>
             <input type="date" id="filter-date-to" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
         </div>
-        <div>
-            <label class="block text-[10px] font-bold text-gray-500 uppercase">Tìm theo số phiếu</label>
-            <input type="text" id="searchReceiptInput" onkeyup="filterReceipts()" placeholder="Nhập số phiếu..." class="w-full p-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
-        </div>
     </div>
+
+    <div>
+        <label class="block text-[10px] font-bold text-gray-500 uppercase">Tìm theo số phiếu</label>
+        <input type="text" id="searchReceiptInput" onkeyup="filterReceipts()" placeholder="Nhập số phiếu..." class="w-full p-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+    </div>
+</div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
         <div class="overflow-x-auto border border-gray-100 rounded-2xl bg-gray-50 p-2 md:p-4">
@@ -701,18 +705,20 @@ function toggleMoreMenu() {
 <div id="page-history" class="hidden p-4 md:p-6 space-y-6">
     <h2 class="text-2xl font-bold text-slate-800 border-b pb-2">LỊCH SỬ HOÁ ĐƠN</h2>
     
-    <div class="bg-white p-4 md:p-6 rounded-xl shadow-lg border border-slate-200">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div class="md:col-span-4">
-                <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm (Số phiếu, KH)..." 
-                        onkeyup="searchInvoice()" 
-                        class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
-            </div>
-            
-            <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tháng</label>
-                <input type="month" id="filterMonth" onchange="loadSalesList()" class="w-full p-2 border border-slate-300 rounded-lg">
-            </div>
+   <div class="bg-white p-4 md:p-6 rounded-xl shadow-lg border border-slate-200">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="md:col-span-4">
+            <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm (Số phiếu, KH)..." 
+                    onkeyup="searchInvoice()" 
+                    class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
+        </div>
+        
+        <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tháng</label>
+            <input type="month" id="filterMonth" onchange="loadSalesList()" class="w-full p-2 border border-slate-300 rounded-lg">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
             <div>
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Từ ngày</label>
                 <input type="date" id="dateFrom" onchange="loadSalesList()" class="w-full p-2 border border-slate-300 rounded-lg">
@@ -721,12 +727,15 @@ function toggleMoreMenu() {
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Đến ngày</label>
                 <input type="date" id="dateTo" onchange="loadSalesList()" class="w-full p-2 border border-slate-300 rounded-lg">
             </div>
-            <div class="flex items-end">
-                <button type="button" onclick="exportInvoiceToExcel()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold p-2 rounded-lg transition h-[42px]">
-                    📊 Xuất Excel
-                </button>
-            </div>
         </div>
+
+        <div class="flex items-end">
+            <button type="button" onclick="exportInvoiceToExcel()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold p-2 rounded-lg transition h-[42px]">
+                📊 Xuất Excel
+            </button>
+        </div>
+    </div>
+</div>
         
         <div class="shadow-sm rounded-lg border border-slate-200 overflow-y-auto max-h-[60vh] overflow-x-auto">
             <table class="w-full text-sm border-collapse min-w-[600px]" id="invoiceTable">
