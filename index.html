@@ -2803,7 +2803,6 @@ function updatePrice(productId, newPrice) {
 }
 
 async function calculateAllStock() {
-    // Tạm thời tạo một map rỗng
     let inventory = {};
 
     try {
@@ -2813,30 +2812,34 @@ async function calculateAllStock() {
             const data = doc.data();
             if (data.items) {
                 data.items.forEach(item => {
-                    const key = item.name;
-                    inventory[key] = (inventory[key] || 0) + (parseInt(item.qty) || 0);
+                    inventory[item.name] = (inventory[item.name] || 0) + (parseInt(item.qty) || 0);
                 });
             }
         });
 
-        // 2. LẤY PHIẾU XUẤT (BÁN HÀNG)
+        // 2. LẤY PHIẾU XUẤT (Đã lưu vào DB)
         const snapshotXuat = await db.collection('sales').get(); 
         snapshotXuat.forEach(doc => {
             const data = doc.data();
             if (data.items) {
                 data.items.forEach(item => {
-                    const key = item.name;
-                    inventory[key] = (inventory[key] || 0) - (parseInt(item.qty) || 0);
+                    inventory[item.name] = (inventory[item.name] || 0) - (parseInt(item.qty) || 0);
                 });
             }
         });
 
-        // 3. Gán vào biến toàn cục
-        window.currentStockMap = inventory;
+        // 3. TRỪ TIẾP SỐ LƯỢNG ĐANG CÓ TRONG GIỎ HÀNG (sellCart)
+        // Đây là bước quan trọng nhất để tồn kho luôn khớp khi bạn đang bán
+        if (typeof sellCart !== 'undefined') {
+            sellCart.forEach(item => {
+                inventory[item.name] = (inventory[item.name] || 0) - (parseInt(item.qty) || 0);
+            });
+        }
 
-        // ĐÃ XÓA: renderProductGrid() được gọi tập trung tại window.onload
+        // 4. Gán vào biến toàn cục
+        window.currentStockMap = inventory;
         
-        console.log("Đã cập nhật tồn kho mới nhất:", window.currentStockMap);
+        console.log("Đã cập nhật tồn kho (bao gồm hàng trong giỏ):", window.currentStockMap);
         
     } catch (error) {
         console.error("Lỗi khi tính toán tồn kho:", error);
@@ -2882,7 +2885,7 @@ function renderProductGrid() {
                     
                     <div class="flex items-center gap-1 mb-0.5 md:mb-2">
                         <span class="text-[10px] md:text-xs font-bold ${isOutOfStock ? 'text-red-600' : 'text-blue-600'}">TỒN:</span>
-                        <span class="text-[10px] md:text-xs font-black ${isOutOfStock ? 'text-red-600' : 'text-blue-700'}">
+                        <span id="stock-display-${idName}" class="text-[10px] md:text-xs font-black ${isOutOfStock ? 'text-red-600' : 'text-blue-700'}">
                             ${isOutOfStock ? 'HẾT' : realStock}
                         </span>
                     </div>
@@ -2915,59 +2918,60 @@ function filterProducts() {
     });
 }
 
-function quickAdd(productName, event) {
-    // 1. Kiểm tra phím Shift (nếu nhấn Shift thì forceNew = true)
+async function quickAdd(productName, event) {
     const forceNew = event ? event.shiftKey : false;
-    
     const p = window.allProductCache.find(i => i.name === productName);
     if (!p) return;
 
-    // 2. Kiểm tra tồn kho
+    // 1. Kiểm tra tồn kho từ bộ nhớ (Đã có sẵn, không cần đợi Firebase)
     const stock = window.currentStockMap ? (window.currentStockMap[productName] || 0) : 0;
     
     if (stock <= 0) {
-        Swal.fire({ 
-            icon: 'error', 
-            title: 'Hết hàng!', 
-            text: `Sản phẩm ${productName} đã hết hàng.` 
-        });
+        Swal.fire({ icon: 'error', title: 'Hết hàng!', text: `Sản phẩm ${productName} đã hết hàng.` });
         return;
     }
 
-    // 3. Trừ tồn kho
-    window.currentStockMap[productName] -= 1;
-    renderProductGrid();
+    // 2. TRỪ KHO NGAY TRÊN BỘ NHỚ (Cực nhanh)
+    window.currentStockMap[productName] = stock - 1;
 
-    // Lấy loại giá
-    const priceType = document.getElementById(`price-type-${productName.replace(/ /g, '_')}`).value;
+    // 3. Xử lý giỏ hàng
+    const idName = productName.replace(/ /g, '_');
+    const priceTypeEl = document.getElementById(`price-type-${idName}`);
+    const priceType = priceTypeEl ? priceTypeEl.value : 'retail';
     const price = priceType === 'wholesale' ? (p.wholesale || 0) : (p.retail || 0);
 
-    // 4. KIỂM TRA ĐỂ CỘNG DỒN HOẶC THÊM DÒNG MỚI
-    // Chỉ tìm sản phẩm nếu KHÔNG nhấn Shift (forceNew == false)
     const existingItem = !forceNew ? sellCart.find(item => item.name === productName) : null;
 
     if (existingItem) {
-        // Nếu đã có trong giỏ và không ép tạo dòng mới, cộng dồn
         existingItem.qty += 1;
         existingItem.total = existingItem.qty * existingItem.price;
     } else {
-        // Nếu chưa có, hoặc nhấn Shift để thêm dòng mới
-        const item = {
-            id: Date.now(), // Thêm ID duy nhất để phân biệt các dòng
+        sellCart.push({
+            id: Date.now(),
             name: p.name,
             unit: p.unit || 'Cái',
             qty: 1, 
             price: parseFloat(price),
             note: "",
             total: parseFloat(price)
-        };
-        sellCart.push(item);
+        });
     }
 
-    renderSellCart();
+    // 4. RENDER GIAO DIỆN TỐI ƯU (Không cần gọi cả hàm renderProductGrid)
+    // Chỉ cập nhật số tồn tại đúng vị trí đó trên màn hình (Cực nhanh)
+    const stockDisplay = document.getElementById(`stock-display-${idName}`);
+    if (stockDisplay) {
+        const newStock = window.currentStockMap[productName];
+        stockDisplay.innerText = newStock <= 0 ? 'HẾT' : newStock;
+        stockDisplay.className = `text-[10px] md:text-xs font-black ${newStock <= 0 ? 'text-red-600' : 'text-blue-700'}`;
+    }
+
+    renderSellCart(); // Render bảng giỏ hàng
     
+    if (typeof updateCartTotalDisplay === 'function') updateCartTotalDisplay();
+
     const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1000 });
-    Toast.fire({ icon: 'success', title: (forceNew ? 'Đã thêm dòng mới: ' : 'Đã thêm: ') + p.name });
+    Toast.fire({ icon: 'success', title: (forceNew ? 'Thêm mới: ' : 'Đã thêm: ') + p.name });
 }
 
 function updateCartTotalDisplay() {
