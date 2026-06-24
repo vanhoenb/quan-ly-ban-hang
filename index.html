@@ -2913,23 +2913,33 @@ function quickAdd(productName) {
     // 2. TRỪ TỒN KHO NGAY LẬP TỨC TRONG BỘ NHỚ
     window.currentStockMap[productName] -= 1;
 
-    // 3. Cập nhật lại giao diện lưới sản phẩm (để số tồn hiển thị giảm đi ngay)
+    // 3. Cập nhật lại giao diện lưới sản phẩm
     renderProductGrid();
 
-    // Lấy giá và thêm vào giỏ
+    // Lấy loại giá
     const priceType = document.getElementById(`price-type-${productName.replace(/ /g, '_')}`).value;
     const price = priceType === 'wholesale' ? (p.wholesale || 0) : (p.retail || 0);
 
-    const item = {
-        name: p.name,
-        unit: p.unit || 'Cái',
-        qty: 1, 
-        price: parseFloat(price),
-        note: "",
-        total: parseFloat(price)
-    };
+    // 4. KIỂM TRA TRONG GIỎ ĐỂ CỘNG DỒN
+    const existingItem = sellCart.find(item => item.name === productName);
 
-    sellCart.push(item);
+    if (existingItem) {
+        // Nếu đã có trong giỏ, chỉ tăng số lượng và tính lại tổng tiền
+        existingItem.qty += 1;
+        existingItem.total = existingItem.qty * existingItem.price;
+    } else {
+        // Nếu chưa có, thêm mới vào giỏ
+        const item = {
+            name: p.name,
+            unit: p.unit || 'Cái',
+            qty: 1, 
+            price: parseFloat(price),
+            note: "",
+            total: parseFloat(price)
+        };
+        sellCart.push(item);
+    }
+
     renderSellCart();
     
     const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1000 });
