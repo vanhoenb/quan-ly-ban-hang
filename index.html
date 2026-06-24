@@ -379,47 +379,49 @@ function toggleMoreMenu() {
         <button id="save-import-btn" onclick="saveImport()" class="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold shadow-md hover:bg-blue-700 transition-all">Lưu nhập kho</button>
     </div>
 
-    <h3 class="font-bold text-gray-700 mt-6">DANH SÁCH PHIẾU NHẬP</h3>
+    <div class="bg-white p-4 md:p-6 rounded-2xl border border-slate-200 shadow-lg mt-10">
+        <h3 class="font-bold text-xl text-slate-800 mb-4 border-b pb-2">📋 DANH SÁCH PHIẾU NHẬP</h3>
 
-   <div class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100 my-4">
-    <div>
-        <label class="block text-[10px] font-bold text-gray-500 uppercase">Tháng</label>
-        <input type="month" id="filter-month" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
-    </div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100 my-4">
+            <div>
+                <label class="block text-[10px] font-bold text-gray-500 uppercase">Tháng</label>
+                <input type="month" id="filter-month" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
 
-    <div class="grid grid-cols-2 gap-3">
-        <div>
-            <label class="block text-[10px] font-bold text-gray-500 uppercase">Từ Ngày</label>
-            <input type="date" id="filter-date-from" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase">Từ Ngày</label>
+                    <input type="date" id="filter-date-from" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase">Đến Ngày</label>
+                    <input type="date" id="filter-date-to" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-gray-500 uppercase">Tìm theo số phiếu</label>
+                <input type="text" id="searchReceiptInput" onkeyup="filterReceipts()" placeholder="Nhập số phiếu..." class="w-full p-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
         </div>
-        <div>
-            <label class="block text-[10px] font-bold text-gray-500 uppercase">Đến Ngày</label>
-            <input type="date" id="filter-date-to" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
-        </div>
-    </div>
 
-    <div>
-        <label class="block text-[10px] font-bold text-gray-500 uppercase">Tìm theo số phiếu</label>
-        <input type="text" id="searchReceiptInput" onkeyup="filterReceipts()" placeholder="Nhập số phiếu..." class="w-full p-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
-    </div>
-</div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
-        <div class="overflow-x-auto border border-gray-100 rounded-2xl bg-gray-50 p-2 md:p-4">
-            <table class="w-full text-sm">
-                <thead class="bg-white border-b">
-                    <tr><th class="p-3 text-left">Số phiếu</th><th class="p-3 text-left">Ngày nhập</th><th class="p-3 text-left">Số SP</th><th class="p-3 text-left">Thao tác</th></tr>
-                </thead>
-                <tbody id="list-receipts-left"></tbody>
-            </table>
-        </div>
-        <div class="overflow-x-auto border border-gray-100 rounded-2xl bg-gray-50 p-2 md:p-4">
-            <table class="w-full text-sm">
-                <thead class="bg-white border-b">
-                    <tr><th class="p-3 text-left">Số phiếu</th><th class="p-3 text-left">Ngày nhập</th><th class="p-3 text-left">Số SP</th><th class="p-3 text-left">Thao tác</th></tr>
-                </thead>
-                <tbody id="list-receipts-right"></tbody>
-            </table>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+            <div class="overflow-x-auto border border-gray-100 rounded-xl bg-white p-2 md:p-4">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50 border-b">
+                        <tr><th class="p-3 text-left">Số phiếu</th><th class="p-3 text-left">Ngày nhập</th><th class="p-3 text-left">Số SP</th><th class="p-3 text-left">Thao tác</th></tr>
+                    </thead>
+                    <tbody id="list-receipts-left"></tbody>
+                </table>
+            </div>
+            <div class="overflow-x-auto border border-gray-100 rounded-xl bg-white p-2 md:p-4">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50 border-b">
+                        <tr><th class="p-3 text-left">Số phiếu</th><th class="p-3 text-left">Ngày nhập</th><th class="p-3 text-left">Số SP</th><th class="p-3 text-left">Thao tác</th></tr>
+                    </thead>
+                    <tbody id="list-receipts-right"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -444,21 +446,22 @@ function toggleMoreMenu() {
         <!-- PHẦN 3: KHO HÀNG -->
 		
        <div id="page-inventory" class="hidden space-y-4 p-2 w-full">
-    <div class="flex flex-col gap-3 w-full">
-        <h2 class="text-lg md:text-xl font-bold">KHO HÀNG TỔNG HỢP</h2>
+    <div class="bg-slate-50 p-4 rounded-2xl shadow-sm border border-slate-200 w-full">
         
-        <div class="flex flex-col gap-2 w-full">
-            <input type="text" id="search-inventory" placeholder="Tìm tên SP..." 
-                    onkeyup="filterInventory()" class="border p-2 rounded-lg w-full">
+        <h2 class="text-lg md:text-xl font-bold mb-4 text-slate-800">KHO HÀNG TỔNG HỢP</h2>
+        
+        <div class="flex flex-col gap-3 w-full mb-4">
+            <input type="text" id="search-inventory" placeholder="🔍 Tìm tên SP..." 
+                    onkeyup="filterInventory()" class="border border-slate-200 p-3 rounded-xl w-full focus:ring-2 focus:ring-blue-500 outline-none">
             
             <div class="grid grid-cols-3 gap-2">
-                <input type="month" id="inv-month" onchange="autoFillDates(this.value)" class="border p-2 rounded-lg text-xs" title="Chọn tháng">
-                <input type="date" id="inv-date-from" class="border p-2 rounded-lg text-xs" title="Từ ngày">
-                <input type="date" id="inv-date-to" class="border p-2 rounded-lg text-xs" title="Đến ngày">
+                <input type="month" id="inv-month" onchange="autoFillDates(this.value)" class="border border-slate-200 p-2 rounded-lg text-xs" title="Chọn tháng">
+                <input type="date" id="inv-date-from" class="border border-slate-200 p-2 rounded-lg text-xs" title="Từ ngày">
+                <input type="date" id="inv-date-to" class="border border-slate-200 p-2 rounded-lg text-xs" title="Đến ngày">
             </div>
 
             <div class="flex gap-2 w-full">
-                <button onclick="togglePrices()" class="flex-1 bg-gray-600 text-white py-2 rounded-lg text-xs font-bold hover:bg-gray-700">
+                <button onclick="togglePrices()" class="flex-1 bg-white border border-slate-300 text-slate-700 py-2 rounded-lg text-xs font-bold hover:bg-slate-100">
                     Ẩn/Hiện Giá
                 </button>
                 <button onclick="exportToExcel()" class="flex-1 bg-green-600 text-white py-2 rounded-lg text-xs font-bold hover:bg-green-700">
@@ -466,21 +469,24 @@ function toggleMoreMenu() {
                 </button>
             </div>
         </div>
-    </div>
 
-    <div class="w-full border rounded-lg shadow-sm bg-white overflow-y-auto max-h-[75vh] overflow-x-auto">
-        <table id="kho-table" class="min-w-full text-left text-xs md:text-sm">
-            <thead class="sticky top-0 bg-gray-100 z-10">
-                <tr class="text-gray-700">
-                    <th class="p-2 border-b">Tên SP</th>
-                    <th class="p-2 border-b">ĐVT</th>
-                    <th class="p-2 border-b">SL</th>
-                    <th class="p-2 border-b price-cell">Giá lẻ</th>
-                    <th class="p-2 border-b price-cell">Giá sỉ</th>
-                </tr>
-            </thead>
-            <tbody id="inventory-data"></tbody>
-        </table>
+        <div class="w-full bg-white border border-slate-200 rounded-xl overflow-hidden shadow-inner">
+            <div class="max-h-[60vh] overflow-y-auto">
+                <table id="kho-table" class="min-w-full text-left text-xs md:text-sm border-collapse">
+                    <thead class="sticky top-0 bg-slate-100 z-10 border-b border-slate-200">
+                        <tr class="text-slate-600 uppercase text-[10px] tracking-wider">
+                            <th class="p-3">Tên SP</th>
+                            <th class="p-3">ĐVT</th>
+                            <th class="p-3">SL</th>
+                            <th class="p-3 price-cell">Giá lẻ</th>
+                            <th class="p-3 price-cell">Giá sỉ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventory-data" class="divide-y divide-slate-100">
+                        </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
         
