@@ -2894,8 +2894,9 @@ function renderProductGrid() {
                         <option value="wholesale">Sỉ: ${wholesalePrice.toLocaleString('vi-VN')}</option>
                     </select>
                     
-                    <button onclick="${isOutOfStock ? `alert('Hết hàng!')` : `quickAdd('${safeName}')`}" 
-                            class="w-full ${isOutOfStock ? 'bg-gray-200 text-gray-500' : 'bg-blue-600 text-white'} text-[9px] md:text-[10px] py-1 rounded font-bold transition-all">
+                    <button onclick="${isOutOfStock ? `alert('Hết hàng!')` : `quickAdd('${safeName}', event)`}" 
+                            class="w-full ${isOutOfStock ? 'bg-gray-200 text-gray-500' : 'bg-blue-600 text-white'} text-[9px] md:text-[10px] py-1 rounded font-bold transition-all"
+                            title="Bấm để thêm | Giữ phím Shift + Bấm để thêm dòng mới">
                         ${isOutOfStock ? 'Hết' : 'Chọn'}
                     </button>
                 </div>
@@ -2914,11 +2915,14 @@ function filterProducts() {
     });
 }
 
-function quickAdd(productName) {
+function quickAdd(productName, event) {
+    // 1. Kiểm tra phím Shift (nếu nhấn Shift thì forceNew = true)
+    const forceNew = event ? event.shiftKey : false;
+    
     const p = window.allProductCache.find(i => i.name === productName);
     if (!p) return;
 
-    // 1. Kiểm tra tồn kho từ biến toàn cục
+    // 2. Kiểm tra tồn kho
     const stock = window.currentStockMap ? (window.currentStockMap[productName] || 0) : 0;
     
     if (stock <= 0) {
@@ -2930,26 +2934,26 @@ function quickAdd(productName) {
         return;
     }
 
-    // 2. TRỪ TỒN KHO NGAY LẬP TỨC TRONG BỘ NHỚ
+    // 3. Trừ tồn kho
     window.currentStockMap[productName] -= 1;
-
-    // 3. Cập nhật lại giao diện lưới sản phẩm
     renderProductGrid();
 
     // Lấy loại giá
     const priceType = document.getElementById(`price-type-${productName.replace(/ /g, '_')}`).value;
     const price = priceType === 'wholesale' ? (p.wholesale || 0) : (p.retail || 0);
 
-    // 4. KIỂM TRA TRONG GIỎ ĐỂ CỘNG DỒN
-    const existingItem = sellCart.find(item => item.name === productName);
+    // 4. KIỂM TRA ĐỂ CỘNG DỒN HOẶC THÊM DÒNG MỚI
+    // Chỉ tìm sản phẩm nếu KHÔNG nhấn Shift (forceNew == false)
+    const existingItem = !forceNew ? sellCart.find(item => item.name === productName) : null;
 
     if (existingItem) {
-        // Nếu đã có trong giỏ, chỉ tăng số lượng và tính lại tổng tiền
+        // Nếu đã có trong giỏ và không ép tạo dòng mới, cộng dồn
         existingItem.qty += 1;
         existingItem.total = existingItem.qty * existingItem.price;
     } else {
-        // Nếu chưa có, thêm mới vào giỏ
+        // Nếu chưa có, hoặc nhấn Shift để thêm dòng mới
         const item = {
+            id: Date.now(), // Thêm ID duy nhất để phân biệt các dòng
             name: p.name,
             unit: p.unit || 'Cái',
             qty: 1, 
@@ -2963,7 +2967,7 @@ function quickAdd(productName) {
     renderSellCart();
     
     const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1000 });
-    Toast.fire({ icon: 'success', title: 'Đã thêm ' + p.name });
+    Toast.fire({ icon: 'success', title: (forceNew ? 'Đã thêm dòng mới: ' : 'Đã thêm: ') + p.name });
 }
 
 function updateCartTotalDisplay() {
