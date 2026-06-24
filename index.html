@@ -326,28 +326,17 @@ function toggleMoreMenu() {
 <div id="page-import" class="hidden space-y-4 px-2 md:px-6">
     <h2 class="text-xl font-bold text-gray-800">NHẬP KHO</h2>
     
-   <div class="bg-yellow-50 p-3 rounded-xl mb-4 border border-yellow-200">
-    <label class="block text-[10px] uppercase font-bold text-yellow-800 mb-1 tracking-wider">Quét mã sản phẩm</label>
-    <div class="flex gap-2">
-        <input type="text" id="search-by-barcode" 
-               class="w-full border border-yellow-200 p-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-yellow-500" 
-               placeholder="Quét mã...">
-        
-        <button type="button" onclick="startScanner('import')" 
-                class="bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-sm active:scale-95 transition-all">
-            📷 Quét
-        </button>
+    <div class="bg-yellow-50 p-3 rounded-xl mb-4 border border-yellow-200">
+        <label class="block text-[10px] uppercase font-bold text-yellow-800 mb-1 tracking-wider">Quét mã sản phẩm</label>
+        <div class="flex gap-2">
+            <input type="text" id="search-by-barcode" class="w-full border border-yellow-200 p-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-yellow-500" placeholder="Quét mã...">
+            <button type="button" onclick="startScanner('import')" class="bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-sm active:scale-95 transition-all">📷 Quét</button>
+        </div>
+        <div id="reader" class="mt-2 w-full max-w-[300px] mx-auto hidden"></div>
+        <button type="button" id="close-scanner-btn" onclick="stopScanner()" class="mt-2 w-full bg-red-500 text-white py-1 rounded-lg font-bold text-xs shadow-sm hover:bg-red-600 transition-all">❌ Đóng Camera</button>
     </div>
-    
-    <div id="reader" class="mt-2 w-full max-w-[300px] mx-auto hidden"></div>
-    
-    <button type="button" id="close-scanner-btn" onclick="stopScanner()" 
-            class="mt-2 w-full bg-red-500 text-white py-1 rounded-lg font-bold text-xs shadow-sm hover:bg-red-600 transition-all">
-        ❌ Đóng Camera
-    </button>
-</div>
 		
-		<div class="grid grid-cols-2 md:grid-cols-6 gap-3 bg-blue-50 p-3 md:p-6 rounded-2xl shadow-sm border border-blue-100">
+    <div class="grid grid-cols-2 md:grid-cols-6 gap-3 bg-blue-50 p-3 md:p-6 rounded-2xl shadow-sm border border-blue-100">
         <div class="md:col-span-1">
             <label class="block text-xs font-bold text-blue-800 mb-1">Số phiếu</label>
             <input type="text" id="imp-receipt" class="w-full border border-blue-200 p-2.5 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" readonly>
@@ -386,43 +375,49 @@ function toggleMoreMenu() {
     <div id="cart-box" class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 overflow-x-auto"></div>
 
     <div class="flex justify-end gap-3">
-        <button id="add-btn" onclick="addToCart()" class="bg-slate-700 text-white px-8 py-3 rounded-2xl hover:bg-slate-800 font-bold transition-all shadow-md">
-            Thêm vào giỏ
-        </button>
-        <button id="save-import-btn" onclick="saveImport()" class="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold shadow-md hover:bg-blue-700 transition-all">
-            Lưu nhập kho
-        </button>
+        <button id="add-btn" onclick="addToCart()" class="bg-slate-700 text-white px-8 py-3 rounded-2xl hover:bg-slate-800 font-bold transition-all shadow-md">Thêm vào giỏ</button>
+        <button id="save-import-btn" onclick="saveImport()" class="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold shadow-md hover:bg-blue-700 transition-all">Lưu nhập kho</button>
     </div>
-
-
 
     <h3 class="font-bold text-gray-700 mt-6">DANH SÁCH PHIẾU NHẬP</h3>
 
-<div class="mt-4 mb-4">
-    <input type="text" id="searchReceiptInput" onkeyup="searchReceipts()" 
-           placeholder="Tìm kiếm theo số phiếu..." 
-           class="w-full md:w-1/3 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-</div>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100 my-4">
+        <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase">Tháng</label>
+            <input type="month" id="filter-month" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase">Từ Ngày</label>
+            <input type="date" id="filter-date-from" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase">Đến Ngày</label>
+            <input type="date" id="filter-date-to" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase">Tìm theo số phiếu</label>
+            <input type="text" id="searchReceiptInput" onkeyup="filterReceipts()" placeholder="Nhập số phiếu..." class="w-full p-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+    </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
-    <div class="overflow-x-auto border border-gray-100 rounded-2xl bg-gray-50 p-2 md:p-4">
-        <table class="w-full text-sm">
-            <thead class="bg-white border-b">
-                <tr><th class="p-3 text-left">Số phiếu</th><th class="p-3 text-left">Ngày nhập</th><th class="p-3 text-left">Số SP</th><th class="p-3 text-left">Thao tác</th></tr>
-            </thead>
-            <tbody id="list-receipts-left"></tbody>
-        </table>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+        <div class="overflow-x-auto border border-gray-100 rounded-2xl bg-gray-50 p-2 md:p-4">
+            <table class="w-full text-sm">
+                <thead class="bg-white border-b">
+                    <tr><th class="p-3 text-left">Số phiếu</th><th class="p-3 text-left">Ngày nhập</th><th class="p-3 text-left">Số SP</th><th class="p-3 text-left">Thao tác</th></tr>
+                </thead>
+                <tbody id="list-receipts-left"></tbody>
+            </table>
+        </div>
+        <div class="overflow-x-auto border border-gray-100 rounded-2xl bg-gray-50 p-2 md:p-4">
+            <table class="w-full text-sm">
+                <thead class="bg-white border-b">
+                    <tr><th class="p-3 text-left">Số phiếu</th><th class="p-3 text-left">Ngày nhập</th><th class="p-3 text-left">Số SP</th><th class="p-3 text-left">Thao tác</th></tr>
+                </thead>
+                <tbody id="list-receipts-right"></tbody>
+            </table>
+        </div>
     </div>
-    <div class="overflow-x-auto border border-gray-100 rounded-2xl bg-gray-50 p-2 md:p-4">
-        <table class="w-full text-sm">
-            <thead class="bg-white border-b">
-                <tr><th class="p-3 text-left">Số phiếu</th><th class="p-3 text-left">Ngày nhập</th><th class="p-3 text-left">Số SP</th><th class="p-3 text-left">Thao tác</th></tr>
-            </thead>
-            <tbody id="list-receipts-right"></tbody>
-        </table>
-    </div>
-</div>
-	
 
     <div id="modal-receipt" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -716,18 +711,18 @@ function toggleMoreMenu() {
             
             <div>
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tháng</label>
-                <input type="month" id="filterMonth" onchange="filterSales()" class="w-full p-2 border border-slate-300 rounded-lg">
+                <input type="month" id="filterMonth" onchange="loadSalesList()" class="w-full p-2 border border-slate-300 rounded-lg">
             </div>
             <div>
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Từ ngày</label>
-                <input type="date" id="dateFrom" onchange="filterSales()" class="w-full p-2 border border-slate-300 rounded-lg">
+                <input type="date" id="dateFrom" onchange="loadSalesList()" class="w-full p-2 border border-slate-300 rounded-lg">
             </div>
             <div>
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Đến ngày</label>
-                <input type="date" id="dateTo" onchange="filterSales()" class="w-full p-2 border border-slate-300 rounded-lg">
+                <input type="date" id="dateTo" onchange="loadSalesList()" class="w-full p-2 border border-slate-300 rounded-lg">
             </div>
             <div class="flex items-end">
-                <button onclick="exportInvoiceToExcel()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold p-2 rounded-lg transition h-[42px]">
+                <button type="button" onclick="exportInvoiceToExcel()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold p-2 rounded-lg transition h-[42px]">
                     📊 Xuất Excel
                 </button>
             </div>
@@ -1202,6 +1197,28 @@ if (invMonthPicker) {
 setTimeout(() => {
     updateDashboardData('inventory', 'today');
 }, 500);
+// --- 5. Lắng nghe sự kiện cho Bộ lọc Bán hàng ---
+    const filterMonth = document.getElementById('filterMonth');
+    const dateFrom = document.getElementById('dateFrom');
+    const dateTo = document.getElementById('dateTo');
+
+    if (filterMonth) {
+        filterMonth.addEventListener('change', () => {
+            if (typeof loadSalesList === 'function') loadSalesList();
+        });
+    }
+    
+    if (dateFrom) {
+        dateFrom.addEventListener('change', () => {
+            if (typeof loadSalesList === 'function') loadSalesList();
+        });
+    }
+    
+    if (dateTo) {
+        dateTo.addEventListener('change', () => {
+            if (typeof loadSalesList === 'function') loadSalesList();
+        });
+    }
 });
 
 // ==== TRANG CHỦ =====
@@ -1761,46 +1778,56 @@ function removeFromCart(index) {
         updateProductList(); 
     }
 
-   function loadReceipts() {
-    console.log("Đang tải danh sách phiếu...");
+  function loadReceipts() {
+    console.log("Đang tải danh sách phiếu theo tháng...");
     const leftBody = document.getElementById('list-receipts-left');
     const rightBody = document.getElementById('list-receipts-right');
     if (!leftBody || !rightBody) return;
 
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    // Lấy giá trị tháng từ input (định dạng YYYY-MM)
+    const filterMonth = document.getElementById('filter-month').value;
+    
+    // Nếu chưa chọn tháng, mặc định lấy tháng hiện tại
+    const now = new Date();
+    const currentMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+    const targetMonth = filterMonth || currentMonth;
+    if (!filterMonth) document.getElementById('filter-month').value = currentMonth;
 
     db.collection('receipts').orderBy('date', 'desc').get()
     .then(snapshot => {
         leftBody.innerHTML = '';
         rightBody.innerHTML = '';
-        window.allReceipts = []; // Reset mảng
+        window.allReceipts = []; 
 
-        const docs = snapshot.docs;
-        const total = docs.length;
+        // Lọc danh sách ngay khi lấy dữ liệu về
+        const filteredDocs = snapshot.docs.filter(doc => {
+            const data = doc.data();
+            const date = data.date?.toDate ? data.date.toDate() : null;
+            if (!date) return false;
+            const docMonth = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
+            return docMonth === targetMonth;
+        });
+
+        const total = filteredDocs.length;
         const midPoint = Math.ceil(total / 2);
 
-        docs.forEach((doc, index) => {
+        filteredDocs.forEach((doc, index) => {
             const data = doc.data();
             
-            // --- CẬP NHẬT QUAN TRỌNG: Lưu phiếu vào mảng toàn cục ---
             window.allReceipts.push({
                 docId: doc.id,
                 displayId: data.id || '---',
                 items: data.items || [],
                 date: data.date
             });
-            // --------------------------------------------------------
 
-            const itemDate = data.date?.toDate ? data.date.toDate() : null;
-            const isOld = itemDate && itemDate < oneWeekAgo;
-            
-            const dateStr = itemDate ? itemDate.toLocaleDateString('vi-VN') : '---';
+            const dateStr = data.date?.toDate ? data.date.toDate().toLocaleDateString('vi-VN') : '---';
             const itemCount = Array.isArray(data.items) ? data.items.length : 0;
             const displayId = data.id || '---';
 
+            // Không còn dùng class old-receipt hay style display:none nữa
             const rowHtml = `
-                <tr class="border-b hover:bg-gray-50 text-center ${isOld ? 'old-receipt' : ''}" ${isOld ? 'style="display:none"' : ''}>
+                <tr class="border-b hover:bg-gray-50 text-center">
                     <td class="border p-2 font-bold">${displayId}</td>
                     <td class="border p-2">${dateStr}</td>
                     <td class="border p-2">${itemCount} loại</td>
@@ -1865,17 +1892,89 @@ function searchReceipts() {
         let idCell = row.getElementsByTagName("td")[0];
         if (idCell) {
             let txtValue = idCell.textContent || idCell.innerText;
-            let isOld = row.classList.contains('old-receipt');
-
-            if (filter === "") {
-                // Nếu ô tìm kiếm rỗng: Ẩn các phiếu cũ (old-receipt)
-                row.style.display = isOld ? "none" : "";
+            
+            // Chỉ cần kiểm tra xem mã phiếu có chứa từ khóa tìm kiếm hay không
+            // Nếu tìm kiếm trống, hiển thị lại tất cả các phiếu của tháng đó
+            if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                row.style.display = "";
             } else {
-                // Nếu đang tìm kiếm: Hiện tất cả các phiếu (cả mới và cũ) khớp từ khóa
-                row.style.display = txtValue.toLowerCase().indexOf(filter) > -1 ? "" : "none";
+                row.style.display = "none";
             }
         }
     });
+}
+
+
+//===== xem theo tháng , Ngày
+function filterReceipts() {
+    const monthInput = document.getElementById('filter-month');
+    
+    // 1. Xử lý khi thay đổi tháng
+    if (event && event.target.id === 'filter-month') {
+        setDateRangeForMonth(monthInput.value); 
+        loadReceipts(); 
+        return;
+    }
+
+    // 2. Lấy giá trị bộ lọc ngày (nếu rỗng thì mặc định là vô cực để không lọc)
+    const fromVal = document.getElementById('filter-date-from').value;
+    const toVal = document.getElementById('filter-date-to').value;
+    const keyword = document.getElementById('searchReceiptInput')?.value.toLowerCase() || "";
+
+    const fromDate = fromVal ? new Date(fromVal) : new Date(0); // Nếu không chọn thì lấy từ năm 1970
+    const toDate = toVal ? new Date(toVal) : new Date(3000, 0, 1); // Nếu không chọn thì lấy đến năm 3000
+
+    const allRows = document.querySelectorAll('#list-receipts-left tr, #list-receipts-right tr');
+    
+    allRows.forEach(row => {
+        // Lấy dữ liệu từ bảng
+        const id = row.cells[0]?.innerText.toLowerCase() || "";
+        const dateStr = row.cells[1]?.innerText || "";
+        
+        // Chuyển đổi định dạng dd/mm/yyyy từ bảng sang Date object
+        const [d, m, y] = dateStr.split('/');
+        const rowDate = new Date(`${y}-${m}-${d}`);
+        
+        // Kiểm tra khớp từ khóa
+        const matchKeyword = id.includes(keyword);
+        // Kiểm tra khớp khoảng ngày
+        const matchDate = rowDate >= fromDate && rowDate <= toDate;
+        
+        // Cập nhật hiển thị
+        row.style.display = (matchKeyword && matchDate) ? "" : "none";
+    });
+}
+
+function setDateRangeForMonth(monthValue) {
+    if (!monthValue) return;
+
+    // monthValue định dạng "YYYY-MM"
+    const [year, month] = monthValue.split('-');
+    
+    // 1. Ngày đầu tháng: YYYY-MM-01
+    const firstDay = `${year}-${month}-01`;
+    
+    // 2. Tính ngày hiện tại và tháng hiện tại để so sánh
+    const now = new Date();
+    const currentYearMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+    
+    let lastDay;
+    if (monthValue === currentYearMonth) {
+        // Nếu là tháng hiện tại, lấy ngày hôm nay (YYYY-MM-DD)
+        lastDay = now.toISOString().split('T')[0];
+    } else {
+        // Nếu là tháng cũ, lấy ngày cuối cùng của tháng đó
+        // Lưu ý: new Date(year, month, 0) lấy ngày cuối của tháng trước đó,
+        // nên cần để là month (vì month trong JS 0-11, nếu để nguyên chuỗi tháng 01-12 thì nó tự hiểu)
+        lastDay = new Date(year, month, 0).toISOString().split('T')[0];
+    }
+
+    // Gán giá trị vào input
+    const fromEl = document.getElementById('filter-date-from');
+    const toEl = document.getElementById('filter-date-to');
+
+    if (fromEl) fromEl.value = firstDay;
+    if (toEl) toEl.value = lastDay;
 }
 
     function updateProductList() {
@@ -3106,50 +3205,99 @@ async function viewInvoiceDetails(docId) {
     }
 }
 
-   function loadSalesList() {
+  async function loadSalesList() {
     console.log("Đang bắt đầu hàm loadSalesList...");
     const body = document.getElementById('sales-list-body');
-    
     if (!body) return;
 
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    // Lấy giá trị
+    const filterMonth = document.getElementById('filterMonth')?.value; // YYYY-MM
+    const dateFrom = document.getElementById('dateFrom')?.value;       // YYYY-MM-DD
+    const dateTo = document.getElementById('dateTo')?.value;           // YYYY-MM-DD
 
-    db.collection('sales').orderBy('date', 'desc').get().then(snapshot => {
+    try {
+        const snapshot = await db.collection('sales').orderBy('date', 'desc').get();
         window.allSales = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         body.innerHTML = '';
-        
+
         snapshot.forEach(doc => {
             const data = doc.data();
             const dateObj = data.date?.toDate ? data.date.toDate() : null;
-            const dateStr = dateObj ? dateObj.toLocaleDateString('vi-VN') : '';
-            
-            // Kiểm tra xem phiếu có cũ hơn 7 ngày không
-            const isOld = dateObj && dateObj < oneWeekAgo;
-            
-            const totalAmount = data.grandTotal || data.total || 0;
-            
-            // Nếu là phiếu cũ, thêm class 'old-invoice' và ẩn đi (style="display:none")
-            body.innerHTML += `
-                <tr class="hover:bg-slate-50 ${isOld ? 'old-invoice' : ''}" ${isOld ? 'style="display:none"' : ''}>
-                    <td class="p-3 border">${data.id || 'N/A'}</td>
-                    <td class="p-3 border">${data.customer || 'Khách lẻ'}</td>
-                    <td class="p-3 border">${dateStr}</td>
-                    <td class="p-3 border font-semibold text-right">
-                        ${Number(totalAmount).toLocaleString('vi-VN')} VNĐ
-                    </td>
-                    <td class="p-3 border text-center">
-                        <button onclick="viewInvoiceDetails('${doc.id}')" class="text-green-600 font-bold hover:underline mr-4">Xem</button>
-                        <button onclick="reprintSale('${doc.id}')" class="text-blue-600 font-bold hover:underline mr-4">In lại</button>
-                        <button onclick="deleteSale('${doc.id}')" class="text-red-600 font-bold hover:underline">Xóa</button>
-                    </td>
-                </tr>
-            `;
+            if (!dateObj) return;
+
+            const rowDateISO = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD
+            const rowMonth = rowDateISO.substring(0, 7); // YYYY-MM
+
+            // --- LOGIC LỌC MỚI: KẾT HỢP CÁC ĐIỀU KIỆN ---
+            let isVisible = true;
+
+            // 1. Lọc theo tháng (nếu có chọn)
+            if (filterMonth && rowMonth !== filterMonth) {
+                isVisible = false;
+            }
+
+            // 2. Lọc theo ngày (nếu có chọn)
+            if (dateFrom && rowDateISO < dateFrom) isVisible = false;
+            if (dateTo && rowDateISO > dateTo) isVisible = false;
+
+            // 3. Nếu người dùng không chọn gì cả (tất cả các ô trống) -> Lọc 7 ngày gần nhất
+            if (!filterMonth && !dateFrom && !dateTo) {
+                const oneWeekAgo = new Date();
+                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                isVisible = (dateObj >= oneWeekAgo);
+            }
+
+            // Render
+            if (isVisible) {
+                const dateStr = dateObj.toLocaleDateString('vi-VN');
+                const totalAmount = data.grandTotal || data.total || 0;
+
+                body.innerHTML += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-3 border">${data.id || 'N/A'}</td>
+                        <td class="p-3 border">${data.customer || 'Khách lẻ'}</td>
+                        <td class="p-3 border">${dateStr}</td>
+                        <td class="p-3 border font-semibold text-right">
+                            ${Number(totalAmount).toLocaleString('vi-VN')} VNĐ
+                        </td>
+                        <td class="p-3 border text-center">
+                            <button onclick="viewInvoiceDetails('${doc.id}')" class="text-green-600 font-bold hover:underline mr-4">Xem</button>
+                            <button onclick="reprintSale('${doc.id}')" class="text-blue-600 font-bold hover:underline mr-4">In lại</button>
+                            <button onclick="deleteSale('${doc.id}')" class="text-red-600 font-bold hover:underline">Xóa</button>
+                        </td>
+                    </tr>
+                `;
+            }
         });
-    }).catch(err => {
+    } catch (err) {
         console.error("Lỗi truy vấn Firestore:", err);
-    });
+        alert("Có lỗi khi tải danh sách hóa đơn!");
+    }
 }
+
+
+
+
+function initSalesPage() {
+    const now = new Date();
+    const monthStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+    
+    // Gán giá trị mặc định cho ô chọn tháng
+    const filterMonth = document.getElementById('filterMonth');
+    if (filterMonth) {
+        filterMonth.value = monthStr;
+        filterMonth.addEventListener('change', () => {
+            loadSalesList();
+        });
+    }
+    
+    // Tải danh sách lần đầu
+    loadSalesList();
+}
+
+
+
+
 
 async function reprintSale(docId) {
     try {
@@ -3613,20 +3761,55 @@ function filterSales() {
 
 // Hàm Xuất Excel
 async function exportInvoiceToExcel() {
-    // 1. Kiểm tra dữ liệu
     if (typeof window.allSales === 'undefined' || window.allSales.length === 0) {
         Swal.fire({ icon: 'warning', title: 'Thông báo', text: 'Chưa có dữ liệu để xuất!' });
+        return;
+    }
+
+    // 1. LẤY GIÁ TRỊ BỘ LỌC TỪ GIAO DIỆN
+    const filterMonth = document.getElementById('filterMonth')?.value; // YYYY-MM
+    const dateFrom = document.getElementById('dateFrom')?.value;       // YYYY-MM-DD
+    const dateTo = document.getElementById('dateTo')?.value;           // YYYY-MM-DD
+
+    // 2. LỌC DỮ LIỆU DỰA TRÊN BỘ LỌC
+    const filteredData = window.allSales.filter(sale => {
+        const dateObj = sale.date?.toDate ? sale.date.toDate() : null;
+        if (!dateObj) return false;
+        
+        const rowDateISO = dateObj.toISOString().split('T')[0];
+        const rowMonth = rowDateISO.substring(0, 7);
+
+        if (filterMonth && rowMonth !== filterMonth) return false;
+        if (dateFrom && rowDateISO < dateFrom) return false;
+        if (dateTo && rowDateISO > dateTo) return false;
+
+        return true;
+    });
+
+    if (filteredData.length === 0) {
+        Swal.fire({ icon: 'warning', title: 'Thông báo', text: 'Không có hóa đơn nào thỏa mãn bộ lọc hiện tại!' });
         return;
     }
 
     showLoading();
 
     try {
-        // 2. Khởi tạo Workbook và Worksheet
         const workbook = new ExcelJS.Workbook();
         const sheet = workbook.addWorksheet('ChiTietBanHang');
 
-        // 3. Tiêu đề cột
+        // --- THÊM TIÊU ĐỀ CHÍNH ---
+        sheet.addRow(['LỊCH SỬ HOÁ ĐƠN']).font = { size: 16, bold: true };
+        sheet.mergeCells('A1:I1');
+        sheet.getCell('A1').alignment = { horizontal: 'center' };
+
+        const fStr = dateFrom ? dateFrom.split('-').reverse().join('-') : 'đầu';
+        const tStr = dateTo ? dateTo.split('-').reverse().join('-') : new Date().toLocaleDateString('vi-VN');
+        sheet.addRow([`Từ ngày ${fStr} đến ngày ${tStr}`]).font = { italic: true };
+        sheet.mergeCells('A2:I2');
+        sheet.getCell('A2').alignment = { horizontal: 'center' };
+        sheet.addRow([]); // Dòng trống
+
+        // 3. TIÊU ĐỀ CỘT
         const header = ["Mã HĐ", "Ngày", "Khách hàng", "Tên SP", "ĐVT", "SL", "Đơn giá", "VAT", "Thành tiền"];
         const headerRow = sheet.addRow(header);
         headerRow.font = { bold: true };
@@ -3636,29 +3819,15 @@ async function exportInvoiceToExcel() {
             cell.alignment = { horizontal: 'center' };
         });
 
-        // 4. Đưa dữ liệu vào sheet
-        window.allSales.forEach(sale => {
+        // 4. ĐỔ DỮ LIỆU
+        filteredData.forEach(sale => {
             const dateStr = sale.date?.toDate ? sale.date.toDate().toLocaleDateString('vi-VN') : (sale.date || 'N/A');
-            
             if (sale.items && Array.isArray(sale.items)) {
                 sale.items.forEach(item => {
                     const qty = Number(item.qty) || 0;
                     const price = Number(item.price) || 0;
                     const total = qty * price;
-                    
-                    const row = sheet.addRow([
-                        sale.id || '',
-                        dateStr,
-                        sale.customer || '',
-                        item.name || '',
-                        item.unit || '',
-                        qty,
-                        price,
-                        (item.vat || 0) + '%',
-                        total
-                    ]);
-
-                    // Kẻ bảng cho từng dòng dữ liệu
+                    const row = sheet.addRow([sale.id || '', dateStr, sale.customer || '', item.name || '', item.unit || '', qty, price, (item.vat || 0) + '%', total]);
                     row.eachCell((cell) => {
                         cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
                     });
@@ -3666,25 +3835,27 @@ async function exportInvoiceToExcel() {
             }
         });
 
-        // 5. Tự động chỉnh độ rộng cột
-        sheet.columns = [
-            { width: 15 }, { width: 15 }, { width: 20 }, { width: 25 }, 
-            { width: 10 }, { width: 10 }, { width: 15 }, { width: 10 }, { width: 15 }
-        ];
+        sheet.columns = [{ width: 15 }, { width: 15 }, { width: 20 }, { width: 25 }, { width: 10 }, { width: 10 }, { width: 15 }, { width: 10 }, { width: 15 }];
 
-        // 6. Xuất file
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         const url = window.URL.createObjectURL(blob);
+        
+        // 5. ĐẶT TÊN FILE
+        const d1 = dateFrom ? dateFrom.split('-')[2] : "dau";
+        const d2 = dateTo ? dateTo.split('-').reverse().join('-') : new Date().toLocaleDateString('vi-VN').replace(/\//g, '-');
+        const fileName = `Lịch sử HĐ từ ${d1} đến ${d2}.xlsx`;
+
         const a = document.createElement('a');
         a.href = url;
-        a.download = "LichSuHoaDon_ChiTiet.xlsx";
+        a.download = fileName;
         a.click();
 
         Swal.close();
-        Swal.fire({ icon: 'success', title: 'Thành công', text: 'Đã xuất file lịch sử hóa đơn!', timer: 2000 });
+        Swal.fire({ icon: 'success', title: 'Thành công', text: 'Đã xuất file theo bộ lọc!', timer: 2000 });
     } catch (err) {
         console.error("Lỗi xuất file:", err);
+        Swal.close();
         Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Không thể xuất báo cáo!' });
     }
 }
@@ -3694,59 +3865,61 @@ window.onload = async function() {
     window.productList = []; 
     
     try {
-        // 1. Tải dữ liệu sản phẩm cơ bản (cần thiết cho updateProductDropdowns và mã vạch)
-        // Đảm bảo updateProductDropdowns chạy trước để lấy đầy đủ window.allProducts
-        if (typeof updateProductDropdowns === 'function') {
-            await updateProductDropdowns();
-        }
-
-        // 2. GỌI HÀM DASHBOARD
-        if (typeof loadDashboard === 'function') {
-            await loadDashboard(); 
-        }
-
-        // 3. Refresh cache (nếu bạn có hàm này để đồng bộ dữ liệu)
+        // 1. Tải dữ liệu sản phẩm
+        if (typeof updateProductDropdowns === 'function') await updateProductDropdowns();
+        if (typeof loadDashboard === 'function') await loadDashboard(); 
         await refreshCache(); 
         
         console.log("Đã load xong dữ liệu hệ thống!");
 
-        // 4. TÍNH TOÁN VÀ TẢI TỒN KHO 
-        // Sau khi updateProductDropdowns đã xong, thì loadInventory mới có mã vạch để hiển thị
-        if (typeof calculateAllStock === 'function') {
-            await calculateAllStock(); 
-        }
-        
-        if (typeof loadInventory === 'function') {
-            await loadInventory(); 
-        }
-        
-        // 5. RENDER GIAO DIỆN KHÁC
-        if (typeof renderProductGrid === 'function') {
-            renderProductGrid();
-        }
+        // 2. Tính toán kho
+        if (typeof calculateAllStock === 'function') await calculateAllStock(); 
+        if (typeof loadInventory === 'function') await loadInventory(); 
+        if (typeof renderProductGrid === 'function') renderProductGrid();
         
     } catch (e) {
         console.error("Lỗi khi tải dữ liệu khởi tạo:", e);
     }
 
-    // --- Các phần code cũ giữ nguyên ---
+    // --- KHỞI TẠO THỜI GIAN NHẬP KHO ---
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
-    const today = String(now.getDate()).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
     
+    const firstDay = `${year}-${month}-01`;
+    const today = `${year}-${month}-${day}`;
+    
+    const fMonth = document.getElementById('filter-month');
+    const fFrom = document.getElementById('filter-date-from');
+    const fTo = document.getElementById('filter-date-to');
+    
+    if (fMonth) fMonth.value = `${year}-${month}`;
+    if (fFrom) fFrom.value = firstDay;
+    if (fTo) fTo.value = today;
+    
+    if (typeof loadReceipts === 'function') loadReceipts();
+
+    // --- KHỞI TẠO THỜI GIAN BÁN HÀNG ---
     const monthInput = document.getElementById('filterMonth');
+    const sellDateFrom = document.getElementById('dateFrom');
+    const sellDateTo = document.getElementById('dateTo');
+    
+    // Gán giá trị chuẩn
     if (monthInput) monthInput.value = `${year}-${month}`;
+    if (sellDateFrom) sellDateFrom.value = firstDay; // Đầu tháng thay vì lỗi string ngày
+    if (sellDateTo) sellDateTo.value = today;
     
-    const dateFrom = document.getElementById('dateFrom');
-    const dateTo = document.getElementById('dateTo');
-    
-    if (dateFrom) dateFrom.value = `${year}-${month}-${today}`;
-    if (dateTo) dateTo.value = `${year}-${month}-${today}`;
-    
-    if (typeof filterSales === 'function') filterSales();
+    // Gọi các hàm render theo thứ tự
     if (typeof updateSellReceiptNum === 'function') updateSellReceiptNum();
-    if (typeof loadSalesList === 'function') loadSalesList();
+    
+    // Đảm bảo load danh sách hóa đơn sau khi đã thiết lập xong các bộ lọc
+    if (typeof loadSalesList === 'function') {
+        await loadSalesList(); 
+    }
+    
+    // Lọc lại dữ liệu theo giá trị mặc định vừa gán
+    if (typeof filterSales === 'function') filterSales();
 };
 
 // Lắng nghe sự kiện dataChanged để tự load lại dữ liệu
