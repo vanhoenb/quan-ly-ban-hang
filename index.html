@@ -520,8 +520,8 @@ function toggleMoreMenu() {
     <h2 class="text-2xl font-bold text-gray-800">BÁN HÀNG / XUẤT HOÁ ĐƠN</h2>
 
    <div class="flex flex-col lg:flex-row gap-4 w-full">
-    <div class="lg:w-1/2 w-full space-y-4">
-        <div class="bg-white p-3 md:p-4 rounded-2xl border border-gray-100 shadow-sm h-full">
+    <div class="lg:w-1/2 w-full space-y-4 h-[750px]">
+        <div class="bg-white p-3 md:p-4 rounded-2xl border-4 border-red-500 shadow-sm h-full">
             
             <div class="flex gap-2 mb-4">
                 <div class="flex-1 bg-yellow-50 p-2 rounded-xl border border-yellow-200 flex items-center gap-1">
@@ -547,15 +547,15 @@ function toggleMoreMenu() {
             </div>
             
             <div id="product-grid" 
-                 class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 h-[400px] md:h-[625px] overflow-y-auto p-1 md:p-2" 
+                 class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 h-[625px] overflow-y-auto p-1 md:p-2" 
                  style="align-content: start;">
             </div>
         </div>
     </div>
 
 
-        <div class="lg:w-1/2 w-full space-y-4">
-            <div class="bg-blue-50 p-3 md:p-4 rounded-2xl border border-gray-300 shadow-sm space-y-3">
+        <div class="lg:w-1/2 w-full space-y-4 h-[750px] flex flex-col">
+            <div class="bg-blue-100 p-3 md:p-4 rounded-2xl border-4 border-blue-400 shadow-sm space-y-3">
                 <div class="flex gap-2">
                     <input type="text" id="sell-receipt" class="w-1/4 border border-gray-300 p-2.5 rounded-xl text-xs" placeholder="Số phiếu" readonly>
                     
@@ -591,11 +591,11 @@ function toggleMoreMenu() {
                         <option value="8">Thuế: 8%</option>
                         <option value="10">Thuế: 10%</option>
                     </select>
-                    <div id="tax-display" class="w-1/3 text-xs font-bold text-red-600 text-right">Thuế: 0 đ</div>
+                    <div id="tax-display" class="w-1/3 text-xs font-bold text-red-500 text-right">Thuế: 0 đ</div>
                 </div>
             </div>
 
-            <div class="bg-white p-3 md:p-4 rounded-2xl shadow-sm border border-gray-300 h-[350px] overflow-y-auto">
+            <div class="bg-white p-3 md:p-4 rounded-2xl shadow-sm border-4 border-blue-400 flex-1 overflow-y-auto">
                 <table class="w-full text-xs border-collapse">
                     <thead class="bg-gray-50 border-b border-gray-300 sticky top-0">
                         <tr>
@@ -612,14 +612,14 @@ function toggleMoreMenu() {
                 </table>
             </div>
 
-            <div class="bg-slate-800 p-4 rounded-2xl text-white border border-gray-300">
+            <div class="bg-blue-100 p-4 rounded-2xl text-white border-4 border-blue-400">
                 <div class="flex justify-between items-center mb-4">
-                    <span class="text-sm">Tổng thanh toán:</span>
-                    <span id="cart-total-display" class="text-xl font-black text-green-400">0 đ</span>
+                    <span class="text-red-600">Tổng thanh toán:</span>
+                    <span id="cart-total-display" class="text-xl font-black text-red-500">0 đ</span>
                 </div>
-                <button id="btn-save-print" onclick="saveAndPrint()" class="w-full bg-green-600 py-4 rounded-xl font-bold text-lg hover:bg-green-700 transition">
-                    LƯU & XUẤT HOÁ ĐƠN (F1)
-                </button>
+                <button id="btn-save-print" onclick="saveAndPrint()" class="w-full bg-green-600 py-4 rounded-xl font-bold text-lg border border-white/20 hover:bg-green-700 transition shadow-lg">
+					LƯU & XUẤT HOÁ ĐƠN (F1)
+				</button>
             </div>
         </div>
     </div>
