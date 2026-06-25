@@ -553,38 +553,39 @@ function toggleMoreMenu() {
         </div>
     </div>
 
-        <div class="lg:w-1/2 w-full space-y-4">
-            <div class="bg-blue-50 p-3 md:p-4 rounded-2xl border border-gray-300 shadow-sm space-y-3">
-                <div class="flex gap-2">
-                    <input type="text" id="sell-receipt" class="w-1/4 border border-gray-300 p-2.5 rounded-xl text-xs" placeholder="Số phiếu" readonly>
-                    <input type="text" id="sell-customer" placeholder="Tên khách hàng" list="cust-list" class="w-1/2 border border-gray-300 p-2.5 rounded-xl text-xs" onchange="autoFillCustomer(this.value)">
-                    <select id="payment-method" class="w-1/4 border border-gray-300 p-2 rounded-xl text-xs">
-                        <option value="Tiền mặt">Tiền mặt</option>
-                        <option value="CK">CK</option>
-                        <option value="Công nợ">Công nợ</option>
-                    </select>
-                    <datalist id="cust-list"></datalist>
-                </div>
-                <div class="flex gap-2">
-                    <input type="text" id="sell-address" placeholder="Địa chỉ" class="w-1/2 border border-gray-300 p-2.5 rounded-xl text-xs">
-                    <input type="text" id="sell-phone" placeholder="SĐT" class="w-1/2 border border-gray-300 p-2.5 rounded-xl text-xs">
-                </div>
-                <input type="text" id="sell-note-global" placeholder="Ghi chú đơn hàng..." class="w-full border border-gray-300 p-2.5 rounded-xl text-xs">
-                
-                <div class="flex gap-2 items-center">
-                    <select id="global-price-type" class="w-1/3 border border-gray-300 p-2 rounded-xl text-[10px]" onchange="applyGlobalPrice()">
-                        <option value="retail">Bán Lẻ</option>
-                        <option value="wholesale">Bán Sỉ</option>
-                    </select>
-                    <select id="global-vat" class="w-1/3 border border-gray-300 p-2 rounded-xl text-[10px]" onchange="updateGrandTotal()">
-                        <option value="0">Thuế: 0%</option>
-                        <option value="5">Thuế: 5%</option>
-                        <option value="8">Thuế: 8%</option>
-                        <option value="10">Thuế: 10%</option>
-                    </select>
-                    <div id="tax-display" class="w-1/3 text-[10px] font-bold text-red-600 text-right">Thuế: 0 đ</div>
-                </div>
-            </div>
+       <div class="lg:w-1/2 w-full space-y-4">
+    <div class="bg-blue-50 p-3 md:p-4 rounded-2xl border border-gray-300 shadow-sm space-y-3">
+        <div class="flex gap-2">
+            <input type="text" id="sell-receipt" class="w-1/4 border border-gray-300 p-2.5 rounded-xl text-xs" placeholder="Số phiếu" readonly>
+            <input type="text" id="sell-customer" placeholder="Tên khách hàng" list="cust-list" class="w-3/4 border border-gray-300 p-2.5 rounded-xl text-xs" onchange="autoFillCustomer(this.value)">
+            <datalist id="cust-list"></datalist>
+        </div>
+        <div class="flex gap-2">
+            <input type="text" id="sell-address" placeholder="Địa chỉ" class="w-1/2 border border-gray-300 p-2.5 rounded-xl text-xs">
+            <input type="text" id="sell-phone" placeholder="SĐT" class="w-1/2 border border-gray-300 p-2.5 rounded-xl text-xs">
+        </div>
+        <div class="flex gap-2">
+            <select id="payment-method" class="w-1/4 border border-gray-300 p-2 rounded-xl text-xs">
+                <option value="Tiền mặt">Tiền mặt</option>
+                <option value="CK">CK</option>
+                <option value="Công nợ">Công nợ</option>
+            </select>
+            <input type="text" id="sell-note-global" placeholder="Ghi chú đơn hàng..." class="w-3/4 border border-gray-300 p-2.5 rounded-xl text-xs">
+        </div>
+        <div class="flex gap-2 items-center">
+            <select id="global-price-type" class="w-1/3 border border-gray-300 p-2 rounded-xl text-xs" onchange="applyGlobalPrice()">
+                <option value="retail">Bán Lẻ</option>
+                <option value="wholesale">Bán Sỉ</option>
+            </select>
+            <select id="global-vat" class="w-1/3 border border-gray-300 p-2 rounded-xl text-xs" onchange="updateGrandTotal()">
+                <option value="0">Thuế: 0%</option>
+                <option value="5">Thuế: 5%</option>
+                <option value="8">Thuế: 8%</option>
+                <option value="10">Thuế: 10%</option>
+            </select>
+            <div id="tax-display" class="w-1/3 text-xs font-bold text-red-600 text-right">Thuế: 0 đ</div>
+        </div>
+    </div>
 
             <div class="bg-white p-3 md:p-4 rounded-2xl shadow-sm border border-gray-300 h-[350px] overflow-y-auto">
                 <table class="w-full text-xs border-collapse">
@@ -616,59 +617,72 @@ function toggleMoreMenu() {
     </div>
 </div>
 
-<div id="print-area" style="display: none; padding: 40px; font-family: 'Times New Roman', serif;">
+<div id="print-area" style="display: none; padding: 40px; font-family: 'Times New Roman', serif; color: #000;">
+    <div style="border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 20px; font-family: 'Goldman', sans-serif;">
+        <div style="text-align: center;">
+            <h2 style="margin: 0; font-size: 18px; font-weight: bold;">HỢP TÁC XÃ SẢN XUẤT VÀ KINH DOANH NÔNG SẢN THANH NGUYỄN </h2>
+            <p style="margin: 5px 0; font-size: 13px;">Địa chỉ: Số 9, ngõ 456, đường Xuân Thành, Phố Thượng , Phường Hoa Lư, Ninh Bình</p>
+            <p style="margin: 2px 0; font-size: 13px;">Hotline: 0982 998 474 - 0949 558 525</p>
+        </div>
+    </div>
+
     <div style="text-align: center; margin-bottom: 20px; font-family: 'Goldman', sans-serif;">
-        <h2 style="margin: 0; font-size: 16px;">HỢP TÁC XÃ SẢN XUẤT KINH DOANH NÔNG SẢN THANH NGUYÊN</h2>
-        <p style="margin: 2px 0; font-size: 13px;">Số 9, ngõ 456, đường Xuân Thành, Ninh Nhất, TP Hoa Lư, Ninh Bình</p>
-        <p style="margin: 2px 0; font-size: 13px;">Điện thoại: 0982 998 474 - 0949 558 525</p>
-        
         <h1 style="margin: 25px 0; font-size: 32px; text-transform: uppercase; letter-spacing: 2px;">HOÁ ĐƠN BÁN HÀNG</h1>
     </div>
 
-    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-        <div>
-            <p style="margin: 2px 0;"><strong>Khách hàng:</strong> <span id="print-customer"></span></p>
-            <p style="margin: 2px 0;"><strong>Địa chỉ:</strong> <span id="print-address"></span></p>
-            <p style="margin: 2px 0;"><strong>SĐT:</strong> <span id="print-phone"></span></p>
+    <div style="display: flex; justify-content: space-between; border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px; background-color: #fafafa;">
+        <div style="width: 75%;">
+            <p style="margin: 5px 0; font-size: 14px;"><strong>Khách hàng:</strong> <span id="print-customer" style="font-weight: bold;"></span></p>
+            <p style="margin: 5px 0; font-size: 14px;"><strong>Địa chỉ:</strong> <span id="print-address"></span></p>
+            <p style="margin: 5px 0; font-size: 14px;"><strong>SĐT:</strong> <span id="print-phone"></span></p>
         </div>
-        <div style="text-align: right;">
-            <p style="margin: 2px 0;"><strong>Số phiếu:</strong> <span id="print-receipt-id"></span></p>
-            <p style="margin: 2px 0;"><strong>Ngày:</strong> <span id="print-date"></span></p>
-            <p style="margin: 2px 0;"><strong>Ghi chú:</strong> <span id="print-note-global"></span></p>
+        <div style="width: 25%; border-left: 1px dashed #999; padding-left: 15px;">
+            <p style="margin: 5px 0; font-size: 14px;"><strong>Số phiếu:</strong> <span id="print-receipt-id"></span></p>
+            <p style="margin: 5px 0; font-size: 14px;"><strong>Ngày lập:</strong> <span id="print-date"></span></p>
+            <p style="margin: 5px 0; font-size: 14px;"><strong>Ghi chú:</strong> <span id="print-note-global"></span></p>
         </div>
     </div>
 
-    <table border="1" style="width: 100%; border-collapse: collapse; text-align: center; margin-bottom: 10px; font-size: 13px;">
-        <thead style="font-family: 'Goldman', sans-serif; background: #f2f2f2;">
+    <table border="1" style="width: 100%; border-collapse: collapse; text-align: center; margin-bottom: 20px; font-size: 13px;">
+        <thead style="background: #eee; font-weight: bold; font-family: 'Goldman', sans-serif;">
             <tr>
-                <th style="padding: 8px 4px; width: 5%;">STT</th>
-                <th style="padding: 8px 4px;">Tên hàng</th>
-                <th style="padding: 8px 4px; width: 7%;">ĐVT</th>
-                <th style="padding: 8px 4px; width: 7%;">SL</th>
-                <th style="padding: 8px 4px;">Đơn giá</th>
-                <th style="padding: 8px 4px;">Thành tiền</th>
-                <th style="padding: 8px 4px; width: 6%;">Thuế GTGT</th>
-                <th style="padding: 8px 4px;">Tiền thuế</th>
-                <th style="padding: 8px 4px;">Ghi chú</th>
+                <th style="padding: 10px 4px;">STT</th>
+                <th style="padding: 10px 4px;">Tên hàng</th>
+                <th style="padding: 10px 4px;">ĐVT</th>
+                <th style="padding: 10px 4px;">SL</th>
+                <th style="padding: 10px 4px;">Đơn giá</th>
+                <th style="padding: 10px 4px;">Thành tiền</th>
+                <th style="padding: 10px 4px;">Thuế%</th>
+                <th style="padding: 10px 4px;">Tiền thuế</th>
+                <th style="padding: 10px 4px;">Ghi chú</th>
             </tr>
         </thead>
         <tbody id="print-items"></tbody>
     </table>
 
-    <div style="text-align: right; margin-top: 15px; font-size: 16px;">
-        <p>Thành tiền trước thuế: <span id="print-subtotal"></span></p>
-        <p>Tiền thuế GTGT: <span id="print-tax-total"></span></p>
-        <p><strong>Cộng tiền thanh toán: <span id="print-total" style="font-weight: bold;"></span></strong></p>
-        <p><em>Số tiền bằng chữ: <span id="print-total-word"></span></em></p>
-    </div>
-
-    <div style="margin-top: 30px; display: flex; justify-content: space-between; text-align: center;">
-        <div style="width: 40%;">
-            <p><strong>Người mua hàng</strong></p><p style="font-size: 12px; font-style: italic;">(Ký, ghi rõ họ tên)</p>
+    <div style="float: right; width: 350px; font-size: 14px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+            <span>Thành tiền trước thuế:</span> <span id="print-subtotal"></span>
         </div>
-        <div style="width: 40%;">
-            <p>Ninh Bình, ngày <span id="print-day"></span> tháng <span id="print-month"></span> năm <span id="print-year"></span></p>
-            <p><strong>Người bán hàng</strong></p><br><br><br>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+            <span>Tiền thuế GTGT:</span> <span id="print-tax-total"></span>
+        </div>
+        <div style="display: flex; justify-content: space-between; border-top: 2px solid #000; margin-top: 10px; padding-top: 10px; font-size: 16px; font-weight: bold;">
+            <span>Cộng thanh toán:</span> <span id="print-total"></span>
+        </div>
+        <p style="margin: 10px 0 0 0; font-style: italic; font-size: 13px;">Bằng chữ: <span id="print-total-word"></span></p>
+    </div>
+    <div style="clear: both;"></div>
+
+    <div style="margin-top: 40px; display: flex; justify-content: space-between; text-align: center;">
+        <div style="width: 45%;">
+            <p style="margin: 0;"><strong>Người mua hàng</strong></p>
+            <p style="font-size: 12px; font-style: italic;">(Ký, ghi rõ họ tên)</p>
+        </div>
+        <div style="width: 45%;">
+            <p style="margin: 0;">Ninh Bình, ngày <span id="print-day"></span> tháng <span id="print-month"></span> năm <span id="print-year"></span></p>
+            <p style="margin: 0;"><strong>Người bán hàng</strong></p>
+            <p style="font-size: 12px; font-style: italic;">(Ký, đóng dấu, ghi rõ họ tên)</p>
         </div>
     </div>
 </div>
@@ -4179,6 +4193,17 @@ async function loadCustomers() {
         });
         
         renderCustomerList(); // Hiển thị dữ liệu mới
+
+        // Cập nhật danh sách gợi ý cho trang bán hàng
+        const custDataList = document.getElementById('cust-list');
+        if (custDataList) {
+            custDataList.innerHTML = '';
+            window.allCustomersData.forEach(customer => {
+                const option = document.createElement('option');
+                option.value = customer.name;
+                custDataList.appendChild(option);
+            });
+        }
     } catch (err) {
         console.error("Lỗi:", err);
     }
