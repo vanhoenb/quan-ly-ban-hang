@@ -4313,26 +4313,55 @@ function renderCustomerList() {
     body.innerHTML = '';
     filteredList.forEach(data => {
         const debt = data.debt || 0;
+        // Đảm bảo totalPaid không bị lỗi undefined
+        const totalPaid = data.totalPaid || 0; 
+        
         body.innerHTML += `
             <tr class="hover:bg-slate-50">
                 <td class="p-3 border font-bold ${debt > 0 ? 'text-blue-600' : ''}">${data.name || ''}</td>
                 <td class="p-3 border">${data.address || ''}</td>
                 <td class="p-3 border">${data.phone || ''}</td>
-                <td class="p-3 border text-center font-bold text-green-600">${data.totalPaid.toLocaleString('vi-VN')} đ</td>
+                <td class="p-3 border text-center font-bold text-green-600">${totalPaid.toLocaleString('vi-VN')} đ</td>
                 <td class="p-3 border text-center font-bold ${debt > 0 ? 'text-red-600' : 'text-slate-500'}">
                     ${debt.toLocaleString('vi-VN')} đ
                 </td>
                 <td class="p-3 border text-center">
-                    <div class="flex justify-center flex-wrap gap-1 min-w-[150px]">
-                        <button onclick="payDebt('${data.id}', ${debt}, '${data.name}')" class="bg-green-600 text-white py-0.5 px-1 rounded text-[10px]">Trả nợ</button>
-                        <button onclick="setOpeningDebt('${data.id}', '${data.name}')" class="bg-orange-500 text-white py-0.5 px-1 rounded text-[10px]">Đầu kỳ</button>
-                        <button onclick="showDebtHistory('${data.id}', '${data.name}')" class="bg-blue-500 text-white py-0.5 px-1 rounded text-[10px]">Lịch sử</button>
-                        <button onclick="deleteCustomer('${data.id}')" class="bg-red-500 text-white py-0.5 px-1 rounded text-[10px]">Xóa</button>
-                    </div>
-                </td>
+					<div class="relative inline-block text-left">
+						<button onclick="toggleMenu(this)" class="bg-blue-600 text-white py-1 px-3 rounded-md text-[11px] font-bold shadow-sm hover:bg-blue-700 transition">
+							Thao tác ▼
+						</button>
+						<div class="hidden absolute right-0 mt-1 w-24 bg-white border border-blue-100 rounded-lg shadow-xl z-50 p-1 flex flex-col gap-1">
+							<button onclick="payDebt('${data.id}', ${debt}, '${data.name}'); toggleMenu(this.parentElement.previousElementSibling)" class="bg-green-600 text-white py-1 rounded text-[10px] w-full">Trả nợ</button>
+							<button onclick="setOpeningDebt('${data.id}', '${data.name}'); toggleMenu(this.parentElement.previousElementSibling)" class="bg-orange-500 text-white py-1 rounded text-[10px] w-full">Đầu kỳ</button>
+							<button onclick="showDebtHistory('${data.id}', '${data.name}'); toggleMenu(this.parentElement.previousElementSibling)" class="bg-indigo-500 text-white py-1 rounded text-[10px] w-full">Lịch sử</button>
+							<button onclick="deleteCustomer('${data.id}'); toggleMenu(this.parentElement.previousElementSibling)" class="bg-red-500 text-white py-1 rounded text-[10px] w-full">Xóa</button>
+						</div>
+					</div>
+				</td>
             </tr>
         `;
     });
+}
+
+// Đặt hàm này ở ngoài hàm renderCustomerList
+function toggleMenu(btn) {
+    // Tìm cái div menu nằm trong cùng container với nút
+    const menu = btn.nextElementSibling;
+    
+    // Đóng tất cả các menu khác trước khi mở menu mới
+    document.querySelectorAll('.absolute').forEach(el => {
+        if (el !== menu) el.classList.add('hidden');
+    });
+    
+    // Toggle trạng thái ẩn hiện của menu này
+    menu.classList.toggle('hidden');
+}
+
+// Click ra ngoài thì đóng menu
+window.onclick = function(event) {
+    if (!event.target.matches('button')) {
+        document.querySelectorAll('.absolute').forEach(el => el.classList.add('hidden'));
+    }
 }
 
 // nợ đầu kỳ
