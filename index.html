@@ -4360,27 +4360,30 @@ function renderCustomerList() {
 }
 
 function toggleMenu(btn) {
+    // Ngăn chặn sự kiện click này lan ra ngoài (giúp không bị đóng nhầm)
+    event.stopPropagation(); 
+    
     const menu = btn.nextElementSibling;
     
-    // Nếu menu đang mở thì đóng, nếu đang đóng thì mở
-    const isHidden = menu.classList.contains('hidden');
+    // Đóng tất cả các menu thao tác khác (có class 'absolute')
+    document.querySelectorAll('.absolute').forEach(el => {
+        if (el !== menu) el.classList.add('hidden');
+    });
     
-    // Đóng tất cả menu khác trước
-    document.querySelectorAll('.absolute').forEach(el => el.classList.add('hidden'));
-    
-    // Chỉ mở menu này nếu nó đang đóng
-    if (isHidden) {
-        menu.classList.remove('hidden');
-    }
+    // Toggle menu hiện tại
+    menu.classList.toggle('hidden');
 }
 
+// Hàm đóng chỉ dành riêng cho các menu thao tác
 function closeAllMenus() {
     document.querySelectorAll('.absolute').forEach(el => el.classList.add('hidden'));
 }
 
-// Click vào bất cứ đâu (trừ nút thao tác) thì đóng menu
+// Click ra ngoài thì đóng, NHƯNG phải kiểm tra kỹ
 document.addEventListener('click', function(e) {
-    if (!e.target.closest('.relative')) {
+    // Chỉ đóng nếu cái thứ bạn bấm vào KHÔNG phải là nút menu
+    const isMenuButton = e.target.matches('button') && e.target.textContent.includes('Thao tác');
+    if (!isMenuButton) {
         closeAllMenus();
     }
 });
