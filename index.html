@@ -155,6 +155,16 @@
     #invoiceTable td {
         vertical-align: middle;
     }
+	
+	/* Chỉ cho menu thao tác hiển thị khi có class 'is-open' */
+    .custom-menu {
+        display: none;
+        position: absolute;
+        z-index: 1000; /* Đưa nó lên cao hẳn */
+    }
+    .custom-menu.is-open {
+        display: flex;
+    }
 
     </style>
     
@@ -4327,14 +4337,20 @@ function renderCustomerList() {
                 </td>
                 <td class="p-3 border text-center">
 					<div class="relative inline-block text-left">
-						<button onclick="toggleMenu(this)" class="bg-blue-600 text-white py-1 px-3 rounded-md text-[11px] font-bold shadow-sm hover:bg-blue-700 transition">
+						<button onclick="event.stopPropagation(); toggleMenu(this)" 
+								class="bg-blue-600 text-white py-1.5 px-3 rounded-md text-[11px] font-bold shadow-sm hover:bg-blue-700 transition active:scale-95">
 							Thao tác ▼
 						</button>
-						<div class="hidden absolute right-0 mt-1 w-24 bg-white border border-blue-100 rounded-lg shadow-xl z-50 p-1 flex flex-col gap-1">
-							<button onclick="payDebt('${data.id}', ${debt}, '${data.name}'); toggleMenu(this.parentElement.previousElementSibling)" class="bg-green-600 text-white py-1 rounded text-[10px] w-full">Trả nợ</button>
-							<button onclick="setOpeningDebt('${data.id}', '${data.name}'); toggleMenu(this.parentElement.previousElementSibling)" class="bg-orange-500 text-white py-1 rounded text-[10px] w-full">Đầu kỳ</button>
-							<button onclick="showDebtHistory('${data.id}', '${data.name}'); toggleMenu(this.parentElement.previousElementSibling)" class="bg-indigo-500 text-white py-1 rounded text-[10px] w-full">Lịch sử</button>
-							<button onclick="deleteCustomer('${data.id}'); toggleMenu(this.parentElement.previousElementSibling)" class="bg-red-500 text-white py-1 rounded text-[10px] w-full">Xóa</button>
+						
+						<div class="hidden fixed mt-1 w-28 bg-white border border-blue-200 rounded-lg shadow-2xl z-[9999] p-1 flex-col gap-1">
+							<button onclick="payDebt('${data.id}', ${debt}, '${data.name}'); closeAllMenus()" 
+									class="bg-green-600 text-white py-1.5 rounded text-[10px] w-full font-bold">Trả nợ</button>
+							<button onclick="setOpeningDebt('${data.id}', '${data.name}'); closeAllMenus()" 
+									class="bg-orange-500 text-white py-1.5 rounded text-[10px] w-full font-bold">Đầu kỳ</button>
+							<button onclick="showDebtHistory('${data.id}', '${data.name}'); closeAllMenus()" 
+									class="bg-indigo-500 text-white py-1.5 rounded text-[10px] w-full font-bold">Lịch sử</button>
+							<button onclick="deleteCustomer('${data.id}'); closeAllMenus()" 
+									class="bg-red-500 text-white py-1.5 rounded text-[10px] w-full font-bold">Xóa</button>
 						</div>
 					</div>
 				</td>
@@ -4343,26 +4359,30 @@ function renderCustomerList() {
     });
 }
 
-// Đặt hàm này ở ngoài hàm renderCustomerList
 function toggleMenu(btn) {
-    // Tìm cái div menu nằm trong cùng container với nút
+    // 1. Ẩn tất cả các menu đang mở khác
+    document.querySelectorAll('.fixed').forEach(el => el.classList.add('hidden'));
+    
+    // 2. Mở menu hiện tại
     const menu = btn.nextElementSibling;
-    
-    // Đóng tất cả các menu khác trước khi mở menu mới
-    document.querySelectorAll('.absolute').forEach(el => {
-        if (el !== menu) el.classList.add('hidden');
-    });
-    
-    // Toggle trạng thái ẩn hiện của menu này
     menu.classList.toggle('hidden');
+    
+    // 3. Tính toán vị trí để nó hiện ngay dưới nút bấm (dành cho mobile)
+    const rect = btn.getBoundingClientRect();
+    menu.style.top = (rect.bottom + 5) + 'px';
+    menu.style.left = (rect.left) + 'px';
 }
 
-// Click ra ngoài thì đóng menu
-window.onclick = function(event) {
-    if (!event.target.matches('button')) {
-        document.querySelectorAll('.absolute').forEach(el => el.classList.add('hidden'));
-    }
+function closeAllMenus() {
+    document.querySelectorAll('.fixed').forEach(el => el.classList.add('hidden'));
 }
+
+// Click bất cứ đâu ngoài vùng menu thì đóng hết
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.relative')) {
+        closeAllMenus();
+    }
+});
 
 // nợ đầu kỳ
 async function setOpeningDebt(customerId, customerName) {
