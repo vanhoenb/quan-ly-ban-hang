@@ -245,25 +245,26 @@ function toggleMoreMenu() {
             </div>
         </div>
         <div class="bg-emerald-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02] flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
-            <p class="text-[10px] md:text-xs font-bold uppercase opacity-80">Đơn Hàng</p>
-            <div class="mt-1">
-                <h3 id="total-orders" class="text-lg md:text-2xl font-black">0</h3>
-                <p class="text-[9px] md:text-[10px] opacity-80 uppercase">Đơn tháng này</p>
-            </div>
-        </div>
-        <div class="bg-amber-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02] flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
-            <p class="text-[10px] md:text-xs font-bold uppercase opacity-80">Tồn Kho</p>
-            <div class="mt-1">
-                <h3 id="total-items" class="text-lg md:text-2xl font-black">0</h3>
-                <p class="text-[9px] md:text-[10px] opacity-80 uppercase">Mã sản phẩm</p>
-            </div>
-        </div>
-        <div class="bg-rose-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02] flex flex-col h-[100px] md:h-[120px]">
-            <p class="text-[10px] md:text-xs font-bold uppercase opacity-80 text-center">Cần Nhập</p>
-            <div id="low-stock-list" class="text-sm md:text-md font-bold mt-1 overflow-y-auto flex-1 custom-scrollbar">
-                -
-            </div>
-        </div>
+			<p class="text-[10px] md:text-xs font-bold uppercase opacity-80">Công Nợ Thu</p>
+			<div class="mt-1">
+				<h3 id="total-debt-summary" class="text-lg md:text-2xl font-black">0 đ</h3>
+				<p class="text-[9px] md:text-[10px] opacity-80 uppercase">Khách đang nợ</p>
+			</div>
+		</div>
+
+		<div class="bg-amber-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02] flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
+			<p class="text-[10px] md:text-xs font-bold uppercase opacity-80">Đã Thu Tháng</p>
+			<div class="mt-1">
+				<h3 id="monthly-paid-summary" class="text-lg md:text-2xl font-black">0 đ</h3>
+				<p class="text-[9px] md:text-[10px] opacity-80 uppercase">Tiền thực về</p>
+			</div>
+		</div>
+
+		<div class="bg-rose-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02] flex flex-col h-[100px] md:h-[120px]">
+			<p class="text-[10px] md:text-xs font-bold uppercase opacity-80 text-center">Khách Nợ Lớn</p>
+			<div id="top-debtors-list" class="text-[10px] md:text-[12px] font-bold mt-1 overflow-y-auto flex-1 custom-scrollbar">
+				</div>
+		</div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -1390,10 +1391,7 @@ async function loadDashboard(filter = 'month', updateCharts = true) {
     });
 
     if (updateCharts) {
-        // Tồn kho là 'today', nhưng Biểu đồ vẫn phải hiển thị dữ liệu tháng (hoặc filter hiện tại)
-        // Nếu filter là 'today', ta vẫn ép biểu đồ hiển thị 'month' để có dữ liệu xem
         const chartFilter = (filter === 'today') ? 'month' : filter;
-        
         await updateDashboardData('revenue', chartFilter);
         await updateDashboardData('topProducts', chartFilter);
     }
@@ -1439,6 +1437,51 @@ async function loadDashboard(filter = 'month', updateCharts = true) {
     
     if (lowStockCountEl) lowStockCountEl.innerText = lowStockItems.length;
     if (totalItemsEl) totalItemsEl.innerText = orderList.length;
+
+    // --- CẬP NHẬT 3 Ô MỚI (CÔNG NỢ, ĐÃ THU, KHÁCH NỢ LỚN) ---
+    const customers = window.allCustomersData || [];
+    const activeDocs = (typeof filteredDocs !== 'undefined') ? filteredDocs : snapshotXuat.docs;
+    
+    const debtEl = document.getElementById('total-debt-summary');
+    const paidEl = document.getElementById('monthly-paid-summary'); 
+    const topDebtorsListEl = document.getElementById('top-debtors-list');
+
+    // 1. Tổng công nợ (Lấy từ danh sách khách hàng)
+    if (debtEl) {
+        const totalDebt = customers.reduce((sum, c) => sum + (Number(c.debt || 0)), 0);
+        debtEl.innerText = totalDebt.toLocaleString('vi-VN') + " đ";
+    }
+
+    // 2. Đã thu tháng (Tính tổng những đơn KHÔNG PHẢI là "Công nợ")
+    if (paidEl) {
+        const totalPaid = activeDocs.reduce((sum, doc) => {
+            const data = doc.data();
+            const total = Number(data.total) || 0;
+            // Chỉ cộng nếu paymentMethod khác "Công nợ"
+            if (data.paymentMethod !== "Công nợ") {
+                return sum + total;
+            }
+            return sum;
+        }, 0);
+        paidEl.innerText = totalPaid.toLocaleString('vi-VN') + " đ";
+    }
+
+    // 3. Khách nợ lớn
+    if (topDebtorsListEl) {
+        const topDebtors = [...customers]
+            .filter(c => Number(c.debt || 0) > 0)
+            .sort((a, b) => Number(b.debt || 0) - Number(a.debt || 0))
+            .slice(0, 5);
+            
+        topDebtorsListEl.innerHTML = topDebtors.length > 0 
+            ? topDebtors.map(c => `
+                <div class="flex justify-between items-center mb-0.5 border-b border-rose-400/30 pb-0.5">
+                    <span class="truncate max-w-[65%] text-[10px] md:text-[11px]">${c.name || 'Khách'}</span>
+                    <span class="font-bold text-[10px] md:text-[11px]">${(Number(c.debt || 0)/1000000).toFixed(1)}tr</span>
+                </div>`).join('')
+            : '<div class="text-center mt-2 opacity-70 text-xs">Không có nợ</div>';
+    }
+    // -------------------------------------------------------
 
     if (recentInvoicesEl) {
         const sortedSales = snapshotXuat.docs
