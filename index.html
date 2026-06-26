@@ -288,7 +288,7 @@ function toggleMoreMenu() {
                 </div>
             </div>
 
-            <div class="bg-gray-200 p-6 rounded-3xl border border-slate-200">
+            <div class="bg-green-100 p-6 rounded-3xl border border-blue-300">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center">
                         <i data-lucide="flame" class="w-4 h-4 mr-2 text-rose-600"></i> TOP 10 SP BÁN CHẠY
@@ -309,7 +309,7 @@ function toggleMoreMenu() {
             </div>
         </div>
 
-			   <div class="bg-blue-200 p-6 rounded-3xl border border-slate-200 h-full flex flex-col">
+			   <div class="bg-blue-200 p-6 rounded-3xl border border-red-300 h-full flex flex-col">
 				<div class="flex justify-between items-center mb-6">
 					<h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center">
 						<i data-lucide="package" class="w-4 h-4 mr-2 text-amber-600"></i> Chi tiết tồn kho
@@ -520,8 +520,8 @@ function toggleMoreMenu() {
     <h2 class="text-2xl font-bold text-gray-800">BÁN HÀNG / XUẤT HOÁ ĐƠN</h2>
 
    <div class="flex flex-col lg:flex-row gap-4 w-full">
-    <div class="lg:w-1/2 w-full space-y-4 h-[800px]">
-        <div class="bg-white p-3 md:p-4 rounded-2xl border-4 border-red-500 shadow-sm h-full">
+   <div class="lg:w-1/2 w-full space-y-4 h-auto md:h-[800px]">
+    <div class="bg-white p-3 md:p-4 rounded-2xl border-4 border-red-500 shadow-sm h-full">
             
             <div class="flex gap-2 mb-4">
                 <div class="flex-1 bg-yellow-50 p-2 rounded-xl border border-yellow-200 flex items-center gap-1">
@@ -547,9 +547,9 @@ function toggleMoreMenu() {
             </div>
             
             <div id="product-grid" 
-                 class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 h-[680px] overflow-y-auto p-1 md:p-2" 
-                 style="align-content: start;">
-            </div>
+				 class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 h-[250px] md:h-[680px] overflow-y-auto p-1 md:p-2" 
+				 style="align-content: start;">
+			</div>
         </div>
     </div>
 
@@ -595,22 +595,22 @@ function toggleMoreMenu() {
                 </div>
             </div>
 
-            <div class="bg-white p-3 md:p-4 rounded-2xl shadow-sm border-4 border-blue-400 flex-1 overflow-y-auto">
-                <table class="w-full text-xs border-collapse">
-                    <thead class="bg-gray-50 border-b border-gray-300 sticky top-0">
-                        <tr>
-                            <th class="p-2 text-left w-1/4 border-r border-gray-300">Tên SP</th> 
-                            <th class="p-2 w-[50px] border-r border-gray-300">SL</th>
-                            <th class="p-2 w-[70px] border-r border-gray-300">Giá</th>
-                            <th class="p-2 w-24 border-r border-gray-300">Ghi chú</th>
-                            <th class="p-2 w-20 border-r border-gray-300">Thành tiền</th>
-                            <th class="p-2 w-8">X</th>
-                        </tr>
-                    </thead>
-                    <tbody id="sell-cart-body" class="divide-y divide-gray-300 text-center">
-                    </tbody>
-                </table>
-            </div>
+            <div class="bg-white p-3 md:p-4 rounded-2xl shadow-sm border-4 border-blue-400 h-48 md:h-auto md:flex-1 overflow-y-auto">
+				<table class="w-full text-xs border-collapse">
+					<thead class="bg-gray-50 border-b border-gray-300 sticky top-0">
+						<tr>
+							<th class="p-2 text-left w-1/4 border-r border-gray-300">Tên SP</th> 
+							<th class="p-2 w-[50px] border-r border-gray-300">SL</th>
+							<th class="p-2 w-[70px] border-r border-gray-300">Giá</th>
+							<th class="p-2 w-24 border-r border-gray-300">Ghi chú</th>
+							<th class="p-2 w-20 border-r border-gray-300">Thành tiền</th>
+							<th class="p-2 w-8">X</th>
+						</tr>
+					</thead>
+					<tbody id="sell-cart-body" class="divide-y divide-gray-300 text-center">
+					</tbody>
+				</table>
+			</div>
 
             <div class="bg-blue-100 p-4 rounded-2xl text-white border-4 border-blue-400">
                 <div class="flex justify-between items-center mb-4">
