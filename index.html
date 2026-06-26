@@ -2903,18 +2903,13 @@ async function calculateAllStock() {
             }
         });
 
-        // 3. TRỪ TIẾP SỐ LƯỢNG ĐANG CÓ TRONG GIỎ HÀNG (sellCart)
-        // Đây là bước quan trọng nhất để tồn kho luôn khớp khi bạn đang bán
-        if (typeof sellCart !== 'undefined') {
-            sellCart.forEach(item => {
-                inventory[item.name] = (inventory[item.name] || 0) - (parseInt(item.qty) || 0);
-            });
-        }
+        // 3. ĐÃ BỎ BƯỚC TRỪ GIỎ HÀNG Ở ĐÂY ĐỂ TRÁNH LỖI KHI LƯU
+        // if (typeof sellCart !== 'undefined') { ... } 
 
         // 4. Gán vào biến toàn cục
         window.currentStockMap = inventory;
         
-        console.log("Đã cập nhật tồn kho (bao gồm hàng trong giỏ):", window.currentStockMap);
+        console.log("Đã cập nhật tồn kho:", window.currentStockMap);
         
     } catch (error) {
         console.error("Lỗi khi tính toán tồn kho:", error);
