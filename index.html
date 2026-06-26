@@ -4260,7 +4260,6 @@ function renderCustomerList() {
     const body = document.getElementById('customer-list-body');
     const searchTerm = (document.getElementById('cust-search')?.value || '').toLowerCase();
     
-    // Lọc dữ liệu từ biến toàn cục đã được loadCustomers cập nhật
     let filteredList = window.allCustomersData.filter(c => 
         (c.name?.toLowerCase().includes(searchTerm)) || 
         (c.phone?.includes(searchTerm))
@@ -4281,15 +4280,53 @@ function renderCustomerList() {
                     ${debt.toLocaleString('vi-VN')} đ
                 </td>
                 <td class="p-3 border text-center">
-                    <div class="flex justify-center gap-1 min-w-[120px]">
-                        <button onclick="payDebt('${data.id}', ${debt}, '${data.name}')" class="flex-1 bg-green-600 text-white py-0.5 px-1 rounded text-[10px]">Trả nợ</button>
-                        <button onclick="showDebtHistory('${data.id}', '${data.name}')" class="flex-1 bg-blue-500 text-white py-0.5 px-1 rounded text-[10px]">Lịch sử</button>
-                        <button onclick="deleteCustomer('${data.id}')" class="flex-1 bg-red-500 text-white py-0.5 px-1 rounded text-[10px]">Xóa</button>
+                    <div class="flex justify-center flex-wrap gap-1 min-w-[150px]">
+                        <button onclick="payDebt('${data.id}', ${debt}, '${data.name}')" class="bg-green-600 text-white py-0.5 px-1 rounded text-[10px]">Trả nợ</button>
+                        <button onclick="setOpeningDebt('${data.id}', '${data.name}')" class="bg-orange-500 text-white py-0.5 px-1 rounded text-[10px]">Đầu kỳ</button>
+                        <button onclick="showDebtHistory('${data.id}', '${data.name}')" class="bg-blue-500 text-white py-0.5 px-1 rounded text-[10px]">Lịch sử</button>
+                        <button onclick="deleteCustomer('${data.id}')" class="bg-red-500 text-white py-0.5 px-1 rounded text-[10px]">Xóa</button>
                     </div>
                 </td>
             </tr>
         `;
     });
+}
+
+// nợ đầu kỳ
+async function setOpeningDebt(customerId, customerName) {
+    const { value: amount } = await Swal.fire({
+        title: 'Nợ đầu kỳ: ' + customerName,
+        input: 'number',
+        inputLabel: 'Nhập số tiền nợ đầu kỳ:',
+        inputPlaceholder: 'Số tiền...',
+        showCancelButton: true,
+        confirmButtonText: 'Lưu',
+        cancelButtonText: 'Hủy'
+    });
+
+    if (amount) {
+        const payAmount = parseFloat(amount);
+        try {
+            // Lưu vào collection riêng để không lẫn với lịch sử trả nợ
+            await db.collection('opening_balances').add({
+                customerId: customerId,
+                customerName: customerName,
+                amount: payAmount,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            // Cộng trực tiếp vào nợ hiện tại của khách
+            const custRef = db.collection('customers').doc(customerId);
+            const custDoc = await custRef.get();
+            const currentDebt = custDoc.data().debt || 0;
+            await custRef.update({ debt: currentDebt + payAmount });
+
+            Swal.fire('Thành công', 'Đã cập nhật nợ đầu kỳ!', 'success');
+            loadCustomers();
+        } catch (error) {
+            Swal.fire('Lỗi', error.message, 'error');
+        }
+    }
 }
 
 function addCustomer() {
@@ -4370,20 +4407,36 @@ async function payDebt(id, currentDebt, customerName) {
 // Hàm hiển thị danh sách các lần trả nợ
 async function showDebtHistory(customerId, customerName) {
     try {
-        // Lấy dữ liệu với bộ lọc đơn giản hơn để kiểm tra xem có lấy được data không
-        const snapshot = await db.collection('debt_history')
-            .where('customerId', '==', customerId)
-            .get();
+        // Lấy dữ liệu từ cả 2 collection
+        const [paySnap, openSnap] = await Promise.all([
+            db.collection('debt_history').where('customerId', '==', customerId).get(),
+            db.collection('opening_balances').where('customerId', '==', customerId).get()
+        ]);
 
-        if (snapshot.empty) {
-            Swal.fire('Thông báo', 'Khách hàng này chưa có lịch sử trả nợ.', 'info');
+        if (paySnap.empty && openSnap.empty) {
+            Swal.fire('Thông báo', 'Khách hàng này chưa có dữ liệu công nợ.', 'info');
             return;
         }
 
         let rows = '';
-        snapshot.forEach(doc => {
+
+        // 1. Hiển thị nợ đầu kỳ (nếu có) - Tô màu vàng nhạt cho dễ phân biệt
+        openSnap.forEach(doc => {
             const d = doc.data();
-            // Sử dụng || '' để tránh lỗi nếu trường dữ liệu bị trống
+            rows += `
+                <tr class="border-b text-xs bg-orange-50">
+                    <td class="p-2 font-bold text-orange-700">Đầu kỳ</td>
+                    <td class="p-2 font-bold text-orange-700">${(d.amount || 0).toLocaleString()}</td>
+                    <td class="p-2 italic text-orange-700">Nhập nợ đầu kỳ</td>
+                    <td class="p-2">
+                        <button onclick="deleteOpeningDebt('${doc.id}', '${customerId}', ${d.amount || 0})" class="text-red-600 font-bold">X</button>
+                    </td>
+                </tr>`;
+        });
+
+        // 2. Hiển thị lịch sử trả nợ
+        paySnap.forEach(doc => {
+            const d = doc.data();
             rows += `
                 <tr class="border-b text-xs">
                     <td class="p-2">${d.date || 'Chưa rõ'}</td>
@@ -4398,15 +4451,42 @@ async function showDebtHistory(customerId, customerName) {
         Swal.fire({
             title: 'Lịch sử: ' + customerName,
             html: `<table class="w-full text-left">
-                     <tr class="bg-gray-100"><th class="p-2">Ngày</th><th class="p-2">Số tiền</th><th class="p-2">Ghi chú</th><th class="p-2">Xóa</th></tr>
+                     <tr class="bg-gray-100">
+                        <th class="p-2">Ngày</th>
+                        <th class="p-2">Số tiền</th>
+                        <th class="p-2">Ghi chú</th>
+                        <th class="p-2">Xóa</th>
+                     </tr>
                      ${rows}
                    </table>`,
             width: '600px'
         });
     } catch (e) {
-        // In chi tiết lỗi ra Console để bạn nhìn thấy
         console.error("Lỗi chi tiết:", e);
         Swal.fire('Lỗi', 'Không thể tải lịch sử: ' + e.message, 'error');
+    }
+}
+
+// xoá nợ đầu kỳ 
+async function deleteOpeningDebt(id, customerId, amount) {
+    if (!confirm("Bạn có chắc muốn xóa nợ đầu kỳ này và trừ số tiền khỏi tổng nợ hiện tại?")) return;
+
+    try {
+        const custRef = db.collection('customers').doc(customerId);
+        const custDoc = await custRef.get();
+        const currentDebt = custDoc.data().debt || 0;
+        
+        // 1. Trừ số tiền đầu kỳ ra khỏi tổng nợ
+        await custRef.update({ debt: currentDebt - amount });
+        
+        // 2. Xóa phiếu đầu kỳ
+        await db.collection('opening_balances').doc(id).delete();
+        
+        Swal.fire('Thành công', 'Đã cập nhật lại công nợ.', 'success');
+        Swal.close(); 
+        loadCustomers();
+    } catch (error) {
+        Swal.fire('Lỗi', error.message, 'error');
     }
 }
 
@@ -4759,7 +4839,7 @@ async function exportFullReport() {
 		titleRow.alignment = { horizontal: 'center' };
 
 		// Đổi tên tiêu đề cột 6 thành "Thành tiền (có thuế)"
-		const header1 = sheet.addRow(["Ngày tháng", "Khách hàng", "Tên sản phẩm", "SL", "Đơn giá", "Thành tiền (có thuế)", "Ghi chú"]);
+		const header1 = sheet.addRow(["Ngày tháng", "Khách hàng", "Tên sản phẩm", "SL", "Đơn giá", "Thành tiền(Có VAT)", "Ghi chú"]);
 
 		// Chỉnh chiều cao dòng
 		header1.height = 25;
@@ -5010,8 +5090,6 @@ async function exportDebtReport() {
 
     const formatNum = (num) => num.toLocaleString('vi-VN');
     
-    // Lưu ý: Tôi giữ lại hàm formatDate của bạn để dùng trong nội dung bảng, 
-    // nhưng bạn có thể thay thế bằng formatDateToDDMMYYYY nếu muốn đồng bộ hoàn toàn.
     const formatDate = (val) => {
         if (!val) return "";
         let d = val.seconds ? new Date(val.seconds * 1000) : new Date(val);
@@ -5019,9 +5097,11 @@ async function exportDebtReport() {
     };
 
     try {
-        const [salesSnap, historySnap] = await Promise.all([
+        // TÍCH HỢP: Đọc thêm collection 'opening_balances'
+        const [salesSnap, historySnap, openSnap] = await Promise.all([
             db.collection('sales').get(),
-            db.collection('debt_history').get()
+            db.collection('debt_history').get(),
+            db.collection('opening_balances').get()
         ]);
 
         const workbook = new ExcelJS.Workbook();
@@ -5033,13 +5113,19 @@ async function exportDebtReport() {
         sheet.mergeCells('A1:H1');
         titleRow.alignment = { horizontal: 'center' };
         
-        // SỬA: Dùng hàm formatDateToDDMMYYYY để hiển thị tiêu đề ngày tháng đẹp hơn
         sheet.addRow([`Từ ngày ${formatDateToDDMMYYYY(from)} đến ngày ${formatDateToDDMMYYYY(to)}`]).alignment = { horizontal: 'center' };
         sheet.mergeCells('A2:H2');
         sheet.addRow([]);
 
-        // ... (Giữ nguyên phần logic xử lý reportData)
         const reportData = {};
+
+        // TÍCH HỢP: Cộng nợ đầu kỳ vào báo cáo
+        openSnap.forEach(doc => {
+            const d = doc.data();
+            if (!reportData[d.customerName]) reportData[d.customerName] = { items: [], pays: [], openingBalance: 0 };
+            reportData[d.customerName].openingBalance += parseFloat(d.amount || 0);
+        });
+
         salesSnap.forEach(doc => {
             const d = doc.data();
             if (d.paymentMethod === 'Công nợ') {
@@ -5084,42 +5170,33 @@ async function exportDebtReport() {
             let totalSales = data.openingBalance;
             let totalPay = 0;
 
-            // Ghi đơn hàng
-			data.items.forEach(s => {
-				// Lấy vatRate của hóa đơn đó (nếu không có thì mặc định là 0)
-				const vatRate = parseFloat(s.vatRate || 0); 
-				
-				s.items?.forEach(item => {
-					// Tính tiền hàng của món này: số lượng * đơn giá
-					const tienHang = parseFloat(item.qty || 0) * parseFloat(item.price || 0);
-					
-					// Tính giá trị sau thuế
-					const amtCoThue = tienHang * (1 + (vatRate / 100));
-					
-					totalSales += amtCoThue; // Cộng vào tổng doanh số
-					
-					const row = sheet.addRow([
-						formatDate(s.date), 
-						item.name, 
-						item.unit || '', 
-						item.qty, 
-						formatNum(item.price), 
-						formatNum(amtCoThue), // Hiển thị số tiền ĐÃ CÓ THUẾ
-						0, 
-						''
-					]);
-					
-					// Căn chỉnh (giữ nguyên logic căn lề của bạn)
-					row.getCell(3).alignment = { horizontal: 'center' };
-					row.getCell(4).alignment = { horizontal: 'center' };
-					row.getCell(5).alignment = { horizontal: 'right' };
-					row.getCell(6).alignment = { horizontal: 'right' };
-					row.getCell(7).alignment = { horizontal: 'right' };
-					row.eachCell(c => setBorderStyle(c));
-				});
-			});
+            data.items.forEach(s => {
+                const vatRate = parseFloat(s.vatRate || 0); 
+                s.items?.forEach(item => {
+                    const tienHang = parseFloat(item.qty || 0) * parseFloat(item.price || 0);
+                    const amtCoThue = tienHang * (1 + (vatRate / 100));
+                    totalSales += amtCoThue;
+                    
+                    const row = sheet.addRow([
+                        formatDate(s.date), 
+                        item.name, 
+                        item.unit || '', 
+                        item.qty, 
+                        formatNum(item.price), 
+                        formatNum(amtCoThue), 
+                        0, 
+                        ''
+                    ]);
+                    
+                    row.getCell(3).alignment = { horizontal: 'center' };
+                    row.getCell(4).alignment = { horizontal: 'center' };
+                    row.getCell(5).alignment = { horizontal: 'right' };
+                    row.getCell(6).alignment = { horizontal: 'right' };
+                    row.getCell(7).alignment = { horizontal: 'right' };
+                    row.eachCell(c => setBorderStyle(c));
+                });
+            });
 
-            // Ghi thanh toán
             data.pays.forEach(p => {
                 const payAmt = parseFloat(p.amount || 0);
                 totalPay += payAmt;
@@ -5128,7 +5205,6 @@ async function exportDebtReport() {
                 row.eachCell(c => setBorderStyle(c));
             });
 
-            // TỔNG CỘNG
             const row2 = sheet.addRow(['', '', '', `TỔNG CỘNG:`, '', formatNum(totalSales), formatNum(totalPay), '']);
             sheet.mergeCells(`D${row2.number}:E${row2.number}`);
             row2.font = { bold: true };
@@ -5136,7 +5212,6 @@ async function exportDebtReport() {
             row2.getCell(7).alignment = { horizontal: 'right' };
             row2.eachCell(c => setBorderStyle(c));
             
-            // SỐ DƯ
             const balance = totalSales - totalPay;
             const row3 = sheet.addRow(['', '', '', 'SỐ DƯ CUỐI KỲ CÒN NỢ:', '', '', '', formatNum(balance)]);
             sheet.mergeCells(`D${row3.number}:G${row3.number}`);
@@ -5152,7 +5227,6 @@ async function exportDebtReport() {
         const buffer = await workbook.xlsx.writeBuffer();
         const a = document.createElement('a');
         a.href = window.URL.createObjectURL(new Blob([buffer]));
-        // SỬA: Tên file cũng dùng định dạng ngày mới
         a.download = `Bao_Cao_Cong_No_${formatDateToDDMMYYYY(from).replace(/-/g,'')}_den_${formatDateToDDMMYYYY(to).replace(/-/g,'')}.xlsx`;
         a.click();
     } catch (e) { alert("Lỗi: " + e.message); }
