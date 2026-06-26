@@ -4626,11 +4626,17 @@ async function exportFullReport() {
     showLoading();
 
     try {
+        const fromDate = new Date(fromVal);
+        const toDate = new Date(toVal);
+        toDate.setHours(23, 59, 59, 999);
+
+        // ĐỌC DỮ LIỆU TỪ NGÀY ĐẦU TIÊN ĐẾN HẾT NGÀY KẾT THÚC
+        // Cách này đảm bảo tính đúng NXT mà vẫn nhẹ hơn nhiều so với việc không có điều kiện gì
         const [salesSnap, receiptsSnap, prodSnap] = await Promise.all([
-			db.collection('sales').orderBy('date', 'asc').get(),
-			db.collection('receipts').orderBy('date', 'asc').get(), // <--- THÊM ORDER BY Ở ĐÂY
-			db.collection('production').get()
-		]);
+            db.collection('sales').where('date', '<=', toDate).get(),
+            db.collection('receipts').where('date', '<=', toDate).get(),
+            db.collection('production').get()
+        ]);
 
         let inventory = {};
 		let orderList = []; // Mảng này sẽ lưu tên sản phẩm theo thứ tự xuất hiện lần đầu
@@ -4664,44 +4670,44 @@ async function exportFullReport() {
 		});
         
         let salesData = [];
-salesSnap.forEach(doc => {
-    const d = doc.data();
-    if (!d.date) return;
-    
-    const dDateObj = d.date.toDate();
-    const dDateStr = dDateObj.toISOString().split('T')[0];
-    
-    // Lấy vatRate của hóa đơn (nếu không có thì mặc định là 0)
-    const vatRate = parseFloat(d.vatRate || 0); 
-    
-    d.items?.forEach(i => {
-        initItem(i.name);
-        const qty = parseInt(i.qty || 0);
-        const price = parseFloat(i.price || 0);
-        
-        // CÔNG THỨC MỚI: Tính thuế dựa trên % của hóa đơn cho từng món
-        const tienHangMoiMon = qty * price;
-        const thueMoiMon = tienHangMoiMon * (vatRate / 100);
-        const thanhTienCoThue = tienHangMoiMon + thueMoiMon;
-        
-        if (dDateObj < fromDateObj) {
-            inventory[i.name].tonDau -= qty;
-        } else if (dDateStr >= fromVal && dDateStr <= toVal) {
-            inventory[i.name].xuat += qty;
-            
-            // Đẩy vào mảng với Thành tiền đã bao gồm thuế
-            salesData.push([
-                dDateStr, 
-                d.customer || 'Khách lẻ', 
-                i.name, 
-                qty, 
-                price, 
-                thanhTienCoThue, // Đã cộng thuế ở đây
-                i.note || ""
-            ]);
-        }
-    });
-});
+		salesSnap.forEach(doc => {
+			const d = doc.data();
+			if (!d.date) return;
+			
+			const dDateObj = d.date.toDate();
+			const dDateStr = dDateObj.toISOString().split('T')[0];
+			
+			// Lấy vatRate của hóa đơn (nếu không có thì mặc định là 0)
+			const vatRate = parseFloat(d.vatRate || 0); 
+			
+			d.items?.forEach(i => {
+				initItem(i.name);
+				const qty = parseInt(i.qty || 0);
+				const price = parseFloat(i.price || 0);
+				
+				// CÔNG THỨC MỚI: Tính thuế dựa trên % của hóa đơn cho từng món
+				const tienHangMoiMon = qty * price;
+				const thueMoiMon = tienHangMoiMon * (vatRate / 100);
+				const thanhTienCoThue = tienHangMoiMon + thueMoiMon;
+				
+				if (dDateObj < fromDateObj) {
+					inventory[i.name].tonDau -= qty;
+				} else if (dDateStr >= fromVal && dDateStr <= toVal) {
+					inventory[i.name].xuat += qty;
+					
+					// Đẩy vào mảng với Thành tiền đã bao gồm thuế
+					salesData.push([
+						dDateStr, 
+						d.customer || 'Khách lẻ', 
+						i.name, 
+						qty, 
+						price, 
+						thanhTienCoThue, // Đã cộng thuế ở đây
+						i.note || ""
+					]);
+				}
+			});
+		});
 
         // TÍNH TOÁN DỮ LIỆU SẢN XUẤT TRONG KHOẢNG (fromVal ĐẾN toVal)
         let spDataRange = {}; 
@@ -4747,59 +4753,59 @@ salesSnap.forEach(doc => {
         sheet.addRow([]);
 
        // I. CHI TIẾT BÁN HÀNG
-const titleRow = sheet.addRow(["I. CHI TIẾT BÁN HÀNG"]);
-titleRow.font = { bold: true, size: 14 };
-sheet.mergeCells(titleRow.number, 1, titleRow.number, 7); 
-titleRow.alignment = { horizontal: 'center' };
+		const titleRow = sheet.addRow(["I. CHI TIẾT BÁN HÀNG"]);
+		titleRow.font = { bold: true, size: 14 };
+		sheet.mergeCells(titleRow.number, 1, titleRow.number, 7); 
+		titleRow.alignment = { horizontal: 'center' };
 
-// Đổi tên tiêu đề cột 6 thành "Thành tiền (có thuế)"
-const header1 = sheet.addRow(["Ngày tháng", "Khách hàng", "Tên sản phẩm", "SL", "Đơn giá", "Thành tiền (có thuế)", "Ghi chú"]);
+		// Đổi tên tiêu đề cột 6 thành "Thành tiền (có thuế)"
+		const header1 = sheet.addRow(["Ngày tháng", "Khách hàng", "Tên sản phẩm", "SL", "Đơn giá", "Thành tiền (có thuế)", "Ghi chú"]);
 
-// Chỉnh chiều cao dòng
-header1.height = 25;
+		// Chỉnh chiều cao dòng
+		header1.height = 25;
 
-header1.eachCell(c => { 
-    c.font = { bold: true, size: 12 }; 
-    // Màu nền hồng nhạt
-    c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFCDD2' } }; 
-    c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; 
-    c.alignment = { horizontal: 'center', vertical: 'middle' }; 
-});
+		header1.eachCell(c => { 
+			c.font = { bold: true, size: 12 }; 
+			// Màu nền hồng nhạt
+			c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFCDD2' } }; 
+			c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; 
+			c.alignment = { horizontal: 'center', vertical: 'middle' }; 
+		});
 
-// SẮP XẾP LẠI DỮ LIỆU THEO NGÀY (YYYY-MM-DD) TRƯỚC KHI VẼ BẢNG
-salesData.sort((a, b) => new Date(a[0]) - new Date(b[0]));
+		// SẮP XẾP LẠI DỮ LIỆU THEO NGÀY (YYYY-MM-DD) TRƯỚC KHI VẼ BẢNG
+		salesData.sort((a, b) => new Date(a[0]) - new Date(b[0]));
 
-salesData.forEach(item => {
-    // TẠO BẢN SAO ĐỂ KHÔNG LÀM THAY ĐỔI DỮ LIỆU GỐC
-    let rowData = [...item]; 
-    
-    // Nếu cột 0 là ngày định dạng yyyy-mm-dd
-    if (rowData[0] && typeof rowData[0] === 'string' && rowData[0].includes('-')) {
-        const parts = rowData[0].split('-'); 
-        if (parts.length === 3) {
-            rowData[0] = `${parts[2]}-${parts[1]}-${parts[0]}`; // Đổi thành dd-mm-yyyy cho đẹp
-        }
-    }
+		salesData.forEach(item => {
+			// TẠO BẢN SAO ĐỂ KHÔNG LÀM THAY ĐỔI DỮ LIỆU GỐC
+			let rowData = [...item]; 
+			
+			// Nếu cột 0 là ngày định dạng yyyy-mm-dd
+			if (rowData[0] && typeof rowData[0] === 'string' && rowData[0].includes('-')) {
+				const parts = rowData[0].split('-'); 
+				if (parts.length === 3) {
+					rowData[0] = `${parts[2]}-${parts[1]}-${parts[0]}`; // Đổi thành dd-mm-yyyy cho đẹp
+				}
+			}
 
-    // Lúc này rowData[5] đã chứa giá trị (Thành tiền + Thuế) từ bước tính toán trước đó
-    const row = sheet.addRow(rowData);
-    
-    row.eachCell((c, col) => {
-        c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-        c.font = { size: 12 };
-        
-        // CĂN GIỮA CÁC CỘT CẦN THIẾT
-        if (col === 1 || col === 4) { // Cột ngày (1) và SL (4) căn giữa
-            c.alignment = { horizontal: 'center' };
-        }
-        
-        if (col === 4) c.font = { bold: true, size: 12 };
-        
-        // Định dạng số tiền
-        // Cột 5 là Đơn giá, cột 6 là Thành tiền (đã bao gồm thuế)
-        if (col === 5 || col === 6) c.numFmt = '#,##0';
-    });
-});
+			// Lúc này rowData[5] đã chứa giá trị (Thành tiền + Thuế) từ bước tính toán trước đó
+			const row = sheet.addRow(rowData);
+			
+			row.eachCell((c, col) => {
+				c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+				c.font = { size: 12 };
+				
+				// CĂN GIỮA CÁC CỘT CẦN THIẾT
+				if (col === 1 || col === 4) { // Cột ngày (1) và SL (4) căn giữa
+					c.alignment = { horizontal: 'center' };
+				}
+				
+				if (col === 4) c.font = { bold: true, size: 12 };
+				
+				// Định dạng số tiền
+				// Cột 5 là Đơn giá, cột 6 là Thành tiền (đã bao gồm thuế)
+				if (col === 5 || col === 6) c.numFmt = '#,##0';
+			});
+		});
         
         // II. NXT
         sheet.addRow([]); 
@@ -5079,39 +5085,39 @@ async function exportDebtReport() {
             let totalPay = 0;
 
             // Ghi đơn hàng
-data.items.forEach(s => {
-    // Lấy vatRate của hóa đơn đó (nếu không có thì mặc định là 0)
-    const vatRate = parseFloat(s.vatRate || 0); 
-    
-    s.items?.forEach(item => {
-        // Tính tiền hàng của món này: số lượng * đơn giá
-        const tienHang = parseFloat(item.qty || 0) * parseFloat(item.price || 0);
-        
-        // Tính giá trị sau thuế
-        const amtCoThue = tienHang * (1 + (vatRate / 100));
-        
-        totalSales += amtCoThue; // Cộng vào tổng doanh số
-        
-        const row = sheet.addRow([
-            formatDate(s.date), 
-            item.name, 
-            item.unit || '', 
-            item.qty, 
-            formatNum(item.price), 
-            formatNum(amtCoThue), // Hiển thị số tiền ĐÃ CÓ THUẾ
-            0, 
-            ''
-        ]);
-        
-        // Căn chỉnh (giữ nguyên logic căn lề của bạn)
-        row.getCell(3).alignment = { horizontal: 'center' };
-        row.getCell(4).alignment = { horizontal: 'center' };
-        row.getCell(5).alignment = { horizontal: 'right' };
-        row.getCell(6).alignment = { horizontal: 'right' };
-        row.getCell(7).alignment = { horizontal: 'right' };
-        row.eachCell(c => setBorderStyle(c));
-    });
-});
+			data.items.forEach(s => {
+				// Lấy vatRate của hóa đơn đó (nếu không có thì mặc định là 0)
+				const vatRate = parseFloat(s.vatRate || 0); 
+				
+				s.items?.forEach(item => {
+					// Tính tiền hàng của món này: số lượng * đơn giá
+					const tienHang = parseFloat(item.qty || 0) * parseFloat(item.price || 0);
+					
+					// Tính giá trị sau thuế
+					const amtCoThue = tienHang * (1 + (vatRate / 100));
+					
+					totalSales += amtCoThue; // Cộng vào tổng doanh số
+					
+					const row = sheet.addRow([
+						formatDate(s.date), 
+						item.name, 
+						item.unit || '', 
+						item.qty, 
+						formatNum(item.price), 
+						formatNum(amtCoThue), // Hiển thị số tiền ĐÃ CÓ THUẾ
+						0, 
+						''
+					]);
+					
+					// Căn chỉnh (giữ nguyên logic căn lề của bạn)
+					row.getCell(3).alignment = { horizontal: 'center' };
+					row.getCell(4).alignment = { horizontal: 'center' };
+					row.getCell(5).alignment = { horizontal: 'right' };
+					row.getCell(6).alignment = { horizontal: 'right' };
+					row.getCell(7).alignment = { horizontal: 'right' };
+					row.eachCell(c => setBorderStyle(c));
+				});
+			});
 
             // Ghi thanh toán
             data.pays.forEach(p => {
