@@ -4337,10 +4337,12 @@ function renderCustomerList() {
                 </td>
                 <td class="p-3 border text-center">
     <div class="relative inline-block text-left">
-        <button onclick="toggleMenu(this)" class="bg-blue-600 text-white py-1.5 px-3 rounded text-[11px] font-bold shadow-sm">
+        <button onclick="toggleMenu(this)" 
+                class="bg-blue-600 text-white py-1 px-3 rounded text-[11px] font-bold shadow-sm">
             Thao tác ▼
         </button>
-        <div class="hidden absolute menu-action right-0 mt-2 w-28 bg-white border border-blue-200 rounded-lg shadow-2xl z-50 p-1 flex-col gap-1">
+        
+        <div class="hidden absolute menu-action right-0 mt-2 w-28 bg-white border border-blue-200 rounded-lg shadow-xl p-1 flex-col gap-1 z-[100]">
             <button onclick="payDebt('${data.id}', ${debt}, '${data.name}')" class="bg-green-600 text-white py-1 rounded text-[10px] w-full font-bold">Trả nợ</button>
             <button onclick="setOpeningDebt('${data.id}', '${data.name}')" class="bg-orange-500 text-white py-1 rounded text-[10px] w-full font-bold">Đầu kỳ</button>
             <button onclick="showDebtHistory('${data.id}', '${data.name}')" class="bg-indigo-500 text-white py-1 rounded text-[10px] w-full font-bold">Lịch sử</button>
@@ -4353,31 +4355,31 @@ function renderCustomerList() {
     });
 }
 
+// Hàm mở/đóng menu (cách đơn giản nhất)
 function toggleMenu(btn) {
-    // Ngăn chặn sự kiện click này lan ra ngoài (giúp không bị đóng nhầm)
-    event.stopPropagation(); 
-    
     const menu = btn.nextElementSibling;
     
-    // Đóng tất cả các menu thao tác khác (có class 'absolute')
-    document.querySelectorAll('.absolute').forEach(el => {
+    // Đóng tất cả menu khác
+    document.querySelectorAll('.menu-action').forEach(el => {
         if (el !== menu) el.classList.add('hidden');
     });
     
-    // Toggle menu hiện tại
+    // Đảo trạng thái ẩn/hiện của menu này
     menu.classList.toggle('hidden');
 }
 
-// Hàm đóng chỉ dành riêng cho các menu thao tác
+// Hàm đóng menu chuyên dụng
 function closeAllMenus() {
-    document.querySelectorAll('.absolute').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.menu-action').forEach(el => el.classList.add('hidden'));
 }
 
-// Click ra ngoài thì đóng, NHƯNG phải kiểm tra kỹ
+// Bắt sự kiện click toàn trang
 document.addEventListener('click', function(e) {
-    // Chỉ đóng nếu cái thứ bạn bấm vào KHÔNG phải là nút menu
-    const isMenuButton = e.target.matches('button') && e.target.textContent.includes('Thao tác');
-    if (!isMenuButton) {
+    // Nếu bấm vào nút "Thao tác" thì bỏ qua, để hàm toggleMenu xử lý
+    if (e.target.innerText.includes('Thao tác')) return;
+    
+    // Nếu bấm vào bất cứ thứ gì KHÔNG PHẢI là menu thao tác thì đóng hết
+    if (!e.target.closest('.menu-action')) {
         closeAllMenus();
     }
 });
