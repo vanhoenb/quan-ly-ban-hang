@@ -4337,20 +4337,14 @@ function renderCustomerList() {
                 </td>
                 <td class="p-3 border text-center">
     <div class="relative inline-block text-left">
-        <button onclick="toggleMenu(this)" 
-                class="bg-blue-600 text-white py-1.5 px-3 rounded text-[11px] font-bold shadow-sm">
+        <button onclick="toggleMenu(this)" class="bg-blue-600 text-white py-1.5 px-3 rounded text-[11px] font-bold shadow-sm">
             Thao tác ▼
         </button>
-        
-        <div class="hidden absolute right-0 mt-2 w-28 bg-white border border-blue-200 rounded-lg shadow-2xl z-50 p-1 flex-col gap-1">
-            <button onclick="payDebt('${data.id}', ${debt}, '${data.name}'); closeAllMenus()" 
-                    class="bg-green-600 text-white py-1 rounded text-[10px] w-full font-bold">Trả nợ</button>
-            <button onclick="setOpeningDebt('${data.id}', '${data.name}'); closeAllMenus()" 
-                    class="bg-orange-500 text-white py-1 rounded text-[10px] w-full font-bold">Đầu kỳ</button>
-            <button onclick="showDebtHistory('${data.id}', '${data.name}'); closeAllMenus()" 
-                    class="bg-indigo-500 text-white py-1 rounded text-[10px] w-full font-bold">Lịch sử</button>
-            <button onclick="deleteCustomer('${data.id}'); closeAllMenus()" 
-                    class="bg-red-500 text-white py-1 rounded text-[10px] w-full font-bold">Xóa</button>
+        <div class="hidden absolute menu-action right-0 mt-2 w-28 bg-white border border-blue-200 rounded-lg shadow-2xl z-50 p-1 flex-col gap-1">
+            <button onclick="payDebt('${data.id}', ${debt}, '${data.name}')" class="bg-green-600 text-white py-1 rounded text-[10px] w-full font-bold">Trả nợ</button>
+            <button onclick="setOpeningDebt('${data.id}', '${data.name}')" class="bg-orange-500 text-white py-1 rounded text-[10px] w-full font-bold">Đầu kỳ</button>
+            <button onclick="showDebtHistory('${data.id}', '${data.name}')" class="bg-indigo-500 text-white py-1 rounded text-[10px] w-full font-bold">Lịch sử</button>
+            <button onclick="deleteCustomer('${data.id}')" class="bg-red-500 text-white py-1 rounded text-[10px] w-full font-bold">Xóa</button>
         </div>
     </div>
 </td>
