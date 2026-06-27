@@ -1138,6 +1138,13 @@ function showPage(pageId) {
     }
 }
 
+function formatNumber(num) {
+    // Math.round(n * 1000) / 1000 là để giữ tối đa 3 chữ số thập phân, 
+    // bạn có thể đổi thành 100 nếu chỉ cần 2 chữ số.
+    // Kết quả dùng Number() để loại bỏ các số 0 thừa ở đuôi (ví dụ: 2.50 -> 2.5)
+    return Number(Math.round(num + 'e+2') + 'e-2');
+}
+
 // Hàm mới: Điền ĐVT và Tự động lấy giá gần nhất
 async function fillProductDetails(name) {
     const unitSelect = document.getElementById('imp-unit');
@@ -1726,7 +1733,7 @@ function renderRevenueChart(filteredDocs, filter) {
     const item = {
         name: document.getElementById('imp-name').value,
         unit: document.getElementById('imp-unit').value,
-        qty: parseInt(document.getElementById('imp-qty').value),
+        qty: parseFloat(document.getElementById('imp-qty').value) || 0,
         retail: document.getElementById('imp-retail').value,
         wholesale: document.getElementById('imp-wholesale').value
     };
@@ -1871,7 +1878,7 @@ function renderCart() {
                     ${item.name} 
                     <span class="text-xs bg-gray-200 px-2 py-0.5 rounded text-gray-600 ml-1">${item.unit}</span>
                 </td>
-                <td class="p-3 text-center font-bold text-blue-600">${item.qty}</td>
+				<td class="p-3 text-center font-bold text-blue-600">${Number(item.qty).toLocaleString('vi-VN', {maximumFractionDigits: 2})}</td>
                 <td class="p-3 text-center">
                     <button onclick="removeFromCart(${index})" 
                             class="text-red-500 hover:text-red-700 font-bold transition-all p-1"
@@ -1951,11 +1958,15 @@ function removeFromCart(index) {
             const data = doc.data();
             
             window.allReceipts.push({
-                docId: doc.id,
-                displayId: data.id || '---',
-                items: data.items || [],
-                date: data.date
-            });
+			docId: doc.id,
+			displayId: data.id || '---',
+			// Dùng .map để duyệt qua từng item và ép kiểu qty sang số thực (float)
+			items: (data.items || []).map(item => ({
+				...item,
+				qty: parseFloat(item.qty) || 0
+			})),
+			date: data.date
+		});
 
             const dateStr = data.date?.toDate ? data.date.toDate().toLocaleDateString('vi-VN') : '---';
             const itemCount = Array.isArray(data.items) ? data.items.length : 0;
@@ -2149,13 +2160,17 @@ function loadInventory() {
             doc.data().items.forEach(item => {
                 const key = (item.name + "_" + item.unit).toLowerCase().trim();
                 
+                // Chuyển parseInt thành parseFloat
+                const qtyValue = parseFloat(item.qty || 0);
+                
                 if (!inventory[key]) {
                     // Lần đầu thấy: khởi tạo object và ghi nhớ thứ tự
-                    inventory[key] = { ...item, qty: parseInt(item.qty || 0) };
+                    inventory[key] = { ...item, qty: qtyValue };
                     orderList.push(key);
                 } else {
                     // Đã thấy: cộng dồn số lượng
-                    inventory[key].qty += parseInt(item.qty || 0);
+                    inventory[key].qty += qtyValue;
+                    
                     // QUAN TRỌNG: Ghi đè giá mới nhất từ phiếu nhập sau
                     inventory[key].retail = item.retail;
                     inventory[key].wholesale = item.wholesale;
@@ -2169,7 +2184,7 @@ function loadInventory() {
                 doc.data().items.forEach(item => {
                     const key = (item.name + "_" + item.unit).toLowerCase().trim();
                     if (inventory[key]) {
-                        inventory[key].qty -= parseInt(item.qty || 0);
+                        inventory[key].qty -= parseFloat(item.qty || 0);
                     }
                 });
             });
@@ -2184,6 +2199,9 @@ function loadInventory() {
                 const retail = Number(item.retail || 0).toLocaleString('vi-VN');
                 const wholesale = Number(item.wholesale || 0).toLocaleString('vi-VN');
                 
+                // SỬA Ở ĐÂY: Hiển thị chính xác giá trị nhập vào, không dư số 0
+                const displayQty = Number(item.qty);
+                
                 // TÌM MÃ VẠCH TỪ DỮ LIỆU SẢN PHẨM TOÀN CỤC
                 const productData = window.allProducts.find(p => p.name === item.name);
                 const barcode = (productData && productData.barcode) ? productData.barcode : '---';
@@ -2195,7 +2213,7 @@ function loadInventory() {
                             <div class="text-[10px] text-gray-400 font-mono">Mã: ${barcode}</div>
                         </td>
                         <td class="p-2">${item.unit}</td>
-                        <td class="p-2 font-bold ${item.qty < 0 ? 'text-red-600' : 'text-blue-600'}">${item.qty}</td>
+                        <td class="p-2 font-bold ${item.qty < 0 ? 'text-red-600' : 'text-blue-600'}">${displayQty}</td>
                         <td class="p-2 price-cell">${retail}</td>
                         <td class="p-2 price-cell">${wholesale}</td>
                     </tr>
@@ -2890,7 +2908,8 @@ function renderSellCart() {
         <td class="p-2 text-left font-medium text-slate-800 break-words w-1/4 text-[11px] border-r border-gray-300">${i.name}</td>
         
         <td class="p-2 w-[50px] border-r border-gray-300">
-            <input type="number" value="${i.qty}" min="1" class="w-full border border-gray-300 rounded text-center text-xs p-1" 
+            <!-- ĐÃ SỬA: Thay min="1" bằng step="any" -->
+            <input type="number" value="${i.qty}" step="any" class="w-full border border-gray-300 rounded text-center text-xs p-1" 
                    onchange="updateCartItem(${index}, 'qty', this.value)">
         </td>
         
@@ -2996,7 +3015,13 @@ function renderProductGrid() {
     ];
     
     window.allProductCache.forEach((p, index) => {
-        const realStock = window.currentStockMap ? (window.currentStockMap[p.name] || 0) : 0;
+        // --- SỬA TẠI ĐÂY ---
+        // Dùng Number() để loại bỏ các số 0 thừa ở đuôi (ví dụ: 2.50 thành 2.5)
+        // Dùng Math.round(... * 100) / 100 để làm tròn sạch số lẻ thừa
+        const rawStock = window.currentStockMap ? (window.currentStockMap[p.name] || 0) : 0;
+        const realStock = Number(Math.round(rawStock * 100) / 100);
+        // -------------------
+
         const safeName = p.name.replace(/'/g, "\\'");
         const idName = p.name.replace(/ /g, '_');
         const isOutOfStock = realStock <= 0;
@@ -3060,7 +3085,7 @@ async function quickAdd(productName, event) {
     const p = window.allProductCache.find(i => i.name === productName);
     if (!p) return;
 
-    // 1. Kiểm tra tồn kho từ bộ nhớ (Đã có sẵn, không cần đợi Firebase)
+    // 1. Kiểm tra tồn kho
     const stock = window.currentStockMap ? (window.currentStockMap[productName] || 0) : 0;
     
     if (stock <= 0) {
@@ -3068,8 +3093,9 @@ async function quickAdd(productName, event) {
         return;
     }
 
-    // 2. TRỪ KHO NGAY TRÊN BỘ NHỚ (Cực nhanh)
-    window.currentStockMap[productName] = stock - 1;
+    // 2. TRỪ KHO VỚI LÀM TRÒN SẠCH (Sử dụng Math.round để tránh lỗi số lẻ)
+    // Nhân 100, làm tròn rồi chia lại 100 để giữ tối đa 2 chữ số thập phân
+    window.currentStockMap[productName] = Math.round((stock - 1) * 100) / 100;
 
     // 3. Xử lý giỏ hàng
     const idName = productName.replace(/ /g, '_');
@@ -3080,7 +3106,8 @@ async function quickAdd(productName, event) {
     const existingItem = !forceNew ? sellCart.find(item => item.name === productName) : null;
 
     if (existingItem) {
-        existingItem.qty += 1;
+        // Cộng và làm tròn sạch
+        existingItem.qty = Math.round((parseFloat(existingItem.qty) + 1) * 100) / 100;
         existingItem.total = existingItem.qty * existingItem.price;
     } else {
         sellCart.push({
@@ -3094,16 +3121,17 @@ async function quickAdd(productName, event) {
         });
     }
 
-    // 4. RENDER GIAO DIỆN TỐI ƯU (Không cần gọi cả hàm renderProductGrid)
-    // Chỉ cập nhật số tồn tại đúng vị trí đó trên màn hình (Cực nhanh)
+    // 4. RENDER GIAO DIỆN VỚI SỐ ĐÃ LÀM TRÒN
     const stockDisplay = document.getElementById(`stock-display-${idName}`);
     if (stockDisplay) {
         const newStock = window.currentStockMap[productName];
-        stockDisplay.innerText = newStock <= 0 ? 'HẾT' : newStock;
-        stockDisplay.className = `text-[10px] md:text-xs font-black ${newStock <= 0 ? 'text-red-600' : 'text-blue-700'}`;
+        // Sử dụng Number() để loại bỏ các số 0 thừa ở đuôi (ví dụ: 2.50 thành 2.5)
+        const displayValue = Number(newStock);
+        stockDisplay.innerText = displayValue <= 0 ? 'HẾT' : displayValue;
+        stockDisplay.className = `text-[10px] md:text-xs font-black ${displayValue <= 0 ? 'text-red-600' : 'text-blue-700'}`;
     }
 
-    renderSellCart(); // Render bảng giỏ hàng
+    renderSellCart();
     
     if (typeof updateCartTotalDisplay === 'function') updateCartTotalDisplay();
 
@@ -3136,11 +3164,11 @@ function updateCartItem(index, field, value) {
     const item = sellCart[index];
     
     if (field === 'qty') {
-        const newQty = parseInt(value) || 1;
+        // SỬA TẠI ĐÂY: Dùng parseFloat thay vì parseInt để nhận diện số lẻ
+        const newQty = parseFloat(value) || 0; 
         
         // 1. TÍNH LẠI TỒN KHO THỰC TẾ
         // Trước khi tính, ta phải trả lại số lượng cũ đã trừ vào kho
-        // Stock thực tế = (Stock hiện tại trong map) + (Số lượng cũ đang nằm trong giỏ)
         const currentStockInMap = window.currentStockMap ? (window.currentStockMap[item.name] || 0) : 0;
         const availableStock = currentStockInMap + item.qty;
 
@@ -3158,7 +3186,7 @@ function updateCartItem(index, field, value) {
 
         // 3. CẬP NHẬT TỒN KHO VÀ GIỎ HÀNG
         // Cập nhật lại map: trừ đi số lượng mới
-        window.currentStockMap[item.name] = availableStock - newQty;
+        window.currentStockMap[item.name] = formatNumber(availableStock - newQty);
         item.qty = newQty;
 
         // 4. QUAN TRỌNG: Vẽ lại lưới sản phẩm để cập nhật số tồn kho mới nhất
@@ -3174,7 +3202,7 @@ function updateCartItem(index, field, value) {
     
     // Render lại giỏ hàng và tổng tiền
     renderSellCart();
-    updateCartTotalDisplay(); // Nếu bạn có hàm này thì gọi để cập nhật tổng tiền
+    updateCartTotalDisplay(); 
 }
 
     // Hàm lưu hóa đơn, in phiếu và trừ kho
@@ -4689,7 +4717,6 @@ async function exportSales() {
     sheet.addRow([`Từ ngày: ${formatDateToDDMMYYYY(from)} - Đến ngày: ${formatDateToDDMMYYYY(to)}`]);
     sheet.addRow([]);
 
-    // Sửa tiêu đề cột để người xem dễ hiểu hơn
     const headerRow = sheet.addRow(["Ngày", "Tên KH", "Tên SP", "ĐVT", "SL", "Đơn giá", "Thuế", "Thành tiền (có thuế)"]);
     headerRow.eachCell((cell) => {
         cell.font = { bold: true };
@@ -4702,13 +4729,13 @@ async function exportSales() {
     snapshot.forEach(doc => {
         const sale = doc.data();
         const date = sale.date ? sale.date.toDate().toLocaleDateString('vi-VN') : '';
-        const vatRate = parseFloat(sale.vatRate) || 0; // Lấy % thuế của hóa đơn đó
+        const vatRate = parseFloat(sale.vatRate) || 0;
 
         sale.items.forEach(i => {
-            const qty = parseInt(i.qty) || 0;
+            // SỬA ĐỔI: Dùng parseFloat thay vì parseInt để giữ số lẻ 2.5
+            const qty = parseFloat(i.qty) || 0; 
             const price = parseFloat(i.price) || 0;
             
-            // Tính tiền hàng và thuế cho từng mặt hàng
             const tienHangMoiMon = qty * price;
             const thueMoiMon = tienHangMoiMon * (vatRate / 100);
             const thanhTienCoThue = tienHangMoiMon + thueMoiMon;
@@ -4766,8 +4793,10 @@ async function exportInventory() {
     try {
         const [receiptsSnap, salesSnap] = await Promise.all([db.collection('receipts').get(), db.collection('sales').get()]);
         let inventory = {};
-        receiptsSnap.forEach(doc => { doc.data().items?.forEach(i => { if (!inventory[i.name]) inventory[i.name] = { nhap: 0, xuat: 0 }; inventory[i.name].nhap += parseInt(i.qty || 0); }); });
-        salesSnap.forEach(doc => { doc.data().items?.forEach(i => { if (!inventory[i.name]) inventory[i.name] = { nhap: 0, xuat: 0 }; inventory[i.name].xuat += parseInt(i.qty || 0); }); });
+
+        // SỬA ĐỔI: Dùng parseFloat để giữ lại số lẻ (2.5)
+        receiptsSnap.forEach(doc => { doc.data().items?.forEach(i => { if (!inventory[i.name]) inventory[i.name] = { nhap: 0, xuat: 0 }; inventory[i.name].nhap += parseFloat(i.qty || 0); }); });
+        salesSnap.forEach(doc => { doc.data().items?.forEach(i => { if (!inventory[i.name]) inventory[i.name] = { nhap: 0, xuat: 0 }; inventory[i.name].xuat += parseFloat(i.qty || 0); }); });
 
         const workbook = new ExcelJS.Workbook();
         const sheet = workbook.addWorksheet('NXT');
@@ -4832,75 +4861,75 @@ async function exportFullReport() {
         ]);
 
         let inventory = {};
-		let orderList = []; // Mảng này sẽ lưu tên sản phẩm theo thứ tự xuất hiện lần đầu
+        let orderList = []; // Mảng này sẽ lưu tên sản phẩm theo thứ tự xuất hiện lần đầu
 
-		const initItem = (name) => { 
-			if (!inventory[name]) { 
-				inventory[name] = { tonDau: 0, nhapMoi: 0, nhapDoi: 0, xuat: 0 }; 
-				orderList.push(name); // Lưu lại tên sản phẩm ngay khi nó xuất hiện lần đầu
-			} 
-		};
+        const initItem = (name) => { 
+            if (!inventory[name]) { 
+                inventory[name] = { tonDau: 0, nhapMoi: 0, nhapDoi: 0, xuat: 0 }; 
+                orderList.push(name); // Lưu lại tên sản phẩm ngay khi nó xuất hiện lần đầu
+            } 
+        };
 
-		const fromDateObj = new Date(fromVal);
+        const fromDateObj = new Date(fromVal);
 
-		// Lưu ý: receiptsSnap nên được sắp xếp theo ngày từ trước nếu bạn muốn thứ tự chính xác
-		receiptsSnap.forEach(doc => {
-			const d = doc.data();
-			if (!d.date) return;
-			const dDateObj = d.date.toDate();
-			const dDateStr = dDateObj.toISOString().split('T')[0];
-			
-			d.items?.forEach(i => {
-				initItem(i.name);
-				const qty = parseInt(i.qty || 0);
-				if (dDateObj < fromDateObj) {
-					inventory[i.name].tonDau += qty;
-				} else if (dDateStr >= fromVal && dDateStr <= toVal) {
-					if (d.type === 'Nhập mới') inventory[i.name].nhapMoi += qty;
-					else inventory[i.name].nhapDoi += qty;
-				}
-			});
-		});
+        // Lưu ý: receiptsSnap nên được sắp xếp theo ngày từ trước nếu bạn muốn thứ tự chính xác
+        receiptsSnap.forEach(doc => {
+            const d = doc.data();
+            if (!d.date) return;
+            const dDateObj = d.date.toDate();
+            const dDateStr = dDateObj.toISOString().split('T')[0];
+            
+            d.items?.forEach(i => {
+                initItem(i.name);
+                const qty = parseFloat(i.qty || 0); // Sửa thành parseFloat
+                if (dDateObj < fromDateObj) {
+                    inventory[i.name].tonDau += qty;
+                } else if (dDateStr >= fromVal && dDateStr <= toVal) {
+                    if (d.type === 'Nhập mới') inventory[i.name].nhapMoi += qty;
+                    else inventory[i.name].nhapDoi += qty;
+                }
+            });
+        });
         
         let salesData = [];
-		salesSnap.forEach(doc => {
-			const d = doc.data();
-			if (!d.date) return;
-			
-			const dDateObj = d.date.toDate();
-			const dDateStr = dDateObj.toISOString().split('T')[0];
-			
-			// Lấy vatRate của hóa đơn (nếu không có thì mặc định là 0)
-			const vatRate = parseFloat(d.vatRate || 0); 
-			
-			d.items?.forEach(i => {
-				initItem(i.name);
-				const qty = parseInt(i.qty || 0);
-				const price = parseFloat(i.price || 0);
-				
-				// CÔNG THỨC MỚI: Tính thuế dựa trên % của hóa đơn cho từng món
-				const tienHangMoiMon = qty * price;
-				const thueMoiMon = tienHangMoiMon * (vatRate / 100);
-				const thanhTienCoThue = tienHangMoiMon + thueMoiMon;
-				
-				if (dDateObj < fromDateObj) {
-					inventory[i.name].tonDau -= qty;
-				} else if (dDateStr >= fromVal && dDateStr <= toVal) {
-					inventory[i.name].xuat += qty;
-					
-					// Đẩy vào mảng với Thành tiền đã bao gồm thuế
-					salesData.push([
-						dDateStr, 
-						d.customer || 'Khách lẻ', 
-						i.name, 
-						qty, 
-						price, 
-						thanhTienCoThue, // Đã cộng thuế ở đây
-						i.note || ""
-					]);
-				}
-			});
-		});
+        salesSnap.forEach(doc => {
+            const d = doc.data();
+            if (!d.date) return;
+            
+            const dDateObj = d.date.toDate();
+            const dDateStr = dDateObj.toISOString().split('T')[0];
+            
+            // Lấy vatRate của hóa đơn (nếu không có thì mặc định là 0)
+            const vatRate = parseFloat(d.vatRate || 0); 
+            
+            d.items?.forEach(i => {
+                initItem(i.name);
+                const qty = parseFloat(i.qty || 0); // Sửa thành parseFloat
+                const price = parseFloat(i.price || 0);
+                
+                // CÔNG THỨC MỚI: Tính thuế dựa trên % của hóa đơn cho từng món
+                const tienHangMoiMon = qty * price;
+                const thueMoiMon = tienHangMoiMon * (vatRate / 100);
+                const thanhTienCoThue = tienHangMoiMon + thueMoiMon;
+                
+                if (dDateObj < fromDateObj) {
+                    inventory[i.name].tonDau -= qty;
+                } else if (dDateStr >= fromVal && dDateStr <= toVal) {
+                    inventory[i.name].xuat += qty;
+                    
+                    // Đẩy vào mảng với Thành tiền đã bao gồm thuế
+                    salesData.push([
+                        dDateStr, 
+                        d.customer || 'Khách lẻ', 
+                        i.name, 
+                        qty, 
+                        price, 
+                        thanhTienCoThue, // Đã cộng thuế ở đây
+                        i.note || ""
+                    ]);
+                }
+            });
+        });
 
         // TÍNH TOÁN DỮ LIỆU SẢN XUẤT TRONG KHOẢNG (fromVal ĐẾN toVal)
         let spDataRange = {}; 
@@ -4914,18 +4943,18 @@ async function exportFullReport() {
             
             // Lũy kế đến ngày kết thúc (toVal) để tính tồn kho chưa đóng/nấu
             if (dDateStr <= toVal) {
-                totalMeChuaNauLuyKe += parseInt(d.meChuaNau || 0);
-                totalMeChoDongLuyKe += parseInt(d.meChuaDong || 0);
-                totalMeDaDongLuyKe += parseInt(d.soMe || 0);
+                totalMeChuaNauLuyKe += parseFloat(d.meChuaNau || 0);
+                totalMeChoDongLuyKe += parseFloat(d.meChuaDong || 0);
+                totalMeDaDongLuyKe += parseFloat(d.soMe || 0);
             }
 
             // GOM DỮ LIỆU TRONG KHOẢNG [fromVal, toVal]
             if (dDateStr >= fromVal && dDateStr <= toVal) {
                 totalKgDaDongRange += parseFloat(d.soKg || 0);
-                totalMeDaDongRange += parseInt(d.soMe || 0);
+                totalMeDaDongRange += parseFloat(d.soMe || 0);
                 if (d.tenSP) {
                     if (!spDataRange[d.tenSP]) spDataRange[d.tenSP] = { sl: 0, kg: 0 };
-                    spDataRange[d.tenSP].sl += parseInt(d.sl || 0);
+                    spDataRange[d.tenSP].sl += parseFloat(d.sl || 0);
                     spDataRange[d.tenSP].kg += parseFloat(d.soKg || 0);
                 }
             }
@@ -4945,45 +4974,45 @@ async function exportFullReport() {
         dateRow.alignment = { horizontal: 'center' };
         sheet.addRow([]);
 
-       // I. CHI TIẾT BÁN HÀNG
-		const titleRow = sheet.addRow(["I. CHI TIẾT BÁN HÀNG"]);
-		titleRow.font = { bold: true, size: 14 };
-		sheet.mergeCells(titleRow.number, 1, titleRow.number, 7); 
-		titleRow.alignment = { horizontal: 'center' };
+        // I. CHI TIẾT BÁN HÀNG
+        const titleRow = sheet.addRow(["I. CHI TIẾT BÁN HÀNG"]);
+        titleRow.font = { bold: true, size: 14 };
+        sheet.mergeCells(titleRow.number, 1, titleRow.number, 7); 
+        titleRow.alignment = { horizontal: 'center' };
 
-		// Đổi tên tiêu đề cột 6 thành "Thành tiền (có thuế)"
-		const header1 = sheet.addRow(["Ngày tháng", "Khách hàng", "Tên sản phẩm", "SL", "Đơn giá", "Thành tiền", "Ghi chú"]);
+        // Đổi tên tiêu đề cột 6 thành "Thành tiền (có thuế)"
+        const header1 = sheet.addRow(["Ngày tháng", "Khách hàng", "Tên sản phẩm", "SL", "Đơn giá", "Thành tiền", "Ghi chú"]);
 
-		// Chỉnh chiều cao dòng
-		header1.height = 25;
+        // Chỉnh chiều cao dòng
+        header1.height = 25;
 
-		header1.eachCell(c => { 
-			c.font = { bold: true, size: 12 }; 
-			// Màu nền hồng nhạt
-			c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFCDD2' } }; 
-			c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; 
-			c.alignment = { horizontal: 'center', vertical: 'middle' }; 
-		});
+        header1.eachCell(c => { 
+            c.font = { bold: true, size: 12 }; 
+            // Màu nền hồng nhạt
+            c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFCDD2' } }; 
+            c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; 
+            c.alignment = { horizontal: 'center', vertical: 'middle' }; 
+        });
 
-		// SẮP XẾP LẠI DỮ LIỆU THEO NGÀY (YYYY-MM-DD) TRƯỚC KHI VẼ BẢNG
-		salesData.sort((a, b) => new Date(a[0]) - new Date(b[0]));
+        // SẮP XẾP LẠI DỮ LIỆU THEO NGÀY (YYYY-MM-DD) TRƯỚC KHI VẼ BẢNG
+        salesData.sort((a, b) => new Date(a[0]) - new Date(b[0]));
 
-		salesData.forEach(item => {
-			// TẠO BẢN SAO ĐỂ KHÔNG LÀM THAY ĐỔI DỮ LIỆU GỐC
-			let rowData = [...item]; 
-			
-			// Nếu cột 0 là ngày định dạng yyyy-mm-dd
-			if (rowData[0] && typeof rowData[0] === 'string' && rowData[0].includes('-')) {
-				const parts = rowData[0].split('-'); 
-				if (parts.length === 3) {
-					rowData[0] = `${parts[2]}-${parts[1]}-${parts[0]}`; // Đổi thành dd-mm-yyyy cho đẹp
-				}
-			}
+        salesData.forEach(item => {
+            // TẠO BẢN SAO ĐỂ KHÔNG LÀM THAY ĐỔI DỮ LIỆU GỐC
+            let rowData = [...item]; 
+            
+            // Nếu cột 0 là ngày định dạng yyyy-mm-dd
+            if (rowData[0] && typeof rowData[0] === 'string' && rowData[0].includes('-')) {
+                const parts = rowData[0].split('-'); 
+                if (parts.length === 3) {
+                    rowData[0] = `${parts[2]}-${parts[1]}-${parts[0]}`; // Đổi thành dd-mm-yyyy cho đẹp
+                }
+            }
 
-			// Lúc này rowData[5] đã chứa giá trị (Thành tiền + Thuế) từ bước tính toán trước đó
-			const row = sheet.addRow(rowData);
-			
-			row.eachCell((c, col) => {
+            // Lúc này rowData[5] đã chứa giá trị (Thành tiền + Thuế) từ bước tính toán trước đó
+            const row = sheet.addRow(rowData);
+            
+            row.eachCell((c, col) => {
 				c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
 				c.font = { size: 12 };
 				
@@ -4997,8 +5026,8 @@ async function exportFullReport() {
 				// Định dạng số tiền
 				// Cột 5 là Đơn giá, cột 6 là Thành tiền (đã bao gồm thuế)
 				if (col === 5 || col === 6) c.numFmt = '#,##0';
-			});
-		});
+            });
+        });
         
         // II. NXT
         sheet.addRow([]); 
@@ -5025,14 +5054,19 @@ async function exportFullReport() {
 
         // SỬA Ở ĐÂY: Dùng orderList đã được sắp xếp từ trước
         orderList.forEach(name => {
-            const item = inventory[name];
-            // Chỉ hiển thị các sản phẩm có tồn tại trong dữ liệu
-            if (!item) return;
+    const item = inventory[name];
+    if (!item) return;
 
-            // THÊM: Kiểm tra nếu tất cả số liệu đều bằng 0 thì bỏ qua dòng này
-            if (item.tonDau === 0 && item.nhapMoi === 0 && item.nhapDoi === 0 && item.xuat === 0) return;
+    // Tính tồn cuối
+    const tonCuoi = item.tonDau + item.nhapMoi + item.nhapDoi - item.xuat;
 
-            const row = sheet.addRow([
+    // Kiểm tra nếu tất cả đều bằng 0 thì bỏ qua
+    if (item.tonDau === 0 && item.nhapMoi === 0 && item.nhapDoi === 0 && item.xuat === 0 && tonCuoi === 0) return;
+
+    // Dùng hàm hỗ trợ để biến số 0 thành chuỗi rỗng
+    const valOrEmpty = (v) => (v === 0 ? "" : v);
+
+    const row = sheet.addRow([
                 formatDateToDDMMYYYY(toVal), 
                 name, 
                 formatVal(item.tonDau), 
@@ -5156,6 +5190,7 @@ async function exportFullReport() {
         Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Có lỗi xảy ra khi xuất báo cáo!' });
     }
 }
+
 
 
 
