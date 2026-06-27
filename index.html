@@ -2194,31 +2194,30 @@ function loadInventory() {
             tbody.innerHTML = '';
             
             orderList.forEach(key => {
-                const item = inventory[key];
-                // Sử dụng Number() để định dạng số an toàn
-                const retail = Number(item.retail || 0).toLocaleString('vi-VN');
-                const wholesale = Number(item.wholesale || 0).toLocaleString('vi-VN');
-                
-                // SỬA Ở ĐÂY: Hiển thị chính xác giá trị nhập vào, không dư số 0
-                const displayQty = Number(item.qty);
-                
-                // TÌM MÃ VẠCH TỪ DỮ LIỆU SẢN PHẨM TOÀN CỤC
-                const productData = window.allProducts.find(p => p.name === item.name);
-                const barcode = (productData && productData.barcode) ? productData.barcode : '---';
+				const item = inventory[key];
+				const retail = Number(item.retail || 0).toLocaleString('vi-VN');
+				const wholesale = Number(item.wholesale || 0).toLocaleString('vi-VN');
+				
+				// SỬA Ở ĐÂY: Dùng làm tròn Math.round để xử lý sai số thập phân
+				const qtyNum = parseFloat(item.qty || 0);
+				const displayQty = (Math.round(qtyNum * 100) / 100).toString();
+				
+				const productData = window.allProducts.find(p => p.name === item.name);
+				const barcode = (productData && productData.barcode) ? productData.barcode : '---';
 
-                tbody.innerHTML += `
-                    <tr class="text-center border-b hover:bg-gray-50">
-                        <td class="p-2 text-left">
-                            <div class="font-medium">${item.name}</div>
-                            <div class="text-[10px] text-gray-400 font-mono">Mã: ${barcode}</div>
-                        </td>
-                        <td class="p-2">${item.unit}</td>
-                        <td class="p-2 font-bold ${item.qty < 0 ? 'text-red-600' : 'text-blue-600'}">${displayQty}</td>
-                        <td class="p-2 price-cell">${retail}</td>
-                        <td class="p-2 price-cell">${wholesale}</td>
-                    </tr>
-                `;
-            });
+				tbody.innerHTML += `
+					<tr class="text-center border-b hover:bg-gray-50">
+						<td class="p-2 text-left">
+							<div class="font-medium">${item.name}</div>
+							<div class="text-[10px] text-gray-400 font-mono">Mã: ${barcode}</div>
+						</td>
+						<td class="p-2">${item.unit}</td>
+						<td class="p-2 font-bold ${item.qty < 0 ? 'text-red-600' : 'text-blue-600'}">${displayQty}</td>
+						<td class="p-2 price-cell">${retail}</td>
+						<td class="p-2 price-cell">${wholesale}</td>
+					</tr>
+				`;
+			});
         }).catch(err => {
             console.error("Lỗi khi tải phiếu xuất: ", err);
         });
