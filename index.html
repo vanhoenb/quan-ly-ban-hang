@@ -574,7 +574,8 @@ function toggleMoreMenu() {
                         <input type="text" id="sell-customer" placeholder="Tên khách hàng" 
 						   class="w-full border border-gray-300 p-2.5 rounded-xl text-xs" 
 						   oninput="filterCustomerList(this.value)" 
-						   onclick="this.value=''; filterCustomerList('');">
+						   onclick="this.value=''; filterCustomerList('');"
+						   autocomplete="off"> <!-- THÊM DÒNG NÀY VÀO -->
                         <div id="dropdown-list" class="absolute z-[100] w-full bg-white border border-gray-300 rounded-xl mt-1 shadow-lg max-h-48 overflow-y-auto hidden text-xs">
                         </div>
                     </div>
@@ -4391,17 +4392,24 @@ function renderCustomerList() {
         </button>
         
         <div class="hidden absolute menu-action right-0 mt-2 w-28 bg-white border border-blue-200 rounded-lg shadow-xl p-1 flex-col gap-1 z-[100]">
-            <button onclick="payDebt('${data.id}', ${debt}, '${data.name}')" class="bg-green-600 text-white py-1 rounded text-[10px] w-full font-bold">Trả nợ</button>
-            <button onclick="setOpeningDebt('${data.id}', '${data.name}')" class="bg-orange-500 text-white py-1 rounded text-[10px] w-full font-bold">Đầu kỳ</button>
-            <button onclick="showDebtHistory('${data.id}', '${data.name}')" class="bg-indigo-500 text-white py-1 rounded text-[10px] w-full font-bold">Lịch sử</button>
-            <button onclick="deleteCustomer('${data.id}')" class="bg-red-500 text-white py-1 rounded text-[10px] w-full font-bold">Xóa</button>
-        </div>
-    </div>
-</td>
+				<button onclick="payDebt('${data.id}', ${debt}, '${data.name}')" class="bg-green-600 text-white py-1 rounded text-[10px] w-full font-bold">Trả nợ</button>
+				<button onclick="setOpeningDebt('${data.id}', '${data.name}')" class="bg-orange-500 text-white py-1 rounded text-[10px] w-full font-bold">Đầu kỳ</button>
+				<button onclick="showDebtHistory('${data.id}', '${data.name}')" class="bg-indigo-500 text-white py-1 rounded text-[10px] w-full font-bold">Lịch sử</button>
+				
+				<!-- NÚT SỬA ĐẶT TẠI ĐÂY -->
+				<button onclick="editCustomer('${data.id}')" class="bg-blue-500 text-white py-1 rounded text-[10px] w-full font-bold">Sửa</button>
+				
+				<!-- NÚT XÓA Ở CUỐI -->
+				<button onclick="deleteCustomer('${data.id}')" class="bg-red-500 text-white py-1 rounded text-[10px] w-full font-bold">Xóa</button>
+			</div>
+		</div>
+	</td>
             </tr>
         `;
     });
 }
+
+
 
 // Hàm mở/đóng menu (cách đơn giản nhất)
 function toggleMenu(btn) {
@@ -4666,6 +4674,53 @@ async function deleteCustomer(id) {
             alert("Đã xóa đại lý.");
         } catch (error) {
             alert("Lỗi khi xóa: " + error.message);
+        }
+    }
+}
+
+async function editCustomer(id) {
+    // 1. Tìm thông tin khách hàng trong mảng dữ liệu đã tải sẵn
+    const customer = window.allCustomersData.find(c => c.id === id);
+    if (!customer) return;
+
+    // 2. Sử dụng SweetAlert2 để nhập liệu (đẹp và chuyên nghiệp hơn prompt)
+    const { value: formValues } = await Swal.fire({
+        title: 'Sửa thông tin khách hàng',
+        html:
+            `<input id="swal-name" class="swal2-input" placeholder="Tên khách hàng" value="${customer.name || ''}">` +
+            `<input id="swal-address" class="swal2-input" placeholder="Địa chỉ" value="${customer.address || ''}">` +
+            `<input id="swal-phone" class="swal2-input" placeholder="Số điện thoại" value="${customer.phone || ''}">`,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'Cập nhật',
+        cancelButtonText: 'Hủy',
+        preConfirm: () => {
+            return {
+                name: document.getElementById('swal-name').value,
+                address: document.getElementById('swal-address').value,
+                phone: document.getElementById('swal-phone').value
+            }
+        }
+    });
+
+    // 3. Nếu người dùng nhấn Cập nhật
+    if (formValues) {
+        if (!formValues.name) return Swal.fire('Lỗi', 'Tên khách hàng không được để trống!', 'error');
+
+        try {
+            // Cập nhật lên Firestore
+            await db.collection('customers').doc(id).update({
+                name: formValues.name,
+                address: formValues.address,
+                phone: formValues.phone
+            });
+
+            Swal.fire('Thành công', 'Đã cập nhật thông tin!', 'success');
+            
+            // Tải lại dữ liệu để cập nhật giao diện
+            loadCustomers();
+        } catch (error) {
+            Swal.fire('Lỗi', 'Không thể cập nhật: ' + error.message, 'error');
         }
     }
 }
