@@ -2934,40 +2934,49 @@ async function calculateAllStock() {
     let inventory = {};
 
     try {
-        // 1. LẤY PHIẾU NHẬP
+        // 1. LẤY PHIẾU NHẬP (Dùng parseFloat để giữ số lẻ 1.5, 2.5...)
         const snapshotNhap = await db.collection('receipts').get();
         snapshotNhap.forEach(doc => {
             const data = doc.data();
             if (data.items) {
                 data.items.forEach(item => {
-                    inventory[item.name] = (inventory[item.name] || 0) + (parseInt(item.qty) || 0);
+                    inventory[item.name] = (inventory[item.name] || 0) + (parseFloat(item.qty) || 0);
                 });
             }
         });
 
-        // 2. LẤY PHIẾU XUẤT (Đã lưu vào DB)
+        // 2. LẤY PHIẾU XUẤT (Dùng parseFloat để giữ số lẻ)
         const snapshotXuat = await db.collection('sales').get(); 
         snapshotXuat.forEach(doc => {
             const data = doc.data();
             if (data.items) {
                 data.items.forEach(item => {
-                    inventory[item.name] = (inventory[item.name] || 0) - (parseInt(item.qty) || 0);
+                    inventory[item.name] = (inventory[item.name] || 0) - (parseFloat(item.qty) || 0);
                 });
             }
         });
 
-        // 3. ĐÃ BỎ BƯỚC TRỪ GIỎ HÀNG Ở ĐÂY ĐỂ TRÁNH LỖI KHI LƯU
-        // if (typeof sellCart !== 'undefined') { ... } 
+        // 3. TRỪ GIỎ HÀNG (Để nhân viên nhìn thấy số tồn thực tế sau khi đã trừ hàng đang bán)
+        // Lưu ý: Chỉ trừ nếu giỏ hàng có hàng
+        if (typeof sellCart !== 'undefined' && Array.isArray(sellCart)) {
+            sellCart.forEach(item => {
+                inventory[item.name] = (inventory[item.name] || 0) - (parseFloat(item.qty) || 0);
+            });
+        }
 
         // 4. Gán vào biến toàn cục
         window.currentStockMap = inventory;
         
-        console.log("Đã cập nhật tồn kho:", window.currentStockMap);
+        // 5. Cập nhật lại giao diện ngay để số tồn nhảy theo thời gian thực
+        if (typeof renderProductGrid === 'function') renderProductGrid();
+        
+        console.log("Đã cập nhật tồn kho (đã trừ giỏ):", window.currentStockMap);
         
     } catch (error) {
         console.error("Lỗi khi tính toán tồn kho:", error);
     }
 }
+
 function updateItemNote(index, value) {
     sellCart[index].note = value;
 }
@@ -3179,9 +3188,18 @@ async function saveAndPrint() {
     await calculateAllStock(); 
 
     for (const item of sellCart) {
-        const stock = window.currentStockMap ? (window.currentStockMap[item.name] || 0) : 0;
-        if (item.qty > stock) {
-            alert(`LỖI: Sản phẩm ${item.name} chỉ còn ${stock} trong kho, nhưng bạn xuất ${item.qty}. Vui lòng kiểm tra lại!`);
+        // 1. Lấy tồn kho hiện tại (đã bị trừ giỏ hàng)
+        let stock = window.currentStockMap ? parseFloat(window.currentStockMap[item.name] || 0) : 0;
+        
+        // 2. CỘNG NGƯỢC GIỎ HÀNG VÀO ĐỂ CÓ TỒN KHO GỐC TRƯỚC KHI BÁN
+        // Vì currentStockMap đã trừ giỏ, nên giờ ta cộng lại đúng số lượng trong giỏ
+        // để có con số tồn kho thực tế trước khi bấm lưu
+        const qtyInCart = parseFloat(item.qty || 0);
+        const realStockBeforeSale = stock + qtyInCart;
+
+        // 3. So sánh
+        if (qtyInCart > realStockBeforeSale + 0.000001) {
+            alert(`LỖI: Sản phẩm ${item.name} chỉ còn ${realStockBeforeSale} trong kho, nhưng bạn xuất ${qtyInCart}. Vui lòng kiểm tra lại!`);
             return;
         }
     }
@@ -3600,9 +3618,12 @@ async function reprintSale(docId) {
                 const prodQuery = await db.collection('inventory').where('name', '==', item.name).get();
                 if (!prodQuery.empty) {
                     const prodDoc = prodQuery.docs[0];
-                    const currentQty = prodDoc.data().qty || 0;
+                    // Dùng parseFloat để không bị làm tròn số lẻ (ví dụ 1.5 vẫn là 1.5)
+                    const currentQty = parseFloat(prodDoc.data().qty || 0);
+                    const qtyToRestore = parseFloat(item.qty || 0);
+                    
                     batch.update(prodDoc.ref, { 
-                        qty: currentQty + parseInt(item.qty) 
+                        qty: currentQty + qtyToRestore 
                     });
                 }
             }
