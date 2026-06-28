@@ -187,7 +187,10 @@
 </style>
     
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Chartjs Plugin Datalabels -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
@@ -338,7 +341,7 @@ function toggleMoreMenu() {
             </div>
         </div>
 
-			   <div class="bg-blue-200 p-6 rounded-3xl border border-red-300 h-full flex flex-col">
+			   <div class="bg-blue-200 !p-1 rounded-3xl border border-red-300 h-full flex flex-col">
 				<div class="flex justify-between items-center mb-6">
 					<h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center">
 						<i data-lucide="package" class="w-4 h-4 mr-2 text-amber-600"></i> Chi tiết tồn kho
@@ -356,9 +359,7 @@ function toggleMoreMenu() {
 						</select>
 					</div>
 				</div>
-				<div id="home-inventory-list" 
-         class="flex-1 grid grid-cols-1 gap-3 content-start overflow-y-auto custom-scrollbar pr-1" 
-         style="max-height: 650px;">
+				<div id="home-inventory-list" class="flex-1 grid grid-cols-1 gap-3 content-start overflow-y-auto custom-scrollbar pr-1 !px-0" style="max-height: 650px;">
     </div>
 </div>
     </div> 
@@ -1449,20 +1450,21 @@ async function loadDashboard(filter = 'month', updateCharts = true) {
 
     // SỬA HÀM BAR: Thêm tham số glow để áp dụng viền quang
     const bar = (val, color, label, applyGlow = false) => {
-        if (val <= 0) return ''; 
-        const width = (val / totalMax) * 100;
-        const labelText = width < 10 ? `${val}` : `${label}&nbsp;:&nbsp;${val}`;
-        
-        // Thêm class ring-white và shadow nếu là ô tồn cuối đang báo động
-        const glowClass = applyGlow ? 'ring-2 ring-white ring-inset shadow-[0_0_8px_rgba(255,255,255,0.7)]' : '';
-        
-        return `
-        <div style="width: ${width}%; min-width: 20px; flex-shrink: 0;" 
-             class="${color} ${glowClass} flex items-center justify-center text-[10px] font-black text-white shadow-[inset_0_-2px_3px_rgba(0,0,0,0.2)] px-0.5 truncate" 
-             title="${label}: ${val}">
-            ${labelText}
-        </div>`;
-    };
+    if (val <= 0) return ''; 
+    const width = (val / totalMax) * 100;
+    // Luôn hiển thị nhãn và số, dùng white-space: nowrap để không xuống dòng
+    const labelText = `<span style="white-space: nowrap;">${label}&nbsp;:&nbsp;${val}</span>`;
+    
+    const glowClass = applyGlow ? 'ring-2 ring-white ring-inset shadow-[0_0_8px_rgba(255,255,255,0.7)]' : '';
+    
+    // Thêm flex-grow: 1 để tự giãn lấp đầy khoảng trống 2 đầu
+    return `
+    <div style="width: ${width}%; flex-grow: 1; min-width: 35px; flex-shrink: 0;" 
+         class="${color} ${glowClass} flex items-center justify-center text-[10px] font-black text-white shadow-[inset_0_-2px_3px_rgba(0,0,0,0.2)] px-0.5" 
+         title="${label}: ${val}">
+        ${labelText}
+    </div>`;
+};
 
     inventoryCardsHtml += `
     <div class="mb-0.5 bg-white p-1 rounded-lg border border-slate-200 shadow-sm transition-all">
@@ -1470,19 +1472,14 @@ async function loadDashboard(filter = 'month', updateCharts = true) {
             ${name} ${isLowStock ? '<span class="animate-pulse">⚠️</span>' : ''}
         </div>
         
-        <div class="flex w-full h-8 rounded-md overflow-hidden border border-slate-300 shadow-sm">
-    <!-- Tồn đầu (Đ): Màu Teal-600 (Xanh lam trầm, làm nền tảng dịu mắt) -->
-    ${bar(item.tonDau, 'bg-blue-500', 'Đ')}
-    
-    <!-- Nhập (N): Màu Amber-500 (Vàng đậm, dễ đọc, không bị chói) -->
-    ${bar(totalNhap, 'bg-amber-500', 'N')}
-    
-    <!-- Xuất (X): Màu Rose-500 (Đỏ hồng, nổi bật nhưng vẫn hài hòa) -->
-    ${bar(item.out, 'bg-rose-500', 'X')}
-    
-    <!-- Tồn cuối (C): Màu Emerald-500 (Xanh lá, có hiệu ứng viền quang) -->
-    ${bar(tonCuoi, 'bg-emerald-500', 'C', isLowStock)}
-</div>
+        <!-- Giữ rounded-md và overflow-hidden ở đây để giữ bo tròn -->
+        <!-- Thêm !mx-0 và !px-0 để ép tràn sát mép -->
+        <div class="flex w-full h-8 rounded-md overflow-hidden border border-slate-300 shadow-sm !mx-0 !px-0">
+            ${bar(item.tonDau, 'bg-blue-500', 'Đ')}
+            ${bar(totalNhap, 'bg-amber-500', 'N')}
+            ${bar(item.out, 'bg-rose-500', 'X')}
+            ${bar(tonCuoi, 'bg-emerald-500', 'C', isLowStock)}
+        </div>
     </div>`;
 });
 
@@ -1588,39 +1585,71 @@ async function handleInvFilterChange() {
 let topProductChart;
 function renderTopProductsChart(dataArray) {
     const ctx = document.getElementById('topProductsChart').getContext('2d');
-    
     if (topProductChart) topProductChart.destroy();
+
+    // 1. Tìm giá trị bán chạy nhất để ép lề phải
+    const maxSold = Math.max(...dataArray.map(item => item.sold));
+
+    const gradient = ctx.createLinearGradient(0, 0, 400, 0);
+    gradient.addColorStop(0, '#6366f1');
+    gradient.addColorStop(1, '#a855f7');
 
     topProductChart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: dataArray.map(item => item.name),
             datasets: [{
-                label: 'Số lượng',
                 data: dataArray.map(item => item.sold),
-                backgroundColor: '#e11d48', // Màu đỏ rose
-                borderRadius: 8
+                backgroundColor: gradient,
+                borderRadius: 12,
+                barThickness: 22
             }]
         },
         options: {
+            indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
-            indexAxis: 'y', // Biểu đồ cột ngang
-            plugins: { legend: { display: false } },
+            layout: { 
+                // 2. Xóa sạch khoảng trống lề phải
+                padding: { left: 0, right: 0, top: 0, bottom: 0 } 
+            },
+            plugins: { 
+                legend: { display: false },
+                datalabels: {
+                    anchor: 'end',
+                    align: 'left', // Đẩy số vào trong cột
+                    offset: 8,     // Khoảng cách số so với mép phải cột
+                    color: '#ffffff',
+                    font: { weight: 'bold', size: 11 }
+                }
+            },
             scales: {
-                x: { beginAtZero: true }
+                x: { 
+                    display: false,
+                    // 3. THUỘC TÍNH QUAN TRỌNG: Ép thanh dài nhất chạm kịch phải
+                    max: maxSold 
+                },
+                y: { 
+                    grid: { display: false },
+                    ticks: { 
+                        color: '#334155', 
+                        font: { size: 10 },
+                        padding: 5,
+                        crossAlign: 'near'
+                    }
+                }
             }
-        }
+        },
+        plugins: [ChartDataLabels]
     });
 }
-
 
 
 // Hàm cập nhật dữ liệu lọc thời gian
 async function updateDashboardData(type, filter, customDate = null) {
     if (!snapshotXuatGlobal) return;
 
-    // 1. Cập nhật UI cho các select box (chỉ cập nhật nếu đúng loại)
+    // 1. Cập nhật UI cho các select box
     if (type === 'revenue' || type === 'both') {
         const filterEl = document.getElementById('time-filter');
         if (filterEl) filterEl.value = filter;
@@ -1629,7 +1658,6 @@ async function updateDashboardData(type, filter, customDate = null) {
         const topFilterEl = document.getElementById('top-product-filter');
         if (topFilterEl) topFilterEl.value = filter;
     }
-    // THÊM: Cập nhật UI cho Tồn kho
     if (type === 'inventory' || type === 'both') {
         const invFilterEl = document.getElementById('inv-time-filter');
         if (invFilterEl) invFilterEl.value = filter;
@@ -1638,7 +1666,7 @@ async function updateDashboardData(type, filter, customDate = null) {
     const now = new Date();
     let startDate, endDate;
 
-    // 2. Thiết lập khoảng thời gian theo giờ địa phương
+    // 2. Thiết lập khoảng thời gian
     if (customDate) {
         const [year, month] = customDate.split('-');
         startDate = new Date(year, month - 1, 1, 0, 0, 0);
@@ -1658,7 +1686,7 @@ async function updateDashboardData(type, filter, customDate = null) {
         endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
     }
 
-    // 3. Lọc tài liệu theo khoảng [startDate, endDate]
+    // 3. Lọc dữ liệu
     const filteredDocs = snapshotXuatGlobal.docs.filter(doc => {
         const data = doc.data();
         if (!data.date) return false;
@@ -1666,7 +1694,7 @@ async function updateDashboardData(type, filter, customDate = null) {
         return dDate >= startDate && dDate <= endDate;
     });
 
-    // 4 & 5. Logic cập nhật
+    // 4. Render Revenue
     if (type === 'revenue' || type === 'both') {
         const newTotal = filteredDocs.reduce((sum, doc) => sum + Number(doc.data().total || 0), 0);
         const totalRevEl = document.getElementById('total-revenue');
@@ -1677,6 +1705,7 @@ async function updateDashboardData(type, filter, customDate = null) {
         renderRevenueChart(filteredDocs, filter);
     }
 
+    // 5. Render Top Products
     if (type === 'topProducts' || type === 'both') {
         let productSalesCount = {};
         filteredDocs.forEach(doc => {
@@ -1693,19 +1722,20 @@ async function updateDashboardData(type, filter, customDate = null) {
         renderTopProductsChart(topProductsArray);
     }
 
-    // THÊM: Logic cập nhật Tồn kho
+    // 6. Cập nhật Tồn kho
     if (type === 'inventory' || type === 'both') {
-        // Gọi lại hàm loadDashboard với filter tương ứng
         await loadDashboard(filter, false);
     }
 }
 
 
-// --- 1. Khởi tạo biểu đồ doanh thu (Tự thích nghi theo bộ lọc) ---
+// --- 1. Khởi tạo biểu đồ doanh thu (Dạng Cột 3D giả + Đường lượn sóng) ---
 function renderRevenueChart(filteredDocs, filter) {
+    // Đăng ký plugin bắt buộc
+    Chart.register(ChartDataLabels);
+
     const ctx = document.getElementById('revenueChart').getContext('2d');
     
-    // Đảm bảo myChart là biến riêng của biểu đồ doanh thu
     if (typeof window.revenueChartInstance !== 'undefined' && window.revenueChartInstance) {
         window.revenueChartInstance.destroy();
     }
@@ -1713,9 +1743,8 @@ function renderRevenueChart(filteredDocs, filter) {
     let labels = [];
     let dataValues = [];
 
-    // Xử lý 'custom' giống như 'month'
+    // Logic xử lý dữ liệu (giữ nguyên yêu cầu của bạn)
     const isMonthlyView = (filter === 'month' || filter === 'custom');
-
     if (filter === 'today') {
         labels = ['Hôm nay'];
         dataValues = [filteredDocs.reduce((sum, doc) => sum + Number(doc.data().total || 0), 0)];
@@ -1728,39 +1757,81 @@ function renderRevenueChart(filteredDocs, filter) {
             dataValues[index] += Number(doc.data().total || 0);
         });
     } else if (isMonthlyView) {
-        // Gom dữ liệu theo tuần của tháng
         labels = ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'];
         dataValues = [0, 0, 0, 0];
         filteredDocs.forEach(doc => {
             const date = doc.data().date.toDate().getDate();
             let weekIndex = Math.floor((date - 1) / 7);
-            if (weekIndex > 3) weekIndex = 3; // Gom ngày 29,30,31 vào tuần 4
+            if (weekIndex > 3) weekIndex = 3;
             dataValues[weekIndex] += Number(doc.data().total || 0);
         });
     }
 
+    // Tạo gradient dọc để giả lập hiệu ứng 3D cho cột
+    const barGradient = ctx.createLinearGradient(0, 0, 0, 400);
+    barGradient.addColorStop(0, '#60a5fa'); // Màu sáng ở trên
+    barGradient.addColorStop(1, '#1e40af'); // Màu tối ở dưới
+
+    // Khởi tạo biểu đồ
     window.revenueChartInstance = new Chart(ctx, {
-        type: 'line',
+        type: 'bar',
         data: {
             labels: labels,
-            datasets: [{
-                label: 'Doanh thu (VNĐ)',
-                data: dataValues,
-                borderColor: '#3b82f6',
-                tension: 0.4,
-                fill: true,
-                backgroundColor: 'rgba(59, 130, 246, 0.1)'
-            }]
+            datasets: [
+                {
+                    label: 'Doanh thu (Cột)',
+                    data: dataValues,
+                    type: 'bar',
+                    backgroundColor: barGradient,
+                    borderRadius: { topLeft: 4, topRight: 4, bottomLeft: 0, bottomRight: 0 },
+                    order: 2,
+                    datalabels: { display: false } // Ẩn số trên cột để tránh rối
+                },
+                {
+                    label: 'Xu hướng',
+                    data: dataValues,
+                    type: 'line',
+                    borderColor: '#fbbf24', // Màu vàng nổi bật
+                    borderWidth: 3,
+                    tension: 0.4, // Đường lượn sóng
+                    pointRadius: 5,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#fbbf24',
+                    pointBorderWidth: 2,
+                    order: 1,
+                    datalabels: {
+                        align: 'top',
+                        anchor: 'end',
+                        offset: 4,
+                        color: '#1e3a8a',
+                        font: { weight: 'bold', size: 10 }, // Cỡ chữ tối ưu cho mobile
+                        formatter: (value) => value.toLocaleString('vi-VN') // Định dạng 1.000.000
+                    }
+                }
+            ]
         },
         options: { 
             responsive: true, 
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true } }
-        }
+            layout: { padding: { top: 25 } }, // Thêm khoảng trống để không bị cắt chữ
+            plugins: { 
+                legend: { display: false } 
+            },
+            scales: { 
+                y: { 
+                    beginAtZero: true, 
+                    grid: { display: false },
+                    ticks: { font: { size: 9 } } 
+                },
+                x: { 
+                    grid: { display: false },
+                    ticks: { font: { size: 9 } } 
+                }
+            }
+        },
+        plugins: [ChartDataLabels]
     });
 }
-	
 
     // --- NHẬP KHO =================
 	
