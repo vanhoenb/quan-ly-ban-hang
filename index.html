@@ -1054,11 +1054,12 @@ function toggleMoreMenu() {
         <h3 class="mb-6 font-bold text-2xl text-gray-800 px-2 md:px-0">QUẢN LÝ NGUYÊN LIỆU</h3>
         
         <!-- Tab Menu -->
-        <div class="flex space-x-2 mb-6 px-2 md:px-0 overflow-x-auto">
-            <button onclick="openNLTab('ncc-tab')" class="px-4 py-2 bg-blue-600 text-white rounded font-bold text-xs whitespace-nowrap">NCC</button>
-            <button onclick="openNLTab('dm-tab')" class="px-4 py-2 bg-blue-600 text-white rounded font-bold text-xs whitespace-nowrap">DANH MỤC NL</button>
-            <button onclick="openNLTab('nhap-tab')" class="px-4 py-2 bg-blue-600 text-white rounded font-bold text-xs whitespace-nowrap">NHẬP & NỢ</button>
-        </div>
+		<div class="flex space-x-2 mb-6 px-2 md:px-0 overflow-x-auto">
+			<!-- Thêm tab-btn vào class -->
+			<button id="btn-ncc" onclick="openNLTab('ncc-tab')" class="tab-btn px-4 py-2 bg-blue-600 text-white rounded font-bold text-xs whitespace-nowrap shadow-md">NCC & CÔNG NỢ</button>
+			<button id="btn-dm" onclick="openNLTab('dm-tab')" class="tab-btn px-4 py-2 bg-gray-300 text-gray-700 rounded font-bold text-xs whitespace-nowrap">DANH MỤC NL</button>
+			<button id="btn-nhap" onclick="openNLTab('nhap-tab')" class="tab-btn px-4 py-2 bg-gray-300 text-gray-700 rounded font-bold text-xs whitespace-nowrap">NHẬP KHO NL</button>
+		</div>
 
         <!-- Tab 1: Nhà Cung Cấp -->
         <div id="ncc-tab" class="nl-tab-pane bg-white p-4 md:p-6 rounded-xl shadow">
@@ -1071,15 +1072,15 @@ function toggleMoreMenu() {
             <div class="overflow-x-auto border rounded-lg">
                 <table class="w-full text-sm text-left">
                     <thead class="bg-gray-50 text-xs uppercase text-gray-600">
-                        <tr>
-                            <th class="p-3">Tên NCC</th>
-                            <th class="p-3">Địa chỉ</th>
-                            <th class="p-3">SĐT</th>
-                            <th class="p-3">Nợ NCC</th>
-                            <th class="p-3">Đã trả</th>
-                            <th class="p-3">Hành động</th>
-                        </tr>
-                    </thead>
+						<tr>
+							<th class="p-3 w-[25%]">Tên NCC</th>
+							<th class="p-3 w-[25%] hidden md:table-cell">Địa chỉ</th>
+							<th class="p-3 w-[12%] text-center hidden md:table-cell">SĐT</th>
+							<th class="p-3 w-[12%] text-center">Nợ NCC</th>
+							<th class="p-3 w-[12%] text-center">Đã trả</th>
+							<th class="p-3 w-[14%] text-center">Hành động</th>
+						</tr>
+					</thead>
                     <tbody id="body-ncc"></tbody>
                 </table>
             </div>
@@ -1101,50 +1102,53 @@ function toggleMoreMenu() {
         </div>
         
         <!-- Tab 3: Nhập & Công nợ -->
-        <div id="nhap-tab" class="nl-tab-pane hidden p-0">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div class="col-span-12 lg:col-span-9 bg-white p-4 md:p-5 rounded-xl shadow-sm border border-gray-100">
-                    <h4 class="font-bold mb-4 text-gray-700">DANH SÁCH CHI TIẾT NHẬP</h4>
-                    <div class="overflow-y-auto max-h-[500px] border rounded-lg">
-                        <table class="w-full text-xs text-left">
-                            <thead class="bg-gray-100 text-gray-600 uppercase sticky top-0">
-                                <tr>
-                                    <th class="p-3">Số Phiếu</th>
-                                    <th class="p-3">Ngày</th>
-                                    <th class="p-3">Tên NL</th>
-                                    <th class="p-3">SL</th>
-                                    <th class="p-3">Đơn Giá</th>
-                                    <th class="p-3">Thành Tiền</th>
-                                    <th class="p-3 text-center">Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody id="body-phieu" class="divide-y divide-gray-100"></tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="col-span-12 lg:col-span-3 bg-blue-50 p-4 md:p-5 rounded-xl border-2 border-blue-200 shadow-md">
-                    <h4 class="font-bold mb-4 text-blue-800 text-sm flex items-center">📝 NHẬP HÀNG MỚI</h4>
-                    <div class="grid grid-cols-1 gap-2 mb-4">
-                        <input id="in-so-phieu" placeholder="Số phiếu" class="border border-blue-100 p-2 rounded text-sm bg-white w-full">
-                        <select id="sel-ncc-nhap" class="border border-blue-100 p-2 rounded text-sm bg-white w-full"><option>Chọn NCC</option></select>
-                        <div class="grid grid-cols-2 gap-2">
-                            <input id="in-so-hd" placeholder="Số HĐ" class="border border-blue-100 p-2 rounded text-sm bg-white w-full">
-                            <input id="in-ngay-hd" type="date" class="border border-blue-100 p-2 rounded text-sm bg-white w-full">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 gap-2 mb-4">
-                        <select id="sel-nl" class="border border-blue-100 p-2 rounded text-sm bg-white w-full"><option>Chọn NL</option></select>
-                        <div class="grid grid-cols-2 gap-2">
-                            <input id="in-sl" type="number" placeholder="SL" class="border border-blue-100 p-2 rounded text-sm bg-white w-full">
-                            <input id="in-gia" type="number" placeholder="Đơn giá" class="border border-blue-100 p-2 rounded text-sm bg-white w-full">
-                        </div>
-                    </div>
-                    <button type="button" onclick="addNguyenLieuToCart();" class="w-full bg-gray-700 text-white py-2 rounded mb-3 hover:bg-black text-sm font-bold shadow">THÊM VÀO GIỎ</button>
-                    <div id="gio-hang-nl" class="my-2 border p-2 text-xs bg-white rounded min-h-[50px] max-h-[100px] overflow-y-auto border-blue-100"></div>
-                    <button onclick="saveFullInvoice()" class="bg-blue-600 text-white w-full py-3 rounded font-bold text-sm hover:bg-blue-700 shadow-lg mt-2">LƯU PHIẾU NHẬP</button>
-                </div>
+				<div id="nhap-tab" class="nl-tab-pane hidden p-0">
+					<div class="flex flex-col-reverse lg:grid lg:grid-cols-12 gap-6">
+						<!-- Danh sách: order-2 (nằm dưới trên đt) -->
+						<div class="col-span-12 lg:col-span-9 bg-white p-4 md:p-5 rounded-xl shadow-sm border border-gray-100">
+							<h4 class="font-bold mb-4 text-gray-700">DANH SÁCH CHI TIẾT NHẬP</h4>
+							<div class="overflow-y-auto max-h-[500px] border rounded-lg">
+								<table class="w-full text-xs text-left">
+									<thead class="bg-gray-100 text-gray-600 uppercase sticky top-0 text-xs">
+					<tr>
+						<th class="p-3 w-[12%]">Số Phiếu</th>
+						<th class="p-3 w-[15%]">Ngày</th>
+						<th class="p-3 w-[25%]">Tên NL</th> <!-- Rộng nhất -->
+						<th class="p-3 w-[8%] text-center">SL</th>
+						<th class="p-3 w-[15%] text-right">Đơn Giá</th>
+						<th class="p-3 w-[15%] text-right">Thành Tiền</th>
+						<th class="p-3 w-[10%] text-center">Thao tác</th>
+					</tr>
+				</thead>
+                    <tbody id="body-phieu" class="divide-y divide-gray-100"></tbody>
+                </table>
             </div>
         </div>
+        
+        <!-- Nhập liệu: order-1 (nằm trên trên đt) -->
+        <div class="col-span-12 lg:col-span-3 bg-blue-50 p-4 md:p-5 rounded-xl border-2 border-blue-200 shadow-md">
+            <h4 class="font-bold mb-4 text-blue-800 text-sm flex items-center">📝 NHẬP HÀNG MỚI</h4>
+            <div class="grid grid-cols-1 gap-2 mb-4">
+                <input id="in-so-phieu" placeholder="Số phiếu" class="border border-blue-100 p-2 rounded text-sm bg-white w-full">
+                <select id="sel-ncc-nhap" class="border border-blue-100 p-2 rounded text-sm bg-white w-full"><option>Chọn NCC</option></select>
+                <div class="grid grid-cols-2 gap-2">
+                    <input id="in-so-hd" placeholder="Số HĐ" class="border border-blue-100 p-2 rounded text-sm bg-white w-full">
+                    <input id="in-ngay-hd" type="date" class="border border-blue-100 p-2 rounded text-sm bg-white w-full">
+                </div>
+            </div>
+            <div class="grid grid-cols-1 gap-2 mb-4">
+                <select id="sel-nl" class="border border-blue-100 p-2 rounded text-sm bg-white w-full"><option>Chọn NL</option></select>
+                <div class="grid grid-cols-2 gap-2">
+                    <input id="in-sl" type="number" placeholder="SL" class="border border-blue-100 p-2 rounded text-sm bg-white w-full">
+                    <input id="in-gia" type="number" placeholder="Đơn giá" class="border border-blue-100 p-2 rounded text-sm bg-white w-full">
+                </div>
+            </div>
+            <button type="button" onclick="addNguyenLieuToCart();" class="w-full bg-gray-700 text-white py-2 rounded mb-3 hover:bg-black text-sm font-bold shadow">THÊM VÀO GIỎ</button>
+            <div id="gio-hang-nl" class="my-2 border p-2 text-xs bg-white rounded min-h-[50px] max-h-[100px] overflow-y-auto border-blue-100"></div>
+            <button onclick="saveFullInvoice()" class="bg-blue-600 text-white w-full py-3 rounded font-bold text-sm hover:bg-blue-700 shadow-lg mt-2">LƯU PHIẾU NHẬP</button>
+        </div>
+    </div>
+</div>
 
         <!-- Popup -->
         <div id="popup-ncc" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center p-4 z-50">
@@ -1157,13 +1161,7 @@ function toggleMoreMenu() {
     </div>
 </div>
 
-<script>
-    function openNLTab(tabId) {
-        document.querySelectorAll('.nl-tab-pane').forEach(t => t.classList.add('hidden'));
-        document.getElementById(tabId).classList.remove('hidden');
-        if(tabId === 'nhap-tab') loadDropdowns();
-    }
-</script>
+
 
    		
 <style media="print">
@@ -6224,19 +6222,36 @@ function tinhSoKgThanhPham() {
  */
 // Chuyển đổi giữa các tab và làm mới dữ liệu
 function openNLTab(tabId) {
-    // 1. Ẩn tất cả các tab
+    // 1. Ẩn tất cả các tab content
     document.querySelectorAll('.nl-tab-pane').forEach(t => t.classList.add('hidden'));
     
     // 2. Hiển thị tab được chọn
     const tab = document.getElementById(tabId);
     if (tab) tab.classList.remove('hidden');
 
-    // 3. Nếu là tab Nhập kho, tự động tạo số phiếu mới
+    // 3. Hiệu ứng đổi màu nút (Cập nhật class cho các nút)
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
+        btn.classList.add('bg-gray-300', 'text-gray-700');
+    });
+
+    // Xác định id của nút dựa trên tabId
+    const btnMap = {
+        'ncc-tab': 'btn-ncc',
+        'dm-tab': 'btn-dm',
+        'nhap-tab': 'btn-nhap'
+    };
+    
+    const activeBtn = document.getElementById(btnMap[tabId]);
+    if (activeBtn) {
+        activeBtn.classList.remove('bg-gray-300', 'text-gray-700');
+        activeBtn.classList.add('bg-blue-600', 'text-white', 'shadow-md');
+    }
+
+    // 4. Các logic cũ của bạn (Giữ nguyên không thiếu cái nào)
     if (tabId === 'nhap-tab') {
         generateInvoiceNumber();
     }
-
-    // 4. Cập nhật dữ liệu
     loadDropdowns(); 
     loadAllData();   
 }
@@ -6278,6 +6293,8 @@ function showPopup(title, content) {
 async function loadTableNCC() {
     const bodyNCC = document.getElementById('body-ncc');
     if (!bodyNCC) return;
+    
+    // Lấy dữ liệu nhà cung cấp
     const nccSnap = await db.collection('suppliers').get();
     bodyNCC.innerHTML = '';
     
@@ -6286,21 +6303,89 @@ async function loadTableNCC() {
         const payments = await db.collection('payments').where('supplierName', '==', d.name).get();
         const totalPaid = payments.docs.reduce((sum, p) => sum + p.data().amount, 0);
 
-        // Tạo biến tên an toàn
+        // Tạo biến an toàn cho dữ liệu
         const safeName = d.name.replace(/'/g, "\\'");
+        const safePhone = (d.phone || '').replace(/'/g, "\\'");
+        const safeAddress = (d.address || '').replace(/'/g, "\\'");
 
-        bodyNCC.innerHTML += `<tr class="border-b">
-            <td class="p-2 text-sm">${d.name}</td>
-            <td class="p-2 text-sm">${d.address || ''}</td>
-            <td class="p-2 text-sm">${d.phone || ''}</td>
-            <td class="p-2 text-sm font-bold text-red-600">${(d.debt || 0).toLocaleString()}</td>
-            <td class="p-2 text-sm text-green-600">${totalPaid.toLocaleString()}</td>
-            <td class="p-2 text-sm">
-                <button onclick="openPayModal('${doc.id}', '${safeName}')" class="bg-blue-500 text-white px-2 py-1 rounded text-xs font-bold mr-1">Trả Nợ</button>
-                <button onclick="window.openHistory('${safeName}')" class="bg-purple-500 text-white px-2 py-1 rounded text-xs font-bold mr-1">Lịch sử</button>
-                <button onclick="deleteDoc('suppliers', '${doc.id}')" class="bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">Xóa</button>
+        bodyNCC.innerHTML += `<tr class="border-b hover:bg-gray-50">
+            <td class="p-2 text-sm w-[25%]">${d.name}</td>
+            <td class="p-2 text-sm w-[25%] hidden md:table-cell">${d.address || ''}</td>
+            <td class="p-2 text-sm w-[12%] text-center hidden md:table-cell">${d.phone || ''}</td>
+            <td class="p-2 text-sm w-[12%] text-center font-bold text-red-600">${(d.debt || 0).toLocaleString()}</td>
+            <td class="p-2 text-sm w-[12%] text-center text-green-600">${totalPaid.toLocaleString()}</td>
+            <td class="p-2 text-right w-[14%]">
+                <div class="flex flex-col md:flex-row gap-1 justify-end">
+                    <!-- Nút Trả Nợ -->
+                    <button onclick="openPayModal('${doc.id}', '${safeName}')" class="bg-blue-600 text-white px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap hover:bg-blue-700 transition">
+                        <span class="md:hidden">Trả</span>
+                        <span class="hidden md:inline">Trả Nợ</span>
+                    </button>
+                    <!-- Nút Lịch sử -->
+                    <button onclick="window.openHistory('${safeName}')" class="bg-purple-600 text-white px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap hover:bg-purple-700 transition">
+                        <span class="md:hidden">Sử</span>
+                        <span class="hidden md:inline">Lịch sử</span>
+                    </button>
+                    <!-- Nút Sửa -->
+                    <button onclick="editNCC('${doc.id}', '${safeName}', '${safePhone}', '${safeAddress}')" class="bg-yellow-500 text-white px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap hover:bg-yellow-600 transition">
+                        <span class="md:hidden">Sửa</span>
+                        <span class="hidden md:inline">Sửa</span>
+                    </button>
+                    <!-- Nút Xóa -->
+                    <button onclick="deleteDoc('suppliers', '${doc.id}')" class="bg-red-600 text-white px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap hover:bg-red-700 transition">
+                        <span class="md:hidden">Xóa</span>
+                        <span class="hidden md:inline">Xóa</span>
+                    </button>
+                </div>
             </td>
         </tr>`;
+    }
+}
+
+// Hàm này đưa thông tin lên ô input để bạn sửa
+function editNCC(docId, name, phone, address) {
+    document.getElementById('in-ncc').value = name;
+    document.getElementById('in-sdt').value = phone;
+    document.getElementById('in-diachi').value = address;
+
+    // Chuyển đổi nút "THÊM NCC" thành nút "LƯU CẬP NHẬT"
+    const addBtn = document.querySelector('button[onclick="addNCC()"]');
+    if (addBtn) {
+        addBtn.innerText = "LƯU CẬP NHẬT";
+        addBtn.className = "bg-orange-600 text-white p-2 rounded font-bold hover:bg-orange-700 w-full";
+        // Thay đổi onclick để gọi hàm lưu
+        addBtn.setAttribute('onclick', `updateNCC('${docId}')`);
+    }
+}
+
+// Hàm lưu thông tin sau khi sửa
+async function updateNCC(docId) {
+    const name = document.getElementById('in-ncc').value;
+    const phone = document.getElementById('in-sdt').value;
+    const address = document.getElementById('in-diachi').value;
+
+    if (!name) return alert("Nhập tên NCC!");
+
+    try {
+        await db.collection('suppliers').doc(docId).update({ name, phone, address });
+        alert("Cập nhật thành công!");
+
+        // Reset nút về trạng thái ban đầu
+        const updateBtn = document.querySelector(`button[onclick="updateNCC('${docId}')"]`);
+        if (updateBtn) {
+            updateBtn.innerText = "THÊM NCC";
+            updateBtn.className = "bg-green-600 text-white p-2 rounded font-bold hover:bg-green-700 w-full";
+            updateBtn.setAttribute('onclick', "addNCC()");
+        }
+
+        // Xóa dữ liệu cũ trong input
+        document.getElementById('in-ncc').value = '';
+        document.getElementById('in-sdt').value = '';
+        document.getElementById('in-diachi').value = '';
+
+        loadAllData();
+    } catch (error) {
+        alert("Lỗi cập nhật: " + error.message);
     }
 }
 
@@ -6489,12 +6574,23 @@ async function deleteDoc(col, id) {
 async function loadTableNL() {
     const bodyNL = document.getElementById('body-nl');
     if (!bodyNL) return;
+    
     const nlSnap = await db.collection('materials_list').get();
     bodyNL.innerHTML = '';
+    
     nlSnap.forEach(doc => {
         const d = doc.data();
-        bodyNL.innerHTML += `<tr><td>${d.name}</td><td>${d.unit}</td>
-            <td><button onclick="deleteDoc('materials_list', '${doc.id}')" class="text-red-500">Xóa</button></td></tr>`;
+        bodyNL.innerHTML += `<tr class="border-b hover:bg-gray-50">
+            <td class="p-3">${d.name}</td>
+            <td class="p-3">${d.unit}</td>
+            <td class="p-3 text-center">
+                <button onclick="deleteDoc('materials_list', '${doc.id}')" class="text-red-500 hover:text-red-700 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </button>
+            </td>
+        </tr>`;
     });
 }
 
@@ -6563,12 +6659,16 @@ function addNguyenLieuToCart() {
 // 2. Hàm render riêng, sử dụng ID riêng (ví dụ: gio-hang-nl)
 function renderCartNL() {
     const gioHangDiv = document.getElementById('gio-hang-nl');
-    if (!gioHangDiv) return; // Tránh lỗi nếu trang khác không có ID này
+    if (!gioHangDiv) return;
 
     gioHangDiv.innerHTML = cartNL.map((item, index) => `
         <div class="flex justify-between items-center p-2 border-b">
             <span>${item.nl} | ${item.sl} | ${item.thanhTien.toLocaleString()} đ</span>
-            <button onclick="xoaNguyenLieu(${index})" class="text-red-500 font-bold ml-2 px-2 hover:bg-red-100 rounded">X</button>
+            <button onclick="xoaNguyenLieu(${index})" class="text-red-500 hover:text-red-700 transition-colors ml-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+            </button>
         </div>
     `).join('');
 }
@@ -6627,7 +6727,6 @@ async function loadTablePhieu() {
     const bodyPhieu = document.getElementById('body-phieu');
     if (!bodyPhieu) return;
     
-    // Lưu ý: Nếu có quá nhiều phiếu, lệnh orderBy này cũng có thể cần Index (như lỗi hôm trước)
     const phieuSnap = await db.collection('material_imports').orderBy('date', 'desc').get();
     
     bodyPhieu.innerHTML = '';
@@ -6635,18 +6734,21 @@ async function loadTablePhieu() {
         const d = doc.data();
         const dateStr = d.date?.toDate()?.toLocaleDateString() || "N/A";
         
-        bodyPhieu.innerHTML += `<tr class="border-b">
-            <td class="p-2">${d.soPhieu || ''}</td>
-            <td class="p-2">${dateStr}</td>
-            <td class="p-2">${d.nl || ''}</td>
-            <td class="p-2">${d.dvt || ''}</td>
-            <td class="p-2">${d.sl || 0}</td>
-            <td class="p-2">${(d.gia || 0).toLocaleString()}</td>
-            <td class="p-2 font-bold">${(d.total || 0).toLocaleString()}</td>
-            <td class="p-2">
-                <button onclick="deleteDoc('material_imports', '${doc.id}')" class="text-red-500 font-bold">Xóa</button>
-            </td>
-        </tr>`;
+        bodyPhieu.innerHTML += `<tr class="border-b hover:bg-gray-50 text-sm">
+    <td class="p-3 w-[12%]">${d.soPhieu || ''}</td>
+    <td class="p-3 w-[15%]">${dateStr}</td>
+    <td class="p-3 w-[25%] font-medium">${d.nl || ''}</td>
+    <td class="p-3 w-[8%] text-center">${d.sl || 0}</td>
+    <td class="p-3 w-[15%] text-right">${(d.gia || 0).toLocaleString()}</td>
+    <td class="p-3 w-[15%] text-right font-bold text-gray-800">${(d.total || 0).toLocaleString()}</td>
+    <td class="p-3 w-[10%] text-center">
+        <button onclick="deleteDoc('material_imports', '${doc.id}')" class="text-red-500 hover:text-red-700 transition-colors duration-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+        </button>
+    </td>
+</tr>`;
     });
 }
 
