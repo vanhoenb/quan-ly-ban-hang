@@ -6453,42 +6453,48 @@ async function addNCC() {
 }
 
 // Hàm xóa đa năng cho mọi collection
-async function deletePaymentNCC(payId, nccName, amount) {
-    if (!confirm("Xác nhận xóa lần trả nợ này?")) return;
+// Hàm xóa đa năng cho mọi collection
+async function deleteDoc(col, id) {
+    if (!confirm("Xác nhận xóa?")) return;
     
     try {
-        // 1. Xóa bản ghi thanh toán
-        await db.collection('payments').doc(payId).delete();
-        
-        // 2. Tìm tất cả các NCC có tên này (xử lý trường hợp trùng tên)
-        const snap = await db.collection('suppliers').where('name', '==', nccName).get();
-        
-        if (snap.empty) {
-            alert("Không tìm thấy thông tin NCC!");
-            return;
+        if (col === 'suppliers') {
+            // Kiểm tra công nợ trước khi xóa NCC
+            const docSnap = await db.collection('suppliers').doc(id).get();
+            const nccData = docSnap.data();
+            if ((nccData.debt || 0) > 0) {
+                alert("Không thể xóa: Nhà cung cấp này vẫn còn công nợ!");
+                return; // Dừng lại, không xóa
+            }
+        } 
+        else if (col === 'material_imports') {
+            const docSnap = await db.collection('material_imports').doc(id).get();
+            const phieuData = docSnap.data();
+            
+            // SỬA: Thay phieuData.supplierName thành phieuData.ncc
+            // vì trong hàm saveFullInvoice bạn đang lưu trường là 'ncc'
+            if (phieuData.ncc) {
+                const nccSnap = await db.collection('suppliers').where('name', '==', phieuData.ncc).get();
+                if (!nccSnap.empty) {
+                    await nccSnap.docs[0].ref.update({ 
+                        debt: firebase.firestore.FieldValue.increment(-(phieuData.total || 0)) 
+                    });
+                }
+            } else {
+                console.warn("Phiếu nhập này không có trường ncc, bỏ qua bước trừ nợ.");
+            }
         }
 
-        // 3. Cập nhật nợ cho TẤT CẢ các bản ghi tìm thấy
-        for (const doc of snap.docs) {
-            const data = doc.data();
-            // Nếu không có trường debt, mặc định là 0
-            const currentDebt = data.debt || 0; 
-            
-            await doc.ref.update({ 
-                debt: currentDebt + amount 
-            });
+        await db.collection(col).doc(id).delete();
+        alert("Đã xóa thành công!");
+        
+        // Tải lại dữ liệu
+        if (typeof loadAllData === 'function') {
+            await loadAllData();
         }
-        
-        // 4. Đóng popup và làm mới
-        const popup = document.getElementById('popup-ncc');
-        if (popup) popup.classList.add('hidden');
-        
-        alert("Xóa thành công!");
-        loadAllData();
-        
     } catch (error) {
-        console.error("Lỗi:", error);
-        alert("Lỗi khi xóa: " + error.message);
+        console.error("Lỗi xóa: ", error);
+        alert("Có lỗi xảy ra: " + error.message);
     }
 }
 /**
