@@ -1046,50 +1046,51 @@ function toggleMoreMenu() {
     </div>
   </div>
 </div>
+
 <!-- PHẦN 7: NGUYÊN LIỆU & CÔNG NỢ -->
-<div id="page-NguyenLieu" class="page-content hidden p-6 bg-gray-50">
+<div id="page-NguyenLieu" class="page-content hidden p-2 md:p-6 bg-gray-50">
     <!-- Bỏ max-w-7xl để dùng toàn bộ màn hình -->
     <div class="w-full">
-        <h3 class="mb-6 font-bold text-2xl text-gray-800">QUẢN LÝ NGUYÊN LIỆU</h3>
+        <h3 class="mb-6 font-bold text-2xl text-gray-800 px-2 md:px-0">QUẢN LÝ NGUYÊN LIỆU</h3>
         
         <!-- Tab Menu -->
-        <div class="flex space-x-2 mb-6">
-            <button onclick="openNLTab('ncc-tab')" class="px-4 py-2 bg-blue-600 text-white rounded font-bold text-xs">NCC</button>
-            <button onclick="openNLTab('dm-tab')" class="px-4 py-2 bg-blue-600 text-white rounded font-bold text-xs">DANH MỤC NL</button>
-            <button onclick="openNLTab('nhap-tab')" class="px-4 py-2 bg-blue-600 text-white rounded font-bold text-xs">NHẬP & NỢ</button>
+        <div class="flex space-x-2 mb-6 px-2 md:px-0 overflow-x-auto">
+            <button onclick="openNLTab('ncc-tab')" class="px-4 py-2 bg-blue-600 text-white rounded font-bold text-xs whitespace-nowrap">NCC</button>
+            <button onclick="openNLTab('dm-tab')" class="px-4 py-2 bg-blue-600 text-white rounded font-bold text-xs whitespace-nowrap">DANH MỤC NL</button>
+            <button onclick="openNLTab('nhap-tab')" class="px-4 py-2 bg-blue-600 text-white rounded font-bold text-xs whitespace-nowrap">NHẬP & NỢ</button>
         </div>
 
         <!-- Tab 1: Nhà Cung Cấp -->
-        <div id="ncc-tab" class="nl-tab-pane bg-white p-6 rounded-xl shadow">
+        <div id="ncc-tab" class="nl-tab-pane bg-white p-4 md:p-6 rounded-xl shadow">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <input id="in-ncc" placeholder="Tên NCC" class="border p-2 rounded">
-                <input id="in-sdt" placeholder="SĐT" class="border p-2 rounded">
-                <input id="in-diachi" placeholder="Địa chỉ" class="border p-2 rounded">
-                <button onclick="addNCC()" class="bg-green-600 text-white p-2 rounded font-bold hover:bg-green-700">THÊM NCC</button>
+                <input id="in-ncc" placeholder="Tên NCC" class="border p-2 rounded w-full">
+                <input id="in-sdt" placeholder="SĐT" class="border p-2 rounded w-full">
+                <input id="in-diachi" placeholder="Địa chỉ" class="border p-2 rounded w-full">
+                <button onclick="addNCC()" class="bg-green-600 text-white p-2 rounded font-bold hover:bg-green-700 w-full">THÊM NCC</button>
             </div>
             <div class="overflow-x-auto border rounded-lg">
                 <table class="w-full text-sm text-left">
-    <thead class="bg-gray-50 text-xs uppercase text-gray-600">
-        <tr>
-            <th class="p-3">Tên NCC</th>
-            <th class="p-3">Địa chỉ</th>
-            <th class="p-3">SĐT</th>
-            <th class="p-3">Nợ NCC</th>
-            <th class="p-3">Đã trả</th>
-            <th class="p-3">Hành động</th>
-        </tr>
-    </thead>
-    <tbody id="body-ncc"></tbody>
-</table>
+                    <thead class="bg-gray-50 text-xs uppercase text-gray-600">
+                        <tr>
+                            <th class="p-3">Tên NCC</th>
+                            <th class="p-3">Địa chỉ</th>
+                            <th class="p-3">SĐT</th>
+                            <th class="p-3">Nợ NCC</th>
+                            <th class="p-3">Đã trả</th>
+                            <th class="p-3">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="body-ncc"></tbody>
+                </table>
             </div>
         </div>
 
         <!-- Tab 2: Danh mục NL -->
-        <div id="dm-tab" class="nl-tab-pane hidden bg-white p-6 rounded-xl shadow">
+        <div id="dm-tab" class="nl-tab-pane hidden bg-white p-4 md:p-6 rounded-xl shadow">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <input id="in-nl" placeholder="Tên Nguyên Liệu" class="border p-2 rounded">
-                <input id="in-dvt" placeholder="ĐVT" class="border p-2 rounded">
-                <button onclick="addNL()" class="bg-green-600 text-white p-2 rounded font-bold hover:bg-green-700">THÊM NL</button>
+                <input id="in-nl" placeholder="Tên Nguyên Liệu" class="border p-2 rounded w-full">
+                <input id="in-dvt" placeholder="ĐVT" class="border p-2 rounded w-full">
+                <button onclick="addNL()" class="bg-green-600 text-white p-2 rounded font-bold hover:bg-green-700 w-full">THÊM NL</button>
             </div>
             <div class="border rounded-lg overflow-hidden">
                 <table class="w-full text-sm text-left">
@@ -1098,73 +1099,60 @@ function toggleMoreMenu() {
                 </table>
             </div>
         </div>
-
-       
-<!-- Tab 3: Nhập & Công nợ -->
-<div id="nhap-tab" class="nl-tab-pane hidden p-0">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        <!-- CỘT TRÁI: DANH SÁCH (Có thanh cuộn) -->
-        <div class="col-span-12 lg:col-span-9 bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-            <h4 class="font-bold mb-4 text-gray-700">DANH SÁCH CHI TIẾT NHẬP</h4>
-            <!-- Giới hạn chiều cao và thêm thanh cuộn dọc -->
-            <div class="overflow-y-auto max-h-[500px] border rounded-lg">
-                <table class="w-full text-xs text-left">
-                    <thead class="bg-gray-100 text-gray-600 uppercase sticky top-0">
-                        <tr>
-                            <th class="p-3">Số Phiếu</th>
-                            <th class="p-3">Ngày</th>
-                            <th class="p-3">Tên NL</th>
-                            <th class="p-3">SL</th>
-                            <th class="p-3">Đơn Giá</th>
-                            <th class="p-3">Thành Tiền</th>
-                            <th class="p-3 text-center">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody id="body-phieu" class="divide-y divide-gray-100"></tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- CỘT PHẢI: FORM NHẬP (Làm nổi bật) -->
-        <div class="col-span-12 lg:col-span-3 bg-blue-50 p-5 rounded-xl border-2 border-blue-200 shadow-md">
-            <h4 class="font-bold mb-4 text-blue-800 text-sm flex items-center">
-                <span class="mr-2">📝</span> NHẬP HÀNG MỚI
-            </h4>
-            
-            <div class="grid grid-cols-1 gap-2 mb-4">
-                <input id="in-so-phieu" placeholder="Số phiếu" class="border border-blue-100 p-2 rounded text-sm bg-white">
-                <select id="sel-ncc-nhap" class="border border-blue-100 p-2 rounded text-sm bg-white"><option>Chọn NCC</option></select>
-                
-                <div class="grid grid-cols-2 gap-2">
-                    <input id="in-so-hd" placeholder="Số HĐ" class="border border-blue-100 p-2 rounded text-sm bg-white">
-                    <input id="in-ngay-hd" type="date" class="border border-blue-100 p-2 rounded text-sm bg-white">
+        <!-- Tab 3: Nhập & Công nợ -->
+        <div id="nhap-tab" class="nl-tab-pane hidden p-0">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="col-span-12 lg:col-span-9 bg-white p-4 md:p-5 rounded-xl shadow-sm border border-gray-100">
+                    <h4 class="font-bold mb-4 text-gray-700">DANH SÁCH CHI TIẾT NHẬP</h4>
+                    <div class="overflow-y-auto max-h-[500px] border rounded-lg">
+                        <table class="w-full text-xs text-left">
+                            <thead class="bg-gray-100 text-gray-600 uppercase sticky top-0">
+                                <tr>
+                                    <th class="p-3">Số Phiếu</th>
+                                    <th class="p-3">Ngày</th>
+                                    <th class="p-3">Tên NL</th>
+                                    <th class="p-3">SL</th>
+                                    <th class="p-3">Đơn Giá</th>
+                                    <th class="p-3">Thành Tiền</th>
+                                    <th class="p-3 text-center">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="body-phieu" class="divide-y divide-gray-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-span-12 lg:col-span-3 bg-blue-50 p-4 md:p-5 rounded-xl border-2 border-blue-200 shadow-md">
+                    <h4 class="font-bold mb-4 text-blue-800 text-sm flex items-center">📝 NHẬP HÀNG MỚI</h4>
+                    <div class="grid grid-cols-1 gap-2 mb-4">
+                        <input id="in-so-phieu" placeholder="Số phiếu" class="border border-blue-100 p-2 rounded text-sm bg-white w-full">
+                        <select id="sel-ncc-nhap" class="border border-blue-100 p-2 rounded text-sm bg-white w-full"><option>Chọn NCC</option></select>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input id="in-so-hd" placeholder="Số HĐ" class="border border-blue-100 p-2 rounded text-sm bg-white w-full">
+                            <input id="in-ngay-hd" type="date" class="border border-blue-100 p-2 rounded text-sm bg-white w-full">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 gap-2 mb-4">
+                        <select id="sel-nl" class="border border-blue-100 p-2 rounded text-sm bg-white w-full"><option>Chọn NL</option></select>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input id="in-sl" type="number" placeholder="SL" class="border border-blue-100 p-2 rounded text-sm bg-white w-full">
+                            <input id="in-gia" type="number" placeholder="Đơn giá" class="border border-blue-100 p-2 rounded text-sm bg-white w-full">
+                        </div>
+                    </div>
+                    <button type="button" onclick="addNguyenLieuToCart();" class="w-full bg-gray-700 text-white py-2 rounded mb-3 hover:bg-black text-sm font-bold shadow">THÊM VÀO GIỎ</button>
+                    <div id="gio-hang-nl" class="my-2 border p-2 text-xs bg-white rounded min-h-[50px] max-h-[100px] overflow-y-auto border-blue-100"></div>
+                    <button onclick="saveFullInvoice()" class="bg-blue-600 text-white w-full py-3 rounded font-bold text-sm hover:bg-blue-700 shadow-lg mt-2">LƯU PHIẾU NHẬP</button>
                 </div>
             </div>
-            
-            <div class="grid grid-cols-1 gap-2 mb-4">
-                <select id="sel-nl" class="border border-blue-100 p-2 rounded text-sm bg-white"><option>Chọn NL</option></select>
-                <div class="grid grid-cols-2 gap-2">
-                    <input id="in-sl" type="number" placeholder="SL" class="border border-blue-100 p-2 rounded text-sm bg-white">
-                    <input id="in-gia" type="number" placeholder="Đơn giá" class="border border-blue-100 p-2 rounded text-sm bg-white">
-                </div>
-            </div>
-            
-           <button type="button" onclick="console.log('Đã bấm nút!'); addNguyenLieuToCart();" class="w-full bg-gray-700 text-white py-2 rounded mb-3 hover:bg-black text-sm font-bold shadow">
-    THÊM VÀO GIỎ
-</button>
-            <div id="gio-hang-nl" class="my-2 border p-2 text-xs bg-white rounded min-h-[50px] max-h-[100px] overflow-y-auto border-blue-100"></div>
-            <button onclick="saveFullInvoice()" class="bg-blue-600 text-white w-full py-3 rounded font-bold text-sm hover:bg-blue-700 shadow-lg mt-2">LƯU PHIẾU NHẬP</button>
         </div>
-    </div>
-</div>
 
-    <!-- Popup -->
-    <div id="popup-ncc" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center p-4 z-50">
-        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm">
-            <h3 id="popup-title" class="font-bold text-lg mb-4 text-center"></h3>
-            <div id="popup-content" class="mb-4"></div>
-            <button onclick="document.getElementById('popup-ncc').classList.add('hidden')" class="w-full bg-gray-500 text-white py-2 rounded">Đóng</button>
+        <!-- Popup -->
+        <div id="popup-ncc" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center p-4 z-50">
+            <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm">
+                <h3 id="popup-title" class="font-bold text-lg mb-4 text-center"></h3>
+                <div id="popup-content" class="mb-4"></div>
+                <button onclick="document.getElementById('popup-ncc').classList.add('hidden')" class="w-full bg-gray-500 text-white py-2 rounded">Đóng</button>
+            </div>
         </div>
     </div>
 </div>
