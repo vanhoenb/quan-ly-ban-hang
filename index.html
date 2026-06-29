@@ -206,6 +206,9 @@
         <button onclick="showPage('page-customers'); toggleMoreMenu()" class="text-white text-xs p-3 hover:bg-slate-700 flex items-center gap-2 border-b border-slate-700"><i data-lucide="users" class="w-4 h-4"></i> Khách Hàng</button>
         <button onclick="showPage('page-products-manage'); loadProductManage(); toggleMoreMenu()" class="text-white text-xs p-3 hover:bg-slate-700 flex items-center gap-2 border-b border-slate-700"><i data-lucide="settings" class="w-4 h-4"></i> Danh mục SP</button>
         <button onclick="showPage('page-SanXuat'); toggleMoreMenu()" class="text-white text-xs p-3 hover:bg-slate-700 flex items-center gap-2"><i data-lucide="factory" class="w-4 h-4"></i> Sản xuất</button>
+		<button onclick="showPage('page-NguyenLieu'); toggleMoreMenu()" class="text-white text-xs p-3 hover:bg-slate-700 flex items-center gap-2 border-b border-slate-700">
+    <i data-lucide="database" class="w-4 h-4"></i> Nguyên Liệu
+</button>
     </div>
 
     <div class="flex justify-around items-center px-2 py-2">
@@ -244,6 +247,9 @@ function toggleMoreMenu() {
         <button onclick="showPage('page-customers'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="users"></i> KH & Công Nợ</button>
         <button onclick="showPage('page-products-manage'); loadProductManage(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="settings"></i> Danh mục SP</button>
         <button onclick="showPage('page-SanXuat'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="factory"></i> Sản xuất</button>
+		<button onclick="showPage('page-NguyenLieu'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3">
+    <i data-lucide="database"></i> Nguyên Liệu
+</button>
         <button onclick="showPage('page-report'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="bar-chart-3"></i> Báo cáo</button>
     </nav>
 </aside>
@@ -268,35 +274,42 @@ function toggleMoreMenu() {
     </div>
 
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <div class="bg-blue-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02] flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
-            <p class="text-[10px] md:text-xs font-bold uppercase opacity-80">Doanh Thu</p>
-            <div class="mt-1">
-                <h3 id="total-revenue" class="text-lg md:text-2xl font-black">0 đ</h3>
-                <p class="text-[9px] md:text-[10px] opacity-80 uppercase">Tổng doanh thu</p>
-            </div>
+    <!-- 1. Doanh Thu (Giữ nguyên) -->
+    <div class="bg-blue-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02] flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
+        <p class="text-[10px] md:text-xs font-bold uppercase opacity-80">Doanh Thu</p>
+        <div class="mt-1">
+            <h3 id="total-revenue" class="text-lg md:text-2xl font-black">0 đ</h3>
+            <p class="text-[9px] md:text-[10px] opacity-80 uppercase">Tổng doanh thu</p>
         </div>
-        <div class="bg-emerald-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02] flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
-			<p class="text-[10px] md:text-xs font-bold uppercase opacity-80">Công Nợ Thu</p>
-			<div class="mt-1">
-				<h3 id="total-debt-summary" class="text-lg md:text-2xl font-black">0 đ</h3>
-				<p class="text-[9px] md:text-[10px] opacity-80 uppercase">Khách đang nợ</p>
-			</div>
-		</div>
-
-		<div class="bg-amber-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02] flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
-			<p class="text-[10px] md:text-xs font-bold uppercase opacity-80">Đã Thu Tháng</p>
-			<div class="mt-1">
-				<h3 id="monthly-paid-summary" class="text-lg md:text-2xl font-black">0 đ</h3>
-				<p class="text-[9px] md:text-[10px] opacity-80 uppercase">Tiền thực về</p>
-			</div>
-		</div>
-
-		<div class="bg-rose-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02] flex flex-col h-[100px] md:h-[120px]">
-			<p class="text-[10px] md:text-xs font-bold uppercase opacity-80 text-center">Khách Nợ Lớn</p>
-			<div id="top-debtors-list" class="text-[10px] md:text-[12px] font-bold mt-1 overflow-y-auto flex-1 custom-scrollbar">
-				</div>
-		</div>
     </div>
+
+    <!-- 2. Công Nợ KH (Giữ nguyên) -->
+    <div class="bg-emerald-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02] flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
+        <p class="text-[10px] md:text-xs font-bold uppercase opacity-80">Công Nợ Thu</p>
+        <div class="mt-1">
+            <h3 id="total-debt-summary" class="text-lg md:text-2xl font-black">0 đ</h3>
+            <p class="text-[9px] md:text-[10px] opacity-80 uppercase">Khách đang nợ</p>
+        </div>
+    </div>
+
+    <!-- 3. Tổng nợ NCC (Thay thế) -->
+    <div class="bg-amber-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02] flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
+        <p class="text-[10px] md:text-xs font-bold uppercase opacity-80">Tổng Nợ NCC</p>
+        <div class="mt-1">
+            <h3 id="total-debt-ncc-summary" class="text-lg md:text-2xl font-black">0 đ</h3>
+            <p class="text-[9px] md:text-[10px] opacity-80 uppercase">Nợ nhà cung cấp</p>
+        </div>
+    </div>
+
+    <!-- 4. Lợi nhuận (Thay thế) -->
+    <div class="bg-rose-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02] flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
+        <p class="text-[10px] md:text-xs font-bold uppercase opacity-80">Lợi Nhuận</p>
+        <div class="mt-1">
+            <h3 id="profit-summary" class="text-lg md:text-2xl font-black">0 đ</h3>
+            <p class="text-[9px] md:text-[10px] opacity-80 uppercase">Doanh thu - Nợ NCC</p>
+        </div>
+    </div>
+</div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div class="space-y-8">
@@ -871,12 +884,14 @@ function toggleMoreMenu() {
 </table>
 
         <!-- PHẦN 6: BÁO CÁO -->
+<!-- PHẦN 6: BÁO CÁO -->
 <div id="page-report" class="hidden p-4 md:p-8 space-y-6 md:space-y-8 bg-slate-50 min-h-screen">
     <div class="border-b pb-4 md:pb-6">
         <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900">Trung Tâm Báo Cáo</h2>
         <p class="text-slate-500 mt-1 text-sm md:text-base">Xuất dữ liệu chi tiết phục vụ đối soát và quản lý kho</p>
     </div>
 
+    <!-- Khối chọn ngày -->
     <div class="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div class="border border-slate-100 p-4 rounded-2xl bg-slate-50">
@@ -890,34 +905,34 @@ function toggleMoreMenu() {
         </div>
     </div>
 
+    <!-- Danh sách các khối Báo cáo -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
         
+        <!-- BC Tổng Hợp -->
         <div class="bg-white p-4 md:p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg transition-all">
             <h3 class="font-bold text-sm md:text-lg text-slate-800 mb-2 md:mb-4 text-center">BC Tổng Hợp</h3>
-            <button onclick="exportFullReport()" class="w-full bg-blue-600 text-white py-3 md:py-4 rounded-xl font-bold text-xs md:text-sm hover:bg-blue-700 transition shadow-md">
-                Xuất File
-            </button>
+            <button onclick="exportFullReport()" class="w-full bg-blue-600 text-white py-3 md:py-4 rounded-xl font-bold text-xs md:text-sm hover:bg-blue-700 transition shadow-md">Xuất File</button>
         </div>
 
+        <!-- BC Bán Hàng -->
         <div class="bg-white p-4 md:p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg transition-all">
             <h3 class="font-bold text-sm md:text-lg text-slate-800 mb-2 md:mb-4 text-center">BC Bán Hàng</h3>
-            <button onclick="exportSales()" class="w-full bg-green-600 text-white py-3 md:py-4 rounded-xl font-bold text-xs md:text-sm hover:bg-green-700 transition shadow-md">
-                Tải File
-            </button>
-        </div>
-        
-        <div class="bg-white p-4 md:p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg transition-all">
-            <h3 class="font-bold text-sm md:text-lg text-slate-800 mb-2 md:mb-4 text-center">BC Công Nợ</h3>
-            <button onclick="exportDebtReport()" class="w-full bg-indigo-600 text-white py-3 md:py-4 rounded-xl font-bold text-xs md:text-sm hover:bg-indigo-700 transition shadow-md">
-                Tải File
-            </button>
+            <button onclick="exportSales()" class="w-full bg-green-600 text-white py-3 md:py-4 rounded-xl font-bold text-xs md:text-sm hover:bg-green-700 transition shadow-md">Tải File</button>
         </div>
 
+        <!-- BC Công Nợ (KH + NCC trong 1 khối) -->
+        <div class="bg-white p-4 md:p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg transition-all flex flex-col justify-between">
+            <h3 class="font-bold text-sm md:text-lg text-slate-800 mb-2 text-center">BC Công Nợ</h3>
+            <div class="grid grid-cols-1 gap-2">
+                <button onclick="exportDebtReport()" class="w-full bg-indigo-600 text-white py-2 md:py-3 rounded-lg font-bold text-[10px] md:text-xs hover:bg-indigo-700 transition shadow">KH</button>
+                <button onclick="exportSupplierDebtReport()" class="w-full bg-emerald-600 text-white py-2 md:py-3 rounded-lg font-bold text-[10px] md:text-xs hover:bg-emerald-700 transition shadow">NCC</button>
+            </div>
+        </div>
+
+        <!-- BC Tồn Kho -->
         <div class="bg-white p-4 md:p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg transition-all">
             <h3 class="font-bold text-sm md:text-lg text-slate-800 mb-2 md:mb-4 text-center">BC Tồn Kho</h3>
-            <button onclick="exportInventory()" class="w-full bg-orange-500 text-white py-3 md:py-4 rounded-xl font-bold text-xs md:text-sm hover:bg-orange-600 transition shadow-md">
-                Tải File
-            </button>
+            <button onclick="exportInventory()" class="w-full bg-orange-500 text-white py-3 md:py-4 rounded-xl font-bold text-xs md:text-sm hover:bg-orange-600 transition shadow-md">Tải File</button>
         </div>
     </div>
 </div>
@@ -1031,7 +1046,136 @@ function toggleMoreMenu() {
     </div>
   </div>
 </div>
+<!-- PHẦN 7: NGUYÊN LIỆU & CÔNG NỢ -->
+<div id="page-NguyenLieu" class="page-content hidden p-6 bg-gray-50">
+    <!-- Bỏ max-w-7xl để dùng toàn bộ màn hình -->
+    <div class="w-full">
+        <h3 class="mb-6 font-bold text-2xl text-gray-800">QUẢN LÝ NGUYÊN LIỆU</h3>
+        
+        <!-- Tab Menu -->
+        <div class="flex space-x-2 mb-6">
+            <button onclick="openNLTab('ncc-tab')" class="px-4 py-2 bg-blue-600 text-white rounded font-bold text-xs">NCC</button>
+            <button onclick="openNLTab('dm-tab')" class="px-4 py-2 bg-blue-600 text-white rounded font-bold text-xs">DANH MỤC NL</button>
+            <button onclick="openNLTab('nhap-tab')" class="px-4 py-2 bg-blue-600 text-white rounded font-bold text-xs">NHẬP & NỢ</button>
+        </div>
 
+        <!-- Tab 1: Nhà Cung Cấp -->
+        <div id="ncc-tab" class="nl-tab-pane bg-white p-6 rounded-xl shadow">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <input id="in-ncc" placeholder="Tên NCC" class="border p-2 rounded">
+                <input id="in-sdt" placeholder="SĐT" class="border p-2 rounded">
+                <input id="in-diachi" placeholder="Địa chỉ" class="border p-2 rounded">
+                <button onclick="addNCC()" class="bg-green-600 text-white p-2 rounded font-bold hover:bg-green-700">THÊM NCC</button>
+            </div>
+            <div class="overflow-x-auto border rounded-lg">
+                <table class="w-full text-sm text-left">
+    <thead class="bg-gray-50 text-xs uppercase text-gray-600">
+        <tr>
+            <th class="p-3">Tên NCC</th>
+            <th class="p-3">Địa chỉ</th>
+            <th class="p-3">SĐT</th>
+            <th class="p-3">Nợ NCC</th>
+            <th class="p-3">Đã trả</th>
+            <th class="p-3">Hành động</th>
+        </tr>
+    </thead>
+    <tbody id="body-ncc"></tbody>
+</table>
+            </div>
+        </div>
+
+        <!-- Tab 2: Danh mục NL -->
+        <div id="dm-tab" class="nl-tab-pane hidden bg-white p-6 rounded-xl shadow">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <input id="in-nl" placeholder="Tên Nguyên Liệu" class="border p-2 rounded">
+                <input id="in-dvt" placeholder="ĐVT" class="border p-2 rounded">
+                <button onclick="addNL()" class="bg-green-600 text-white p-2 rounded font-bold hover:bg-green-700">THÊM NL</button>
+            </div>
+            <div class="border rounded-lg overflow-hidden">
+                <table class="w-full text-sm text-left">
+                    <thead class="bg-gray-100"><tr><th class="p-3">Tên NL</th><th class="p-3">ĐVT</th><th class="p-3">Hành động</th></tr></thead>
+                    <tbody id="body-nl"></tbody>
+                </table>
+            </div>
+        </div>
+
+       
+<!-- Tab 3: Nhập & Công nợ -->
+<div id="nhap-tab" class="nl-tab-pane hidden p-0">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- CỘT TRÁI: DANH SÁCH (Có thanh cuộn) -->
+        <div class="col-span-12 lg:col-span-9 bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+            <h4 class="font-bold mb-4 text-gray-700">DANH SÁCH CHI TIẾT NHẬP</h4>
+            <!-- Giới hạn chiều cao và thêm thanh cuộn dọc -->
+            <div class="overflow-y-auto max-h-[500px] border rounded-lg">
+                <table class="w-full text-xs text-left">
+                    <thead class="bg-gray-100 text-gray-600 uppercase sticky top-0">
+                        <tr>
+                            <th class="p-3">Số Phiếu</th>
+                            <th class="p-3">Ngày</th>
+                            <th class="p-3">Tên NL</th>
+                            <th class="p-3">SL</th>
+                            <th class="p-3">Đơn Giá</th>
+                            <th class="p-3">Thành Tiền</th>
+                            <th class="p-3 text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="body-phieu" class="divide-y divide-gray-100"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- CỘT PHẢI: FORM NHẬP (Làm nổi bật) -->
+        <div class="col-span-12 lg:col-span-3 bg-blue-50 p-5 rounded-xl border-2 border-blue-200 shadow-md">
+            <h4 class="font-bold mb-4 text-blue-800 text-sm flex items-center">
+                <span class="mr-2">📝</span> NHẬP HÀNG MỚI
+            </h4>
+            
+            <div class="grid grid-cols-1 gap-2 mb-4">
+                <input id="in-so-phieu" placeholder="Số phiếu" class="border border-blue-100 p-2 rounded text-sm bg-white">
+                <select id="sel-ncc-nhap" class="border border-blue-100 p-2 rounded text-sm bg-white"><option>Chọn NCC</option></select>
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <input id="in-so-hd" placeholder="Số HĐ" class="border border-blue-100 p-2 rounded text-sm bg-white">
+                    <input id="in-ngay-hd" type="date" class="border border-blue-100 p-2 rounded text-sm bg-white">
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 gap-2 mb-4">
+                <select id="sel-nl" class="border border-blue-100 p-2 rounded text-sm bg-white"><option>Chọn NL</option></select>
+                <div class="grid grid-cols-2 gap-2">
+                    <input id="in-sl" type="number" placeholder="SL" class="border border-blue-100 p-2 rounded text-sm bg-white">
+                    <input id="in-gia" type="number" placeholder="Đơn giá" class="border border-blue-100 p-2 rounded text-sm bg-white">
+                </div>
+            </div>
+            
+           <button type="button" onclick="console.log('Đã bấm nút!'); addNguyenLieuToCart();" class="w-full bg-gray-700 text-white py-2 rounded mb-3 hover:bg-black text-sm font-bold shadow">
+    THÊM VÀO GIỎ
+</button>
+            <div id="gio-hang-nl" class="my-2 border p-2 text-xs bg-white rounded min-h-[50px] max-h-[100px] overflow-y-auto border-blue-100"></div>
+            <button onclick="saveFullInvoice()" class="bg-blue-600 text-white w-full py-3 rounded font-bold text-sm hover:bg-blue-700 shadow-lg mt-2">LƯU PHIẾU NHẬP</button>
+        </div>
+    </div>
+</div>
+
+    <!-- Popup -->
+    <div id="popup-ncc" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center p-4 z-50">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm">
+            <h3 id="popup-title" class="font-bold text-lg mb-4 text-center"></h3>
+            <div id="popup-content" class="mb-4"></div>
+            <button onclick="document.getElementById('popup-ncc').classList.add('hidden')" class="w-full bg-gray-500 text-white py-2 rounded">Đóng</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openNLTab(tabId) {
+        document.querySelectorAll('.nl-tab-pane').forEach(t => t.classList.add('hidden'));
+        document.getElementById(tabId).classList.remove('hidden');
+        if(tabId === 'nhap-tab') loadDropdowns();
+    }
+</script>
 
    		
 <style media="print">
@@ -1214,6 +1358,7 @@ async function fillProductDetails(name) {
    // --- BIẾN TOÀN CỤC ---
 let cart = [];
 let sellCart = [];
+let cartNL = []; // <--- THÊM DÒNG NÀY VÀO ĐÂY
 let currentProductData = null; 
 let currentStock = 0;          
 let snapshotXuatGlobal;
@@ -1342,8 +1487,17 @@ setTimeout(() => {
             if (typeof loadSalesList === 'function') loadSalesList();
         });
     }
+// DÁN ĐOẠN CODE BỔ SUNG VÀO ĐÂY
+    db.collection('suppliers').onSnapshot(snap => {
+        window.allSuppliersData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if (typeof loadDashboard === 'function') {
+            const currentFilter = document.getElementById('inv-time-filter')?.value || 'today';
+            loadDashboard(currentFilter, false);
+        }
+    });
 });
 
+// ==== TRANG CHỦ =====
 // ==== TRANG CHỦ =====
 async function loadDashboard(filter = 'month', updateCharts = true) {
     console.log("Đang load dữ liệu với filter:", filter);
@@ -1440,52 +1594,48 @@ async function loadDashboard(filter = 'month', updateCharts = true) {
     let inventoryCardsHtml = '';
     let lowStockItems = [];
 
-   orderList.forEach(name => {
-    const item = inventoryMap[name];
-    const tonCuoi = item.tonDau + item.nhap + item.change - item.out;
-    const totalNhap = item.nhap + item.change;
-    
-    // Tổng hàng khả dụng làm mốc 100%
-    const maxVal = Math.max(item.tonDau + totalNhap, 1); 
-    const isLowStock = tonCuoi < 5;
+    orderList.forEach(name => {
+        const item = inventoryMap[name];
+        const tonCuoi = item.tonDau + item.nhap + item.change - item.out;
+        const totalNhap = item.nhap + item.change;
+        
+        const maxVal = Math.max(item.tonDau + totalNhap, 1); 
+        const isLowStock = tonCuoi < 5;
 
-    // Hàm bar gọn gàng, không lồng dấu backtick để tránh lỗi màu hiển thị trên phần mềm
-    const bar = (val, color, label, applyGlow = false, borderClass = 'border-slate-300') => {
-        const barWidth = val > 0 ? Math.min((val / maxVal) * 100, 100) : 0; 
-        const glowClass = applyGlow ? 'ring-2 ring-white ring-inset shadow-[0_0_8px_rgba(255,255,255,0.7)]' : '';
-        
-        // Tách riêng phần HTML của thanh màu để tránh lồng dấu backtick
-        let colorBarHtml = '';
-        if (barWidth > 0) {
-            colorBarHtml = `<div style="width: ${barWidth}%;" class="h-full ${color} ${glowClass} shadow-[inset_0_-2px_3px_rgba(0,0,0,0.2)] transition-all duration-500"></div>`;
-        }
-        
-        return `
-        <div class="flex-1 h-8 bg-slate-200 rounded-md border ${borderClass} shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] overflow-hidden relative">
-            ${colorBarHtml}
-            <div class="absolute inset-0 flex items-center justify-center text-[9px] font-black text-black">
-                ${label}:&nbsp;<b>${val}</b>
+        const bar = (val, color, label, applyGlow = false, borderClass = 'border-slate-300') => {
+            const barWidth = val > 0 ? Math.min((val / maxVal) * 100, 100) : 0; 
+            const glowClass = applyGlow ? 'ring-2 ring-white ring-inset shadow-[0_0_8px_rgba(255,255,255,0.7)]' : '';
+            
+            let colorBarHtml = '';
+            if (barWidth > 0) {
+                colorBarHtml = `<div style="width: ${barWidth}%;" class="h-full ${color} ${glowClass} shadow-[inset_0_-2px_3px_rgba(0,0,0,0.2)] transition-all duration-500"></div>`;
+            }
+            
+            return `
+            <div class="flex-1 h-8 bg-slate-200 rounded-md border ${borderClass} shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] overflow-hidden relative">
+                ${colorBarHtml}
+                <div class="absolute inset-0 flex items-center justify-center text-[9px] font-black text-black">
+                    ${label}:&nbsp;<b>${val}</b>
+                </div>
+            </div>`;
+        };
+
+        const tcBorderClass = isLowStock ? 'border-2 border-red-500 animate-pulse' : 'border-slate-300';
+
+        inventoryCardsHtml += `
+        <div class="mb-2 bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
+            <div class="text-[11px] font-bold text-slate-700 mb-1 truncate">
+                ${name} ${isLowStock ? '<span class="animate-pulse">⚠️</span>' : ''}
+            </div>
+            
+            <div class="flex w-full gap-1">
+                ${bar(item.tonDau, 'bg-blue-400', 'T.Đầu')}
+                ${bar(totalNhap, 'bg-amber-400', 'Nhập')}
+                ${bar(item.out, 'bg-rose-400', 'Xuất')}
+                ${bar(tonCuoi, 'bg-emerald-400', 'T.Cuối', isLowStock, tcBorderClass)}
             </div>
         </div>`;
-    };
-
-    // Tách riêng class viền của ô Tồn Cuối ra ngoài chuỗi HTML
-    const tcBorderClass = isLowStock ? 'border-2 border-red-500 animate-pulse' : 'border-slate-300';
-
-    inventoryCardsHtml += `
-    <div class="mb-2 bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
-        <div class="text-[11px] font-bold text-slate-700 mb-1 truncate">
-            ${name} ${isLowStock ? '<span class="animate-pulse">⚠️</span>' : ''}
-        </div>
-        
-        <div class="flex w-full gap-1">
-            ${bar(item.tonDau, 'bg-blue-400', 'T.Đầu')}
-            ${bar(totalNhap, 'bg-amber-400', 'Nhập')}
-            ${bar(item.out, 'bg-rose-400', 'Xuất')}
-            ${bar(tonCuoi, 'bg-emerald-400', 'T.Cuối', isLowStock, tcBorderClass)}
-        </div>
-    </div>`;
-});
+    });
 
     if (invListEl) invListEl.innerHTML = inventoryCardsHtml || '<p class="col-span-2 p-4 text-center text-slate-400 text-sm">Chưa có dữ liệu tồn kho</p>';
     if (lowStockListEl) {
@@ -1499,49 +1649,32 @@ async function loadDashboard(filter = 'month', updateCharts = true) {
     if (lowStockCountEl) lowStockCountEl.innerText = lowStockItems.length;
     if (totalItemsEl) totalItemsEl.innerText = orderList.length;
 
-    // --- CẬP NHẬT 3 Ô MỚI (CÔNG NỢ, ĐÃ THU, KHÁCH NỢ LỚN) ---
+    // --- CẬP NHẬT 4 Ô MỚI (CÔNG NỢ KH, THỰC THU, NỢ NCC, LỢI NHUẬN) ---
     const customers = window.allCustomersData || [];
+    const suppliers = window.allSuppliersData || []; // Đảm bảo đã nạp dữ liệu này
     const activeDocs = (typeof filteredDocs !== 'undefined') ? filteredDocs : snapshotXuat.docs;
     
-    const debtEl = document.getElementById('total-debt-summary');
-    const paidEl = document.getElementById('monthly-paid-summary'); 
-    const topDebtorsListEl = document.getElementById('top-debtors-list');
+    const debtEl = document.getElementById('total-debt-summary'); // Công nợ KH
+    const paidEl = document.getElementById('monthly-paid-summary'); // Tiền thực thu
+    const debtNCCEl = document.getElementById('total-debt-ncc-summary'); // Tổng nợ NCC
+    const profitEl = document.getElementById('profit-summary'); // Lợi nhuận
 
-    // 1. Tổng công nợ (Lấy từ danh sách khách hàng)
-    if (debtEl) {
-        const totalDebt = customers.reduce((sum, c) => sum + (Number(c.debt || 0)), 0);
-        debtEl.innerText = totalDebt.toLocaleString('vi-VN') + " đ";
-    }
+    // 1. Tổng công nợ KH
+    const totalDebtKH = customers.reduce((sum, c) => sum + (Number(c.debt || 0)), 0);
+    if (debtEl) debtEl.innerText = totalDebtKH.toLocaleString('vi-VN') + " đ";
 
-    // 2. Đã thu tháng (Tính tổng những đơn KHÔNG PHẢI là "Công nợ")
-    if (paidEl) {
-        const totalPaid = activeDocs.reduce((sum, doc) => {
-            const data = doc.data();
-            const total = Number(data.total) || 0;
-            // Chỉ cộng nếu paymentMethod khác "Công nợ"
-            if (data.paymentMethod !== "Công nợ") {
-                return sum + total;
-            }
-            return sum;
-        }, 0);
-        paidEl.innerText = totalPaid.toLocaleString('vi-VN') + " đ";
-    }
+    // 2. Tiền thực thu (Tổng doanh thu - Công nợ KH)
+    const totalRevenue = activeDocs.reduce((sum, doc) => sum + Number(doc.data().total || 0), 0);
+    const totalPaid = totalRevenue - totalDebtKH;
+    if (paidEl) paidEl.innerText = totalPaid.toLocaleString('vi-VN') + " đ";
 
-    // 3. Khách nợ lớn
-    if (topDebtorsListEl) {
-        const topDebtors = [...customers]
-            .filter(c => Number(c.debt || 0) > 0)
-            .sort((a, b) => Number(b.debt || 0) - Number(a.debt || 0))
-            .slice(0, 5);
-            
-        topDebtorsListEl.innerHTML = topDebtors.length > 0 
-            ? topDebtors.map(c => `
-                <div class="flex justify-between items-center mb-0.5 border-b border-rose-400/30 pb-0.5">
-                    <span class="truncate max-w-[65%] text-[10px] md:text-[11px]">${c.name || 'Khách'}</span>
-                    <span class="font-bold text-[10px] md:text-[11px]">${(Number(c.debt || 0)/1000000).toFixed(1)}tr</span>
-                </div>`).join('')
-            : '<div class="text-center mt-2 opacity-70 text-xs">Không có nợ</div>';
-    }
+    // 3. Tổng nợ NCC
+    const totalDebtNCC = suppliers.reduce((sum, s) => sum + (Number(s.debt || 0)), 0);
+    if (debtNCCEl) debtNCCEl.innerText = totalDebtNCC.toLocaleString('vi-VN') + " đ";
+
+    // 4. Lợi nhuận (Tổng doanh thu - Tổng nợ NCC)
+    const profit = totalRevenue - totalDebtNCC;
+    if (profitEl) profitEl.innerText = profit.toLocaleString('vi-VN') + " đ";
     // -------------------------------------------------------
 
     if (recentInvoicesEl) {
@@ -5555,6 +5688,151 @@ function setBorderStyle(cell) {
     cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
 }
 
+//======= CÔNG NƠ NHÀ CC ==============
+async function exportSupplierDebtReport() {
+    const from = document.getElementById('date-from').value;
+    const to = document.getElementById('date-to').value;
+    if (!from || !to) return alert("Vli lòng chọn Từ ngày và Đến ngày");
+
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
+    toDate.setHours(23, 59, 59, 999);
+
+    const formatNum = (num) => num.toLocaleString('vi-VN');
+    
+    const formatDate = (val) => {
+        if (!val) return "";
+        let d = val.seconds ? new Date(val.seconds * 1000) : new Date(val);
+        return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    };
+
+    try {
+        // TÍCH HỢP: Đọc từ collection phù hợp cho NCC
+        const [importsSnap, paymentsSnap, openSnap] = await Promise.all([
+            db.collection('material_imports').get(),
+            db.collection('payments').get(), // Đọc từ collection thanh toán như image_91d67e.jpg
+            db.collection('supplier_opening_balances').get()
+        ]);
+
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet('BaoCaoCongNoNCC');
+
+        // 1. Tiêu đề
+        const titleRow = sheet.addRow(['BÁO CÁO CHI TIẾT CÔNG NỢ NHÀ CUNG CẤP']);
+        titleRow.font = { bold: true, size: 14 };
+        sheet.mergeCells('A1:H1');
+        titleRow.alignment = { horizontal: 'center' };
+        
+        sheet.addRow([`Từ ngày ${formatDateToDDMMYYYY(from)} đến ngày ${formatDateToDDMMYYYY(to)}`]).alignment = { horizontal: 'center' };
+        sheet.mergeCells('A2:H2');
+        sheet.addRow([]);
+
+        // 2. Xử lý dữ liệu
+        const reportData = {};
+
+        // Xử lý công nợ đầu kỳ
+        openSnap.forEach(doc => {
+            const d = doc.data();
+            const ncc = d.ncc || "Chưa xác định";
+            if (!reportData[ncc]) reportData[ncc] = { items: [], pays: [], openingBalance: 0 };
+            reportData[ncc].openingBalance += parseFloat(d.amount || 0);
+        });
+
+        // Xử lý nhập hàng
+        importsSnap.forEach(doc => {
+            const d = doc.data();
+            const ncc = d.ncc || "Chưa xác định";
+            if (!reportData[ncc]) reportData[ncc] = { items: [], pays: [], openingBalance: 0 };
+            
+            const dDate = d.date.seconds ? new Date(d.date.seconds * 1000) : new Date(d.date);
+            const amount = parseFloat(d.total || 0);
+            
+            if (dDate < fromDate) {
+                reportData[ncc].openingBalance += amount;
+            } else {
+                reportData[ncc].items.push({ ...d, dateObj: dDate, total: amount, nl: d.nl || 'Nhập hàng' });
+            }
+        });
+
+        // Xử lý thanh toán từ collection 'payments'
+        paymentsSnap.forEach(doc => {
+            const d = doc.data();
+            const ncc = d.supplierName; // Theo image_91d67e.jpg
+            if (ncc && reportData[ncc]) {
+                const pDate = d.date.seconds ? new Date(d.date.seconds * 1000) : new Date(d.date);
+                if (pDate >= fromDate && pDate <= toDate) {
+                    reportData[ncc].pays.push({ ...d, dateObj: pDate, amount: parseFloat(d.amount || 0) });
+                }
+            }
+        });
+
+        // 3. Render ra Excel
+        const keys = Object.keys(reportData);
+        if (keys.length === 0) {
+            alert("Không tìm thấy dữ liệu nào cho NCC trong khoảng thời gian này!");
+            return;
+        }
+
+        for (const nccName of keys) {
+            const data = reportData[nccName];
+            
+            const header = sheet.addRow([`NHÀ CUNG CẤP: ${nccName.toUpperCase()}`]);
+            header.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8F5E9' } };
+            header.font = { bold: true };
+            sheet.mergeCells(`A${header.number}:H${header.number}`);
+            
+            const cols = sheet.addRow(['Ngày tháng', 'Diễn giải', 'ĐVT', 'SL', 'Đơn giá', 'Phát sinh (Nợ)', 'Thanh toán (Trả)', 'Ghi chú']);
+            cols.font = { bold: true };
+            cols.eachCell(c => { 
+                c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5F5F5' } }; 
+                c.alignment = { horizontal: 'center', vertical: 'middle' };
+                setBorderStyle(c); 
+            });
+
+            const row1 = sheet.addRow(['', '', '', 'NỢ ĐẦU KỲ CHUYỂN SANG:', '', formatNum(data.openingBalance), '', '']);
+            sheet.mergeCells(`D${row1.number}:E${row1.number}`);
+            row1.getCell(4).font = { bold: true };
+            row1.eachCell(c => setBorderStyle(c));
+
+            let totalDebt = data.openingBalance;
+            let totalPay = 0;
+
+            // In dữ liệu nhập hàng với tên nguyên liệu (s.nl)
+            data.items.forEach(s => {
+                const row = sheet.addRow([formatDate(s.dateObj), s.nl, '', '', '', formatNum(s.total), 0, '']);
+                totalDebt += s.total;
+                row.eachCell(c => setBorderStyle(c));
+            });
+
+            // In dữ liệu thanh toán
+            data.pays.forEach(p => {
+                totalPay += p.amount;
+                const row = sheet.addRow([formatDate(p.dateObj), 'Thanh toán công nợ', '', '', '', 0, formatNum(p.amount), '']);
+                row.eachCell(c => setBorderStyle(c));
+            });
+
+            const row2 = sheet.addRow(['', '', '', `TỔNG CỘNG:`, '', formatNum(totalDebt), formatNum(totalPay), '']);
+            sheet.mergeCells(`D${row2.number}:E${row2.number}`);
+            row2.font = { bold: true };
+            row2.eachCell(c => setBorderStyle(c));
+            
+            const balance = totalDebt - totalPay;
+            const row3 = sheet.addRow(['', '', '', 'SỐ DƯ CUỐI KỲ CÒN NỢ:', '', '', '', formatNum(balance)]);
+            sheet.mergeCells(`D${row3.number}:G${row3.number}`);
+            row3.font = { bold: true, color: { argb: 'FFFF0000' } };
+            row3.eachCell(c => setBorderStyle(c));
+            
+            sheet.addRow([]);
+        }
+
+        sheet.columns.forEach(col => col.width = 15);
+        const buffer = await workbook.xlsx.writeBuffer();
+        const a = document.createElement('a');
+        a.href = window.URL.createObjectURL(new Blob([buffer]));
+        a.download = `Bao_Cao_Cong_No_NCC_${formatDateToDDMMYYYY(from).replace(/-/g,'')}_den_${formatDateToDDMMYYYY(to).replace(/-/g,'')}.xlsx`;
+        a.click();
+    } catch (e) { alert("Lỗi xuất báo cáo NCC: " + e.message); }
+}
 
 // ========== QUẢN LÝ SẢN PHẨM========
 // 1. Hàm thêm sản phẩm mới
@@ -5950,7 +6228,446 @@ function tinhSoKgThanhPham() {
     if (typeof tinhTonCuoi === 'function') tinhTonCuoi();
 }
 
+// --- 1. HỆ THỐNG CHUNG ---
+//const db = firebase.firestore();
 
+/**
+ * --- 1. HỆ THỐNG CHUNG ---
+ */
+// Chuyển đổi giữa các tab và làm mới dữ liệu
+function openNLTab(tabId) {
+    // 1. Ẩn tất cả các tab
+    document.querySelectorAll('.nl-tab-pane').forEach(t => t.classList.add('hidden'));
+    
+    // 2. Hiển thị tab được chọn
+    const tab = document.getElementById(tabId);
+    if (tab) tab.classList.remove('hidden');
+
+    // 3. Nếu là tab Nhập kho, tự động tạo số phiếu mới
+    if (tabId === 'nhap-tab') {
+        generateInvoiceNumber();
+    }
+
+    // 4. Cập nhật dữ liệu
+    loadDropdowns(); 
+    loadAllData();   
+}
+
+// Nạp dữ liệu vào các thẻ <select> (Nhà cung cấp, Nguyên liệu)
+async function loadDropdowns() {
+    const selNCC = document.getElementById('sel-ncc-nhap');
+    const selNL = document.getElementById('sel-nl');
+    // Lấy danh sách NCC từ Firestore
+    if (selNCC) {
+        const nccSnap = await db.collection('suppliers').get();
+        selNCC.innerHTML = '<option>Chọn NCC</option>';
+        nccSnap.forEach(doc => selNCC.innerHTML += `<option value="${doc.data().name}">${doc.data().name}</option>`);
+    }
+    // Lấy danh sách Nguyên liệu từ Firestore
+    if (selNL) {
+        const nlSnap = await db.collection('materials_list').get();
+        selNL.innerHTML = '<option>Chọn NL</option>';
+        nlSnap.forEach(doc => selNL.innerHTML += `<option value="${doc.data().name}">${doc.data().name}</option>`);
+    }
+}
+
+// Hàm khởi chạy đồng bộ việc tải tất cả các bảng dữ liệu
+async function loadAllData() {
+    // Đã xóa loadTableTra() ra khỏi danh sách
+    await Promise.allSettled([loadTableNCC(), loadTableNL(), loadTablePhieu()]);
+}
+/**
+ * --- 2. TAB NHÀ CUNG CẤP (NCC) & MODAL POPUP ---
+ */
+// Hiển thị nội dung vào khung Modal chung
+function showPopup(title, content) {
+    document.getElementById('popup-title').innerText = title;
+    document.getElementById('popup-content').innerHTML = content;
+    document.getElementById('popup-ncc').classList.remove('hidden');
+}
+
+// Render bảng danh sách NCC và tính toán công nợ
+async function loadTableNCC() {
+    const bodyNCC = document.getElementById('body-ncc');
+    if (!bodyNCC) return;
+    const nccSnap = await db.collection('suppliers').get();
+    bodyNCC.innerHTML = '';
+    
+    for (const doc of nccSnap.docs) {
+        const d = doc.data();
+        const payments = await db.collection('payments').where('supplierName', '==', d.name).get();
+        const totalPaid = payments.docs.reduce((sum, p) => sum + p.data().amount, 0);
+
+        // Tạo biến tên an toàn
+        const safeName = d.name.replace(/'/g, "\\'");
+
+        bodyNCC.innerHTML += `<tr class="border-b">
+            <td class="p-2 text-sm">${d.name}</td>
+            <td class="p-2 text-sm">${d.address || ''}</td>
+            <td class="p-2 text-sm">${d.phone || ''}</td>
+            <td class="p-2 text-sm font-bold text-red-600">${(d.debt || 0).toLocaleString()}</td>
+            <td class="p-2 text-sm text-green-600">${totalPaid.toLocaleString()}</td>
+            <td class="p-2 text-sm">
+                <button onclick="openPayModal('${doc.id}', '${safeName}')" class="bg-blue-500 text-white px-2 py-1 rounded text-xs font-bold mr-1">Trả Nợ</button>
+                <button onclick="window.openHistory('${safeName}')" class="bg-purple-500 text-white px-2 py-1 rounded text-xs font-bold mr-1">Lịch sử</button>
+                <button onclick="deleteDoc('suppliers', '${doc.id}')" class="bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">Xóa</button>
+            </td>
+        </tr>`;
+    }
+}
+
+// Mở khung nhập liệu cho thao tác trả nợ
+function openPayModal(docId, nccName) {
+    // Lưu ý: Đã đổi payDebt thành paySupplierDebt ở dòng bên dưới
+    const content = `
+        <input type="number" id="in-pay-modal" class="border p-2 w-full mb-4" placeholder="Nhập số tiền">
+        <button onclick="paySupplierDebt('${docId}', '${nccName}')" class="bg-blue-600 text-white w-full py-2 rounded">Xác nhận trả nợ</button>
+    `;
+    showPopup("Trả nợ: " + nccName, content);
+}
+
+//======= XỬ LÝ TRẢ NỢ NHÀ CUNG CẤP =======
+async function paySupplierDebt(docId, nccName) {
+    const inputElement = document.getElementById('in-pay-modal');
+    const amount = parseFloat(inputElement ? inputElement.value : 0);
+    
+    if (!amount || amount <= 0) return alert("Vui lòng nhập số tiền hợp lệ!");
+
+    try {
+        // Ghi vào collection 'payments' với tên trường supplierName khớp với image_91d67e.jpg
+        await db.collection('payments').add({ 
+            supplierName: nccName, 
+            amount: amount, 
+            date: new Date() 
+        });
+
+        // Cập nhật nợ trong collection 'suppliers'
+        await db.collection('suppliers').doc(docId).update({ 
+            debt: firebase.firestore.FieldValue.increment(-amount) 
+        });
+
+        // Đóng popup và reset dữ liệu
+        document.getElementById('popup-ncc').classList.add('hidden');
+        if (inputElement) inputElement.value = '';
+        
+        // Tải lại dữ liệu (đảm bảo loadAllData là hàm global hoặc được định nghĩa)
+        if (typeof loadAllData === 'function') {
+            loadAllData();
+        }
+    } catch (error) {
+        console.error("Lỗi khi thanh toán:", error);
+        alert("Có lỗi xảy ra: " + error.message);
+    }
+}
+
+// Truy vấn và hiển thị lịch sử trả tiền của NCC
+async function openHistoryModal(nccName) {
+    try {
+        console.log("Đang tải dữ liệu cho:", nccName);
+        const snaps = await db.collection('payments').where('supplierName', '==', nccName).orderBy('date', 'desc').get();
+        
+        console.log("Truy vấn xong, số bản ghi:", snaps.size);
+
+        let html = `<div class="max-h-60 overflow-y-auto">`;
+        if (snaps.empty) {
+            html += "Chưa có dữ liệu thanh toán.";
+        } else {
+            snaps.forEach(doc => {
+                const d = doc.data();
+                const dateStr = d.date?.toDate()?.toLocaleDateString() || "N/A";
+                
+                // --- SỬA Ở DÒNG NÀY ---
+                // Đổi 'deletePayment' thành 'deletePaymentNCC'
+                html += `<div class="flex justify-between border-b py-2 text-sm">
+                    <span>${dateStr}: ${d.amount?.toLocaleString()}</span>
+                    <button onclick="deletePaymentNCC('${doc.id}', '${nccName.replace(/'/g, "\\'")}', ${d.amount})" 
+                            class="text-red-500 font-bold hover:underline">Xóa</button>
+                </div>`;
+            });
+        }
+        html += `</div>`;
+        showPopup("Lịch sử: " + nccName, html);
+    } catch (err) {
+        console.error("Lỗi chi tiết:", err);
+        alert("Lỗi: " + err.message);
+    }
+}
+
+// Đổi tên thành deletePaymentNCC để tách biệt hoàn toàn với deletePayment của KH
+async function deletePaymentNCC(payId, nccName, amount) {
+    if (!confirm("Xác nhận xóa lần trả nợ này?")) return;
+    
+    try {
+        // 1. Xóa lịch sử thanh toán
+        await db.collection('payments').doc(payId).delete();
+        
+        // 2. Tìm tất cả các NCC có tên này
+        const snap = await db.collection('suppliers').where('name', '==', nccName).get();
+        
+        if (snap.empty) {
+            alert("Không tìm thấy NCC!");
+            return;
+        }
+
+        // 3. Duyệt qua từng bản ghi tìm được
+        for (const doc of snap.docs) {
+            const data = doc.data();
+            
+            // ÉP KIỂU AN TOÀN: Nếu data.debt không tồn tại hoặc là undefined, lấy bằng 0
+            const currentDebt = (typeof data.debt !== 'undefined') ? data.debt : 0;
+            
+            console.log("Đang cập nhật nợ cho doc:", doc.id, "Nợ cũ:", currentDebt, "Cộng thêm:", amount);
+
+            await doc.ref.update({ 
+                debt: currentDebt + amount 
+            });
+        }
+        
+        // 4. Hoàn tất
+        const popup = document.getElementById('popup-ncc');
+        if (popup) popup.classList.add('hidden');
+        
+        alert("Đã xóa và cập nhật nợ!");
+        loadAllData();
+        
+    } catch (error) {
+        console.error("LỖI CHI TIẾT:", error);
+        alert("Lỗi: " + error.message);
+    }
+}
+
+/**
+ * --- 3. CÁC HÀM CƠ BẢN (Thêm & Xóa) ---
+ */
+// Thêm mới NCC vào Database
+async function addNCC() {
+    const name = document.getElementById('in-ncc').value;
+    const phone = document.getElementById('in-sdt').value;
+    const address = document.getElementById('in-diachi').value;
+    if (!name) return alert("Nhập tên NCC!");
+    await db.collection('suppliers').add({ name, phone, address, debt: 0 });
+    document.getElementById('in-ncc').value = ''; 
+    document.getElementById('in-sdt').value = ''; 
+    document.getElementById('in-diachi').value = ''; 
+    loadAllData();
+}
+
+// Hàm xóa đa năng cho mọi collection
+async function deletePaymentNCC(payId, nccName, amount) {
+    if (!confirm("Xác nhận xóa lần trả nợ này?")) return;
+    
+    try {
+        // 1. Xóa bản ghi thanh toán
+        await db.collection('payments').doc(payId).delete();
+        
+        // 2. Tìm tất cả các NCC có tên này (xử lý trường hợp trùng tên)
+        const snap = await db.collection('suppliers').where('name', '==', nccName).get();
+        
+        if (snap.empty) {
+            alert("Không tìm thấy thông tin NCC!");
+            return;
+        }
+
+        // 3. Cập nhật nợ cho TẤT CẢ các bản ghi tìm thấy
+        for (const doc of snap.docs) {
+            const data = doc.data();
+            // Nếu không có trường debt, mặc định là 0
+            const currentDebt = data.debt || 0; 
+            
+            await doc.ref.update({ 
+                debt: currentDebt + amount 
+            });
+        }
+        
+        // 4. Đóng popup và làm mới
+        const popup = document.getElementById('popup-ncc');
+        if (popup) popup.classList.add('hidden');
+        
+        alert("Xóa thành công!");
+        loadAllData();
+        
+    } catch (error) {
+        console.error("Lỗi:", error);
+        alert("Lỗi khi xóa: " + error.message);
+    }
+}
+/**
+ * --- 4. TAB DANH MỤC NGUYÊN LIỆU (DMNL) ---
+ */
+// Hiển thị danh sách nguyên liệu
+async function loadTableNL() {
+    const bodyNL = document.getElementById('body-nl');
+    if (!bodyNL) return;
+    const nlSnap = await db.collection('materials_list').get();
+    bodyNL.innerHTML = '';
+    nlSnap.forEach(doc => {
+        const d = doc.data();
+        bodyNL.innerHTML += `<tr><td>${d.name}</td><td>${d.unit}</td>
+            <td><button onclick="deleteDoc('materials_list', '${doc.id}')" class="text-red-500">Xóa</button></td></tr>`;
+    });
+}
+
+// Thêm nguyên liệu mới
+async function addNL() {
+    const name = document.getElementById('in-nl').value;
+    if (!name) return alert("Nhập tên NL!");
+    await db.collection('materials_list').add({ name, unit: document.getElementById('in-dvt').value });
+    document.getElementById('in-nl').value = ''; loadAllData();
+}
+
+/**
+ * --- 5. TAB NHẬP KHO & CÔNG NỢ ---
+ */
+// Hàm tự động tạo số phiếu (Ví dụ: NL01, NL02...)
+async function generateInvoiceNumber() {
+    const snap = await db.collection('material_imports').orderBy('soPhieu', 'desc').limit(1).get();
+    let nextNum = 1;
+    
+    if (!snap.empty) {
+        const lastDoc = snap.docs[0].data();
+        const lastNum = parseInt(lastDoc.soPhieu.replace('NL', '')) || 0;
+        nextNum = lastNum + 1;
+    }
+    
+    // Format thành NL01, NL02...
+    const newId = 'NL' + nextNum.toString().padStart(2, '0');
+    document.getElementById('in-so-phieu').value = newId;
+}
+
+function addNguyenLieuToCart() {
+    try {
+        console.log("Đang chạy hàm addNguyenLieuToCart...");
+        
+        const selEl = document.getElementById('sel-nl');
+        const slEl = document.getElementById('in-sl');
+        const giaEl = document.getElementById('in-gia');
+
+        if (!selEl || !slEl || !giaEl) {
+            alert("Lỗi: Không tìm thấy ID input!");
+            return;
+        }
+
+        const nl = selEl.value;
+        const sl = parseFloat(slEl.value);
+        const gia = parseFloat(giaEl.value);
+
+        if (nl === "Chọn NL" || isNaN(sl) || isNaN(gia)) {
+            alert("Vui lòng chọn NL, nhập SL và Giá!");
+            return;
+        }
+        
+        cartNL.push({ nl, sl, gia, thanhTien: sl * gia });
+        renderCartNL();
+
+        slEl.value = '';
+        giaEl.value = '';
+        selEl.value = 'Chọn NL';
+        
+    } catch (err) {
+        alert("Lỗi chương trình: " + err.message);
+        console.error("Chi tiết lỗi:", err);
+    }
+}
+
+// 2. Hàm render riêng, sử dụng ID riêng (ví dụ: gio-hang-nl)
+function renderCartNL() {
+    const gioHangDiv = document.getElementById('gio-hang-nl');
+    if (!gioHangDiv) return; // Tránh lỗi nếu trang khác không có ID này
+
+    gioHangDiv.innerHTML = cartNL.map((item, index) => `
+        <div class="flex justify-between items-center p-2 border-b">
+            <span>${item.nl} | ${item.sl} | ${item.thanhTien.toLocaleString()} đ</span>
+            <button onclick="xoaNguyenLieu(${index})" class="text-red-500 font-bold ml-2 px-2 hover:bg-red-100 rounded">X</button>
+        </div>
+    `).join('');
+}
+
+// 3. Hàm xóa riêng
+function xoaNguyenLieu(index) {
+    cartNL.splice(index, 1);
+    renderCartNL(); // Cập nhật lại list NL
+}
+
+async function saveFullInvoice() {
+    const soPhieu = document.getElementById('in-so-phieu').value;
+    const ncc = document.getElementById('sel-ncc-nhap').value;
+    
+    if (ncc === 'Chọn NCC') return alert("Vui lòng chọn NCC!");
+    
+    // SỬA Ở ĐÂY: Kiểm tra cartNL thay vì cart
+    if (cartNL.length === 0) return alert("Giỏ hàng đang trống!");
+
+    // SỬA Ở ĐÂY: Tính tổng dựa trên cartNL
+    const totalInvoice = cartNL.reduce((sum, item) => sum + item.thanhTien, 0);
+
+    // SỬA Ở ĐÂY: Lặp qua cartNL để lưu vào DB
+    for (let item of cartNL) {
+        await db.collection('material_imports').add({
+            soPhieu,
+            ncc,
+            soHd: document.getElementById('in-so-hd').value,
+            ngayHd: document.getElementById('in-ngay-hd').value,
+            nl: item.nl,
+            sl: item.sl,
+            gia: item.gia,
+            total: item.thanhTien,
+            date: new Date()
+        });
+    }
+    
+    const snap = await db.collection('suppliers').where('name', '==', ncc).get();
+    if (!snap.empty) await snap.docs[0].ref.update({ debt: firebase.firestore.FieldValue.increment(totalInvoice) });
+    
+    // --- RESET TOÀN BỘ ---
+    cartNL = []; // Xóa giỏ NL
+    document.getElementById('gio-hang-nl').innerHTML = ''; // Reset ID giỏ hàng mới
+    document.getElementById('in-so-hd').value = '';
+    document.getElementById('in-ngay-hd').value = '';
+    document.getElementById('sel-ncc-nhap').value = 'Chọn NCC';
+    
+    alert("Đã lưu phiếu!");
+    
+    await generateInvoiceNumber();
+    loadAllData();
+}
+
+// Render bảng danh sách phiếu nhập
+async function loadTablePhieu() {
+    const bodyPhieu = document.getElementById('body-phieu');
+    if (!bodyPhieu) return;
+    
+    // Lưu ý: Nếu có quá nhiều phiếu, lệnh orderBy này cũng có thể cần Index (như lỗi hôm trước)
+    const phieuSnap = await db.collection('material_imports').orderBy('date', 'desc').get();
+    
+    bodyPhieu.innerHTML = '';
+    phieuSnap.forEach(doc => {
+        const d = doc.data();
+        const dateStr = d.date?.toDate()?.toLocaleDateString() || "N/A";
+        
+        bodyPhieu.innerHTML += `<tr class="border-b">
+            <td class="p-2">${d.soPhieu || ''}</td>
+            <td class="p-2">${dateStr}</td>
+            <td class="p-2">${d.nl || ''}</td>
+            <td class="p-2">${d.dvt || ''}</td>
+            <td class="p-2">${d.sl || 0}</td>
+            <td class="p-2">${(d.gia || 0).toLocaleString()}</td>
+            <td class="p-2 font-bold">${(d.total || 0).toLocaleString()}</td>
+            <td class="p-2">
+                <button onclick="deleteDoc('material_imports', '${doc.id}')" class="text-red-500 font-bold">Xóa</button>
+            </td>
+        </tr>`;
+    });
+}
+
+window.openHistory = function(name) {
+    console.log("Đã bấm vào: " + name);
+    openHistoryModal(name);
+};
+// Khởi chạy toàn bộ dữ liệu khi trang web được tải xong
+window.addEventListener('DOMContentLoaded', () => {
+    loadAllData();
+	generateInvoiceNumber(); // Đảm bảo có số phiếu ngay khi vừa load web
+});
 
 // --- KHỞI TẠO HỆ THỐNG ---
 // 1. Cấu hình ban đầu
