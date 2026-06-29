@@ -6398,41 +6398,38 @@ async function deletePaymentNCC(payId, nccName, amount) {
     if (!confirm("Xác nhận xóa lần trả nợ này?")) return;
     
     try {
-        // 1. Xóa lịch sử thanh toán
+        // 1. Xóa bản ghi thanh toán
         await db.collection('payments').doc(payId).delete();
         
-        // 2. Tìm tất cả các NCC có tên này
+        // 2. Tìm tất cả các NCC có tên này (xử lý trường hợp trùng tên)
         const snap = await db.collection('suppliers').where('name', '==', nccName).get();
         
         if (snap.empty) {
-            alert("Không tìm thấy NCC!");
+            alert("Không tìm thấy thông tin NCC!");
             return;
         }
 
-        // 3. Duyệt qua từng bản ghi tìm được
+        // 3. Cập nhật nợ cho TẤT CẢ các bản ghi tìm thấy
         for (const doc of snap.docs) {
             const data = doc.data();
+            // Nếu không có trường debt, mặc định là 0
+            const currentDebt = data.debt || 0; 
             
-            // ÉP KIỂU AN TOÀN: Nếu data.debt không tồn tại hoặc là undefined, lấy bằng 0
-            const currentDebt = (typeof data.debt !== 'undefined') ? data.debt : 0;
-            
-            console.log("Đang cập nhật nợ cho doc:", doc.id, "Nợ cũ:", currentDebt, "Cộng thêm:", amount);
-
             await doc.ref.update({ 
                 debt: currentDebt + amount 
             });
         }
         
-        // 4. Hoàn tất
+        // 4. Đóng popup và làm mới
         const popup = document.getElementById('popup-ncc');
         if (popup) popup.classList.add('hidden');
         
-        alert("Đã xóa và cập nhật nợ!");
+        alert("Xóa thành công!");
         loadAllData();
         
     } catch (error) {
-        console.error("LỖI CHI TIẾT:", error);
-        alert("Lỗi: " + error.message);
+        console.error("Lỗi:", error);
+        alert("Lỗi khi xóa: " + error.message);
     }
 }
 
