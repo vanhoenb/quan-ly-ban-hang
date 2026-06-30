@@ -1405,21 +1405,16 @@ document.addEventListener('DOMContentLoaded', () => {
         window.allSuppliersData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     });
 
-    // 5. Load dữ liệu lần đầu tiên với độ trễ để DOM ổn định
-    // Đợi 300ms đảm bảo input đã nhận giá trị, sau đó mới gọi refresh để tránh vẽ biểu đồ rỗng
-    setTimeout(() => {
-        const finFrom = document.getElementById('fin-from')?.value;
-        const finTo = document.getElementById('fin-to')?.value;
+    // 5. Load dữ liệu lần đầu tiên (Gọi trực tiếp để tránh xung đột)
+    const finFrom = document.getElementById('fin-from')?.value;
+    const finTo = document.getElementById('fin-to')?.value;
         
-        if (finFrom && finTo) {
-            window.refreshFinance();
-        } else {
-            // Trường hợp lỗi hoặc chưa có giá trị, gọi mặc định
-            loadDashboard('default');
-        }
-        
-        window.refreshInventory();
-    }, 300);
+    if (finFrom && finTo) {
+        window.refreshFinance();
+    } else {
+        loadDashboard('default');
+    }
+    window.refreshInventory();
 });
 
 // ==== TRANG CHỦ =====
@@ -1432,10 +1427,12 @@ async function loadDashboard(filter = 'default') {
     // 0. Hiển thị trạng thái đang tải (nếu cần)
     console.log("Đang tải dữ liệu dashboard...");
 
-    const [salesSnap, receiptsSnap, suppliersSnap] = await Promise.all([
+    // THAY ĐỔI 1: Thêm 'customersSnap' vào đây
+    const [salesSnap, receiptsSnap, suppliersSnap, customersSnap] = await Promise.all([
         db.collection('sales').get(),
         db.collection('receipts').get(),
-        db.collection('suppliers').get()
+        db.collection('suppliers').get(),
+        db.collection('customers').get() 
     ]);
     
     const now = new Date();
@@ -1482,14 +1479,18 @@ async function loadDashboard(filter = 'default') {
 
     // 3. Tính toán số liệu
     let totalRevenue = 0;
+    
+    // THAY ĐỔI 2: Tính totalDebt trực tiếp từ danh sách khách hàng
     let totalDebt = 0;
+    customersSnap.forEach(doc => {
+        totalDebt += (Number(doc.data().debt) || 0);
+    });
+
     const productSalesMap = {};
 
     filteredSales.forEach(order => {
         totalRevenue += (Number(order.total) || 0);
-        if (order.paymentMethod === "Công nợ") {
-            totalDebt += (Number(order.total) || 0);
-        }
+        // Lưu ý: Không cần tính totalDebt từ order.paymentMethod nữa vì đã lấy từ customers
         if (order.items) {
             order.items.forEach(item => {
                 productSalesMap[item.name] = (productSalesMap[item.name] || 0) + Number(item.qty || 0);
@@ -1515,7 +1516,7 @@ async function loadDashboard(filter = 'default') {
     updateEl('total-debt-ncc-summary', totalDebtNCC);
     updateEl('profit-summary', profit);
 
-    // 5. Cập nhật Biểu đồ (Sử dụng setTimeout để đợi DOM hoàn tất render UI)
+    // 5. Cập nhật Biểu đồ
     setTimeout(() => {
         if (typeof updateRevenueChart === 'function') updateRevenueChart(filteredSales);
         if (typeof updateTopProductsChart === 'function') updateTopProductsChart(topProducts);
@@ -1906,6 +1907,17 @@ function updateTopProductsChart(topProducts) {
         plugins: [ChartDataLabels] 
     });
 }
+
+// ==================================================
+// DÁN ĐOẠN CODE NÀY VÀO DƯỚI CÙNG CỦA FILE JS
+// ==================================================
+// Thay thế đoạn onSnapshot cũ bằng đoạn này để nó cập nhật đồng bộ
+// Dưới cùng file JS:
+// DÁN DUY NHẤT ĐOẠN NÀY Ở CUỐI FILE
+db.collection('customers').onSnapshot(() => {
+    console.log("Dữ liệu khách hàng thay đổi, cập nhật dashboard...");
+    loadDashboard('default');
+});
 
     // --- NHẬP KHO =================
 	
