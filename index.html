@@ -1186,8 +1186,27 @@ function showPage(pageId) {
     // 4. Gọi hàm tải dữ liệu tương ứng
     switch(pageId) {
         case 'page-home':
-            // CẬP NHẬT: Gọi refreshFinance thay vì loadDashboard trực tiếp 
-            // để đảm bảo dữ liệu ngày tháng luôn đồng bộ và biểu đồ luôn vẽ lại
+            // Lấy ngày hiện tại
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            const dLast = new Date(y, now.getMonth() + 1, 0).getDate();
+            const todayStr = `${y}-${m}-${d}`;
+            
+            // Reset Doanh thu về đầu tháng
+            const finFrom = document.getElementById('fin-from');
+            const finTo = document.getElementById('fin-to');
+            if (finFrom) finFrom.value = `${y}-${m}-01`;
+            if (finTo) finTo.value = `${y}-${m}-${dLast}`;
+
+            // Reset Tồn kho (NXT) về ngày hiện tại
+            const invFrom = document.getElementById('inv-from');
+            const invTo = document.getElementById('inv-to');
+            if (invFrom) invFrom.value = todayStr;
+            if (invTo) invTo.value = todayStr;
+
+            // Gọi hàm refresh
             if (typeof window.refreshFinance === 'function') window.refreshFinance();
             if (typeof window.refreshInventory === 'function') window.refreshInventory();
             break;
@@ -1199,18 +1218,18 @@ function showPage(pageId) {
             
         case 'page-inventory':
             // TỰ ĐỘNG ĐIỀN NGÀY THÁNG KHI MỞ TRANG KHO
-            const now = new Date();
-            const y = now.getFullYear();
-            const m = String(now.getMonth() + 1).padStart(2, '0');
-            const dLast = new Date(y, now.getMonth() + 1, 0).getDate();
+            const nowInv = new Date();
+            const yInv = nowInv.getFullYear();
+            const mInv = String(nowInv.getMonth() + 1).padStart(2, '0');
+            const dLastInv = new Date(yInv, nowInv.getMonth() + 1, 0).getDate();
             
             const mInput = document.getElementById('inv-month');
             const fInput = document.getElementById('inv-date-from');
             const tInput = document.getElementById('inv-date-to');
             
-            if (mInput && !mInput.value) mInput.value = `${y}-${m}`;
-            if (fInput && !fInput.value) fInput.value = `${y}-${m}-01`;
-            if (tInput && !tInput.value) tInput.value = `${y}-${m}-${dLast}`;
+            if (mInput && !mInput.value) mInput.value = `${yInv}-${mInv}`;
+            if (fInput && !fInput.value) fInput.value = `${yInv}-${mInv}-01`;
+            if (tInput && !tInput.value) tInput.value = `${yInv}-${mInv}-${dLastInv}`;
 
             if (typeof loadInventory === 'function') loadInventory();
             break;
