@@ -265,6 +265,7 @@ function toggleMoreMenu() {
         
         <!-- PHẦN 1: TRANG CHỦ -->
 		
+<!-- PHẦN 1: TRANG CHỦ -->
 <div id="page-home" class="p-2 md:p-8 space-y-8 bg-slate-50 min-h-screen">
     <div class="flex justify-between items-end">
         <div>
@@ -273,45 +274,28 @@ function toggleMoreMenu() {
         </div>
     </div>
 
+    <!-- Các thẻ chỉ số tài chính -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-    <!-- 1. Doanh Thu (Giữ nguyên) -->
-    <div class="bg-blue-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02] flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
-        <p class="text-[10px] md:text-xs font-bold uppercase opacity-80">Doanh Thu</p>
-        <div class="mt-1">
+        <div class="bg-blue-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
+            <p class="text-[10px] font-bold uppercase opacity-80">Doanh Thu</p>
             <h3 id="total-revenue" class="text-lg md:text-2xl font-black">0 đ</h3>
-            <p class="text-[9px] md:text-[10px] opacity-80 uppercase">Tổng doanh thu</p>
         </div>
-    </div>
-
-    <!-- 2. Công Nợ KH (Giữ nguyên) -->
-    <div class="bg-emerald-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02] flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
-        <p class="text-[10px] md:text-xs font-bold uppercase opacity-80">Công Nợ Thu</p>
-        <div class="mt-1">
+        <div class="bg-rose-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
+            <p class="text-[10px] font-bold uppercase opacity-80">Công Nợ Thu</p>
             <h3 id="total-debt-summary" class="text-lg md:text-2xl font-black">0 đ</h3>
-            <p class="text-[9px] md:text-[10px] opacity-80 uppercase">Khách đang nợ</p>
         </div>
-    </div>
-
-    <!-- 3. Tổng nợ NCC (Thay thế) -->
-    <div class="bg-amber-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02] flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
-        <p class="text-[10px] md:text-xs font-bold uppercase opacity-80">Tổng Nợ NCC</p>
-        <div class="mt-1">
+        <div class="bg-amber-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
+            <p class="text-[10px] font-bold uppercase opacity-80">Tổng Nợ NCC</p>
             <h3 id="total-debt-ncc-summary" class="text-lg md:text-2xl font-black">0 đ</h3>
-            <p class="text-[9px] md:text-[10px] opacity-80 uppercase">Nợ nhà cung cấp</p>
         </div>
-    </div>
-
-    <!-- 4. Lợi nhuận (Thay thế) -->
-    <div class="bg-rose-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg transition hover:scale-[1.02] flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
-        <p class="text-[10px] md:text-xs font-bold uppercase opacity-80">Lợi Nhuận</p>
-        <div class="mt-1">
+        <div class="bg-emerald-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
+            <p class="text-[10px] font-bold uppercase opacity-80">Lợi Nhuận</p>
             <h3 id="profit-summary" class="text-lg md:text-2xl font-black">0 đ</h3>
-            <p class="text-[9px] md:text-[10px] opacity-80 uppercase">Doanh thu - Nợ NCC</p>
         </div>
     </div>
-</div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Cột trái: Biểu đồ -->
         <div class="space-y-8">
             <div class="bg-gray-200 p-6 rounded-3xl border border-red-400">
                 <div class="flex justify-between items-center mb-6">
@@ -319,63 +303,36 @@ function toggleMoreMenu() {
                         <i data-lucide="bar-chart-3" class="w-4 h-4 mr-2 text-blue-600"></i> Biểu đồ doanh thu
                     </h3>
                     <div class="flex gap-2">
-                        <input type="month" id="revenue-month-picker" class="hidden text-[10px] border border-slate-300 rounded-lg px-2 outline-none">
-                        <select id="time-filter" onchange="if(this.value==='custom') document.getElementById('revenue-month-picker').classList.remove('hidden'); else document.getElementById('revenue-month-picker').classList.add('hidden');" class="text-[10px] bg-white/50 border border-slate-300 rounded-lg px-2 py-1 text-slate-600 font-bold outline-none cursor-pointer">
-                            <option value="today">Hôm nay</option>
-                            <option value="week">Tuần này</option>
-                            <option value="month" selected>Tháng này</option>
-                            <option value="custom">Tháng khác...</option>
-                        </select>
-                    </div>
+						<input type="date" id="fin-from" onchange="refreshFinance()" class="text-[10px] border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+						<input type="date" id="fin-to" onchange="refreshFinance()" class="text-[10px] border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+					</div>
                 </div>
-                <div class="h-64">
-                    <canvas id="revenueChart"></canvas>
-                </div>
+                <div class="h-64"><canvas id="revenueChart"></canvas></div>
             </div>
-
             <div class="bg-green-100 p-6 rounded-3xl border border-blue-300">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center">
                         <i data-lucide="flame" class="w-4 h-4 mr-2 text-rose-600"></i> TOP 10 SP BÁN CHẠY
                     </h3>
-                    <div class="flex gap-2">
-                        <input type="month" id="top-month-picker" class="hidden text-[10px] border border-slate-300 rounded-lg px-2 outline-none">
-                        <select id="top-product-filter" onchange="if(this.value==='custom') document.getElementById('top-month-picker').classList.remove('hidden'); else document.getElementById('top-month-picker').classList.add('hidden');" class="text-[10px] bg-white/50 border border-slate-300 rounded-lg px-2 py-1 text-slate-600 font-bold outline-none cursor-pointer">
-                            <option value="today">Hôm nay</option>
-                            <option value="week">Tuần này</option>
-                            <option value="month" selected>Tháng này</option>
-                            <option value="custom">Tháng khác...</option>
-                        </select>
-                    </div>
                 </div>
-                <div class="h-64">
-                    <canvas id="topProductsChart"></canvas>
-                </div>
+                <div class="h-64"><canvas id="topProductsChart"></canvas></div>
             </div>
         </div>
 
-			   <div class="bg-blue-200 !p-1 rounded-3xl border border-red-300 h-full flex flex-col">
-				<div class="flex justify-between items-center mb-6">
-					<h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center">
-						<i data-lucide="package" class="w-4 h-4 mr-2 text-amber-600"></i> Chi tiết tồn kho
-					</h3>
-					<div class="flex gap-2">
-						<input type="month" id="inv-month-picker" onchange="updateDashboardData('inventory', 'custom', this.value)" class="hidden text-[10px] border border-slate-300 rounded-lg px-2 outline-none">
-						
-						<select id="inv-time-filter" 
-								onchange="if(this.value==='custom') document.getElementById('inv-month-picker').classList.remove('hidden'); else { document.getElementById('inv-month-picker').classList.add('hidden'); updateDashboardData('inventory', this.value); }" 
-								class="text-[10px] bg-white/50 border border-slate-300 rounded-lg px-2 py-1 text-slate-600 font-bold outline-none cursor-pointer">
-							<option value="today" selected>Hôm nay</option>
-							<option value="week">Tuần này</option>
-							<option value="month">Tháng này</option>
-							<option value="custom">Chọn tháng</option>
-						</select>
-					</div>
+        <!-- Cột phải: Tồn kho -->
+        <div class="bg-blue-200 p-4 rounded-3xl border border-red-300 h-full flex flex-col">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center">
+                    <i data-lucide="package" class="w-4 h-4 mr-2 text-amber-600"></i> Chi tiết tồn kho
+                </h3>
+                <div class="flex gap-2">
+					<input type="date" id="inv-from" onchange="refreshInventory()" class="text-[10px] border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+					<input type="date" id="inv-to" onchange="refreshInventory()" class="text-[10px] border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
 				</div>
-				<div id="home-inventory-list" class="flex-1 grid grid-cols-1 gap-3 content-start overflow-y-auto custom-scrollbar pr-1 !px-0" style="max-height: 650px;">
+            </div>
+            <div id="home-inventory-list" class="flex-1 grid grid-cols-1 gap-3 content-start overflow-y-auto custom-scrollbar pr-1" style="max-height: 600px;"></div>
+        </div>
     </div>
-</div>
-    </div> 
 </div>
 
  <!-- NHẬP KHO -->
@@ -1161,7 +1118,13 @@ function toggleMoreMenu() {
     </div>
 </div>
 
-
+<script>
+    function openNLTab(tabId) {
+        document.querySelectorAll('.nl-tab-pane').forEach(t => t.classList.add('hidden'));
+        document.getElementById(tabId).classList.remove('hidden');
+        if(tabId === 'nhap-tab') loadDropdowns();
+    }
+</script>
 
    		
 <style media="print">
@@ -1223,15 +1186,10 @@ function showPage(pageId) {
     // 4. Gọi hàm tải dữ liệu tương ứng
     switch(pageId) {
         case 'page-home':
-            // Reset ô chọn về 'today'
-            const invFilterEl = document.getElementById('inv-time-filter');
-            if (invFilterEl) {
-                invFilterEl.value = 'today';
-                // Kích hoạt sự kiện change để giao diện tự cập nhật theo
-                invFilterEl.dispatchEvent(new Event('change'));
-            }
-            // Gọi loadDashboard với 'today'
-            if (typeof loadDashboard === 'function') loadDashboard('today', true);
+            // CẬP NHẬT: Gọi refreshFinance thay vì loadDashboard trực tiếp 
+            // để đảm bảo dữ liệu ngày tháng luôn đồng bộ và biểu đồ luôn vẽ lại
+            if (typeof window.refreshFinance === 'function') window.refreshFinance();
+            if (typeof window.refreshInventory === 'function') window.refreshInventory();
             break;
             
         case 'page-import':
@@ -1240,6 +1198,20 @@ function showPage(pageId) {
             break;
             
         case 'page-inventory':
+            // TỰ ĐỘNG ĐIỀN NGÀY THÁNG KHI MỞ TRANG KHO
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const dLast = new Date(y, now.getMonth() + 1, 0).getDate();
+            
+            const mInput = document.getElementById('inv-month');
+            const fInput = document.getElementById('inv-date-from');
+            const tInput = document.getElementById('inv-date-to');
+            
+            if (mInput && !mInput.value) mInput.value = `${y}-${m}`;
+            if (fInput && !fInput.value) fInput.value = `${y}-${m}-01`;
+            if (tInput && !tInput.value) tInput.value = `${y}-${m}-${dLast}`;
+
             if (typeof loadInventory === 'function') loadInventory();
             break;
             
@@ -1248,7 +1220,6 @@ function showPage(pageId) {
             break;
             
         case 'page-sell':
-            // CẬP NHẬT TỒN KHO MỚI NHẤT MỖI KHI MỞ TRANG BÁN HÀNG
             if (typeof calculateAllStock === 'function') calculateAllStock();
             if (typeof updateSellReceiptNum === 'function') updateSellReceiptNum();
             if (typeof loadCustomers === 'function') loadCustomers();
@@ -1273,7 +1244,7 @@ function showPage(pageId) {
     }
 }
 
-    function handleEnter(event, nextId) {
+function handleEnter(event, nextId) {
     if (event.key === 'Enter') {
         event.preventDefault();
         
@@ -1347,256 +1318,386 @@ let sellCart = [];
 let cartNL = []; // <--- THÊM DÒNG NÀY VÀO ĐÂY
 let currentProductData = null; 
 let currentStock = 0;          
-let snapshotXuatGlobal;
+let revenueChartInstance = null;
+let topProductChartInstance = null;
 let myChart; 
-let allInventoryData = [];
-let isResetting = false; // Biến này dùng để khóa autoFill khi đang reset
+
+
 
 // --- KHỞI TẠO SỰ KIỆN KHI TRANG TẢI XONG ---
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Cấu hình mặc định cho các ô ngày tháng (SỬA LỖI MÚI GIỜ)
+    // 1. Cấu hình ngày tháng mặc định
     const now = new Date();
-    // Hàm lấy YYYY-MM-DD địa phương
     const toLocalDateStr = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    
+    const firstDay = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
     const today = toLocalDateStr(now);
-    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-    // Trang chủ / Hóa đơn
-    if(document.getElementById('date-from')) document.getElementById('date-from').value = today;
-    if(document.getElementById('date-to')) document.getElementById('date-to').value = today;
+    // Gán giá trị mặc định cho các input
+    const inputs = {
+        'fin-from': firstDay, 'fin-to': today,
+        'inv-from': today, 'inv-to': today
+    };
 
-    // Trang Kho hàng (Bộ lọc mới)
-    const invMonth = document.getElementById('inv-month');
-    if(invMonth) {
-        invMonth.value = currentMonth;
-        autoFillDates(currentMonth); // Tự điền Từ ngày/Đến ngày
-    }
-
-    // 2. Lắng nghe sự kiện cho Bộ lọc Dashboard (Doanh thu & Top SP tách biệt)
-    const timeFilter = document.getElementById('time-filter');
-    const topProductFilter = document.getElementById('top-product-filter');
-    const revMonthPicker = document.getElementById('revenue-month-picker');
-    const topMonthPicker = document.getElementById('top-month-picker');
-
-    if (timeFilter) {
-        timeFilter.addEventListener('change', (e) => {
-            if (e.target.value === 'custom') {
-                if (revMonthPicker) revMonthPicker.classList.remove('hidden');
-            } else {
-                if (revMonthPicker) revMonthPicker.classList.add('hidden');
-                updateDashboardData('revenue', e.target.value); // Chỉ cập nhật doanh thu
-            }
-        });
-    }
-
-    if (revMonthPicker) {
-        revMonthPicker.addEventListener('change', (e) => updateDashboardData('revenue', 'custom', e.target.value));
-    }
-
-    if (topProductFilter) {
-        topProductFilter.addEventListener('change', (e) => {
-            if (e.target.value === 'custom') {
-                if (topMonthPicker) topMonthPicker.classList.remove('hidden');
-            } else {
-                if (topMonthPicker) topMonthPicker.classList.add('hidden');
-                updateDashboardData('topProducts', e.target.value); // Chỉ cập nhật Top SP
-            }
-        });
-    }
-
-    if (topMonthPicker) {
-        topMonthPicker.addEventListener('change', (e) => updateDashboardData('topProducts', 'custom', e.target.value));
-    }
-
-    // 3. Lắng nghe sự kiện cho Trang Sản Xuất
-    ['sxTonDau', 'sxSL', 'sxSoKg', 'sxSoMe', 'sxMeChuaNau', 'sxMeChuaDong'].forEach(id => {
+    Object.entries(inputs).forEach(([id, val]) => {
         const el = document.getElementById(id);
-        if(el) {
-            el.addEventListener('input', () => {
-                tinhTonCuoi();
-                tinhTruLui();
-            });
-        }
+        if (el) el.value = val;
     });
 
-    // 4. Khởi tạo bộ lọc Tồn kho
-const invTimeFilter = document.getElementById('inv-time-filter');
-const invMonthPicker = document.getElementById('inv-month-picker');
+    // 2. Thiết lập sự kiện cho các bộ lọc (Select dropdowns)
+    const setupFilterToggle = (filterId, pickerId, callback) => {
+        const filter = document.getElementById(filterId);
+        const picker = document.getElementById(pickerId);
+        if (!filter) return;
 
-if (invTimeFilter) {
-    // --- ÉP BUỘC GIÁ TRỊ VỀ TODAY ---
-    invTimeFilter.value = 'today';
-    
-    // Ẩn cái chọn tháng nếu đang là today
-    if (invMonthPicker) invMonthPicker.classList.add('hidden');
-
-    invTimeFilter.addEventListener('change', (e) => {
-        if (e.target.value === 'custom') {
-            if (invMonthPicker) invMonthPicker.classList.remove('hidden');
-        } else {
-            if (invMonthPicker) invMonthPicker.classList.add('hidden');
-            // Gọi load dữ liệu
-            updateDashboardData('inventory', e.target.value);
-        }
-    });
-}
-
-if (invMonthPicker) {
-    invMonthPicker.addEventListener('change', (e) => updateDashboardData('inventory', 'custom', e.target.value));
-}
-
-// --- GỌI MỘT LẦN DUY NHẤT ---
-// Dùng setTimeOut để đảm bảo các thành phần đã load xong hết rồi mới ép load dữ liệu
-setTimeout(() => {
-    updateDashboardData('inventory', 'today');
-}, 500);
-// --- 5. Lắng nghe sự kiện cho Bộ lọc Bán hàng ---
-    const filterMonth = document.getElementById('filterMonth');
-    const dateFrom = document.getElementById('dateFrom');
-    const dateTo = document.getElementById('dateTo');
-
-    if (filterMonth) {
-        filterMonth.addEventListener('change', () => {
-            if (typeof loadSalesList === 'function') loadSalesList();
+        filter.addEventListener('change', (e) => {
+            const val = e.target.value;
+            if (val === 'custom') {
+                if (picker) picker.classList.remove('hidden');
+            } else {
+                if (picker) picker.classList.add('hidden');
+                callback(val);
+            }
         });
-    }
-    
-    if (dateFrom) {
-        dateFrom.addEventListener('change', () => {
-            if (typeof loadSalesList === 'function') loadSalesList();
-        });
-    }
-    
-    if (dateTo) {
-        dateTo.addEventListener('change', () => {
-            if (typeof loadSalesList === 'function') loadSalesList();
-        });
-    }
-// DÁN ĐOẠN CODE BỔ SUNG VÀO ĐÂY
+    };
+
+    setupFilterToggle('time-filter', 'revenue-month-picker', (val) => loadDashboard(val));
+    setupFilterToggle('top-product-filter', 'top-month-picker', (val) => loadDashboard(val));
+    setupFilterToggle('inv-time-filter', 'inv-month-picker', (val) => renderInventoryList(val));
+
+    // 3. Hàm refresh ổn định
+    window.refreshFinance = () => {
+        const from = document.getElementById('fin-from')?.value;
+        const to = document.getElementById('fin-to')?.value;
+        if (from && to) loadDashboard({ from, to });
+    };
+
+    window.refreshInventory = () => {
+        const from = document.getElementById('inv-from')?.value;
+        const to = document.getElementById('inv-to')?.value;
+        if (from && to) renderInventoryList({ from, to });
+    };
+
+    // Gắn sự kiện "change" trực tiếp vào các ô input ngày
+    ['fin-from', 'fin-to'].forEach(id => document.getElementById(id)?.addEventListener('change', window.refreshFinance));
+    ['inv-from', 'inv-to'].forEach(id => document.getElementById(id)?.addEventListener('change', window.refreshInventory));
+
+    // 4. Lắng nghe dữ liệu nhà cung cấp
     db.collection('suppliers').onSnapshot(snap => {
         window.allSuppliersData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        if (typeof loadDashboard === 'function') {
-            const currentFilter = document.getElementById('inv-time-filter')?.value || 'today';
-            loadDashboard(currentFilter, false);
-        }
     });
+
+    // 5. Load dữ liệu lần đầu tiên với độ trễ để DOM ổn định
+    // Đợi 300ms đảm bảo input đã nhận giá trị, sau đó mới gọi refresh để tránh vẽ biểu đồ rỗng
+    setTimeout(() => {
+        const finFrom = document.getElementById('fin-from')?.value;
+        const finTo = document.getElementById('fin-to')?.value;
+        
+        if (finFrom && finTo) {
+            window.refreshFinance();
+        } else {
+            // Trường hợp lỗi hoặc chưa có giá trị, gọi mặc định
+            loadDashboard('default');
+        }
+        
+        window.refreshInventory();
+    }, 300);
 });
 
 // ==== TRANG CHỦ =====
 // ==== TRANG CHỦ =====
-async function loadDashboard(filter = 'month', updateCharts = true) {
-    console.log("Đang load dữ liệu với filter:", filter);
-    const invBody = document.getElementById('home-inventory-body');
-    const totalRevEl = document.getElementById('total-revenue');
-    const totalOrdersEl = document.getElementById('total-orders');
-    const totalItemsEl = document.getElementById('total-items');
-    const lowStockCountEl = document.getElementById('low-stock-count');
-    const recentInvoicesEl = document.getElementById('recent-invoices-list');
-    const topProductsEl = document.getElementById('top-products-list');
+/**
+ * Hàm điều phối chính để load dữ liệu trang chủ
+ * @param {string} filter - 'today', 'week', 'month', hoặc 'YYYY-MM'
+ */
+async function loadDashboard(filter = 'default') {
+    // 0. Hiển thị trạng thái đang tải (nếu cần)
+    console.log("Đang tải dữ liệu dashboard...");
 
-    // Hàm hỗ trợ lấy ngày YYYY-MM-DD theo giờ địa phương
-    const getLocalDateStr = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-
-    if (invBody) invBody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-500">Đang tải...</td></tr>';
-
-    const [snapshotNhap, snapshotXuat] = await Promise.all([
-        db.collection('receipts').orderBy('date', 'asc').get(),
-        db.collection('sales').get()
+    const [salesSnap, receiptsSnap, suppliersSnap] = await Promise.all([
+        db.collection('sales').get(),
+        db.collection('receipts').get(),
+        db.collection('suppliers').get()
     ]);
-
-    snapshotXuatGlobal = snapshotXuat; 
-
-    // --- SỬA LOGIC TÍNH MỐC THỜI GIAN ---
+    
     const now = new Date();
-    let startDate;
+    let startDate = new Date();
+    let endDate = new Date();
 
-    if (filter.includes('-')) {
-        const [year, month] = filter.split('-');
-        startDate = new Date(year, month - 1, 1);
-    } else if (filter === 'today') {
-        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    // 1. Xác định khoảng thời gian lọc 
+    if (typeof filter === 'object' && filter !== null) {
+        startDate = new Date(filter.from);
+        startDate.setHours(0, 0, 0, 0);
+        endDate = new Date(filter.to);
+        endDate.setHours(23, 59, 59, 999);
+    } 
+    else if (filter === 'default') {
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        startDate.setHours(0, 0, 0, 0);
+        endDate = new Date();
+    }
+    else if (filter === 'today') {
+        startDate.setHours(0, 0, 0, 0);
+        endDate = new Date(); // Lấy đến thời điểm hiện tại
     } else if (filter === 'week') {
         const day = now.getDay();
-        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day + (day === 0 ? -6 : 1));
-    } else {
+        const diff = now.getDate() - (day === 0 ? 6 : day - 1);
+        startDate = new Date(now.setDate(diff));
+        startDate.setHours(0, 0, 0, 0);
+        endDate = new Date();
+    } else if (filter === 'month') {
         startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+    } else if (typeof filter === 'string' && filter.includes('-')) {
+        const [year, month] = filter.split('-');
+        startDate = new Date(year, month - 1, 1);
+        endDate = new Date(year, month, 0, 23, 59, 59);
     }
-    const firstDayStr = getLocalDateStr(startDate);
-    // ------------------------------------
 
-    let inventoryMap = {}; 
-    let orderList = []; 
-    let productSalesCount = {};
-
-    const processItem = (name, qty, type, dDateStr, isReceipt) => {
-        if (!name || typeof name !== 'string') return;
-        const cleanName = name.trim();
-        
-        if (!inventoryMap[cleanName]) {
-            inventoryMap[cleanName] = { tonDau: 0, nhap: 0, change: 0, out: 0 };
-            orderList.push(cleanName);
-        }
-        
-        const q = parseInt(qty) || 0;
-        if (dDateStr < firstDayStr) {
-            if (isReceipt) inventoryMap[cleanName].tonDau += q;
-            else inventoryMap[cleanName].tonDau -= q;
-        } else {
-            if (isReceipt) {
-                if (type === 'Nhập mới') inventoryMap[cleanName].nhap += q;
-                else inventoryMap[cleanName].change += q;
-            } else {
-                inventoryMap[cleanName].out += q;
-            }
-        }
-    };
-
-    snapshotNhap.forEach(doc => {
-        const data = doc.data();
-        if (!data.items || !data.date) return;
-        const dDateStr = getLocalDateStr(data.date.toDate());
-        data.items.forEach(i => processItem(i.name, i.qty, data.type, dDateStr, true));
+    // 2. Lọc dữ liệu tài chính
+    const filteredSales = salesSnap.docs.map(doc => doc.data()).filter(order => {
+        const orderDate = order.date?.toDate ? order.date.toDate() : new Date(order.date);
+        return orderDate >= startDate && orderDate <= endDate;
     });
 
-    snapshotXuat.forEach(doc => {
-        const data = doc.data();
-        if (!data.items || !data.date) return;
-        const dDateStr = getLocalDateStr(data.date.toDate());
-        data.items.forEach(i => {
-            processItem(i.name, i.qty, null, dDateStr, false);
-            productSalesCount[i.name] = (productSalesCount[i.name] || 0) + (parseInt(i.qty) || 0);
+    const allSuppliers = suppliersSnap.docs.map(doc => doc.data());
+
+    // 3. Tính toán số liệu
+    let totalRevenue = 0;
+    let totalDebt = 0;
+    const productSalesMap = {};
+
+    filteredSales.forEach(order => {
+        totalRevenue += (Number(order.total) || 0);
+        if (order.paymentMethod === "Công nợ") {
+            totalDebt += (Number(order.total) || 0);
+        }
+        if (order.items) {
+            order.items.forEach(item => {
+                productSalesMap[item.name] = (productSalesMap[item.name] || 0) + Number(item.qty || 0);
+            });
+        }
+    });
+
+    const topProducts = Object.entries(productSalesMap)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10);
+
+    let totalDebtNCC = allSuppliers.reduce((sum, sup) => sum + (Number(sup.debt) || 0), 0);
+    const profit = totalRevenue - totalDebtNCC;
+
+    // 4. Cập nhật UI an toàn
+    const updateEl = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = val.toLocaleString('vi-VN') + ' đ';
+    };
+
+    updateEl('total-revenue', totalRevenue);
+    updateEl('total-debt-summary', totalDebt);
+    updateEl('total-debt-ncc-summary', totalDebtNCC);
+    updateEl('profit-summary', profit);
+
+    // 5. Cập nhật Biểu đồ (Sử dụng setTimeout để đợi DOM hoàn tất render UI)
+    setTimeout(() => {
+        if (typeof updateRevenueChart === 'function') updateRevenueChart(filteredSales);
+        if (typeof updateTopProductsChart === 'function') updateTopProductsChart(topProducts);
+    }, 50);
+}
+
+// 2. Hàm gọi update tài chính
+function refreshFinance() {
+    const from = document.getElementById('fin-from').value;
+    const to = document.getElementById('fin-to').value;
+    
+    // Đảm bảo truyền vào dạng object
+    if (from && to) {
+        loadDashboard({ from: from, to: to });
+    }
+}
+
+// 3. Hàm gọi update tồn kho
+function refreshInventory() {
+    const from = document.getElementById('inv-from').value;
+    const to = document.getElementById('inv-to').value;
+    
+    // Sửa lại: Truyền vào 1 object
+    if (from && to) {
+        renderInventoryList({ from: from, to: to });
+    }
+}
+
+// Hàm hỗ trợ tính toán ngày (Bạn có thể tinh chỉnh)
+function getDateRange(filter) {
+    const now = new Date();
+    // Logic tính start/end dựa trên filter 'today', 'week', 'month'...
+    // ... Trả về { start: Date, end: Date }
+    return { start: now, end: now }; 
+}
+
+function renderInventoryList(data) {
+    const container = document.getElementById('home-inventory-list');
+    container.innerHTML = ''; // Xóa cũ
+    
+    // Giả sử data là danh sách sản phẩm
+    data.forEach(item => {
+        const div = document.createElement('div');
+        div.className = "bg-white p-3 rounded-xl shadow-sm flex justify-between items-center";
+        div.innerHTML = `
+            <div>
+                <p class="font-bold text-sm">${item.productName || 'Sản phẩm'}</p>
+                <p class="text-[10px] text-slate-400">SL: ${item.quantity || 0}</p>
+            </div>
+            <div class="text-right">
+                <p class="font-black text-blue-600">${(item.totalAmount || 0).toLocaleString()} đ</p>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+async function prepareInventoryData(targetDate) {
+    // 1. Định nghĩa ngày hôm qua để tính Tồn đầu
+    const d = new Date(targetDate);
+    d.setDate(d.getDate() - 1);
+    const yesterday = d.toISOString().split('T')[0];
+
+    // 2. Fetch dữ liệu từ Firestore
+    const [salesSnap, receiptsSnap] = await Promise.all([
+        db.collection('sales').get(),
+        db.collection('receipts').get()
+    ]);
+
+    const inventoryMap = {};
+
+    // 3. Tính toán Tồn đầu, Nhập, Xuất
+    // Bạn cần lặp qua tất cả dữ liệu
+    salesSnap.forEach(doc => {
+        const order = doc.data();
+        const orderDate = order.date.toDate().toISOString().split('T')[0]; // Giả sử là Timestamp
+        
+        order.items.forEach(item => {
+            if (!inventoryMap[item.name]) inventoryMap[item.name] = { tonDau: 0, nhap: 0, change: 0, out: 0 };
+            
+            if (orderDate < targetDate) {
+                inventoryMap[item.name].tonDau -= Number(item.qty);
+            } else if (orderDate === targetDate) {
+                inventoryMap[item.name].out += Number(item.qty);
+            }
         });
     });
 
-    if (updateCharts) {
-        const chartFilter = (filter === 'today') ? 'month' : filter;
-        await updateDashboardData('revenue', chartFilter);
-        await updateDashboardData('topProducts', chartFilter);
+    receiptsSnap.forEach(doc => {
+        const receipt = doc.data();
+        const recDate = receipt.date.toDate().toISOString().split('T')[0];
+        
+        receipt.items.forEach(item => {
+            if (!inventoryMap[item.name]) inventoryMap[item.name] = { tonDau: 0, nhap: 0, change: 0, out: 0 };
+            
+            if (recDate < targetDate) {
+                inventoryMap[item.name].tonDau += Number(item.qty);
+            } else if (recDate === targetDate) {
+                if (receipt.type === 'Nhập mới') inventoryMap[item.name].nhap += Number(item.qty);
+                else inventoryMap[item.name].change += Number(item.qty);
+            }
+        });
+    });
+
+    return inventoryMap;
+}
+
+// Tồn kho
+async function renderInventoryList(filter = 'today') {
+    const receiptsSnap = await db.collection('receipts').get();
+    const salesSnap = await db.collection('sales').get();
+
+    const inventoryMap = new Map();
+    const now = new Date();
+    
+    // Ngày bạn bắt đầu sử dụng phần mềm (tháng 6/2026)
+    const START_DATE_STR = '2026-06-01'; 
+
+    // 1. Xác định mốc thời gian lọc (Giờ VN)
+    const getVNString = (date) => {
+        return new Date(date.getTime() + (7 * 60 * 60 * 1000)).toISOString().split('T')[0];
+    };
+
+    let startDate = new Date();
+    let endDate = new Date(); // Thêm endDate để lọc khoảng
+
+    if (typeof filter === 'object' && filter !== null) {
+        // Trường hợp mới: {from, to}
+        startDate = new Date(filter.from);
+        endDate = new Date(filter.to);
+    } else if (filter === 'today') {
+        startDate.setHours(0, 0, 0, 0);
+        endDate = new Date();
+    } else if (filter === 'week') {
+        const day = now.getDay();
+        const diff = now.getDate() - (day === 0 ? 6 : day - 1);
+        startDate = new Date(now.setDate(diff));
+        startDate.setHours(0, 0, 0, 0);
+        endDate = new Date();
+    } else if (filter === 'month') {
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+    } else if (filter.includes('-')) {
+        const [year, month] = filter.split('-');
+        startDate = new Date(year, month - 1, 1);
+        endDate = new Date(year, month, 0, 23, 59, 59);
     }
+    
+    const startStr = getVNString(startDate);
+    const endStr = getVNString(endDate);
 
-    const invListEl = document.getElementById('home-inventory-list');
-    const lowStockListEl = document.getElementById('low-stock-list');
+    // 2. Hàm lấy ngày theo múi giờ VN từ Firebase
+    const getDocDate = (ts) => {
+        const d = ts?.toDate ? ts.toDate() : new Date(ts);
+        return getVNString(d);
+    };
+
+    // 3. Gộp và Sắp xếp
+    let allTransactions = [];
+    receiptsSnap.forEach(doc => allTransactions.push({ ...doc.data(), typeDoc: 'receipt', d: getDocDate(doc.data().date) }));
+    salesSnap.forEach(doc => allTransactions.push({ ...doc.data(), typeDoc: 'sale', d: getDocDate(doc.data().date) }));
+    allTransactions.sort((a, b) => new Date(a.d) - new Date(b.d));
+
+    // 4. XỬ LÝ LOGIC NGHIÊM NGẶT
+    allTransactions.forEach(data => {
+        data.items.forEach(item => {
+            if (!inventoryMap.has(item.name)) {
+                inventoryMap.set(item.name, { tonDau: 0, nhap: 0, change: 0, out: 0 });
+            }
+            const inv = inventoryMap.get(item.name);
+            
+            // Logic tính toán:
+            if (data.d < startStr) {
+                if (data.d >= START_DATE_STR) {
+                    if (data.typeDoc === 'receipt') inv.tonDau += Number(item.qty || 0);
+                    else inv.tonDau -= Number(item.qty || 0);
+                }
+            } else if (data.d >= startStr && data.d <= endStr) {
+                // Tính Nhập/Xuất nằm trong khoảng từ startStr đến endStr
+                if (data.typeDoc === 'receipt') {
+                    if (data.type === 'Nhập mới') inv.nhap += Number(item.qty || 0);
+                    else inv.change += Number(item.qty || 0);
+                } else {
+                    inv.out += Number(item.qty || 0);
+                }
+            }
+        });
+    });
+
+    // 5. Render giao diện
     let inventoryCardsHtml = '';
-    let lowStockItems = [];
-
-    orderList.forEach(name => {
-        const item = inventoryMap[name];
+    inventoryMap.forEach((item, name) => {
         const tonCuoi = item.tonDau + item.nhap + item.change - item.out;
         const totalNhap = item.nhap + item.change;
-        
-        const maxVal = Math.max(item.tonDau + totalNhap, 1); 
+        const maxVal = Math.max(item.tonDau + totalNhap + item.out + tonCuoi, 1); 
         const isLowStock = tonCuoi < 5;
 
         const bar = (val, color, label, applyGlow = false, borderClass = 'border-slate-300') => {
             const barWidth = val > 0 ? Math.min((val / maxVal) * 100, 100) : 0; 
             const glowClass = applyGlow ? 'ring-2 ring-white ring-inset shadow-[0_0_8px_rgba(255,255,255,0.7)]' : '';
-            
-            let colorBarHtml = '';
-            if (barWidth > 0) {
-                colorBarHtml = `<div style="width: ${barWidth}%;" class="h-full ${color} ${glowClass} shadow-[inset_0_-2px_3px_rgba(0,0,0,0.2)] transition-all duration-500"></div>`;
-            }
-            
+            let colorBarHtml = barWidth > 0 ? `<div style="width: ${barWidth}%;" class="h-full ${color} ${glowClass} shadow-[inset_0_-2px_3px_rgba(0,0,0,0.2)] transition-all duration-500"></div>` : '';
             return `
             <div class="flex-1 h-8 bg-slate-200 rounded-md border ${borderClass} shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] overflow-hidden relative">
                 ${colorBarHtml}
@@ -1607,13 +1708,11 @@ async function loadDashboard(filter = 'month', updateCharts = true) {
         };
 
         const tcBorderClass = isLowStock ? 'border-2 border-red-500 animate-pulse' : 'border-slate-300';
-
         inventoryCardsHtml += `
         <div class="mb-2 bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
             <div class="text-[11px] font-bold text-slate-700 mb-1 truncate">
                 ${name} ${isLowStock ? '<span class="animate-pulse">⚠️</span>' : ''}
             </div>
-            
             <div class="flex w-full gap-1">
                 ${bar(item.tonDau, 'bg-blue-400', 'T.Đầu')}
                 ${bar(totalNhap, 'bg-amber-400', 'Nhập')}
@@ -1623,336 +1722,164 @@ async function loadDashboard(filter = 'month', updateCharts = true) {
         </div>`;
     });
 
-    if (invListEl) invListEl.innerHTML = inventoryCardsHtml || '<p class="col-span-2 p-4 text-center text-slate-400 text-sm">Chưa có dữ liệu tồn kho</p>';
-    if (lowStockListEl) {
-        lowStockListEl.innerHTML = lowStockItems.length > 0 
-            ? `<div class="grid grid-cols-2 gap-x-2 gap-y-0.5">` + 
-              lowStockItems.map(name => `<div class="truncate text-[10px] md:text-[11px]">• ${name}</div>`).join('') + 
-              `</div>`
-            : '<div class="text-xs opacity-70 mt-2">Đủ hàng</div>';
-    }
-    
-    if (lowStockCountEl) lowStockCountEl.innerText = lowStockItems.length;
-    if (totalItemsEl) totalItemsEl.innerText = orderList.length;
-
-    // --- CẬP NHẬT 4 Ô MỚI (CÔNG NỢ KH, THỰC THU, NỢ NCC, LỢI NHUẬN) ---
-    const customers = window.allCustomersData || [];
-    const suppliers = window.allSuppliersData || []; // Đảm bảo đã nạp dữ liệu này
-    const activeDocs = (typeof filteredDocs !== 'undefined') ? filteredDocs : snapshotXuat.docs;
-    
-    const debtEl = document.getElementById('total-debt-summary'); // Công nợ KH
-    const paidEl = document.getElementById('monthly-paid-summary'); // Tiền thực thu
-    const debtNCCEl = document.getElementById('total-debt-ncc-summary'); // Tổng nợ NCC
-    const profitEl = document.getElementById('profit-summary'); // Lợi nhuận
-
-    // 1. Tổng công nợ KH
-    const totalDebtKH = customers.reduce((sum, c) => sum + (Number(c.debt || 0)), 0);
-    if (debtEl) debtEl.innerText = totalDebtKH.toLocaleString('vi-VN') + " đ";
-
-    // 2. Tiền thực thu (Tổng doanh thu - Công nợ KH)
-    const totalRevenue = activeDocs.reduce((sum, doc) => sum + Number(doc.data().total || 0), 0);
-    const totalPaid = totalRevenue - totalDebtKH;
-    if (paidEl) paidEl.innerText = totalPaid.toLocaleString('vi-VN') + " đ";
-
-    // 3. Tổng nợ NCC
-    const totalDebtNCC = suppliers.reduce((sum, s) => sum + (Number(s.debt || 0)), 0);
-    if (debtNCCEl) debtNCCEl.innerText = totalDebtNCC.toLocaleString('vi-VN') + " đ";
-
-    // 4. Lợi nhuận (Tổng doanh thu - Tổng nợ NCC)
-    const profit = totalRevenue - totalDebtNCC;
-    if (profitEl) profitEl.innerText = profit.toLocaleString('vi-VN') + " đ";
-    // -------------------------------------------------------
-
-    if (recentInvoicesEl) {
-        const sortedSales = snapshotXuat.docs
-            .filter(d => d.data().date)
-            .sort((a, b) => b.data().date.toDate() - a.data().date.toDate())
-            .slice(0, 5);
-        recentInvoicesEl.innerHTML = sortedSales.map(doc => {
-            const d = doc.data();
-            return `<div class="flex justify-between p-2 border-b"><span>${d.customer || 'Khách lẻ'}</span><span class="font-bold">${Number(d.total || 0).toLocaleString()}đ</span></div>`;
-        }).join('');
-    }
-
-    if (document.getElementById('topProductsChart') && updateCharts) {
-        const topProductsArray = Object.entries(productSalesCount)
-            .map(([name, qty]) => ({ name: name, sold: qty }))
-            .sort((a, b) => b.sold - a.sold)
-            .slice(0, 10);
-        renderTopProductsChart(topProductsArray);
-    }
+    document.getElementById('home-inventory-list').innerHTML = inventoryCardsHtml || '<p class="text-center py-4 text-xs">Không có dữ liệu</p>';
 }
 
-async function updateInventoryView() {
-    const select = document.getElementById('inv-time-filter');
-    const input = document.getElementById('inv-month-picker');
-    const filter = (select.value === 'custom') ? input.value : select.value;
-    
-    // Chỉ truyền 2 tham số: filter và false
-    await loadDashboard(filter, false); 
+//============DOANH THU ==============
+// Hàm cập nhật Tài chính (Gọi khi thay đổi 2 ô input ngày)
+async function updateFinance() {
+    const fromVal = document.getElementById('fin-from')?.value;
+    const toVal = document.getElementById('fin-to')?.value;
+    if (!fromVal || !toVal) return;
+
+    const startDate = new Date(fromVal);
+    const endDate = new Date(toVal);
+    endDate.setHours(23, 59, 59, 999);
+
+    try {
+        const [salesSnap, suppliersSnap] = await Promise.all([
+            db.collection('sales').get(),
+            db.collection('suppliers').get()
+        ]);
+
+        const filteredSales = salesSnap.docs.map(doc => doc.data()).filter(order => {
+            const orderDate = order.date?.toDate ? order.date.toDate() : new Date(order.date);
+            return orderDate >= startDate && orderDate <= endDate;
+        });
+
+        const allSuppliers = suppliersSnap.docs.map(doc => doc.data());
+        let totalRevenue = 0, totalDebt = 0;
+        const productSalesMap = {};
+
+        filteredSales.forEach(order => {
+            totalRevenue += (Number(order.total) || 0);
+            if (order.paymentMethod === "Công nợ") totalDebt += (Number(order.total) || 0);
+            if (order.items) {
+                order.items.forEach(item => {
+                    productSalesMap[item.name] = (productSalesMap[item.name] || 0) + Number(item.qty || 0);
+                });
+            }
+        });
+
+        const topProducts = Object.entries(productSalesMap).sort((a, b) => b[1] - a[1]).slice(0, 10);
+        let totalDebtNCC = allSuppliers.reduce((sum, sup) => sum + (Number(sup.debt) || 0), 0);
+        
+        document.getElementById('total-revenue').innerText = totalRevenue.toLocaleString('vi-VN') + ' đ';
+        document.getElementById('total-debt-summary').innerText = totalDebt.toLocaleString('vi-VN') + ' đ';
+        document.getElementById('total-debt-ncc-summary').innerText = totalDebtNCC.toLocaleString('vi-VN') + ' đ';
+        document.getElementById('profit-summary').innerText = (totalRevenue - totalDebtNCC).toLocaleString('vi-VN') + ' đ';
+        
+        // CHỈ VẼ KHI CÓ DỮ LIỆU ĐỂ TRÁNH NHÁY
+        if (filteredSales.length > 0) {
+            updateRevenueChart(filteredSales);
+            updateTopProductsChart(topProducts);
+        }
+    } catch (error) { console.error("Lỗi:", error); }
 }
 
-// Hàm này dùng chung cho mọi trường hợp chọn
-async function handleInvFilterChange() {
-    const select = document.getElementById('inv-time-filter');
-    const input = document.getElementById('inv-month-picker');
-    const filter = (select.value === 'custom') ? input.value : select.value;
+//===========biểu đồ ============
+// Hàm vẽ biểu đồ doanh thu
+function updateRevenueChart(filteredSales) {
+    const canvas = document.getElementById('revenueChart');
     
-    // Lưu lựa chọn cuối cùng vào bộ nhớ trình duyệt
-    sessionStorage.setItem('lastInvFilter', filter);
+    // Nếu chưa thấy canvas, đợi 50ms rồi thử lại lần nữa
+    if (!canvas) {
+        setTimeout(() => updateRevenueChart(filteredSales), 50);
+        return;
+    }
+
+    // Nếu đã tồn tại instance cũ, hủy ngay lập tức
+    if (window.revenueChartInstance) {
+        window.revenueChartInstance.destroy();
+        window.revenueChartInstance = null;
+    }
+
+    const ctx = canvas.getContext('2d');
     
-    await loadDashboard(filter, false);
+    // ... phần xử lý dữ liệu dailyData giữ nguyên ...
+    
+    const dailyData = {};
+    filteredSales.forEach(order => {
+        const d = order.date?.toDate ? order.date.toDate() : new Date(order.date);
+        const dateStr = d.toISOString().split('T')[0];
+        dailyData[dateStr] = (dailyData[dateStr] || 0) + (Number(order.total) || 0);
+    });
+
+    const labels = Object.keys(dailyData).sort();
+    const data = labels.map(date => dailyData[date]);
+
+    // Vẽ mới
+window.revenueChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'Doanh thu',
+            data: data,
+            borderColor: '#2563eb',       // Giữ màu đường line
+            backgroundColor: 'transparent', // Đặt nền trong suốt
+            fill: false,                  // QUAN TRỌNG: Tắt hoàn toàn việc tô màu nền
+            tension: 0.3
+        }]
+    },
+    options: { 
+        responsive: true, 
+        maintainAspectRatio: false, 
+        animation: false
+    }
+});
 }
 
-// --- 2. Thêm hàm vẽ biểu đồ cột ngang cho Top 10 ---
-let topProductChart;
-function renderTopProductsChart(dataArray) {
-    const ctx = document.getElementById('topProductsChart').getContext('2d');
-    if (topProductChart) topProductChart.destroy();
+//==== TOP SP BÁN CHẠY ====================
+function updateTopProductsChart(topProducts) {
+    const ctx = document.getElementById('topProductsChart')?.getContext('2d');
+    if (!ctx) return;
+    if (window.topProductChartInstance) window.topProductChartInstance.destroy();
 
-    // 1. Tìm giá trị bán chạy nhất để ép lề phải
-    const maxSold = Math.max(...dataArray.map(item => item.sold));
-
-    const gradient = ctx.createLinearGradient(0, 0, 400, 0);
-    gradient.addColorStop(0, '#6366f1');
-    gradient.addColorStop(1, '#a855f7');
-
-    topProductChart = new Chart(ctx, {
+    window.topProductChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: dataArray.map(item => item.name),
+            labels: topProducts.map(p => p[0]),
             datasets: [{
-                data: dataArray.map(item => item.sold),
-                backgroundColor: gradient,
-                borderRadius: 12,
-                barThickness: 22
+                label: 'Số lượng',
+                data: topProducts.map(p => p[1]),
+                backgroundColor: '#f43f5e',
+                borderRadius: 6,
+                barPercentage: 0.9, 
+                categoryPercentage: 0.9
             }]
         },
         options: {
-            indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
-            layout: { 
-                // 2. Xóa sạch khoảng trống lề phải
-                padding: { left: 0, right: 0, top: 0, bottom: 0 } 
-            },
-            plugins: { 
+            indexAxis: 'y',
+            animation: false,
+            plugins: {
                 legend: { display: false },
                 datalabels: {
                     anchor: 'end',
-                    align: 'left', // Đẩy số vào trong cột
-                    offset: 8,     // Khoảng cách số so với mép phải cột
+                    align: 'left',
                     color: '#ffffff',
-                    font: { weight: 'bold', size: 11 }
+                    font: { weight: 'bold', size: 11 },
+                    formatter: (value) => value
                 }
             },
             scales: {
                 x: { 
-                    display: false,
-                    // 3. THUỘC TÍNH QUAN TRỌNG: Ép thanh dài nhất chạm kịch phải
-                    max: maxSold 
+                    grid: { display: false }, 
+                    beginAtZero: true,
+                    grace: '10%',
+                    ticks: { display: false } // Ẩn số trục X để cột kéo dài hết cỡ
                 },
                 y: { 
                     grid: { display: false },
-                    ticks: { 
-                        color: '#334155', 
-                        font: { size: 10 },
-                        padding: 5,
-                        crossAlign: 'near'
+                    ticks: {
+                        font: { size: 10 } // Giữ font nhỏ cho nhãn tên sản phẩm
                     }
                 }
             }
         },
-        plugins: [ChartDataLabels]
-    });
-}
-
-
-// Hàm cập nhật dữ liệu lọc thời gian
-async function updateDashboardData(type, filter, customDate = null) {
-    if (!snapshotXuatGlobal) return;
-
-    // 1. Cập nhật UI cho các select box
-    if (type === 'revenue' || type === 'both') {
-        const filterEl = document.getElementById('time-filter');
-        if (filterEl) filterEl.value = filter;
-    }
-    if (type === 'topProducts' || type === 'both') {
-        const topFilterEl = document.getElementById('top-product-filter');
-        if (topFilterEl) topFilterEl.value = filter;
-    }
-    if (type === 'inventory' || type === 'both') {
-        const invFilterEl = document.getElementById('inv-time-filter');
-        if (invFilterEl) invFilterEl.value = filter;
-    }
-
-    const now = new Date();
-    let startDate, endDate;
-
-    // 2. Thiết lập khoảng thời gian
-    if (customDate) {
-        const [year, month] = customDate.split('-');
-        startDate = new Date(year, month - 1, 1, 0, 0, 0);
-        endDate = new Date(year, month, 0, 23, 59, 59);
-    } else if (filter === 'today') {
-        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-        endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-    } else if (filter === 'week') {
-        const day = now.getDay();
-        const diff = now.getDate() - day + (day === 0 ? -6 : 1);
-        startDate = new Date(now.getFullYear(), now.getMonth(), diff, 0, 0, 0);
-        endDate = new Date(startDate);
-        endDate.setDate(endDate.getDate() + 6);
-        endDate.setHours(23, 59, 59, 999);
-    } else { // month
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
-        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
-    }
-
-    // 3. Lọc dữ liệu
-    const filteredDocs = snapshotXuatGlobal.docs.filter(doc => {
-        const data = doc.data();
-        if (!data.date) return false;
-        const dDate = data.date.toDate();
-        return dDate >= startDate && dDate <= endDate;
-    });
-
-    // 4. Render Revenue
-    if (type === 'revenue' || type === 'both') {
-        const newTotal = filteredDocs.reduce((sum, doc) => sum + Number(doc.data().total || 0), 0);
-        const totalRevEl = document.getElementById('total-revenue');
-        const totalOrdersEl = document.getElementById('total-orders');
-        
-        if (totalRevEl) totalRevEl.innerText = newTotal.toLocaleString('vi-VN') + " đ";
-        if (totalOrdersEl) totalOrdersEl.innerText = filteredDocs.length;
-        renderRevenueChart(filteredDocs, filter);
-    }
-
-    // 5. Render Top Products
-    if (type === 'topProducts' || type === 'both') {
-        let productSalesCount = {};
-        filteredDocs.forEach(doc => {
-            (doc.data().items || []).forEach(i => {
-                productSalesCount[i.name] = (productSalesCount[i.name] || 0) + (parseInt(i.qty) || 0);
-            });
-        });
-
-        const topProductsArray = Object.entries(productSalesCount)
-            .map(([name, qty]) => ({ name: name, sold: qty }))
-            .sort((a, b) => b.sold - a.sold)
-            .slice(0, 10);
-
-        renderTopProductsChart(topProductsArray);
-    }
-
-    // 6. Cập nhật Tồn kho
-    if (type === 'inventory' || type === 'both') {
-        await loadDashboard(filter, false);
-    }
-}
-
-
-// --- 1. Khởi tạo biểu đồ doanh thu (Dạng Cột 3D giả + Đường lượn sóng) ---
-function renderRevenueChart(filteredDocs, filter) {
-    // Đăng ký plugin bắt buộc
-    Chart.register(ChartDataLabels);
-
-    const ctx = document.getElementById('revenueChart').getContext('2d');
-    
-    if (typeof window.revenueChartInstance !== 'undefined' && window.revenueChartInstance) {
-        window.revenueChartInstance.destroy();
-    }
-
-    let labels = [];
-    let dataValues = [];
-
-    // Logic xử lý dữ liệu (giữ nguyên yêu cầu của bạn)
-    const isMonthlyView = (filter === 'month' || filter === 'custom');
-    if (filter === 'today') {
-        labels = ['Hôm nay'];
-        dataValues = [filteredDocs.reduce((sum, doc) => sum + Number(doc.data().total || 0), 0)];
-    } else if (filter === 'week') {
-        labels = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
-        dataValues = [0, 0, 0, 0, 0, 0, 0];
-        filteredDocs.forEach(doc => {
-            const dayIndex = doc.data().date.toDate().getDay();
-            const index = dayIndex === 0 ? 6 : dayIndex - 1;
-            dataValues[index] += Number(doc.data().total || 0);
-        });
-    } else if (isMonthlyView) {
-        labels = ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'];
-        dataValues = [0, 0, 0, 0];
-        filteredDocs.forEach(doc => {
-            const date = doc.data().date.toDate().getDate();
-            let weekIndex = Math.floor((date - 1) / 7);
-            if (weekIndex > 3) weekIndex = 3;
-            dataValues[weekIndex] += Number(doc.data().total || 0);
-        });
-    }
-
-    // Tạo gradient dọc để giả lập hiệu ứng 3D cho cột
-	  const barGradient = ctx.createLinearGradient(0, 0, 0, 400);
-		barGradient.addColorStop(0, '#fda4af'); // Hồng nhạt
-		barGradient.addColorStop(1, '#be123c'); // Đỏ đậm
-
-    // Khởi tạo biểu đồ
-    window.revenueChartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Doanh thu (Cột)',
-                    data: dataValues,
-                    type: 'bar',
-                    backgroundColor: barGradient,
-                    borderRadius: { topLeft: 4, topRight: 4, bottomLeft: 0, bottomRight: 0 },
-                    order: 2,
-                    datalabels: { display: false } // Ẩn số trên cột để tránh rối
-                },
-                {
-                    label: 'Xu hướng',
-                    data: dataValues,
-                    type: 'line',
-                    borderColor: '#fbbf24', // Màu vàng nổi bật
-                    borderWidth: 3,
-                    tension: 0.4, // Đường lượn sóng
-                    pointRadius: 5,
-                    pointBackgroundColor: '#ffffff',
-                    pointBorderColor: '#fbbf24',
-                    pointBorderWidth: 2,
-                    order: 1,
-                    datalabels: {
-                        align: 'top',
-                        anchor: 'end',
-                        offset: 4,
-                        color: '#1e3a8a',
-                        font: { weight: 'bold', size: 10 }, // Cỡ chữ tối ưu cho mobile
-                        formatter: (value) => value.toLocaleString('vi-VN') // Định dạng 1.000.000
-                    }
-                }
-            ]
-        },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false,
-            layout: { padding: { top: 25 } }, // Thêm khoảng trống để không bị cắt chữ
-            plugins: { 
-                legend: { display: false } 
-            },
-            scales: { 
-                y: { 
-                    beginAtZero: true, 
-                    grid: { display: false },
-                    ticks: { font: { size: 9 } } 
-                },
-                x: { 
-                    grid: { display: false },
-                    ticks: { font: { size: 9 } } 
-                }
-            }
-        },
-        plugins: [ChartDataLabels]
+        plugins: [ChartDataLabels] 
     });
 }
 
@@ -2689,17 +2616,31 @@ window.saveItemEdit = async function(docId, index) {
 function autoFillDates(monthValue) {
     if (!monthValue) return;
     
-    // monthValue có định dạng "YYYY-MM"
+    // Tách năm và tháng từ định dạng "YYYY-MM"
     const [year, month] = monthValue.split('-');
     
     // Ngày đầu tháng
     const firstDay = `${year}-${month}-01`;
     
-    // Ngày cuối tháng
-    const lastDay = new Date(year, month, 0).toISOString().split('T')[0];
+    // Ngày cuối tháng (sử dụng ngày 0 của tháng kế tiếp để lấy ngày cuối của tháng hiện tại)
+    const lastDay = new Date(year, parseInt(month), 0).toISOString().split('T')[0];
     
-    document.getElementById('inv-date-from').value = firstDay;
-    document.getElementById('inv-date-to').value = lastDay;
+    // Lấy các phần tử DOM
+    const fromEl = document.getElementById('inv-date-from');
+    const toEl = document.getElementById('inv-date-to');
+    
+    // Kiểm tra tồn tại trước khi gán giá trị
+    if (fromEl && toEl) {
+        fromEl.value = firstDay;
+        toEl.value = lastDay;
+        
+        // Gọi hàm cập nhật dữ liệu để bảng tự động nhảy số
+        if (typeof window.refreshInventory === 'function') {
+            window.refreshInventory();
+        }
+    } else {
+        console.error("Không tìm thấy ID inv-date-from hoặc inv-date-to. Hãy kiểm tra lại file HTML!");
+    }
 }
 
 // 1. Hàm Tìm kiếm (Lọc sản phẩm)
