@@ -277,20 +277,20 @@ function toggleMoreMenu() {
     <!-- Các thẻ chỉ số tài chính -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <div class="bg-blue-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
-            <p class="text-[10px] font-bold uppercase opacity-80">Doanh Thu</p>
-            <h3 id="total-revenue" class="text-lg md:text-2xl font-black">0 đ</h3>
+            <p class="text-[12px] font-bold uppercase opacity-80">Tổng Doanh Thu</p>
+            <h3 id="total-revenue" class="text-lg md:text-3xl font-black">0 đ</h3>
         </div>
         <div class="bg-rose-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
-            <p class="text-[10px] font-bold uppercase opacity-80">Công Nợ Thu</p>
-            <h3 id="total-debt-summary" class="text-lg md:text-2xl font-black">0 đ</h3>
+            <p class="text-[12px] font-bold uppercase opacity-80">Công Nợ Cần Thu</p>
+            <h3 id="total-debt-summary" class="text-lg md:text-3xl font-black">0 đ</h3>
         </div>
         <div class="bg-amber-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
-            <p class="text-[10px] font-bold uppercase opacity-80">Tổng Nợ NCC</p>
-            <h3 id="total-debt-ncc-summary" class="text-lg md:text-2xl font-black">0 đ</h3>
+            <p class="text-[12px] font-bold uppercase opacity-80">Tổng Nợ NCC</p>
+            <h3 id="total-debt-ncc-summary" class="text-lg md:text-3xl font-black">0 đ</h3>
         </div>
         <div class="bg-emerald-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
-            <p class="text-[10px] font-bold uppercase opacity-80">Lợi Nhuận</p>
-            <h3 id="profit-summary" class="text-lg md:text-2xl font-black">0 đ</h3>
+            <p class="text-[12px] font-bold uppercase opacity-80">Lợi Nhuận</p>
+            <h3 id="profit-summary" class="text-lg md:text-3xl font-black">0 đ</h3>
         </div>
     </div>
 
@@ -1809,25 +1809,30 @@ function updateRevenueChart(filteredSales) {
     const data = labels.map(date => dailyData[date]);
 
     // Vẽ mới
-window.revenueChartInstance = new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: labels,
-        datasets: [{
-            label: 'Doanh thu',
-            data: data,
-            borderColor: '#2563eb',       // Giữ màu đường line
-            backgroundColor: 'transparent', // Đặt nền trong suốt
-            fill: false,                  // QUAN TRỌNG: Tắt hoàn toàn việc tô màu nền
-            tension: 0.3
-        }]
-    },
-    options: { 
-        responsive: true, 
-        maintainAspectRatio: false, 
-        animation: false
-    }
-});
+    window.revenueChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Doanh thu',
+                data: data,
+                borderColor: '#2563eb',       // Giữ màu đường line
+                backgroundColor: 'transparent', // Đặt nền trong suốt
+                fill: false,                  // QUAN TRỌNG: Tắt hoàn toàn việc tô màu nền
+                tension: 0.3
+            }]
+        },
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            animation: false,
+            plugins: {
+                legend: {
+                    display: false // Ẩn phần chú thích (ô màu xanh và chữ Doanh thu)
+                }
+            }
+        }
+    });
 }
 
 //==== TOP SP BÁN CHẠY ====================
