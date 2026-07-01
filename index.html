@@ -5795,54 +5795,73 @@ async function exportExcelQuyen1() {
         const workbook = new ExcelJS.Workbook();
         const sheet = workbook.addWorksheet('Bước 1');
 
-        // --- 1. TIÊU ĐỀ CHÍNH ---
-        sheet.mergeCells('A1:C1'); sheet.getCell('A1').value = 'Người kiểm tra: Nguyễn Văn Hoè';
-        sheet.mergeCells('A2:C2'); sheet.getCell('A2').value = 'Thời gian kiểm tra: ngày......... tháng ......... năm 20...........';
-        sheet.mergeCells('A3:C3'); sheet.getCell('A3').value = 'Địa điểm kiểm tra: Xưởng sản xuất';
-        sheet.mergeCells('H1:O2'); 
+        // --- 1. TIÊU ĐỀ CHÍNH (Dòng 1-4) ---
+        sheet.mergeCells('A1:D1'); sheet.getCell('A1').value = 'Người kiểm tra: Nguyễn Văn Hoè';
+        sheet.mergeCells('A2:D2'); sheet.getCell('A2').value = 'Thời gian kiểm tra: ngày.............tháng...........năm 20.....';
+        sheet.mergeCells('A3:D3'); sheet.getCell('A3').value = 'Địa điểm kiểm tra: Tại xưởng sản xuất';
         sheet.getCell('H1').value = 'Mẫu số 1: Kiểm tra trước khi chế biến thức ăn\n(Bước 1)';
         sheet.getCell('H1').font = { bold: true, size: 14 };
-        sheet.getCell('H1').alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
-
-        // --- 2. PHẦN I ---
+        
+// --- 2. PHẦN I ---
         let r = 5;
         sheet.mergeCells(`A${r}:O${r}`);
         sheet.getCell(`A${r}`).value = 'I. Thực phẩm tươi sống, đông lạnh: thịt, cá, rau, củ, quả...';
         sheet.getCell(`A${r}`).font = { bold: true };
-        r++;
         
-        // Gộp các cột không thay đổi
-        ['A', 'B', 'C', 'D', 'H', 'I', 'J', 'O'].forEach(col => sheet.mergeCells(`${col}${r}:${col}${r+1}`));
-        sheet.mergeCells(`K${r}:L${r}`); sheet.mergeCells(`M${r}:N${r}`);
+        // --- TIÊU ĐỀ CỘT (Dòng 6-7) ---
+        // Gộp dọc các cột đơn
+        sheet.mergeCells('A6:A7'); sheet.mergeCells('B6:B7'); sheet.mergeCells('C6:C7');
+        sheet.mergeCells('D6:D7'); sheet.mergeCells('H6:H7'); sheet.mergeCells('I6:I7');
+        sheet.mergeCells('J6:J7'); sheet.mergeCells('O6:O7');
         
-        // --- GIỮ NGUYÊN GỘP E:G Ở TIÊU ĐỀ ---
-        sheet.mergeCells(`E${r}:G${r}`); 
-        
-        // Đặt giá trị tiêu đề
-        sheet.getRow(r).values = ["TT", "Tên thực phẩm", "Thời gian nhập", "Khối lượng", "Nơi cung cấp", "", "", "Chứng từ", "Giấy ĐK VS", "Giấy kiểm dịch", "Kiểm tra cảm quan", "", "Xét nghiệm", "", "Biện pháp xử lý"];
-        sheet.getRow(r+1).values = ["", "", "", "", "Tên cơ sở", "Địa chỉ, ĐT", "Tên người giao", "", "", "", "Đạt", "Không đạt", "Đạt", "Không đạt", ""];
-        
-        for(let i=r; i<=r+1; i++) {
-            sheet.getRow(i).eachCell(c => { c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; });
+        // Gộp các nhóm tiêu đề ngang
+        sheet.mergeCells('E6:G6'); // Nơi cung cấp
+        sheet.mergeCells('K6:L6'); // Cảm quan
+        sheet.mergeCells('M6:N6'); // Xét nghiệm
+
+        // Gán giá trị tiêu đề dòng 6
+        sheet.getCell('A6').value = "TT";
+        sheet.getCell('B6').value = "Tên thực phẩm";
+        sheet.getCell('C6').value = "Thời gian nhập ( ngày, giờ)";
+        sheet.getCell('D6').value = "Khối lượng (kg/lít....)";
+        sheet.getCell('E6').value = "Nơi cung cấp";
+        sheet.getCell('H6').value = "Chứng từ, hóa đơn";
+        sheet.getCell('I6').value = "Giấy ĐK VS thú y";
+        sheet.getCell('J6').value = "Giấy kiểm dịch";
+        sheet.getCell('K6').value = "Kiểm tra cảm quan (màu, mùi, vị, trạng thái, bảo quản...)";
+        sheet.getCell('M6').value = "Xét nghiệm nhanh (nếu có) (vi sinh, hóa lý)";
+        sheet.getCell('O6').value = "Biện pháp xử lý /Ghi chú";
+
+        // Gán giá trị dòng 7 (Tiêu đề con)
+        sheet.getCell('E7').value = "Tên cơ sở";
+        sheet.getCell('F7').value = "Địa chỉ, điện thoại";
+        sheet.getCell('G7').value = "Tên người giao hàng";
+        sheet.getCell('K7').value = "Đạt";
+        sheet.getCell('L7').value = "Không đạt";
+        sheet.getCell('M7').value = "Đạt";
+        sheet.getCell('N7').value = "Không đạt";
+
+        // Dòng 8: Dòng số thứ tự
+        const row8 = ["(1)", "(2)", "(3)", "(4)", "(5)", "(6)", "(7)", "(8)", "(9)", "(10)", "(11)", "(12)", "(13)", "(14)", "(15)"];
+        sheet.getRow(8).values = row8;
+
+        // Định dạng khung và căn lề cho dòng 6, 7, 8 (Áp dụng theo kiểu quyển 2)
+        for(let i = 6; i <= 8; i++) {
+            sheet.getRow(i).font = { bold: true };
+            sheet.getRow(i).eachCell({ includeEmpty: true }, c => {
+                c.border = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} };
+                c.alignment = { 
+                    horizontal: 'center', 
+                    vertical: 'middle', 
+                    wrapText: true 
+                };
+            });
         }
-        r += 2;
+        r = 8; // Cập nhật con trỏ dòng để dữ liệu bắt đầu từ dòng 9
 
         dataI.forEach((d, i) => {
             const dObj = d.date ? (d.date.toDate ? d.date.toDate() : new Date(d.date)) : new Date();
-            
-            // --- ĐỔ DỮ LIỆU ĐÚNG 15 CỘT ---
-            // Cột F là vị trí thứ 6 trong mảng này (index 5)
-            const row = sheet.addRow([
-                i + 1,              // A
-                d.nl || "",         // B
-                dObj.toLocaleDateString(), // C
-                d.sl || "",         // D
-                d.ncc || "",        // E: Tên cơ sở
-                d.address || "",    // F: ĐỊA CHỈ (HIỆN Ở ĐÂY)
-                d.nguoigiao || "",  // G: Tên người giao
-                "", "", "", "Đạt", "", "", "", "" // H đến O
-            ]);
-            
+            const row = sheet.addRow([i + 1, d.nl || "", dObj.toLocaleDateString(), d.sl || "", d.ncc || "", d.address || "", d.nguoigiao || "", "", "", "", "Đạt", "", "", "", ""]);
             row.eachCell(c => { 
                 c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; 
                 c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }; 
@@ -5855,16 +5874,20 @@ async function exportExcelQuyen1() {
         sheet.getCell(`A${r}`).value = 'II. Thực phẩm khô và thực phẩm bao gói sẵn, phụ gia thực phẩm';
         sheet.getCell(`A${r}`).font = { bold: true };
         r++;
-        sheet.getRow(r).values = ["TT", "Tên thực phẩm", "Tên cơ sở SX", "Địa chỉ, ĐT", "Thời gian nhập", "Khối lượng", "Nơi cung cấp", "Hạn sử dụng", "Điều kiện bảo quản", "Chứng từ", "Cảm quan Đạt", "Cảm quan KĐ", "XN Đạt", "XN KĐ", "Biện pháp xử lý"];
+        sheet.getRow(r).values = ["TT", "Tên thực phẩm", "Tên cơ sở SX", "Địa chỉ sản xuất", "Thời gian nhập( ngày, giờ)", "Khối lượng (kg/lít....)", "Nơi cung cấp", "Hạn sử dụng", "Điều kiện bảo quản(T0 thường/ lạnh...)", "Chứng từ, hóa đơn", "Cảm quan Đạt", "Cảm quan KĐ", "XN Đạt", "XN KĐ", "Biện pháp xử lý/Ghi chú"];
         
-        // Kẻ khung tiêu đề bảng II
-        sheet.getRow(r).eachCell(c => { c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; });
+        sheet.getRow(r).eachCell(c => { c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }; c.font = { bold: true }; });
         
         dataII.forEach((d, i) => {
             const dObj = d.date ? (d.date.toDate ? d.date.toDate() : new Date(d.date)) : new Date();
             const row = sheet.addRow([i + 1, d.nl || "", d.csSX || "", d.address || "", dObj.toLocaleDateString(), d.sl || "", d.ncc || "", d.hsd || "", d.dkbq || "", "", "Đạt", "", "", "", ""]);
-            row.eachCell(c => { c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; c.alignment = { horizontal: 'center' }; });
+            row.eachCell(c => { c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; c.alignment = { horizontal: 'center', wrapText: true }; });
         });
+
+        // --- CẤU HÌNH TRANG IN (KHỚP A4 NẰM NGANG) ---
+        sheet.pageSetup = { orientation: 'landscape', fitToWidth: 1, fitToHeight: 0, paperSize: 9, margins: { left: 0.25, right: 0.25, top: 0.5, bottom: 0.5 } };
+        const columnWidths = [4, 15, 12, 10, 12, 18, 12, 10, 10, 10, 6, 8, 6, 8, 12];
+        columnWidths.forEach((width, i) => { sheet.getColumn(i + 1).width = width; });
 
         await saveExcelFile(workbook, 'Mau_So_1_Buoc_1');
     } catch (err) { alert("Lỗi: " + err.message); }
@@ -5880,24 +5903,41 @@ async function exportExcelQuyen2() {
         toDate.setHours(23, 59, 59, 999);
 
         const snap = await db.collection('production').get();
-        const filtered = [];
+        
+        // --- BƯỚC XỬ LÝ DỮ LIỆU: NHÓM THEO NGÀY & TÊN SP ---
+        const groups = {}; 
         snap.forEach(doc => {
             const d = doc.data();
             if (d.timestamp && d.tenSP && d.tenSP.trim() !== '') {
                 const dDate = d.timestamp.seconds ? new Date(d.timestamp.seconds * 1000) : new Date(d.timestamp);
+                
                 if (dDate >= fromDate && dDate <= toDate) {
-                    filtered.push(d);
+                    const dateStr = dDate.toISOString().split('T')[0]; // Định dạng YYYY-MM-DD
+                    const key = `${dateStr}_${d.tenSP}`;
+                    
+                    if (!groups[key]) {
+                        groups[key] = {
+                            tenSP: d.tenSP,
+                            sl: 0,
+                            ca: dDate.getHours() < 12 ? "Sáng" : "Chiều",
+                            date: dDate
+                        };
+                    }
+                    groups[key].sl += (parseFloat(d.sl) || 0);
                 }
             }
         });
+
+        // Chuyển nhóm thành mảng và sắp xếp theo ngày
+        const filtered = Object.values(groups).sort((a, b) => a.date - b.date);
 
         const workbook = new ExcelJS.Workbook();
         const sheet = workbook.addWorksheet('Quyen 2');
         
         // --- 1. TIÊU ĐỀ CHÍNH (Dòng 1-4) ---
-        sheet.mergeCells('A1:C1'); sheet.getCell('A1').value = 'Người kiểm tra: Nguyễn Văn Hoè';
-        sheet.mergeCells('A2:C2'); sheet.getCell('A2').value = 'Thời gian kiểm tra: ................................................';
-        sheet.mergeCells('A3:C3'); sheet.getCell('A3').value = 'Địa điểm kiểm tra: Tại xưởng sản xuất';
+        sheet.mergeCells('A1:D1'); sheet.getCell('A1').value = 'Người kiểm tra: Nguyễn Văn Hoè';
+        sheet.mergeCells('A2:D2'); sheet.getCell('A2').value = 'Thời gian kiểm tra: ngày.............tháng...........năm 20.....';
+        sheet.mergeCells('A3:D3'); sheet.getCell('A3').value = 'Địa điểm kiểm tra: Tại xưởng sản xuất';
         sheet.getCell('G1').value = 'MẪU SỐ 2: KIỂM TRA KHI CHẾ BIẾN THỨC ĂN ';
         sheet.getCell('G1').font = { bold: true, size: 14 };
         sheet.getCell('G2').value = '(Bước 2)';
@@ -5908,17 +5948,15 @@ async function exportExcelQuyen2() {
         sheet.mergeCells('D5:D6'); sheet.mergeCells('E5:E6'); sheet.mergeCells('F5:F6');
         sheet.mergeCells('G5:G6'); sheet.mergeCells('H5:J5'); sheet.mergeCells('K5:L5'); sheet.mergeCells('M5:M6');
 
-        // Gán giá trị vào ô đầu của vùng gộp
-        sheet.getCell('A5').value = "TT"; sheet.getCell('B5').value = "Ca"; 
-        sheet.getCell('C5').value = "Tên sản phẩm"; sheet.getCell('D5').value = "Nguyên liệu chính";
-        sheet.getCell('E5').value = "Số lượng"; sheet.getCell('F5').value = "Giờ sơ chế"; 
-        sheet.getCell('G5').value = "Giờ chế biến"; sheet.getCell('H5').value = "Kiểm tra điều kiện vệ sinh";
-        sheet.getCell('H6').value = "Người tham gia"; sheet.getCell('I6').value = "Trang thiết bị"; 
-        sheet.getCell('J6').value = "Khu vực"; sheet.getCell('K5').value = "Kiểm tra cảm quan";
+        sheet.getCell('A5').value = "TT"; sheet.getCell('B5').value = "Ca/ (Bữa ăn, giờ ăn...)"; 
+        sheet.getCell('C5').value = "Tên sản phẩm"; sheet.getCell('D5').value = "Nguyên liệu chính để chế biến (tên, số lượng...)";
+        sheet.getCell('E5').value = "Số lượng"; sheet.getCell('F5').value = "Thời gian sơ chế xong (ngày, giờ)"; 
+        sheet.getCell('G5').value = "Thời gian chế biến xong (ngày, giờ)"; sheet.getCell('H5').value = "Kiểm tra điều kiện vệ sinh (từ thời điểm bắt đầu sơ chế, chế biến cho đến khi thức ăn được chế biến xong)";
+        sheet.getCell('H6').value = "Người tham gia chế biến"; sheet.getCell('I6').value = "Trang thiết bị dụng cụ"; 
+        sheet.getCell('J6').value = "Khu vực chế biến và phụ trợ"; sheet.getCell('K5').value = "Kiểm tra cảm quan thức ăn (màu, mùi, vị, trạng thái, bảo quản...)";
         sheet.getCell('K6').value = "Đạt"; sheet.getCell('L6').value = "Không đạt"; 
-        sheet.getCell('M5').value = "Biện pháp xử lý";
+        sheet.getCell('M5').value = "Biện pháp xử lý/Ghi chú";
 
-        // Hàng 7 (Đánh số)
         const row7 = ['(1)', '(2)', '(3)', '(4)', '(5)', '(6)', '(7)', '(8)', '(9)', '(10)', '(11)', '(12)', '(13)'];
         sheet.getRow(7).values = row7;
 
@@ -5926,18 +5964,18 @@ async function exportExcelQuyen2() {
             sheet.getRow(i).font = { bold: true };
             sheet.getRow(i).eachCell(c => {
                 c.border = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} };
-                c.alignment = { horizontal: 'center', vertical: 'middle' };
+                // --- THÊM wrapText: true VÀO ĐÂY ---
+                c.alignment = { 
+                    horizontal: 'center', 
+                    vertical: 'middle', 
+                    wrapText: true 
+                };
             });
         }
-
         // --- 3. DỮ LIỆU (Bắt đầu từ hàng 8) ---
         filtered.forEach((d, i) => {
-            const dDate = d.timestamp.seconds ? new Date(d.timestamp.seconds * 1000) : new Date(d.timestamp);
-            const hour = dDate.getHours();
-            const ca = hour < 12 ? "Sáng" : "Chiều";
-
             const row = sheet.addRow([
-                i + 1, ca, d.tenSP || "", "Thịt lợn, mỡ lợn, hành khô, mắm tép", d.sl || "", "", "", 
+                i + 1, d.ca, d.tenSP, "Thịt lợn, mỡ lợn, hành khô, mắm tép", d.sl, "", "", 
                 "Đạt", "Đạt", "Đạt", "Đạt", "Đạt", "" 
             ]);
             
@@ -5948,7 +5986,7 @@ async function exportExcelQuyen2() {
         });
 
         sheet.columns.forEach((col, i) => {
-            col.width = (i === 3) ? 30 : 15; // Cột D (index 3) rộng hơn để chứa nguyên liệu
+            col.width = (i === 3) ? 30 : 15; 
         });
         
         await saveExcelFile(workbook, 'So_Kiem_Thuc_Quyen_2');
@@ -5958,13 +5996,43 @@ async function exportExcelQuyen2() {
 // --- 2. XUẤT QUYỂN 3 ---
 async function exportExcelQuyen3() {
     const dates = getDates(); if (!dates) return;
+    
+    // --- LẤY THỜI GIAN BẮT ĐẦU VÀ KẾT THÚC ---
+    const fromDate = new Date(dates.from);
+    const toDate = new Date(dates.to);
+    toDate.setHours(23, 59, 59, 999); // Lấy đến cuối ngày kết thúc
+
     try {
         const snap = await db.collection('production').get();
-        const filtered = [];
+        
+        // --- BƯỚC GỘP DỮ LIỆU ---
+        const groups = {};
         snap.forEach(doc => {
             const d = doc.data();
-            if (d.tenSP && d.timestamp) filtered.push(d); 
+            if (d.tenSP && d.timestamp) {
+                const dateObj = d.timestamp.toDate();
+                
+                // --- THÊM ĐIỀU KIỆN LỌC NGÀY Ở ĐÂY ---
+                if (dateObj >= fromDate && dateObj <= toDate) {
+                    const dateStr = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD
+                    const key = `${dateStr}_${d.tenSP}`;
+                    
+                    if (!groups[key]) {
+                        groups[key] = {
+                            tenSP: d.tenSP,
+                            sl: 0,
+                            dvt: d.dvt || "",
+                            dateObj: dateObj,
+                            ca: dateObj.getHours() < 12 ? "Sáng" : "Chiều"
+                        };
+                    }
+                    groups[key].sl += (parseFloat(d.sl) || 0);
+                }
+            }
         });
+
+        // Chuyển nhóm thành mảng và sắp xếp theo thời gian
+        const filtered = Object.values(groups).sort((a, b) => a.dateObj - b.dateObj);
 
         const workbook = new ExcelJS.Workbook();
         const sheet = workbook.addWorksheet('Quyen 3');
@@ -5975,12 +6043,12 @@ async function exportExcelQuyen3() {
         sheet.getCell('A1').font = { bold: true, size: 14 };
         sheet.getCell('A1').alignment = { horizontal: 'center' };
 
+        // --- 2. TIÊU ĐỀ CỘT (Dòng 3-4) ---
         let r = 3;
-        // Gộp dọc các cột đơn
         ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'J'].forEach(col => sheet.mergeCells(`${col}${r}:${col}${r+1}`));
-        sheet.mergeCells('H' + r + ':I' + r); // Gộp ngang "Kiểm tra cảm quan"
+        sheet.mergeCells('H' + r + ':I' + r);
 
-        sheet.getRow(r).values = ["TT", "Ca", "Tên sản phẩm", "Số lượng", "Thời gian chia xong", "Thời gian hoàn thành", "Dụng cụ", "Kiểm tra cảm quan", "", "Biện pháp xử lý"];
+        sheet.getRow(r).values = ["TT", "Ca (Bữa ăn, giờ ăn...)", "Tên sản phẩm", "Số lượng", "Thời gian chia xong (ngày, giờ)", "Thời gian hoàn thành(ngày, giờ)", "Dụng cụ chia, chứa đựng, che đậy, bảo quản thức ăn", "Kiểm tra cảm quan món ăn (màu, mùi, vị, trạng thái, bảo quản...)", "", "Biện pháp xử lý/Ghi chú"];
         sheet.getRow(r + 1).values = ["", "", "", "", "", "", "", "Đạt", "Không đạt", ""];
 
         // Dòng đánh số (1) -> (10)
@@ -5992,7 +6060,6 @@ async function exportExcelQuyen3() {
             c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } };
         });
 
-        // Định dạng tiêu đề
         for (let i = r; i <= r + 1; i++) {
             sheet.getRow(i).eachCell(c => {
                 c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
@@ -6003,30 +6070,24 @@ async function exportExcelQuyen3() {
 
         // Đổ dữ liệu
         filtered.forEach((d, i) => {
-            const dateObj = d.timestamp.toDate();
-            const hour = dateObj.getHours();
-            // Logic Ca: Sáng nếu giờ < 12, Chiều nếu giờ >= 12
-            const ca = hour < 12 ? "Sáng" : "Chiều";
-            const timeStr = dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            
+            const timeStr = d.dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             const row = sheet.addRow([
-                i + 1, 
-                ca,              // Ca dựa trên giờ
-                d.tenSP || "",   
-                (d.sl || 0) + " " + (d.dvt || ""), 
-                timeStr,         
-                timeStr,         
-                "Đạt",           // Đạt vào cột Dụng cụ
-                "Đạt",           // Đạt (cảm quan)
-                "",              // Không đạt
-                ""               // Để trống cột Biện pháp xử lý
+                i + 1, d.ca, d.tenSP, d.sl + " " + d.dvt, timeStr, timeStr, "Đạt", "Đạt", "", "" 
             ]);
-            
             row.eachCell(c => {
                 c.border = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} };
                 c.alignment = { horizontal: 'center', vertical: 'middle' };
             });
         });
+
+        // Cấu hình trang in
+        sheet.getColumn('A').width = 5; sheet.getColumn('B').width = 12; sheet.getColumn('C').width = 15;
+        sheet.getColumn('D').width = 10; sheet.getColumn('E').width = 14; sheet.getColumn('F').width = 14;
+        sheet.getColumn('G').width = 25; sheet.getColumn('H').width = 12; sheet.getColumn('I').width = 12;
+        sheet.getColumn('J').width = 18;
+
+        sheet.pageSetup = { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0, paperSize: 9 };
+        sheet.views = [{ showGridLines: false }];
 
         await saveExcelFile(workbook, 'So_Kiem_Thuc_Quyen_3');
     } catch (e) { alert("Lỗi: " + e.message); }
@@ -6035,23 +6096,50 @@ async function exportExcelQuyen3() {
 // --- 3. XUẤT LƯU MẪU ---
 async function exportExcelLuuMau() {
     const dates = getDates(); if (!dates) return;
+    
+    // --- LẤY THỜI GIAN LỌC ---
+    const fromDate = new Date(dates.from);
+    const toDate = new Date(dates.to);
+    toDate.setHours(23, 59, 59, 999);
+
     try {
         const snap = await db.collection('production').get();
-        const filtered = [];
+        
+        // --- BƯỚC GỘP DỮ LIỆU ---
+        const groups = {};
         snap.forEach(doc => {
             const d = doc.data();
-            if (d.tenSP && d.timestamp) filtered.push(d);
+            if (d.tenSP && d.timestamp) {
+                const dateObj = d.timestamp.toDate();
+                
+                // --- THÊM ĐIỀU KIỆN LỌC NGÀY ---
+                if (dateObj >= fromDate && dateObj <= toDate) {
+                    const dateStr = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD
+                    const key = `${dateStr}_${d.tenSP}`;
+                    
+                    if (!groups[key]) {
+                        groups[key] = {
+                            tenSP: d.tenSP,
+                            sl: 0,
+                            dateObj: dateObj,
+                            ca: dateObj.getHours() < 12 ? "Sáng" : "Chiều"
+                        };
+                    }
+                    groups[key].sl += (parseFloat(d.sl) || 0);
+                }
+            }
         });
+
+        const filtered = Object.values(groups).sort((a, b) => a.dateObj - b.dateObj);
 
         const workbook = new ExcelJS.Workbook();
         const sheet = workbook.addWorksheet('Luu Mau');
 
-        // Bố cục tiêu đề theo image_abb406.jpg
+        // Bố cục tiêu đề
         sheet.getRow(1).getCell(1).value = 'Người kiểm tra: Nguyễn Văn Hoè';
         sheet.getRow(2).getCell(1).value = 'Thời gian kiểm tra: ngày.............. tháng .............. năm 20..............';
         sheet.getRow(3).getCell(1).value = 'Địa điểm kiểm tra: Tại xưởng sản xuất';
         
-        // Tiêu đề chính "Lưu mẫu..."
         sheet.mergeCells('G2:L2');
         const titleCell = sheet.getCell('G2');
         titleCell.value = 'LƯU MẪU THEO DÕI VÀ HUỶ MẪU THỨC ĂN';
@@ -6059,8 +6147,6 @@ async function exportExcelLuuMau() {
         titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
         let r = 5; 
-
-        // Tiêu đề cột
         const headerRow = sheet.getRow(r);
         headerRow.values = ["TT", "Tên mẫu sản phẩm", "Ca (giờ ăn...)", "Số lượng", "Khối lượng/ thể tích mẫu (gam/ml)", 
             "Dụng cụ chứa mẫu thức ăn lưu", "Nhiệt độ bảo quản mẫu (°C)", "Thời gian lấy mẫu (giờ, ngày, tháng, năm)", 
@@ -6070,7 +6156,6 @@ async function exportExcelLuuMau() {
         const numRow = sheet.getRow(r + 1);
         numRow.values = ["(1)", "(2)", "(3)", "(4)", "(5)", "(6)", "(7)", "(8)", "(9)", "(10)", "(11)", "(12)"];
 
-        // Định dạng tiêu đề cột
         [headerRow, numRow].forEach(row => {
             row.eachCell(c => {
                 c.border = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} };
@@ -6083,38 +6168,28 @@ async function exportExcelLuuMau() {
 
         // Đổ dữ liệu
         filtered.forEach((d, i) => {
-            const dateObj = d.timestamp.toDate();
-            const ca = dateObj.getHours() < 12 ? "Sáng" : "Chiều";
-            const timeStr = dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            
-            // Logic ghi chú tự động
+            const timeStr = d.dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             let ghiChu = "";
             const ten = (d.tenSP || "").toLowerCase();
-            if (ten.includes("thuỷ tinh") || ten.includes("thủy tinh")) {
-                ghiChu = "6 tháng";
-            } else if (ten.includes("nhựa") || ten.includes("túi zip")) {
-                ghiChu = "25 ngày";
-            }
+            if (ten.includes("thuỷ tinh") || ten.includes("thủy tinh")) ghiChu = "6 tháng";
+            else if (ten.includes("nhựa") || ten.includes("túi zip")) ghiChu = "25 ngày";
             
             const row = sheet.addRow([
-                i + 1, 
-                d.tenSP || "", 
-                ca, 
-                d.sl || 0, 
-                "100g",         // Đã sửa thành 100g theo yêu cầu
-                "Lọ thuỷ tinh", 
-                "Nhiệt độ thường", 
-                timeStr, 
-                timeStr, 
-                ghiChu, 
-                "", ""
+                i + 1, d.tenSP || "", d.ca, d.sl, "100g", "Lọ thuỷ tinh", "Nhiệt độ thường", timeStr, timeStr, ghiChu, "", ""
             ]);
             
             row.eachCell(c => {
                 c.border = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} };
-                c.alignment = { horizontal: 'center', vertical: 'middle' };
+                c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
             });
         });
+
+        // Thiết lập độ rộng cột cho A4 nằm ngang
+        const cols = [5, 20, 10, 10, 15, 15, 15, 15, 15, 15, 15, 15];
+        cols.forEach((w, i) => { sheet.getColumn(i + 1).width = w; });
+
+        sheet.pageSetup = { orientation: 'landscape', fitToWidth: 1, fitToHeight: 0, paperSize: 9 };
+        sheet.views = [{ showGridLines: false }];
 
         await saveExcelFile(workbook, 'So_Luu_Mau');
     } catch (e) { alert("Lỗi: " + e.message); }
