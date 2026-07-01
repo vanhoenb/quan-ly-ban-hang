@@ -934,6 +934,21 @@ function toggleMoreMenu() {
                     onkeyup="searchSanXuat()" 
                     class="w-full pl-4 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
+		<!-- Bộ lọc mới -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+  <div>
+    <label class="block text-xs font-bold text-gray-500 uppercase">Chọn Tháng</label>
+    <input type="month" id="monthPickerSX" onchange="capNhatNgayTheoThangSanxuat()">
+  </div>
+  <div>
+    <label class="block text-xs font-bold text-gray-500 uppercase">Từ ngày</label>
+    <input type="date" id="dateStartSX" class="w-full p-2 border rounded text-sm" onchange="filterSanXuat()">
+  </div>
+  <div>
+    <label class="block text-xs font-bold text-gray-500 uppercase">Đến ngày</label>
+    <input type="date" id="dateEndSX" class="w-full p-2 border rounded text-sm" onchange="filterSanXuat()">
+  </div>
+</div>
 
           <div class="overflow-y-auto max-h-[65vh] overflow-x-auto border border-gray-100 rounded-lg">
             <table class="w-full text-left border-collapse">
@@ -1082,24 +1097,41 @@ function toggleMoreMenu() {
         </div>
         
         <!-- Tab 3: Nhập & Công nợ -->
-				<div id="nhap-tab" class="nl-tab-pane hidden p-0">
-					<div class="flex flex-col-reverse lg:grid lg:grid-cols-12 gap-6">
-						<!-- Danh sách: order-2 (nằm dưới trên đt) -->
-						<div class="col-span-12 lg:col-span-9 bg-white p-4 md:p-5 rounded-xl shadow-sm border border-gray-100">
-							<h4 class="font-bold mb-4 text-gray-700">DANH SÁCH CHI TIẾT NHẬP</h4>
-							<div class="overflow-y-auto max-h-[500px] border rounded-lg">
-								<table class="w-full text-xs text-left">
-									<thead class="bg-gray-100 text-gray-600 uppercase sticky top-0 text-xs">
-					<tr>
-						<th class="p-3 w-[12%]">Số Phiếu</th>
-						<th class="p-3 w-[15%]">Ngày</th>
-						<th class="p-3 w-[25%]">Tên NL</th> <!-- Rộng nhất -->
-						<th class="p-3 w-[8%] text-center">SL</th>
-						<th class="p-3 w-[15%] text-right">Đơn Giá</th>
-						<th class="p-3 w-[15%] text-right">Thành Tiền</th>
-						<th class="p-3 w-[10%] text-center">Thao tác</th>
-					</tr>
-				</thead>
+<div id="nhap-tab" class="nl-tab-pane hidden p-0">
+    <div class="flex flex-col-reverse lg:grid lg:grid-cols-12 gap-6">
+        <!-- Danh sách: order-2 (nằm dưới trên đt) -->
+        <div class="col-span-12 lg:col-span-9 bg-white p-4 md:p-5 rounded-xl shadow-sm border border-gray-100">
+            <h4 class="font-bold mb-4 text-gray-700">DANH SÁCH CHI TIẾT NHẬP</h4>
+            
+            <!-- BỘ LỌC MỚI ĐƯỢC THÊM VÀO -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase">Chọn Tháng</label>
+                    <input type="month" id="monthPickerNhapKho" class="w-full p-2 border rounded text-sm" onchange="capNhatNgayTheoThangNhapKho()">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase">Từ ngày</label>
+                    <input type="date" id="dateStartNhapKho" class="w-full p-2 border rounded text-sm" onchange="filterNhapKho()">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase">Đến ngày</label>
+                    <input type="date" id="dateEndNhapKho" class="w-full p-2 border rounded text-sm" onchange="filterNhapKho()">
+                </div>
+            </div>
+
+            <div class="overflow-y-auto max-h-[500px] border rounded-lg">
+                <table class="w-full text-xs text-left">
+                    <thead class="bg-gray-100 text-gray-600 uppercase sticky top-0 text-xs">
+                        <tr>
+                            <th class="p-3 w-[12%]">Số Phiếu</th>
+                            <th class="p-3 w-[15%]">Ngày</th>
+                            <th class="p-3 w-[25%]">Tên NL</th>
+                            <th class="p-3 w-[8%] text-center">SL</th>
+                            <th class="p-3 w-[15%] text-right">Đơn Giá</th>
+                            <th class="p-3 w-[15%] text-right">Thành Tiền</th>
+                            <th class="p-3 w-[10%] text-center">Thao tác</th>
+                        </tr>
+                    </thead>
                     <tbody id="body-phieu" class="divide-y divide-gray-100"></tbody>
                 </table>
             </div>
@@ -6411,6 +6443,8 @@ document.addEventListener('keydown', function(event) {
 
 // ============SẢN XUẤT =============
 
+
+
 function getRawNumber(id) {
   const val = document.getElementById(id).value;
   return parseFloat(val.replace(/\./g, '').replace(',', '.')) || 0;
@@ -6425,8 +6459,6 @@ async function khoiTaoTrangSanXuat() {
     let nextNum = 1;
     if (!snapshot.empty) {
         const lastDoc = snapshot.docs[0].data();
-        // Cũ: split('-')[1] cho "SX-0001"
-        // Mới: dùng regex hoặc replace để lấy số từ "SX01", "SX02"...
         const lastSoPhieu = lastDoc.soPhieu || "SX00"; 
         const lastNum = parseInt(lastSoPhieu.replace('SX', ''));
         
@@ -6435,14 +6467,25 @@ async function khoiTaoTrangSanXuat() {
         }
     }
     
-    // Cập nhật giá trị vào ô input với định dạng SX01, SX02...
-    // padStart(2, '0') nghĩa là lấy 2 chữ số (VD: SX01, SX02, SX99, SX100...)
     document.getElementById('sxSoPhieu').value = "SX" + nextNum.toString().padStart(2, '0');
 
-    // 2. Load danh sách
+    // 2. Thiết lập tháng hiện tại và Load danh sách
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
     
-    loadInitSX();
+    // Gán giá trị tháng hiện tại vào input
+    const monthPicker = document.getElementById('monthPickerSX');
+    if (monthPicker) {
+        monthPicker.value = `${year}-${month}`;
+        // Tự động tính ngày và lọc dữ liệu ngay khi khởi tạo
+        capNhatNgayTheoThangSanxuat(); 
+    } else {
+        // Nếu chưa có tháng thì load mặc định
+        loadInitSX();
+    }
 }
+
 async function luuSanXuat() {
     const btn = document.querySelector('.btn-save') || document.querySelector('.btn-primary'); 
     
@@ -6574,8 +6617,9 @@ async function loadInitSX() {
 
 async function huyPhieuSX(id) {
     if (!id) {
-        // Nếu không truyền id, lấy từ select box
-        id = document.getElementById('select_HuySX').value;
+        // Nếu không truyền id, lấy từ select box (nếu vẫn dùng cách cũ)
+        const selectBox = document.getElementById('select_HuySX');
+        if (selectBox) id = selectBox.value;
     }
     
     if (!id) { alert("Vui lòng chọn phiếu!"); return; }
@@ -6584,8 +6628,18 @@ async function huyPhieuSX(id) {
     try {
         await db.collection('production').doc(id).delete();
         alert("Đã xóa!");
-        loadInitSX(); // Gọi lại để cập nhật bảng ngay
+        
+        // --- SỬA Ở ĐÂY ---
+        // Thay vì gọi loadInitSX (hàm tải tất cả), 
+        // ta gọi lại filterSanXuat để bảng giữ nguyên bộ lọc đang chọn
+        if (typeof filterSanXuat === 'function') {
+            await filterSanXuat();
+        } else {
+            // Nếu không dùng bộ lọc thì mới gọi lại hàm load cũ
+            loadInitSX();
+        }
     } catch (e) {
+        console.error("Lỗi xóa: ", e);
         alert("Lỗi: " + e.message);
     }
 }
@@ -6628,6 +6682,81 @@ function tinhSoKgThanhPham() {
     
     // Luôn tính tồn cuối
     if (typeof tinhTonCuoi === 'function') tinhTonCuoi();
+}
+
+// chọn tháng, ngày
+function capNhatNgayTheoThangSanxuat() {
+    const monthVal = document.getElementById('monthPickerSX').value; // YYYY-MM
+    if (!monthVal) return;
+
+    const [year, month] = monthVal.split('-');
+    
+    // Tạo ngày 01 của tháng, giờ địa phương
+    const firstDay = new Date(year, month - 1, 1);
+    // Tạo ngày cuối cùng của tháng (ngày 0 của tháng sau là ngày cuối tháng này)
+    const lastDay = new Date(year, month, 0);
+
+    // HÀM TỰ ĐỊNH DẠNG YYYY-MM-DD TRÁNH LỖI MÚI GIỜ
+    const formatInputDate = (date) => {
+        const y = date.getFullYear();
+        const m = (date.getMonth() + 1).toString().padStart(2, '0');
+        const d = date.getDate().toString().padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    };
+
+    document.getElementById('dateStartSX').value = formatInputDate(firstDay);
+    document.getElementById('dateEndSX').value = formatInputDate(lastDay);
+
+    filterSanXuat();
+}
+
+// 2. Lọc dữ liệu theo Từ ngày - Đến ngày
+async function filterSanXuat() {
+    const startVal = document.getElementById('dateStartSX').value;
+    const endVal = document.getElementById('dateEndSX').value;
+    
+    if (!startVal || !endVal) return;
+
+    // Chuyển string date thành mốc thời gian
+    const startDate = new Date(startVal + "T00:00:00");
+    const endDate = new Date(endVal + "T23:59:59");
+
+    const listBody = document.getElementById('list-sanxuat');
+    listBody.innerHTML = "<tr><td colspan='8' class='text-center'>Đang tải...</td></tr>";
+
+    try {
+        // Truy vấn dữ liệu theo thời gian
+        const snapshot = await db.collection('production')
+            .where('timestamp', '>=', startDate)
+            .where('timestamp', '<=', endDate)
+            .orderBy('timestamp', 'desc')
+            .get();
+
+        let htmlRows = "";
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const dateObj = data.timestamp ? data.timestamp.toDate() : null;
+            const ngay = dateObj ? dateObj.toLocaleDateString('vi-VN') : "---";
+
+            htmlRows += `<tr>
+                <td class="p-3">${ngay}</td>
+                <td class="p-3 font-bold">${data.soPhieu || "---"}</td>
+                <td class="p-3">${data.tenSP || "---"}</td>
+                <td class="p-3">${data.sl || 0}</td>           
+                <td class="p-3 text-primary">${data.meChuaNau || 0}</td>
+                <td class="p-3 text-warning">${data.meChuaDong || 0}</td>
+                <td class="p-3 text-success">${data.soMe || 0}</td>
+                <td class="p-3 text-center">
+                    <button class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1 rounded-lg" onclick="huyPhieuSX('${doc.id}')">
+                        <i class="fas fa-trash-alt"></i> Xóa
+                    </button>
+                </td>
+            </tr>`;
+        });
+        listBody.innerHTML = htmlRows || "<tr><td colspan='8' class='text-center'>Không có dữ liệu trong khoảng này</td></tr>";
+    } catch (e) {
+        console.error("Lỗi lọc: ", e);
+    }
 }
 
 // --- 1. HỆ THỐNG CHUNG ---
@@ -6945,41 +7074,41 @@ async function deleteDoc(col, id) {
     
     try {
         if (col === 'suppliers') {
-            // Kiểm tra công nợ trước khi xóa NCC
             const docSnap = await db.collection('suppliers').doc(id).get();
             const nccData = docSnap.data();
             if ((nccData.debt || 0) > 0) {
                 alert("Không thể xóa: Nhà cung cấp này vẫn còn công nợ!");
-                return; // Dừng lại, không xóa
+                return;
             }
         } 
         else if (col === 'material_imports') {
             const docSnap = await db.collection('material_imports').doc(id).get();
             const phieuData = docSnap.data();
             
-            // Ưu tiên dùng nccId để trừ nợ (an toàn nhất khi đổi tên NCC)
             if (phieuData.nccId) {
                 await db.collection('suppliers').doc(phieuData.nccId).update({ 
                     debt: firebase.firestore.FieldValue.increment(-(phieuData.total || 0)) 
                 });
-            } 
-            // Nếu phiếu cũ chưa có nccId, mới dùng tên (để dự phòng)
-            else if (phieuData.ncc) {
+            } else if (phieuData.ncc) {
                 const nccSnap = await db.collection('suppliers').where('name', '==', phieuData.ncc).get();
                 if (!nccSnap.empty) {
                     await nccSnap.docs[0].ref.update({ 
                         debt: firebase.firestore.FieldValue.increment(-(phieuData.total || 0)) 
                     });
                 }
-            } else {
-                console.warn("Phiếu nhập này không có trường ncc, bỏ qua bước trừ nợ.");
             }
         }
 
         await db.collection(col).doc(id).delete();
         alert("Đã xóa thành công!");
         
-        // Tải lại dữ liệu
+        // --- ĐOẠN CẬP NHẬT Ở ĐÂY ---
+        // Nếu vừa xóa ở Nhập kho, gọi filter để giữ bộ lọc
+        if (col === 'material_imports') {
+            if (typeof filterNhapKho === 'function') await filterNhapKho();
+        } 
+        
+        // Tải lại các dữ liệu khác nếu cần
         if (typeof loadAllData === 'function') {
             await loadAllData();
         }
@@ -7183,11 +7312,93 @@ window.openHistory = function(name) {
     console.log("Đã bấm vào: " + name);
     openHistoryModal(name);
 };
+
 // Khởi chạy toàn bộ dữ liệu khi trang web được tải xong
 window.addEventListener('DOMContentLoaded', () => {
     loadAllData();
-	generateInvoiceNumber(); // Đảm bảo có số phiếu ngay khi vừa load web
+    generateInvoiceNumber(); 
+    
+    // --- THÊM DÒNG NÀY ---
+    // Tự động load dữ liệu tháng hiện tại cho tab Nhập kho
+    initMonthNhapKho(); 
 });
+
+// ngày , tháng
+
+// 1. Tự nhảy ngày khi chọn tháng (cho tab Nhập kho)
+function capNhatNgayTheoThangNhapKho() {
+    const monthVal = document.getElementById('monthPickerNhapKho').value;
+    if (!monthVal) return;
+
+    const [year, month] = monthVal.split('-');
+    const firstDay = new Date(year, month - 1, 1);
+    const lastDay = new Date(year, month, 0);
+
+    const formatInputDate = (date) => {
+        const y = date.getFullYear();
+        const m = (date.getMonth() + 1).toString().padStart(2, '0');
+        const d = date.getDate().toString().padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    };
+
+    document.getElementById('dateStartNhapKho').value = formatInputDate(firstDay);
+    document.getElementById('dateEndNhapKho').value = formatInputDate(lastDay);
+
+    filterNhapKho();
+}
+
+// 2. Lọc danh sách Nhập kho
+async function filterNhapKho() {
+    const startVal = document.getElementById('dateStartNhapKho').value;
+    const endVal = document.getElementById('dateEndNhapKho').value;
+    if (!startVal || !endVal) return;
+
+    const startDate = new Date(startVal + "T00:00:00");
+    const endDate = new Date(endVal + "T23:59:59");
+
+    const listBody = document.getElementById('body-phieu');
+    listBody.innerHTML = "<tr><td colspan='7' class='text-center'>Đang tải...</td></tr>";
+
+    try {
+        const snapshot = await db.collection('material_imports')
+            .where('timestamp', '>=', startDate)
+            .where('timestamp', '<=', endDate)
+            .orderBy('timestamp', 'desc')
+            .get();
+
+        let htmlRows = "";
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const dateObj = data.timestamp ? data.timestamp.toDate() : null;
+            const ngay = dateObj ? dateObj.toLocaleDateString('vi-VN') : "---";
+
+            htmlRows += `<tr>
+                <td class="p-3">${data.soPhieu || "---"}</td>
+                <td class="p-3">${ngay}</td>
+                <td class="p-3">${data.tenNL || "---"}</td>
+                <td class="p-3 text-center">${data.sl || 0}</td>
+                <td class="p-3 text-right">${(data.donGia || 0).toLocaleString('vi-VN')}</td>
+                <td class="p-3 text-right">${(data.thanhTien || 0).toLocaleString('vi-VN')}</td>
+                <td class="p-3 text-center">
+                    <button class="text-red-500" onclick="deleteDoc('material_imports', '${doc.id}')">Xóa</button>
+                </td>
+            </tr>`;
+        });
+        listBody.innerHTML = htmlRows || "<tr><td colspan='7' class='text-center'>Không có dữ liệu</td></tr>";
+    } catch (e) {
+        console.error("Lỗi lọc Nhập kho: ", e);
+    }
+}
+
+// 3. Khởi tạo tháng hiện tại khi mở trang (thêm vào hàm khởi tạo chung của bạn)
+function initMonthNhapKho() {
+    const now = new Date();
+    const monthPicker = document.getElementById('monthPickerNhapKho');
+    if (monthPicker) {
+        monthPicker.value = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+        capNhatNgayTheoThangNhapKho();
+    }
+}
 
 // --- KHỞI TẠO HỆ THỐNG ---
 // 1. Cấu hình ban đầu
