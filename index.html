@@ -5517,7 +5517,7 @@ async function exportFullReport() {
         const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         const a = document.createElement('a');
         a.href = window.URL.createObjectURL(blob);
-        a.download = `Bao_Cao_Tong_Hop_${fromVal}_den_${toVal}.xlsx`;
+        a.download = `Bao_Cao_Tong_Hop_${formatDateToDDMMYYYY(fromVal)}_den_${formatDateToDDMMYYYY(toVal)}.xlsx`;
         a.click();
         
         Swal.close();
