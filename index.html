@@ -6957,9 +6957,14 @@ async function deleteDoc(col, id) {
             const docSnap = await db.collection('material_imports').doc(id).get();
             const phieuData = docSnap.data();
             
-            // SỬA: Thay phieuData.supplierName thành phieuData.ncc
-            // vì trong hàm saveFullInvoice bạn đang lưu trường là 'ncc'
-            if (phieuData.ncc) {
+            // Ưu tiên dùng nccId để trừ nợ (an toàn nhất khi đổi tên NCC)
+            if (phieuData.nccId) {
+                await db.collection('suppliers').doc(phieuData.nccId).update({ 
+                    debt: firebase.firestore.FieldValue.increment(-(phieuData.total || 0)) 
+                });
+            } 
+            // Nếu phiếu cũ chưa có nccId, mới dùng tên (để dự phòng)
+            else if (phieuData.ncc) {
                 const nccSnap = await db.collection('suppliers').where('name', '==', phieuData.ncc).get();
                 if (!nccSnap.empty) {
                     await nccSnap.docs[0].ref.update({ 
@@ -7097,21 +7102,26 @@ function xoaNguyenLieu(index) {
 
 async function saveFullInvoice() {
     const soPhieu = document.getElementById('in-so-phieu').value;
-    const ncc = document.getElementById('sel-ncc-nhap').value;
+    const nccName = document.getElementById('sel-ncc-nhap').value;
     
-    if (ncc === 'Chọn NCC') return alert("Vui lòng chọn NCC!");
-    
-    // SỬA Ở ĐÂY: Kiểm tra cartNL thay vì cart
+    if (nccName === 'Chọn NCC') return alert("Vui lòng chọn NCC!");
     if (cartNL.length === 0) return alert("Giỏ hàng đang trống!");
 
-    // SỬA Ở ĐÂY: Tính tổng dựa trên cartNL
+    // 1. TÌM ID CỦA NCC TRƯỚC KHI LƯU
+    const nccSnap = await db.collection('suppliers').where('name', '==', nccName).get();
+    if (nccSnap.empty) return alert("Không tìm thấy thông tin NCC trong hệ thống!");
+    
+    const nccDoc = nccSnap.docs[0];
+    const nccId = nccDoc.id; // Lấy ID chuẩn
+
     const totalInvoice = cartNL.reduce((sum, item) => sum + item.thanhTien, 0);
 
-    // SỬA Ở ĐÂY: Lặp qua cartNL để lưu vào DB
+    // 2. LƯU PHIẾU VỚI CẢ TÊN VÀ ID
     for (let item of cartNL) {
         await db.collection('material_imports').add({
             soPhieu,
-            ncc,
+            ncc: nccName,      // Lưu tên để hiển thị nhanh
+            nccId: nccId,      // LƯU THÊM ID ĐỂ LÀM KHÓA TRUY VẤN
             soHd: document.getElementById('in-so-hd').value,
             ngayHd: document.getElementById('in-ngay-hd').value,
             nl: item.nl,
@@ -7122,18 +7132,19 @@ async function saveFullInvoice() {
         });
     }
     
-    const snap = await db.collection('suppliers').where('name', '==', ncc).get();
-    if (!snap.empty) await snap.docs[0].ref.update({ debt: firebase.firestore.FieldValue.increment(totalInvoice) });
+    // 3. Cập nhật nợ vào NCC bằng ID
+    await nccDoc.ref.update({ 
+        debt: firebase.firestore.FieldValue.increment(totalInvoice) 
+    });
     
     // --- RESET TOÀN BỘ ---
-    cartNL = []; // Xóa giỏ NL
-    document.getElementById('gio-hang-nl').innerHTML = ''; // Reset ID giỏ hàng mới
+    cartNL = []; 
+    document.getElementById('gio-hang-nl').innerHTML = '';
     document.getElementById('in-so-hd').value = '';
     document.getElementById('in-ngay-hd').value = '';
     document.getElementById('sel-ncc-nhap').value = 'Chọn NCC';
     
     alert("Đã lưu phiếu!");
-    
     await generateInvoiceNumber();
     loadAllData();
 }
