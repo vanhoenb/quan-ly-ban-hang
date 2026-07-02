@@ -1121,19 +1121,17 @@ function toggleMoreMenu() {
 
             <div class="overflow-y-auto max-h-[500px] border rounded-lg">
                 <table class="w-full text-xs text-left">
-                    <thead class="bg-gray-100 text-gray-600 uppercase sticky top-0 text-xs">
-                        <tr>
-                            <th class="p-3 w-[12%]">Số Phiếu</th>
-                            <th class="p-3 w-[15%]">Ngày</th>
-                            <th class="p-3 w-[25%]">Tên NL</th>
-                            <th class="p-3 w-[8%] text-center">SL</th>
-                            <th class="p-3 w-[15%] text-right">Đơn Giá</th>
-                            <th class="p-3 w-[15%] text-right">Thành Tiền</th>
-                            <th class="p-3 w-[10%] text-center">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody id="body-phieu" class="divide-y divide-gray-100"></tbody>
-                </table>
+					<thead class="bg-gray-100 text-gray-600 uppercase sticky top-0 text-xs">
+						<tr>
+							<th class="p-3 w-[15%]">Số Phiếu</th>
+							<th class="p-3 w-[15%]">Ngày</th>
+							<th class="p-3 w-[40%]">NCC</th>
+							<th class="p-3 w-[15%] text-right">Tổng Tiền</th>
+							<th class="p-3 w-[15%] text-center">Thao tác</th>
+						</tr>
+					</thead>
+					<tbody id="body-phieu" class="divide-y divide-gray-100"></tbody>
+				</table>
             </div>
         </div>
         
@@ -6896,8 +6894,8 @@ async function loadDropdowns() {
 
 // Hàm khởi chạy đồng bộ việc tải tất cả các bảng dữ liệu
 async function loadAllData() {
-    // Đã xóa loadTableTra() ra khỏi danh sách
-    await Promise.allSettled([loadTableNCC(), loadTableNL(), loadTablePhieu()]);
+    // Đã xóa loadTablePhieu() khỏi đây để không bị xung đột với hàm filter
+    await Promise.allSettled([loadTableNCC(), loadTableNL()]);
 }
 /**
  * --- 2. TAB NHÀ CUNG CẤP (NCC) & MODAL POPUP ---
@@ -7143,55 +7141,56 @@ async function addNCC() {
 }
 
 // Hàm xóa đa năng cho mọi collection
-// Hàm xóa đa năng cho mọi collection
-async function deleteDoc(col, id) {
-    if (!confirm("Xác nhận xóa?")) return;
+async function deleteDoc(col, soPhieu) {
+    if (!confirm("Xác nhận xóa phiếu nhập " + soPhieu + " và trừ nợ NCC?")) return;
     
     try {
-        if (col === 'suppliers') {
-            const docSnap = await db.collection('suppliers').doc(id).get();
-            const nccData = docSnap.data();
-            if ((nccData.debt || 0) > 0) {
-                alert("Không thể xóa: Nhà cung cấp này vẫn còn công nợ!");
-                return;
-            }
-        } 
-        else if (col === 'material_imports') {
-            const docSnap = await db.collection('material_imports').doc(id).get();
-            const phieuData = docSnap.data();
+        if (col === 'material_imports') {
+            // 1. Tìm tất cả các dòng có chung soPhieu
+            const snapshot = await db.collection('material_imports').where('soPhieu', '==', soPhieu).get();
             
-            if (phieuData.nccId) {
-                await db.collection('suppliers').doc(phieuData.nccId).update({ 
-                    debt: firebase.firestore.FieldValue.increment(-(phieuData.total || 0)) 
+            if (snapshot.empty) return alert("Không tìm thấy dữ liệu phiếu!");
+
+            let totalPhiếu = 0;
+            let nccId = null;
+
+            // 2. Tính tổng tiền và xác định NCC
+            snapshot.forEach(doc => {
+                const d = doc.data();
+                totalPhiếu += (d.thanhTien || 0); // Dùng thanhTien thay vì total
+                if (!nccId) nccId = d.nccId;
+            });
+
+            // 3. Trừ nợ NCC
+            if (nccId) {
+                await db.collection('suppliers').doc(nccId).update({ 
+                    debt: firebase.firestore.FieldValue.increment(-totalPhiếu) 
                 });
-            } else if (phieuData.ncc) {
-                const nccSnap = await db.collection('suppliers').where('name', '==', phieuData.ncc).get();
-                if (!nccSnap.empty) {
-                    await nccSnap.docs[0].ref.update({ 
-                        debt: firebase.firestore.FieldValue.increment(-(phieuData.total || 0)) 
-                    });
-                }
             }
+
+            // 4. Xóa tất cả các dòng của phiếu này
+            const batch = db.batch();
+            snapshot.docs.forEach(doc => batch.delete(doc.ref));
+            await batch.commit();
+            
+            alert("Đã xóa phiếu và cập nhật nợ!");
+        } 
+        else {
+            // Xử lý xóa các collection khác (suppliers, etc...)
+            await db.collection(col).doc(soPhieu).delete();
+            alert("Đã xóa thành công!");
         }
 
-        await db.collection(col).doc(id).delete();
-        alert("Đã xóa thành công!");
+        // Cập nhật giao diện
+        if (typeof filterNhapKho === 'function') await filterNhapKho();
+        if (typeof loadAllData === 'function') await loadAllData();
         
-        // --- ĐOẠN CẬP NHẬT Ở ĐÂY ---
-        // Nếu vừa xóa ở Nhập kho, gọi filter để giữ bộ lọc
-        if (col === 'material_imports') {
-            if (typeof filterNhapKho === 'function') await filterNhapKho();
-        } 
-        
-        // Tải lại các dữ liệu khác nếu cần
-        if (typeof loadAllData === 'function') {
-            await loadAllData();
-        }
     } catch (error) {
         console.error("Lỗi xóa: ", error);
         alert("Có lỗi xảy ra: " + error.message);
     }
 }
+
 /**
  * --- 4. TAB DANH MỤC NGUYÊN LIỆU (DMNL) ---
  */
@@ -7311,37 +7310,42 @@ async function saveFullInvoice() {
     if (nccName === 'Chọn NCC') return alert("Vui lòng chọn NCC!");
     if (cartNL.length === 0) return alert("Giỏ hàng đang trống!");
 
-    // 1. TÌM ID CỦA NCC TRƯỚC KHI LƯU
+    // 1. TÌM ID CỦA NCC
     const nccSnap = await db.collection('suppliers').where('name', '==', nccName).get();
     if (nccSnap.empty) return alert("Không tìm thấy thông tin NCC trong hệ thống!");
     
     const nccDoc = nccSnap.docs[0];
-    const nccId = nccDoc.id; // Lấy ID chuẩn
+    const nccId = nccDoc.id; 
 
     const totalInvoice = cartNL.reduce((sum, item) => sum + item.thanhTien, 0);
+    
+    // TẠO TIMESTAMP CHUNG CHO CẢ PHIẾU (để filterNhapKho lọc đúng)
+    const now = new Date();
 
-    // 2. LƯU PHIẾU VỚI CẢ TÊN VÀ ID
+    // 2. LƯU CHI TIẾT PHIẾU
     for (let item of cartNL) {
         await db.collection('material_imports').add({
-            soPhieu,
-            ncc: nccName,      // Lưu tên để hiển thị nhanh
-            nccId: nccId,      // LƯU THÊM ID ĐỂ LÀM KHÓA TRUY VẤN
+            soPhieu: soPhieu,
+            ncc: nccName,
+            nccId: nccId,
             soHd: document.getElementById('in-so-hd').value,
             ngayHd: document.getElementById('in-ngay-hd').value,
-            nl: item.nl,
+            // Sửa tên trường khớp với filterNhapKho
+            tenNL: item.nl,         
             sl: item.sl,
-            gia: item.gia,
-            total: item.thanhTien,
-            date: new Date()
+            donGia: item.gia,
+            thanhTien: item.thanhTien,
+            // Sử dụng timestamp để filter lọc được theo khoảng thời gian
+            timestamp: now 
         });
     }
     
-    // 3. Cập nhật nợ vào NCC bằng ID
+    // 3. Cập nhật nợ
     await nccDoc.ref.update({ 
         debt: firebase.firestore.FieldValue.increment(totalInvoice) 
     });
     
-    // --- RESET TOÀN BỘ ---
+    // --- RESET FORM ---
     cartNL = []; 
     document.getElementById('gio-hang-nl').innerHTML = '';
     document.getElementById('in-so-hd').value = '';
@@ -7350,7 +7354,10 @@ async function saveFullInvoice() {
     
     alert("Đã lưu phiếu!");
     await generateInvoiceNumber();
-    loadAllData();
+    
+    // Tải lại dữ liệu và cập nhật bảng lọc nếu đang mở
+    if (typeof loadAllData === 'function') await loadAllData();
+    if (typeof filterNhapKho === 'function') await filterNhapKho();
 }
 
 // Render bảng danh sách phiếu nhập
@@ -7388,13 +7395,15 @@ window.openHistory = function(name) {
     openHistoryModal(name);
 };
 
-// Khởi chạy toàn bộ dữ liệu khi trang web được tải xong
-window.addEventListener('DOMContentLoaded', () => {
-    loadAllData();
-    generateInvoiceNumber(); 
+// Hàm 2: Xử lý dữ liệu Nhập kho
+window.addEventListener('DOMContentLoaded', async () => {
+    // 1. Chỉ gọi các hàm setup ban đầu
+    await generateInvoiceNumber(); 
     
-    // --- THÊM DÒNG NÀY ---
-    // Tự động load dữ liệu tháng hiện tại cho tab Nhập kho
+    // 2. Chạy loadAllData (Nhưng đảm bảo bên trong nó KHÔNG GỌI loadTablePhieu)
+    await loadAllData(); 
+
+    // 3. Khởi tạo tháng và lọc dữ liệu (đây là hàm hiển thị chính)
     initMonthNhapKho(); 
 });
 
@@ -7422,57 +7431,141 @@ function capNhatNgayTheoThangNhapKho() {
     filterNhapKho();
 }
 
-// 2. Lọc danh sách Nhập kho
 async function filterNhapKho() {
-    const startVal = document.getElementById('dateStartNhapKho').value;
-    const endVal = document.getElementById('dateEndNhapKho').value;
-    if (!startVal || !endVal) return;
-
-    const startDate = new Date(startVal + "T00:00:00");
-    const endDate = new Date(endVal + "T23:59:59");
-
+    const startEl = document.getElementById('dateStartNhapKho');
+    const endEl = document.getElementById('dateEndNhapKho');
     const listBody = document.getElementById('body-phieu');
-    listBody.innerHTML = "<tr><td colspan='7' class='text-center'>Đang tải...</td></tr>";
+
+    if (!startEl || !endEl || !startEl.value || !endEl.value) {
+        console.log("Chưa chọn đủ ngày để lọc.");
+        return;
+    }
+
+    const startDate = new Date(startEl.value + "T00:00:00");
+    const endDate = new Date(endEl.value + "T23:59:59");
+
+    listBody.innerHTML = "<tr><td colspan='5' class='text-center p-4'>Đang tải...</td></tr>";
 
     try {
-        const snapshot = await db.collection('material_imports')
+        // PHƯƠNG ÁN 1: Thử truy vấn có Index
+        let snapshot = await db.collection('material_imports')
             .where('timestamp', '>=', startDate)
             .where('timestamp', '<=', endDate)
             .orderBy('timestamp', 'desc')
             .get();
 
-        let htmlRows = "";
+        // PHƯƠNG ÁN 2 (Dự phòng): Nếu snapshot rỗng do thiếu Index, lấy toàn bộ và lọc thủ công
+        if (snapshot.empty) {
+            console.warn("Không tìm thấy dữ liệu qua Index, đang thử lọc thủ công...");
+            snapshot = await db.collection('material_imports').get();
+        }
+
+        const grouped = {};
         snapshot.forEach(doc => {
             const data = doc.data();
-            const dateObj = data.timestamp ? data.timestamp.toDate() : null;
-            const ngay = dateObj ? dateObj.toLocaleDateString('vi-VN') : "---";
+            const ts = data.timestamp || data.date;
+            const dateObj = ts?.toDate ? ts.toDate() : (ts ? new Date(ts) : new Date());
 
-            htmlRows += `<tr>
-                <td class="p-3">${data.soPhieu || "---"}</td>
-                <td class="p-3">${ngay}</td>
-                <td class="p-3">${data.tenNL || "---"}</td>
-                <td class="p-3 text-center">${data.sl || 0}</td>
-                <td class="p-3 text-right">${(data.donGia || 0).toLocaleString('vi-VN')}</td>
-                <td class="p-3 text-right">${(data.thanhTien || 0).toLocaleString('vi-VN')}</td>
-                <td class="p-3 text-center">
-                    <button class="text-red-500" onclick="deleteDoc('material_imports', '${doc.id}')">Xóa</button>
-                </td>
-            </tr>`;
+            // Lọc thủ công nếu snapshot là toàn bộ database
+            if (dateObj >= startDate && dateObj <= endDate) {
+                const id = data.soPhieu || "Chưa rõ số phiếu";
+                if (!grouped[id]) {
+                    grouped[id] = { soPhieu: id, ngay: dateObj, ncc: data.ncc || "Chưa có NCC", items: [], tongTien: 0 };
+                }
+                grouped[id].items.push(data);
+                grouped[id].tongTien += (parseFloat(data.thanhTien) || 0);
+            }
         });
-        listBody.innerHTML = htmlRows || "<tr><td colspan='7' class='text-center'>Không có dữ liệu</td></tr>";
+
+        window.phieuData = grouped;
+
+        const keys = Object.values(grouped);
+        if (keys.length === 0) {
+            listBody.innerHTML = "<tr><td colspan='5' class='text-center p-4'>Không có dữ liệu trong khoảng này</td></tr>";
+            return;
+        }
+
+        let htmlRows = keys.map(p => `
+    <tr class="border-b hover:bg-gray-50">
+        <td class="p-3 w-[15%] font-bold">${p.soPhieu}</td>
+        <td class="p-3 w-[15%]">${p.ngay instanceof Date ? p.ngay.toLocaleDateString('vi-VN') : "---"}</td>
+        <td class="p-3 w-[40%]">${p.ncc}</td>
+        <td class="p-3 w-[15%] text-right font-bold">${p.tongTien.toLocaleString('vi-VN')}</td>
+        <td class="p-3 w-[15%] text-center">
+            <div class="flex justify-center gap-3">
+                <button onclick="xemChiTietPhieu('${p.soPhieu}')" class="text-blue-600 hover:text-blue-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                </button>
+                <button onclick="deleteDoc('material_imports', '${p.soPhieu}')" class="text-red-500 hover:text-red-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                </button>
+            </div>
+        </td>
+    </tr>
+`).join('');
+
+        listBody.innerHTML = htmlRows;
+
     } catch (e) {
-        console.error("Lỗi lọc Nhập kho: ", e);
+        console.error("Lỗi filter:", e);
+        listBody.innerHTML = "<tr><td colspan='5' class='text-center p-4 text-red-500'>Có lỗi xảy ra, kiểm tra Console (F12)</td></tr>";
     }
 }
 
+function xemChiTietPhieu(soPhieu) {
+    const p = window.phieuData[soPhieu];
+    if (!p) {
+        console.error("Không tìm thấy dữ liệu cho phiếu: " + soPhieu);
+        return;
+    }
+
+    // Xây dựng chuỗi HTML với cột Đơn giá
+    let rows = p.items.map(i => {
+        return `<tr>
+            <td class="p-2 border">${i.tenNL}</td>
+            <td class="p-2 border text-center">${i.sl}</td>
+            <td class="p-2 border text-right">${(i.donGia || 0).toLocaleString('vi-VN')}</td>
+            <td class="p-2 border text-right font-bold">${(i.thanhTien || 0).toLocaleString('vi-VN')}</td>
+        </tr>`;
+    }).join('');
+
+    let content = `
+        <table class="w-full text-xs border-collapse">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="p-2 border">NL</th>
+                    <th class="p-2 border">SL</th>
+                    <th class="p-2 border">Đơn giá</th>
+                    <th class="p-2 border">Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${rows}
+            </tbody>
+        </table>
+    `;
+    
+    showPopup("Chi tiết phiếu: " + soPhieu, content);
+}
+
+
 // 3. Khởi tạo tháng hiện tại khi mở trang (thêm vào hàm khởi tạo chung của bạn)
 function initMonthNhapKho() {
-    const now = new Date();
     const monthPicker = document.getElementById('monthPickerNhapKho');
-    if (monthPicker) {
+    if (!monthPicker) return;
+
+    // Nếu input trống thì đặt tháng hiện tại
+    if (!monthPicker.value) {
+        const now = new Date();
         monthPicker.value = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
-        capNhatNgayTheoThangNhapKho();
     }
+    
+    // Gọi hàm cập nhật ngày và lọc dữ liệu ngay lập tức
+    capNhatNgayTheoThangNhapKho();
 }
 
 // --- KHỞI TẠO HỆ THỐNG ---
