@@ -1,8 +1,0 @@
-# Bỏ qua thư mục build của Android
-/android/app/build/
-/android/.gradle/
-/android/local.properties
-
-# Bỏ qua các file tạm khác
-node_modules/
-dist/
