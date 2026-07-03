@@ -262,11 +262,10 @@ function toggleMoreMenu() {
 
     <!-- KHU VỰC NỘI DUNG -->
     <main class="flex-1 p-2 md:p-8">
-        
-        <!-- PHẦN 1: TRANG CHỦ -->
-		
-<!-- PHẦN 1: TRANG CHỦ -->
-<div id="page-home" class="p-2 md:p-8 space-y-8 bg-slate-50 min-h-screen">
+	
+	<!-- Trang chủ -->
+	
+	<div id="page-home" class="p-2 md:p-8 space-y-6 md:space-y-8 bg-slate-50 min-h-screen">
     <div class="flex justify-between items-end">
         <div>
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">BẢNG ĐIỀU KHIỂN</h2>
@@ -274,63 +273,91 @@ function toggleMoreMenu() {
         </div>
     </div>
 
-    <!-- Các thẻ chỉ số tài chính -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <div class="bg-blue-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
-            <p class="text-[12px] font-bold uppercase opacity-80">Tổng Doanh Thu</p>
-            <h3 id="total-revenue" class="text-lg md:text-3xl font-black">0 đ</h3>
+        <div class="bg-blue-500 p-3 md:p-6 rounded-2xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[90px] md:h-[120px]">
+            <p class="text-[10px] md:text-[12px] font-bold uppercase opacity-80">Tổng Doanh Thu</p>
+            <h3 id="total-revenue" class="text-md md:text-2xl font-black">0 đ</h3>
         </div>
-        <div class="bg-rose-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
-            <p class="text-[12px] font-bold uppercase opacity-80">Công Nợ Cần Thu</p>
-            <h3 id="total-debt-summary" class="text-lg md:text-3xl font-black">0 đ</h3>
+        <div class="bg-rose-500 p-3 md:p-6 rounded-2xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[90px] md:h-[120px]">
+            <p class="text-[10px] md:text-[12px] font-bold uppercase opacity-80">Công Nợ Cần Thu</p>
+            <h3 id="total-debt-summary" class="text-md md:text-2xl font-black">0 đ</h3>
         </div>
-        <div class="bg-amber-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
-            <p class="text-[12px] font-bold uppercase opacity-80">Tổng Nợ NCC</p>
-            <h3 id="total-debt-ncc-summary" class="text-lg md:text-3xl font-black">0 đ</h3>
+        <div class="bg-amber-500 p-3 md:p-6 rounded-2xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[90px] md:h-[120px]">
+            <p class="text-[10px] md:text-[12px] font-bold uppercase opacity-80">Tổng Nợ NCC</p>
+            <h3 id="total-debt-ncc-summary" class="text-md md:text-2xl font-black">0 đ</h3>
         </div>
-        <div class="bg-emerald-500 p-4 md:p-6 rounded-2xl md:rounded-3xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[100px] md:h-[120px]">
-            <p class="text-[12px] font-bold uppercase opacity-80">Lợi Nhuận</p>
-            <h3 id="profit-summary" class="text-lg md:text-3xl font-black">0 đ</h3>
+        <div class="bg-emerald-500 p-3 md:p-6 rounded-2xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[90px] md:h-[120px]">
+            <p class="text-[10px] md:text-[12px] font-bold uppercase opacity-80">Lợi Nhuận</p>
+            <h3 id="profit-summary" class="text-md md:text-2xl font-black">0 đ</h3>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Cột trái: Biểu đồ -->
-        <div class="space-y-8">
-            <div class="bg-gray-200 p-6 rounded-3xl border border-red-400">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center">
-                        <i data-lucide="bar-chart-3" class="w-4 h-4 mr-2 text-blue-600"></i> Biểu đồ doanh thu
-                    </h3>
+    <div class="flex space-x-2 bg-slate-200 p-1 rounded-xl">
+        <button onclick="switchMainTab('inventory')" id="btn-main-inventory" class="flex-1 py-2 text-xs md:text-sm font-bold rounded-lg transition-all bg-white shadow-sm text-blue-600">Tồn Kho</button>
+        <button onclick="switchMainTab('revenue')" id="btn-main-revenue" class="flex-1 py-2 text-xs md:text-sm font-bold rounded-lg transition-all text-slate-600">Doanh Thu</button>
+        <button onclick="switchMainTab('products')" id="btn-main-products" class="flex-1 py-2 text-xs md:text-sm font-bold rounded-lg transition-all text-slate-600">Sản Phẩm</button>
+    </div>
+
+    <div id="content-main-inventory" class="main-tab-content block">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white p-4 md:p-6 rounded-3xl border border-emerald-300">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest">Chi tiết tồn kho</h3>
                     <div class="flex gap-2">
-						<input type="date" id="fin-from" onchange="refreshFinance()" class="text-[10px] border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
-						<input type="date" id="fin-to" onchange="refreshFinance()" class="text-[10px] border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
-					</div>
+                        <input type="date" id="inv-from" onchange="refreshInventory()" class="text-[10px] border border-slate-300 rounded-lg px-2 py-1 outline-none">
+                        <input type="date" id="inv-to" onchange="refreshInventory()" class="text-[10px] border border-slate-300 rounded-lg px-2 py-1 outline-none">
+                    </div>
                 </div>
-                <div class="h-64"><canvas id="revenueChart"></canvas></div>
+                <div id="home-inventory-list" class="space-y-2 overflow-y-auto pr-2 h-[300px] md:h-[400px]"></div>
             </div>
-            <div class="bg-green-100 p-6 rounded-3xl border border-blue-300">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center">
-                        <i data-lucide="flame" class="w-4 h-4 mr-2 text-rose-600"></i> TOP 10 SP BÁN CHẠY
-                    </h3>
-                </div>
-                <div class="h-64"><canvas id="topProductsChart"></canvas></div>
+            <div class="bg-rose-50 p-4 md:p-6 rounded-3xl border border-rose-200">
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Khách hàng công nợ</h3>
+                <div id="home-debt-customers-list" class="space-y-2 overflow-y-auto pr-2 h-[300px] md:h-[400px]"></div>
             </div>
         </div>
+    </div>
 
-        <!-- Cột phải: Tồn kho -->
-        <div class="bg-blue-200 p-4 rounded-3xl border border-red-300 h-full flex flex-col">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center">
-                    <i data-lucide="package" class="w-4 h-4 mr-2 text-amber-600"></i> Chi tiết tồn kho
-                </h3>
-                <div class="flex gap-2">
-					<input type="date" id="inv-from" onchange="refreshInventory()" class="text-[10px] border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
-					<input type="date" id="inv-to" onchange="refreshInventory()" class="text-[10px] border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
-				</div>
+    <div id="content-main-revenue" class="main-tab-content hidden space-y-6">
+        <div class="bg-gray-200 p-4 md:p-6 rounded-3xl border border-red-400">
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Biểu đồ doanh thu ngày</h3>
+            <div class="h-[300px] md:h-[400px] w-full"><canvas id="revenueChart"></canvas></div>
+        </div>
+        <div class="bg-white p-4 md:p-6 rounded-3xl border border-blue-300">
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Doanh thu từng tháng</h3>
+            <div class="h-[300px] md:h-[400px] w-full"><canvas id="monthlyRevenueChart"></canvas></div>
+        </div>
+    </div>
+
+    <div id="content-main-products" class="main-tab-content hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-green-100 p-4 md:p-6 rounded-3xl border border-blue-300 flex flex-col">
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">TOP 10 SP BÁN CHẠY</h3>
+                <div class="h-[400px] md:h-[500px] w-full"><canvas id="topProductsChart"></canvas></div>
             </div>
-            <div id="home-inventory-list" class="flex-1 grid grid-cols-1 gap-3 content-start overflow-y-auto custom-scrollbar pr-1" style="max-height: 650px;"></div>
+            <div class="bg-white p-4 md:p-6 rounded-3xl border border-blue-300">
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">PHIẾU XUẤT (KHÁCH CỐ ĐỊNH)</h3>
+                <div class="overflow-y-auto h-[400px] md:h-[500px]">
+                    <table class="w-full text-xs text-left">
+                        <thead class="bg-slate-50 sticky top-0">
+                            <tr><th class="p-2">Số phiếu</th><th class="p-2">KH</th><th class="p-2 hidden md:table-cell">Ngày</th><th class="p-2 text-right">Tổng tiền</th></tr>
+                        </thead>
+                        <tbody id="customer-orders-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="order-detail-modal" class="fixed inset-0 z-[9999] bg-black bg-opacity-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-4 md:p-6">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h3 class="text-lg font-bold" id="modal-title">Chi tiết phiếu</h3>
+                <button onclick="document.getElementById('order-detail-modal').classList.add('hidden')" class="text-gray-500 font-bold text-xl">✕</button>
+            </div>
+            <div id="modal-content" class="text-sm"></div>
+            <div class="mt-6 text-center">
+                <button onclick="document.getElementById('order-detail-modal').classList.add('hidden')" class="bg-violet-600 text-white px-8 py-2 rounded-lg font-bold">Đóng</button>
+            </div>
         </div>
     </div>
 </div>
@@ -1239,6 +1266,10 @@ function showPage(pageId) {
     // 4. Gọi hàm tải dữ liệu tương ứng
     switch(pageId) {
         case 'page-home':
+            // --- THÊM DÒNG NÀY ĐỂ ÉP VỀ TAB TỒN KHO MỖI KHI BẤM VÀO TRANG CHỦ ---
+            if (typeof switchMainTab === 'function') switchMainTab('inventory');
+            // -------------------------------------------------------------------
+
             // Lấy ngày hiện tại
             const now = new Date();
             const y = now.getFullYear();
@@ -1476,6 +1507,19 @@ document.addEventListener('DOMContentLoaded', () => {
  * Hàm điều phối chính để load dữ liệu trang chủ
  * @param {string} filter - 'today', 'week', 'month', hoặc 'YYYY-MM'
  */
+ 
+ function switchMainTab(tabName) {
+    document.querySelectorAll('.main-tab-content').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('button[id^="btn-main-"]').forEach(btn => {
+        btn.classList.remove('bg-white', 'shadow-sm', 'text-blue-600');
+        btn.classList.add('text-slate-600');
+    });
+    document.getElementById('content-main-' + tabName).classList.remove('hidden');
+    const btn = document.getElementById('btn-main-' + tabName);
+    btn.classList.add('bg-white', 'shadow-sm', 'text-blue-600');
+    btn.classList.remove('text-slate-600');
+}
+
 async function loadDashboard(filter = 'default') {
     // 0. Hiển thị trạng thái đang tải (nếu cần)
     console.log("Đang tải dữ liệu dashboard...");
@@ -1523,7 +1567,8 @@ async function loadDashboard(filter = 'default') {
     }
 
     // 2. Lọc dữ liệu tài chính
-    const filteredSales = salesSnap.docs.map(doc => doc.data()).filter(order => {
+    const allSales = salesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const filteredSales = allSales.filter(order => {
         const orderDate = order.date?.toDate ? order.date.toDate() : new Date(order.date);
         return orderDate >= startDate && orderDate <= endDate;
     });
@@ -1543,7 +1588,6 @@ async function loadDashboard(filter = 'default') {
 
     filteredSales.forEach(order => {
         totalRevenue += (Number(order.total) || 0);
-        // Lưu ý: Không cần tính totalDebt từ order.paymentMethod nữa vì đã lấy từ customers
         if (order.items) {
             order.items.forEach(item => {
                 productSalesMap[item.name] = (productSalesMap[item.name] || 0) + Number(item.qty || 0);
@@ -1569,11 +1613,266 @@ async function loadDashboard(filter = 'default') {
     updateEl('total-debt-ncc-summary', totalDebtNCC);
     updateEl('profit-summary', profit);
 
-    // 5. Cập nhật Biểu đồ
+    // 5. Cập nhật Danh sách khách hàng nợ
+    renderDebtCustomers(customersSnap);
+
+    // THÊM MỚI: Cập nhật bảng phiếu xuất khách hàng
+    // Đảm bảo hàm renderCustomerOrders đã được khai báo ở nơi khác trong file JS
+    if (typeof renderCustomerOrders === 'function') {
+        renderCustomerOrders(allSales, customersSnap);
+    }
+
+    // 6. Cập nhật Biểu đồ
     setTimeout(() => {
         if (typeof updateRevenueChart === 'function') updateRevenueChart(filteredSales);
         if (typeof updateTopProductsChart === 'function') updateTopProductsChart(topProducts);
+        // Cập nhật biểu đồ tháng mới
+        if (typeof updateMonthlyRevenueChart === 'function') updateMonthlyRevenueChart(allSales);
     }, 50);
+}
+
+// Bổ sung hàm render bảng phiếu xuất
+function renderCustomerOrders(allSales, customersSnap) {
+    const container = document.getElementById('customer-orders-table');
+    if (!container) return;
+
+    const validCustomers = new Set();
+    customersSnap.forEach(doc => validCustomers.add(doc.data().name?.toString().trim()));
+
+    const now = new Date();
+
+    // Lọc và chỉ lấy đơn mới nhất của mỗi khách
+    const latestOrdersMap = new Map();
+
+    allSales.forEach(order => {
+        const customerName = order.customer?.toString().trim();
+        if (!validCustomers.has(customerName)) return;
+
+        const orderDate = order.date?.toDate ? order.date.toDate() : new Date(order.date);
+        
+        // Nếu khách này chưa có trong Map, hoặc đơn hiện tại mới hơn đơn đã lưu -> lưu đơn này
+        if (!latestOrdersMap.has(customerName) || orderDate > latestOrdersMap.get(customerName).orderDate) {
+            const diffDays = Math.floor((now - orderDate) / (1000 * 60 * 60 * 24));
+            latestOrdersMap.set(customerName, { ...order, orderDate, diffDays });
+        }
+    });
+
+    // SẮP XẾP: Lấy đơn nợ nhiều ngày nhất (diffDays lớn nhất) lên trên cùng
+    const currentOrders = Array.from(latestOrdersMap.values()).sort((a, b) => b.diffDays - a.diffDays);
+
+    if (currentOrders.length === 0) {
+        container.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">Không có đơn hàng nào.</td></tr>`;
+        return;
+    }
+
+    container.innerHTML = currentOrders.map(order => {
+        let colorClass = order.diffDays >= 20 ? 'text-rose-600 font-black' : (order.diffDays >= 10 ? 'text-amber-500 font-bold' : 'text-emerald-600');
+
+        return `
+            <tr class="border-b border-slate-100 hover:bg-slate-50">
+                <td class="p-2 text-xs font-mono">${order.invoiceNumber || order.id.slice(-6)}</td>
+                <td class="p-2 text-xs font-semibold">${order.customer}</td>
+                <td class="p-2 text-xs">${order.orderDate.toLocaleDateString('vi-VN')}</td>
+                <td class="p-2 text-right text-xs">${Number(order.total || 0).toLocaleString('vi-VN')}đ</td>
+                <td class="p-2 text-center">
+                    <div class="${colorClass} text-[10px] font-bold mb-1">${order.diffDays} ngày</div>
+                    <button onclick="viewOrderDetails('${order.id}')" class="text-blue-600 hover:text-blue-800 transition-colors">
+                        <i data-lucide="eye" class="w-4 h-4 mx-auto"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    // Nếu bạn đang dùng thư viện Lucide, đừng quên gọi dòng này để render icon
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+
+window.loadOrderData = function(orderId) {
+    // 1. Kiểm tra sự tồn tại của biến toàn cục allSales
+    if (typeof allSales === 'undefined') {
+        console.error("Biến allSales chưa được định nghĩa!");
+        return;
+    }
+
+    // 2. Tìm đơn hàng
+    const order = allSales.find(o => o.id === orderId);
+    if (!order) {
+        console.error("Không tìm thấy đơn hàng với ID:", orderId);
+        return;
+    }
+
+    // 3. Cập nhật tiêu đề Modal
+    const modalTitle = document.getElementById('modal-title');
+    if (modalTitle) {
+        modalTitle.innerText = "Chi tiết phiếu: " + (order.invoiceNumber || orderId.slice(-6));
+    }
+
+    // 4. Đổ dữ liệu vào Modal
+    const modalContent = document.getElementById('modal-content');
+    if (modalContent) {
+        // Định dạng ngày an toàn
+        const orderDate = (order.date && typeof order.date.toDate === 'function') 
+            ? order.date.toDate().toLocaleDateString('vi-VN') 
+            : 'N/A';
+        
+        // Sử dụng mảng map an toàn
+        const itemsHtml = (order.items || []).map(item => `
+            <tr>
+                <td class="p-2 border">${item.name || 'N/A'}</td>
+                <td class="p-2 border text-center">${item.qty || 0}</td>
+                <td class="p-2 border text-right">${Number(item.price || 0).toLocaleString('vi-VN')}</td>
+                <td class="p-2 border text-right">${Number(item.total || 0).toLocaleString('vi-VN')}</td>
+            </tr>
+        `).join('');
+
+        modalContent.innerHTML = `
+            <div class="space-y-2 mb-4 bg-gray-50 p-3 rounded-lg text-xs">
+                <p><strong>Khách hàng:</strong> ${order.customer || 'Khách lẻ'}</p>
+                <p><strong>Ngày xuất:</strong> ${orderDate}</p>
+                <p><strong>Tổng thanh toán:</strong> <span class="text-red-600 font-bold">${Number(order.total || 0).toLocaleString('vi-VN')} đ</span></p>
+            </div>
+            <div class="overflow-y-auto max-h-[40vh]">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="p-2 border">Sản phẩm</th>
+                            <th class="p-2 border text-center">SL</th>
+                            <th class="p-2 border text-right">Giá</th>
+                            <th class="p-2 border text-right">Tổng</th>
+                        </tr>
+                    </thead>
+                    <tbody>${itemsHtml}</tbody>
+                </table>
+            </div>
+        `;
+    }
+};
+
+window.viewOrderDetails = function(orderId) {
+    console.log("Đã bấm xem đơn:", orderId); // Nếu không thấy dòng này trong F12, nghĩa là hàm chưa được gọi
+    
+    const modal = document.getElementById('order-detail-modal');
+    if (!modal) {
+        console.error("Không tìm thấy phần tử có ID: order-detail-modal");
+        return;
+    }
+    
+    // Gọi hàm load dữ liệu (như đã hướng dẫn ở bước trước)
+    if (typeof loadOrderData === 'function') {
+        loadOrderData(orderId);
+    }
+    
+    // Bỏ class hidden để hiển thị modal
+    modal.classList.remove('hidden');
+    console.log("Đã xóa class hidden, modal sẽ hiện ra");
+};
+
+// Hàm render danh sách khách hàng nợ
+function renderDebtCustomers(customersSnap) {
+    const container = document.getElementById('home-debt-customers-list');
+    if (!container) return;
+
+    let html = '';
+    let hasDebt = false;
+
+    customersSnap.forEach(doc => {
+        const customer = doc.data();
+        const debt = Number(customer.debt) || 0;
+
+        if (debt > 0) {
+            hasDebt = true;
+            html += `
+                <div class="flex justify-between items-center p-3 bg-white rounded-xl shadow-sm border border-rose-100">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-700">${customer.name || 'Khách hàng'}</p>
+                        <p class="text-[10px] text-slate-400">SĐT: ${customer.phone || 'Chưa cập nhật'}</p>
+                    </div>
+                    <p class="text-sm font-black text-rose-600">${debt.toLocaleString('vi-VN')} đ</p>
+                </div>
+            `;
+        }
+    });
+
+    container.innerHTML = hasDebt ? html : '<p class="text-center py-4 text-xs text-slate-400">Không có khách hàng nợ</p>';
+}
+
+// Hàm vẽ biểu đồ doanh thu theo tháng
+function updateMonthlyRevenueChart(allSales) {
+    const canvas = document.getElementById('monthlyRevenueChart');
+    if (!canvas) return;
+
+    if (window.monthlyChartInstance) window.monthlyChartInstance.destroy();
+
+    const ctx = canvas.getContext('2d');
+    const monthlyData = {};
+
+    allSales.forEach(order => {
+        const d = order.date?.toDate ? order.date.toDate() : new Date(order.date);
+        const monthStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        monthlyData[monthStr] = (monthlyData[monthStr] || 0) + (Number(order.total) || 0);
+    });
+
+    const sortedMonths = Object.keys(monthlyData).sort();
+    const dataValues = sortedMonths.map(m => monthlyData[m]);
+
+    window.monthlyChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: sortedMonths,
+            datasets: [{
+                label: 'Doanh thu',
+                data: dataValues,
+                backgroundColor: '#3b82f6',
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { 
+                legend: { display: false },
+                // Thêm cấu hình hiển thị chữ trên cột
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => ctx.raw.toLocaleString('vi-VN') + ' đ'
+                    }
+                }
+            },
+            scales: {
+                y: { 
+                    beginAtZero: true, 
+                    grid: { display: false },
+                    ticks: {
+                        callback: (value) => (value / 1000000) + 'tr' // Rút gọn số trên trục Y
+                    }
+                },
+                x: { grid: { display: false } }
+            },
+            // Đây là phần hiển thị số tiền trực tiếp trên cột
+            animation: {
+                onComplete: function() {
+                    const chart = this;
+                    const ctx = chart.ctx;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
+                    ctx.font = 'bold 10px Arial';
+                    ctx.fillStyle = '#1e293b';
+
+                    chart.data.datasets.forEach((dataset, i) => {
+                        chart.getDatasetMeta(i).data.forEach((bar, index) => {
+                            const data = dataset.data[index];
+                            // Định dạng số tiền (ví dụ: 1.000.000 -> 1tr)
+                            const text = (data / 1000000).toFixed(1) + 'tr';
+                            ctx.fillText(text, bar.x, bar.y - 5);
+                        });
+                    });
+                }
+            }
+        }
+    });
 }
 
 // 2. Hàm gọi update tài chính
@@ -1920,6 +2219,8 @@ function updateRevenueChart(filteredSales) {
     });
 }
 
+
+
 //==== TOP SP BÁN CHẠY ====================
 function updateTopProductsChart(topProducts) {
     const ctx = document.getElementById('topProductsChart')?.getContext('2d');
@@ -1934,44 +2235,54 @@ function updateTopProductsChart(topProducts) {
                 label: 'Số lượng',
                 data: topProducts.map(p => p[1]),
                 backgroundColor: '#f43f5e',
-                borderRadius: 6,
-                barPercentage: 0.9, 
+                borderRadius: 8, // Tăng nhẹ độ bo tròn để hiện đại hơn
+                barPercentage: 0.8, // Điều chỉnh để cột cân đối, không bị quá sát
                 categoryPercentage: 0.9
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            indexAxis: 'y',
-            animation: false,
-            plugins: {
-                legend: { display: false },
-                datalabels: {
-                    anchor: 'end',
-                    align: 'left',
-                    color: '#ffffff',
-                    font: { weight: 'bold', size: 11 },
-                    formatter: (value) => value
-                }
-            },
-            scales: {
-                x: { 
-                    grid: { display: false }, 
-                    beginAtZero: true,
-                    grace: '10%',
-                    ticks: { display: false } // Ẩn số trục X để cột kéo dài hết cỡ
-                },
-                y: { 
-                    grid: { display: false },
-                    ticks: {
-                        font: { size: 10 } // Giữ font nhỏ cho nhãn tên sản phẩm
-                    }
-                }
-            }
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: 'y',
+    animation: false,
+    // THÊM ĐOẠN NÀY ĐỂ LOẠI BỎ KHOẢNG TRẮNG THỪA
+    layout: {
+        padding: {
+            left: 0,
+            right: 20, // Chừa một chút không gian cho con số
+            top: 0,
+            bottom: 0
+        }
+    },
+    plugins: {
+        legend: { display: false },
+        datalabels: {
+            anchor: 'end',
+            align: 'right',
+            color: '#475569',
+            font: { weight: 'bold', size: 11 }
+        }
+    },
+    scales: {
+        x: { 
+            grid: { display: false }, 
+            beginAtZero: true,
+            // SỬA ĐOẠN NÀY: Dùng grace để ép biểu đồ dãn rộng
+            grace: '5%', 
+            ticks: { display: false }
         },
+        y: { 
+            grid: { display: false },
+            ticks: {
+                font: { size: 10 }
+            }
+        }
+    }
+},
         plugins: [ChartDataLabels] 
     });
 }
+
 
 // ==================================================
 // DÁN ĐOẠN CODE NÀY VÀO DƯỚI CÙNG CỦA FILE JS
@@ -5800,32 +6111,60 @@ async function exportExcelQuyen1() {
             supplierMap.set(s.name, s.address);
         });
 
-        const dataI = []; const dataII = [];
+        const dataI = []; 
+        let totalThitMo = 0; // Biến lưu tổng thịt + mỡ
+        const dataII_Raw = []; // Lưu các mục khô/gia vị thực tế
         const khoKeywords = ['hành', 'mắm', 'gia vị', 'phụ gia', 'khô'];
 
         snap.forEach(doc => {
             const d = doc.data();
-            // SỬA: Dùng timestamp.toDate() thay vì date
             let dDate = d.timestamp ? d.timestamp.toDate() : null;
             
             if (dDate && dDate >= fromDate && dDate <= toDate) {
                 d.address = supplierMap.get(d.ncc) || ""; 
-                // SỬA: Dùng tenNL thay vì nl
-                const name = (d.tenNL || "").toLowerCase();
+                const name = (d.tenNL || "").toLowerCase().trim();
+                const sl = Number(d.sl || 0);
+
+                if (name === 'thịt ăn') return; 
+
+                // Tính tổng thịt và mỡ
+                if (name.includes('thịt') || name.includes('mỡ')) {
+                    totalThitMo += sl;
+                }
+
                 if (khoKeywords.some(key => name.includes(key))) {
-                    dataII.push(d);
+                    dataII_Raw.push(d);
                 } else {
                     dataI.push(d);
                 }
             }
         });
 
+        // Tính toán hành/mắm dựa trên tổng thịt mỡ
+        const luongHanh = (totalThitMo * (0.3 / 8.5)).toFixed(2);
+        const luongMam = (totalThitMo * (1.3 / 8.5)).toFixed(2);
+
+        // Kết hợp dữ liệu khô thực tế và dữ liệu tính toán (chỉ thêm nếu có thịt)
+        let dataII = [...dataII_Raw];
+        if (totalThitMo > 0) {
+            const dayOfMeat = dataI.length > 0 ? dataI[0].timestamp : null;
+            dataII.push(
+                { tenNL: "Hành khô", sl: luongHanh, csSX: "HKD Phạm Quang Huy", ncc: "Tổng đại lý Huy Lượt", nguoigiao: "Lượt", address: "Chợ đầu mối tổng hợp Ninh Bình", timestamp: dayOfMeat },
+                { tenNL: "Mắm tép", sl: luongMam, csSX: "Nguyễn Thị Điền", ncc: "Nguyễn Thị Điền", nguoigiao: "Điền", address: "Thôn 24, xã Gia Hòa, huyện Gia Viễn, tỉnh Ninh Bình.", timestamp: dayOfMeat }
+            );
+        }
+
         const workbook = new ExcelJS.Workbook();
         const sheet = workbook.addWorksheet('Bước 1');
 
         // --- 1. TIÊU ĐỀ CHÍNH ---
+        const d = new Date(dates.from);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+
         sheet.mergeCells('A1:D1'); sheet.getCell('A1').value = 'Người kiểm tra: Nguyễn Văn Hoè';
-        sheet.mergeCells('A2:D2'); sheet.getCell('A2').value = 'Thời gian kiểm tra: ngày.............tháng...........năm 20.....';
+        sheet.mergeCells('A2:D2'); sheet.getCell('A2').value = `Thời gian kiểm tra: ngày ${day} tháng ${month} năm ${year}`;
         sheet.mergeCells('A3:D3'); sheet.getCell('A3').value = 'Địa điểm kiểm tra: Tại xưởng sản xuất';
         sheet.getCell('H1').value = 'Mẫu số 1: Kiểm tra trước khi chế biến thức ăn\n(Bước 1)';
         sheet.getCell('H1').font = { bold: true, size: 14 };
@@ -5851,7 +6190,6 @@ async function exportExcelQuyen1() {
         sheet.getCell('E7').value = "Tên cơ sở"; sheet.getCell('F7').value = "Địa chỉ, điện thoại";
         sheet.getCell('G7').value = "Tên người giao hàng"; sheet.getCell('K7').value = "Đạt";
         sheet.getCell('L7').value = "Không đạt"; sheet.getCell('M7').value = "Đạt"; sheet.getCell('N7').value = "Không đạt";
-
         sheet.getRow(8).values = ["(1)", "(2)", "(3)", "(4)", "(5)", "(6)", "(7)", "(8)", "(9)", "(10)", "(11)", "(12)", "(13)", "(14)", "(15)"];
 
         for(let i = 6; i <= 8; i++) {
@@ -5873,38 +6211,43 @@ async function exportExcelQuyen1() {
         sheet.mergeCells(`A${r}:O${r}`);
         sheet.getCell(`A${r}`).value = 'II. Thực phẩm khô và thực phẩm bao gói sẵn, phụ gia thực phẩm';
         sheet.getCell(`A${r}`).font = { bold: true };
-        r++;
-        sheet.getRow(r).values = ["TT", "Tên thực phẩm", "Tên cơ sở SX", "Địa chỉ sản xuất", "Thời gian nhập( ngày, giờ)", "Khối lượng", "Nơi cung cấp", "Hạn sử dụng", "Điều kiện bảo quản", "Chứng từ", "Cảm quan Đạt", "Cảm quan KĐ", "XN Đạt", "XN KĐ", "Ghi chú"];
-        sheet.getRow(r).eachCell(c => { c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }; c.font = { bold: true }; });
         
+        r++;
+        const rowH1 = sheet.getRow(r);
+        rowH1.values = ["TT", "Tên thực phẩm", "Tên cơ sở sản xuất", "Địa chỉ sản xuất", "Thời gian nhập (ngày, giờ)", "Khối lượng (kg/lít...)", "Nơi cung cấp", "", "", "Hạn sử dụng", "Điều kiện bảo quản", "Chứng từ, hóa đơn", "Kiểm tra cảm quan (nhãn, bao bì, bảo quản, hạn sử dụng...)", "", "Biện pháp xử lý/Ghi chú"];
+        sheet.mergeCells(r, 7, r, 9);
+        sheet.mergeCells(r, 13, r, 14);
+        
+        r++;
+        const rowH2 = sheet.getRow(r);
+        rowH2.values = ["", "", "", "", "", "", "Tên cơ sở", "Tên chủ giao hàng", "Địa chỉ, điện thoại", "", "", "", "Đạt", "Không đạt", ""];
+        
+        r++;
+        sheet.getRow(r).values = ["(1)", "(2)", "(3)", "(4)", "(5)", "(6)", "(7)", "(8)", "(9)", "(10)", "(11)", "(12)", "(13)", "(14)", "(15)"];
+
+        for(let i = r - 2; i <= r; i++) {
+            sheet.getRow(i).eachCell(c => { 
+                c.border = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} }; 
+                c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }; 
+                c.font = { bold: true }; 
+            });
+        }
+        
+        const defaultDate = new Date(dates.from).toLocaleDateString();
         dataII.forEach((d, i) => {
-            const dObj = d.timestamp ? d.timestamp.toDate() : new Date();
-            const row = sheet.addRow([i + 1, d.tenNL || "", d.csSX || "", d.address || "", dObj.toLocaleDateString(), d.sl || "", d.ncc || "", d.hsd || "", d.dkbq || "", "", "Đạt", "", "", "", ""]);
+            const displayDate = d.timestamp ? d.timestamp.toDate().toLocaleDateString() : defaultDate;
+            const row = sheet.addRow([i + 1, d.tenNL || "", d.csSX || "", d.address || "", displayDate, d.sl || "", d.ncc || "", d.nguoigiao || "", d.address || "", "", "", "", "Đạt", "", ""]);
             row.eachCell(c => { c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; c.alignment = { horizontal: 'center', wrapText: true }; });
         });
 
-        // 1. Cấu hình trang cơ bản
-        sheet.pageSetup = { 
-            orientation: 'landscape', 
-            paperSize: 9, 
-            margins: { left: 0.2, right: 0.2, top: 0.5, bottom: 0.5 }
-        };
-
-        // 2. Định nghĩa độ rộng cụ thể cho từng cột
-        // Cột 6 (Địa chỉ) để 50, các cột khác để nhỏ lại để tổng kích thước không quá lớn
-        const columnWidths = [4, 12, 10, 8, 10, 50, 10, 8, 8, 8, 5, 6, 5, 6, 8];
-        
-        for (let i = 0; i < columnWidths.length; i++) {
-            sheet.getColumn(i + 1).width = columnWidths[i];
-        }
-
-        // 3. QUAN TRỌNG: Thiết lập thuộc tính để Excel không tự ý chỉnh lại kích thước
+        sheet.pageSetup = { orientation: 'landscape', paperSize: 9, margins: { left: 0.2, right: 0.2, top: 0.5, bottom: 0.5 } };
+        const columnWidths = [4, 12, 10, 8, 10, 10, 10, 10, 10, 8, 8, 8, 6, 8, 8];
+        for (let i = 0; i < columnWidths.length; i++) { sheet.getColumn(i + 1).width = columnWidths[i]; }
         sheet.views = [{ showGridLines: true }];
 
         await saveExcelFile(workbook, 'So_Kiem_Thuc_Quyen_1');
     } catch (err) { alert("Lỗi: " + err.message); }
 }
-
 
 // --- 1. XUẤT QUYỂN 2 (ĐÃ CĂN CHỈNH BẢNG NHƯ ẢNH) ---
 async function exportExcelQuyen2() {
@@ -5947,8 +6290,13 @@ async function exportExcelQuyen2() {
         const sheet = workbook.addWorksheet('Quyen 2');
         
         // --- 1. TIÊU ĐỀ CHÍNH (Dòng 1-4) ---
+        const d = new Date(dates.from);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+
         sheet.mergeCells('A1:D1'); sheet.getCell('A1').value = 'Người kiểm tra: Nguyễn Văn Hoè';
-        sheet.mergeCells('A2:D2'); sheet.getCell('A2').value = 'Thời gian kiểm tra: ngày.............tháng...........năm 20.....';
+        sheet.mergeCells('A2:D2'); sheet.getCell('A2').value = `Thời gian kiểm tra: ngày ${day} tháng ${month} năm ${year}`;
         sheet.mergeCells('A3:D3'); sheet.getCell('A3').value = 'Địa điểm kiểm tra: Tại xưởng sản xuất';
         sheet.getCell('G1').value = 'MẪU SỐ 2: KIỂM TRA KHI CHẾ BIẾN THỨC ĂN ';
         sheet.getCell('G1').font = { bold: true, size: 14 };
@@ -6148,8 +6496,13 @@ async function exportExcelLuuMau() {
         const sheet = workbook.addWorksheet('Luu Mau');
 
         // Bố cục tiêu đề
+        const d = new Date(dates.from);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+
         sheet.getRow(1).getCell(1).value = 'Người kiểm tra: Nguyễn Văn Hoè';
-        sheet.getRow(2).getCell(1).value = 'Thời gian kiểm tra: ngày.............. tháng .............. năm 20..............';
+        sheet.getRow(2).getCell(1).value = `Thời gian kiểm tra: ngày ${day} tháng ${month} năm ${year}`;
         sheet.getRow(3).getCell(1).value = 'Địa điểm kiểm tra: Tại xưởng sản xuất';
         
         sheet.mergeCells('G2:L2');
