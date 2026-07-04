@@ -236,7 +236,7 @@ function toggleMoreMenu() {
 
 <aside id="sidebar" class="fixed md:relative w-55 h-full bg-slate-900 text-white p-4 z-[999] transform -translate-x-full md:translate-x-0 transition-transform duration-300">
     <h1 class="text-xl font-bold mb-6 text-blue-400 flex items-center gap-2 mt-4 md:mt-0">
-        <i data-lucide="package"></i> MENU >>
+        <i data-lucide="package"></i> MENU 
     </h1>
     <nav class="space-y-2 overflow-y-auto max-h-[80vh]">
         <button onclick="showPage('page-home'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-700 flex items-center gap-3"><i data-lucide="home"></i> Trang Chủ</button>
@@ -5466,38 +5466,96 @@ async function exportInventory() {
 
     showLoading();
     try {
+        const fromDate = new Date(from);
+        fromDate.setHours(0, 0, 0, 0);
+        const toDate = new Date(to);
+        toDate.setHours(23, 59, 59, 999);
+
         const [receiptsSnap, salesSnap] = await Promise.all([db.collection('receipts').get(), db.collection('sales').get()]);
+        
         let inventory = {};
+        let firstAppearance = {}; // Lưu mốc thời gian xuất hiện đầu tiên của mỗi SP
 
-        // SỬA ĐỔI: Dùng parseFloat để giữ lại số lẻ (2.5)
-        receiptsSnap.forEach(doc => { doc.data().items?.forEach(i => { if (!inventory[i.name]) inventory[i.name] = { nhap: 0, xuat: 0 }; inventory[i.name].nhap += parseFloat(i.qty || 0); }); });
-        salesSnap.forEach(doc => { doc.data().items?.forEach(i => { if (!inventory[i.name]) inventory[i.name] = { nhap: 0, xuat: 0 }; inventory[i.name].xuat += parseFloat(i.qty || 0); }); });
+        // Hàm hỗ trợ khởi tạo SP
+        const initItem = (name, date) => {
+            if (!inventory[name]) {
+                inventory[name] = { tonDau: 0, nhapMoi: 0, nhapDoi: 0, xuat: 0 };
+                firstAppearance[name] = date;
+            } else {
+                if (date < firstAppearance[name]) firstAppearance[name] = date;
+            }
+        };
 
+        // 1. Xử lý RECEIPTS (Nhập)
+        receiptsSnap.forEach(doc => {
+            const data = doc.data();
+            const d = data.date?.toDate ? data.date.toDate() : new Date(data.date);
+            const type = data.type || 'Nhập mới'; 
+            
+            data.items?.forEach(i => {
+                initItem(i.name, d);
+                const qty = parseFloat(i.qty || 0);
+                if (d < fromDate) {
+                    inventory[i.name].tonDau += qty;
+                } else if (d <= toDate) {
+                    if (type === 'Nhập đổi') inventory[i.name].nhapDoi += qty;
+                    else inventory[i.name].nhapMoi += qty;
+                }
+            });
+        });
+
+        // 2. Xử lý SALES (Xuất)
+        salesSnap.forEach(doc => {
+            const data = doc.data();
+            const d = data.date?.toDate ? data.date.toDate() : new Date(data.date);
+            
+            data.items?.forEach(i => {
+                initItem(i.name, d);
+                const qty = parseFloat(i.qty || 0);
+                if (d < fromDate) {
+                    inventory[i.name].tonDau -= qty;
+                } else if (d <= toDate) {
+                    inventory[i.name].xuat += qty;
+                }
+            });
+        });
+
+        // 3. Xuất Excel
         const workbook = new ExcelJS.Workbook();
         const sheet = workbook.addWorksheet('NXT');
 
-        const titleRow = sheet.addRow(["BÁO CÁO NHẬP XUẤT TỒN"]);
-        titleRow.font = { size: 16, bold: true };
-        sheet.mergeCells('A1:D1');
-        titleRow.alignment = { horizontal: 'center' };
-
-        sheet.addRow([`Từ ngày: ${formatDateToDDMMYYYY(from)} - Đến ngày: ${formatDateToDDMMYYYY(to)}`]);
+        // Tiêu đề
+        sheet.addRow(["BÁO CÁO NHẬP XUẤT TỒN"]).font = { size: 16, bold: true };
+        sheet.addRow([`Từ ngày: ${from} - Đến ngày: ${to}`]);
         sheet.addRow([]);
 
-        const headerRow = sheet.addRow(["Tên sản phẩm", "Nhập", "Xuất", "Tồn cuối"]);
-        headerRow.eachCell((cell) => {
-            cell.font = { bold: true };
-            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } };
-            cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+        // Header
+        const headers = ["STT", "Tên sản phẩm", "Tồn đầu", "Nhập mới", "Nhập đổi", "Xuất", "Tồn cuối"];
+        const headerRow = sheet.addRow(headers);
+        headerRow.eachCell(c => { 
+            c.font = { bold: true }; 
+            c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } }; 
+            c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
         });
 
-        Object.keys(inventory).forEach(name => {
+        // Sắp xếp sản phẩm theo thời gian xuất hiện sớm nhất (firstAppearance)
+        const sortedNames = Object.keys(inventory).sort((a, b) => firstAppearance[a] - firstAppearance[b]);
+
+        sortedNames.forEach((name, index) => {
             let item = inventory[name];
-            const row = sheet.addRow([name, item.nhap, item.xuat, (item.nhap - item.xuat)]);
-            row.eachCell((cell) => { cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }; });
+            let tonCuoi = item.tonDau + item.nhapMoi + item.nhapDoi - item.xuat;
+            
+            const row = sheet.addRow([index + 1, name, item.tonDau, item.nhapMoi, item.nhapDoi, item.xuat, tonCuoi]);
+            
+            // Kẻ bảng cho từng dòng dữ liệu
+            row.eachCell((cell) => {
+                cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+            });
         });
 
-        sheet.columns = [{ width: 30 }, { width: 15 }, { width: 15 }, { width: 15 }];
+        // Căn chỉnh độ rộng cột
+        sheet.columns = [{ width: 8 }, { width: 30 }, { width: 12 }, { width: 12 }, { width: 12 }, { width: 12 }, { width: 12 }];
+        
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         const a = document.createElement('a');
