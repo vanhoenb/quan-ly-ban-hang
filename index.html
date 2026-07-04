@@ -5919,7 +5919,6 @@ async function exportDebtReport() {
     };
 
     try {
-        // TÍCH HỢP: Đọc thêm collection 'opening_balances'
         const [salesSnap, historySnap, openSnap] = await Promise.all([
             db.collection('sales').get(),
             db.collection('debt_history').get(),
@@ -5939,37 +5938,90 @@ async function exportDebtReport() {
         sheet.mergeCells('A2:H2');
         sheet.addRow([]);
 
+        // TỔNG HỢP DỮ LIỆU
         const reportData = {};
+        
+        // 1. Lấy danh sách khách hàng
+        const allNames = new Set();
+        salesSnap.forEach(doc => allNames.add(doc.data().customer));
+        openSnap.forEach(doc => allNames.add(doc.data().customerName));
+        historySnap.forEach(doc => allNames.add(doc.data().customerName));
 
-        // TÍCH HỢP: Cộng nợ đầu kỳ vào báo cáo
-        openSnap.forEach(doc => {
-            const d = doc.data();
-            if (!reportData[d.customerName]) reportData[d.customerName] = { items: [], pays: [], openingBalance: 0 };
-            reportData[d.customerName].openingBalance += parseFloat(d.amount || 0);
+        // 2. Khởi tạo dữ liệu
+        allNames.forEach(name => {
+            if (name) reportData[name] = { items: [], pays: [], openingBalance: 0 };
         });
 
+        // 3. TÍNH TOÁN NỢ ĐẦU KỲ VÀ PHÁT SINH
         salesSnap.forEach(doc => {
             const d = doc.data();
-            if (d.paymentMethod === 'Công nợ') {
-                if (!reportData[d.customer]) reportData[d.customer] = { items: [], pays: [], openingBalance: 0 };
-                const dDate = d.date.seconds ? new Date(d.date.seconds * 1000) : new Date(d.date);
-                if (dDate < fromDate) reportData[d.customer].openingBalance += parseFloat(d.totalAmount || 0);
-                else reportData[d.customer].items.push({ ...d, dateObj: dDate });
+            if (d.paymentMethod !== 'Công nợ' || !reportData[d.customer]) return;
+
+            // TỰ TÍNH TỔNG TIỀN (VÌ DB KHÔNG CÓ TOTALAMOUNT)
+            let calculatedTotal = parseFloat(d.totalAmount || 0);
+            if (calculatedTotal === 0 && d.items) {
+                d.items.forEach(i => calculatedTotal += (parseFloat(i.qty || 0) * parseFloat(i.price || 0)));
+                const vat = parseFloat(d.vatRate || 0);
+                calculatedTotal = calculatedTotal * (1 + vat / 100);
+            }
+            
+            const dDate = d.date.seconds ? new Date(d.date.seconds * 1000) : new Date(d.date);
+            
+            if (dDate < fromDate) {
+                reportData[d.customer].openingBalance += calculatedTotal;
+            } else {
+                reportData[d.customer].items.push({ ...d, totalAmount: calculatedTotal, dateObj: dDate });
             }
         });
 
+        // 4. Trừ Thanh toán
         historySnap.forEach(doc => {
             const d = doc.data();
-            if (reportData[d.customerName]) {
-                const pDate = new Date(d.date);
-                if (pDate < fromDate) reportData[d.customerName].openingBalance -= parseFloat(d.amount || 0);
-                else reportData[d.customerName].pays.push({ ...d, dateObj: pDate });
+            if (!reportData[d.customerName]) return;
+            const pDate = new Date(d.date);
+            const amt = parseFloat(d.amount || 0);
+            
+            if (pDate < fromDate) {
+                reportData[d.customerName].openingBalance -= amt;
+            } else {
+                reportData[d.customerName].pays.push({ ...d, dateObj: pDate });
             }
         });
 
+        // D. LÀM SẠCH NỢ ĐẦU KỲ: 
+        // Nếu sau khi cộng trừ mà nợ đầu kỳ < 0 (tức là đã trả thừa ở các kỳ trước), 
+        // thì ta ép nó về 0 để không bị số âm kéo sang kỳ mới.
+        for (const name in reportData) {
+            if (reportData[name].openingBalance < 0) {
+                reportData[name].openingBalance = 0;
+            }
+        }
+		
+		
+
+       // XUẤT BÁO CÁO (Đã tối ưu logic loại bỏ số âm sai)
         for (const customerName in reportData) {
             const data = reportData[customerName];
             
+            // 1. Tính toán
+            let totalSales = 0; 
+            data.items.forEach(s => {
+                const vat = parseFloat(s.vatRate || 0);
+                s.items?.forEach(i => totalSales += (parseFloat(i.qty || 0) * parseFloat(i.price || 0)) * (1 + vat / 100));
+            });
+            let totalPay = data.pays.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+            
+            // Tính số dư cuối kỳ thực tế
+            let balance = data.openingBalance + totalSales - totalPay;
+            
+            // 2. ÉP DỮ LIỆU SẠCH: 
+			// Chỉ bỏ qua nếu: Không có nợ đầu kỳ, không có phát sinh, không có thanh toán
+			// Nếu data.openingBalance > 0, điều kiện này sẽ là false (không bị continue), khách sẽ được hiện ra.
+			if (Math.abs(data.openingBalance) < 1 && totalSales === 0 && totalPay === 0 && Math.abs(balance) < 1) {
+				continue;
+			}
+
+            // 3. VẼ BÁO CÁO
             const header = sheet.addRow([`KHÁCH HÀNG: ${customerName.toUpperCase()}`]);
             header.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8F5E9' } };
             header.font = { bold: true };
@@ -5983,65 +6035,39 @@ async function exportDebtReport() {
                 setBorderStyle(c); 
             });
 
-            // NỢ ĐẦU KỲ
-            const row1 = sheet.addRow(['', '', '', 'NỢ ĐẦU KỲ CHUYỂN SANG:', '', formatNum(data.openingBalance), '', '']);
+            // NỢ ĐẦU KỲ: Sử dụng Math.max(0, ...) để ép số âm (do lỗi nhập liệu cũ) về 0 nếu cần thiết
+            // Tuy nhiên, nếu bạn muốn nhìn thấy số âm để đối soát, hãy dùng data.openingBalance
+            const displayOpening = Math.max(0, data.openingBalance); 
+            const row1 = sheet.addRow(['', '', '', 'NỢ ĐẦU KỲ CHUYỂN SANG:', '', formatNum(displayOpening), '', '']);
             sheet.mergeCells(`D${row1.number}:E${row1.number}`);
-            row1.getCell(4).font = { bold: true };
             row1.eachCell(c => setBorderStyle(c));
 
-            let totalSales = data.openingBalance;
-            let totalPay = 0;
-
-            data.items.forEach(s => {
-                const vatRate = parseFloat(s.vatRate || 0); 
-                s.items?.forEach(item => {
-                    const tienHang = parseFloat(item.qty || 0) * parseFloat(item.price || 0);
-                    const amtCoThue = tienHang * (1 + (vatRate / 100));
-                    totalSales += amtCoThue;
-                    
-                    const row = sheet.addRow([
-                        formatDate(s.date), 
-                        item.name, 
-                        item.unit || '', 
-                        item.qty, 
-                        formatNum(item.price), 
-                        formatNum(amtCoThue), 
-                        0, 
-                        ''
-                    ]);
-                    
-                    row.getCell(3).alignment = { horizontal: 'center' };
-                    row.getCell(4).alignment = { horizontal: 'center' };
-                    row.getCell(5).alignment = { horizontal: 'right' };
-                    row.getCell(6).alignment = { horizontal: 'right' };
-                    row.getCell(7).alignment = { horizontal: 'right' };
-                    row.eachCell(c => setBorderStyle(c));
-                });
-            });
+            // Thay vì dùng d.totalAmount, hãy dùng s.totalAmount đã tính ở trên
+				data.items.forEach(s => {
+					s.items?.forEach(item => {
+						// Vẽ dòng chi tiết sản phẩm
+						const row = sheet.addRow([formatDate(s.date), item.name, item.unit || '', item.qty, formatNum(item.price), formatNum(parseFloat(item.qty)*parseFloat(item.price)), 0, '']);
+						row.eachCell(c => setBorderStyle(c));
+					});
+				});
 
             data.pays.forEach(p => {
-                const payAmt = parseFloat(p.amount || 0);
-                totalPay += payAmt;
-                const row = sheet.addRow([formatDate(p.date), 'Thanh toán', '', '', '', 0, formatNum(payAmt), p.note]);
-                row.getCell(7).alignment = { horizontal: 'right' };
+                const row = sheet.addRow([formatDate(p.date), 'Thanh toán', '', '', '', 0, formatNum(p.amount), p.note]);
                 row.eachCell(c => setBorderStyle(c));
             });
 
-            const row2 = sheet.addRow(['', '', '', `TỔNG CỘNG:`, '', formatNum(totalSales), formatNum(totalPay), '']);
+            const row2 = sheet.addRow(['', '', '', `TỔNG CỘNG TRONG KỲ:`, '', formatNum(totalSales), formatNum(totalPay), '']);
             sheet.mergeCells(`D${row2.number}:E${row2.number}`);
             row2.font = { bold: true };
-            row2.getCell(6).alignment = { horizontal: 'right' };
-            row2.getCell(7).alignment = { horizontal: 'right' };
             row2.eachCell(c => setBorderStyle(c));
-            
-            const balance = totalSales - totalPay;
-            const row3 = sheet.addRow(['', '', '', 'SỐ DƯ CUỐI KỲ CÒN NỢ:', '', '', '', formatNum(balance)]);
+
+            // SỐ DƯ CUỐI KỲ: Ép về 0 nếu kết quả là âm nhỏ (sai số)
+            const displayBalance = Math.max(0, balance);
+            const row3 = sheet.addRow(['', '', '', 'SỐ DƯ CUỐI KỲ CÒN NỢ:', '', '', '', formatNum(displayBalance)]);
             sheet.mergeCells(`D${row3.number}:G${row3.number}`);
             row3.getCell(4).font = { bold: true, color: { argb: 'FFFF0000' } };
             row3.getCell(8).font = { bold: true, color: { argb: 'FFFF0000' } };
-            row3.getCell(8).alignment = { horizontal: 'right' };
             row3.eachCell(c => setBorderStyle(c));
-            
             sheet.addRow([]);
         }
 
@@ -6563,18 +6589,21 @@ async function exportExcelLuuMau() {
 
 
 //====================================
-//======= CÔNG NƠ NHÀ CC ==============
+//======= CÔNG NỢ NHÀ CC ==============
 async function exportSupplierDebtReport() {
+    // 1. Lấy và kiểm tra dữ liệu đầu vào từ giao diện
     const from = document.getElementById('date-from').value;
     const to = document.getElementById('date-to').value;
-    if (!from || !to) return alert("Vli lòng chọn Từ ngày và Đến ngày");
+    if (!from || !to) return alert("Vui lòng chọn Từ ngày và Đến ngày");
 
     const fromDate = new Date(from);
     const toDate = new Date(to);
     toDate.setHours(23, 59, 59, 999);
 
+    // Hàm format số tiền sang định dạng có dấu chấm phân cách hàng nghìn
     const formatNum = (num) => num.toLocaleString('vi-VN');
     
+    // Hàm chuyển đổi timestamp từ Firebase thành chuỗi ngày tháng DD/MM/YYYY
     const formatDate = (val) => {
         if (!val) return "";
         let d = val.seconds ? new Date(val.seconds * 1000) : new Date(val);
@@ -6582,17 +6611,18 @@ async function exportSupplierDebtReport() {
     };
 
     try {
-        // TÍCH HỢP: Đọc từ collection phù hợp cho NCC
+        // 2. Lấy dữ liệu từ các collection Firebase cùng lúc
         const [importsSnap, paymentsSnap, openSnap] = await Promise.all([
             db.collection('material_imports').get(),
-            db.collection('payments').get(), // Đọc từ collection thanh toán như image_91d67e.jpg
+            db.collection('payments').get(),
             db.collection('supplier_opening_balances').get()
         ]);
 
+        // Khởi tạo file Excel
         const workbook = new ExcelJS.Workbook();
         const sheet = workbook.addWorksheet('BaoCaoCongNoNCC');
 
-        // 1. Tiêu đề
+        // Tạo tiêu đề báo cáo
         const titleRow = sheet.addRow(['BÁO CÁO CHI TIẾT CÔNG NỢ NHÀ CUNG CẤP']);
         titleRow.font = { bold: true, size: 14 };
         sheet.mergeCells('A1:H1');
@@ -6602,54 +6632,67 @@ async function exportSupplierDebtReport() {
         sheet.mergeCells('A2:H2');
         sheet.addRow([]);
 
-        // 2. Xử lý dữ liệu
         const reportData = {};
 
-        // Xử lý công nợ đầu kỳ
+        // 3. Xử lý công nợ đầu kỳ
         openSnap.forEach(doc => {
             const d = doc.data();
             const ncc = d.ncc || "Chưa xác định";
-            if (!reportData[ncc]) reportData[ncc] = { items: [], pays: [], openingBalance: 0 };
+            if (!reportData[ncc]) reportData[ncc] = { transactions: [], openingBalance: 0 };
             reportData[ncc].openingBalance += parseFloat(d.amount || 0);
         });
 
-        // Xử lý nhập hàng
+        // 4. Xử lý dữ liệu nhập hàng
         importsSnap.forEach(doc => {
             const d = doc.data();
             const ncc = d.ncc || "Chưa xác định";
-            if (!reportData[ncc]) reportData[ncc] = { items: [], pays: [], openingBalance: 0 };
+            if (!reportData[ncc]) reportData[ncc] = { transactions: [], openingBalance: 0 };
             
-            const dDate = d.date.seconds ? new Date(d.date.seconds * 1000) : new Date(d.date);
-            const amount = parseFloat(d.total || 0);
+            const amount = parseFloat(d.thanhTien || 0);
+            const dDate = d.timestamp ? (d.timestamp.seconds ? new Date(d.timestamp.seconds * 1000) : new Date(d.timestamp)) : new Date();
             
             if (dDate < fromDate) {
                 reportData[ncc].openingBalance += amount;
             } else {
-                reportData[ncc].items.push({ ...d, dateObj: dDate, total: amount, nl: d.nl || 'Nhập hàng' });
+                // Đẩy thông tin nhập hàng vào mảng giao dịch (thêm trường dvt)
+                reportData[ncc].transactions.push({ 
+                    dateObj: dDate, 
+                    type: 'import', 
+                    content: d.tenNL || "Nhập hàng",
+                    dvt: d.dvt || "", // Lấy đơn vị tính từ dữ liệu
+                    debit: amount, 
+                    credit: 0 
+                });
             }
         });
 
-        // Xử lý thanh toán từ collection 'payments'
+        // 5. Xử lý dữ liệu thanh toán
         paymentsSnap.forEach(doc => {
             const d = doc.data();
-            const ncc = d.supplierName; // Theo image_91d67e.jpg
+            const ncc = d.supplierName;
             if (ncc && reportData[ncc]) {
-                const pDate = d.date.seconds ? new Date(d.date.seconds * 1000) : new Date(d.date);
+                const pDate = d.date ? (d.date.seconds ? new Date(d.date.seconds * 1000) : new Date(d.date)) : new Date();
                 if (pDate >= fromDate && pDate <= toDate) {
-                    reportData[ncc].pays.push({ ...d, dateObj: pDate, amount: parseFloat(d.amount || 0) });
+                    reportData[ncc].transactions.push({ 
+                        dateObj: pDate, 
+                        type: 'payment', 
+                        content: 'Thanh toán công nợ', 
+                        dvt: "", // Thanh toán không có đơn vị tính
+                        debit: 0, 
+                        credit: parseFloat(d.amount || 0) 
+                    });
                 }
             }
         });
 
-        // 3. Render ra Excel
         const keys = Object.keys(reportData);
-        if (keys.length === 0) {
-            alert("Không tìm thấy dữ liệu nào cho NCC trong khoảng thời gian này!");
-            return;
-        }
+        if (keys.length === 0) return alert("Không có dữ liệu!");
 
+        // 6. Vẽ dữ liệu lên file Excel theo từng nhà cung cấp
         for (const nccName of keys) {
             const data = reportData[nccName];
+            // Sắp xếp các giao dịch theo ngày tháng tăng dần
+            data.transactions.sort((a, b) => a.dateObj - b.dateObj);
             
             const header = sheet.addRow([`NHÀ CUNG CẤP: ${nccName.toUpperCase()}`]);
             header.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8F5E9' } };
@@ -6664,42 +6707,47 @@ async function exportSupplierDebtReport() {
                 setBorderStyle(c); 
             });
 
+           // Ghi số dư đầu kỳ (Gộp D-E)
             const row1 = sheet.addRow(['', '', '', 'NỢ ĐẦU KỲ CHUYỂN SANG:', '', formatNum(data.openingBalance), '', '']);
-            sheet.mergeCells(`D${row1.number}:E${row1.number}`);
-            row1.getCell(4).font = { bold: true };
+            sheet.mergeCells(`D${row1.number}:E${row1.number}`); // Gộp D-E
+            row1.getCell(6).alignment = { horizontal: 'right' };
             row1.eachCell(c => setBorderStyle(c));
 
             let totalDebt = data.openingBalance;
             let totalPay = 0;
 
-            // In dữ liệu nhập hàng với tên nguyên liệu (s.nl)
-            data.items.forEach(s => {
-                const row = sheet.addRow([formatDate(s.dateObj), s.nl, '', '', '', formatNum(s.total), 0, '']);
-                totalDebt += s.total;
+            // Ghi chi tiết các giao dịch trong kỳ
+            data.transactions.forEach(t => {
+                const row = sheet.addRow([formatDate(t.dateObj), t.content, t.dvt || "", '', '', formatNum(t.debit), formatNum(t.credit), '']);
+                totalDebt += t.debit;
+                totalPay += t.credit;
+                // Căn phải các cột số tiền
+                row.getCell(6).alignment = { horizontal: 'right' };
+                row.getCell(7).alignment = { horizontal: 'right' };
                 row.eachCell(c => setBorderStyle(c));
             });
 
-            // In dữ liệu thanh toán
-            data.pays.forEach(p => {
-                totalPay += p.amount;
-                const row = sheet.addRow([formatDate(p.dateObj), 'Thanh toán công nợ', '', '', '', 0, formatNum(p.amount), '']);
-                row.eachCell(c => setBorderStyle(c));
-            });
-
+            // Ghi dòng tổng cộng (Gộp D-E)
             const row2 = sheet.addRow(['', '', '', `TỔNG CỘNG:`, '', formatNum(totalDebt), formatNum(totalPay), '']);
-            sheet.mergeCells(`D${row2.number}:E${row2.number}`);
+            sheet.mergeCells(`D${row2.number}:E${row2.number}`); // Gộp D-E
             row2.font = { bold: true };
+            row2.getCell(6).alignment = { horizontal: 'right' };
+            row2.getCell(7).alignment = { horizontal: 'right' };
             row2.eachCell(c => setBorderStyle(c));
             
+            // Ghi dòng số dư cuối kỳ (Gộp D-E)
             const balance = totalDebt - totalPay;
             const row3 = sheet.addRow(['', '', '', 'SỐ DƯ CUỐI KỲ CÒN NỢ:', '', '', '', formatNum(balance)]);
-            sheet.mergeCells(`D${row3.number}:G${row3.number}`);
+            sheet.mergeCells(`D${row3.number}:E${row3.number}`); // Gộp D-E
             row3.font = { bold: true, color: { argb: 'FFFF0000' } };
+            // Căn lề số dư cuối kỳ sang cột H (cell 8)
+            row3.getCell(8).alignment = { horizontal: 'right' };
             row3.eachCell(c => setBorderStyle(c));
             
             sheet.addRow([]);
         }
 
+        // 7. Xuất file Excel
         sheet.columns.forEach(col => col.width = 15);
         const buffer = await workbook.xlsx.writeBuffer();
         const a = document.createElement('a');
