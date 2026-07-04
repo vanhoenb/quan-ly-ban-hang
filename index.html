@@ -1524,12 +1524,12 @@ async function loadDashboard(filter = 'default') {
     // 0. Hiển thị trạng thái đang tải (nếu cần)
     console.log("Đang tải dữ liệu dashboard...");
 
-    // THAY ĐỔI 1: Thêm 'customersSnap' vào đây
+    // Sửa các lệnh .get() thành .get({ source: 'server' })
     const [salesSnap, receiptsSnap, suppliersSnap, customersSnap] = await Promise.all([
-        db.collection('sales').get(),
-        db.collection('receipts').get(),
-        db.collection('suppliers').get(),
-        db.collection('customers').get() 
+        db.collection('sales').get({ source: 'server' }),
+        db.collection('receipts').get({ source: 'server' }),
+        db.collection('suppliers').get({ source: 'server' }),
+        db.collection('customers').get({ source: 'server' }) 
     ]);
     
     const now = new Date();
@@ -1876,14 +1876,15 @@ function updateMonthlyRevenueChart(allSales) {
     });
 }
 
-// 2. Hàm gọi update tài chính
 function refreshFinance() {
-    const from = document.getElementById('fin-from').value;
-    const to = document.getElementById('fin-to').value;
+    const fromEl = document.getElementById('fin-from');
+    const toEl = document.getElementById('fin-to');
     
-    // Đảm bảo truyền vào dạng object
-    if (from && to) {
-        loadDashboard({ from: from, to: to });
+    if (fromEl && toEl && fromEl.value && toEl.value) {
+        loadDashboard({ from: fromEl.value, to: toEl.value });
+    } else {
+        // Nếu không có input ngày, load mặc định
+        loadDashboard('default');
     }
 }
 
@@ -3956,11 +3957,26 @@ async function saveAndPrint() {
         }
         
         renderSellCart();
-        setTimeout(() => {
+		
+		
+       // --- THAY ĐỔI ĐOẠN NÀY ---
+        setTimeout(async () => {
+            console.log("Đang làm mới dữ liệu...");
+            
+            // Ép load lại dashboard với filter hiện tại
+            const from = document.getElementById('fin-from')?.value;
+            const to = document.getElementById('fin-to')?.value;
+            
+            if (from && to) {
+                await loadDashboard({ from: from, to: to });
+            } else {
+                await loadDashboard('default');
+            }
+
             if(typeof updateSellReceiptNum === 'function') updateSellReceiptNum();
             if(typeof loadSalesList === 'function') loadSalesList();
-            if(typeof loadCustomers === 'function') loadCustomers(); // Cập nhật lại list nợ nếu có
-        }, 500);
+            if(typeof loadCustomers === 'function') loadCustomers(); 
+        }, 1000);
         
     } catch (error) {
         console.error("Lỗi: ", error);
