@@ -4188,9 +4188,19 @@ async function reprintSale(docId) {
         if (document.getElementById('print-note-global')) document.getElementById('print-note-global').innerText = data.note || '';
         
         const date = data.date.toDate();
-        if (document.getElementById('print-date')) document.getElementById('print-date').innerText = date.toLocaleDateString('vi-VN');
-        if (document.getElementById('print-day')) document.getElementById('print-day').innerText = date.getDate();
-        if (document.getElementById('print-month')) document.getElementById('print-month').innerText = date.getMonth() + 1;
+        
+        // Cập nhật định dạng ngày: 05/07/2026
+        const formattedDate = date.toLocaleDateString('vi-VN', { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric' 
+        });
+        
+        if (document.getElementById('print-date')) document.getElementById('print-date').innerText = formattedDate;
+        
+        // Thêm số 0 phía trước nếu ngày/tháng là số đơn vị (ví dụ: 05, 07)
+        if (document.getElementById('print-day')) document.getElementById('print-day').innerText = String(date.getDate()).padStart(2, '0');
+        if (document.getElementById('print-month')) document.getElementById('print-month').innerText = String(date.getMonth() + 1).padStart(2, '0');
         if (document.getElementById('print-year')) document.getElementById('print-year').innerText = date.getFullYear();
 
         // 2. Render lại bảng sản phẩm
