@@ -3884,14 +3884,22 @@ async function saveAndPrint() {
 
         // 1. Điền thông tin chung
         const now = new Date();
+        
+        // Tạo định dạng dd/mm/yyyy
+        const formattedDate = now.toLocaleDateString('vi-VN', { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric' 
+        });
+
         const fields = {
             'print-customer': customer,
             'print-address': address,          
             'print-phone': phone,               
             'print-receipt-id': receiptId,  
-            'print-date': now.toLocaleDateString('vi-VN'),
-            'print-day': now.getDate(),
-            'print-month': now.getMonth() + 1,
+            'print-date': formattedDate, // Đã chuyển thành 05/07/2026
+            'print-day': String(now.getDate()).padStart(2, '0'),   // Thêm số 0 phía trước
+            'print-month': String(now.getMonth() + 1).padStart(2, '0'), // Thêm số 0 phía trước
             'print-year': now.getFullYear(),
             'print-note-global': noteGlobal
         };
