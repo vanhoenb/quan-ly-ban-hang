@@ -185,7 +185,33 @@
         background: #94a3b8 !important;
     }
 </style>
+
+<style>
+    /* Bất kỳ hàng nào chứa menu đang mở sẽ nổi lên trên tất cả */
+    tr:has(.menu-action:not(.hidden)) {
+        position: relative;
+        z-index: 9999 !important;
+    }
+	
+</style>
+
+<style>
+    /* 1. Ép mọi popup của Swal lên trên cùng */
+    .swal2-container {
+        z-index: 99999999 !important;
+    }
+
+    /* 2. Đảm bảo khi menu mở, nó sẽ tự động thoát khỏi vòng vây của bảng */
+    .menu-container {
+        position: relative;
+    }
     
+    .menu-action {
+        position: absolute !important;
+        z-index: 1000 !important;
+    }
+</style>
+
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -5062,32 +5088,33 @@ function renderCustomerList() {
         const debt = data.debt || 0;
         const totalPaid = data.totalPaid || 0; 
         
-        body.innerHTML += `
-            <tr class="transition-all duration-300">
-                <td colspan="6" class="p-1">
-                    <div class="flex items-center w-full bg-white border border-slate-200 border-l-4 border-l-blue-400 border-r-4 border-r-blue-400 rounded-lg p-2 
-                                shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] 
-                                hover:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.15)] hover:scale-[1.005] hover:ring-2 hover:ring-blue-200 
-                                transition-all duration-300">
-                        <div class="px-2 text-[11px] font-bold ${debt > 0 ? 'text-blue-600' : 'text-slate-700'} w-[20%] truncate">${data.name || ''}</div>
-                        <div class="px-2 text-[11px] text-slate-600 w-[20%] truncate">${data.address || ''}</div>
-                        <div class="px-2 text-[11px] text-slate-600 w-[15%]">${data.phone || ''}</div>
-                        <div class="px-2 text-[11px] font-bold text-green-600 w-[15%] text-center">${totalPaid.toLocaleString('vi-VN')} đ</div>
-                        <div class="px-2 text-[11px] font-bold ${debt > 0 ? 'text-red-600' : 'text-slate-500'} w-[15%] text-center">${debt.toLocaleString('vi-VN')} đ</div>
-                        <div class="px-1 w-[15%] text-center relative">
-                            <button onclick="toggleMenu(this)" class="bg-blue-600 text-white py-0.5 px-2 rounded text-[10px] font-bold shadow-sm">Thao tác ▼</button>
-                            <div class="hidden absolute menu-action right-0 mt-2 w-28 bg-white border border-blue-200 rounded-lg shadow-xl p-1 flex-col gap-1 z-[100]">
-                                <button onclick="payDebt('${data.id}', ${debt}, '${data.name}')" class="bg-green-600 text-white py-1 rounded text-[10px] w-full font-bold">Trả nợ</button>
-                                <button onclick="setOpeningDebt('${data.id}', '${data.name}')" class="bg-orange-500 text-white py-1 rounded text-[10px] w-full font-bold">Đầu kỳ</button>
-                                <button onclick="showDebtHistory('${data.id}', '${data.name}')" class="bg-indigo-500 text-white py-1 rounded text-[10px] w-full font-bold">Lịch sử</button>
-                                <button onclick="editCustomer('${data.id}')" class="bg-blue-500 text-white py-1 rounded text-[10px] w-full font-bold">Sửa</button>
-                                <button onclick="deleteCustomer('${data.id}')" class="bg-red-500 text-white py-1 rounded text-[10px] w-full font-bold">Xóa</button>
-                            </div>
-                        </div>
+       body.innerHTML += `
+    <tr class="transition-all duration-300">
+        <td colspan="6" class="p-1">
+            <div class="flex items-center w-full bg-white border border-slate-200 border-l-4 border-l-blue-400 border-r-4 border-r-blue-400 rounded-lg p-2 
+                        shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] 
+                        hover:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.15)] hover:scale-[1.005] hover:ring-2 hover:ring-blue-200 transition-all duration-300">
+                        
+                <div class="px-2 text-[11px] font-bold ${debt > 0 ? 'text-blue-600' : 'text-slate-700'} w-[20%] truncate">${data.name || ''}</div>
+                <div class="px-2 text-[11px] text-slate-600 w-[20%] truncate">${data.address || ''}</div>
+                <div class="px-2 text-[11px] text-slate-600 w-[15%]">${data.phone || ''}</div>
+                <div class="px-2 text-[11px] font-bold text-green-600 w-[15%] text-center">${totalPaid.toLocaleString('vi-VN')} đ</div>
+                <div class="px-2 text-[11px] font-bold ${debt > 0 ? 'text-red-600' : 'text-slate-500'} w-[15%] text-center">${debt.toLocaleString('vi-VN')} đ</div>
+                
+                <div class="px-1 w-[15%] text-center relative">
+                    <button onclick="toggleMenu(this)" class="bg-blue-600 text-white py-0.5 px-2 rounded text-[10px] font-bold shadow-sm">Thao tác ▼</button>
+                    <div class="hidden absolute menu-action right-0 mt-2 w-28 bg-white border border-blue-200 rounded-lg shadow-2xl p-1 flex-col gap-1 z-[9999]">
+                        <button onclick="payDebt('${data.id}', ${debt}, '${data.name}')" class="bg-green-600 text-white py-1 rounded text-[10px] w-full font-bold">Trả nợ</button>
+                        <button onclick="setOpeningDebt('${data.id}', '${data.name}')" class="bg-orange-500 text-white py-1 rounded text-[10px] w-full font-bold">Đầu kỳ</button>
+                        <button onclick="showDebtHistory('${data.id}', '${data.name}')" class="bg-indigo-500 text-white py-1 rounded text-[10px] w-full font-bold">Lịch sử</button>
+                        <button onclick="editCustomer('${data.id}')" class="bg-blue-500 text-white py-1 rounded text-[10px] w-full font-bold">Sửa</button>
+                        <button onclick="deleteCustomer('${data.id}')" class="bg-red-500 text-white py-1 rounded text-[10px] w-full font-bold">Xóa</button>
                     </div>
-                </td>
-            </tr>
-        `;
+                </div>
+            </div>
+        </td>
+    </tr>
+`;
     });
 }
 
