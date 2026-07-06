@@ -248,15 +248,15 @@ function toggleMoreMenu() {
         <button onclick="showPage('page-products-manage'); loadProductManage(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="settings"></i> Danh Mục SP</button>
         <button onclick="showPage('page-SanXuat'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="factory"></i> Sản Xuất</button>
 		<button onclick="showPage('page-NguyenLieu'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3">
-    <i data-lucide="database"></i> Nguyên Liệu
-</button>
-        <button onclick="showPage('page-report'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="bar-chart-3"></i> Báo Cáo</button>
-    </nav>
-</aside>
+			<i data-lucide="database"></i> Nguyên Liệu
+		</button>
+				<button onclick="showPage('page-report'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="bar-chart-3"></i> Báo Cáo</button>
+			</nav>
+		</aside>
 
-<div id="sidebar-overlay" onclick="toggleSidebar()" class="md:hidden hidden fixed inset-0 bg-black/50 z-[998]"></div>
+		<div id="sidebar-overlay" onclick="toggleSidebar()" class="md:hidden hidden fixed inset-0 bg-black/50 z-[998]"></div>
 
-<main class="flex-1 overflow-y-auto pb-16 md:pb-0">
+		<main class="flex-1 overflow-y-auto pb-16 md:pb-0">
 	
 
 
@@ -295,7 +295,7 @@ function toggleMoreMenu() {
     <div class="flex space-x-2 bg-slate-200 p-1 rounded-xl">
         <button onclick="switchMainTab('inventory')" id="btn-main-inventory" class="flex-1 py-2 text-xs md:text-sm font-bold rounded-lg transition-all bg-white shadow-sm text-blue-600">NXT KHO</button>
         <button onclick="switchMainTab('revenue')" id="btn-main-revenue" class="flex-1 py-2 text-xs md:text-sm font-bold rounded-lg transition-all text-slate-600">DOANH THU SP</button>
-        <button onclick="switchMainTab('products')" id="btn-main-products" class="flex-1 py-2 text-xs md:text-sm font-bold rounded-lg transition-all text-slate-600">SP BÁN CHẠY + KH NỢ</button>
+        <button onclick="switchMainTab('products')" id="btn-main-products" class="flex-1 py-2 text-xs md:text-sm font-bold rounded-lg transition-all text-slate-600">TOP SP + KH NỢ</button>
     </div>
 
     <div id="content-main-inventory" class="main-tab-content block">
@@ -311,19 +311,19 @@ function toggleMoreMenu() {
                 <div id="home-inventory-list" class="space-y-2 overflow-y-auto pr-2 h-[400px] md:h-[500px]"></div>
             </div>
             <div class="bg-white p-4 md:p-6 rounded-3xl border border-blue-500">
-    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">THỜI GIAN CẤP HÀNG ĐẠI LÝ</h3>
-    
-    <div class="flex items-center w-full px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase">
-    <div class="w-[15%]">Số phiếu</div>
-    <div class="w-[30%]">Khách hàng</div>
-    <div class="w-[15%] text-center">Ngày tháng</div>
-    <div class="w-[20%] text-center">Tổng tiền</div>
-    <div class="w-[20%] text-center">Trạng thái</div>
-</div>
+				<h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">THỜI GIAN CẤP HÀNG ĐẠI LÝ</h3>
+				
+				<div class="flex items-center w-full px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase">
+				<div class="w-[15%]">Số phiếu</div>
+				<div class="w-[30%]">Khách hàng</div>
+				<div class="w-[15%] text-center">Ngày tháng</div>
+				<div class="w-[20%] text-center">Tổng tiền</div>
+				<div class="w-[20%] text-center">Trạng thái</div>
+			</div>
 
-    <div id="customer-orders-table" class="overflow-y-auto h-[400px] md:h-[500px] pr-2">
-        </div>
-</div>
+				<div id="customer-orders-table" class="overflow-y-auto h-[400px] md:h-[500px] pr-2">
+					</div>
+			</div>
         </div>
     </div>
 
@@ -345,9 +345,16 @@ function toggleMoreMenu() {
                 <div class="h-[400px] md:h-[500px] w-full"><canvas id="topProductsChart"></canvas></div>
             </div>
             <div class="bg-rose-50 p-4 md:p-6 rounded-3xl border border-rose-500">
-                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Khách hàng công nợ</h3>
-                <div id="home-debt-customers-list" class="space-y-2 overflow-y-auto pr-2 h-[400px] md:h-[500px]"></div>
-            </div>
+				<h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Khách hàng công nợ</h3>
+				
+				<div class="flex items-center w-full px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase">
+					<div class="w-[40%]">Khách hàng</div>
+					<div class="w-[25%] text-center">SĐT</div>
+					<div class="w-[35%] text-center">Công nợ</div>
+				</div>
+
+				<div id="home-debt-customers-list" class="overflow-y-auto pr-2 h-[400px] md:h-[500px]"></div>
+			</div>
         </div>
     </div>
 
@@ -530,14 +537,14 @@ function toggleMoreMenu() {
             <div class="max-h-[70vh] overflow-y-auto">
                 <table id="kho-table" class="min-w-full text-left text-xs md:text-sm border-collapse">
                     <thead class="sticky top-0 bg-slate-100 z-10 border-b border-slate-200">
-                        <tr class="text-slate-600 uppercase text-[11px] tracking-wider">
-                            <th class="p-4">Tên SP</th>
-                            <th class="p-4 text-center">ĐVT</th>
-                            <th class="p-4 text-center">SL</th>
-                            <th class="p-4 text-right price-cell">Giá lẻ</th>
-                            <th class="p-4 text-right price-cell">Giá sỉ</th>
-                        </tr>
-                    </thead>
+						<tr class="text-slate-600 uppercase text-[11px] tracking-wider">
+							<th class="p-4 w-[40%]">Tên SP</th>
+							<th class="p-4 w-[10%] text-center">ĐVT</th>
+							<th class="p-4 w-[10%] text-center">SL</th>
+							<th class="p-4 w-[20%] text-center price-cell">Giá lẻ</th>
+							<th class="p-4 w-[20%] text-center price-cell">Giá sỉ</th>
+						</tr>
+					</thead>
                     <tbody id="inventory-data" class="divide-y divide-slate-100 text-slate-700">
                         </tbody>
                 </table>
@@ -1639,12 +1646,15 @@ function renderCustomerOrders(allSales, customersSnap) {
     const container = document.getElementById('customer-orders-table');
     if (!container) return;
 
+    // Đảm bảo container là flexbox để các dòng cách nhau bằng gap
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.gap = '10px'; // Khoảng cách giữa các dòng
+
     const validCustomers = new Set();
     customersSnap.forEach(doc => validCustomers.add(doc.data().name?.toString().trim()));
 
     const now = new Date();
-
-    // Lọc và chỉ lấy đơn mới nhất của mỗi khách
     const latestOrdersMap = new Map();
 
     allSales.forEach(order => {
@@ -1653,66 +1663,58 @@ function renderCustomerOrders(allSales, customersSnap) {
 
         const orderDate = order.date?.toDate ? order.date.toDate() : new Date(order.date);
         
-        // Nếu khách này chưa có trong Map, hoặc đơn hiện tại mới hơn đơn đã lưu -> lưu đơn này
         if (!latestOrdersMap.has(customerName) || orderDate > latestOrdersMap.get(customerName).orderDate) {
             const diffDays = Math.floor((now - orderDate) / (1000 * 60 * 60 * 24));
             latestOrdersMap.set(customerName, { ...order, orderDate, diffDays });
         }
     });
 
-    // SẮP XẾP: Lấy đơn nợ nhiều ngày nhất (diffDays lớn nhất) lên trên cùng
     const currentOrders = Array.from(latestOrdersMap.values()).sort((a, b) => b.diffDays - a.diffDays);
 
     if (currentOrders.length === 0) {
-        container.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">Không có đơn hàng nào.</td></tr>`;
+        container.innerHTML = `<div class="p-4 text-center text-slate-400">Không có đơn hàng nào.</div>`;
         return;
     }
 
     container.innerHTML = currentOrders.map(order => {
-    // Logic màu nền hàng
-    let barBg = order.diffDays >= 20 ? 'bg-rose-100' : (order.diffDays >= 10 ? 'bg-amber-100' : 'bg-emerald-100');
-    let borderColor = order.diffDays >= 20 ? 'border-rose-300' : (order.diffDays >= 10 ? 'border-amber-300' : 'border-emerald-300');
-    
-    // Logic màu chữ cho số ngày
-    let dayTextColor = order.diffDays >= 20 ? 'text-rose-600' : (order.diffDays >= 10 ? 'text-amber-600' : 'text-emerald-600');
+        let barBg = order.diffDays >= 20 ? 'bg-rose-50' : (order.diffDays >= 10 ? 'bg-amber-50' : 'bg-emerald-50');
+        let borderColor = order.diffDays >= 20 ? 'border-rose-400' : (order.diffDays >= 10 ? 'border-amber-400' : 'border-emerald-400');
+        let dayTextColor = order.diffDays >= 20 ? 'text-rose-600' : (order.diffDays >= 10 ? 'text-amber-600' : 'text-emerald-600');
 
-    return `
-        <tr class="mb-2 block">
-            <td class="block w-full">
-                <div class="flex items-center ${barBg} border ${borderColor} rounded-lg p-2 gap-2 shadow-sm">
+        return `
+            <div class="block w-full">
+                <div class="flex items-center ${barBg} border-t border-b border-slate-200 border-l-4 ${borderColor} border-r-4 ${borderColor} rounded-lg p-2 gap-2 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] hover:shadow-xl transition-all duration-200">
                     
-                    <div class="bg-white/60 px-2 py-1 rounded text-[10px] font-bold text-slate-600 truncate w-[15%]">
+                    <div class="bg-white/80 px-2 py-1 rounded text-[11px] font-bold text-slate-600 truncate w-[15%]">
                         ${order.invoiceNumber || order.id.slice(-6)}
                     </div>
                     
-                    <div class="bg-white/60 px-2 py-1 rounded text-[10px] font-bold text-slate-900 truncate w-[30%]">
+                    <div class="bg-white/80 px-2 py-1 rounded text-[11px] font-bold text-slate-900 truncate w-[30%]">
                         ${order.customer}
                     </div>
                     
-                    <div class="bg-white/60 px-2 py-1 rounded text-[10px] font-bold text-slate-700 w-[15%] text-center">
+                    <div class="bg-white/80 px-2 py-1 rounded text-[11px] font-bold text-slate-700 w-[15%] text-center">
                         ${order.orderDate.toLocaleDateString('vi-VN')}
                     </div>
                     
-                    <div class="bg-white/60 px-2 py-1 rounded text-[10px] font-bold text-slate-900 w-[20%] text-center truncate">
+                    <div class="bg-white/80 px-2 py-1 rounded text-[11px] font-bold text-slate-900 w-[20%] text-center truncate">
                         ${Number(order.total || 0).toLocaleString('vi-VN')}đ
                     </div>
                     
                     <div class="flex items-center justify-center gap-1 w-[20%]">
-                        <div class="bg-white px-2 py-1 rounded text-[10px] font-black ${dayTextColor} text-center shadow-inner flex-1 mr-1">
+                        <div class="bg-white px-2 py-1 rounded text-[11px] font-black ${dayTextColor} text-center shadow-inner flex-1 mr-1">
                             ${order.diffDays} ngày
                         </div>
                         <button onclick="viewOrderDetails('${order.id}')" 
-                            class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-[10px] font-bold transition shadow-sm">
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-[11px] font-bold transition shadow-sm">
                             XEM
                         </button>
                     </div>
                 </div>
-            </td>
-        </tr>
-    `;
-}).join('');
+            </div>
+        `;
+    }).join('');
 
-    // Nếu bạn đang dùng thư viện Lucide, đừng quên gọi dòng này để render icon
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
     }
@@ -1812,13 +1814,23 @@ function renderDebtCustomers(customersSnap) {
 
         if (debt > 0) {
             hasDebt = true;
+            // Màu số tiền đổi sang rose-600 (đỏ) và nền số tiền sang rose-100
             html += `
-                <div class="flex justify-between items-center p-3 bg-white rounded-xl shadow-sm border border-rose-100">
-                    <div>
-                        <p class="text-sm font-semibold text-slate-700">${customer.name || 'Khách hàng'}</p>
-                        <p class="text-[10px] text-slate-400">SĐT: ${customer.phone || 'Chưa cập nhật'}</p>
+                <div class="flex items-center w-full bg-white border border-slate-200 border-l-4 border-l-blue-400 border-r-4 border-r-blue-400 rounded-lg p-2 mb-3 gap-2 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] hover:shadow-lg transition-all duration-200 text-[10px]">
+                    
+                    <div class="bg-blue-50/50 px-2 py-1 rounded text-[10px] font-bold text-slate-900 truncate w-[40%]">
+                        ${customer.name || 'Khách hàng'}
                     </div>
-                    <p class="text-sm font-black text-rose-600">${debt.toLocaleString('vi-VN')} đ</p>
+                    
+                    <div class="bg-blue-50/50 px-2 py-1 rounded text-[10px] text-slate-600 w-[25%] text-center">
+                        ${customer.phone || 'N/A'}
+                    </div>
+                    
+                    <div class="w-[35%] text-center pr-2">
+                        <span class="font-black text-rose-600 text-[11px] bg-rose-100 px-2 py-1 rounded-md shadow-inner">
+                            ${debt.toLocaleString('vi-VN')} đ
+                        </span>
+                    </div>
                 </div>
             `;
         }
@@ -2810,19 +2822,37 @@ function loadInventory() {
 				const productData = window.allProducts.find(p => p.name === item.name);
 				const barcode = (productData && productData.barcode) ? productData.barcode : '---';
 
-				tbody.innerHTML += `
-					<tr class="text-center border-b hover:bg-gray-50">
-						<td class="p-2 text-left">
-							<div class="font-medium">${item.name}</div>
-							<div class="text-[10px] text-gray-400 font-mono">Mã: ${barcode}</div>
-						</td>
-						<td class="p-2">${item.unit}</td>
-						<td class="p-2 font-bold ${item.qty < 0 ? 'text-red-600' : 'text-blue-600'}">${displayQty}</td>
-						<td class="p-2 price-cell">${retail}</td>
-						<td class="p-2 price-cell">${wholesale}</td>
-					</tr>
-				`;
-			});
+				// Cấu trúc mới đã bo góc và đổ bóng
+              tbody.innerHTML += `
+    <tr class="transition-all duration-300">
+        <td colspan="5" class="p-0.5">
+            <div class="flex items-center w-full bg-white border border-slate-200 border-l-4 border-l-blue-400 border-r-4 border-r-blue-400 rounded-lg p-1.5 
+                        shadow-[0_4px_6px_-2px_rgba(0,0,0,0.2)] hover:shadow-[0_6px_10px_-2px_rgba(0,0,0,0.25)] hover:scale-[1.002] transition-all duration-300">
+                
+                <div class="px-2 w-[40%] text-left">
+                    <div class="font-bold text-[13px] text-slate-800 leading-tight">${item.name}</div>
+                    <div class="text-[10px] text-gray-400 font-mono">Mã: ${barcode}</div>
+                </div>
+                
+                <div class="px-1 w-[10%] text-center text-[12px] text-slate-600">${item.unit}</div>
+                
+                <div class="px-1 w-[10%] text-center font-bold text-[13px] ${item.qty < 0 ? 'text-red-600' : 'text-blue-600'}">
+                    ${displayQty}
+                </div>
+                
+                <div class="px-1 w-[20%] text-center text-[12px] text-slate-600 price-cell">
+                    ${retail}
+                </div>
+                
+                <div class="px-1 w-[20%] text-center text-[12px] text-slate-600 price-cell">
+                    ${wholesale}
+                </div>
+                
+            </div>
+        </td>
+    </tr>
+`;
+            });
         }).catch(err => {
             console.error("Lỗi khi tải phiếu xuất: ", err);
         });
@@ -4145,34 +4175,34 @@ async function viewInvoiceDetails(docId) {
             }
 
             // Render
-            if (isVisible) {
-                const dateStr = dateObj.toLocaleDateString('vi-VN');
-                const totalAmount = data.grandTotal || data.total || 0;
+			if (isVisible) {
+				const dateStr = dateObj.toLocaleDateString('vi-VN');
+				const totalAmount = data.grandTotal || data.total || 0;
 
-                body.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="p-3 border text-left w-[10%]">${data.id || 'N/A'}</td>
-                        <td class="p-3 border text-left w-[30%] truncate">${data.customer || 'Khách lẻ'}</td>
-                        <td class="p-3 border text-center w-[15%]">${dateStr}</td>
-                        <td class="p-3 border font-semibold text-right w-[25%]">
-                            ${Number(totalAmount).toLocaleString('vi-VN')} VNĐ
-                        </td>
-                        <td class="p-3 border text-center w-[20%]">
-                            <div class="flex justify-center gap-5">
-                                <button onclick="viewInvoiceDetails('${doc.id}')" title="Xem" class="text-green-600 hover:text-green-800 transition-transform hover:scale-110">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                                </button>
-                                <button onclick="reprintSale('${doc.id}')" title="In lại" class="text-blue-600 hover:text-blue-800 transition-transform hover:scale-110">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
-                                </button>
-                                <button onclick="deleteSale('${doc.id}')" title="Xóa" class="text-red-600 hover:text-red-800 transition-transform hover:scale-110">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            }
+				body.innerHTML += `
+					<tr class="hover:bg-transparent transition-colors">
+						<td colspan="5" class="p-2">
+							<div class="flex items-center w-full bg-white border border-slate-200 border-l-4 border-l-blue-400 border-r-4 border-r-blue-400 rounded-lg p-3 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] hover:shadow-xl transition-all duration-200">
+								<div class="text-[11px] font-bold text-slate-700 w-[10%] truncate px-2">${data.id || 'N/A'}</div>
+								<div class="text-[11px] font-bold text-slate-900 truncate w-[30%] px-2">${data.customer || 'Khách lẻ'}</div>
+								<div class="text-[11px] font-bold text-slate-700 w-[15%] text-center px-2">${dateStr}</div>
+								<div class="text-[11px] font-black text-rose-600 w-[25%] text-right px-2">${Number(totalAmount).toLocaleString('vi-VN')} VNĐ</div>
+								<div class="flex justify-center items-center gap-4 w-[20%] px-2">
+									<button onclick="viewInvoiceDetails('${doc.id}')" title="Xem" class="text-green-600 hover:text-green-800 transition-transform hover:scale-110">
+										<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+									</button>
+									<button onclick="reprintSale('${doc.id}')" title="In lại" class="text-blue-600 hover:text-blue-800 transition-transform hover:scale-110">
+										<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+									</button>
+									<button onclick="deleteSale('${doc.id}')" title="Xóa" class="text-red-600 hover:text-red-800 transition-transform hover:scale-110">
+										<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+									</button>
+								</div>
+							</div>
+						</td>
+					</tr>
+				`;
+			}
         });
     } catch (err) {
         console.error("Lỗi truy vấn Firestore:", err);
@@ -5014,6 +5044,7 @@ async function loadCustomers() {
     }
 }
 
+
 // Hàm này chuyên để lọc và hiển thị, gọi mỗi khi gõ phím
 function renderCustomerList() {
     const body = document.getElementById('customer-list-body');
@@ -5029,43 +5060,36 @@ function renderCustomerList() {
     body.innerHTML = '';
     filteredList.forEach(data => {
         const debt = data.debt || 0;
-        // Đảm bảo totalPaid không bị lỗi undefined
         const totalPaid = data.totalPaid || 0; 
         
         body.innerHTML += `
-            <tr class="hover:bg-slate-50">
-                <td class="p-3 border font-bold ${debt > 0 ? 'text-blue-600' : ''}">${data.name || ''}</td>
-                <td class="p-3 border">${data.address || ''}</td>
-                <td class="p-3 border">${data.phone || ''}</td>
-                <td class="p-3 border text-center font-bold text-green-600">${totalPaid.toLocaleString('vi-VN')} đ</td>
-                <td class="p-3 border text-center font-bold ${debt > 0 ? 'text-red-600' : 'text-slate-500'}">
-                    ${debt.toLocaleString('vi-VN')} đ
+            <tr class="transition-all duration-300">
+                <td colspan="6" class="p-1">
+                    <div class="flex items-center w-full bg-white border border-slate-200 border-l-4 border-l-blue-400 border-r-4 border-r-blue-400 rounded-lg p-2 
+                                shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] 
+                                hover:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.15)] hover:scale-[1.005] hover:ring-2 hover:ring-blue-200 
+                                transition-all duration-300">
+                        <div class="px-2 text-[11px] font-bold ${debt > 0 ? 'text-blue-600' : 'text-slate-700'} w-[20%] truncate">${data.name || ''}</div>
+                        <div class="px-2 text-[11px] text-slate-600 w-[20%] truncate">${data.address || ''}</div>
+                        <div class="px-2 text-[11px] text-slate-600 w-[15%]">${data.phone || ''}</div>
+                        <div class="px-2 text-[11px] font-bold text-green-600 w-[15%] text-center">${totalPaid.toLocaleString('vi-VN')} đ</div>
+                        <div class="px-2 text-[11px] font-bold ${debt > 0 ? 'text-red-600' : 'text-slate-500'} w-[15%] text-center">${debt.toLocaleString('vi-VN')} đ</div>
+                        <div class="px-1 w-[15%] text-center relative">
+                            <button onclick="toggleMenu(this)" class="bg-blue-600 text-white py-0.5 px-2 rounded text-[10px] font-bold shadow-sm">Thao tác ▼</button>
+                            <div class="hidden absolute menu-action right-0 mt-2 w-28 bg-white border border-blue-200 rounded-lg shadow-xl p-1 flex-col gap-1 z-[100]">
+                                <button onclick="payDebt('${data.id}', ${debt}, '${data.name}')" class="bg-green-600 text-white py-1 rounded text-[10px] w-full font-bold">Trả nợ</button>
+                                <button onclick="setOpeningDebt('${data.id}', '${data.name}')" class="bg-orange-500 text-white py-1 rounded text-[10px] w-full font-bold">Đầu kỳ</button>
+                                <button onclick="showDebtHistory('${data.id}', '${data.name}')" class="bg-indigo-500 text-white py-1 rounded text-[10px] w-full font-bold">Lịch sử</button>
+                                <button onclick="editCustomer('${data.id}')" class="bg-blue-500 text-white py-1 rounded text-[10px] w-full font-bold">Sửa</button>
+                                <button onclick="deleteCustomer('${data.id}')" class="bg-red-500 text-white py-1 rounded text-[10px] w-full font-bold">Xóa</button>
+                            </div>
+                        </div>
+                    </div>
                 </td>
-                <td class="p-3 border text-center">
-    <div class="relative inline-block text-left">
-        <button onclick="toggleMenu(this)" 
-                class="bg-blue-600 text-white py-1 px-3 rounded text-[11px] font-bold shadow-sm">
-            Thao tác ▼
-        </button>
-        
-        <div class="hidden absolute menu-action right-0 mt-2 w-28 bg-white border border-blue-200 rounded-lg shadow-xl p-1 flex-col gap-1 z-[100]">
-				<button onclick="payDebt('${data.id}', ${debt}, '${data.name}')" class="bg-green-600 text-white py-1 rounded text-[10px] w-full font-bold">Trả nợ</button>
-				<button onclick="setOpeningDebt('${data.id}', '${data.name}')" class="bg-orange-500 text-white py-1 rounded text-[10px] w-full font-bold">Đầu kỳ</button>
-				<button onclick="showDebtHistory('${data.id}', '${data.name}')" class="bg-indigo-500 text-white py-1 rounded text-[10px] w-full font-bold">Lịch sử</button>
-				
-				<!-- NÚT SỬA ĐẶT TẠI ĐÂY -->
-				<button onclick="editCustomer('${data.id}')" class="bg-blue-500 text-white py-1 rounded text-[10px] w-full font-bold">Sửa</button>
-				
-				<!-- NÚT XÓA Ở CUỐI -->
-				<button onclick="deleteCustomer('${data.id}')" class="bg-red-500 text-white py-1 rounded text-[10px] w-full font-bold">Xóa</button>
-			</div>
-		</div>
-	</td>
             </tr>
         `;
     });
 }
-
 
 
 // Hàm mở/đóng menu (cách đơn giản nhất)
@@ -6895,27 +6919,33 @@ async function addProduct() {
 }
 
 // 2. Hàm hiển thị danh sách để quản lý
+// 2. Hàm hiển thị danh sách để quản lý
 async function loadProductManage() {
-    // Sắp xếp theo createdAt tăng dần (asc: cũ trước, mới sau)
     const snapshot = await db.collection('products').orderBy('createdAt', 'asc').get();
     const tbody = document.getElementById('prod-manage-body');
     tbody.innerHTML = '';
     
     snapshot.forEach(doc => {
         let p = doc.data();
-        // Kiểm tra nếu barcode không tồn tại (SP cũ) thì để trống và gợi ý Gán mã
         let barcodeDisplay = p.barcode ? 
-            `<span class="bg-blue-100 text-blue-700 px-2 py-1 rounded font-bold">${p.barcode}</span>` : 
-            '<span class="text-gray-400 italic">Chưa có</span>';
+            `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold text-[11px]">${p.barcode}</span>` : 
+            '<span class="text-gray-400 italic text-[11px]">Chưa có</span>';
         
         tbody.innerHTML += `
-            <tr class="border-b hover:bg-gray-50">
-                <td class="p-3">${barcodeDisplay}</td>
-                <td class="p-3">${p.name}</td>
-                <td class="p-3">${p.unit}</td>
-                <td class="p-3 text-center">
-                    <button onclick="editBarcode('${doc.id}', '${p.name}')" class="text-blue-600 font-bold hover:underline mr-3">Gán mã</button>
-                    <button onclick="deleteProduct('${doc.id}')" class="text-red-500 font-bold hover:underline">Xóa</button>
+            <tr class="transition-all duration-300">
+                <td colspan="4" class="p-1">
+                    <div class="flex items-center w-full bg-white border border-slate-200 border-l-4 border-l-blue-400 border-r-4 border-r-blue-400 rounded-lg p-2 
+                                shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] 
+                                hover:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.15)] hover:scale-[1.01] hover:ring-2 hover:ring-blue-200 
+                                transition-all duration-300">
+                        <div class="px-2 w-[25%]">${barcodeDisplay}</div>
+                        <div class="px-2 w-[35%] text-[12px] font-bold text-slate-800 truncate">${p.name}</div>
+                        <div class="px-2 w-[15%] text-[12px] text-slate-600">${p.unit}</div>
+                        <div class="px-2 w-[25%] text-center">
+                            <button onclick="editBarcode('${doc.id}', '${p.name}')" class="text-blue-600 text-[11px] font-bold hover:underline mr-3">Gán mã</button>
+                            <button onclick="deleteProduct('${doc.id}')" class="text-red-500 text-[11px] font-bold hover:underline">Xóa</button>
+                        </div>
+                    </div>
                 </td>
             </tr>`;
     });
@@ -7452,37 +7482,38 @@ async function loadTableNCC() {
         const safePhone = (d.phone || '').replace(/'/g, "\\'");
         const safeAddress = (d.address || '').replace(/'/g, "\\'");
 
-        bodyNCC.innerHTML += `<tr class="border-b hover:bg-gray-50">
-            <td class="p-2 text-sm w-[25%]">${d.name}</td>
-            <td class="p-2 text-sm w-[25%] hidden md:table-cell">${d.address || ''}</td>
-            <td class="p-2 text-sm w-[12%] text-center hidden md:table-cell">${d.phone || ''}</td>
-            <td class="p-2 text-sm w-[12%] text-center font-bold text-red-600">${(d.debt || 0).toLocaleString()}</td>
-            <td class="p-2 text-sm w-[12%] text-center text-green-600">${totalPaid.toLocaleString()}</td>
-            <td class="p-2 text-right w-[14%]">
-                <div class="flex flex-col md:flex-row gap-1 justify-end">
-                    <!-- Nút Trả Nợ -->
-                    <button onclick="openPayModal('${doc.id}', '${safeName}')" class="bg-blue-600 text-white px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap hover:bg-blue-700 transition">
-                        <span class="md:hidden">Trả</span>
-                        <span class="hidden md:inline">Trả Nợ</span>
-                    </button>
-                    <!-- Nút Lịch sử -->
-                    <button onclick="window.openHistory('${safeName}')" class="bg-purple-600 text-white px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap hover:bg-purple-700 transition">
-                        <span class="md:hidden">Sử</span>
-                        <span class="hidden md:inline">Lịch sử</span>
-                    </button>
-                    <!-- Nút Sửa -->
-                    <button onclick="editNCC('${doc.id}', '${safeName}', '${safePhone}', '${safeAddress}')" class="bg-yellow-500 text-white px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap hover:bg-yellow-600 transition">
-                        <span class="md:hidden">Sửa</span>
-                        <span class="hidden md:inline">Sửa</span>
-                    </button>
-                    <!-- Nút Xóa -->
-                    <button onclick="deleteDoc('suppliers', '${doc.id}')" class="bg-red-600 text-white px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap hover:bg-red-700 transition">
-                        <span class="md:hidden">Xóa</span>
-                        <span class="hidden md:inline">Xóa</span>
-                    </button>
-                </div>
-            </td>
-        </tr>`;
+        bodyNCC.innerHTML += `
+            <tr class="transition-all duration-300">
+                <td colspan="6" class="p-1">
+                    <div class="flex items-center w-full bg-white border border-slate-200 border-l-4 border-l-blue-400 border-r-4 border-r-blue-400 rounded-lg p-2 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] hover:shadow-xl hover:scale-[1.002] transition-all duration-300">
+                        <div class="p-2 text-sm w-[25%] font-bold">${d.name}</div>
+                        <div class="p-2 text-sm w-[25%] hidden md:table-cell">${d.address || ''}</div>
+                        <div class="p-2 text-sm w-[12%] text-center hidden md:table-cell">${d.phone || ''}</div>
+                        <div class="p-2 text-sm w-[12%] text-center font-bold text-red-600">${(d.debt || 0).toLocaleString()}</div>
+                        <div class="p-2 text-sm w-[12%] text-center text-green-600 font-bold">${totalPaid.toLocaleString()}</div>
+                        <div class="p-1 text-right w-[14%]">
+                            <div class="flex flex-col md:flex-row gap-1 justify-end">
+                                <button onclick="openPayModal('${doc.id}', '${safeName}')" class="bg-blue-600 text-white px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap hover:bg-blue-700 transition">
+                                    <span class="md:hidden">Trả</span>
+                                    <span class="hidden md:inline">Trả Nợ</span>
+                                </button>
+                                <button onclick="window.openHistory('${safeName}')" class="bg-purple-600 text-white px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap hover:bg-purple-700 transition">
+                                    <span class="md:hidden">Sử</span>
+                                    <span class="hidden md:inline">Lịch sử</span>
+                                </button>
+                                <button onclick="editNCC('${doc.id}', '${safeName}', '${safePhone}', '${safeAddress}')" class="bg-yellow-500 text-white px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap hover:bg-yellow-600 transition">
+                                    <span class="md:hidden">Sửa</span>
+                                    <span class="hidden md:inline">Sửa</span>
+                                </button>
+                                <button onclick="deleteDoc('suppliers', '${doc.id}')" class="bg-red-600 text-white px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap hover:bg-red-700 transition">
+                                    <span class="md:hidden">Xóa</span>
+                                    <span class="hidden md:inline">Xóa</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>`;
     }
 }
 
