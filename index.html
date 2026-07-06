@@ -1703,44 +1703,43 @@ function renderCustomerOrders(allSales, customersSnap) {
     }
 
     container.innerHTML = currentOrders.map(order => {
-        let barBg = order.diffDays >= 20 ? 'bg-rose-50' : (order.diffDays >= 10 ? 'bg-amber-50' : 'bg-emerald-50');
-        let borderColor = order.diffDays >= 20 ? 'border-rose-400' : (order.diffDays >= 10 ? 'border-amber-400' : 'border-emerald-400');
-        let dayTextColor = order.diffDays >= 20 ? 'text-rose-600' : (order.diffDays >= 10 ? 'text-amber-600' : 'text-emerald-600');
+    let barBg = order.diffDays >= 20 ? 'bg-rose-50' : (order.diffDays >= 10 ? 'bg-amber-50' : 'bg-emerald-50');
+    let borderColor = order.diffDays >= 20 ? 'border-rose-400' : (order.diffDays >= 10 ? 'border-amber-400' : 'border-emerald-400');
+    let dayTextColor = order.diffDays >= 20 ? 'text-rose-600' : (order.diffDays >= 10 ? 'text-amber-600' : 'text-emerald-600');
 
-        return `
-            <div class="block w-full">
-                <div class="flex items-center ${barBg} border-t border-b border-slate-200 border-l-4 ${borderColor} border-r-4 ${borderColor} rounded-lg p-2 gap-2 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] hover:shadow-xl transition-all duration-200">
+    return `
+        <div class="block w-full">
+            <div class="flex flex-wrap items-center ${barBg} border-t border-b border-slate-200 border-l-4 ${borderColor} border-r-4 ${borderColor} rounded-lg p-2 gap-2 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] hover:shadow-xl transition-all duration-200">
                     
-                    <div class="bg-white/80 px-2 py-1 rounded text-[11px] font-bold text-slate-600 truncate w-[15%]">
-                        ${order.invoiceNumber || order.id.slice(-6)}
+                <div class="bg-white/80 px-2 py-1 rounded text-[11px] font-bold text-slate-600 truncate w-[15%] min-w-[50px]">
+                    ${order.invoiceNumber || order.id.slice(-6)}
+                </div>
+                
+                <div class="bg-white/80 px-2 py-1 rounded text-[11px] font-bold text-slate-900 truncate flex-1 min-w-[100px]">
+                    ${order.customer}
+                </div>
+                
+                <div class="bg-white/80 px-2 py-1 rounded text-[11px] font-bold text-slate-700 w-[18%] text-center">
+                    ${order.orderDate.toLocaleDateString('vi-VN')}
+                </div>
+                
+                <div class="bg-white/80 px-2 py-1 rounded text-[11px] font-bold text-slate-900 min-w-[70px] text-center">
+                    ${Number(order.total || 0).toLocaleString('vi-VN')}đ
+                </div>
+                
+                <div class="flex items-center justify-end gap-1 flex-1 min-w-[80px]">
+                    <div class="bg-white px-2 py-1 rounded text-[11px] font-black ${dayTextColor} text-center shadow-inner">
+                        ${order.diffDays} ngày
                     </div>
-                    
-                    <div class="bg-white/80 px-2 py-1 rounded text-[11px] font-bold text-slate-900 truncate w-[30%]">
-                        ${order.customer}
-                    </div>
-                    
-                    <div class="bg-white/80 px-2 py-1 rounded text-[11px] font-bold text-slate-700 w-[15%] text-center">
-                        ${order.orderDate.toLocaleDateString('vi-VN')}
-                    </div>
-                    
-                    <div class="bg-white/80 px-2 py-1 rounded text-[11px] font-bold text-slate-900 w-[20%] text-center truncate">
-                        ${Number(order.total || 0).toLocaleString('vi-VN')}đ
-                    </div>
-                    
-                    <div class="flex items-center justify-center gap-1 w-[20%]">
-                        <div class="bg-white px-2 py-1 rounded text-[11px] font-black ${dayTextColor} text-center shadow-inner flex-1 mr-1">
-                            ${order.diffDays} ngày
-                        </div>
-                        <button onclick="viewOrderDetails('${order.id}')" 
-                            class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-[11px] font-bold transition shadow-sm">
-                            XEM
-                        </button>
-                    </div>
+                    <button onclick="viewOrderDetails('${order.id}')" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-[11px] font-bold transition shadow-sm">
+                        XEM
+                    </button>
                 </div>
             </div>
-        `;
-    }).join('');
-
+        </div>
+    `;
+}).join('');
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
     }
