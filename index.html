@@ -4065,6 +4065,7 @@ async function viewInvoiceDetails(docId) {
     }
 }
 
+// hiển thị và tìm kiếm phiếu xuất trang lịch sử hđ
   async function loadSalesList() {
     console.log("Đang bắt đầu hàm loadSalesList...");
     const body = document.getElementById('sales-list-body');
@@ -4591,7 +4592,7 @@ async function findProductDirectly(barcode) {
         console.error("Lỗi:", err);
     }
 }
-
+// tièm kiếm phiếu xuất bỏ
 function searchInvoice() {
     // Chỉ cần gọi lại hàm loadSalesList, 
     // hàm này đã được nâng cấp để tự tìm kiếm trong toàn bộ dữ liệu.
