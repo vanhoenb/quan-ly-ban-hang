@@ -838,15 +838,15 @@ function toggleMoreMenu() {
         <div class="grid grid-cols-2 md:grid-cols-12 gap-3 items-end">
             
            <div class="col-span-2 md:col-span-4">
-    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Tìm kiếm</label>
-    <input type="text" id="searchInput" placeholder="🔍 Số phiếu, KH..." 
-           oninput="loadSalesList()" 
-           class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
-</div>
+				<label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Tìm kiếm</label>
+				<input type="text" id="searchInput" placeholder="🔍 Số phiếu, KH..." 
+					   oninput="loadSalesList()" 
+					   class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
+			</div>
             
             <div class="col-span-1 md:col-span-2">
                 <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Tháng</label>
-                <input type="month" id="filterMonth" onchange="loadSalesList()" class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                <input type="month" id="filterMonth" onchange="handleMonthChange()" class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
 
             <div class="col-span-1 md:col-span-2">
@@ -4235,6 +4235,32 @@ async function viewInvoiceDetails(docId) {
     }
 }
 
+//=== ngày tháng ======
+function handleMonthChange() {
+    const filterMonth = document.getElementById('filterMonth');
+    const dateFrom = document.getElementById('dateFrom');
+    const dateTo = document.getElementById('dateTo');
+
+    if (!filterMonth.value) return;
+
+    // Lấy năm và tháng từ input month (ví dụ: 2026-06)
+    const [year, month] = filterMonth.value.split('-').map(Number);
+    
+    // Tạo chuỗi ngày đầu tháng: YYYY-MM-01
+    const firstDayStr = `${year}-${String(month).padStart(2, '0')}-01`;
+    
+    // Tạo ngày cuối tháng: Dùng hàm Date với ngày 0 của tháng sau để lấy ngày cuối của tháng hiện tại
+    // Chỉnh sửa: Sử dụng setDate(0) trên đối tượng Date mới để lấy chính xác ngày cuối
+    const lastDayObj = new Date(year, month, 0); 
+    const lastDayStr = `${year}-${String(month).padStart(2, '0')}-${String(lastDayObj.getDate()).padStart(2, '0')}`;
+
+    // Gán trực tiếp giá trị vào ô input (Input date bắt buộc cần định dạng YYYY-MM-DD)
+    dateFrom.value = firstDayStr;
+    dateTo.value = lastDayStr;
+    
+    // Tải lại dữ liệu
+    loadSalesList();
+}
 
 
 
@@ -4242,17 +4268,12 @@ function initSalesPage() {
     const now = new Date();
     const monthStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
     
-    // Gán giá trị mặc định cho ô chọn tháng
     const filterMonth = document.getElementById('filterMonth');
     if (filterMonth) {
         filterMonth.value = monthStr;
-        filterMonth.addEventListener('change', () => {
-            loadSalesList();
-        });
+        // Gọi hàm handleMonthChange ngay lần đầu để nó tự điền dateFrom/dateTo
+        handleMonthChange(); 
     }
-    
-    // Tải danh sách lần đầu
-    loadSalesList();
 }
 
 
