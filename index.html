@@ -342,9 +342,9 @@ function toggleMoreMenu() {
 				<div class="flex items-center w-full px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase">
 				<div class="w-[15%]">Số phiếu</div>
 				<div class="w-[30%]">Khách hàng</div>
-				<div class="w-[15%] text-center">Ngày tháng</div>
+				<div class="w-[20%] text-center">Ngày tháng</div>
 				<div class="w-[20%] text-center">Tổng tiền</div>
-				<div class="w-[20%] text-center">Trạng thái</div>
+				<div class="w-[15%] text-center">Trạng thái</div>
 			</div>
 
 				<div id="customer-orders-table" class="overflow-y-auto h-[400px] md:h-[500px] pr-2">
@@ -1709,32 +1709,27 @@ function renderCustomerOrders(allSales, customersSnap) {
 
     return `
         <div class="block w-full">
-            <div class="flex flex-wrap items-center ${barBg} border-t border-b border-slate-200 border-l-4 ${borderColor} border-r-4 ${borderColor} rounded-lg p-2 gap-2 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] hover:shadow-xl transition-all duration-200">
+            <div onclick="viewOrderDetails('${order.id}')" 
+                 class="flex items-center ${barBg} border-t border-b border-slate-200 border-l-4 ${borderColor} border-r-4 ${borderColor} rounded-lg p-2 gap-2 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] hover:shadow-xl transition-all duration-200 cursor-pointer hover:bg-slate-100">
                     
-                <div class="bg-white/80 px-2 py-1 rounded text-[11px] font-bold text-slate-600 truncate w-[15%] min-w-[50px]">
+                <div class="w-[15%] px-2 py-1 rounded text-[11px] font-bold text-slate-600 truncate">
                     ${order.invoiceNumber || order.id.slice(-6)}
                 </div>
                 
-                <div class="bg-white/80 px-2 py-1 rounded text-[11px] font-bold text-slate-900 truncate flex-1 min-w-[100px]">
+                <div class="w-[30%] px-2 py-1 rounded text-[11px] font-bold text-slate-900 truncate">
                     ${order.customer}
                 </div>
                 
-                <div class="bg-white/80 px-2 py-1 rounded text-[11px] font-bold text-slate-700 w-[18%] text-center">
+                <div class="w-[20%] px-2 py-1 rounded text-[11px] font-bold text-slate-700 text-right">
                     ${order.orderDate.toLocaleDateString('vi-VN')}
                 </div>
                 
-                <div class="bg-white/80 px-2 py-1 rounded text-[11px] font-bold text-slate-900 min-w-[70px] text-center">
+                <div class="w-[20%] px-2 py-1 rounded text-[11px] font-bold text-slate-900 text-right">
                     ${Number(order.total || 0).toLocaleString('vi-VN')}đ
                 </div>
                 
-                <div class="flex items-center justify-end gap-1 flex-1 min-w-[80px]">
-                    <div class="bg-white px-2 py-1 rounded text-[11px] font-black ${dayTextColor} text-center shadow-inner">
-                        ${order.diffDays} ngày
-                    </div>
-                    <button onclick="viewOrderDetails('${order.id}')" 
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-[11px] font-bold transition shadow-sm">
-                        XEM
-                    </button>
+                <div class="w-[15%] px-2 py-1 rounded text-[11px] font-black ${dayTextColor} text-right">
+                    ${order.diffDays} ngày
                 </div>
             </div>
         </div>
