@@ -3431,12 +3431,31 @@ function stopScanner(pageType) {
     // --- BÁN HÀNG (MỚI THÊM) ---=====
 //====================================================	
 
-      function updateSellReceiptNum() {
-        db.collection('sales').get().then(snapshot => {
-            const num = (snapshot.size + 1).toString().padStart(2, '0');
-            document.getElementById('sell-receipt').value = 'PX' + num;
+     function updateSellReceiptNum() {
+    db.collection('sales').get().then(snapshot => {
+        let maxNum = 0;
+        
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            // Lấy ID phiếu (giả sử định dạng là PX01, PX02...)
+            const id = data.id || ""; 
+            // Cắt chữ "PX" ra chỉ lấy phần số
+            const currentNum = parseInt(id.replace('PX', '')) || 0;
+            
+            // Tìm số lớn nhất
+            if (currentNum > maxNum) {
+                maxNum = currentNum;
+            }
         });
-    }
+
+        // Tạo số tiếp theo: Lấy số lớn nhất + 1
+        const nextNum = (maxNum + 1).toString().padStart(2, '0');
+        const receiptInput = document.getElementById('sell-receipt');
+        if (receiptInput) {
+            receiptInput.value = 'PX' + nextNum;
+        }
+    });
+}
 
     // 2. Cập nhật hàm autoFillDetails
 async function autoFillDetails(name) {
