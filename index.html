@@ -7641,8 +7641,14 @@ async function loadDropdowns() {
 
 // Hàm khởi chạy đồng bộ việc tải tất cả các bảng dữ liệu
 async function loadAllData() {
-    // Đã xóa loadTablePhieu() khỏi đây để không bị xung đột với hàm filter
-    await Promise.allSettled([loadTableNCC(), loadTableNL()]);
+    // Không dùng allSettled nữa, dùng await trực tiếp để đảm bảo thứ tự
+    await loadTableNCC(); 
+    await loadTableNL();
+    
+    // Nếu có hàm loadDashboard, gọi luôn ở đây cho chắc chắn
+    if (typeof loadDashboard === 'function') {
+        await loadDashboard();
+    }
 }
 /**
  * --- 2. TAB NHÀ CUNG CẤP (NCC) & MODAL POPUP ---
@@ -7773,25 +7779,22 @@ async function paySupplierDebt(docId, nccName) {
     if (!amount || amount <= 0) return alert("Vui lòng nhập số tiền hợp lệ!");
 
     try {
-        // Ghi vào collection 'payments' với tên trường supplierName khớp với image_91d67e.jpg
         await db.collection('payments').add({ 
             supplierName: nccName, 
             amount: amount, 
             date: new Date() 
         });
 
-        // Cập nhật nợ trong collection 'suppliers'
         await db.collection('suppliers').doc(docId).update({ 
             debt: firebase.firestore.FieldValue.increment(-amount) 
         });
 
-        // Đóng popup và reset dữ liệu
         document.getElementById('popup-ncc').classList.add('hidden');
         if (inputElement) inputElement.value = '';
         
-        // Tải lại dữ liệu (đảm bảo loadAllData là hàm global hoặc được định nghĩa)
+        // --- CHỈ CẦN THÊM 'await' Ở DÒNG NÀY ---
         if (typeof loadAllData === 'function') {
-            loadAllData();
+            await loadAllData(); 
         }
     } catch (error) {
         console.error("Lỗi khi thanh toán:", error);
@@ -7851,7 +7854,6 @@ async function deletePaymentNCC(payId, nccName, amount) {
         // 3. Cập nhật nợ cho TẤT CẢ các bản ghi tìm thấy
         for (const doc of snap.docs) {
             const data = doc.data();
-            // Nếu không có trường debt, mặc định là 0
             const currentDebt = data.debt || 0; 
             
             await doc.ref.update({ 
@@ -7864,7 +7866,9 @@ async function deletePaymentNCC(payId, nccName, amount) {
         if (popup) popup.classList.add('hidden');
         
         alert("Xóa thành công!");
-        loadAllData();
+        
+        // THÊM await VÀO ĐÂY ĐỂ ĐỢI DỮ LIỆU CẬP NHẬT XONG MỚI RENDER LẠI BẢNG
+        await loadAllData();
         
     } catch (error) {
         console.error("Lỗi:", error);
