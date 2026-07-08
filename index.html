@@ -7111,7 +7111,7 @@ async function addProduct() {
     updateProductDropdowns();
 }
 
-// 2. Hàm hiển thị danh sách để quản lý
+
 // 2. Hàm hiển thị danh sách để quản lý
 async function loadProductManage() {
     const snapshot = await db.collection('products').orderBy('createdAt', 'asc').get();
@@ -7125,12 +7125,10 @@ async function loadProductManage() {
             '<span class="text-gray-400 italic text-[11px]">Chưa có</span>';
         
         tbody.innerHTML += `
-            <tr class="transition-all duration-300">
+            <tr>
                 <td colspan="4" class="p-1">
                     <div class="flex items-center w-full bg-white border border-slate-200 border-l-4 border-l-blue-400 border-r-4 border-r-blue-400 rounded-lg p-2 
-                                shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] 
-                                hover:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.15)] hover:scale-[1.01] hover:ring-2 hover:ring-blue-200 
-                                transition-all duration-300">
+                                shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]">
                         <div class="px-2 w-[25%]">${barcodeDisplay}</div>
                         <div class="px-2 w-[35%] text-[12px] font-bold text-slate-800 truncate">${p.name}</div>
                         <div class="px-2 w-[15%] text-[12px] text-slate-600">${p.unit}</div>
