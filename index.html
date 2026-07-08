@@ -1565,12 +1565,12 @@ async function loadDashboard(filter = 'default') {
     // 0. Hiển thị trạng thái đang tải (nếu cần)
     console.log("Đang tải dữ liệu dashboard...");
 
-    // Sửa các lệnh .get() thành .get({ source: 'server' })
+    // Cập nhật để Firebase dùng Cache (tiết kiệm lượt đọc) thay vì luôn ép lấy từ Server
     const [salesSnap, receiptsSnap, suppliersSnap, customersSnap] = await Promise.all([
-        db.collection('sales').get({ source: 'server' }),
-        db.collection('receipts').get({ source: 'server' }),
-        db.collection('suppliers').get({ source: 'server' }),
-        db.collection('customers').get({ source: 'server' }) 
+        db.collection('sales').get({ source: 'default' }),
+        db.collection('receipts').get({ source: 'default' }),
+        db.collection('suppliers').get({ source: 'default' }),
+        db.collection('customers').get({ source: 'default' }) 
     ]);
     
     const now = new Date();
