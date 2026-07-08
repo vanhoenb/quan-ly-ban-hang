@@ -260,25 +260,25 @@ function toggleMoreMenu() {
 }
 </script>
 
-<aside id="sidebar" class="fixed md:relative w-55 h-full bg-slate-900 text-white p-4 z-[999] transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+<aside id="sidebar" onclick="toggleSidebarMenu()" class="cursor-pointer fixed md:relative w-55 h-full bg-slate-900 text-white p-4 z-[999] transform -translate-x-full md:translate-x-0 transition-all duration-300">
     <h1 class="text-xl font-bold mb-6 text-blue-400 flex items-center gap-2 mt-4 md:mt-0">
-        <i data-lucide="package"></i> MENU 
+        <i data-lucide="package" class="w-6 h-6"></i> <span class="sidebar-text">MENU</span> 
     </h1>
     <nav class="space-y-2 overflow-y-auto max-h-[80vh]">
-        <button onclick="showPage('page-home'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-700 flex items-center gap-3"><i data-lucide="home"></i> Trang Chủ</button>
-        <button onclick="showPage('page-import'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="arrow-down-circle"></i> Nhập Kho</button>
-        <button onclick="showPage('page-inventory'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="box"></i> Kho Hàng</button>
-        <button onclick="showPage('page-sell'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="shopping-cart"></i> Bán Hàng</button>
-        <button onclick="showPage('page-history'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="history"></i> Lịch Sử HĐ</button>
-        <button onclick="showPage('page-customers'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="users"></i> KH & Công Nợ</button>
-        <button onclick="showPage('page-products-manage'); loadProductManage(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="settings"></i> Danh Mục SP</button>
-        <button onclick="showPage('page-SanXuat'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="factory"></i> Sản Xuất</button>
-		<button onclick="showPage('page-NguyenLieu'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3">
-			<i data-lucide="database"></i> Nguyên Liệu
-		</button>
-				<button onclick="showPage('page-report'); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="bar-chart-3"></i> Báo Cáo</button>
-			</nav>
-		</aside>
+        <button onclick="showPage('page-home'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-700 flex items-center gap-3"><i data-lucide="home" class="w-6 h-6"></i> <span class="sidebar-text">Trang Chủ</span></button>
+        <button onclick="showPage('page-import'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="arrow-down-circle" class="w-6 h-6"></i> <span class="sidebar-text">Nhập Kho</span></button>
+        <button onclick="showPage('page-inventory'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="box" class="w-6 h-6"></i> <span class="sidebar-text">Kho Hàng</span></button>
+        <button onclick="showPage('page-sell'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="shopping-cart" class="w-6 h-6"></i> <span class="sidebar-text">Bán Hàng</span></button>
+        <button onclick="showPage('page-history'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="history" class="w-6 h-6"></i> <span class="sidebar-text">Lịch Sử HĐ</span></button>
+        <button onclick="showPage('page-customers'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="users" class="w-6 h-6"></i> <span class="sidebar-text">KH & Công Nợ</span></button>
+        <button onclick="showPage('page-products-manage'); loadProductManage(); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="settings" class="w-6 h-6"></i> <span class="sidebar-text">Danh Mục SP</span></button>
+        <button onclick="showPage('page-SanXuat'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="factory" class="w-6 h-6"></i> <span class="sidebar-text">Sản Xuất</span></button>
+        <button onclick="showPage('page-NguyenLieu'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3">
+            <i data-lucide="database" class="w-6 h-6"></i> <span class="sidebar-text">Nguyên Liệu</span>
+        </button>
+        <button onclick="showPage('page-report'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="bar-chart-3" class="w-6 h-6"></i> <span class="sidebar-text">Báo Cáo</span></button>
+    </nav>
+</aside>
 
 		<div id="sidebar-overlay" onclick="toggleSidebar()" class="md:hidden hidden fixed inset-0 bg-black/50 z-[998]"></div>
 
@@ -1283,6 +1283,23 @@ function toggleMoreMenu() {
         if (sidebar) sidebar.classList.remove('active');
         if (overlay) overlay.classList.remove('active');
     }
+	
+	
+	// ẨN HIỆN MENU TRÊN PC ===
+	function toggleSidebarMenu() {
+    const sidebar = document.getElementById('sidebar');
+    const texts = document.querySelectorAll('.sidebar-text');
+    
+    // Thu gọn sang w-20 để chứa vừa icon to, mở rộng về w-55
+    if (sidebar.classList.contains('w-55')) {
+        sidebar.classList.replace('w-55', 'w-20');
+        texts.forEach(el => el.classList.add('hidden'));
+    } else {
+        sidebar.classList.replace('w-20', 'w-55');
+        texts.forEach(el => el.classList.remove('hidden'));
+    }
+}
+	
   
 // --- HÀM ĐIỀU HƯỚNG TRANG ---
 function showPage(pageId) {
