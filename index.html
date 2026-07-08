@@ -7934,6 +7934,10 @@ async function deleteDoc(col, soPhieu) {
         // Cập nhật giao diện
         if (typeof filterNhapKho === 'function') await filterNhapKho();
         if (typeof loadAllData === 'function') await loadAllData();
+		// THÊM DÒNG NÀY VÀO: Cập nhật lại toàn bộ Dashboard để các ô số liệu tự nhảy
+        if (typeof loadDashboard === 'function') {
+            await loadDashboard();
+        }
         
     } catch (error) {
         console.error("Lỗi xóa: ", error);
@@ -8108,6 +8112,10 @@ async function saveFullInvoice() {
     // Tải lại dữ liệu và cập nhật bảng lọc nếu đang mở
     if (typeof loadAllData === 'function') await loadAllData();
     if (typeof filterNhapKho === 'function') await filterNhapKho();
+	// --- CẬP NHẬT LẠI DASHBOARD ---
+    if (typeof loadDashboard === 'function') {
+        await loadDashboard();
+    }
 }
 
 // Render bảng danh sách phiếu nhập
