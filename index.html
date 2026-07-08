@@ -3695,64 +3695,46 @@ function renderProductGrid() {
     grid.innerHTML = '';
     
     const themeClasses = [
-        { l: 'border-l-blue-500', r: 'border-r-blue-500', bg: 'bg-blue-50' },
-        { l: 'border-l-emerald-500', r: 'border-r-emerald-500', bg: 'bg-emerald-50' },
-        { l: 'border-l-amber-500', r: 'border-r-amber-500', bg: 'bg-amber-50' },
-        { l: 'border-l-rose-500', r: 'border-r-rose-500', bg: 'bg-rose-50' },
-        { l: 'border-l-violet-500', r: 'border-r-violet-500', bg: 'bg-violet-50' },
-        { l: 'border-l-cyan-500', r: 'border-r-cyan-500', bg: 'bg-cyan-50' }
+        { l: 'border-l-blue-400', bg: 'bg-white', btn: 'bg-blue-600', shadow: 'shadow-[0_8px_0_0_#1e40af]' },
+        { l: 'border-l-emerald-400', bg: 'bg-white', btn: 'bg-emerald-600', shadow: 'shadow-[0_8px_0_0_#065f46]' },
+        { l: 'border-l-amber-400', bg: 'bg-white', btn: 'bg-amber-600', shadow: 'shadow-[0_8px_0_0_#92400e]' },
+        { l: 'border-l-rose-400', bg: 'bg-white', btn: 'bg-rose-600', shadow: 'shadow-[0_8px_0_0_#9f1239]' },
+        { l: 'border-l-violet-400', bg: 'bg-white', btn: 'bg-violet-600', shadow: 'shadow-[0_8px_0_0_#6d28d9]' },
+        { l: 'border-l-cyan-400', bg: 'bg-white', btn: 'bg-cyan-600', shadow: 'shadow-[0_8px_0_0_#155e75]' }
     ];
     
     window.allProductCache.forEach((p, index) => {
-        // --- SỬA TẠI ĐÂY ---
-        // Dùng Number() để loại bỏ các số 0 thừa ở đuôi (ví dụ: 2.50 thành 2.5)
-        // Dùng Math.round(... * 100) / 100 để làm tròn sạch số lẻ thừa
         const rawStock = window.currentStockMap ? (window.currentStockMap[p.name] || 0) : 0;
         const realStock = Number(Math.round(rawStock * 100) / 100);
-        // -------------------
-
+        
         const safeName = p.name.replace(/'/g, "\\'");
         const idName = p.name.replace(/ /g, '_');
         const isOutOfStock = realStock <= 0;
-        
-        const retailPrice = Number(p.retail || 0);
-        const wholesalePrice = Number(p.wholesale || 0);
-        
         const b = themeClasses[index % themeClasses.length];
         
         grid.innerHTML += `
-            <div class="group ${b.bg} p-1.5 md:p-3 rounded-lg border border-gray-200 ${b.l} ${b.r} border-l-4 border-r-4 shadow-sm flex flex-col justify-between">
-                <div>
-                    <div class="flex justify-between items-start gap-1">
-                        <p class="font-bold text-gray-800 text-[10px] md:text-xs leading-tight h-6 md:h-8 overflow-hidden line-clamp-2 mb-0.5" title="${p.name}">
-                            ${p.name}
-                        </p>
-                        <button onclick="quickAdd('${safeName}', {shiftKey: true})" 
-                                class="flex-shrink-0 w-5 h-5 flex items-center justify-center bg-emerald-500 text-white rounded-full hover:bg-emerald-600 transition-all text-xs font-bold shadow-sm"
-                                title="Thêm dòng mới">
-                            +
-                        </button>
-                    </div>
-                    
-                    <div class="flex items-center gap-1 mb-0.5 md:mb-2">
-                        <span class="text-[10px] md:text-xs font-bold ${isOutOfStock ? 'text-red-600' : 'text-blue-600'}">TỒN:</span>
-                        <span id="stock-display-${idName}" class="text-[10px] md:text-xs font-black ${isOutOfStock ? 'text-red-600' : 'text-blue-700'}">
-                            ${isOutOfStock ? 'HẾT' : realStock}
-                        </span>
-                    </div>
+            <div onclick="${isOutOfStock ? `alert('Hết hàng!')` : `quickAdd('${safeName}')`}" 
+                 class="group ${b.bg} p-3 md:p-4 rounded-2xl border border-gray-100 ${b.l} border-l-8 
+                        ${b.shadow} flex flex-col justify-between cursor-pointer h-24 md:h-28
+                        hover:translate-y-[-4px] hover:shadow-[0_12px_0_0_rgba(0,0,0,0.2)] 
+                        active:translate-y-[4px] active:shadow-none transition-all duration-200">
+                
+                <div class="flex justify-between items-start gap-3">
+                    <p class="font-black text-gray-700 text-[12px] md:text-sm leading-tight line-clamp-2 uppercase tracking-tight" title="${p.name}">
+                        ${p.name}
+                    </p>
+                    <button onclick="quickAdd('${safeName}', {shiftKey: true}); event.stopPropagation();" 
+                            class="flex-shrink-0 w-8 h-8 flex items-center justify-center ${b.btn} text-white rounded-xl hover:brightness-125 transition-all text-lg font-black shadow-lg active:scale-95"
+                            title="Thêm dòng mới">
+                        +
+                    </button>
                 </div>
                 
-                <div class="mt-auto">
-                    <select id="price-type-${idName}" class="w-full text-[11px] md:text-xs font-bold border border-gray-200 rounded p-1 mb-1 bg-white outline-none">
-                        <option value="retail">Lẻ: ${retailPrice.toLocaleString('vi-VN')}</option>
-                        <option value="wholesale">Sỉ: ${wholesalePrice.toLocaleString('vi-VN')}</option>
-                    </select>
-                    
-                    <button onclick="${isOutOfStock ? `alert('Hết hàng!')` : `quickAdd('${safeName}', event)`}" 
-                            class="w-full ${isOutOfStock ? 'bg-gray-200 text-gray-500' : 'bg-blue-600 text-white'} text-[9px] md:text-[10px] py-1 rounded font-bold transition-all"
-                            title="Bấm để thêm | Giữ phím Shift + Bấm để thêm dòng mới">
-                        ${isOutOfStock ? 'Hết' : 'Chọn'}
-                    </button>
+                <div class="flex items-center gap-2 mt-1">
+                    <span class="text-[10px] uppercase font-black ${isOutOfStock ? 'text-red-500' : 'text-slate-400'}">Tồn kho:</span>
+                    <span id="stock-display-${idName}" class="text-[12px] font-black ${isOutOfStock ? 'text-red-600' : 'text-blue-700'}">
+                        ${isOutOfStock ? 'HẾT' : realStock}
+                    </span>
                 </div>
             </div>
         `;
@@ -3782,14 +3764,12 @@ async function quickAdd(productName, event) {
         return;
     }
 
-    // 2. TRỪ KHO VỚI LÀM TRÒN SẠCH (Sử dụng Math.round để tránh lỗi số lẻ)
-    // Nhân 100, làm tròn rồi chia lại 100 để giữ tối đa 2 chữ số thập phân
+    // 2. TRỪ KHO VỚI LÀM TRÒN SẠCH
     window.currentStockMap[productName] = Math.round((stock - 1) * 100) / 100;
 
-    // 3. Xử lý giỏ hàng
-    const idName = productName.replace(/ /g, '_');
-    const priceTypeEl = document.getElementById(`price-type-${idName}`);
-    const priceType = priceTypeEl ? priceTypeEl.value : 'retail';
+    // 3. Xử lý giỏ hàng (SỬA LẠI: Lấy giá từ cài đặt chung của hóa đơn)
+    const globalPriceTypeEl = document.getElementById('global-price-type');
+    const priceType = globalPriceTypeEl ? globalPriceTypeEl.value : 'retail';
     const price = priceType === 'wholesale' ? (p.wholesale || 0) : (p.retail || 0);
 
     const existingItem = !forceNew ? sellCart.find(item => item.name === productName) : null;
@@ -3811,13 +3791,13 @@ async function quickAdd(productName, event) {
     }
 
     // 4. RENDER GIAO DIỆN VỚI SỐ ĐÃ LÀM TRÒN
+    const idName = productName.replace(/ /g, '_');
     const stockDisplay = document.getElementById(`stock-display-${idName}`);
     if (stockDisplay) {
         const newStock = window.currentStockMap[productName];
-        // Sử dụng Number() để loại bỏ các số 0 thừa ở đuôi (ví dụ: 2.50 thành 2.5)
         const displayValue = Number(newStock);
         stockDisplay.innerText = displayValue <= 0 ? 'HẾT' : displayValue;
-        stockDisplay.className = `text-[10px] md:text-xs font-black ${displayValue <= 0 ? 'text-red-600' : 'text-blue-700'}`;
+        stockDisplay.className = `text-[10px] font-black ${displayValue <= 0 ? 'text-red-600' : 'text-blue-700'}`;
     }
 
     renderSellCart();
@@ -3843,10 +3823,15 @@ function applyGlobalPrice() {
     sellCart.forEach(item => {
         // Tìm lại sản phẩm trong cache để lấy đúng giá
         const p = window.allProductCache.find(x => x.name === item.name);
-        item.price = type === 'wholesale' ? (p.wholesale || 0) : (p.retail || 0);
-        item.total = item.price * item.qty;
+        if (p) {
+            item.price = parseFloat(type === 'wholesale' ? (p.wholesale || 0) : (p.retail || 0));
+            // Làm tròn tổng tiền sau khi nhân để tránh lỗi số lẻ (ví dụ: 10.000000001)
+            item.total = Math.round((item.price * item.qty) * 100) / 100;
+        }
     });
     renderSellCart();
+    // Nên gọi thêm hàm cập nhật tổng cộng đơn hàng để đảm bảo con số ở chân trang khớp với bảng
+    if (typeof updateCartTotalDisplay === 'function') updateCartTotalDisplay();
 }
 
 function updateCartItem(index, field, value) {
