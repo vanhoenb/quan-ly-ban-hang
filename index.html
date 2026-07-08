@@ -300,15 +300,15 @@ function toggleMoreMenu() {
     </div>
 
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <div class="bg-blue-500 p-3 md:p-6 rounded-2xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[90px] md:h-[120px]">
+        <div onclick="showDashboardDetail('revenue')" class="bg-blue-500 p-3 md:p-6 rounded-2xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:brightness-110 transition-all">
             <p class="text-[10px] md:text-[12px] font-bold uppercase opacity-80">Tổng Doanh Thu</p>
             <h3 id="total-revenue" class="text-md md:text-2xl font-black">0 đ</h3>
         </div>
-        <div class="bg-rose-500 p-3 md:p-6 rounded-2xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[90px] md:h-[120px]">
+        <div onclick="showDashboardDetail('debt-customer')" class="bg-rose-500 p-3 md:p-6 rounded-2xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:brightness-110 transition-all">
             <p class="text-[10px] md:text-[12px] font-bold uppercase opacity-80">Công Nợ Cần Thu</p>
             <h3 id="total-debt-summary" class="text-md md:text-2xl font-black">0 đ</h3>
         </div>
-        <div class="bg-amber-500 p-3 md:p-6 rounded-2xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[90px] md:h-[120px]">
+        <div onclick="showDashboardDetail('debt-ncc')" class="bg-amber-500 p-3 md:p-6 rounded-2xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:brightness-110 transition-all">
             <p class="text-[10px] md:text-[12px] font-bold uppercase opacity-80">Tổng Nợ NCC</p>
             <h3 id="total-debt-ncc-summary" class="text-md md:text-2xl font-black">0 đ</h3>
         </div>
@@ -337,19 +337,16 @@ function toggleMoreMenu() {
                 <div id="home-inventory-list" class="space-y-2 overflow-y-auto pr-2 h-[400px] md:h-[500px]"></div>
             </div>
             <div class="bg-white p-4 md:p-6 rounded-3xl border border-blue-500">
-				<h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">THỜI GIAN CẤP HÀNG ĐẠI LÝ</h3>
-				
-				<div class="flex items-center w-full px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase">
-				<div class="w-[15%]">Số phiếu</div>
-				<div class="w-[30%]">Khách hàng</div>
-				<div class="w-[20%] text-center">Ngày tháng</div>
-				<div class="w-[20%] text-center">Tổng tiền</div>
-				<div class="w-[15%] text-center">Trạng thái</div>
-			</div>
-
-				<div id="customer-orders-table" class="overflow-y-auto h-[400px] md:h-[500px] pr-2">
-					</div>
-			</div>
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">THỜI GIAN CẤP HÀNG ĐẠI LÝ</h3>
+                <div class="flex items-center w-full px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase">
+                    <div class="w-[15%]">Số phiếu</div>
+                    <div class="w-[30%]">Khách hàng</div>
+                    <div class="w-[20%] text-center">Ngày tháng</div>
+                    <div class="w-[20%] text-center">Tổng tiền</div>
+                    <div class="w-[15%] text-center">Trạng thái</div>
+                </div>
+                <div id="customer-orders-table" class="overflow-y-auto h-[400px] md:h-[500px] pr-2"></div>
+            </div>
         </div>
     </div>
 
@@ -371,16 +368,14 @@ function toggleMoreMenu() {
                 <div class="h-[400px] md:h-[500px] w-full"><canvas id="topProductsChart"></canvas></div>
             </div>
             <div class="bg-rose-50 p-4 md:p-6 rounded-3xl border border-rose-500">
-				<h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Khách hàng công nợ</h3>
-				
-				<div class="flex items-center w-full px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase">
-					<div class="w-[40%]">Khách hàng</div>
-					<div class="w-[25%] text-center">SĐT</div>
-					<div class="w-[35%] text-center">Công nợ</div>
-				</div>
-
-				<div id="home-debt-customers-list" class="overflow-y-auto pr-2 h-[400px] md:h-[500px]"></div>
-			</div>
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Khách hàng công nợ</h3>
+                <div class="flex items-center w-full px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase">
+                    <div class="w-[40%]">Khách hàng</div>
+                    <div class="w-[25%] text-center">SĐT</div>
+                    <div class="w-[35%] text-center">Công nợ</div>
+                </div>
+                <div id="home-debt-customers-list" class="overflow-y-auto pr-2 h-[400px] md:h-[500px]"></div>
+            </div>
         </div>
     </div>
 
@@ -394,6 +389,16 @@ function toggleMoreMenu() {
             <div class="mt-6 text-center">
                 <button onclick="document.getElementById('order-detail-modal').classList.add('hidden')" class="bg-violet-600 text-white px-8 py-2 rounded-lg font-bold">Đóng</button>
             </div>
+        </div>
+    </div>
+
+    <div id="dashboard-detail-modal" class="fixed inset-0 z-[9999] bg-black/50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm max-h-[80vh] overflow-hidden flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50">
+                <h3 id="modal-detail-title" class="font-black text-slate-800">Chi tiết</h3>
+                <button onclick="document.getElementById('dashboard-detail-modal').classList.add('hidden')" class="text-slate-400 hover:text-black text-xl font-bold">✕</button>
+            </div>
+            <div id="modal-detail-content" class="p-4 overflow-y-auto"></div>
         </div>
     </div>
 </div>
@@ -1614,7 +1619,6 @@ async function loadDashboard(filter = 'default') {
     // 3. Tính toán số liệu
     let totalRevenue = 0;
     
-    // THAY ĐỔI 2: Tính totalDebt trực tiếp từ danh sách khách hàng
     let totalDebt = 0;
     customersSnap.forEach(doc => {
         totalDebt += (Number(doc.data().debt) || 0);
@@ -1652,11 +1656,20 @@ async function loadDashboard(filter = 'default') {
     // 5. Cập nhật Danh sách khách hàng nợ
     renderDebtCustomers(customersSnap);
 
-    // THÊM MỚI: Cập nhật bảng phiếu xuất khách hàng
-    // Đảm bảo hàm renderCustomerOrders đã được khai báo ở nơi khác trong file JS
     if (typeof renderCustomerOrders === 'function') {
         renderCustomerOrders(allSales, customersSnap);
     }
+
+    // ==============================================================================
+    // --- [ĐOẠN MỚI ĐƯỢC THÊM VÀO] ---
+    // Lưu dữ liệu vào biến toàn cục window để hàm showDashboardDetail có thể sử dụng
+    // khi người dùng bấm vào các ô trên giao diện mà không cần load lại dữ liệu.
+    window.currentDashboardData = {
+        filteredSales: filteredSales, // Danh sách hóa đơn đã lọc theo thời gian
+        customersSnap: customersSnap, // Snapshot dữ liệu khách hàng
+        allSuppliers: allSuppliers    // Mảng dữ liệu nhà cung cấp
+    };
+    // ------------------------------------------------------------------------------
 
     // 6. Cập nhật Biểu đồ
     setTimeout(() => {
@@ -1665,6 +1678,140 @@ async function loadDashboard(filter = 'default') {
         // Cập nhật biểu đồ tháng mới
         if (typeof updateMonthlyRevenueChart === 'function') updateMonthlyRevenueChart(allSales);
     }, 50);
+}
+
+/**
+ * Hàm hiển thị chi tiết bảng điều khiển (Dashboard)
+ * Đặt hàm này ở cuối file JS của bạn
+ */
+function showDashboardDetail(type) {
+    // 1. Kiểm tra xem dữ liệu đã được load chưa
+    if (typeof window.currentDashboardData === 'undefined') {
+        console.error("Dữ liệu dashboard chưa sẵn sàng.");
+        alert("Dữ liệu chưa sẵn sàng, vui lòng tải lại trang.");
+        return;
+    }
+
+    const { filteredSales, customersSnap, allSuppliers } = window.currentDashboardData;
+    const modal = document.getElementById('dashboard-detail-modal');
+    const content = document.getElementById('modal-detail-content');
+    const title = document.getElementById('modal-detail-title');
+    
+    if (!modal || !content || !title) {
+        console.error("Không tìm thấy các phần tử Modal (HTML) trên trang.");
+        return;
+    }
+
+    // 2. Hiển thị Modal và trạng thái tải
+    modal.classList.remove('hidden');
+    content.innerHTML = '<p class="text-center text-sm p-4 text-slate-500">Đang tải dữ liệu...</p>';
+
+    // --- XỬ LÝ THEO LOẠI ---
+
+    // TRƯỜNG HỢP 1: DOANH THU THEO SẢN PHẨM
+    if (type === 'revenue') {
+        title.innerText = "Doanh thu theo Sản phẩm";
+        const productMap = {};
+        let totalItemsValue = 0; // Tổng tiền các items
+        let totalRealRevenue = 0; // Tổng thực tế từ order.total
+
+        filteredSales.forEach(order => {
+            const orderTotal = Number(order.total) || 0;
+            totalRealRevenue += orderTotal;
+
+            if (order.items && Array.isArray(order.items)) {
+                order.items.forEach(item => {
+                    const itemTotal = Number(item.total) || 0;
+                    productMap[item.name] = (productMap[item.name] || 0) + itemTotal;
+                    totalItemsValue += itemTotal;
+                });
+            }
+        });
+
+        // Tính phần chênh lệch (Thuế, phí, chiết khấu...)
+        const diff = totalRealRevenue - totalItemsValue;
+
+        // Chuyển object thành mảng và sắp xếp giảm dần
+        const sortedProducts = Object.entries(productMap).sort((a, b) => b[1] - a[1]);
+
+        let html = `
+            <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-xl">
+                <div class="flex justify-between items-center text-blue-900">
+                    <span class="font-bold text-xs uppercase">Tổng cộng</span>
+                    <span class="font-black text-sm">${totalRealRevenue.toLocaleString('vi-VN')} đ</span>
+                </div>
+            </div>
+            <div class="space-y-1 max-h-[60vh] overflow-y-auto pr-1">
+        `;
+        
+        // Render danh sách sản phẩm
+        sortedProducts.forEach(([name, total]) => {
+            html += `
+                <div class="flex justify-between items-center py-1.5 border-b border-slate-100">
+                    <span class="text-xs font-medium text-slate-700 pr-2 line-clamp-2">${name}</span>
+                    <span class="text-xs font-bold text-slate-900 whitespace-nowrap">${total.toLocaleString('vi-VN')} đ</span>
+                </div>
+            `;
+        });
+
+        // Nếu có chênh lệch (Thuế/Phí), hiển thị dòng này
+        if (Math.abs(diff) > 1) {
+            html += `
+                <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-300 bg-slate-50">
+                    <span class="text-xs font-bold text-slate-500 italic pr-2">Thuế / Phí / Khác</span>
+                    <span class="text-xs font-bold text-slate-600 whitespace-nowrap">${diff.toLocaleString('vi-VN')} đ</span>
+                </div>
+            `;
+        }
+        
+        html += '</div>';
+        content.innerHTML = html;
+    }
+
+    // TRƯỜNG HỢP 2: KHÁCH HÀNG CÔNG NỢ
+    else if (type === 'debt-customer') {
+        title.innerText = "Công nợ Khách hàng";
+        let html = '<div class="space-y-1 max-h-[60vh] overflow-y-auto pr-1">';
+        let hasDebt = false;
+
+        customersSnap.forEach(doc => {
+            const data = doc.data();
+            const debt = Number(data.debt) || 0;
+            if (debt > 0) {
+                hasDebt = true;
+                html += `
+                    <div class="flex justify-between items-center py-1.5 border-b border-slate-100">
+                        <span class="text-xs font-medium text-slate-700 pr-2 line-clamp-2">${data.name || 'Khách hàng'}</span>
+                        <span class="text-xs font-bold text-rose-600 whitespace-nowrap">${debt.toLocaleString('vi-VN')} đ</span>
+                    </div>
+                `;
+            }
+        });
+        html += '</div>';
+        content.innerHTML = !hasDebt ? '<p class="text-center text-sm p-4 text-slate-500">Hiện tại không có khách hàng nào nợ.</p>' : html;
+    }
+
+    // TRƯỜNG HỢP 3: CÔNG NỢ NHÀ CUNG CẤP
+    else if (type === 'debt-ncc') {
+        title.innerText = "Nợ Nhà cung cấp";
+        const activeDebtSuppliers = allSuppliers.filter(sup => (Number(sup.debt) || 0) > 0);
+
+        if (activeDebtSuppliers.length === 0) {
+            content.innerHTML = '<p class="text-center text-sm p-4 text-slate-500">Hiện tại không nợ nhà cung cấp nào.</p>';
+        } else {
+            let html = '<div class="space-y-1 max-h-[60vh] overflow-y-auto pr-1">';
+            activeDebtSuppliers.forEach(sup => {
+                html += `
+                    <div class="flex justify-between items-center py-1.5 border-b border-slate-100">
+                        <span class="text-xs font-medium text-slate-700 pr-2 line-clamp-2">${sup.name || 'NCC'}</span>
+                        <span class="text-xs font-bold text-amber-700 whitespace-nowrap">${Number(sup.debt).toLocaleString('vi-VN')} đ</span>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            content.innerHTML = html;
+        }
+    }
 }
 
 // Bổ sung hàm render bảng phiếu xuất
