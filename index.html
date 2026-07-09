@@ -6538,7 +6538,7 @@ async function exportExcelQuyen1() {
         sheet.mergeCells('A2:D2'); sheet.getCell('A2').value = `Thời gian kiểm tra: ngày ${day} tháng ${month} năm ${year}`;
         sheet.mergeCells('A3:D3'); sheet.getCell('A3').value = 'Địa điểm kiểm tra: Tại xưởng sản xuất';
         sheet.getCell('H1').value = 'Mẫu số 1: Kiểm tra trước khi chế biến thức ăn\n(Bước 1)';
-        sheet.getCell('H1').font = { bold: true, size: 14 };
+        sheet.getCell('H1').font = { bold: true, size: 16 };
         
         // --- 2. PHẦN I ---
         let r = 5;
@@ -6670,7 +6670,7 @@ async function exportExcelQuyen2() {
         sheet.mergeCells('A2:D2'); sheet.getCell('A2').value = `Thời gian kiểm tra: ngày ${day} tháng ${month} năm ${year}`;
         sheet.mergeCells('A3:D3'); sheet.getCell('A3').value = 'Địa điểm kiểm tra: Tại xưởng sản xuất';
         sheet.getCell('G1').value = 'MẪU SỐ 2: KIỂM TRA KHI CHẾ BIẾN THỨC ĂN ';
-        sheet.getCell('G1').font = { bold: true, size: 14 };
+        sheet.getCell('G1').font = { bold: true, size: 16 };
         sheet.getCell('G2').value = '(Bước 2)';
         sheet.getCell('G2').font = { bold: true };
         
@@ -6771,7 +6771,7 @@ async function exportExcelQuyen3() {
         // Tiêu đề chính
         sheet.mergeCells('A1:J1');
         sheet.getCell('A1').value = 'MẪU SỐ 3: KIỂM TRA SAU KHI CHẾ BIẾN THỨC ĂN (BƯỚC 3)';
-        sheet.getCell('A1').font = { bold: true, size: 14 };
+        sheet.getCell('A1').font = { bold: true, size: 16 };
         sheet.getCell('A1').alignment = { horizontal: 'center' };
 
         // --- 2. TIÊU ĐỀ CỘT (Dòng 3-4) ---
@@ -6879,7 +6879,7 @@ async function exportExcelLuuMau() {
         sheet.mergeCells('G2:L2');
         const titleCell = sheet.getCell('G2');
         titleCell.value = 'LƯU MẪU THEO DÕI VÀ HUỶ MẪU THỨC ĂN';
-        titleCell.font = { bold: true, size: 14 };
+        titleCell.font = { bold: true, size: 16 };
         titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
         let r = 5; 
