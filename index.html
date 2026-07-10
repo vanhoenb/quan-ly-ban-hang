@@ -2023,81 +2023,7 @@ function renderDebtCustomers(customersSnap) {
     container.innerHTML = hasDebt ? html : '<p class="text-center py-4 text-xs text-slate-400">Không có khách hàng nợ</p>';
 }
 
-// Hàm vẽ biểu đồ doanh thu theo tháng
-function updateMonthlyRevenueChart(allSales) {
-    const canvas = document.getElementById('monthlyRevenueChart');
-    if (!canvas) return;
 
-    if (window.monthlyChartInstance) window.monthlyChartInstance.destroy();
-
-    const ctx = canvas.getContext('2d');
-    const monthlyData = {};
-
-    allSales.forEach(order => {
-        const d = order.date?.toDate ? order.date.toDate() : new Date(order.date);
-        const monthStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-        monthlyData[monthStr] = (monthlyData[monthStr] || 0) + (Number(order.total) || 0);
-    });
-
-    const sortedMonths = Object.keys(monthlyData).sort();
-    const dataValues = sortedMonths.map(m => monthlyData[m]);
-
-    window.monthlyChartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: sortedMonths,
-            datasets: [{
-                label: 'Doanh thu',
-                data: dataValues,
-                backgroundColor: '#3b82f6',
-                borderRadius: 8
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { 
-                legend: { display: false },
-                // Thêm cấu hình hiển thị chữ trên cột
-                tooltip: {
-                    callbacks: {
-                        label: (ctx) => ctx.raw.toLocaleString('vi-VN') + ' đ'
-                    }
-                }
-            },
-            scales: {
-                y: { 
-                    beginAtZero: true, 
-                    grid: { display: false },
-                    ticks: {
-                        callback: (value) => (value / 1000000) + 'tr' // Rút gọn số trên trục Y
-                    }
-                },
-                x: { grid: { display: false } }
-            },
-            // Đây là phần hiển thị số tiền trực tiếp trên cột
-            animation: {
-                onComplete: function() {
-                    const chart = this;
-                    const ctx = chart.ctx;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'bottom';
-                    ctx.font = 'bold 10px Arial';
-                    ctx.fillStyle = '#1e293b';
-
-                    chart.data.datasets.forEach((dataset, i) => {
-                        chart.getDatasetMeta(i).data.forEach((bar, index) => {
-                            const data = dataset.data[index];
-                            // Định dạng số tiền (ví dụ: 1.000.000 -> 1tr)
-                            const text = (data / 1000000).toFixed(1) + 'tr';
-                            ctx.fillText(text, bar.x, bar.y - 5);
-                        });
-                    });
-                }
-            }
-        }
-    });
-}
 
 function refreshFinance() {
     const fromEl = document.getElementById('fin-from');
@@ -2381,24 +2307,20 @@ async function updateFinance() {
 }
 
 //===========biểu đồ ============
-// Hàm vẽ biểu đồ doanh thu
+// Hàm vẽ biểu đồ doanh thu theo ngày
 function updateRevenueChart(filteredSales) {
     const canvas = document.getElementById('revenueChart');
-    
-    // Nếu chưa thấy canvas, đợi 50ms rồi thử lại lần nữa
     if (!canvas) {
         setTimeout(() => updateRevenueChart(filteredSales), 50);
         return;
     }
 
-    // Nếu đã tồn tại instance cũ, hủy ngay lập tức
     if (window.revenueChartInstance) {
         window.revenueChartInstance.destroy();
         window.revenueChartInstance = null;
     }
 
     const ctx = canvas.getContext('2d');
-    
     const dailyData = {};
     filteredSales.forEach(order => {
         const d = order.date?.toDate ? order.date.toDate() : new Date(order.date);
@@ -2406,44 +2328,179 @@ function updateRevenueChart(filteredSales) {
         dailyData[dateStr] = (dailyData[dateStr] || 0) + (Number(order.total) || 0);
     });
 
-    // Sắp xếp các ngày theo thứ tự tăng dần
     const sortedDates = Object.keys(dailyData).sort();
-    
-    // Chuyển đổi định dạng ngày từ YYYY-MM-DD sang DD.MM.YYYY
     const labels = sortedDates.map(dateStr => {
         const [year, month, day] = dateStr.split('-');
-        return `${day}.${month}.${year}`;
+        return `${day}.${month}`;
     });
-    
     const data = sortedDates.map(date => dailyData[date]);
 
-    // Vẽ mới
     window.revenueChartInstance = new Chart(ctx, {
-        type: 'line',
+        type: 'bar',
         data: {
             labels: labels,
-            datasets: [{
-                label: 'Doanh thu',
-                data: data,
-                borderColor: '#2563eb',       // Giữ màu đường line
-                backgroundColor: 'transparent', // Đặt nền trong suốt
-                fill: false,                  // QUAN TRỌNG: Tắt hoàn toàn việc tô màu nền
-                tension: 0.3
-            }]
+            datasets: [
+                {
+                    label: 'Doanh thu (Cột)',
+                    type: 'bar',
+                    data: data,
+                    backgroundColor: 'rgba(168, 85, 247, 0.6)',
+                    // borderRadius: 20 tạo hình trụ tròn ở đầu
+                    borderRadius: { topLeft: 20, topRight: 20, bottomLeft: 0, bottomRight: 0 },
+                    barPercentage: 0.3, // Mảnh hơn nữa
+                    categoryPercentage: 0.6
+                },
+                {
+                    label: 'Doanh thu (Đường)',
+                    type: 'line',
+                    data: data,
+                    borderColor: '#1e40af',
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#1e40af'
+                }
+            ]
         },
         options: { 
             responsive: true, 
             maintainAspectRatio: false, 
-            animation: false,
-            plugins: {
-                legend: {
-                    display: false // Ẩn phần chú thích (ô màu xanh và chữ Doanh thu)
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { 
+                    beginAtZero: true, 
+                    grid: { color: '#f1f5f9' },
+                    ticks: { callback: (v) => (v / 1000000) + 'tr' } 
+                },
+                x: { grid: { display: false } }
+            },
+            animation: {
+                onComplete: function() {
+                    const chart = this;
+                    const ctx = chart.ctx;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
+                    ctx.font = 'bold 9px Arial';
+                    ctx.fillStyle = '#1e293b';
+
+                    const dataset = chart.data.datasets[0];
+                    chart.getDatasetMeta(0).data.forEach((bar, index) => {
+                        const value = dataset.data[index];
+                        if (value > 0) {
+                            // Giữ nguyên số nếu là 2.54, chỉ chia cho triệu
+                            const valInTr = (value / 1000000);
+                            const text = valInTr.toFixed(2).replace('.00', '') + 'tr';
+                            ctx.fillText(text, bar.x, bar.y - 5);
+                        }
+                    });
                 }
             }
         }
     });
 }
 
+
+// Hàm vẽ biểu đồ doanh thu theo tháng
+function updateMonthlyRevenueChart(allSales) {
+    const canvas = document.getElementById('monthlyRevenueChart');
+    if (!canvas) return;
+
+    if (window.monthlyChartInstance) window.monthlyChartInstance.destroy();
+
+    const ctx = canvas.getContext('2d');
+    const monthlyData = {};
+
+    allSales.forEach(order => {
+        const d = order.date?.toDate ? order.date.toDate() : new Date(order.date);
+        const monthStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        monthlyData[monthStr] = (monthlyData[monthStr] || 0) + (Number(order.total) || 0);
+    });
+
+    const sortedMonths = Object.keys(monthlyData).sort();
+    const dataValues = sortedMonths.map(m => monthlyData[m]);
+
+    window.monthlyChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: sortedMonths,
+            datasets: [{
+                label: 'Doanh thu',
+                data: dataValues,
+                backgroundColor: '#3b82f6',
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            // --- THÊM PHẦN CLICK NÀY ---
+            onClick: (event, elements) => {
+                if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const selectedMonth = sortedMonths[index];
+                    // Lọc và vẽ lại biểu đồ doanh thu theo ngày
+                    const filtered = allSales.filter(o => {
+                        const d = o.date?.toDate ? o.date.toDate() : new Date(o.date);
+                        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` === selectedMonth;
+                    });
+                    if (typeof updateRevenueChart === 'function') updateRevenueChart(filtered);
+                }
+            },
+            // ---------------------------
+            plugins: { 
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => ctx.raw.toLocaleString('vi-VN') + ' đ'
+                    }
+                }
+            },
+            scales: { 
+                y: { 
+                    beginAtZero: true, 
+                    grid: { display: false },
+                    ticks: { callback: (value) => (value / 1000000) + 'tr' }
+                },
+                x: { grid: { display: false } }
+            },
+            animation: {
+                onComplete: function() {
+                    const chart = this;
+                    const ctx = chart.ctx;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
+                    ctx.font = 'bold 10px Arial';
+                    ctx.fillStyle = '#1e293b';
+
+                    chart.data.datasets.forEach((dataset, i) => {
+                        chart.getDatasetMeta(i).data.forEach((bar, index) => {
+                            const data = dataset.data[index];
+                            const text = (data / 1000000).toFixed(1) + 'tr';
+                            ctx.fillText(text, bar.x, bar.y - 5);
+                        });
+                    });
+                }
+            }
+        }
+    });
+}
+
+function filterRevenueByDayOfMonth(monthKey, allSales) {
+    // 1. Lọc đơn hàng thuộc tháng đó
+    const monthSales = allSales.filter(order => {
+        const d = order.date?.toDate ? order.date.toDate() : new Date(order.date);
+        const orderMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        return orderMonth === monthKey;
+    });
+
+    // 2. Gọi hàm vẽ biểu đồ chi tiết theo ngày (tôi giả sử bạn dùng hàm updateRevenueChart đã gửi trước đó)
+    // Nếu bạn muốn hiển thị một thông báo cho người dùng biết đang xem tháng nào:
+    alert("Đang hiển thị chi tiết tháng: " + monthKey);
+    
+    // Gọi hàm vẽ lại biểu đồ doanh thu (biểu đồ đường hoặc cột theo ngày)
+    updateRevenueChart(monthSales); 
+}
 
 
 //==== TOP SP BÁN CHẠY ====================
