@@ -1446,30 +1446,34 @@ async function fillProductDetails(name) {
         }
     }
 
-    // 2. Tìm giá mới nhất từ lịch sử phiếu nhập
-    // Chúng ta lấy tất cả phiếu nhập, sắp xếp theo ngày mới nhất
-    try {
-        const snapshot = await db.collection('receipts').orderBy('date', 'desc').get();
-        let found = false;
-        
-        for (let doc of snapshot.docs) {
-            const item = doc.data().items.find(i => i.name === name);
-            if (item) {
-                // Đổ giá vào input (Người dùng vẫn có thể sửa lại sau đó)
-                if (retailInput) retailInput.value = item.retail || '';
-                if (wholesaleInput) wholesaleInput.value = item.wholesale || '';
-                found = true;
-                break; // Tìm thấy phiếu mới nhất rồi thì dừng
+    // 2. Tìm giá mới nhất: Ưu tiên giá từ danh mục (đã sửa ở Kho), sau đó mới tới lịch sử
+    if (product && (product.retail || product.wholesale)) {
+        if (retailInput) retailInput.value = product.retail || '';
+        if (wholesaleInput) wholesaleInput.value = product.wholesale || '';
+        console.log("Đã lấy giá từ danh mục Kho cho:", name);
+    } else {
+        // Nếu danh mục chưa có giá, tìm trong lịch sử phiếu nhập (Logic cũ)
+        try {
+            const snapshot = await db.collection('receipts').orderBy('date', 'desc').get();
+            let found = false;
+            
+            for (let doc of snapshot.docs) {
+                const item = doc.data().items.find(i => i.name === name);
+                if (item) {
+                    if (retailInput) retailInput.value = item.retail || '';
+                    if (wholesaleInput) wholesaleInput.value = item.wholesale || '';
+                    found = true;
+                    break;
+                }
             }
+            
+            if (!found) {
+                if (retailInput) retailInput.value = '';
+                if (wholesaleInput) wholesaleInput.value = '';
+            }
+        } catch (err) {
+            console.error("Lỗi khi tải giá từ lịch sử:", err);
         }
-        
-        // Nếu không tìm thấy lịch sử, reset giá về rỗng để nhập mới
-        if (!found) {
-            if (retailInput) retailInput.value = '';
-            if (wholesaleInput) wholesaleInput.value = '';
-        }
-    } catch (err) {
-        console.error("Lỗi khi tải giá từ lịch sử:", err);
     }
 }
 
@@ -3052,47 +3056,52 @@ function loadInventory() {
             tbody.innerHTML = '';
             
             orderList.forEach(key => {
-				const item = inventory[key];
-				const retail = Number(item.retail || 0).toLocaleString('vi-VN');
-				const wholesale = Number(item.wholesale || 0).toLocaleString('vi-VN');
-				
-				// SỬA Ở ĐÂY: Dùng làm tròn Math.round để xử lý sai số thập phân
-				const qtyNum = parseFloat(item.qty || 0);
-				const displayQty = (Math.round(qtyNum * 100) / 100).toString();
-				
-				const productData = window.allProducts.find(p => p.name === item.name);
-				const barcode = (productData && productData.barcode) ? productData.barcode : '---';
+                const item = inventory[key];
+                
+                // --- BẮT ĐẦU ĐOẠN SỬA ---
+                // Tìm sản phẩm trong allProducts để lấy giá mới nhất nếu có
+                const productData = window.allProducts.find(p => p.name === item.name);
+                
+                // Ưu tiên giá từ productData (nếu đã sửa ở kho), nếu không có mới dùng giá từ phiếu nhập (item)
+                const rVal = (productData && productData.retail) ? productData.retail : (item.retail || 0);
+                const wVal = (productData && productData.wholesale) ? productData.wholesale : (item.wholesale || 0);
+                
+                const retail = Number(rVal).toLocaleString('vi-VN');
+                const wholesale = Number(wVal).toLocaleString('vi-VN');
+                // --- KẾT THÚC ĐOẠN SỬA ---
+                
+                const qtyNum = parseFloat(item.qty || 0);
+                const displayQty = (Math.round(qtyNum * 100) / 100).toString();
+                
+                const barcode = (productData && productData.barcode) ? productData.barcode : '---';
 
-				// Cấu trúc mới đã bo góc và đổ bóng
-              tbody.innerHTML += `
-    <tr class="transition-all duration-300">
-        <td colspan="5" class="p-0.5">
-            <div class="flex items-center w-full bg-white border border-slate-200 border-l-4 border-l-blue-400 border-r-4 border-r-blue-400 rounded-lg p-1.5 
-                        shadow-[0_4px_6px_-2px_rgba(0,0,0,0.2)] hover:shadow-[0_6px_10px_-2px_rgba(0,0,0,0.25)] hover:scale-[1.002] transition-all duration-300">
-                
-                <div class="px-2 w-[40%] text-left">
-                    <div class="font-bold text-[13px] text-slate-800 leading-tight">${item.name}</div>
-                    <div class="text-[10px] text-gray-400 font-mono">Mã: ${barcode}</div>
-                </div>
-                
-                <div class="px-1 w-[10%] text-center text-[12px] text-slate-600">${item.unit}</div>
-                
-                <div class="px-1 w-[10%] text-center font-bold text-[13px] ${item.qty < 0 ? 'text-red-600' : 'text-blue-600'}">
-                    ${displayQty}
-                </div>
-                
-                <div class="px-1 w-[20%] text-center text-[12px] text-slate-600 price-cell">
-                    ${retail}
-                </div>
-                
-                <div class="px-1 w-[20%] text-center text-[12px] text-slate-600 price-cell">
-                    ${wholesale}
-                </div>
-                
-            </div>
-        </td>
-    </tr>
-`;
+                // Cấu trúc hiển thị (giữ nguyên, dùng biến retail/wholesale vừa tính ở trên)
+                tbody.innerHTML += `
+                <tr class="transition-all duration-300">
+                    <td colspan="5" class="p-0.5">
+                        <div class="flex items-center w-full bg-white border border-slate-200 border-l-4 border-l-blue-400 border-r-4 border-r-blue-400 rounded-lg p-1.5 shadow-[0_4px_6px_-2px_rgba(0,0,0,0.2)] hover:shadow-[0_6px_10px_-2px_rgba(0,0,0,0.25)] hover:scale-[1.002] transition-all duration-300">
+                            <div class="px-2 w-[40%] text-left">
+                                <div class="font-bold text-[13px] text-slate-800 leading-tight">${item.name}</div>
+                                <div class="text-[10px] text-gray-400 font-mono">Mã: ${barcode}</div>
+                            </div>
+                            <div class="px-1 w-[10%] text-center text-[12px] text-slate-600">${item.unit}</div>
+                            <div class="px-1 w-[10%] text-center font-bold text-[13px] ${item.qty < 0 ? 'text-red-600' : 'text-blue-600'}">
+                                ${displayQty}
+                            </div>
+                            <div class="px-1 w-[20%] text-center">
+                                <input type="text" value="${retail}" 
+                                       class="w-full text-center text-[12px] text-slate-600 bg-transparent border-b border-dashed border-slate-300 focus:border-blue-500 outline-none"
+                                       onblur="updateProductPrice('${item.name}', this.value, 'retail')">
+                            </div>
+                            <div class="px-1 w-[20%] text-center">
+                                <input type="text" value="${wholesale}" 
+                                       class="w-full text-center text-[12px] text-slate-600 bg-transparent border-b border-dashed border-slate-300 focus:border-blue-500 outline-none"
+                                       onblur="updateProductPrice('${item.name}', this.value, 'wholesale')">
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                `;
             });
         }).catch(err => {
             console.error("Lỗi khi tải phiếu xuất: ", err);
@@ -3108,6 +3117,54 @@ window.allProducts = [];
 
 // Lưu trữ các instance của Choices vào một object để quản lý nhiều dropdown
 window.choicesInstances = {}; 
+
+//Sửa giá SP ====
+window.updateProductPrice = async function(productName, newValue, type) {
+    const cleanValue = parseFloat(newValue.replace(/\./g, ''));
+    if (isNaN(cleanValue)) {
+        alert("Vui lòng nhập số hợp lệ!");
+        loadInventory();
+        return;
+    }
+
+    try {
+        const cleanName = productName.trim(); 
+        const snapshot = await db.collection('products').where('name', '==', cleanName).get();
+        
+        if (!snapshot.empty) {
+            const docId = snapshot.docs[0].id;
+            const updateData = {};
+            updateData[type] = cleanValue;
+            
+            await db.collection('products').doc(docId).update(updateData);
+            
+            // 1. Cập nhật cache allProducts
+            const pIdx = window.allProducts.findIndex(p => p.name && p.name.trim() === cleanName);
+            if (pIdx > -1) {
+                window.allProducts[pIdx][type] = cleanValue;
+            }
+            
+            // 2. CẬP NHẬT THÊM allProductCache (Dành cho hàm quickAdd)
+            if (window.allProductCache) {
+                const cIdx = window.allProductCache.findIndex(p => p.name && p.name.trim() === cleanName);
+                if (cIdx > -1) {
+                    window.allProductCache[cIdx][type] = cleanValue;
+                }
+            }
+            
+            console.log(`Đã cập nhật ${type} cho ${cleanName} thành ${cleanValue}`);
+        } else {
+            console.error("Không tìm thấy sản phẩm với tên chính xác là:", cleanName);
+            alert("Không tìm thấy sản phẩm: " + cleanName + " trong danh mục!");
+        }
+    } catch (err) {
+        console.error("Lỗi cập nhật giá:", err);
+        alert("Có lỗi xảy ra, vui lòng thử lại!");
+    }
+};
+
+
+
 
 async function updateProductDropdowns() {
     try {
