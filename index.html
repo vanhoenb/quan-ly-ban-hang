@@ -1586,8 +1586,10 @@ document.addEventListener('DOMContentLoaded', () => {
     window.refreshInventory();
 });
 
-// ==== TRANG CHỦ =====
-// ==== TRANG CHỦ =====
+//===================================================================
+// =============================TRANG CHỦ ===========================
+//===================================================================
+
 /**
  * Hàm điều phối chính để load dữ liệu trang chủ
  * @param {string} filter - 'today', 'week', 'month', hoặc 'YYYY-MM'
@@ -2154,7 +2156,8 @@ async function prepareInventoryData(targetDate) {
     return inventoryMap;
 }
 
-// Tồn kho
+// ================TỒN KHO ==============================
+
 async function renderInventoryList(filter = 'today') {
     const receiptsSnap = await db.collection('receipts').get();
     const salesSnap = await db.collection('sales').get();
@@ -2281,7 +2284,8 @@ async function renderInventoryList(filter = 'today') {
     document.getElementById('home-inventory-list').innerHTML = inventoryCardsHtml || '<p class="text-center py-4 text-xs">Không có dữ liệu</p>';
 }
 
-//============DOANH THU ==============
+//============================DOANH THU ====================
+
 // Hàm cập nhật Tài chính (Gọi khi thay đổi 2 ô input ngày)
 async function updateFinance() {
     const fromVal = document.getElementById('fin-from')?.value;
@@ -2333,7 +2337,8 @@ async function updateFinance() {
     } catch (error) { console.error("Lỗi:", error); }
 }
 
-//===========biểu đồ ============
+//============================BIỂU ĐỒ ==================================
+
 // Hàm vẽ biểu đồ doanh thu theo ngày
 function updateRevenueChart(filteredSales) {
     const canvas = document.getElementById('revenueChart');
@@ -2574,7 +2579,7 @@ function filterRevenueByDayOfMonth(monthKey, allSales) {
 }
 
 
-//==== TOP SP BÁN CHẠY ====================
+//==== =========================TOP SP BÁN CHẠY ====================
 function updateTopProductsChart(topProducts) {
     const ctx = document.getElementById('topProductsChart')?.getContext('2d');
     if (!ctx) return;
@@ -2648,7 +2653,10 @@ db.collection('customers').onSnapshot(() => {
     loadDashboard('default');
 });
 
-    // --- NHẬP KHO =================
+
+//========================================================================
+//==========================TRANG NHẬP KHO ===============================
+//========================================================================
 	
     function updateReceiptNum() {
         db.collection('receipts').get().then(snapshot => {
@@ -3448,6 +3456,10 @@ window.saveItemEdit = async function(docId, index) {
     }
 };
 
+//============================================================
+//=====================TRANG KHO HÀNG ========================
+//============================================================
+
 // tự động điền ngày
 function autoFillDates(monthValue) {
     if (!monthValue) return;
@@ -3772,9 +3784,9 @@ function stopScanner(pageType) {
 }
 
 
-//==================================================
-    // --- BÁN HÀNG (MỚI THÊM) ---=====
-//====================================================	
+//================================================================
+//=============================TRANG BÁN HÀNG ====================
+//================================================================	
 
      function updateSellReceiptNum() {
     db.collection('sales').get().then(snapshot => {
@@ -4426,6 +4438,11 @@ async function saveAndPrint() {
     }
 }
 
+//==================================================================
+//========================= TRANG LỊCH SỬ HĐ =======================
+//==================================================================
+
+
 async function viewInvoiceDetails(docId) {
     try {
         const doc = await db.collection('sales').doc(docId).get();
@@ -4621,9 +4638,6 @@ function initSalesPage() {
 }
 
 
-
-
-
 async function reprintSale(docId) {
     try {
         const doc = await db.collection('sales').doc(docId).get();
@@ -4703,8 +4717,9 @@ async function reprintSale(docId) {
     }
 }
 
-   async function deleteSale(docId) {
-    if (confirm("Xóa hóa đơn này sẽ cộng lại hàng vào kho và điều chỉnh lại công nợ (nếu có). Bạn chắc chắn chứ?")) {
+
+async function deleteSale(docId) {
+   if (confirm("Xóa hóa đơn này sẽ cộng lại hàng vào kho và điều chỉnh lại công nợ (nếu có). Bạn chắc chắn chứ?")) {
         try {
             // 1. Lấy thông tin hóa đơn
             const docRef = db.collection('sales').doc(docId);
@@ -4919,8 +4934,9 @@ document.addEventListener('click', (e) => {
     return result.charAt(0).toUpperCase() + result.slice(1) + " đồng./.";
 }
 
-// =====QUÉT MÃ QR ============
+// ================QUÉT MÃ QR ==============
 // ===== HÀM HỖ TRỢ TÌM KIẾM CHUẨN XÁC =====
+
 function getProductByBarcode(scannedCode) {
     const code = String(scannedCode || "").trim();
     if (!code) return null;
@@ -5383,8 +5399,10 @@ document.addEventListener('keydown', function(event) {
 });
 
 
+//=================================================================
+//========================= TRANG KHÁCH HÀNG ======================
+//=================================================================
 
-// TRANG KHÁCH HÀNG =====
 
 // Biến toàn cục để lưu trữ dữ liệu khách hàng
 window.allCustomersData = []; 
@@ -5803,7 +5821,10 @@ async function editCustomer(id) {
     }
 }
 
-//================ BÁO CÁO (ĐÃ TỐI ƯU HÓA) ==============
+//======================================================================
+//======================= TRANG BÁO CÁO (ĐÃ TỐI ƯU HÓA) ================
+//======================================================================
+
 
 const showLoading = () => Swal.fire({ title: 'Đang xử lý...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
 
@@ -6616,7 +6637,7 @@ function setBorderStyle(cell) {
 }
 
 
-//============BC Y TẾ =========
+//================== BÁO CÁO Y TẾ =============
 
 
 // --- HÀM HỖ TRỢ ĐỊNH DẠNG NGÀY THÁNG ---
@@ -6652,7 +6673,7 @@ async function saveExcelFile(workbook, filename) {
     } catch (e) { alert("Lỗi lưu file: " + e.message); }
 }
 
-// --- 1. XUẤT QUYỂN 1 (ĐÃ SỬA LỖI LẤY DỮ LIỆU) ---
+//================== 1. XUẤT QUYỂN 1 =====================
 async function exportExcelQuyen1() {
     const dates = getDates(); if (!dates) return;
     try {
@@ -6807,7 +6828,7 @@ async function exportExcelQuyen1() {
     } catch (err) { alert("Lỗi: " + err.message); }
 }
 
-// --- 1. XUẤT QUYỂN 2 (ĐÃ CĂN CHỈNH BẢNG NHƯ ẢNH) ---
+// ============== 1. XUẤT QUYỂN 2 ====================
 async function exportExcelQuyen2() {
     const dates = getDates(); if (!dates) return;
     try {
@@ -6911,7 +6932,8 @@ async function exportExcelQuyen2() {
     } catch (err) { alert("Lỗi xuất Q2: " + err.message); }
 }
 
-// --- 2. XUẤT QUYỂN 3 ---
+// ================== 2. XUẤT QUYỂN 3 ================
+
 async function exportExcelQuyen3() {
     const dates = getDates(); if (!dates) return;
     
@@ -7011,7 +7033,8 @@ async function exportExcelQuyen3() {
     } catch (e) { alert("Lỗi: " + e.message); }
 }
 
-// --- 3. XUẤT LƯU MẪU ---
+// ================ 3. XUẤT LƯU MẪU ================
+
 async function exportExcelLuuMau() {
     const dates = getDates(); if (!dates) return;
     
@@ -7119,8 +7142,10 @@ async function exportExcelLuuMau() {
 }
 
 
-//====================================
-//======= CÔNG NỢ NHÀ CC ==============
+//====================================================
+//================== CÔNG NỢ NHÀ CC ==================
+//==================================================== 
+
 async function exportSupplierDebtReport() {
     // 1. Lấy và kiểm tra dữ liệu đầu vào từ giao diện
     const from = document.getElementById('date-from').value;
@@ -7288,7 +7313,10 @@ async function exportSupplierDebtReport() {
     } catch (e) { alert("Lỗi xuất báo cáo NCC: " + e.message); }
 }
 
-// ========== QUẢN LÝ SẢN PHẨM========
+//==================================================================
+// ======================== TRANG QUẢN LÝ SẢN PHẨM =================
+//==================================================================
+
 // 1. Hàm thêm sản phẩm mới
 async function addProduct() {
     const name = document.getElementById('new-prod-name').value;
@@ -7464,9 +7492,9 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-
-// ============SẢN XUẤT =============
-
+//========================================================
+// ======================= TRANG SẢN XUẤT ================
+//========================================================
 
 
 function getRawNumber(id) {
@@ -7783,7 +7811,11 @@ async function filterSanXuat() {
     }
 }
 
-// --- 1. HỆ THỐNG CHUNG ---
+
+//==========================================================
+//================== TRANG NGUYÊN LIỆU =====================
+//==========================================================
+
 //const db = firebase.firestore();
 
 /**
