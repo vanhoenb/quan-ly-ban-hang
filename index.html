@@ -320,7 +320,7 @@ function toggleMoreMenu() {
 
     <div class="flex space-x-2 bg-slate-200 p-1 rounded-xl">
         <button onclick="switchMainTab('inventory')" id="btn-main-inventory" class="flex-1 py-2 text-xs md:text-sm font-bold rounded-lg transition-all bg-white shadow-sm text-blue-600">NXT KHO</button>
-        <button onclick="switchMainTab('revenue')" id="btn-main-revenue" class="flex-1 py-2 text-xs md:text-sm font-bold rounded-lg transition-all text-slate-600">DOANH THU SP</button>
+        <button onclick="switchMainTab('revenue')" id="btn-main-revenue" class="flex-1 py-2 text-xs md:text-sm font-bold rounded-lg transition-all text-slate-600">DOANH THU</button>
         <button onclick="switchMainTab('products')" id="btn-main-products" class="flex-1 py-2 text-xs md:text-sm font-bold rounded-lg transition-all text-slate-600">TOP SP + KH NỢ</button>
     </div>
 
@@ -2371,7 +2371,8 @@ function updateRevenueChart(filteredSales) {
                     label: 'Doanh thu (Cột)',
                     type: 'bar',
                     data: data,
-                    backgroundColor: 'rgba(168, 85, 247, 0.6)',
+                    order: 2, // Lớp dưới
+                    backgroundColor: 'rgba(220, 38, 38, 0.8)',
                     borderRadius: { topLeft: 20, topRight: 20, bottomLeft: 0, bottomRight: 0 },
                     barPercentage: 0.3,
                     categoryPercentage: 0.6
@@ -2380,6 +2381,7 @@ function updateRevenueChart(filteredSales) {
                     label: 'Doanh thu (Đường)',
                     type: 'line',
                     data: data,
+                    order: 1, // Lớp trên (số nhỏ hơn sẽ hiển thị đè lên)
                     borderColor: '#1e40af',
                     backgroundColor: 'transparent',
                     borderWidth: 2,
@@ -2418,7 +2420,6 @@ function updateRevenueChart(filteredSales) {
                     const finalTax = totalTax + gap;
 
                     const body = document.getElementById('modalDetailsBody');
-                    // Giao diện bảng gọn gàng, dùng class để tự co giãn theo di động
                     let htmlContent = Object.keys(itemsInDay).map(name => `
                         <tr class="border-b border-gray-100 hover:bg-gray-50">
                             <td class="py-2 px-1 text-sm text-slate-700">${name}</td>
@@ -2450,6 +2451,22 @@ function updateRevenueChart(filteredSales) {
             scales: {
                 y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { callback: v => (v / 1000000) + 'tr' } },
                 x: { grid: { display: false } }
+            },
+            animation: {
+                onComplete: function() {
+                    const chart = this;
+                    const ctx = chart.ctx;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
+                    ctx.font = 'bold 10px Arial';
+                    ctx.fillStyle = '#000000'; // Đã đổi sang màu đen
+                    chart.getDatasetMeta(0).data.forEach((bar, index) => {
+                        const val = data[index];
+                        if (val > 0) {
+                            ctx.fillText((val / 1000000).toFixed(2).replace('.00', '') + 'tr', bar.x, bar.y - 5);
+                        }
+                    });
+                }
             }
         }
     });
