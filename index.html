@@ -5616,7 +5616,13 @@ async function payDebt(id, currentDebt, customerName) {
             });
 
             Swal.fire('Thành công!', 'Đã cập nhật nợ cho khách hàng.', 'success');
-            loadCustomers(); // Load lại danh sách để cập nhật số nợ mới
+            
+            // Các lệnh cập nhật UI
+            loadCustomers(); // Load lại danh sách khách hàng
+            if (typeof loadDashboard === 'function') {
+                loadDashboard(); // Cập nhật lại số liệu Dashboard ở trang chủ
+            }
+            
         } catch (error) {
             Swal.fire('Lỗi!', error.message, 'error');
         }
