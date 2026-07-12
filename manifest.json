@@ -1,13 +1,13 @@
 {
   "name": "QUẢN LÝ KHO & BÁN HÀNG",
-  "short_name": "KHO & BÁN HÀNG",
+  "short_name": "BÁN HÀNG",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#0f172a",
   "icons": [
     {
-      "src": "https://i.postimg.cc/63QWGZCM/Hoe.png",
+      "src": "https://i.postimg.cc/NFzKdc6X/Chu-H.png",
       "sizes": "512x512",
       "type": "image/png"
     }
