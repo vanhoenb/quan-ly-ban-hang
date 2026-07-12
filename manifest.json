@@ -1,26 +1,15 @@
- {
-
+{
   "name": "QUẢN LÝ KHO & BÁN HÀNG",
-
-  "short_name": "KHO & BÁN HÀNG ",
-
+  "short_name": "KHO & BÁN HÀNG",
   "start_url": "./index.html",
-
   "display": "standalone",
-
   "background_color": "#ffffff",
-
   "theme_color": "#0f172a",
-
   "icons": [
-
     {
-  "src": "https://cdn-icons-png.flaticon.com/512/9133/9133742.png",
-  "sizes": "512x512",
-  "type": "image/png"
-}
-
+      "src": "https://img.icons8.com/?size=512&id=55389&format=png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
   ]
-
-} 
-
+}
