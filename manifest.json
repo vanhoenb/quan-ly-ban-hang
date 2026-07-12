@@ -3,11 +3,11 @@
   "short_name": "KHO & BÁN HÀNG",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#000000",
   "theme_color": "#0f172a",
   "icons": [
     {
-      "src": "https://img.icons8.com/?size=512&id=55389&format=png",
+      "src": "https://i.postimg.cc/63QWGZCM/Hoe.png",
       "sizes": "512x512",
       "type": "image/png"
     }
