@@ -2414,37 +2414,36 @@ function updateRevenueChart(filteredSales) {
                         }
                     });
 
-                    // Tính phần chênh lệch (nếu có) cộng dồn vào Thuế để khớp TỔNG DOANH THU
                     const gap = totalRevenue - totalGoods - totalTax;
                     const finalTax = totalTax + gap;
 
                     const body = document.getElementById('modalDetailsBody');
+                    // Giao diện bảng gọn gàng, dùng class để tự co giãn theo di động
                     let htmlContent = Object.keys(itemsInDay).map(name => `
                         <tr class="border-b border-gray-100 hover:bg-gray-50">
-                            <td class="py-3 px-3">${name}</td>
-                            <td class="text-center py-3 px-3">${itemsInDay[name].qty}</td>
-                            <td class="text-right py-3 px-3">${itemsInDay[name].total.toLocaleString('vi-VN')} đ</td>
+                            <td class="py-2 px-1 text-sm text-slate-700">${name}</td>
+                            <td class="text-center py-2 px-1 text-sm text-slate-600">${itemsInDay[name].qty}</td>
+                            <td class="text-right py-2 px-1 text-sm font-bold text-blue-600">${itemsInDay[name].total.toLocaleString('vi-VN')} đ</td>
                         </tr>`).join('');
 
                     htmlContent += `
-                        <tr class="bg-gray-100 font-bold border-t-2">
-                            <td class="py-3 px-3 text-right" colspan="2">Tổng tiền hàng:</td>
-                            <td class="text-right py-3 px-3">${totalGoods.toLocaleString('vi-VN')} đ</td>
+                        <tr class="bg-gray-100 font-bold border-t-2 border-gray-300">
+                            <td class="py-2 px-1 text-right text-sm" colspan="2">Tổng hàng:</td>
+                            <td class="text-right py-2 px-1 text-sm">${totalGoods.toLocaleString('vi-VN')} đ</td>
                         </tr>`;
                     
-                    // Chỉ hiển thị Thuế nếu có giá trị
                     if (finalTax > 0) {
-                        htmlContent += `<tr class="bg-gray-50"><td class="py-2 px-3 text-right" colspan="2">Thuế:</td><td class="text-right py-2 px-3">${finalTax.toLocaleString('vi-VN')} đ</td></tr>`;
+                        htmlContent += `<tr class="bg-gray-50"><td class="py-1 px-1 text-right text-sm" colspan="2">Thuế:</td><td class="text-right py-1 px-1 text-sm">${finalTax.toLocaleString('vi-VN')} đ</td></tr>`;
                     }
                     
                     htmlContent += `
-                        <tr class="bg-blue-50 font-black text-blue-900 border-t-2">
-                            <td class="py-3 px-3 text-right" colspan="2">TỔNG DOANH THU:</td>
-                            <td class="text-right py-3 px-3">${totalRevenue.toLocaleString('vi-VN')} đ</td>
+                        <tr class="bg-blue-50 font-black text-blue-900 border-t-2 border-blue-200">
+                            <td class="py-2 px-1 text-right text-sm" colspan="2">TỔNG DOANH THU:</td>
+                            <td class="text-right py-2 px-1 text-sm">${totalRevenue.toLocaleString('vi-VN')} đ</td>
                         </tr>`;
 
                     body.innerHTML = htmlContent;
-                    document.getElementById('modalDateTitle').innerText = 'Chi tiết ngày: ' + selectedDate;
+                    document.getElementById('modalDateTitle').innerText = 'Ngày: ' + selectedDate;
                     document.getElementById('salesDetailModal').classList.remove('hidden');
                 }
             },
@@ -2455,7 +2454,6 @@ function updateRevenueChart(filteredSales) {
         }
     });
 }
-
 
 // Hàm vẽ biểu đồ doanh thu theo tháng
 function updateMonthlyRevenueChart(allSales) {
