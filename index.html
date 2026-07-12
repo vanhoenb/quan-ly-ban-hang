@@ -401,6 +401,29 @@ function toggleMoreMenu() {
             <div id="modal-detail-content" class="p-4 overflow-y-auto"></div>
         </div>
     </div>
+	<!-- Modal chi tiết bán hàng theo ngày -->
+    <div id="salesDetailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 max-h-[80vh] overflow-hidden flex flex-col">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <h3 id="modalDateTitle" class="font-black text-slate-800 text-lg">Chi tiết bán hàng</h3>
+                <button onclick="document.getElementById('salesDetailModal').classList.add('hidden')" class="text-slate-400 hover:text-black text-xl font-bold">✕</button>
+            </div>
+            <div class="overflow-y-auto flex-1">
+                <table class="w-full text-sm">
+                    <thead class="sticky top-0 bg-blue-50 text-blue-700">
+                        <tr>
+                            <th class="text-left py-3 px-3 font-bold">Tên sản phẩm</th>
+                            <th class="text-center py-3 px-3 font-bold">SL</th>
+                            <th class="text-right py-3 px-3 font-bold">Tổng tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modalDetailsBody" class="divide-y divide-gray-100"></tbody>
+                </table>
+            </div>
+            <button onclick="document.getElementById('salesDetailModal').classList.add('hidden')" 
+                    class="mt-4 w-full bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-slate-700 transition-all">Đóng</button>
+        </div>
+    </div>
 </div>
 
  <!-- NHẬP KHO ------>
@@ -2349,9 +2372,8 @@ function updateRevenueChart(filteredSales) {
                     type: 'bar',
                     data: data,
                     backgroundColor: 'rgba(168, 85, 247, 0.6)',
-                    // borderRadius: 20 tạo hình trụ tròn ở đầu
                     borderRadius: { topLeft: 20, topRight: 20, bottomLeft: 0, bottomRight: 0 },
-                    barPercentage: 0.3, // Mảnh hơn nữa
+                    barPercentage: 0.3,
                     categoryPercentage: 0.6
                 },
                 {
@@ -2367,38 +2389,68 @@ function updateRevenueChart(filteredSales) {
                 }
             ]
         },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false, 
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
             plugins: { legend: { display: false } },
-            scales: {
-                y: { 
-                    beginAtZero: true, 
-                    grid: { color: '#f1f5f9' },
-                    ticks: { callback: (v) => (v / 1000000) + 'tr' } 
-                },
-                x: { grid: { display: false } }
-            },
-            animation: {
-                onComplete: function() {
-                    const chart = this;
-                    const ctx = chart.ctx;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'bottom';
-                    ctx.font = 'bold 9px Arial';
-                    ctx.fillStyle = '#1e293b';
+            onClick: (event, elements) => {
+                if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const selectedDate = sortedDates[index];
+                    const itemsInDay = {};
+                    let totalGoods = 0, totalTax = 0, totalRevenue = 0;
 
-                    const dataset = chart.data.datasets[0];
-                    chart.getDatasetMeta(0).data.forEach((bar, index) => {
-                        const value = dataset.data[index];
-                        if (value > 0) {
-                            // Giữ nguyên số nếu là 2.54, chỉ chia cho triệu
-                            const valInTr = (value / 1000000);
-                            const text = valInTr.toFixed(2).replace('.00', '') + 'tr';
-                            ctx.fillText(text, bar.x, bar.y - 5);
+                    filteredSales.forEach(order => {
+                        const d = order.date?.toDate ? order.date.toDate() : new Date(order.date);
+                        if (d.toISOString().split('T')[0] === selectedDate) {
+                            totalTax += (Number(order.tax) || 0);
+                            totalRevenue += (Number(order.total) || 0);
+                            (order.items || []).forEach(item => {
+                                if (!itemsInDay[item.name]) itemsInDay[item.name] = { qty: 0, total: 0 };
+                                itemsInDay[item.name].qty += parseFloat(item.qty || 0);
+                                itemsInDay[item.name].total += (parseFloat(item.qty || 0) * parseFloat(item.price || 0));
+                                totalGoods += (parseFloat(item.qty || 0) * parseFloat(item.price || 0));
+                            });
                         }
                     });
+
+                    // Tính phần chênh lệch (nếu có) cộng dồn vào Thuế để khớp TỔNG DOANH THU
+                    const gap = totalRevenue - totalGoods - totalTax;
+                    const finalTax = totalTax + gap;
+
+                    const body = document.getElementById('modalDetailsBody');
+                    let htmlContent = Object.keys(itemsInDay).map(name => `
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-3 px-3">${name}</td>
+                            <td class="text-center py-3 px-3">${itemsInDay[name].qty}</td>
+                            <td class="text-right py-3 px-3">${itemsInDay[name].total.toLocaleString('vi-VN')} đ</td>
+                        </tr>`).join('');
+
+                    htmlContent += `
+                        <tr class="bg-gray-100 font-bold border-t-2">
+                            <td class="py-3 px-3 text-right" colspan="2">Tổng tiền hàng:</td>
+                            <td class="text-right py-3 px-3">${totalGoods.toLocaleString('vi-VN')} đ</td>
+                        </tr>`;
+                    
+                    // Chỉ hiển thị Thuế nếu có giá trị
+                    if (finalTax > 0) {
+                        htmlContent += `<tr class="bg-gray-50"><td class="py-2 px-3 text-right" colspan="2">Thuế:</td><td class="text-right py-2 px-3">${finalTax.toLocaleString('vi-VN')} đ</td></tr>`;
+                    }
+                    
+                    htmlContent += `
+                        <tr class="bg-blue-50 font-black text-blue-900 border-t-2">
+                            <td class="py-3 px-3 text-right" colspan="2">TỔNG DOANH THU:</td>
+                            <td class="text-right py-3 px-3">${totalRevenue.toLocaleString('vi-VN')} đ</td>
+                        </tr>`;
+
+                    body.innerHTML = htmlContent;
+                    document.getElementById('modalDateTitle').innerText = 'Chi tiết ngày: ' + selectedDate;
+                    document.getElementById('salesDetailModal').classList.remove('hidden');
                 }
+            },
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { callback: v => (v / 1000000) + 'tr' } },
+                x: { grid: { display: false } }
             }
         }
     });
