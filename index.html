@@ -8685,14 +8685,14 @@ function initMonthNhapKho() {
 
 //LỊCH VÀ GI CHÚ
 // 1. Khai báo biến toàn cục
-let calendar; 
 let selectedEvent;
+
 // 2. Hàm mở Modal
 function openEventModal() {
     document.getElementById('modal-add-event').classList.remove('hidden');
 }
 
-// 3. Khởi tạo lịch
+// 3. Khởi tạo lịch và tải từ Firebase
 document.addEventListener('DOMContentLoaded', function() {
     const calendarEl = document.getElementById('calendar-container');
     if (!calendarEl) return;
@@ -8702,25 +8702,23 @@ document.addEventListener('DOMContentLoaded', function() {
         initialView: 'dayGridWeek', 
         height: 'auto',
         eventDisplay: 'block', 
-        dayMaxEvents: false, // BẬT: Hiển thị tất cả sự kiện, không bị gom lại
-        eventTimeFormat: { // Định dạng hiển thị giờ bên trong ô
-            hour: '2-digit',
-            minute: '2-digit',
-            meridiem: false
-        },
+        dayMaxEvents: false,
+        eventTimeFormat: { hour: '2-digit', minute: '2-digit', meridiem: false },
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
             right: 'dayGridMonth,dayGridWeek,dayGridDay'
         },
-        buttonText: {
-            today: 'Hôm nay', month: 'Tháng', week: 'Tuần', day: 'Ngày'
-        },
+        buttonText: { today: 'Hôm nay', month: 'Tháng', week: 'Tuần', day: 'Ngày' },
         editable: true,
         selectable: true,
+        // THÊM: Lưu khi kéo thả sự kiện
+        eventDrop: function(info) { updateFirebaseEventDate(info.event); },
+        eventResize: function(info) { updateFirebaseEventDate(info.event); },
+        
         eventClick: function(info) {
             selectedEvent = info.event;
-            document.getElementById('view-event-title').innerText = selectedEvent.title;
+            document.getElementById('view-event-title').innerText = selectedEvent.title.replace('✅ ', '');
             const timeStr = selectedEvent.start ? selectedEvent.start.toLocaleString('vi-VN') : 'Cả ngày';
             document.getElementById('view-event-time').innerText = "Thời gian: " + timeStr;
             document.getElementById('modal-view-event').classList.remove('hidden');
@@ -8729,89 +8727,77 @@ document.addEventListener('DOMContentLoaded', function() {
     
     window.calendar.render();
 
-    // Tải dữ liệu từ localStorage
-    const savedEvents = JSON.parse(localStorage.getItem('myEvents') || '[]');
-    savedEvents.forEach(ev => window.calendar.addEvent(ev));
+    // TẢI DỮ LIỆU TỪ FIREBASE
+    db.collection('calendar_events').onSnapshot((snapshot) => {
+        window.calendar.removeAllEvents();
+        snapshot.forEach((doc) => {
+            let data = doc.data();
+            window.calendar.addEvent({
+                id: doc.id,
+                title: data.title,
+                start: data.start,
+                allDay: data.allDay,
+                backgroundColor: data.backgroundColor,
+                borderColor: data.borderColor,
+                textColor: data.textColor
+            });
+        });
+    });
 });
 
-// Hàm lưu (Có lưu vào localStorage)
+// Thêm: Hàm tự động cập nhật ngày khi kéo thả
+function updateFirebaseEventDate(event) {
+    db.collection('calendar_events').doc(event.id).update({
+        start: event.startStr
+    });
+}
+
+// Hàm lưu lên Firebase (Giữ nguyên)
 function saveNewEvent() {
     const title = document.getElementById('new-event-title').value;
     const start = document.getElementById('new-event-date').value;
     const color = document.getElementById('new-event-color').value; 
 
-    if (!title) {
-        alert("Vui lòng nhập tên công việc!");
-        return;
-    }
+    if (!title) { alert("Vui lòng nhập tên công việc!"); return; }
 
-    // Ép allDay: true để sự kiện hiển thị tràn bề ngang (dạng Block)
-    const eventData = { 
-        title: title, 
-        start: start || null, 
-        allDay: true, 
-        backgroundColor: color, 
+    db.collection('calendar_events').add({
+        title: title,
+        start: start || null,
+        allDay: true,
+        backgroundColor: color,
         borderColor: color,
         textColor: '#ffffff'
-    };
-
-    if (window.calendar) {
-        window.calendar.addEvent(eventData);
-        
-        let events = JSON.parse(localStorage.getItem('myEvents') || '[]');
-        events.push(eventData);
-        localStorage.setItem('myEvents', JSON.stringify(events));
-        
+    }).then(() => {
         document.getElementById('modal-add-event').classList.add('hidden');
         document.getElementById('new-event-title').value = '';
-        document.getElementById('new-event-date').value = '';
-    }
+    });
 }
 
-// Hàm xử lý Xóa (Có xóa trong localStorage)
+// Hàm xóa trên Firebase
 function deleteEvent() {
     if (selectedEvent && confirm("Bạn có chắc chắn muốn xóa công việc này?")) {
-        // Xóa trong localStorage
-        let events = JSON.parse(localStorage.getItem('myEvents') || '[]');
-        events = events.filter(e => e.title !== selectedEvent.title || e.start !== selectedEvent.startStr);
-        localStorage.setItem('myEvents', JSON.stringify(events));
-        
-        selectedEvent.remove();
-        document.getElementById('modal-view-event').classList.add('hidden');
+        db.collection('calendar_events').doc(selectedEvent.id).delete().then(() => {
+            document.getElementById('modal-view-event').classList.add('hidden');
+        });
     }
 }
 
-// Hàm xử lý Hoàn thành
+// Hàm cập nhật trạng thái Hoàn thành lên Firebase
 function markDone() {
     if (selectedEvent) {
-        selectedEvent.setProp('backgroundColor', '#22c55e');
-        selectedEvent.setProp('borderColor', '#22c55e');
-        if(!selectedEvent.title.includes('✅')) {
-            selectedEvent.setProp('title', '✅ ' + selectedEvent.title);
-        }
-        document.getElementById('modal-view-event').classList.add('hidden');
-        
-        // Lưu cập nhật vào localStorage
-        updateLocalStorage();
+        const newTitle = selectedEvent.title.includes('✅ ') ? selectedEvent.title : '✅ ' + selectedEvent.title;
+        db.collection('calendar_events').doc(selectedEvent.id).update({
+            backgroundColor: '#22c55e',
+            borderColor: '#22c55e',
+            title: newTitle
+        }).then(() => {
+            document.getElementById('modal-view-event').classList.add('hidden');
+        });
     }
-}
-
-// Hàm cập nhật lại localStorage khi có thay đổi (như đổi màu)
-function updateLocalStorage() {
-    const allEvents = window.calendar.getEvents().map(ev => ({
-        title: ev.title,
-        start: ev.startStr,
-        allDay: ev.allDay,
-        backgroundColor: ev.backgroundColor,
-        borderColor: ev.borderColor
-    }));
-    localStorage.setItem('myEvents', JSON.stringify(allEvents));
 }
 
 function fixCalendarLayout() {
-    if (window.calendar) {
-        setTimeout(() => { window.calendar.updateSize(); }, 200);
-    }
+    if (window.calendar) setTimeout(() => { window.calendar.updateSize(); }, 200);
 }
 
 // --- KHỞI TẠO HỆ THỐNG ---
