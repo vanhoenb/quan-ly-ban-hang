@@ -7,8 +7,9 @@
 	<link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <script src="https://cdn.tailwindcss.com"></script>
-   <link href="https://fonts.googleapis.com/css2?family=Goldman&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Goldman&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
+	<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
     <style>
@@ -212,6 +213,38 @@
     }
 </style>
 
+<style>
+    /* 1. Cấu trúc cơ bản */
+    #calendar-container { min-height: 500px; width: 100%; }
+    .fc .fc-toolbar-title { font-size: 1.2rem !important; font-weight: bold; }
+    
+    /* 2. Ép sự kiện hiển thị dạng khối (Block) to, đẹp */
+    .fc-event, .fc .fc-daygrid-event {
+        display: block !important;
+        padding: 8px 12px !important;
+        margin: 4px 6px !important;
+        border-radius: 8px !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        white-space: normal !important;
+        cursor: pointer;
+        border: none !important;
+    }
+    
+    /* 3. Đảm bảo chữ màu trắng và hiệu ứng di chuột */
+    .fc-event-main {
+        color: #ffffff !important;
+    }
+    .fc-event:hover {
+        filter: brightness(0.9);
+    }
+
+    /* 4. Tăng chiều cao các ô ngày để lịch nhìn thoáng, không bị bé */
+    .fc-daygrid-day-frame {
+        min-height: 150px !important; 
+    }
+</style>
+
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -221,6 +254,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+	<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+	<script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.8/locales/vi.global.min.js'></script>
 </head>
 <body class="bg-gray-100 flex h-screen">
 
@@ -234,6 +269,9 @@
         <button onclick="showPage('page-SanXuat'); toggleMoreMenu()" class="text-white text-xs p-3 hover:bg-slate-700 flex items-center gap-2"><i data-lucide="factory" class="w-4 h-4"></i> Sản Xuất</button>
 		<button onclick="showPage('page-NguyenLieu'); toggleMoreMenu()" class="text-white text-xs p-3 hover:bg-slate-700 flex items-center gap-2 border-b border-slate-700">
     <i data-lucide="database" class="w-4 h-4"></i> Nguyên Liệu
+</button>
+<button onclick="showPage('page-LichCongViec'); toggleMoreMenu()" class="text-white text-xs p-3 hover:bg-slate-700 flex items-center gap-2 border-b border-slate-700">
+    <i data-lucide="calendar" class="w-4 h-4"></i> Lịch Công Việc
 </button>
     </div>
 
@@ -277,6 +315,9 @@ function toggleMoreMenu() {
             <i data-lucide="database" class="w-6 h-6"></i> <span class="sidebar-text">Nguyên Liệu</span>
         </button>
         <button onclick="showPage('page-report'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3"><i data-lucide="bar-chart-3" class="w-6 h-6"></i> <span class="sidebar-text">Báo Cáo</span></button>
+		<button onclick="showPage('page-LichCongViec'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 hover:bg-slate-800 flex items-center gap-3">
+    <i data-lucide="calendar" class="w-6 h-6"></i> <span class="sidebar-text">Lịch Công Việc</span>
+</button>
     </nav>
 </aside>
 
@@ -1262,6 +1303,79 @@ function toggleMoreMenu() {
     </div>
 </div>
 
+<!-- LỊCH VÀ GHI CHÚ -->
+<div id="page-LichCongViec" class="page-content hidden p-2 md:p-6 bg-gray-50">
+    <div class="w-full">
+        <h3 class="mb-6 font-bold text-2xl text-gray-800 px-2 md:px-0">LỊCH CÔNG VIỆC & GHI CHÚ</h3>
+
+        <div class="flex flex-col lg:flex-row gap-6">
+            <div class="w-full lg:w-1/4 space-y-4">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                    <h4 class="font-bold text-gray-700 mb-4">DANH MỤC LỊCH</h4>
+                    <div class="space-y-2" id="calendar-categories">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" checked class="rounded text-blue-600"> <span>Công việc cá nhân</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" checked class="rounded text-green-600"> <span>Hẹn khách hàng</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" checked class="rounded text-red-600"> <span>Deadline</span>
+                        </label>
+                    </div>
+                    <button onclick="openEventModal()" class="w-full mt-4 bg-blue-600 text-white py-2 rounded-lg font-bold text-sm hover:bg-blue-700 transition">
+                        + Thêm lịch mới
+                    </button>
+                </div>
+            </div>
+
+            <div class="w-full lg:w-3/4">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 min-h-[600px]">
+                    <div id="calendar-container" class="h-full"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button onclick="openEventModal()" class="fixed bottom-20 md:bottom-10 right-10 bg-red-500 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-3xl hover:bg-red-600 transition z-[100]">
+        +
+    </button>
+
+    <div id="modal-add-event" class="hidden fixed inset-0 bg-black/50 z-[1000] flex justify-center items-center p-4">
+        <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm">
+            <h3 class="font-bold text-lg mb-4 text-gray-800">Thêm công việc mới</h3>
+            <input id="new-event-title" type="text" placeholder="Tên công việc" class="w-full border p-2 rounded mb-3">
+            <input id="new-event-date" type="datetime-local" class="w-full border p-2 rounded mb-3">
+            
+            <select id="new-event-color" class="w-full border p-2 rounded mb-3">
+    <option value="#4285F4">Xanh dương (Google)</option>
+    <option value="#DB4437">Đỏ (Deadline)</option>
+    <option value="#0F9D58">Xanh lá (Hẹn khách)</option>
+    <option value="#F4B400">Vàng (Cá nhân)</option>
+    <option value="#9C27B0">Tím (Học tập)</option>
+</select>
+
+            <div class="flex gap-2">
+                <button onclick="document.getElementById('modal-add-event').classList.add('hidden')" class="flex-1 bg-gray-200 py-2 rounded font-bold">Hủy</button>
+                <button onclick="saveNewEvent()" class="flex-1 bg-blue-600 text-white py-2 rounded font-bold">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-view-event" class="hidden fixed inset-0 bg-black/50 z-[1000] flex justify-center items-center p-4">
+        <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm">
+            <h3 id="view-event-title" class="font-bold text-lg mb-2 text-gray-800"></h3>
+            <p id="view-event-time" class="text-gray-500 text-sm mb-6"></p>
+            <div class="flex gap-2">
+                <button onclick="document.getElementById('modal-view-event').classList.add('hidden')" class="flex-1 bg-gray-200 py-2 rounded font-bold">Đóng</button>
+                <button onclick="markDone()" class="flex-1 bg-green-600 text-white py-2 rounded font-bold">Hoàn thành</button>
+                <button onclick="deleteEvent()" class="flex-1 bg-red-600 text-white py-2 rounded font-bold">Xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <script>
     function openNLTab(tabId) {
         document.querySelectorAll('.nl-tab-pane').forEach(t => t.classList.add('hidden'));
@@ -1420,6 +1534,10 @@ function showPage(pageId) {
         case 'page-history':
             if (typeof loadSalesList === 'function') loadSalesList();
             break;
+		// THÊM ĐOẠN NÀY VÀO TRƯỚC DẤU ĐÓNG CỦA SWITCH
+        case 'page-LichCongViec':
+            if (typeof fixCalendarLayout === 'function') fixCalendarLayout();
+            break;	
     }
     
     // Cập nhật lại các biểu tượng (nếu dùng Lucide)
@@ -8562,6 +8680,138 @@ function initMonthNhapKho() {
     
     // Gọi hàm cập nhật ngày và lọc dữ liệu ngay lập tức
     capNhatNgayTheoThangNhapKho();
+}
+
+
+//LỊCH VÀ GI CHÚ
+// 1. Khai báo biến toàn cục
+let calendar; 
+let selectedEvent;
+// 2. Hàm mở Modal
+function openEventModal() {
+    document.getElementById('modal-add-event').classList.remove('hidden');
+}
+
+// 3. Khởi tạo lịch
+document.addEventListener('DOMContentLoaded', function() {
+    const calendarEl = document.getElementById('calendar-container');
+    if (!calendarEl) return;
+
+    window.calendar = new FullCalendar.Calendar(calendarEl, {
+        locale: 'vi',
+        initialView: 'dayGridWeek', 
+        height: 'auto',
+        eventDisplay: 'block', 
+        dayMaxEvents: false, // BẬT: Hiển thị tất cả sự kiện, không bị gom lại
+        eventTimeFormat: { // Định dạng hiển thị giờ bên trong ô
+            hour: '2-digit',
+            minute: '2-digit',
+            meridiem: false
+        },
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,dayGridWeek,dayGridDay'
+        },
+        buttonText: {
+            today: 'Hôm nay', month: 'Tháng', week: 'Tuần', day: 'Ngày'
+        },
+        editable: true,
+        selectable: true,
+        eventClick: function(info) {
+            selectedEvent = info.event;
+            document.getElementById('view-event-title').innerText = selectedEvent.title;
+            const timeStr = selectedEvent.start ? selectedEvent.start.toLocaleString('vi-VN') : 'Cả ngày';
+            document.getElementById('view-event-time').innerText = "Thời gian: " + timeStr;
+            document.getElementById('modal-view-event').classList.remove('hidden');
+        }
+    });
+    
+    window.calendar.render();
+
+    // Tải dữ liệu từ localStorage
+    const savedEvents = JSON.parse(localStorage.getItem('myEvents') || '[]');
+    savedEvents.forEach(ev => window.calendar.addEvent(ev));
+});
+
+// Hàm lưu (Có lưu vào localStorage)
+function saveNewEvent() {
+    const title = document.getElementById('new-event-title').value;
+    const start = document.getElementById('new-event-date').value;
+    const color = document.getElementById('new-event-color').value; 
+
+    if (!title) {
+        alert("Vui lòng nhập tên công việc!");
+        return;
+    }
+
+    // Ép allDay: true để sự kiện hiển thị tràn bề ngang (dạng Block)
+    const eventData = { 
+        title: title, 
+        start: start || null, 
+        allDay: true, 
+        backgroundColor: color, 
+        borderColor: color,
+        textColor: '#ffffff'
+    };
+
+    if (window.calendar) {
+        window.calendar.addEvent(eventData);
+        
+        let events = JSON.parse(localStorage.getItem('myEvents') || '[]');
+        events.push(eventData);
+        localStorage.setItem('myEvents', JSON.stringify(events));
+        
+        document.getElementById('modal-add-event').classList.add('hidden');
+        document.getElementById('new-event-title').value = '';
+        document.getElementById('new-event-date').value = '';
+    }
+}
+
+// Hàm xử lý Xóa (Có xóa trong localStorage)
+function deleteEvent() {
+    if (selectedEvent && confirm("Bạn có chắc chắn muốn xóa công việc này?")) {
+        // Xóa trong localStorage
+        let events = JSON.parse(localStorage.getItem('myEvents') || '[]');
+        events = events.filter(e => e.title !== selectedEvent.title || e.start !== selectedEvent.startStr);
+        localStorage.setItem('myEvents', JSON.stringify(events));
+        
+        selectedEvent.remove();
+        document.getElementById('modal-view-event').classList.add('hidden');
+    }
+}
+
+// Hàm xử lý Hoàn thành
+function markDone() {
+    if (selectedEvent) {
+        selectedEvent.setProp('backgroundColor', '#22c55e');
+        selectedEvent.setProp('borderColor', '#22c55e');
+        if(!selectedEvent.title.includes('✅')) {
+            selectedEvent.setProp('title', '✅ ' + selectedEvent.title);
+        }
+        document.getElementById('modal-view-event').classList.add('hidden');
+        
+        // Lưu cập nhật vào localStorage
+        updateLocalStorage();
+    }
+}
+
+// Hàm cập nhật lại localStorage khi có thay đổi (như đổi màu)
+function updateLocalStorage() {
+    const allEvents = window.calendar.getEvents().map(ev => ({
+        title: ev.title,
+        start: ev.startStr,
+        allDay: ev.allDay,
+        backgroundColor: ev.backgroundColor,
+        borderColor: ev.borderColor
+    }));
+    localStorage.setItem('myEvents', JSON.stringify(allEvents));
+}
+
+function fixCalendarLayout() {
+    if (window.calendar) {
+        setTimeout(() => { window.calendar.updateSize(); }, 200);
+    }
 }
 
 // --- KHỞI TẠO HỆ THỐNG ---
