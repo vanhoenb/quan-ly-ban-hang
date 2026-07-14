@@ -7275,7 +7275,7 @@ async function exportSupplierDebtReport() {
     toDate.setHours(23, 59, 59, 999);
 
     // Hàm format số tiền sang định dạng có dấu chấm phân cách hàng nghìn
-    const formatNum = (num) => num.toLocaleString('vi-VN');
+    const formatNum = (num) => (num !== null && num !== undefined && num !== "") ? num.toLocaleString('vi-VN') : "0";
     
     // Hàm chuyển đổi timestamp từ Firebase thành chuỗi ngày tháng DD/MM/YYYY
     const formatDate = (val) => {
@@ -7285,12 +7285,22 @@ async function exportSupplierDebtReport() {
     };
 
     try {
-        // 2. Lấy dữ liệu từ các collection Firebase cùng lúc
-        const [importsSnap, paymentsSnap, openSnap] = await Promise.all([
+        // 2. SỬA TẠI ĐÂY: Lấy dữ liệu từ các collection Firebase cùng lúc (Đã thêm bảng danh mục materials_list)
+        const [importsSnap, paymentsSnap, openSnap, materialsSnap] = await Promise.all([
             db.collection('material_imports').get(),
             db.collection('payments').get(),
-            db.collection('supplier_opening_balances').get()
+            db.collection('supplier_opening_balances').get(),
+            db.collection('materials_list').get() // Thêm collection này để đồng bộ lấy ĐVT
         ]);
+
+        // SỬA TẠI ĐÂY: Tạo bảng map tra cứu ĐVT dựa trên cặp trường 'name' và 'unit' từ bảng danh mục
+        const materialUnitMap = {};
+        materialsSnap.forEach(doc => {
+            const d = doc.data();
+            if (d.name && d.unit) {
+                materialUnitMap[d.name] = d.unit;
+            }
+        });
 
         // Khởi tạo file Excel
         const workbook = new ExcelJS.Workbook();
@@ -7316,7 +7326,7 @@ async function exportSupplierDebtReport() {
             reportData[ncc].openingBalance += parseFloat(d.amount || 0);
         });
 
-        // 4. Xử lý dữ liệu nhập hàng
+        // 4. Xử lý dữ liệu nhập hàng (Đã sửa để lấy đúng trường sl viết tắt và tự động tra cứu ĐVT)
         importsSnap.forEach(doc => {
             const d = doc.data();
             const ncc = d.ncc || "Chưa xác định";
@@ -7328,12 +7338,18 @@ async function exportSupplierDebtReport() {
             if (dDate < fromDate) {
                 reportData[ncc].openingBalance += amount;
             } else {
-                // Đẩy thông tin nhập hàng vào mảng giao dịch (thêm trường dvt)
+                const tenNL = d.tenNL || "Nhập hàng";
+                
+                // SỬA TẠI ĐÂY: Tự động tra cứu ĐVT từ bảng danh mục dựa vào tên nguyên liệu (tenNL)
+                const finalDvt = d.dvt || materialUnitMap[tenNL] || "";
+
                 reportData[ncc].transactions.push({ 
                     dateObj: dDate, 
                     type: 'import', 
-                    content: d.tenNL || "Nhập hàng",
-                    dvt: d.dvt || "", // Lấy đơn vị tính từ dữ liệu
+                    content: tenNL,
+                    dvt: finalDvt, // Đã có ĐVT tự động đối chiếu từ danh mục
+                    sl: (d.sl !== undefined && d.sl !== null && d.sl !== "") ? parseFloat(d.sl) : "", // SỬA TẠI ĐÂY: Đổi sang d.sl theo thực tế Firestore
+                    donGia: (d.donGia !== undefined && d.donGia !== null && d.donGia !== "") ? parseFloat(d.donGia) : "", // Lấy Đơn giá
                     debit: amount, 
                     credit: 0 
                 });
@@ -7351,7 +7367,9 @@ async function exportSupplierDebtReport() {
                         dateObj: pDate, 
                         type: 'payment', 
                         content: 'Thanh toán công nợ', 
-                        dvt: "", // Thanh toán không có đơn vị tính
+                        dvt: "", 
+                        sl: "",       // Thanh toán không có số lượng
+                        donGia: "",   // Thanh toán không có đơn giá
                         debit: 0, 
                         credit: parseFloat(d.amount || 0) 
                     });
@@ -7381,7 +7399,7 @@ async function exportSupplierDebtReport() {
                 setBorderStyle(c); 
             });
 
-           // Ghi số dư đầu kỳ (Gộp D-E)
+            // Ghi số dư đầu kỳ (Gộp D-E)
             const row1 = sheet.addRow(['', '', '', 'NỢ ĐẦU KỲ CHUYỂN SANG:', '', formatNum(data.openingBalance), '', '']);
             sheet.mergeCells(`D${row1.number}:E${row1.number}`); // Gộp D-E
             row1.getCell(6).alignment = { horizontal: 'right' };
@@ -7390,12 +7408,25 @@ async function exportSupplierDebtReport() {
             let totalDebt = data.openingBalance;
             let totalPay = 0;
 
-            // Ghi chi tiết các giao dịch trong kỳ
+            // Ghi chi tiết các giao dịch trong kỳ (Đã sửa điền ĐVT, SL, Đơn giá)
             data.transactions.forEach(t => {
-                const row = sheet.addRow([formatDate(t.dateObj), t.content, t.dvt || "", '', '', formatNum(t.debit), formatNum(t.credit), '']);
+                const row = sheet.addRow([
+                    formatDate(t.dateObj), 
+                    t.content, 
+                    t.dvt, 
+                    t.sl !== "" ? formatNum(t.sl) : "", // Điền Số lượng hoàn chỉnh
+                    t.donGia !== "" ? formatNum(t.donGia) : "", // Điền Đơn giá hoàn chỉnh
+                    t.debit ? formatNum(t.debit) : "0", 
+                    t.credit ? formatNum(t.credit) : "0", 
+                    ''
+                ]);
+                
                 totalDebt += t.debit;
                 totalPay += t.credit;
-                // Căn phải các cột số tiền
+                
+                // Căn phải cho các cột chứa số liệu (SL, Đơn giá, Phát sinh, Thanh toán)
+                row.getCell(4).alignment = { horizontal: 'right' };
+                row.getCell(5).alignment = { horizontal: 'right' };
                 row.getCell(6).alignment = { horizontal: 'right' };
                 row.getCell(7).alignment = { horizontal: 'right' };
                 row.eachCell(c => setBorderStyle(c));
