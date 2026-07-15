@@ -214,34 +214,189 @@
 </style>
 
 <style>
-    /* 1. Cấu trúc cơ bản */
-    #calendar-container { min-height: 500px; width: 100%; }
-    .fc .fc-toolbar-title { font-size: 1.2rem !important; font-weight: bold; }
-    
-    /* 2. Ép sự kiện hiển thị dạng khối (Block) to, đẹp */
+    /* 1. Khung chứa lịch */
+    #calendar-container { 
+        min-height: 500px; width: 100%; background: #ffffff;
+        border-radius: 12px; padding: 15px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 2. Làm rõ các đường kẻ ô ngày */
+    .fc .fc-daygrid-day {
+        border: 1px solid #cbd5e1 !important;
+    }
+    .fc .fc-col-header-cell {
+        border: 1px solid #cbd5e1 !important;
+    }
+
+    /* 3. Hiệu ứng 3D cho ghi chú */
     .fc-event, .fc .fc-daygrid-event {
         display: block !important;
-        padding: 8px 12px !important;
-        margin: 4px 6px !important;
-        border-radius: 8px !important;
-        font-size: 14px !important;
-        font-weight: 600 !important;
+        padding: 6px 10px !important;
+        margin: 4px 5px !important;
+        border-radius: 6px !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
         white-space: normal !important;
         cursor: pointer;
         border: none !important;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.2), inset 0 -2px 0 rgba(0,0,0,0.15); 
+        transition: all 0.2s ease;
     }
     
-    /* 3. Đảm bảo chữ màu trắng và hiệu ứng di chuột */
-    .fc-event-main {
-        color: #ffffff !important;
+    .fc-event:hover { 
+        transform: translateY(-3px);
+        box-shadow: 0 6px 10px rgba(0,0,0,0.3), inset 0 -2px 0 rgba(0,0,0,0.15);
+        filter: brightness(1.05); 
     }
-    .fc-event:hover {
-        filter: brightness(0.9);
+    
+    .fc-event-main { color: #ffffff !important; }
+
+    /* 4. Định dạng ô ngày */
+    .fc-daygrid-day-frame { 
+        min-height: 140px !important; 
+        padding: 5px;
+    }
+    .fc-day-other { background-color: #f8fafc !important; }
+
+    /* 5. Highlight Thứ 7 và Chủ Nhật (Đã sửa lỗi màu chữ) */
+    /* Màu nền cho cột */
+    .fc-day-sat, .fc-day-sun { background-color: #fff1f2 !important; }
+    
+    /* Màu số ngày trong ô */
+    .fc-day-sat .fc-daygrid-day-number, 
+    .fc-day-sun .fc-daygrid-day-number { 
+        color: #e11d48 !important; 
+        font-weight: bold !important; 
+    }
+    
+    /* Màu chữ Thứ 7 và CN trên thanh tiêu đề */
+    .fc-col-header-cell.fc-day-sat .fc-col-header-cell-cushion, 
+    .fc-col-header-cell.fc-day-sun .fc-col-header-cell-cushion { 
+        color: #e11d48 !important; 
+        font-weight: 700 !important; 
+    }
+	
+    /* 6. Hiệu ứng cho trạng thái "Đã xong" (Đã hoàn thành) */
+    .fc-event.event-done {
+        opacity: 0.6 !important;
+        text-decoration: line-through !important;
+        filter: grayscale(0.8) !important;
+        box-shadow: none !important; /* Bỏ hiệu ứng 3D khi đã xong */
+    }
+    .fc-event.event-done:hover {
+        transform: none !important;
+        opacity: 0.8 !important;
     }
 
-    /* 4. Tăng chiều cao các ô ngày để lịch nhìn thoáng, không bị bé */
-    .fc-daygrid-day-frame {
-        min-height: 150px !important; 
+    /* 7. Khoanh tròn và làm nổi bật ngày hiện tại (Hôm nay) */
+    .fc-day-today {
+        background-color: #f0f9ff !important;
+        position: relative;
+    }
+    .fc-day-today .fc-daygrid-day-number {
+        background-color: #3b82f6 !important;
+        color: #ffffff !important;
+        border-radius: 50% !important;
+        width: 32px !important;
+        height: 32px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-weight: 800 !important;
+        margin: 4px auto !important;
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+    }
+
+    /* 8. Cải thiện Header (Nút nhấn & Thứ trong tuần) */
+    .fc .fc-toolbar { padding: 10px 0; }
+    
+    .fc .fc-button-group .fc-button {
+        background-color: #f1f5f9 !important;
+        border: none !important;
+        color: #475569 !important;
+        font-weight: 600 !important;
+    }
+    .fc .fc-button-primary:not(:disabled).fc-button-active {
+        background-color: #3b82f6 !important;
+        color: white !important;
+    }
+    
+    .fc .fc-col-header-cell {
+        background-color: #f8fafc !important;
+        padding: 10px 0 !important;
+    }
+    .fc .fc-col-header-cell-cushion {
+        color: #475569 !important;
+        font-weight: 700 !important;
+        text-transform: uppercase;
+        font-size: 0.85rem !important;
+        text-decoration: none !important;
+    }
+    
+    .fc .fc-toolbar-title {
+        color: #0f172a !important;
+        font-size: 1.4rem !important;
+        font-weight: 800 !important;
+    }
+	/* 9. Tinh chỉnh tiêu đề và nút chế độ hiển thị */
+    .fc .fc-toolbar-title {
+        text-transform: capitalize !important; /* Chữ tháng năm trông mềm mại hơn */
+        letter-spacing: -0.02em !important;    /* Tăng độ tinh tế */
+    }
+
+    .fc .fc-view-harness .fc-button-primary {
+        background-color: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        color: #64748b !important;
+        border-radius: 8px !important;
+        padding: 6px 12px !important;
+        margin-left: 5px !important;
+    }
+    
+    .fc-button-active {
+        background-color: #1e293b !important; /* Màu xanh đen sang trọng */
+        color: #ffffff !important;
+        border-color: #1e293b !important;
+    }
+	/* 10. Tách rời các nút Tháng, Tuần, Ngày */
+    .fc .fc-button-group {
+        display: flex !important;
+        gap: 8px !important;       /* Tạo khoảng cách 8px giữa các nút */
+        box-shadow: none !important; /* Loại bỏ bóng đổ dính liền của group */
+    }
+
+    .fc .fc-button-group > .fc-button {
+        border-radius: 8px !important; /* Bo góc từng nút riêng biệt */
+        border: 1px solid #e2e8f0 !important; /* Viền để nhìn rõ từng nút */
+        margin: 0 !important;         /* Xóa margin mặc định của thư viện */
+    }
+
+    /* Đảm bảo nút không bị dính khi hover */
+    .fc .fc-button-group > .fc-button:not(:last-child) {
+        margin-right: 8px !important;
+    }
+	/* 11. Cố định hàng ngang cho Toolbar */
+    .fc .fc-toolbar {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important; /* Ngăn chặn nhảy dòng */
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 10px !important;
+        width: 100% !important;
+    }
+
+    .fc .fc-toolbar-chunk {
+        display: flex !important;
+        align-items: center !important;
+        white-space: nowrap !important;
+        flex-shrink: 0; /* Ngăn không cho các phần bị co lại */
+    }
+
+    /* Đảm bảo nhóm nút điều hướng < > hôm nay nằm sát nhau */
+    .fc .fc-toolbar-chunk:first-child {
+        gap: 5px !important;
     }
 </style>
 
@@ -8738,7 +8893,7 @@ document.addEventListener('DOMContentLoaded', function() {
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
-            right: 'dayGridMonth,dayGridWeek,dayGridDay'
+            right: 'dayGridMonth,dayGridWeek,dayGridDay' // Thêm các nút chuyển view
         },
         buttonText: { today: 'Hôm nay', month: 'Tháng', week: 'Tuần', day: 'Ngày' },
         editable: true,
@@ -8749,7 +8904,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         eventClick: function(info) {
             selectedEvent = info.event;
-            document.getElementById('view-event-title').innerText = selectedEvent.title.replace('✅ ', '');
+            document.getElementById('view-event-title').innerText = selectedEvent.title.replace('✅ ', '').replace(' (Đã xong)', '');
             const timeStr = selectedEvent.start ? selectedEvent.start.toLocaleString('vi-VN') : 'Cả ngày';
             document.getElementById('view-event-time').innerText = "Thời gian: " + timeStr;
             document.getElementById('modal-view-event').classList.remove('hidden');
@@ -8763,6 +8918,8 @@ document.addEventListener('DOMContentLoaded', function() {
         window.calendar.removeAllEvents();
         snapshot.forEach((doc) => {
             let data = doc.data();
+            // Kiểm tra trạng thái để gán class hiển thị
+            const isDone = data.status === 'done';
             window.calendar.addEvent({
                 id: doc.id,
                 title: data.title,
@@ -8770,7 +8927,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 allDay: data.allDay,
                 backgroundColor: data.backgroundColor,
                 borderColor: data.borderColor,
-                textColor: data.textColor
+                textColor: data.textColor,
+                // Gán class này để CSS hiệu ứng hoạt động
+                classNames: isDone ? ['event-done'] : [], 
+                extendedProps: { status: data.status }
             });
         });
     });
@@ -8783,7 +8943,7 @@ function updateFirebaseEventDate(event) {
     });
 }
 
-// Hàm lưu lên Firebase (Giữ nguyên)
+// Hàm lưu lên Firebase (Đã thêm trường status: 'pending')
 function saveNewEvent() {
     const title = document.getElementById('new-event-title').value;
     const start = document.getElementById('new-event-date').value;
@@ -8797,7 +8957,8 @@ function saveNewEvent() {
         allDay: true,
         backgroundColor: color,
         borderColor: color,
-        textColor: '#ffffff'
+        textColor: '#ffffff',
+        status: 'pending' // Mặc định là chưa làm
     }).then(() => {
         document.getElementById('modal-add-event').classList.add('hidden');
         document.getElementById('new-event-title').value = '';
@@ -8816,11 +8977,12 @@ function deleteEvent() {
 // Hàm cập nhật trạng thái Hoàn thành lên Firebase
 function markDone() {
     if (selectedEvent) {
-        const newTitle = selectedEvent.title.includes('✅ ') ? selectedEvent.title : '✅ ' + selectedEvent.title;
+        // Cập nhật trạng thái vào Firebase
         db.collection('calendar_events').doc(selectedEvent.id).update({
-            backgroundColor: '#22c55e',
-            borderColor: '#22c55e',
-            title: newTitle
+            backgroundColor: '#64748b', // Màu xám cho việc đã hoàn thành
+            borderColor: '#64748b',
+            title: selectedEvent.title.replace('✅ ', '') + ' (Đã xong)',
+            status: 'done' // Thêm trường status để nhận diện
         }).then(() => {
             document.getElementById('modal-view-event').classList.add('hidden');
         });
