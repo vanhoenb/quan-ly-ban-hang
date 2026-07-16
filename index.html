@@ -211,6 +211,36 @@
         position: absolute !important;
         z-index: 1000 !important;
     }
+	
+	/* Định dạng thanh cuộn custom siêu đẹp, tiệp màu với Dark Theme */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px; /* Độ rộng cực kỳ thanh mảnh */
+    height: 6px;
+}
+
+/* Đường ray chạy của thanh cuộn (chìm phía dưới) */
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.5); /* Màu tối slate-900 mờ */
+    border-radius: 10px;
+}
+
+/* Cục kéo của thanh cuộn (nổi phía trên) */
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.4); /* Màu xanh neon mờ đồng bộ với nút */
+    border-radius: 10px;
+    border: 1px solid rgba(30, 41, 59, 0.5);
+}
+
+/* Đổi màu đậm hơn khi người dùng di chuột (Hover) vào thanh cuộn */
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.8); /* Sáng xanh nổi bật hẳn lên */
+}
+
+/* Hỗ trợ hiển thị mượt trên cả trình duyệt Firefox */
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(59, 130, 246, 0.4) rgba(15, 23, 42, 0.5);
+}
 </style>
 
 <style>
@@ -400,6 +430,8 @@
     }
 </style>
 
+
+
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -587,53 +619,73 @@ function toggleMoreMenu() {
 	
 	<!-- Trang chủ -->
 	
-	<div id="page-home" class="p-2 md:p-8 space-y-6 md:space-y-8 bg-slate-50 min-h-screen">
+	<div id="page-home" class="p-2 md:p-8 space-y-6 md:space-y-8 bg-slate-950 min-h-screen text-slate-100 transition-colors duration-300">
+    
     <div class="flex justify-between items-end">
         <div>
-            <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">BẢNG ĐIỀU KHIỂN</h2>
-            <p class="text-slate-500 text-sm">Tổng quan tình hình kinh doanh</p>
+            <h2 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_4px_rgba(255,255,255,0.1)]">BẢNG ĐIỀU KHIỂN</h2>
+            <p class="text-slate-400 text-sm">Tổng quan tình hình kinh doanh</p>
         </div>
     </div>
 
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <div onclick="showDashboardDetail('revenue')" class="bg-blue-500 p-3 md:p-6 rounded-2xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:brightness-110 transition-all">
-            <p class="text-[10px] md:text-[12px] font-bold uppercase opacity-80">Tổng Doanh Thu</p>
-            <h3 id="total-revenue" class="text-md md:text-2xl font-black">0 đ</h3>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 select-none">
+        
+        <div onclick="showDashboardDetail('revenue')" 
+             class="bg-blue-950/40 border-b-[4px] border-blue-800 text-blue-400 p-3 md:p-6 rounded-2xl shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-blue-900/40 hover:border-blue-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
+            <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-blue-300/80">Tổng Doanh Thu</p>
+            <h3 id="total-revenue" class="text-md md:text-2xl font-black drop-shadow-[0_2px_4px_rgba(59,130,246,0.3)]">0 đ</h3>
         </div>
-        <div onclick="showDashboardDetail('debt-customer')" class="bg-rose-500 p-3 md:p-6 rounded-2xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:brightness-110 transition-all">
-            <p class="text-[10px] md:text-[12px] font-bold uppercase opacity-80">Công Nợ Cần Thu</p>
-            <h3 id="total-debt-summary" class="text-md md:text-2xl font-black">0 đ</h3>
+        
+        <div onclick="showDashboardDetail('debt-customer')" 
+             class="bg-rose-950/40 border-b-[4px] border-rose-800 text-rose-400 p-3 md:p-6 rounded-2xl shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-rose-900/40 hover:border-rose-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
+            <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-rose-300/80">Công Nợ Cần Thu</p>
+            <h3 id="total-debt-summary" class="text-md md:text-2xl font-black drop-shadow-[0_2px_4px_rgba(244,63,94,0.3)]">0 đ</h3>
         </div>
-        <div onclick="showDashboardDetail('debt-ncc')" class="bg-amber-500 p-3 md:p-6 rounded-2xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:brightness-110 transition-all">
-            <p class="text-[10px] md:text-[12px] font-bold uppercase opacity-80">Tổng Nợ NCC</p>
-            <h3 id="total-debt-ncc-summary" class="text-md md:text-2xl font-black">0 đ</h3>
+        
+        <div onclick="showDashboardDetail('debt-ncc')" 
+             class="bg-amber-950/40 border-b-[4px] border-amber-800 text-amber-400 p-3 md:p-6 rounded-2xl shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-amber-900/40 hover:border-amber-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
+            <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-amber-300/80">Tổng Nợ NCC</p>
+            <h3 id="total-debt-ncc-summary" class="text-md md:text-2xl font-black drop-shadow-[0_2px_4px_rgba(245,158,11,0.3)]">0 đ</h3>
         </div>
-        <div class="bg-emerald-500 p-3 md:p-6 rounded-2xl text-white shadow-lg flex flex-col items-center justify-center text-center h-[90px] md:h-[120px]">
-            <p class="text-[10px] md:text-[12px] font-bold uppercase opacity-80">Lợi Nhuận</p>
-            <h3 id="profit-summary" class="text-md md:text-2xl font-black">0 đ</h3>
+        
+        <div class="bg-emerald-950/40 border-b-[4px] border-emerald-800 text-emerald-400 p-3 md:p-6 rounded-2xl shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] hover:bg-emerald-900/40 hover:border-emerald-700 hover:-translate-y-[2px] transition-all duration-150">
+            <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-emerald-300/80">Lợi Nhuận</p>
+            <h3 id="profit-summary" class="text-md md:text-2xl font-black drop-shadow-[0_2px_4px_rgba(16,185,129,0.3)]">0 đ</h3>
         </div>
     </div>
 
-    <div class="flex space-x-2 bg-slate-200 p-1 rounded-xl">
-        <button onclick="switchMainTab('inventory')" id="btn-main-inventory" class="flex-1 py-2 text-xs md:text-sm font-bold rounded-lg transition-all bg-white shadow-sm text-blue-600">NXT KHO</button>
-        <button onclick="switchMainTab('revenue')" id="btn-main-revenue" class="flex-1 py-2 text-xs md:text-sm font-bold rounded-lg transition-all text-slate-600">DOANH THU</button>
-        <button onclick="switchMainTab('products')" id="btn-main-products" class="flex-1 py-2 text-xs md:text-sm font-bold rounded-lg transition-all text-slate-600">TOP SP + KH NỢ</button>
-    </div>
+    <div class="grid grid-cols-3 gap-2 md:gap-3 bg-slate-950 p-1.5 rounded-2xl border border-slate-900 shadow-[inset_0_4px_12px_rgba(0,0,0,0.8)] select-none">
+    <button onclick="switchMainTab('inventory')" id="btn-main-inventory" 
+        class="py-2.5 px-1 text-[10px] md:text-sm font-black rounded-xl transition-all duration-150 bg-gradient-to-b from-blue-950/40 to-blue-900/30 text-blue-400 border-t border-l border-blue-500/20 border-b-[4px] border-blue-600 shadow-[0_6px_15px_rgba(59,130,246,0.25)] -translate-y-[2px] active:translate-y-0 active:border-b-[1px] uppercase tracking-wider">
+        NXT KHO
+    </button>
+    
+    <button onclick="switchMainTab('revenue')" id="btn-main-revenue" 
+        class="py-2.5 px-1 text-[10px] md:text-sm font-bold rounded-xl transition-all duration-150 bg-slate-900/40 text-slate-500 border-b-[2px] border-slate-950 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] translate-y-0 hover:text-slate-300 hover:bg-slate-900/80 hover:border-b-[4px] hover:border-slate-800 hover:-translate-y-[2px] hover:shadow-[0_4px_10px_rgba(0,0,0,0.4)] active:translate-y-[1px] active:border-b-[1px] uppercase tracking-wider">
+        DOANH THU
+    </button>
+    
+    <button onclick="switchMainTab('products')" id="btn-main-products" 
+        class="py-2.5 px-1 text-[10px] md:text-sm font-bold rounded-xl transition-all duration-150 bg-slate-900/40 text-slate-500 border-b-[2px] border-slate-950 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] translate-y-0 hover:text-slate-300 hover:bg-slate-900/80 hover:border-b-[4px] hover:border-slate-800 hover:-translate-y-[2px] hover:shadow-[0_4px_10px_rgba(0,0,0,0.4)] active:translate-y-[1px] active:border-b-[1px] uppercase tracking-wider">
+        TOP SP + KH NỢ
+    </button>
+</div>
 
     <div id="content-main-inventory" class="main-tab-content block">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white p-4 md:p-6 rounded-3xl border border-red-600">
+            <div class="bg-slate-900 p-4 md:p-6 rounded-3xl border border-rose-950/60 shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest">CHI TIẾT TỒN KHO</h3>
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">CHI TIẾT TỒN KHO</h3>
                     <div class="flex gap-2">
-                        <input type="date" id="inv-from" onchange="refreshInventory()" class="text-[10px] border border-slate-500 rounded-lg px-2 py-1 outline-none">
-                        <input type="date" id="inv-to" onchange="refreshInventory()" class="text-[10px] border border-slate-500 rounded-lg px-2 py-1 outline-none">
+                        <input type="date" id="inv-from" onchange="refreshInventory()" class="text-[10px] bg-slate-950 border border-slate-800 text-slate-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500 transition-all">
+                        <input type="date" id="inv-to" onchange="refreshInventory()" class="text-[10px] bg-slate-950 border border-slate-800 text-slate-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500 transition-all">
                     </div>
                 </div>
-                <div id="home-inventory-list" class="space-y-2 overflow-y-auto pr-2 h-[400px] md:h-[500px]"></div>
+                <div id="home-inventory-list" class="space-y-2 overflow-y-auto custom-scrollbar pr-2 h-[400px] md:h-[500px]"></div>
             </div>
-            <div class="bg-white p-4 md:p-6 rounded-3xl border border-blue-500">
-                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">THỜI GIAN CẤP HÀNG ĐẠI LÝ</h3>
+            
+            <div class="bg-slate-900 p-4 md:p-6 rounded-3xl border border-blue-950/60 shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">THỜI GIAN CẤP HÀNG ĐẠI LÝ</h3>
                 <div class="flex items-center w-full px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase">
                     <div class="w-[15%]">Số phiếu</div>
                     <div class="w-[30%]">Khách hàng</div>
@@ -641,30 +693,30 @@ function toggleMoreMenu() {
                     <div class="w-[20%] text-center">Tổng tiền</div>
                     <div class="w-[15%] text-center">Trạng thái</div>
                 </div>
-                <div id="customer-orders-table" class="overflow-y-auto h-[400px] md:h-[500px] pr-2"></div>
+                <div id="customer-orders-table" class="overflow-y-auto custom-scrollbar h-[400px] md:h-[500px] pr-2"></div>
             </div>
         </div>
     </div>
 
     <div id="content-main-revenue" class="main-tab-content hidden space-y-6">
-        <div class="bg-gray-200 p-4 md:p-6 rounded-3xl border border-red-500">
-            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Biểu đồ doanh thu ngày</h3>
+        <div class="bg-slate-900 p-4 md:p-6 rounded-3xl border border-rose-950/60 shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Biểu đồ doanh thu ngày</h3>
             <div class="h-[300px] md:h-[400px] w-full"><canvas id="revenueChart"></canvas></div>
         </div>
-        <div class="bg-white p-4 md:p-6 rounded-3xl border border-blue-500">
-            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Doanh thu từng tháng</h3>
+        <div class="bg-slate-900 p-4 md:p-6 rounded-3xl border border-blue-950/60 shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Doanh thu từng tháng</h3>
             <div class="h-[300px] md:h-[400px] w-full"><canvas id="monthlyRevenueChart"></canvas></div>
         </div>
     </div>
 
     <div id="content-main-products" class="main-tab-content hidden">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-green-100 p-4 md:p-6 rounded-3xl border border-blue-500 flex flex-col">
-                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">TOP 10 SP BÁN CHẠY</h3>
+            <div class="bg-slate-900 p-4 md:p-6 rounded-3xl border border-blue-950/60 shadow-[0_8px_30px_rgba(0,0,0,0.4)] flex flex-col">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">TOP 10 SP BÁN CHẠY</h3>
                 <div class="h-[400px] md:h-[500px] w-full"><canvas id="topProductsChart"></canvas></div>
             </div>
-            <div class="bg-rose-50 p-4 md:p-6 rounded-3xl border border-rose-500">
-                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Khách hàng công nợ</h3>
+            <div class="bg-slate-900 p-4 md:p-6 rounded-3xl border border-rose-950/60 shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Khách hàng công nợ</h3>
                 <div class="flex items-center w-full px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase">
                     <div class="w-[40%]">Khách hàng</div>
                     <div class="w-[25%] text-center">SĐT</div>
@@ -675,49 +727,49 @@ function toggleMoreMenu() {
         </div>
     </div>
 
-    <div id="order-detail-modal" class="fixed inset-0 z-[9999] bg-black bg-opacity-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-4 md:p-6">
-            <div class="flex justify-between items-center mb-4 border-b pb-2">
-                <h3 class="text-lg font-bold" id="modal-title">Chi tiết phiếu</h3>
-                <button onclick="document.getElementById('order-detail-modal').classList.add('hidden')" class="text-gray-500 font-bold text-xl">✕</button>
+    <div id="order-detail-modal" class="fixed inset-0 z-[9999] bg-black/70 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-4 md:p-6 text-slate-200">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-2">
+                <h3 class="text-lg font-bold text-white" id="modal-title">Chi tiết phiếu</h3>
+                <button onclick="document.getElementById('order-detail-modal').classList.add('hidden')" class="text-slate-400 hover:text-white font-bold text-xl">✕</button>
             </div>
             <div id="modal-content" class="text-sm"></div>
             <div class="mt-6 text-center">
-                <button onclick="document.getElementById('order-detail-modal').classList.add('hidden')" class="bg-violet-600 text-white px-8 py-2 rounded-lg font-bold">Đóng</button>
+                <button onclick="document.getElementById('order-detail-modal').classList.add('hidden')" class="bg-violet-950/60 border-b-[3px] border-violet-800 hover:bg-violet-900/50 hover:border-violet-700 text-violet-400 px-8 py-2 rounded-lg font-bold active:translate-y-[1px] transition-all">Đóng</button>
             </div>
         </div>
     </div>
 
-    <div id="dashboard-detail-modal" class="fixed inset-0 z-[9999] bg-black/50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm max-h-[80vh] overflow-hidden flex flex-col">
-            <div class="p-4 border-b flex justify-between items-center bg-gray-50">
-                <h3 id="modal-detail-title" class="font-black text-slate-800">Chi tiết</h3>
-                <button onclick="document.getElementById('dashboard-detail-modal').classList.add('hidden')" class="text-slate-400 hover:text-black text-xl font-bold">✕</button>
+    <div id="dashboard-detail-modal" class="fixed inset-0 z-[9999] bg-black/70 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[80vh] overflow-hidden flex flex-col">
+            <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
+                <h3 id="modal-detail-title" class="font-black text-white">Chi tiết</h3>
+                <button onclick="document.getElementById('dashboard-detail-modal').classList.add('hidden')" class="text-slate-400 hover:text-white text-xl font-bold">✕</button>
             </div>
-            <div id="modal-detail-content" class="p-4 overflow-y-auto"></div>
+            <div id="modal-detail-content" class="p-4 overflow-y-auto text-slate-200"></div>
         </div>
     </div>
-	<!-- Modal chi tiết bán hàng theo ngày -->
-    <div id="salesDetailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 max-h-[80vh] overflow-hidden flex flex-col">
-            <div class="flex justify-between items-center mb-4 border-b pb-3">
-                <h3 id="modalDateTitle" class="font-black text-slate-800 text-lg">Chi tiết bán hàng</h3>
-                <button onclick="document.getElementById('salesDetailModal').classList.add('hidden')" class="text-slate-400 hover:text-black text-xl font-bold">✕</button>
+
+    <div id="salesDetailModal" class="hidden fixed inset-0 bg-black/70 z-[9999] flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-lg p-6 max-h-[80vh] overflow-hidden flex flex-col text-slate-200">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
+                <h3 id="modalDateTitle" class="font-black text-white text-lg">Chi tiết bán hàng</h3>
+                <button onclick="document.getElementById('salesDetailModal').classList.add('hidden')" class="text-slate-400 hover:text-white text-xl font-bold">✕</button>
             </div>
             <div class="overflow-y-auto flex-1">
                 <table class="w-full text-sm">
-                    <thead class="sticky top-0 bg-blue-50 text-blue-700">
+                    <thead class="sticky top-0 bg-slate-950 text-blue-400 border-b border-slate-800">
                         <tr>
                             <th class="text-left py-3 px-3 font-bold">Tên sản phẩm</th>
                             <th class="text-center py-3 px-3 font-bold">SL</th>
                             <th class="text-right py-3 px-3 font-bold">Tổng tiền</th>
                         </tr>
                     </thead>
-                    <tbody id="modalDetailsBody" class="divide-y divide-gray-100"></tbody>
+                    <tbody id="modalDetailsBody" class="divide-y divide-slate-800/50"></tbody>
                 </table>
             </div>
             <button onclick="document.getElementById('salesDetailModal').classList.add('hidden')" 
-                    class="mt-4 w-full bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-slate-700 transition-all">Đóng</button>
+                    class="mt-4 w-full bg-slate-950 border-b-[3px] border-slate-800 hover:bg-slate-800 text-slate-300 py-3 rounded-xl font-bold active:translate-y-[1px] transition-all">Đóng</button>
         </div>
     </div>
 </div>
@@ -1969,15 +2021,54 @@ document.addEventListener('DOMContentLoaded', () => {
  */
  
  function switchMainTab(tabName) {
-    document.querySelectorAll('.main-tab-content').forEach(el => el.classList.add('hidden'));
-    document.querySelectorAll('button[id^="btn-main-"]').forEach(btn => {
-        btn.classList.remove('bg-white', 'shadow-sm', 'text-blue-600');
-        btn.classList.add('text-slate-600');
+    // 1. Ẩn toàn bộ nội dung các tab
+    document.querySelectorAll('.main-tab-content').forEach(el => {
+        el.classList.add('hidden');
+        el.classList.remove('block', 'space-y-6');
     });
-    document.getElementById('content-main-' + tabName).classList.remove('hidden');
-    const btn = document.getElementById('btn-main-' + tabName);
-    btn.classList.add('bg-white', 'shadow-sm', 'text-blue-600');
-    btn.classList.remove('text-slate-600');
+
+    // 2. Hiển thị nội dung tab được chọn
+    const activeContent = document.getElementById('content-main-' + tabName);
+    if (activeContent) {
+        activeContent.classList.remove('hidden');
+        if (tabName === 'revenue') {
+            activeContent.classList.add('space-y-6'); // Giữ cấu hình space-y cho biểu đồ
+        } else {
+            activeContent.classList.add('block');
+        }
+    }
+
+    // 3. Danh sách class 3D khi Tab được chọn (Chân đế xanh Neon, nảy lên)
+    const activeClasses = [
+        'bg-gradient-to-b', 'from-blue-950/40', 'to-blue-900/30', 
+        'text-blue-400', 'border-t', 'border-l', 'border-blue-500/20', 
+        'border-b-[4px]', 'border-blue-600', 'shadow-[0_6px_15px_rgba(59,130,246,0.25)]', 
+        '-translate-y-[2px]', 'font-black'
+    ];
+    
+    // 4. Danh sách class khi Tab KHÔNG được chọn (Chìm xuống khay, mờ tối)
+    const inactiveClasses = [
+        'bg-slate-900/40', 'text-slate-500', 'border-b-[2px]', 
+        'border-slate-950', 'shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]', 
+        'translate-y-0', 'hover:text-slate-300', 'hover:bg-slate-900/80', 
+        'hover:border-b-[4px]', 'hover:border-slate-800', 'hover:-translate-y-[2px]', 
+        'hover:shadow-[0_4px_10px_rgba(0,0,0,0.4)]', 'font-bold'
+    ];
+
+    // 5. Cập nhật trạng thái hiển thị 3D cho từng nút
+    const tabs = ['inventory', 'revenue', 'products'];
+    tabs.forEach(t => {
+        const btn = document.getElementById('btn-main-' + t);
+        if (btn) {
+            if (t === tabName) {
+                btn.classList.remove(...inactiveClasses);
+                btn.classList.add(...activeClasses);
+            } else {
+                btn.classList.remove(...activeClasses);
+                btn.classList.add(...inactiveClasses);
+            }
+        }
+    });
 }
 
 async function loadDashboard(filter = 'default') {
@@ -2264,33 +2355,46 @@ function renderCustomerOrders(allSales, customersSnap) {
     const currentOrders = Array.from(latestOrdersMap.values()).sort((a, b) => b.diffDays - a.diffDays);
 
     if (currentOrders.length === 0) {
-        container.innerHTML = `<div class="p-4 text-center text-slate-400">Không có đơn hàng nào.</div>`;
+        container.innerHTML = `<div class="p-4 text-center text-slate-500 text-xs">Không có đơn hàng nào.</div>`;
         return;
     }
 
     container.innerHTML = currentOrders.map(order => {
-    let barBg = order.diffDays >= 20 ? 'bg-rose-50' : (order.diffDays >= 10 ? 'bg-amber-50' : 'bg-emerald-50');
-    let borderColor = order.diffDays >= 20 ? 'border-rose-400' : (order.diffDays >= 10 ? 'border-amber-400' : 'border-emerald-400');
-    let dayTextColor = order.diffDays >= 20 ? 'text-rose-600' : (order.diffDays >= 10 ? 'text-amber-600' : 'text-emerald-600');
+        // --- THIẾT LẬP MÀU NỀN & CHỮ NEON CHO DARK MODE ---
+        let barBg = order.diffDays >= 20 
+            ? 'bg-rose-950/20 hover:bg-rose-950/35 text-rose-400' 
+            : (order.diffDays >= 10 
+                ? 'bg-amber-950/20 hover:bg-amber-950/35 text-amber-400' 
+                : 'bg-emerald-950/20 hover:bg-emerald-950/35 text-emerald-400');
 
-    return `
+        let borderColor = order.diffDays >= 20 
+            ? 'border-rose-900/60' 
+            : (order.diffDays >= 10 ? 'border-amber-900/60' : 'border-emerald-900/60');
+
+        let dayTextColor = order.diffDays >= 20 
+            ? 'text-rose-400 drop-shadow-[0_0_6px_rgba(244,63,94,0.4)]' 
+            : (order.diffDays >= 10 
+                ? 'text-amber-400 drop-shadow-[0_0_6px_rgba(245,158,11,0.4)]' 
+                : 'text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.4)]');
+
+        return `
         <div class="block w-full">
             <div onclick="viewOrderDetails('${order.id}')" 
-                 class="flex items-center ${barBg} border-t border-b border-slate-200 border-l-4 ${borderColor} border-r-4 ${borderColor} rounded-lg p-2 gap-2 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] hover:shadow-xl transition-all duration-200 cursor-pointer hover:bg-slate-100">
+                 class="flex items-center ${barBg} border-t border-b border-slate-800/80 border-l-4 ${borderColor} border-r-4 ${borderColor} rounded-xl p-2 gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.3)] transition-all duration-200 cursor-pointer text-xs">
                     
-                <div class="w-[15%] px-2 py-1 rounded text-[11px] font-bold text-slate-600 truncate">
+                <div class="w-[15%] px-2 py-1 rounded text-[11px] font-mono font-bold text-slate-400 truncate">
                     ${order.invoiceNumber || order.id.slice(-6)}
                 </div>
                 
-                <div class="w-[30%] px-2 py-1 rounded text-[11px] font-bold text-slate-900 truncate">
+                <div class="w-[30%] px-2 py-1 rounded text-[11px] font-bold text-slate-100 truncate">
                     ${order.customer}
                 </div>
                 
-                <div class="w-[20%] px-2 py-1 rounded text-[11px] font-bold text-slate-700 text-right">
+                <div class="w-[20%] px-2 py-1 rounded text-[11px] font-semibold text-slate-400 text-right">
                     ${order.orderDate.toLocaleDateString('vi-VN')}
                 </div>
                 
-                <div class="w-[20%] px-2 py-1 rounded text-[11px] font-bold text-slate-900 text-right">
+                <div class="w-[20%] px-2 py-1 rounded text-[11px] font-bold text-slate-200 text-right">
                     ${Number(order.total || 0).toLocaleString('vi-VN')}đ
                 </div>
                 
@@ -2299,8 +2403,9 @@ function renderCustomerOrders(allSales, customersSnap) {
                 </div>
             </div>
         </div>
-    `;
-}).join('');
+        `;
+    }).join('');
+
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
     }
@@ -2334,33 +2439,34 @@ window.loadOrderData = function(orderId) {
             ? order.date.toDate().toLocaleDateString('vi-VN') 
             : 'N/A';
         
-        // Sử dụng mảng map an toàn
+        // --- RENDERING BẢNG CHI TIẾT SẢN PHẨM SANG DARK MODE ---
         const itemsHtml = (order.items || []).map(item => `
-            <tr>
-                <td class="p-2 border">${item.name || 'N/A'}</td>
-                <td class="p-2 border text-center">${item.qty || 0}</td>
-                <td class="p-2 border text-right">${Number(item.price || 0).toLocaleString('vi-VN')}</td>
-                <td class="p-2 border text-right">${Number(item.total || 0).toLocaleString('vi-VN')}</td>
+            <tr class="border-b border-slate-800/80 hover:bg-slate-900/30 transition-colors">
+                <td class="p-2.5 text-slate-300 font-medium">${item.name || 'N/A'}</td>
+                <td class="p-2.5 text-center text-slate-200 font-bold">${item.qty || 0}</td>
+                <td class="p-2.5 text-right text-slate-300 font-mono">${Number(item.price || 0).toLocaleString('vi-VN')}</td>
+                <td class="p-2.5 text-right text-slate-100 font-bold font-mono">${Number(item.total || 0).toLocaleString('vi-VN')}</td>
             </tr>
         `).join('');
 
         modalContent.innerHTML = `
-            <div class="space-y-2 mb-4 bg-gray-50 p-3 rounded-lg text-xs">
-                <p><strong>Khách hàng:</strong> ${order.customer || 'Khách lẻ'}</p>
-                <p><strong>Ngày xuất:</strong> ${orderDate}</p>
-                <p><strong>Tổng thanh toán:</strong> <span class="text-red-600 font-bold">${Number(order.total || 0).toLocaleString('vi-VN')} đ</span></p>
+            <div class="space-y-2 mb-4 bg-slate-950/80 border border-slate-800/80 p-3.5 rounded-xl text-xs text-slate-300">
+                <p><strong class="text-slate-400">Khách hàng:</strong> <span class="text-slate-100 font-bold">${order.customer || 'Khách lẻ'}</span></p>
+                <p><strong class="text-slate-400">Ngày xuất:</strong> <span class="text-slate-200 font-mono">${orderDate}</span></p>
+                <p><strong class="text-slate-400">Tổng thanh toán:</strong> <span class="text-rose-400 font-black drop-shadow-[0_0_6px_rgba(244,63,94,0.4)] text-[13px]">${Number(order.total || 0).toLocaleString('vi-VN')} đ</span></p>
             </div>
-            <div class="overflow-y-auto max-h-[40vh]">
+            
+            <div class="overflow-y-auto max-h-[40vh] rounded-xl border border-slate-800/80 bg-slate-950/20">
                 <table class="w-full text-left border-collapse text-xs">
                     <thead>
-                        <tr class="bg-gray-100">
-                            <th class="p-2 border">Sản phẩm</th>
-                            <th class="p-2 border text-center">SL</th>
-                            <th class="p-2 border text-right">Giá</th>
-                            <th class="p-2 border text-right">Tổng</th>
+                        <tr class="bg-slate-900 text-slate-400 border-b border-slate-800">
+                            <th class="p-2.5 font-bold">Sản phẩm</th>
+                            <th class="p-2.5 text-center font-bold">SL</th>
+                            <th class="p-2.5 text-right font-bold">Giá</th>
+                            <th class="p-2.5 text-right font-bold">Tổng</th>
                         </tr>
                     </thead>
-                    <tbody>${itemsHtml}</tbody>
+                    <tbody class="divide-y divide-slate-800/50">${itemsHtml}</tbody>
                 </table>
             </div>
         `;
@@ -2368,7 +2474,7 @@ window.loadOrderData = function(orderId) {
 };
 
 window.viewOrderDetails = function(orderId) {
-    console.log("Đã bấm xem đơn:", orderId); // Nếu không thấy dòng này trong F12, nghĩa là hàm chưa được gọi
+    console.log("Đã bấm xem đơn:", orderId);
     
     const modal = document.getElementById('order-detail-modal');
     if (!modal) {
@@ -2376,17 +2482,15 @@ window.viewOrderDetails = function(orderId) {
         return;
     }
     
-    // Gọi hàm load dữ liệu (như đã hướng dẫn ở bước trước)
     if (typeof loadOrderData === 'function') {
         loadOrderData(orderId);
     }
     
-    // Bỏ class hidden để hiển thị modal
     modal.classList.remove('hidden');
     console.log("Đã xóa class hidden, modal sẽ hiện ra");
 };
 
-// Hàm render danh sách khách hàng nợ
+// Hàm render danh sách khách hàng nợ (Đã chuyển đổi sang Dark Mode)
 function renderDebtCustomers(customersSnap) {
     const container = document.getElementById('home-debt-customers-list');
     if (!container) return;
@@ -2400,20 +2504,19 @@ function renderDebtCustomers(customersSnap) {
 
         if (debt > 0) {
             hasDebt = true;
-            // Màu số tiền đổi sang rose-600 (đỏ) và nền số tiền sang rose-100
             html += `
-                <div class="flex items-center w-full bg-white border border-slate-200 border-l-4 border-l-blue-400 border-r-4 border-r-blue-400 rounded-lg p-2 mb-3 gap-2 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] hover:shadow-lg transition-all duration-200 text-[10px]">
+                <div class="flex items-center w-full bg-slate-950/40 border border-slate-800/80 border-l-4 border-l-blue-600/80 border-r-4 border-r-blue-600/80 rounded-xl p-2 mb-3 gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.3)] hover:border-slate-700 transition-all duration-200 text-[10px]">
                     
-                    <div class="bg-blue-50/50 px-2 py-1 rounded text-[10px] font-bold text-slate-900 truncate w-[40%]">
+                    <div class="bg-blue-950/30 border border-blue-900/30 px-2 py-1 rounded text-[10px] font-bold text-slate-100 truncate w-[40%]">
                         ${customer.name || 'Khách hàng'}
                     </div>
                     
-                    <div class="bg-blue-50/50 px-2 py-1 rounded text-[10px] text-slate-600 w-[25%] text-center">
+                    <div class="bg-slate-900/60 border border-slate-800 px-2 py-1 rounded text-[10px] text-slate-400 w-[25%] text-center font-mono">
                         ${customer.phone || 'N/A'}
                     </div>
                     
                     <div class="w-[35%] text-center pr-2">
-                        <span class="font-black text-rose-600 text-[11px] bg-rose-100 px-2 py-1 rounded-md shadow-inner">
+                        <span class="font-black text-rose-400 text-[11px] bg-rose-950/50 border border-rose-900/50 px-2 py-1 rounded-md drop-shadow-[0_0_4px_rgba(244,63,94,0.4)]">
                             ${debt.toLocaleString('vi-VN')} đ
                         </span>
                     </div>
@@ -2422,7 +2525,7 @@ function renderDebtCustomers(customersSnap) {
         }
     });
 
-    container.innerHTML = hasDebt ? html : '<p class="text-center py-4 text-xs text-slate-400">Không có khách hàng nợ</p>';
+    container.innerHTML = hasDebt ? html : '<p class="text-center py-6 text-xs text-slate-500">Không có khách hàng nợ</p>';
 }
 
 
@@ -2612,7 +2715,7 @@ async function renderInventoryList(filter = 'today') {
         });
     });
 
-    // 5. Render giao diện
+    // 5. Render giao diện (Đã thiết kế lại đồng bộ Premium Dark Mode)
     let inventoryCardsHtml = '';
     inventoryMap.forEach((item, name) => {
         const tonCuoi = item.tonDau + item.nhap + item.change - item.out;
@@ -2626,35 +2729,39 @@ async function renderInventoryList(filter = 'today') {
         const maxVal = Math.max(item.tonDau + totalNhap + item.out + tonCuoi, 1); 
         const isLowStock = tonCuoi < 5;
 
-        const bar = (val, color, label, applyGlow = false, borderClass = 'border-slate-300') => {
+        // Hàm vẽ thanh tiến trình tối ưu hóa tương phản Dark Mode
+        const bar = (val, color, label, applyGlow = false, borderClass = 'border-slate-800') => {
             const barWidth = val > 0 ? Math.min((val / maxVal) * 100, 100) : 0; 
-            const glowClass = applyGlow ? 'ring-2 ring-white ring-inset shadow-[0_0_8px_rgba(255,255,255,0.7)]' : '';
-            let colorBarHtml = barWidth > 0 ? `<div style="width: ${barWidth}%;" class="h-full ${color} ${glowClass} shadow-[inset_0_-2px_3px_rgba(0,0,0,0.2)] transition-all duration-500"></div>` : '';
+            // Nếu dưới mức an toàn: tạo hiệu ứng viền phát sáng đỏ nhấp nháy cơ học
+            const glowClass = applyGlow ? 'ring-1 ring-rose-500/50 ring-inset shadow-[0_0_8px_rgba(244,63,94,0.6)] animate-pulse' : '';
+            let colorBarHtml = barWidth > 0 ? `<div style="width: ${barWidth}%;" class="h-full ${color} ${glowClass} shadow-[inset_0_-2px_3px_rgba(0,0,0,0.4)] transition-all duration-500"></div>` : '';
             return `
-            <div class="flex-1 h-8 bg-slate-200 rounded-md border ${borderClass} shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] overflow-hidden relative">
+            <div class="flex-1 h-8 bg-slate-950 rounded-lg border ${borderClass} shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)] overflow-hidden relative">
                 ${colorBarHtml}
-                <div class="absolute inset-0 flex items-center justify-center text-[9px] font-black text-black">
+                <div class="absolute inset-0 flex items-center justify-center text-[9px] font-black text-slate-100 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
                     ${label}:&nbsp;<b>${val}</b>
                 </div>
             </div>`;
         };
 
-        const tcBorderClass = isLowStock ? 'border-2 border-red-500 animate-pulse' : 'border-slate-300';
+        // Thiết lập viền cảnh báo cho Tồn cuối
+        const tcBorderClass = isLowStock ? 'border-rose-500/80' : 'border-slate-800';
+        
         inventoryCardsHtml += `
-        <div class="mb-2 bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
-            <div class="text-[11px] font-bold text-slate-700 mb-1 truncate">
-                ${name} ${isLowStock ? '<span class="animate-pulse">⚠️</span>' : ''}
+        <div class="mb-2 bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/80 shadow-[0_4px_6px_rgba(0,0,0,0.2)] hover:border-slate-700 transition-all duration-150">
+            <div class="text-[11px] font-bold text-slate-300 mb-1.5 truncate flex items-center gap-1">
+                ${name} ${isLowStock ? '<span class="text-rose-500 animate-pulse text-[12px]">⚠️</span>' : ''}
             </div>
-            <div class="flex w-full gap-1">
-                ${bar(item.tonDau, 'bg-blue-400', 'T.Đầu')}
-                ${bar(totalNhap, 'bg-amber-400', 'Nhập')}
-                ${bar(item.out, 'bg-rose-400', 'Xuất')}
-                ${bar(tonCuoi, 'bg-emerald-400', 'T.Cuối', isLowStock, tcBorderClass)}
+            <div class="flex w-full gap-1.5">
+                ${bar(item.tonDau, 'bg-blue-600/85', 'T.Đầu')}
+                ${bar(totalNhap, 'bg-amber-600/85', 'Nhập')}
+                ${bar(item.out, 'bg-rose-600/85', 'Xuất')}
+                ${bar(tonCuoi, isLowStock ? 'bg-rose-700/80' : 'bg-emerald-600/85', 'T.Cuối', isLowStock, tcBorderClass)}
             </div>
         </div>`;
     });
 
-    document.getElementById('home-inventory-list').innerHTML = inventoryCardsHtml || '<p class="text-center py-4 text-xs">Không có dữ liệu</p>';
+    document.getElementById('home-inventory-list').innerHTML = inventoryCardsHtml || '<p class="text-center py-6 text-xs text-slate-500">Không có dữ liệu</p>';
 }
 
 //============================DOANH THU ====================
@@ -2750,7 +2857,7 @@ function updateRevenueChart(filteredSales) {
                     type: 'bar',
                     data: data,
                     order: 2, // Lớp dưới
-                    backgroundColor: 'rgba(220, 38, 38, 0.8)',
+                    backgroundColor: 'rgba(239, 68, 68, 0.85)', // Đỏ Neon sáng hơn chút cho Dark Mode
                     borderRadius: { topLeft: 20, topRight: 20, bottomLeft: 0, bottomRight: 0 },
                     barPercentage: 0.3,
                     categoryPercentage: 0.6
@@ -2759,13 +2866,13 @@ function updateRevenueChart(filteredSales) {
                     label: 'Doanh thu (Đường)',
                     type: 'line',
                     data: data,
-                    order: 1, // Lớp trên (số nhỏ hơn sẽ hiển thị đè lên)
-                    borderColor: '#1e40af',
+                    order: 1, // Lớp trên
+                    borderColor: '#60a5fa', // Đổi từ xanh tối sang Xanh Neon dịu mắt, cực nổi trên nền tối
                     backgroundColor: 'transparent',
                     borderWidth: 2,
                     tension: 0.3,
                     pointRadius: 4,
-                    pointBackgroundColor: '#1e40af'
+                    pointBackgroundColor: '#3b82f6'
                 }
             ]
         },
@@ -2798,27 +2905,33 @@ function updateRevenueChart(filteredSales) {
                     const finalTax = totalTax + gap;
 
                     const body = document.getElementById('modalDetailsBody');
+                    
+                    // --- ĐỒNG BỘ CHI TIẾT BẢNG SANG PREMIUM DARK MODE ---
                     let htmlContent = Object.keys(itemsInDay).map(name => `
-                        <tr class="border-b border-gray-100 hover:bg-gray-50">
-                            <td class="py-2 px-1 text-sm text-slate-700">${name}</td>
-                            <td class="text-center py-2 px-1 text-sm text-slate-600">${itemsInDay[name].qty}</td>
-                            <td class="text-right py-2 px-1 text-sm font-bold text-blue-600">${itemsInDay[name].total.toLocaleString('vi-VN')} đ</td>
+                        <tr class="border-b border-slate-800/60 hover:bg-slate-900/30 transition-colors">
+                            <td class="py-2.5 px-2 text-sm text-slate-300 font-medium">${name}</td>
+                            <td class="text-center py-2.5 px-2 text-sm text-slate-400 font-mono">${itemsInDay[name].qty}</td>
+                            <td class="text-right py-2.5 px-2 text-sm font-bold text-cyan-400 font-mono">${itemsInDay[name].total.toLocaleString('vi-VN')} đ</td>
                         </tr>`).join('');
 
                     htmlContent += `
-                        <tr class="bg-gray-100 font-bold border-t-2 border-gray-300">
-                            <td class="py-2 px-1 text-right text-sm" colspan="2">Tổng hàng:</td>
-                            <td class="text-right py-2 px-1 text-sm">${totalGoods.toLocaleString('vi-VN')} đ</td>
+                        <tr class="bg-slate-900 font-bold border-t border-slate-800 text-slate-300">
+                            <td class="py-2.5 px-2 text-right text-sm" colspan="2">Tổng hàng:</td>
+                            <td class="text-right py-2.5 px-2 text-sm font-mono text-slate-200">${totalGoods.toLocaleString('vi-VN')} đ</td>
                         </tr>`;
                     
                     if (finalTax > 0) {
-                        htmlContent += `<tr class="bg-gray-50"><td class="py-1 px-1 text-right text-sm" colspan="2">Thuế:</td><td class="text-right py-1 px-1 text-sm">${finalTax.toLocaleString('vi-VN')} đ</td></tr>`;
+                        htmlContent += `
+                        <tr class="bg-slate-950/50 text-slate-400">
+                            <td class="py-2 px-2 text-right text-sm" colspan="2">Thuế:</td>
+                            <td class="text-right py-2 px-2 text-sm font-mono">${finalTax.toLocaleString('vi-VN')} đ</td>
+                        </tr>`;
                     }
                     
                     htmlContent += `
-                        <tr class="bg-blue-50 font-black text-blue-900 border-t-2 border-blue-200">
-                            <td class="py-2 px-1 text-right text-sm" colspan="2">TỔNG DOANH THU:</td>
-                            <td class="text-right py-2 px-1 text-sm">${totalRevenue.toLocaleString('vi-VN')} đ</td>
+                        <tr class="bg-blue-950/40 font-black text-blue-400 border-t border-blue-900/60">
+                            <td class="py-2.5 px-2 text-right text-sm" colspan="2">TỔNG DOANH THU:</td>
+                            <td class="text-right py-2.5 px-2 text-sm font-mono text-blue-300 drop-shadow-[0_0_4px_rgba(59,130,246,0.3)]">${totalRevenue.toLocaleString('vi-VN')} đ</td>
                         </tr>`;
 
                     body.innerHTML = htmlContent;
@@ -2827,8 +2940,21 @@ function updateRevenueChart(filteredSales) {
                 }
             },
             scales: {
-                y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { callback: v => (v / 1000000) + 'tr' } },
-                x: { grid: { display: false } }
+                // --- CHỈNH MÀU TRỤC TỌA ĐỘ VÀ ĐƯỜNG LƯỚI CHO DARK MODE ---
+                y: { 
+                    beginAtZero: true, 
+                    grid: { color: 'rgba(255, 255, 255, 0.08)' }, // Đường lưới mờ tinh tế màu trắng
+                    ticks: { 
+                        color: '#94a3b8', // Màu chữ trục Y (Slate 400) dễ đọc
+                        callback: v => (v / 1000000) + 'tr' 
+                    } 
+                },
+                x: { 
+                    grid: { display: false },
+                    ticks: {
+                        color: '#94a3b8' // Màu chữ trục X (Slate 400)
+                    }
+                }
             },
             animation: {
                 onComplete: function() {
@@ -2837,7 +2963,10 @@ function updateRevenueChart(filteredSales) {
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
                     ctx.font = 'bold 10px Arial';
-                    ctx.fillStyle = '#000000'; // Đã đổi sang màu đen
+                    
+                    // --- ĐỒI SỐ TRÊN ĐẦU CỘT SANG MÀU TRẮNG SÁNG ---
+                    ctx.fillStyle = '#f8fafc'; // Màu trắng Slate cực rõ trên nền tối
+                    
                     chart.getDatasetMeta(0).data.forEach((bar, index) => {
                         const val = data[index];
                         if (val > 0) {
@@ -2876,14 +3005,13 @@ function updateMonthlyRevenueChart(allSales) {
             datasets: [{
                 label: 'Doanh thu',
                 data: dataValues,
-                backgroundColor: '#3b82f6',
+                backgroundColor: '#3b82f6', // Màu xanh dương tiêu chuẩn rất hợp với Dark Mode
                 borderRadius: 8
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            // --- THÊM PHẦN CLICK NÀY ---
             onClick: (event, elements) => {
                 if (elements.length > 0) {
                     const index = elements[0].index;
@@ -2896,7 +3024,6 @@ function updateMonthlyRevenueChart(allSales) {
                     if (typeof updateRevenueChart === 'function') updateRevenueChart(filtered);
                 }
             },
-            // ---------------------------
             plugins: { 
                 legend: { display: false },
                 tooltip: {
@@ -2906,12 +3033,21 @@ function updateMonthlyRevenueChart(allSales) {
                 }
             },
             scales: { 
+                // --- CHỈNH MÀU TRỤC TỌA ĐỘ CHO BIỂU ĐỒ THÁNG ---
                 y: { 
                     beginAtZero: true, 
-                    grid: { display: false },
-                    ticks: { callback: (value) => (value / 1000000) + 'tr' }
+                    grid: { color: 'rgba(255, 255, 255, 0.08)' }, // Lưới tối mờ
+                    ticks: { 
+                        color: '#94a3b8', // Chữ trục Y
+                        callback: (value) => (value / 1000000) + 'tr' 
+                    }
                 },
-                x: { grid: { display: false } }
+                x: { 
+                    grid: { display: false },
+                    ticks: {
+                        color: '#94a3b8' // Chữ trục X
+                    }
+                }
             },
             animation: {
                 onComplete: function() {
@@ -2920,7 +3056,9 @@ function updateMonthlyRevenueChart(allSales) {
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
                     ctx.font = 'bold 10px Arial';
-                    ctx.fillStyle = '#1e293b';
+                    
+                    // --- ĐỔI CHỮ SỐ TRÊN ĐẦU CỘT THÀNH MÀU TRẮNG SÁNG ---
+                    ctx.fillStyle = '#f8fafc'; // Đổi từ '#1e293b' sang màu trắng sáng
 
                     chart.data.datasets.forEach((dataset, i) => {
                         chart.getDatasetMeta(i).data.forEach((bar, index) => {
@@ -2943,11 +3081,7 @@ function filterRevenueByDayOfMonth(monthKey, allSales) {
         return orderMonth === monthKey;
     });
 
-    // 2. Gọi hàm vẽ biểu đồ chi tiết theo ngày (tôi giả sử bạn dùng hàm updateRevenueChart đã gửi trước đó)
-    // Nếu bạn muốn hiển thị một thông báo cho người dùng biết đang xem tháng nào:
-    alert("Đang hiển thị chi tiết tháng: " + monthKey);
-    
-    // Gọi hàm vẽ lại biểu đồ doanh thu (biểu đồ đường hoặc cột theo ngày)
+    // 2. Gọi hàm vẽ biểu đồ chi tiết theo ngày
     updateRevenueChart(monthSales); 
 }
 
