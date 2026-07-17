@@ -456,120 +456,138 @@
     }
 </style>
 <style>
+
     /* ==========================================================================
-       HỆ THỐNG CSS DUAL THEME (CHỈ HOẠT ĐỘNG KHI BẬT DARK MODE - CÓ CLASS .dark)
-       ========================================================================== */
-    .dark {
-        
-        /* ------------------ I. DÙNG CHUNG CHO SELECT BOX SẢN PHẨM ------------------ */
-        .select2-selection, 
-        .select2-container--default .select2-selection--single,
-        .choices__inner,
-        .ts-control,
-        .ss-main,
-        .product-select {
-            background-color: #020617 !important;
-            color: #f8fafc !important;
-            border-color: #334155 !important;
-        }
+   HỆ THỐNG CSS DUAL THEME (ĐÃ CẬP NHẬT MÀU NỀN & TIÊU ĐỀ)
+   ========================================================================== */
+/* --- 1. DARK MODE (Giữ nguyên) --- */
+.dark, .dark body, .dark #page-dashboard, .dark [id*="page-"], .dark .bg-white {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+}
+.dark #page-dashboard *, .dark [id*="page-"] * {
+    border-color: #334155 !important;
+}
 
-        .select2-dropdown,
-        .select2-container--default .select2-dropdown,
-        .ts-dropdown,
-        .choices__list--dropdown,
-        .ss-content {
-            background-color: #020617 !important;
-            border: 1px solid #334155 !important;
-            color: #f8fafc !important;
-        }
+/* --- 2. LIGHT MODE (Đã sửa: Không ép màu thẻ con, chỉ chỉnh nền trang) --- */
 
-        .select2-results__option,
-        .ts-dropdown .option,
-        .choices__item--choice {
-            background-color: #020617 !important;
-            color: #f8fafc !important;
-        }
+/* Chỉ thay đổi màu nền trang để giảm chói */
+html:not(.dark) body:not(.dark) {
+    background-color: #e2e8f0 !important; /* Xám ghi dịu mắt cho cả trang */
+    color: #1e293b !important;
+}
 
-        .select2-results__option--highlighted,
-        .ts-dropdown .option.active,
-        .choices__item--choice.is-highlighted {
-            background-color: #1e3a8a !important;
-            color: #ffffff !important;
-        }
-
-        .select2-search__field,
-        .ts-control input,
-        .choices__input {
-            background-color: #020617 !important;
-            color: #f8fafc !important;
-            border-color: #334155 !important;
-        }
+/* BỎ QUY TẮC ÉP MÀU .bg-white */
+/* Các thẻ .bg-white giờ sẽ tự giữ nguyên định dạng gốc của trang 
+   (bao gồm cả màu sắc dòng sản phẩm, bo góc, v.v.) */
 
 
-        /* ------------------ II. DÀNH RIÊNG CHO TRANG: NHẬP KHO ------------------ */
-        #cart-box, 
-        #cart-box table, 
-        #cart-box tr, 
-        #cart-box td, 
-        #cart-box th {
-            background-color: #020617 !important;
-            color: #f8fafc !important;
-            border-color: #334155 !important;
-        }
-
-        #page-import input, 
-        #page-import select {
-            background-color: #020617 !important;
-            color: #f8fafc !important;
-            border-color: #334155 !important;
-        }
-
-        #page-import table tbody tr {
-            background-color: #0f172a !important; 
-            color: #f8fafc !important;
-        }
-
-
-        /* ------------------ III. DÀNH RIÊNG CHO TRANG: KHO HÀNG (ĐÃ FIX) ------------------ */
-        /* Dùng selector * để ép mọi thẻ con bên trong #inventory-data nhận màu tối, bất kể JS gán gì */
-        #inventory-data, 
-        #inventory-data tr, 
-        #inventory-data td, 
-        #inventory-data * {
-            background-color: #020617 !important; 
-            color: #f8fafc !important;
-        }
-
-        /* Giữ lại đường kẻ mờ cho bảng */
-        #inventory-data td {
-            border-bottom: 1px solid #1e293b !important;
-        }
-
-        /* Hiệu ứng hover di chuột sáng nhẹ */
-        #inventory-data tr:hover,
-        #inventory-data tr:hover * {
-            background-color: #0f172a !important;
-        }
-
-        /* Các ô input tìm kiếm/ngày tháng ở trang kho */
-        #page-inventory input, 
-        #page-inventory select {
-            background-color: #020617 !important;
-            color: #f8fafc !important;
-            border-color: #334155 !important;
-        }
+.dark {
+    /* ------------------ I. DÙNG CHUNG CHO SELECT BOX SẢN PHẨM ------------------ */
+    .select2-selection, 
+    .select2-container--default .select2-selection--single,
+    .choices__inner,
+    .ts-control,
+    .ss-main,
+    .product-select {
+        background-color: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
     }
-	
-	/* --- DÀNH RIÊNG CHO TRANG: BÁN HÀNG --- */
+
+    .select2-dropdown,
+    .select2-container--default .select2-dropdown,
+    .ts-dropdown,
+    .choices__list--dropdown,
+    .ss-content {
+        background-color: #0f172a !important;
+        border: 1px solid #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    .select2-results__option,
+    .ts-dropdown .option,
+    .choices__item--choice {
+        background-color: #0f172a !important;
+        color: #f8fafc !important;
+    }
+
+    .select2-results__option--highlighted,
+    .ts-dropdown .option.active,
+    .choices__item--choice.is-highlighted {
+        background-color: #1e3a8a !important;
+        color: #ffffff !important;
+    }
+
+    .select2-search__field,
+    .ts-control input,
+    .choices__input {
+        background-color: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+
+    /* ------------------ II. DÀNH RIÊNG CHO TRANG: NHẬP KHO ------------------ */
+    #cart-box, 
+    #cart-box table, 
+    #cart-box tr, 
+    #cart-box td, 
+    #cart-box th {
+        background-color: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    #page-import input, 
+    #page-import select {
+        background-color: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    #page-import table tbody tr {
+        background-color: #0f172a !important; 
+        color: #f8fafc !important;
+    }
+
+
+    /* ------------------ III. DÀNH RIÊNG CHO TRANG: KHO HÀNG (ĐÃ FIX) ------------------ */
+    #inventory-data, 
+    #inventory-data tr, 
+    #inventory-data td, 
+    #inventory-data * {
+        background-color: #0f172a !important; 
+        color: #f8fafc !important;
+    }
+
+    #inventory-data td {
+        border-bottom: 1px solid #1e293b !important;
+    }
+
+    #inventory-data tr:hover,
+    #inventory-data tr:hover * {
+        background-color: #0f172a !important;
+    }
+
+    #page-inventory input, 
+    #page-inventory select {
+        background-color: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+}
+
+/* --- DÀNH RIÊNG CHO TRANG: BÁN HÀNG --- */
 .dark #page-sell input, 
 .dark #page-sell select {
-    background-color: #020617 !important;
+    background-color: #0f172a !important;
     color: #f8fafc !important;
     border-color: #334155 !important;
 }
 
 .dark #page-sell .bg-white {
-    background-color: #020617 !important;
+    background-color: #0f172a !important;
     color: #f8fafc !important;
     border-color: #334155 !important;
 }
@@ -593,85 +611,74 @@
 
 /* --- FIX LỖI: DANH SÁCH KHÁCH HÀNG & GIỎ HÀNG --- */
 
-/* Ép màu cho danh sách khách hàng và TẤT CẢ các thẻ con bên trong */
 .dark #dropdown-list,
 .dark #dropdown-list * {
-    background-color: #020617 !important;
+    background-color: #0f172a !important;
     color: #f8fafc !important;
     border-color: #334155 !important;
 }
 
-/* Fix lỗi trắng khi di chuột vào dòng sản phẩm hoặc danh sách khách hàng */
 .dark #sell-cart-body tr:hover,
 .dark #sell-cart-body tr:hover td,
 .dark #dropdown-list div:hover,
 .dark #dropdown-list div:hover * {
-    background-color: #1e3a8a !important; /* Màu xanh đậm khi hover */
+    background-color: #1e3a8a !important;
     color: #ffffff !important;
 }
 
-/* Fix chữ trong giỏ hàng */
 .dark #sell-cart-body td {
     color: #f8fafc !important;
 }
 
-/* Fix chữ trong danh sách sản phẩm (Product Grid) */
 .dark #product-grid div, 
 .dark #product-grid p {
-    color: #f8fafc !important; /* Tên sản phẩm màu trắng */
+    color: #f8fafc !important;
 }
 
-/* Đổi màu chữ Tồn kho thành màu xanh xám nhẹ (#94a3b8) */
 .dark #product-grid span {
     color: #94a3b8 !important;
 }
 
-/* Ưu tiên giữ màu đỏ cho chữ "HẾT" hoặc các trạng thái quan trọng */
 .dark #product-grid .text-red-500, 
 .dark #product-grid .text-red-600,
 .dark #product-grid .text-red-400 {
     color: #ef4444 !important;
 }
 
-/* Fix viền bảng khi ở chế độ tối */
 .dark #page-sell .divide-gray-300 {
     border-color: #334155 !important;
 }
 
-/* --- FIX THANH CUỘN (SCROLLBAR) CHO DANH SÁCH SẢN PHẨM --- */
 .dark #product-grid::-webkit-scrollbar {
-    width: 8px; /* Độ rộng thanh cuộn */
+    width: 8px;
 }
 
 .dark #product-grid::-webkit-scrollbar-track {
-    background: #020617 !important; /* Màu nền của thanh cuộn */
+    background: #0f172a !important;
 }
 
 .dark #product-grid::-webkit-scrollbar-thumb {
-    background: #334155 !important; /* Màu của thanh trượt */
+    background: #334155 !important;
     border-radius: 4px;
 }
 
 .dark #product-grid::-webkit-scrollbar-thumb:hover {
-    background: #475569 !important; /* Màu khi di chuột vào thanh trượt */
+    background: #475569 !important;
 }
 
-/* --- TRANG: KHÁCH HÀNG (FIX MÀU CHỮ CỘT 1, 2, 3) --- */
-
+/* --- TRANG: KHÁCH HÀNG --- */
 .dark #page-customers input {
-    background-color: #020617 !important;
+    background-color: #0f172a !important;
     color: #f8fafc !important;
     border-color: #334155 !important;
 }
 
-/* 1. Ép màu nền tối và xóa transition để không bị loang màu */
 .dark #customer-list-body tr,
 .dark #customer-list-body td {
-    background-color: #020617 !important;
+    background-color: #0f172a !important;
     transition: none !important;
 }
 
-/* 2. CHỈ ÉP CHỮ TRẮNG CHO CỘT 1, 2, 3 (Tên đại lý, Địa chỉ, SĐT) */
 .dark #customer-list-body tr td:nth-child(1), 
 .dark #customer-list-body tr td:nth-child(1) *,
 .dark #customer-list-body tr td:nth-child(2), 
@@ -681,20 +688,18 @@
     color: #f8fafc !important;
 }
 
-/* 3. Chỉ áp dụng đường kẻ cho hàng và ô */
 .dark #customer-list-body tr,
 .dark #customer-list-body td {
     border-bottom: 1px solid #1e293b !important;
 }
 
-/* Hiệu ứng di chuột (hover) - không delay */
 .dark #customer-list-body tr:hover {
     background-color: #0f172a !important;
 }
 
-/* --- FIX POPUP/MODAL BỊ TRẮNG --- */
+/* --- FIX POPUP/MODAL --- */
 .dark .bg-white {
-    background-color: #020617 !important;
+    background-color: #0f172a !important;
     color: #f8fafc !important;
     border: 1px solid #334155 !important;
 }
@@ -707,12 +712,12 @@
     border: 1px solid #334155 !important;
 }
 
-/* --- FIX THANH CUỘN (SCROLLBAR) --- */
+/* --- FIX THANH CUỘN --- */
 .dark .max-h-\[70vh\]::-webkit-scrollbar {
     width: 8px;
 }
 .dark .max-h-\[70vh\]::-webkit-scrollbar-track {
-    background: #020617 !important;
+    background: #0f172a !important;
 }
 .dark .max-h-\[70vh\]::-webkit-scrollbar-thumb {
     background: #334155 !important;
@@ -722,58 +727,48 @@
     background: #475569 !important;
 }
 
-/* --- CSS: TRANG DANH MỤC SẢN PHẨM (ĐÃ FIX LỖI CỘT) --- */
-
-/* 1. Nền tổng thể của trang */
+/* --- CSS: TRANG DANH MỤC SẢN PHẨM --- */
 .dark #page-products-manage {
-    background-color: #020617 !important;
+    background-color: #0f172a !important;
     color: #f8fafc !important;
 }
 
-/* 2. Tiêu đề trang */
 .dark #page-products-manage h2 {
     color: #ffffff !important;
 }
 
-/* 3. Các khối chứa input */
 .dark #page-products-manage .bg-white {
     background-color: #0f172a !important;
     border-color: #334155 !important;
 }
 
-/* 4. Các ô nhập liệu (input) */
 .dark #page-products-manage input {
-    background-color: #020617 !important;
+    background-color: #0f172a !important;
     color: #f8fafc !important;
     border-color: #334155 !important;
 }
 
-/* 5. Ép bảng về trong suốt để không bị nền trắng đè lên */
 .dark #page-products-manage table {
     background-color: transparent !important; 
-    border-collapse: collapse !important; /* Đảm bảo căn chỉnh chuẩn */
+    border-collapse: collapse !important;
 }
 
-/* 6. Tiêu đề bảng (thead) */
 .dark #page-products-manage thead {
     background-color: #1e293b !important;
 }
 
-/* 7. FIX THANH DÒNG SẢN PHẨM (TR) - Giữ nguyên cấu trúc bảng */
 .dark #page-products-manage table tbody tr {
-    background-color: #1e293b !important; /* Nền tối cho hàng */
-    border-bottom: 1px solid #334155 !important; /* Chỉ kẻ đường dưới để phân cách */
+    background-color: #1e293b !important;
+    border-bottom: 1px solid #334155 !important;
     color: #f8fafc !important;
 }
 
-/* Đảm bảo ô (td) không bị lệch màu */
 .dark #page-products-manage table td {
     background-color: transparent !important; 
     color: #f8fafc !important;
     border: none !important;
 }
 
-/* 8. Chỉnh màu viền và màu chữ chung */
 .dark #page-products-manage .border-gray-100,
 .dark #page-products-manage .border-gray-200 {
     border-color: #334155 !important;
@@ -783,19 +778,16 @@
     color: #cbd5e1 !important;
 }
 
-/* --- FIX TRIỆT ĐỂ: ÉP MỌI CHỮ TRONG BẢNG PHẢI SÁNG --- */
 .dark #page-products-manage table td *,
 .dark #page-products-manage table th * {
     color: #f8fafc !important;
 }
 
-/* Fix link trong bảng */
 .dark #page-products-manage table a {
     color: #60a5fa !important;
     text-decoration: none;
 }
 
-/* --- FIX MÃ VẠCH & CÁC NỀN TRẮNG CÒN SÓT LẠI --- */
 .dark #page-products-manage table td span {
     background-color: transparent !important;
     color: #f8fafc !important;
@@ -803,11 +795,9 @@
     box-shadow: none !important;
 }
 
-/* --- CSS: TRANG LỊCH SỬ HOÁ ĐƠN (DARK MODE - ĐÃ FIX CỘT THAO TÁC) --- */
-
-/* 1. Nền tổng thể */
+/* --- CSS: TRANG LỊCH SỬ HOÁ ĐƠN --- */
 .dark #page-history {
-    background-color: #020617 !important;
+    background-color: #0f172a !important;
     color: #f8fafc !important;
 }
 
@@ -816,9 +806,8 @@
     border-color: #334155 !important;
 }
 
-/* 2. Input và Label */
 .dark #page-history input {
-    background-color: #020617 !important;
+    background-color: #0f172a !important;
     color: #f8fafc !important;
     border-color: #334155 !important;
 }
@@ -827,7 +816,6 @@
     color: #94a3b8 !important;
 }
 
-/* 3. Bảng danh sách */
 .dark #page-history table {
     background-color: #0f172a !important;
     border-color: #334155 !important;
@@ -841,41 +829,31 @@
     border-bottom: 1px solid #334155 !important;
 }
 
-/* 4. CHỈ ÉP CHỮ TRẮNG CHO 3 CỘT ĐẦU */
 .dark #page-history tbody tr td:nth-child(1), .dark #page-history tbody tr td:nth-child(1) *,
 .dark #page-history tbody tr td:nth-child(2), .dark #page-history tbody tr td:nth-child(2) *,
 .dark #page-history tbody tr td:nth-child(3), .dark #page-history tbody tr td:nth-child(3) * {
     color: #f8fafc !important;
 }
 
-/* 5. CỘT 4 (TỔNG TIỀN) - ÉP MÀU ĐỎ HỒNG */
 .dark #page-history tbody tr td:nth-child(4),
 .dark #page-history tbody tr td:nth-child(4) * {
     color: #fb7185 !important;
 }
 
-/* CỘT 5 (THAO TÁC) - KHÔNG ĐỤNG VÀO: 
-   Nó sẽ giữ nguyên màu gốc của icon/nút bấm */
-
-
-/* --- CSS: TRANG BÁO CÁO (DARK MODE) --- */
-
-/* 1. Nền tổng thể trang báo cáo */
+/* --- CSS: TRANG BÁO CÁO --- */
 .dark #page-report {
-    background-color: #020617 !important;
+    background-color: #0f172a !important;
     color: #f8fafc !important;
 }
 
-/* 2. Tiêu đề chính */
 .dark #page-report h2 {
     color: #ffffff !important;
 }
 
 .dark #page-report p {
-    color: #94a3b8 !important; /* Màu xám nhạt cho mô tả */
+    color: #94a3b8 !important;
 }
 
-/* 3. Các khối chứa (card) và nội dung bên trong */
 .dark #page-report .bg-white {
     background-color: #0f172a !important;
     border-color: #334155 !important;
@@ -886,44 +864,37 @@
     border-color: #334155 !important;
 }
 
-/* 4. Tiêu đề các khối báo cáo (h3) */
 .dark #page-report h3 {
     color: #f8fafc !important;
 }
 
-/* 5. Nhãn (label) và Ô nhập liệu (input) */
 .dark #page-report label {
     color: #cbd5e1 !important;
 }
 
 .dark #page-report input {
-    background-color: #020617 !important;
+    background-color: #0f172a !important;
     color: #f8fafc !important;
     border-color: #334155 !important;
 }
 
-/* 6. Hiệu ứng hover cho các khối báo cáo */
 .dark #page-report .hover\:shadow-lg:hover {
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important;
     border-color: #475569 !important;
 }
 
-/* --- CSS: TRANG SẢN XUẤT (ĐÃ FIX TRIỆT ĐỂ NỀN TRẮNG & SCROLLBAR) --- */
-
-/* 1. Nền tổng thể và Tiêu đề */
+/* --- CSS: TRANG SẢN XUẤT --- */
 .dark #page-SanXuat {
-    background-color: #020617 !important;
+    background-color: #0f172a !important;
     color: #f8fafc !important;
 }
 
-/* 2. Loại bỏ các mảng trắng bg-gray-50 còn sót lại */
 .dark #page-SanXuat.bg-gray-50,
 .dark #page-SanXuat .bg-gray-50 {
     background-color: #0f172a !important; 
     border-color: #334155 !important;
 }
 
-/* 3. Các thẻ chứa (Card) */
 .dark #page-SanXuat .bg-white {
     background-color: #0f172a !important;
     border-color: #334155 !important;
@@ -934,7 +905,6 @@
     border-color: #334155 !important;
 }
 
-/* 4. Bảng danh sách */
 .dark #page-SanXuat thead {
     background-color: #1e293b !important;
 }
@@ -951,32 +921,28 @@
     border-bottom: 1px solid #334155 !important;
 }
 
-/* 5. Input và Select */
 .dark #page-SanXuat input,
 .dark #page-SanXuat select {
-    background-color: #020617 !important;
+    background-color: #0f172a !important;
     color: #f8fafc !important;
     border-color: #334155 !important;
 }
 
-/* 6. Nhãn (Label) */
 .dark #page-SanXuat label {
     color: #94a3b8 !important;
 }
 
-/* 7. Fix input readonly */
 .dark #page-SanXuat input[readonly] {
     background-color: #0f172a !important;
 }
 
-/* --- FIX THANH CUỘN (SCROLLBAR) CHO DARK MODE --- */
 .dark #page-SanXuat ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
 
 .dark #page-SanXuat ::-webkit-scrollbar-track {
-    background: #020617; 
+    background: #0f172a; 
 }
 
 .dark #page-SanXuat ::-webkit-scrollbar-thumb {
@@ -988,11 +954,9 @@
     background: #475569;
 }
 
-/* --- CSS: TRANG NGUYÊN LIỆU & CÔNG NỢ (DARK MODE) --- */
-
-/* 1. Nền tổng thể */
+/* --- CSS: TRANG NGUYÊN LIỆU & CÔNG NỢ --- */
 .dark #page-NguyenLieu {
-    background-color: #020617 !important;
+    background-color: #0f172a !important;
     color: #f8fafc !important;
 }
 
@@ -1001,7 +965,6 @@
     color: #ffffff !important;
 }
 
-/* 2. Loại bỏ các mảng trắng bg-white và bg-gray-50 */
 .dark #page-NguyenLieu .bg-white {
     background-color: #0f172a !important;
     border-color: #334155 !important;
@@ -1017,7 +980,6 @@
     border-color: #334155 !important;
 }
 
-/* 3. Bảng danh sách */
 .dark #page-NguyenLieu thead {
     background-color: #1e293b !important;
 }
@@ -1034,7 +996,6 @@
     border-bottom: 1px solid #334155 !important;
 }
 
-/* 4. Tab Menu (Nút bấm) */
 .dark #page-NguyenLieu .tab-btn {
     background-color: #334155 !important;
     color: #94a3b8 !important;
@@ -1045,10 +1006,9 @@
     color: #ffffff !important;
 }
 
-/* 5. Input, Select và Label */
 .dark #page-NguyenLieu input,
 .dark #page-NguyenLieu select {
-    background-color: #020617 !important;
+    background-color: #0f172a !important;
     color: #f8fafc !important;
     border-color: #334155 !important;
 }
@@ -1057,21 +1017,19 @@
     color: #94a3b8 !important;
 }
 
-/* 6. Fix ô giỏ hàng (gio-hang-nl) */
 .dark #page-NguyenLieu #gio-hang-nl {
-    background-color: #020617 !important;
+    background-color: #0f172a !important;
     border-color: #334155 !important;
     color: #f8fafc !important;
 }
 
-/* --- TÙY CHỈNH THANH CUỘN (SCROLLBAR) --- */
 .dark #page-NguyenLieu ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
 
 .dark #page-NguyenLieu ::-webkit-scrollbar-track {
-    background: #020617; 
+    background: #0f172a; 
 }
 
 .dark #page-NguyenLieu ::-webkit-scrollbar-thumb {
@@ -1083,40 +1041,36 @@
     background: #475569;
 }
 
-/* --- CSS: TRANG LỊCH CÔNG VIỆC (DARK MODE - HOÀN THIỆN) --- */
-
-/* 1. Nền tổng thể */
+/* --- CSS: TRANG LỊCH CÔNG VIỆC (ĐÃ FIX: BỎ TRẮNG & GIỮ MÀU GHI CHÚ) --- */
 .dark #page-LichCongViec {
-    background-color: #020617 !important;
+    background-color: #0f172a !important;
 }
 
-/* 2. Các card trắng (Danh mục lịch, Calendar container) */
 .dark #page-LichCongViec .bg-white {
     background-color: #0f172a !important;
-    border-color: #334155 !important;
+    border: none !important; /* Loại bỏ viền trắng ở khung ngoài */
     color: #f8fafc !important;
 }
 
-/* 3. Tiêu đề (LỊCH CÔNG VIỆC, DANH MỤC, v.v.) */
+/* Fix tiêu đề trong trang lịch */
 .dark #page-LichCongViec h3,
 .dark #page-LichCongViec h4 {
     color: #f8fafc !important;
 }
 
-/* 4. Text trong checkbox */
 .dark #page-LichCongViec span {
     color: #e2e8f0 !important;
 }
 
-/* 5. Input và Select (Trong trang và trong Modal) */
+/* Fix Input và Select */
 .dark #page-LichCongViec input,
 .dark #page-LichCongViec select {
-    background-color: #020617 !important;
+    background-color: #0f172a !important;
     color: #f8fafc !important;
     border: 1px solid #334155 !important;
 }
 
-/* 6. Fix Modal (Thêm và Xem sự kiện) */
+/* Fix Modal */
 .dark #modal-add-event .bg-white,
 .dark #modal-view-event .bg-white {
     background-color: #0f172a !important;
@@ -1124,21 +1078,23 @@
     border: 1px solid #334155 !important;
 }
 
-/* Fix text trong modal */
 .dark #modal-add-event h3,
 .dark #modal-view-event h3,
 .dark #view-event-time {
     color: #f8fafc !important;
 }
 
-/* 7. FIX KHUNG LỊCH (CALENDAR GRID) */
-/* Ép bảng lịch sang tối */
+/* --- FIX LỊCH & BẢNG (LOẠI BỎ ÉP MÀU THẺ DIV ĐỂ GIỮ MÀU GHI CHÚ) --- */
+.dark #calendar-container {
+    background-color: #0f172a !important;
+    border: none !important; /* Loại bỏ viền trắng bao quanh lịch */
+}
+
 .dark #calendar-container table {
     background-color: #0f172a !important;
     border-color: #334155 !important;
 }
 
-/* Ép các ô ngày (td) và tiêu đề thứ (th) sang tối */
 .dark #calendar-container td,
 .dark #calendar-container th {
     background-color: #0f172a !important;
@@ -1146,22 +1102,20 @@
     color: #f8fafc !important;
 }
 
-/* 8. FIX THANH ĐIỀU HƯỚNG LỊCH (Toolbar - Phần bị trắng ở trên) */
-.dark #calendar-container div {
+/* Chỉ ép màu cho các phần tử cấu trúc, KHÔNG ép màu cho các thẻ div con (để giữ màu ghi chú) */
+.dark #calendar-container .calendar-header {
     background-color: #0f172a !important;
     color: #f8fafc !important;
-    border-color: #334155 !important;
+    border-bottom: 1px solid #334155 !important;
 }
 
-/* Ép màu chữ cho các nút tháng/tuần/ngày */
 .dark #calendar-container button {
     color: #f8fafc !important;
     background-color: #1e293b !important;
 }
 
-/* --- CSS TỔNG - ĐỒNG BỘ NỀN VÀ TIÊU ĐỀ (CHỈ ÁP DỤNG KHI Ở CHẾ ĐỘ DARK) --- */
+/* --- CSS TỔNG - ĐỒNG BỘ NỀN VÀ TIÊU ĐỀ (ĐÃ SỬA: TIÊU ĐỀ TRONG SUỐT) --- */
 
-/* 1. Ép tất cả các trang về màu nền đồng nhất CHỈ KHI LÀ DARK MODE */
 .dark #page-import, 
 .dark #page-sales, 
 .dark #page-sell, 
@@ -1169,13 +1123,13 @@
 .dark #page-kho-hang, 
 .dark #page-dashboard,
 .dark [id*="page-"] { 
-    background-color: #020617 !important;
+    background-color: #0f172a !important;
     color: #f8fafc !important;
     min-height: 100vh;
     padding: 20px;
 }
 
-/* 2. Ép tất cả tiêu đề h2 trong các trang về kiểu khối đen đồng bộ CHỈ KHI LÀ DARK MODE */
+/* ĐÃ SỬA: BỎ NỀN & BỎ VIỀN TIÊU ĐỀ H2 */
 .dark #page-import h2, 
 .dark #page-sales h2, 
 .dark #page-sell h2, 
@@ -1184,26 +1138,47 @@
 .dark [id*="page-"] h2, 
 .dark .page-title, 
 .dark .header-title {
-    background-color: #1e293b !important; 
-    color: #ffffff !important;           
-    padding: 20px !important;            
+    background-color: transparent !important; 
+    color: #ffffff !important;            
+    padding: 20px 0 !important;          
     margin-bottom: 25px !important;      
-    border-radius: 8px !important;       
-    display: block !important;           
-    width: 100% !important;              
+    border: none !important;             
+    display: block !important;            
+    width: 100% !important;               
     font-size: 24px !important;
     font-weight: bold !important;
-    border: 1px solid #334155 !important;
-    visibility: visible !important;      
-    opacity: 1 !important;
 }
 
-/* 3. Fix riêng cho khu vực Bán hàng nếu nó bị đè class CHỈ KHI LÀ DARK MODE */
 .dark #page-sell, 
 .dark #page-sales {
-    background-color: #020617 !important;
+    background-color: #0f172a !important;
 }
 
+/* 1. Giảm padding và margin của tiêu đề H2 */
+.dark [id*="page-"] h2,
+.dark .page-title, 
+.dark .header-title {
+    padding-top: 10px !important;      /* Giảm từ 20px xuống 10px */
+    padding-bottom: 5px !important;    /* Giảm từ 20px xuống 5px */
+    margin-bottom: 5px !important;     /* Giảm từ 25px xuống 5px */
+}
+
+/* 2. Đẩy dòng chữ Tổng quan sát lên sát tiêu đề */
+.dark [id*="page-"] h2 + p,
+.dark .page-title + p {
+    margin-top: 0px !important;        /* Ép không có khoảng cách trên */
+    padding-top: 0px !important;
+}
+
+/* ĐẨY TIÊU ĐỀ LÊN CAO ĐỂ NỘI DUNG BÊN DƯỚI ĐẦY LÊN */
+.dark [id*="page-"] h2, 
+.dark .page-title, 
+.dark .header-title {
+    margin-top: -15px !important;    /* Kéo tiêu đề lên trên 15px */
+    margin-bottom: 10px !important;  /* Thu hẹp khoảng cách với nội dung bên dưới */
+    padding-top: 5px !important;     /* Giảm khoảng cách phía trên */
+    padding-bottom: 5px !important;  /* Giảm khoảng cách phía dưới */
+}
 
 </style>
 
@@ -1222,171 +1197,149 @@
 </head>
 <body class="bg-gray-100 flex h-screen">
 
+  <!-- DI ĐỘNG -->
   <div class="md:hidden fixed bottom-0 left-0 w-full z-[800] bg-slate-900 border-t border-slate-800/80 shadow-[0_-4px_15px_rgba(0,0,0,0.5)]">
     
     <div id="more-menu-list" class="hidden absolute bottom-full right-2 w-max bg-slate-900 border border-slate-800 rounded-xl shadow-[0_-5px_20px_rgba(0,0,0,0.5)] flex flex-col p-2 gap-2 mb-2 select-none">
         
-        <button onclick="showPage('page-inventory'); toggleMoreMenu()" 
-                class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-blue-950/40 border-blue-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-blue-400 text-xs font-bold">
+        <button onclick="showPage('page-inventory'); toggleMoreMenu()" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-blue-950/40 border-blue-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-blue-400 text-xs font-bold">
             <i data-lucide="box" class="w-4 h-4 drop-shadow-[0_1px_2px_rgba(59,130,246,0.4)]"></i> Kho Hàng
         </button>
         
-        <button onclick="showPage('page-history'); toggleMoreMenu()" 
-                class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-purple-950/40 border-purple-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-purple-400 text-xs font-bold">
+        <button onclick="showPage('page-history'); toggleMoreMenu()" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-purple-950/40 border-purple-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-purple-400 text-xs font-bold">
             <i data-lucide="history" class="w-4 h-4 drop-shadow-[0_1px_2px_rgba(168,85,247,0.4)]"></i> Lịch Sử HĐ
         </button>
         
-        <button onclick="showPage('page-customers'); toggleMoreMenu()" 
-                class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-teal-950/40 border-teal-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-teal-400 text-xs font-bold">
+        <button onclick="showPage('page-customers'); toggleMoreMenu()" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-teal-950/40 border-teal-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-teal-400 text-xs font-bold">
             <i data-lucide="users" class="w-4 h-4 drop-shadow-[0_1px_2px_rgba(20,184,166,0.4)]"></i> Khách Hàng
         </button>
         
-        <button onclick="showPage('page-products-manage'); loadProductManage(); toggleMoreMenu()" 
-                class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-orange-950/40 border-orange-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-orange-400 text-xs font-bold">
+        <button onclick="showPage('page-products-manage'); loadProductManage(); toggleMoreMenu()" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-orange-950/40 border-orange-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-orange-400 text-xs font-bold">
             <i data-lucide="settings" class="w-4 h-4 drop-shadow-[0_1px_2px_rgba(249,115,22,0.4)]"></i> Danh Mục SP
         </button>
         
-        <button onclick="showPage('page-SanXuat'); toggleMoreMenu()" 
-                class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-fuchsia-950/40 border-fuchsia-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-fuchsia-400 text-xs font-bold">
+        <button onclick="showPage('page-SanXuat'); toggleMoreMenu()" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-fuchsia-950/40 border-fuchsia-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-fuchsia-400 text-xs font-bold">
             <i data-lucide="factory" class="w-4 h-4 drop-shadow-[0_1px_2px_rgba(217,70,239,0.4)]"></i> Sản Xuất
         </button>
         
-        <button onclick="showPage('page-NguyenLieu'); toggleMoreMenu()" 
-                class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-lime-950/40 border-lime-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-lime-400 text-xs font-bold">
+        <button onclick="showPage('page-NguyenLieu'); toggleMoreMenu()" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-lime-950/40 border-lime-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-lime-400 text-xs font-bold">
             <i data-lucide="database" class="w-4 h-4 drop-shadow-[0_1px_2px_rgba(132,204,22,0.4)]"></i> Nguyên Liệu
         </button>
         
-        <button onclick="showPage('page-LichCongViec'); toggleMoreMenu()" 
-                class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-indigo-950/40 border-indigo-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-indigo-400 text-xs font-bold">
+        <button onclick="showPage('page-LichCongViec'); toggleMoreMenu()" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-indigo-950/40 border-indigo-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-indigo-400 text-xs font-bold">
             <i data-lucide="calendar" class="w-4 h-4 drop-shadow-[0_1px_2px_rgba(99,102,241,0.4)]"></i> Lịch Công Việc
         </button>
+
+        <!-- NÚT GIAO DIỆN DI ĐỘNG (Đã đồng bộ) -->
+<button onclick="toggleTheme(); toggleMoreMenu()" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-slate-950/40 border-slate-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-amber-400 text-xs font-bold">
+    <i id="theme-icon-mob" data-lucide="moon" class="w-4 h-4"></i> Giao diện: Tối
+</button>
     </div>
 
     <div class="flex justify-around items-center px-2 py-3 gap-1.5 select-none">
-        
-        <button onclick="showPage('page-home')" 
-                class="flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] bg-emerald-950/40 border-emerald-800 text-emerald-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]">
+        <button onclick="showPage('page-home')" class="flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] bg-emerald-950/40 border-emerald-800 text-emerald-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]">
             <i data-lucide="home" class="w-5 h-5 drop-shadow-[0_1.5px_3px_rgba(16,185,129,0.4)]"></i>
             <span class="text-[8px] md:text-[9px] font-bold tracking-wider mt-0.5">Trang Chủ</span>
         </button>
         
-        <button onclick="showPage('page-sell')" 
-                class="flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] bg-rose-950/40 border-rose-800 text-rose-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]">
+        <button onclick="showPage('page-sell')" class="flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] bg-rose-950/40 border-rose-800 text-rose-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]">
             <i data-lucide="shopping-cart" class="w-5 h-5 drop-shadow-[0_1.5px_3px_rgba(244,63,94,0.4)]"></i>
             <span class="text-[8px] md:text-[9px] font-bold tracking-wider mt-0.5">Bán Hàng</span>
         </button>
         
-        <button onclick="showPage('page-import')" 
-                class="flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] bg-amber-950/40 border-amber-800 text-amber-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]">
+        <button onclick="showPage('page-import')" class="flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] bg-amber-950/40 border-amber-800 text-amber-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]">
             <i data-lucide="arrow-down-circle" class="w-5 h-5 drop-shadow-[0_1.5px_3px_rgba(245,158,11,0.4)]"></i>
             <span class="text-[8px] md:text-[9px] font-bold tracking-wider mt-0.5">Nhập Kho</span>
         </button>
         
-        <button onclick="showPage('page-report')" 
-                class="flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] bg-sky-950/40 border-sky-800 text-sky-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]">
+        <button onclick="showPage('page-report')" class="flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] bg-sky-950/40 border-sky-800 text-sky-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]">
             <i data-lucide="bar-chart-3" class="w-5 h-5 drop-shadow-[0_1.5px_3px_rgba(14,165,233,0.4)]"></i>
             <span class="text-[8px] md:text-[9px] font-bold tracking-wider mt-0.5">Báo Cáo</span>
         </button>
         
-        <button onclick="toggleMoreMenu()" 
-                class="flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] bg-indigo-950/40 border-indigo-800 text-indigo-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]">
+        <button onclick="toggleMoreMenu()" class="flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] bg-indigo-950/40 border-indigo-800 text-indigo-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]">
             <i data-lucide="more-horizontal" class="w-5 h-5 drop-shadow-[0_1.5px_3px_rgba(99,102,241,0.4)]"></i>
             <span class="text-[8px] md:text-[9px] font-bold tracking-wider mt-0.5">Khác</span>
         </button>
     </div>
-</div>
+  </div>
 
-<script>
-function toggleMoreMenu() {
-    const menu = document.getElementById('more-menu-list');
-    menu.classList.toggle('hidden');
-    // Ép load lại icon khi mở menu
-    if (!menu.classList.contains('hidden') && typeof lucide !== 'undefined') {
-        lucide.createIcons();
+  <script>
+    function toggleMoreMenu() {
+        const menu = document.getElementById('more-menu-list');
+        menu.classList.toggle('hidden');
+        if (!menu.classList.contains('hidden') && typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
     }
-}
-</script>
+  </script>
 
-<aside id="sidebar" onclick="toggleSidebarMenu()" class="cursor-pointer fixed md:relative w-55 h-full bg-slate-900 border-r border-slate-800/60 text-white p-4 z-[999] transform -translate-x-full md:translate-x-0 transition-all duration-300">
+  <!-- PC SIDEBAR (Thêm flex flex-col) -->
+  <aside id="sidebar" onclick="toggleSidebarMenu()" class="cursor-pointer fixed md:relative w-55 h-full bg-slate-900 border-r border-slate-800/60 text-white p-4 z-[999] transform -translate-x-full md:translate-x-0 transition-all duration-300 flex flex-col">
     
     <div class="w-full p-2 mb-6 rounded-lg flex items-center gap-3 border-b-[3px] bg-slate-950/80 border-slate-800 shadow-[0_4px_6px_rgba(0,0,0,0.4)] text-blue-400 font-bold mt-4 md:mt-0 select-none">
         <i data-lucide="package" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(96,165,250,0.4)]"></i> 
         <span class="sidebar-text tracking-wider">MENU</span> 
     </div>
     
-    <nav class="space-y-2 overflow-y-auto max-h-[80vh]">
+    <!-- Nav thêm flex-1 -->
+    <nav class="space-y-2 overflow-y-auto max-h-[80vh] flex-1">
         
-        <button onclick="showPage('page-home'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" 
-                class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-emerald-950/50 border-emerald-800 hover:bg-emerald-900/60 hover:border-emerald-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-emerald-400">
-            <i data-lucide="home" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(16,185,129,0.4)]"></i> 
-            <span class="sidebar-text">Trang Chủ</span>
+        <button onclick="showPage('page-home'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-emerald-950/50 border-emerald-800 hover:bg-emerald-900/60 hover:border-emerald-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-emerald-400">
+            <i data-lucide="home" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(16,185,129,0.4)]"></i> <span class="sidebar-text">Trang Chủ</span>
         </button>
 
-        <button onclick="showPage('page-import'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" 
-                class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-amber-950/50 border-amber-800 hover:bg-amber-900/60 hover:border-amber-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-amber-400">
-            <i data-lucide="arrow-down-circle" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(245,158,11,0.4)]"></i> 
-            <span class="sidebar-text">Nhập Kho</span>
+        <button onclick="showPage('page-import'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-amber-950/50 border-amber-800 hover:bg-amber-900/60 hover:border-amber-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-amber-400">
+            <i data-lucide="arrow-down-circle" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(245,158,11,0.4)]"></i> <span class="sidebar-text">Nhập Kho</span>
         </button>
 
-        <button onclick="showPage('page-inventory'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" 
-                class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-blue-950/50 border-blue-800 hover:bg-blue-900/60 hover:border-blue-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-blue-400">
-            <i data-lucide="box" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(59,130,246,0.4)]"></i> 
-            <span class="sidebar-text">Kho Hàng</span>
+        <button onclick="showPage('page-inventory'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-blue-950/50 border-blue-800 hover:bg-blue-900/60 hover:border-blue-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-blue-400">
+            <i data-lucide="box" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(59,130,246,0.4)]"></i> <span class="sidebar-text">Kho Hàng</span>
         </button>
 
-        <button onclick="showPage('page-sell'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" 
-                class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-rose-950/50 border-rose-800 hover:bg-rose-900/60 hover:border-rose-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-rose-400">
-            <i data-lucide="shopping-cart" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(244,63,94,0.4)]"></i> 
-            <span class="sidebar-text">Bán Hàng</span>
+        <button onclick="showPage('page-sell'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-rose-950/50 border-rose-800 hover:bg-rose-900/60 hover:border-rose-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-rose-400">
+            <i data-lucide="shopping-cart" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(244,63,94,0.4)]"></i> <span class="sidebar-text">Bán Hàng</span>
         </button>
 
-        <button onclick="showPage('page-history'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" 
-                class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-purple-950/50 border-purple-800 hover:bg-purple-900/60 hover:border-purple-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-purple-400">
-            <i data-lucide="history" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(168,85,247,0.4)]"></i> 
-            <span class="sidebar-text">Lịch Sử HĐ</span>
+        <button onclick="showPage('page-history'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-purple-950/50 border-purple-800 hover:bg-purple-900/60 hover:border-purple-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-purple-400">
+            <i data-lucide="history" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(168,85,247,0.4)]"></i> <span class="sidebar-text">Lịch Sử HĐ</span>
         </button>
 
-        <button onclick="showPage('page-customers'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" 
-                class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-teal-950/50 border-teal-800 hover:bg-teal-900/60 hover:border-teal-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-teal-400">
-            <i data-lucide="users" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(20,184,166,0.4)]"></i> 
-            <span class="sidebar-text">KH & Công Nợ</span>
+        <button onclick="showPage('page-customers'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-teal-950/50 border-teal-800 hover:bg-teal-900/60 hover:border-teal-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-teal-400">
+            <i data-lucide="users" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(20,184,166,0.4)]"></i> <span class="sidebar-text">KH & Công Nợ</span>
         </button>
 
-        <button onclick="showPage('page-products-manage'); loadProductManage(); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" 
-                class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-orange-950/50 border-orange-800 hover:bg-orange-900/60 hover:border-orange-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-orange-400">
-            <i data-lucide="settings" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(249,115,22,0.4)]"></i> 
-            <span class="sidebar-text">Danh Mục SP</span>
+        <button onclick="showPage('page-products-manage'); loadProductManage(); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-orange-950/50 border-orange-800 hover:bg-orange-900/60 hover:border-orange-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-orange-400">
+            <i data-lucide="settings" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(249,115,22,0.4)]"></i> <span class="sidebar-text">Danh Mục SP</span>
         </button>
 
-        <button onclick="showPage('page-SanXuat'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" 
-                class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-fuchsia-950/50 border-fuchsia-800 hover:bg-fuchsia-900/60 hover:border-fuchsia-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-fuchsia-400">
-            <i data-lucide="factory" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(217,70,239,0.4)]"></i> 
-            <span class="sidebar-text">Sản Xuất</span>
+        <button onclick="showPage('page-SanXuat'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-fuchsia-950/50 border-fuchsia-800 hover:bg-fuchsia-900/60 hover:border-fuchsia-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-fuchsia-400">
+            <i data-lucide="factory" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(217,70,239,0.4)]"></i> <span class="sidebar-text">Sản Xuất</span>
         </button>
 
-        <button onclick="showPage('page-NguyenLieu'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" 
-                class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-lime-950/50 border-lime-800 hover:bg-lime-900/60 hover:border-lime-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-lime-400">
-            <i data-lucide="database" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(132,204,22,0.4)]"></i> 
-            <span class="sidebar-text">Nguyên Liệu</span>
+        <button onclick="showPage('page-NguyenLieu'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-lime-950/50 border-lime-800 hover:bg-lime-900/60 hover:border-lime-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-lime-400">
+            <i data-lucide="database" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(132,204,22,0.4)]"></i> <span class="sidebar-text">Nguyên Liệu</span>
         </button>
 
-        <button onclick="showPage('page-report'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" 
-                class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-sky-950/50 border-sky-800 hover:bg-sky-900/60 hover:border-sky-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-sky-400">
-            <i data-lucide="bar-chart-3" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(14,165,233,0.4)]"></i> 
-            <span class="sidebar-text">Báo Cáo</span>
+        <button onclick="showPage('page-report'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-sky-950/50 border-sky-800 hover:bg-sky-900/60 hover:border-sky-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-sky-400">
+            <i data-lucide="bar-chart-3" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(14,165,233,0.4)]"></i> <span class="sidebar-text">Báo Cáo</span>
         </button>
 
-        <button onclick="showPage('page-LichCongViec'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" 
-                class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-indigo-950/50 border-indigo-800 hover:bg-indigo-900/60 hover:border-indigo-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-indigo-400">
-            <i data-lucide="calendar" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(99,102,241,0.4)]"></i> 
-            <span class="sidebar-text">Lịch Công Việc</span>
+        <button onclick="showPage('page-LichCongViec'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-indigo-950/50 border-indigo-800 hover:bg-indigo-900/60 hover:border-indigo-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-indigo-400">
+            <i data-lucide="calendar" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(99,102,241,0.4)]"></i> <span class="sidebar-text">Lịch Công Việc</span>
         </button>
     </nav>
-</aside>
 
-		<div id="sidebar-overlay" onclick="toggleSidebar()" class="md:hidden hidden fixed inset-0 bg-black/50 z-[998]"></div>
+    <!-- Nút Giao diện PC (Đã đồng bộ) -->
+<button onclick="toggleTheme()" id="theme-toggle-btn" class="mt-4 w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-slate-950/50 border-slate-800 hover:bg-slate-900/60 hover:border-slate-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-amber-400">
+    <i id="theme-icon" data-lucide="moon" class="w-6 h-6"></i> 
+    <span id="theme-text" class="sidebar-text">Giao diện: Tối</span>
+</button>
+  </aside>
 
-		<main class="flex-1 overflow-y-auto pb-16 md:pb-0">
+  <div id="sidebar-overlay" onclick="toggleSidebar()" class="md:hidden hidden fixed inset-0 bg-black/50 z-[998]"></div>
+
+  <main class="flex-1 overflow-y-auto pb-16 md:pb-0">
 	
 
 
@@ -1401,18 +1354,6 @@ function toggleMoreMenu() {
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:drop-shadow-[0_2px_4px_rgba(255,255,255,0.1)]">BẢNG ĐIỀU KHIỂN</h2>
             <p class="text-slate-500 dark:text-slate-400 text-sm">Tổng quan tình hình kinh doanh</p>
         </div>
-        
-        <!-- NÚT CHUYỂN ĐỔI GIAO DIỆN 3D CƠ HỌC (ĐÃ ĐỒNG BỘ THEME) -->
-        <button onclick="toggleTheme()" id="theme-toggle-btn" 
-                class="select-none flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-xl transition-all duration-150 transform active:translate-y-[1px] active:border-b-[1px]
-                       bg-white dark:bg-slate-900 
-                       text-slate-700 dark:text-amber-400 
-                       border border-slate-200 dark:border-slate-950
-                       border-b-[3px] border-slate-300 dark:border-b-[4px] dark:border-slate-950 
-                       shadow-md dark:shadow-[0_4px_10px_rgba(0,0,0,0.4)] mb-1">
-            <i id="theme-icon" data-lucide="moon" class="w-4 h-4"></i>
-            <span id="theme-text" class="hidden sm:inline">Giao diện: Tối</span>
-        </button>
     </div>
 
     <!-- 4 KHỐI CARD THỐNG KÊ 3D TRÊN 2 GIAO DIỆN SÁNG/TỐI -->
@@ -2837,28 +2778,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 3. Danh sách class 3D khi Tab được chọn (Hỗ trợ cả giao diện Sáng & Tối)
+    // 3. Danh sách class 3D khi Tab được chọn
     const activeClasses = [
-        'bg-gradient-to-b', 'from-blue-100', 'to-blue-200', 'dark:from-blue-950/40', 'dark:to-blue-900/30', 
-        'text-blue-600', 'dark:text-blue-400', 
-        'border-t', 'border-l', 'border-white', 'dark:border-blue-500/20', 
-        'border-b-[4px]', 'border-blue-400', 'dark:border-blue-600', 
-        'shadow-[0_4px_10px_rgba(59,130,246,0.15)]', 'dark:shadow-[0_6px_15px_rgba(59,130,246,0.25)]', 
+        'bg-gradient-to-b', 'from-blue-100', 'to-blue-200', 
+        'text-blue-600', 
+        'border-t', 'border-l', 'border-white', 
+        'border-b-[4px]', 'border-blue-400', 
+        'shadow-[0_4px_10px_rgba(59,130,246,0.15)]', 
         '-translate-y-[2px]', 'font-black'
     ];
     
-    // 4. Danh sách class khi Tab KHÔNG được chọn (Hỗ trợ cả giao diện Sáng & Tối)
+    // 4. Danh sách class khi Tab KHÔNG được chọn
     const inactiveClasses = [
-        'bg-slate-100/80', 'dark:bg-slate-900/40', 
-        'text-slate-400', 'dark:text-slate-500', 
-        'border-b-[2px]', 'border-slate-300', 'dark:border-slate-950', 
-        'shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]', 'dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]', 
+        'bg-slate-100/80', 
+        'text-slate-400', 
+        'border-b-[2px]', 'border-slate-300', 
+        'shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]', 
         'translate-y-0', 
-        'hover:text-slate-700', 'dark:hover:text-slate-300', 
-        'hover:bg-slate-50', 'dark:hover:bg-slate-900/80', 
-        'hover:border-b-[4px]', 'hover:border-slate-400', 'dark:hover:border-slate-800', 
+        'hover:text-slate-700', 
+        'hover:bg-slate-50', 
+        'hover:border-b-[4px]', 'hover:border-slate-400', 
         'hover:-translate-y-[2px]', 
-        'hover:shadow-[0_4px_10px_rgba(0,0,0,0.1)]', 'dark:shadow-[0_4px_10px_rgba(0,0,0,0.4)]', 
+        'hover:shadow-[0_4px_10px_rgba(0,0,0,0.1)]', 
         'font-bold'
     ];
 
