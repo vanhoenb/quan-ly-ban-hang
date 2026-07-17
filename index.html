@@ -212,33 +212,59 @@
         z-index: 1000 !important;
     }
 	
-	/* Định dạng thanh cuộn custom siêu đẹp, tiệp màu với Dark Theme */
+	/* =========================================================================
+   --- HỆ THỐNG THANH CUỘN THÔNG MINH TỰ ĐỘNG BIẾN ĐỔI THEO THEME SÁNG/TỐI ---
+   ========================================================================= */
+
+/* Định dạng kích thước chung cho thanh cuộn (Siêu mảnh 6px) */
 .custom-scrollbar::-webkit-scrollbar {
-    width: 6px; /* Độ rộng cực kỳ thanh mảnh */
+    width: 6px;
     height: 6px;
 }
 
-/* Đường ray chạy của thanh cuộn (chìm phía dưới) */
+/* 1. ĐƯỜNG RAY CHẠY CỦA THANH CUỘN (TRACK) */
+/* Giao diện Sáng (Mặc định): Màu xám slate-200 mờ nhẹ nhàng */
 .custom-scrollbar::-webkit-scrollbar-track {
-    background: rgba(15, 23, 42, 0.5); /* Màu tối slate-900 mờ */
+    background: rgba(226, 232, 240, 0.5);
     border-radius: 10px;
 }
+/* Giao diện Tối (Dark Mode): Tự động chuyển sang màu slate-900 tối chìm */
+.dark .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.5);
+}
 
-/* Cục kéo của thanh cuộn (nổi phía trên) */
+/* 2. CỤC KÉO CỦA THANH CUỘN (THUMB) */
+/* Giao diện Sáng (Mặc định): Màu xanh mờ, viền xám nhạt tinh tế */
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(59, 130, 246, 0.4); /* Màu xanh neon mờ đồng bộ với nút */
+    background: rgba(59, 130, 246, 0.35);
+    border-radius: 10px;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+}
+/* Giao diện Tối (Dark Mode): Tự động đổi sang xanh neon mờ high-tech */
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.4);
     border-radius: 10px;
     border: 1px solid rgba(30, 41, 59, 0.5);
 }
 
-/* Đổi màu đậm hơn khi người dùng di chuột (Hover) vào thanh cuộn */
+/* 3. HIỆU ỨNG DI CHUỘT VÀO THANH CUỘN (HOVER) */
+/* Giao diện Sáng: Xanh đậm hơn chút khi rê chuột */
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(59, 130, 246, 0.8); /* Sáng xanh nổi bật hẳn lên */
+    background: rgba(59, 130, 246, 0.6);
+}
+/* Giao diện Tối: Sáng rực xanh neon nổi bật hẳn lên */
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.8);
 }
 
-/* Hỗ trợ hiển thị mượt trên cả trình duyệt Firefox */
+/* 4. HỖ TRỢ HIỂN THỊ MƯỢT TRÊN TRÌNH DUYỆT FIREFOX */
+/* Trạng thái giao diện Sáng */
 .custom-scrollbar {
     scrollbar-width: thin;
+    scrollbar-color: rgba(59, 130, 246, 0.35) rgba(226, 232, 240, 0.5);
+}
+/* Trạng thái giao diện Tối */
+.dark .custom-scrollbar {
     scrollbar-color: rgba(59, 130, 246, 0.4) rgba(15, 23, 42, 0.5);
 }
 </style>
@@ -429,7 +455,757 @@
         gap: 5px !important;
     }
 </style>
+<style>
+    /* ==========================================================================
+       HỆ THỐNG CSS DUAL THEME (CHỈ HOẠT ĐỘNG KHI BẬT DARK MODE - CÓ CLASS .dark)
+       ========================================================================== */
+    .dark {
+        
+        /* ------------------ I. DÙNG CHUNG CHO SELECT BOX SẢN PHẨM ------------------ */
+        .select2-selection, 
+        .select2-container--default .select2-selection--single,
+        .choices__inner,
+        .ts-control,
+        .ss-main,
+        .product-select {
+            background-color: #020617 !important;
+            color: #f8fafc !important;
+            border-color: #334155 !important;
+        }
 
+        .select2-dropdown,
+        .select2-container--default .select2-dropdown,
+        .ts-dropdown,
+        .choices__list--dropdown,
+        .ss-content {
+            background-color: #020617 !important;
+            border: 1px solid #334155 !important;
+            color: #f8fafc !important;
+        }
+
+        .select2-results__option,
+        .ts-dropdown .option,
+        .choices__item--choice {
+            background-color: #020617 !important;
+            color: #f8fafc !important;
+        }
+
+        .select2-results__option--highlighted,
+        .ts-dropdown .option.active,
+        .choices__item--choice.is-highlighted {
+            background-color: #1e3a8a !important;
+            color: #ffffff !important;
+        }
+
+        .select2-search__field,
+        .ts-control input,
+        .choices__input {
+            background-color: #020617 !important;
+            color: #f8fafc !important;
+            border-color: #334155 !important;
+        }
+
+
+        /* ------------------ II. DÀNH RIÊNG CHO TRANG: NHẬP KHO ------------------ */
+        #cart-box, 
+        #cart-box table, 
+        #cart-box tr, 
+        #cart-box td, 
+        #cart-box th {
+            background-color: #020617 !important;
+            color: #f8fafc !important;
+            border-color: #334155 !important;
+        }
+
+        #page-import input, 
+        #page-import select {
+            background-color: #020617 !important;
+            color: #f8fafc !important;
+            border-color: #334155 !important;
+        }
+
+        #page-import table tbody tr {
+            background-color: #0f172a !important; 
+            color: #f8fafc !important;
+        }
+
+
+        /* ------------------ III. DÀNH RIÊNG CHO TRANG: KHO HÀNG (ĐÃ FIX) ------------------ */
+        /* Dùng selector * để ép mọi thẻ con bên trong #inventory-data nhận màu tối, bất kể JS gán gì */
+        #inventory-data, 
+        #inventory-data tr, 
+        #inventory-data td, 
+        #inventory-data * {
+            background-color: #020617 !important; 
+            color: #f8fafc !important;
+        }
+
+        /* Giữ lại đường kẻ mờ cho bảng */
+        #inventory-data td {
+            border-bottom: 1px solid #1e293b !important;
+        }
+
+        /* Hiệu ứng hover di chuột sáng nhẹ */
+        #inventory-data tr:hover,
+        #inventory-data tr:hover * {
+            background-color: #0f172a !important;
+        }
+
+        /* Các ô input tìm kiếm/ngày tháng ở trang kho */
+        #page-inventory input, 
+        #page-inventory select {
+            background-color: #020617 !important;
+            color: #f8fafc !important;
+            border-color: #334155 !important;
+        }
+    }
+	
+	/* --- DÀNH RIÊNG CHO TRANG: BÁN HÀNG --- */
+.dark #page-sell input, 
+.dark #page-sell select {
+    background-color: #020617 !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+
+.dark #page-sell .bg-white {
+    background-color: #020617 !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+
+.dark #page-sell .bg-blue-100 {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+}
+
+.dark #page-sell .bg-gray-50 {
+    background-color: #1e293b !important;
+}
+
+.dark #page-sell table {
+    color: #f8fafc !important;
+}
+
+.dark #page-sell .border-gray-300 {
+    border-color: #334155 !important;
+}
+
+/* --- FIX LỖI: DANH SÁCH KHÁCH HÀNG & GIỎ HÀNG --- */
+
+/* Ép màu cho danh sách khách hàng và TẤT CẢ các thẻ con bên trong */
+.dark #dropdown-list,
+.dark #dropdown-list * {
+    background-color: #020617 !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+
+/* Fix lỗi trắng khi di chuột vào dòng sản phẩm hoặc danh sách khách hàng */
+.dark #sell-cart-body tr:hover,
+.dark #sell-cart-body tr:hover td,
+.dark #dropdown-list div:hover,
+.dark #dropdown-list div:hover * {
+    background-color: #1e3a8a !important; /* Màu xanh đậm khi hover */
+    color: #ffffff !important;
+}
+
+/* Fix chữ trong giỏ hàng */
+.dark #sell-cart-body td {
+    color: #f8fafc !important;
+}
+
+/* Fix chữ trong danh sách sản phẩm (Product Grid) */
+.dark #product-grid div, 
+.dark #product-grid p {
+    color: #f8fafc !important; /* Tên sản phẩm màu trắng */
+}
+
+/* Đổi màu chữ Tồn kho thành màu xanh xám nhẹ (#94a3b8) */
+.dark #product-grid span {
+    color: #94a3b8 !important;
+}
+
+/* Ưu tiên giữ màu đỏ cho chữ "HẾT" hoặc các trạng thái quan trọng */
+.dark #product-grid .text-red-500, 
+.dark #product-grid .text-red-600,
+.dark #product-grid .text-red-400 {
+    color: #ef4444 !important;
+}
+
+/* Fix viền bảng khi ở chế độ tối */
+.dark #page-sell .divide-gray-300 {
+    border-color: #334155 !important;
+}
+
+/* --- FIX THANH CUỘN (SCROLLBAR) CHO DANH SÁCH SẢN PHẨM --- */
+.dark #product-grid::-webkit-scrollbar {
+    width: 8px; /* Độ rộng thanh cuộn */
+}
+
+.dark #product-grid::-webkit-scrollbar-track {
+    background: #020617 !important; /* Màu nền của thanh cuộn */
+}
+
+.dark #product-grid::-webkit-scrollbar-thumb {
+    background: #334155 !important; /* Màu của thanh trượt */
+    border-radius: 4px;
+}
+
+.dark #product-grid::-webkit-scrollbar-thumb:hover {
+    background: #475569 !important; /* Màu khi di chuột vào thanh trượt */
+}
+
+/* --- TRANG: KHÁCH HÀNG (FIX MÀU CHỮ CỘT 1, 2, 3) --- */
+
+.dark #page-customers input {
+    background-color: #020617 !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+
+/* 1. Ép màu nền tối và xóa transition để không bị loang màu */
+.dark #customer-list-body tr,
+.dark #customer-list-body td {
+    background-color: #020617 !important;
+    transition: none !important;
+}
+
+/* 2. CHỈ ÉP CHỮ TRẮNG CHO CỘT 1, 2, 3 (Tên đại lý, Địa chỉ, SĐT) */
+.dark #customer-list-body tr td:nth-child(1), 
+.dark #customer-list-body tr td:nth-child(1) *,
+.dark #customer-list-body tr td:nth-child(2), 
+.dark #customer-list-body tr td:nth-child(2) *,
+.dark #customer-list-body tr td:nth-child(3), 
+.dark #customer-list-body tr td:nth-child(3) * {
+    color: #f8fafc !important;
+}
+
+/* 3. Chỉ áp dụng đường kẻ cho hàng và ô */
+.dark #customer-list-body tr,
+.dark #customer-list-body td {
+    border-bottom: 1px solid #1e293b !important;
+}
+
+/* Hiệu ứng di chuột (hover) - không delay */
+.dark #customer-list-body tr:hover {
+    background-color: #0f172a !important;
+}
+
+/* --- FIX POPUP/MODAL BỊ TRẮNG --- */
+.dark .bg-white {
+    background-color: #020617 !important;
+    color: #f8fafc !important;
+    border: 1px solid #334155 !important;
+}
+
+.dark .bg-white input,
+.dark .bg-white textarea,
+.dark .bg-white select {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+    border: 1px solid #334155 !important;
+}
+
+/* --- FIX THANH CUỘN (SCROLLBAR) --- */
+.dark .max-h-\[70vh\]::-webkit-scrollbar {
+    width: 8px;
+}
+.dark .max-h-\[70vh\]::-webkit-scrollbar-track {
+    background: #020617 !important;
+}
+.dark .max-h-\[70vh\]::-webkit-scrollbar-thumb {
+    background: #334155 !important;
+    border-radius: 4px;
+}
+.dark .max-h-\[70vh\]::-webkit-scrollbar-thumb:hover {
+    background: #475569 !important;
+}
+
+/* --- CSS: TRANG DANH MỤC SẢN PHẨM (ĐÃ FIX LỖI CỘT) --- */
+
+/* 1. Nền tổng thể của trang */
+.dark #page-products-manage {
+    background-color: #020617 !important;
+    color: #f8fafc !important;
+}
+
+/* 2. Tiêu đề trang */
+.dark #page-products-manage h2 {
+    color: #ffffff !important;
+}
+
+/* 3. Các khối chứa input */
+.dark #page-products-manage .bg-white {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+}
+
+/* 4. Các ô nhập liệu (input) */
+.dark #page-products-manage input {
+    background-color: #020617 !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+
+/* 5. Ép bảng về trong suốt để không bị nền trắng đè lên */
+.dark #page-products-manage table {
+    background-color: transparent !important; 
+    border-collapse: collapse !important; /* Đảm bảo căn chỉnh chuẩn */
+}
+
+/* 6. Tiêu đề bảng (thead) */
+.dark #page-products-manage thead {
+    background-color: #1e293b !important;
+}
+
+/* 7. FIX THANH DÒNG SẢN PHẨM (TR) - Giữ nguyên cấu trúc bảng */
+.dark #page-products-manage table tbody tr {
+    background-color: #1e293b !important; /* Nền tối cho hàng */
+    border-bottom: 1px solid #334155 !important; /* Chỉ kẻ đường dưới để phân cách */
+    color: #f8fafc !important;
+}
+
+/* Đảm bảo ô (td) không bị lệch màu */
+.dark #page-products-manage table td {
+    background-color: transparent !important; 
+    color: #f8fafc !important;
+    border: none !important;
+}
+
+/* 8. Chỉnh màu viền và màu chữ chung */
+.dark #page-products-manage .border-gray-100,
+.dark #page-products-manage .border-gray-200 {
+    border-color: #334155 !important;
+}
+
+.dark #page-products-manage .text-gray-600 {
+    color: #cbd5e1 !important;
+}
+
+/* --- FIX TRIỆT ĐỂ: ÉP MỌI CHỮ TRONG BẢNG PHẢI SÁNG --- */
+.dark #page-products-manage table td *,
+.dark #page-products-manage table th * {
+    color: #f8fafc !important;
+}
+
+/* Fix link trong bảng */
+.dark #page-products-manage table a {
+    color: #60a5fa !important;
+    text-decoration: none;
+}
+
+/* --- FIX MÃ VẠCH & CÁC NỀN TRẮNG CÒN SÓT LẠI --- */
+.dark #page-products-manage table td span {
+    background-color: transparent !important;
+    color: #f8fafc !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* --- CSS: TRANG LỊCH SỬ HOÁ ĐƠN (DARK MODE - ĐÃ FIX CỘT THAO TÁC) --- */
+
+/* 1. Nền tổng thể */
+.dark #page-history {
+    background-color: #020617 !important;
+    color: #f8fafc !important;
+}
+
+.dark #page-history .bg-white {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+}
+
+/* 2. Input và Label */
+.dark #page-history input {
+    background-color: #020617 !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+
+.dark #page-history label {
+    color: #94a3b8 !important;
+}
+
+/* 3. Bảng danh sách */
+.dark #page-history table {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+}
+
+.dark #page-history thead {
+    background-color: #1e293b !important;
+}
+
+.dark #page-history tbody tr {
+    border-bottom: 1px solid #334155 !important;
+}
+
+/* 4. CHỈ ÉP CHỮ TRẮNG CHO 3 CỘT ĐẦU */
+.dark #page-history tbody tr td:nth-child(1), .dark #page-history tbody tr td:nth-child(1) *,
+.dark #page-history tbody tr td:nth-child(2), .dark #page-history tbody tr td:nth-child(2) *,
+.dark #page-history tbody tr td:nth-child(3), .dark #page-history tbody tr td:nth-child(3) * {
+    color: #f8fafc !important;
+}
+
+/* 5. CỘT 4 (TỔNG TIỀN) - ÉP MÀU ĐỎ HỒNG */
+.dark #page-history tbody tr td:nth-child(4),
+.dark #page-history tbody tr td:nth-child(4) * {
+    color: #fb7185 !important;
+}
+
+/* CỘT 5 (THAO TÁC) - KHÔNG ĐỤNG VÀO: 
+   Nó sẽ giữ nguyên màu gốc của icon/nút bấm */
+
+
+/* --- CSS: TRANG BÁO CÁO (DARK MODE) --- */
+
+/* 1. Nền tổng thể trang báo cáo */
+.dark #page-report {
+    background-color: #020617 !important;
+    color: #f8fafc !important;
+}
+
+/* 2. Tiêu đề chính */
+.dark #page-report h2 {
+    color: #ffffff !important;
+}
+
+.dark #page-report p {
+    color: #94a3b8 !important; /* Màu xám nhạt cho mô tả */
+}
+
+/* 3. Các khối chứa (card) và nội dung bên trong */
+.dark #page-report .bg-white {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+}
+
+.dark #page-report .bg-slate-50 {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+/* 4. Tiêu đề các khối báo cáo (h3) */
+.dark #page-report h3 {
+    color: #f8fafc !important;
+}
+
+/* 5. Nhãn (label) và Ô nhập liệu (input) */
+.dark #page-report label {
+    color: #cbd5e1 !important;
+}
+
+.dark #page-report input {
+    background-color: #020617 !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+
+/* 6. Hiệu ứng hover cho các khối báo cáo */
+.dark #page-report .hover\:shadow-lg:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important;
+    border-color: #475569 !important;
+}
+
+/* --- CSS: TRANG SẢN XUẤT (ĐÃ FIX TRIỆT ĐỂ NỀN TRẮNG & SCROLLBAR) --- */
+
+/* 1. Nền tổng thể và Tiêu đề */
+.dark #page-SanXuat {
+    background-color: #020617 !important;
+    color: #f8fafc !important;
+}
+
+/* 2. Loại bỏ các mảng trắng bg-gray-50 còn sót lại */
+.dark #page-SanXuat.bg-gray-50,
+.dark #page-SanXuat .bg-gray-50 {
+    background-color: #0f172a !important; 
+    border-color: #334155 !important;
+}
+
+/* 3. Các thẻ chứa (Card) */
+.dark #page-SanXuat .bg-white {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+}
+
+.dark #page-SanXuat .bg-blue-50 {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+/* 4. Bảng danh sách */
+.dark #page-SanXuat thead {
+    background-color: #1e293b !important;
+}
+
+.dark #page-SanXuat thead th {
+    color: #cbd5e1 !important;
+}
+
+.dark #page-SanXuat tbody {
+    color: #f8fafc !important;
+}
+
+.dark #page-SanXuat tbody tr {
+    border-bottom: 1px solid #334155 !important;
+}
+
+/* 5. Input và Select */
+.dark #page-SanXuat input,
+.dark #page-SanXuat select {
+    background-color: #020617 !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+
+/* 6. Nhãn (Label) */
+.dark #page-SanXuat label {
+    color: #94a3b8 !important;
+}
+
+/* 7. Fix input readonly */
+.dark #page-SanXuat input[readonly] {
+    background-color: #0f172a !important;
+}
+
+/* --- FIX THANH CUỘN (SCROLLBAR) CHO DARK MODE --- */
+.dark #page-SanXuat ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.dark #page-SanXuat ::-webkit-scrollbar-track {
+    background: #020617; 
+}
+
+.dark #page-SanXuat ::-webkit-scrollbar-thumb {
+    background: #334155; 
+    border-radius: 4px;
+}
+
+.dark #page-SanXuat ::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* --- CSS: TRANG NGUYÊN LIỆU & CÔNG NỢ (DARK MODE) --- */
+
+/* 1. Nền tổng thể */
+.dark #page-NguyenLieu {
+    background-color: #020617 !important;
+    color: #f8fafc !important;
+}
+
+.dark #page-NguyenLieu h3, 
+.dark #page-NguyenLieu h4 {
+    color: #ffffff !important;
+}
+
+/* 2. Loại bỏ các mảng trắng bg-white và bg-gray-50 */
+.dark #page-NguyenLieu .bg-white {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+}
+
+.dark #page-NguyenLieu .bg-gray-50 {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+.dark #page-NguyenLieu .bg-blue-50 {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+/* 3. Bảng danh sách */
+.dark #page-NguyenLieu thead {
+    background-color: #1e293b !important;
+}
+
+.dark #page-NguyenLieu thead th {
+    color: #cbd5e1 !important;
+}
+
+.dark #page-NguyenLieu tbody {
+    color: #f8fafc !important;
+}
+
+.dark #page-NguyenLieu tbody tr {
+    border-bottom: 1px solid #334155 !important;
+}
+
+/* 4. Tab Menu (Nút bấm) */
+.dark #page-NguyenLieu .tab-btn {
+    background-color: #334155 !important;
+    color: #94a3b8 !important;
+}
+
+.dark #page-NguyenLieu .tab-btn.bg-blue-600 {
+    background-color: #2563eb !important;
+    color: #ffffff !important;
+}
+
+/* 5. Input, Select và Label */
+.dark #page-NguyenLieu input,
+.dark #page-NguyenLieu select {
+    background-color: #020617 !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+
+.dark #page-NguyenLieu label {
+    color: #94a3b8 !important;
+}
+
+/* 6. Fix ô giỏ hàng (gio-hang-nl) */
+.dark #page-NguyenLieu #gio-hang-nl {
+    background-color: #020617 !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+/* --- TÙY CHỈNH THANH CUỘN (SCROLLBAR) --- */
+.dark #page-NguyenLieu ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.dark #page-NguyenLieu ::-webkit-scrollbar-track {
+    background: #020617; 
+}
+
+.dark #page-NguyenLieu ::-webkit-scrollbar-thumb {
+    background: #334155; 
+    border-radius: 4px;
+}
+
+.dark #page-NguyenLieu ::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* --- CSS: TRANG LỊCH CÔNG VIỆC (DARK MODE - HOÀN THIỆN) --- */
+
+/* 1. Nền tổng thể */
+.dark #page-LichCongViec {
+    background-color: #020617 !important;
+}
+
+/* 2. Các card trắng (Danh mục lịch, Calendar container) */
+.dark #page-LichCongViec .bg-white {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+/* 3. Tiêu đề (LỊCH CÔNG VIỆC, DANH MỤC, v.v.) */
+.dark #page-LichCongViec h3,
+.dark #page-LichCongViec h4 {
+    color: #f8fafc !important;
+}
+
+/* 4. Text trong checkbox */
+.dark #page-LichCongViec span {
+    color: #e2e8f0 !important;
+}
+
+/* 5. Input và Select (Trong trang và trong Modal) */
+.dark #page-LichCongViec input,
+.dark #page-LichCongViec select {
+    background-color: #020617 !important;
+    color: #f8fafc !important;
+    border: 1px solid #334155 !important;
+}
+
+/* 6. Fix Modal (Thêm và Xem sự kiện) */
+.dark #modal-add-event .bg-white,
+.dark #modal-view-event .bg-white {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+    border: 1px solid #334155 !important;
+}
+
+/* Fix text trong modal */
+.dark #modal-add-event h3,
+.dark #modal-view-event h3,
+.dark #view-event-time {
+    color: #f8fafc !important;
+}
+
+/* 7. FIX KHUNG LỊCH (CALENDAR GRID) */
+/* Ép bảng lịch sang tối */
+.dark #calendar-container table {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+}
+
+/* Ép các ô ngày (td) và tiêu đề thứ (th) sang tối */
+.dark #calendar-container td,
+.dark #calendar-container th {
+    background-color: #0f172a !important;
+    border: 1px solid #334155 !important;
+    color: #f8fafc !important;
+}
+
+/* 8. FIX THANH ĐIỀU HƯỚNG LỊCH (Toolbar - Phần bị trắng ở trên) */
+.dark #calendar-container div {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+
+/* Ép màu chữ cho các nút tháng/tuần/ngày */
+.dark #calendar-container button {
+    color: #f8fafc !important;
+    background-color: #1e293b !important;
+}
+
+/* --- CSS TỔNG - ĐỒNG BỘ NỀN VÀ TIÊU ĐỀ (CHỈ ÁP DỤNG KHI Ở CHẾ ĐỘ DARK) --- */
+
+/* 1. Ép tất cả các trang về màu nền đồng nhất CHỈ KHI LÀ DARK MODE */
+.dark #page-import, 
+.dark #page-sales, 
+.dark #page-sell, 
+.dark #page-customers, 
+.dark #page-kho-hang, 
+.dark #page-dashboard,
+.dark [id*="page-"] { 
+    background-color: #020617 !important;
+    color: #f8fafc !important;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* 2. Ép tất cả tiêu đề h2 trong các trang về kiểu khối đen đồng bộ CHỈ KHI LÀ DARK MODE */
+.dark #page-import h2, 
+.dark #page-sales h2, 
+.dark #page-sell h2, 
+.dark #page-customers h2, 
+.dark #page-kho-hang h2,
+.dark [id*="page-"] h2, 
+.dark .page-title, 
+.dark .header-title {
+    background-color: #1e293b !important; 
+    color: #ffffff !important;           
+    padding: 20px !important;            
+    margin-bottom: 25px !important;      
+    border-radius: 8px !important;       
+    display: block !important;           
+    width: 100% !important;              
+    font-size: 24px !important;
+    font-weight: bold !important;
+    border: 1px solid #334155 !important;
+    visibility: visible !important;      
+    opacity: 1 !important;
+}
+
+/* 3. Fix riêng cho khu vực Bán hàng nếu nó bị đè class CHỈ KHI LÀ DARK MODE */
+.dark #page-sell, 
+.dark #page-sales {
+    background-color: #020617 !important;
+}
+
+
+</style>
 
 
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -618,75 +1394,96 @@ function toggleMoreMenu() {
     <main class="flex-1 p-2 md:p-8">
 	
 	<!-- Trang chủ -->
-	
-	<div id="page-home" class="p-2 md:p-8 space-y-6 md:space-y-8 bg-slate-950 min-h-screen text-slate-100 transition-colors duration-300">
+<div id="page-home" class="p-2 md:p-8 space-y-6 md:space-y-8 bg-slate-50 dark:bg-slate-950 min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-300">
     
-    <div class="flex justify-between items-end">
+    <div class="flex justify-between items-end pb-2 border-b border-slate-200 dark:border-slate-900">
         <div>
-            <h2 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_4px_rgba(255,255,255,0.1)]">BẢNG ĐIỀU KHIỂN</h2>
-            <p class="text-slate-400 text-sm">Tổng quan tình hình kinh doanh</p>
+            <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:drop-shadow-[0_2px_4px_rgba(255,255,255,0.1)]">BẢNG ĐIỀU KHIỂN</h2>
+            <p class="text-slate-500 dark:text-slate-400 text-sm">Tổng quan tình hình kinh doanh</p>
         </div>
+        
+        <!-- NÚT CHUYỂN ĐỔI GIAO DIỆN 3D CƠ HỌC (ĐÃ ĐỒNG BỘ THEME) -->
+        <button onclick="toggleTheme()" id="theme-toggle-btn" 
+                class="select-none flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-xl transition-all duration-150 transform active:translate-y-[1px] active:border-b-[1px]
+                       bg-white dark:bg-slate-900 
+                       text-slate-700 dark:text-amber-400 
+                       border border-slate-200 dark:border-slate-950
+                       border-b-[3px] border-slate-300 dark:border-b-[4px] dark:border-slate-950 
+                       shadow-md dark:shadow-[0_4px_10px_rgba(0,0,0,0.4)] mb-1">
+            <i id="theme-icon" data-lucide="moon" class="w-4 h-4"></i>
+            <span id="theme-text" class="hidden sm:inline">Giao diện: Tối</span>
+        </button>
     </div>
 
+    <!-- 4 KHỐI CARD THỐNG KÊ 3D TRÊN 2 GIAO DIỆN SÁNG/TỐI -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 select-none">
         
+        <!-- Tổng Doanh Thu -->
         <div onclick="showDashboardDetail('revenue')" 
-             class="bg-blue-950/40 border-b-[4px] border-blue-800 text-blue-400 p-3 md:p-6 rounded-2xl shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-blue-900/40 hover:border-blue-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
-            <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-blue-300/80">Tổng Doanh Thu</p>
-            <h3 id="total-revenue" class="text-md md:text-2xl font-black drop-shadow-[0_2px_4px_rgba(59,130,246,0.3)]">0 đ</h3>
+             class="bg-blue-50/60 dark:bg-blue-950/40 border-b-[4px] border-blue-300 dark:border-blue-800 text-blue-600 dark:text-blue-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(59,130,246,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-blue-100/60 dark:hover:bg-blue-900/40 hover:border-blue-400 dark:hover:border-blue-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
+            <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-blue-500 dark:text-blue-300/80">Tổng Doanh Thu</p>
+            <h3 id="total-revenue" class="text-md md:text-2xl font-black drop-shadow-[0_1.5px_3px_rgba(59,130,246,0.15)] dark:drop-shadow-[0_2px_4px_rgba(59,130,246,0.3)]">0 đ</h3>
         </div>
         
+        <!-- Công Nợ Cần Thu -->
         <div onclick="showDashboardDetail('debt-customer')" 
-             class="bg-rose-950/40 border-b-[4px] border-rose-800 text-rose-400 p-3 md:p-6 rounded-2xl shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-rose-900/40 hover:border-rose-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
-            <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-rose-300/80">Công Nợ Cần Thu</p>
-            <h3 id="total-debt-summary" class="text-md md:text-2xl font-black drop-shadow-[0_2px_4px_rgba(244,63,94,0.3)]">0 đ</h3>
+             class="bg-rose-50/60 dark:bg-rose-950/40 border-b-[4px] border-rose-300 dark:border-rose-800 text-rose-600 dark:text-rose-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(244,63,94,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-rose-100/60 dark:hover:bg-rose-900/40 hover:border-rose-400 dark:hover:border-rose-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
+            <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-rose-500 dark:text-rose-300/80">Công Nợ Cần Thu</p>
+            <h3 id="total-debt-summary" class="text-md md:text-2xl font-black drop-shadow-[0_1.5px_3px_rgba(244,63,94,0.15)] dark:drop-shadow-[0_2px_4px_rgba(244,63,94,0.3)]">0 đ</h3>
         </div>
         
+        <!-- Tổng Nợ NCC -->
         <div onclick="showDashboardDetail('debt-ncc')" 
-             class="bg-amber-950/40 border-b-[4px] border-amber-800 text-amber-400 p-3 md:p-6 rounded-2xl shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-amber-900/40 hover:border-amber-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
-            <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-amber-300/80">Tổng Nợ NCC</p>
-            <h3 id="total-debt-ncc-summary" class="text-md md:text-2xl font-black drop-shadow-[0_2px_4px_rgba(245,158,11,0.3)]">0 đ</h3>
+             class="bg-amber-50/60 dark:bg-amber-950/40 border-b-[4px] border-amber-300 dark:border-amber-800 text-amber-600 dark:text-amber-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(245,158,11,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-amber-100/60 dark:hover:bg-amber-900/40 hover:border-amber-400 dark:hover:border-amber-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
+            <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-300/80">Tổng Nợ NCC</p>
+            <h3 id="total-debt-ncc-summary" class="text-md md:text-2xl font-black drop-shadow-[0_1.5px_3px_rgba(245,158,11,0.15)] dark:drop-shadow-[0_2px_4px_rgba(245,158,11,0.3)]">0 đ</h3>
         </div>
         
-        <div class="bg-emerald-950/40 border-b-[4px] border-emerald-800 text-emerald-400 p-3 md:p-6 rounded-2xl shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] hover:bg-emerald-900/40 hover:border-emerald-700 hover:-translate-y-[2px] transition-all duration-150">
-            <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-emerald-300/80">Lợi Nhuận</p>
-            <h3 id="profit-summary" class="text-md md:text-2xl font-black drop-shadow-[0_2px_4px_rgba(16,185,129,0.3)]">0 đ</h3>
+        <!-- Lợi Nhuận -->
+        <div class="bg-emerald-50/60 dark:bg-emerald-950/40 border-b-[4px] border-emerald-300 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(16,185,129,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] hover:bg-emerald-100/60 dark:hover:bg-emerald-900/40 hover:border-emerald-400 dark:hover:border-emerald-700 hover:-translate-y-[2px] transition-all duration-150">
+            <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-emerald-500 dark:text-emerald-300/80">Lợi Nhuận</p>
+            <h3 id="profit-summary" class="text-md md:text-2xl font-black drop-shadow-[0_1.5px_3px_rgba(16,185,129,0.15)] dark:drop-shadow-[0_2px_4px_rgba(16,185,129,0.3)]">0 đ</h3>
         </div>
     </div>
 
-    <div class="grid grid-cols-3 gap-2 md:gap-3 bg-slate-950 p-1.5 rounded-2xl border border-slate-900 shadow-[inset_0_4px_12px_rgba(0,0,0,0.8)] select-none">
-    <button onclick="switchMainTab('inventory')" id="btn-main-inventory" 
-        class="py-2.5 px-1 text-[10px] md:text-sm font-black rounded-xl transition-all duration-150 bg-gradient-to-b from-blue-950/40 to-blue-900/30 text-blue-400 border-t border-l border-blue-500/20 border-b-[4px] border-blue-600 shadow-[0_6px_15px_rgba(59,130,246,0.25)] -translate-y-[2px] active:translate-y-0 active:border-b-[1px] uppercase tracking-wider">
-        NXT KHO
-    </button>
-    
-    <button onclick="switchMainTab('revenue')" id="btn-main-revenue" 
-        class="py-2.5 px-1 text-[10px] md:text-sm font-bold rounded-xl transition-all duration-150 bg-slate-900/40 text-slate-500 border-b-[2px] border-slate-950 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] translate-y-0 hover:text-slate-300 hover:bg-slate-900/80 hover:border-b-[4px] hover:border-slate-800 hover:-translate-y-[2px] hover:shadow-[0_4px_10px_rgba(0,0,0,0.4)] active:translate-y-[1px] active:border-b-[1px] uppercase tracking-wider">
-        DOANH THU
-    </button>
-    
-    <button onclick="switchMainTab('products')" id="btn-main-products" 
-        class="py-2.5 px-1 text-[10px] md:text-sm font-bold rounded-xl transition-all duration-150 bg-slate-900/40 text-slate-500 border-b-[2px] border-slate-950 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] translate-y-0 hover:text-slate-300 hover:bg-slate-900/80 hover:border-b-[4px] hover:border-slate-800 hover:-translate-y-[2px] hover:shadow-[0_4px_10px_rgba(0,0,0,0.4)] active:translate-y-[1px] active:border-b-[1px] uppercase tracking-wider">
-        TOP SP + KH NỢ
-    </button>
-</div>
+    <!-- THANH TABS MENU 3D (HỖ TRỢ DUAL THEME SÁNG / TỐI) -->
+    <div class="grid grid-cols-3 gap-2 md:gap-3 bg-slate-200 dark:bg-slate-950 p-1.5 rounded-2xl border border-slate-300 dark:border-slate-900 shadow-[inset_0_2px_6px_rgba(0,0,0,0.15)] dark:shadow-[inset_0_4px_12px_rgba(0,0,0,0.8)] select-none">
+        <!-- Tab 1: NXT KHO (Mặc định đang Active) -->
+        <button onclick="switchMainTab('inventory')" id="btn-main-inventory" 
+            class="py-2.5 px-1 text-[10px] md:text-sm font-black rounded-xl transition-all duration-150 bg-gradient-to-b from-blue-100 to-blue-200 dark:from-blue-950/40 dark:to-blue-900/30 text-blue-600 dark:text-blue-400 border-t border-l border-white dark:border-blue-500/20 border-b-[4px] border-blue-400 dark:border-blue-600 shadow-[0_4px_10px_rgba(59,130,246,0.15)] dark:shadow-[0_6px_15px_rgba(59,130,246,0.25)] -translate-y-[2px] active:translate-y-0 active:border-b-[1px] uppercase tracking-wider">
+            NXT KHO
+        </button>
+        
+        <!-- Tab 2: DOANH THU -->
+        <button onclick="switchMainTab('revenue')" id="btn-main-revenue" 
+            class="py-2.5 px-1 text-[10px] md:text-sm font-bold rounded-xl transition-all duration-150 bg-slate-100/80 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border-b-[2px] border-slate-300 dark:border-slate-950 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] translate-y-0 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/80 hover:border-b-[4px] hover:border-slate-400 dark:hover:border-slate-800 hover:-translate-y-[2px] hover:shadow-[0_4px_10px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_4px_10px_rgba(0,0,0,0.4)] active:translate-y-[1px] active:border-b-[1px] uppercase tracking-wider">
+            DOANH THU
+        </button>
+        
+        <!-- Tab 3: TOP SP + KH NỢ -->
+        <button onclick="switchMainTab('products')" id="btn-main-products" 
+            class="py-2.5 px-1 text-[10px] md:text-sm font-bold rounded-xl transition-all duration-150 bg-slate-100/80 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border-b-[2px] border-slate-300 dark:border-slate-950 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] translate-y-0 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/80 hover:border-b-[4px] hover:border-slate-400 dark:hover:border-slate-800 hover:-translate-y-[2px] hover:shadow-[0_4px_10px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_4px_10px_rgba(0,0,0,0.4)] active:translate-y-[1px] active:border-b-[1px] uppercase tracking-wider">
+            TOP SP + KH NỢ
+        </button>
+    </div>
 
+    <!-- NỘI DUNG CHUYỂN ĐỔI TAB (TỒN KHO) -->
     <div id="content-main-inventory" class="main-tab-content block">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-slate-900 p-4 md:p-6 rounded-3xl border border-rose-950/60 shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
+            <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-rose-100 dark:border-rose-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">CHI TIẾT TỒN KHO</h3>
+                    <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">CHI TIẾT TỒN KHO</h3>
                     <div class="flex gap-2">
-                        <input type="date" id="inv-from" onchange="refreshInventory()" class="text-[10px] bg-slate-950 border border-slate-800 text-slate-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500 transition-all">
-                        <input type="date" id="inv-to" onchange="refreshInventory()" class="text-[10px] bg-slate-950 border border-slate-800 text-slate-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500 transition-all">
+                        <input type="date" id="inv-from" onchange="refreshInventory()" class="text-[10px] bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500 transition-all">
+                        <input type="date" id="inv-to" onchange="refreshInventory()" class="text-[10px] bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500 transition-all">
                     </div>
                 </div>
                 <div id="home-inventory-list" class="space-y-2 overflow-y-auto custom-scrollbar pr-2 h-[400px] md:h-[500px]"></div>
             </div>
             
-            <div class="bg-slate-900 p-4 md:p-6 rounded-3xl border border-blue-950/60 shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">THỜI GIAN CẤP HÀNG ĐẠI LÝ</h3>
-                <div class="flex items-center w-full px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase">
+            <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-blue-100 dark:border-blue-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
+                <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">THỜI GIAN CẤP HÀNG ĐẠI LÝ</h3>
+                <div class="flex items-center w-full px-2 mb-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">
                     <div class="w-[15%]">Số phiếu</div>
                     <div class="w-[30%]">Khách hàng</div>
                     <div class="w-[20%] text-center">Ngày tháng</div>
@@ -698,26 +1495,28 @@ function toggleMoreMenu() {
         </div>
     </div>
 
+    <!-- NỘI DUNG CHUYỂN ĐỔI TAB (BIỂU ĐỒ DOANH THU) -->
     <div id="content-main-revenue" class="main-tab-content hidden space-y-6">
-        <div class="bg-slate-900 p-4 md:p-6 rounded-3xl border border-rose-950/60 shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
-            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Biểu đồ doanh thu ngày</h3>
+        <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-rose-100 dark:border-rose-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
+            <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">Biểu đồ doanh thu ngày</h3>
             <div class="h-[300px] md:h-[400px] w-full"><canvas id="revenueChart"></canvas></div>
         </div>
-        <div class="bg-slate-900 p-4 md:p-6 rounded-3xl border border-blue-950/60 shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
-            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Doanh thu từng tháng</h3>
+        <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-blue-100 dark:border-blue-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
+            <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">Doanh thu từng tháng</h3>
             <div class="h-[300px] md:h-[400px] w-full"><canvas id="monthlyRevenueChart"></canvas></div>
         </div>
     </div>
 
+    <!-- NỘI DUNG CHUYỂN ĐỔI TAB (TOP SẢN PHẨM & CÔNG NỢ) -->
     <div id="content-main-products" class="main-tab-content hidden">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-slate-900 p-4 md:p-6 rounded-3xl border border-blue-950/60 shadow-[0_8px_30px_rgba(0,0,0,0.4)] flex flex-col">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">TOP 10 SP BÁN CHẠY</h3>
+            <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-blue-100 dark:border-blue-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] flex flex-col">
+                <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">TOP 10 SP BÁN CHẠY</h3>
                 <div class="h-[400px] md:h-[500px] w-full"><canvas id="topProductsChart"></canvas></div>
             </div>
-            <div class="bg-slate-900 p-4 md:p-6 rounded-3xl border border-rose-950/60 shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Khách hàng công nợ</h3>
-                <div class="flex items-center w-full px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase">
+            <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-rose-100 dark:border-rose-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
+                <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">Khách hàng công nợ</h3>
+                <div class="flex items-center w-full px-2 mb-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">
                     <div class="w-[40%]">Khách hàng</div>
                     <div class="w-[25%] text-center">SĐT</div>
                     <div class="w-[35%] text-center">Công nợ</div>
@@ -727,107 +1526,110 @@ function toggleMoreMenu() {
         </div>
     </div>
 
+    <!-- MODAL CHI TIẾT PHIẾU (ĐỒNG BỘ THEME) -->
     <div id="order-detail-modal" class="fixed inset-0 z-[9999] bg-black/70 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-4 md:p-6 text-slate-200">
-            <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-2">
-                <h3 class="text-lg font-bold text-white" id="modal-title">Chi tiết phiếu</h3>
-                <button onclick="document.getElementById('order-detail-modal').classList.add('hidden')" class="text-slate-400 hover:text-white font-bold text-xl">✕</button>
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-4 md:p-6 text-slate-800 dark:text-slate-200">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white" id="modal-title">Chi tiết phiếu</h3>
+                <button onclick="document.getElementById('order-detail-modal').classList.add('hidden')" class="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white font-bold text-xl">✕</button>
             </div>
             <div id="modal-content" class="text-sm"></div>
             <div class="mt-6 text-center">
-                <button onclick="document.getElementById('order-detail-modal').classList.add('hidden')" class="bg-violet-950/60 border-b-[3px] border-violet-800 hover:bg-violet-900/50 hover:border-violet-700 text-violet-400 px-8 py-2 rounded-lg font-bold active:translate-y-[1px] transition-all">Đóng</button>
+                <button onclick="document.getElementById('order-detail-modal').classList.add('hidden')" 
+                        class="bg-violet-50 dark:bg-violet-950/60 border border-violet-200 dark:border-transparent border-b-[3px] border-violet-300 dark:border-violet-800 hover:bg-violet-100 dark:hover:bg-violet-900/50 hover:border-violet-400 dark:hover:border-violet-700 text-violet-600 dark:text-violet-400 px-8 py-2 rounded-lg font-bold active:translate-y-[1px] transition-all">Đóng</button>
             </div>
         </div>
     </div>
 
+    <!-- MODAL KHÁC TRÊN BẢNG ĐIỀU KHIỂN -->
     <div id="dashboard-detail-modal" class="fixed inset-0 z-[9999] bg-black/70 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[80vh] overflow-hidden flex flex-col">
-            <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
-                <h3 id="modal-detail-title" class="font-black text-white">Chi tiết</h3>
-                <button onclick="document.getElementById('dashboard-detail-modal').classList.add('hidden')" class="text-slate-400 hover:text-white text-xl font-bold">✕</button>
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[80vh] overflow-hidden flex flex-col">
+            <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-950/50">
+                <h3 id="modal-detail-title" class="font-black text-slate-900 dark:text-white">Chi tiết</h3>
+                <button onclick="document.getElementById('dashboard-detail-modal').classList.add('hidden')" class="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white text-xl font-bold">✕</button>
             </div>
-            <div id="modal-detail-content" class="p-4 overflow-y-auto text-slate-200"></div>
+            <div id="modal-detail-content" class="p-4 overflow-y-auto text-slate-800 dark:text-slate-200"></div>
         </div>
     </div>
 
+    <!-- MODAL CHI TIẾT BÁN HÀNG CỦA BIỂU ĐỒ -->
     <div id="salesDetailModal" class="hidden fixed inset-0 bg-black/70 z-[9999] flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-lg p-6 max-h-[80vh] overflow-hidden flex flex-col text-slate-200">
-            <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
-                <h3 id="modalDateTitle" class="font-black text-white text-lg">Chi tiết bán hàng</h3>
-                <button onclick="document.getElementById('salesDetailModal').classList.add('hidden')" class="text-slate-400 hover:text-white text-xl font-bold">✕</button>
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-lg p-6 max-h-[80vh] overflow-hidden flex flex-col text-slate-800 dark:text-slate-200">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
+                <h3 id="modalDateTitle" class="font-black text-slate-900 dark:text-white text-lg">Chi tiết bán hàng</h3>
+                <button onclick="document.getElementById('salesDetailModal').classList.add('hidden')" class="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white text-xl font-bold">✕</button>
             </div>
             <div class="overflow-y-auto flex-1">
                 <table class="w-full text-sm">
-                    <thead class="sticky top-0 bg-slate-950 text-blue-400 border-b border-slate-800">
+                    <thead class="sticky top-0 bg-slate-50 dark:bg-slate-950 text-blue-600 dark:text-blue-400 border-b border-slate-200 dark:border-slate-800">
                         <tr>
                             <th class="text-left py-3 px-3 font-bold">Tên sản phẩm</th>
                             <th class="text-center py-3 px-3 font-bold">SL</th>
                             <th class="text-right py-3 px-3 font-bold">Tổng tiền</th>
                         </tr>
                     </thead>
-                    <tbody id="modalDetailsBody" class="divide-y divide-slate-800/50"></tbody>
+                    <tbody id="modalDetailsBody" class="divide-y divide-slate-200 dark:divide-slate-800/50"></tbody>
                 </table>
             </div>
             <button onclick="document.getElementById('salesDetailModal').classList.add('hidden')" 
-                    class="mt-4 w-full bg-slate-950 border-b-[3px] border-slate-800 hover:bg-slate-800 text-slate-300 py-3 rounded-xl font-bold active:translate-y-[1px] transition-all">Đóng</button>
+                    class="mt-4 w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-transparent border-b-[3px] border-slate-300 dark:border-slate-800 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 py-3 rounded-xl font-bold active:translate-y-[1px] transition-all">Đóng</button>
         </div>
     </div>
 </div>
 
- <!-- NHẬP KHO ------>
- 
+<!-- NHẬP KHO ------>
 <div id="page-import" class="hidden space-y-4 px-2 md:px-6">
-    <h2 class="text-xl font-bold text-gray-800">NHẬP KHO</h2>
+    <h2 class="text-xl font-bold text-gray-800 dark:text-white">NHẬP KHO</h2>
     
-   <div class="bg-yellow-50 p-2 rounded-xl mb-4 border border-yellow-200">
-    <div class="flex gap-2 items-center">
-        <input type="text" id="search-by-barcode" class="w-full border border-yellow-200 p-2 rounded-lg text-sm outline-none" placeholder="Quét mã...">
-        <button type="button" onclick="startScanner('import')" class="bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-sm active:scale-95 transition-all whitespace-nowrap">📷 Quét</button>
+    <div class="bg-yellow-50 dark:bg-slate-900 p-2 rounded-xl mb-4 border border-yellow-200 dark:border-slate-700">
+        <div class="flex gap-2 items-center">
+            <input type="text" id="search-by-barcode" class="w-full border border-yellow-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-lg text-sm text-gray-800 dark:text-white outline-none" placeholder="Quét mã...">
+            <button type="button" onclick="startScanner('import')" class="bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-sm active:scale-95 transition-all whitespace-nowrap">📷 Quét</button>
+        </div>
+    
+        <div id="reader" class="mt-2 w-full max-w-[300px] mx-auto hidden"></div>
+    
+        <button type="button" id="close-scanner-btn" onclick="stopScanner()" class="mt-2 w-full bg-red-500 text-white py-1 rounded-lg font-bold text-xs shadow-sm">❌ Đóng Camera</button>
     </div>
-    
-    <div id="reader" class="mt-2 w-full max-w-[300px] mx-auto hidden"></div>
-    
-    <button type="button" id="close-scanner-btn" onclick="stopScanner()" class="mt-2 w-full bg-red-500 text-white py-1 rounded-lg font-bold text-xs shadow-sm">❌ Đóng Camera</button>
-</div>
-		
-    <div class="grid grid-cols-2 md:grid-cols-6 gap-3 bg-blue-100 p-3 md:p-6 rounded-2xl shadow-sm border border-blue-100">
+        
+    <div class="grid grid-cols-2 md:grid-cols-6 gap-3 bg-blue-100 dark:bg-slate-900 p-3 md:p-6 rounded-2xl shadow-sm border border-blue-100 dark:border-slate-700">
         <div class="md:col-span-1">
-            <label class="block text-xs font-bold text-blue-800 mb-1">Số phiếu</label>
-            <input type="text" id="imp-receipt" class="w-full border border-blue-200 p-2.5 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" readonly>
+            <label class="block text-xs font-bold text-blue-800 dark:text-blue-400 mb-1">Số phiếu</label>
+            <input type="text" id="imp-receipt" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" readonly>
         </div>
         <div class="md:col-span-1">
-            <label class="block text-xs font-bold text-blue-800 mb-1">Loại</label>
-            <select id="imp-type" class="w-full border border-blue-200 p-2.5 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"><option>Nhập mới</option><option>Nhập đổi</option></select>
+            <label class="block text-xs font-bold text-blue-800 dark:text-blue-400 mb-1">Loại</label>
+            <select id="imp-type" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"><option>Nhập mới</option><option>Nhập đổi</option></select>
         </div>
         <div class="md:col-span-4">
-            <label class="block text-xs font-bold text-blue-800 mb-1">Nhà cung cấp (Chọn hoặc nhập)</label>
-            <input type="text" id="imp-vendor" list="cust-list" class="w-full border border-blue-200 p-2.5 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Chọn hoặc nhập tên NCC..." onkeydown="handleEnter(event, 'imp-name')">
+            <label class="block text-xs font-bold text-blue-800 dark:text-blue-400 mb-1">Nhà cung cấp (Chọn hoặc nhập)</label>
+            <input type="text" id="imp-vendor" list="cust-list" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Chọn hoặc nhập tên NCC..." onkeydown="handleEnter(event, 'imp-name')">
             <datalist id="cust-list"></datalist>
         </div>
         <div class="md:col-span-2">
-            <label class="block text-xs font-bold text-blue-800 mb-1">Tên Sản Phẩm</label>
-            <select id="imp-name" class="product-select w-full border border-blue-200 p-2.5 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" onkeydown="handleEnter(event, 'imp-unit')"></select>
+            <label class="block text-xs font-bold text-blue-800 dark:text-blue-400 mb-1">Tên Sản Phẩm</label>
+            <select id="imp-name" class="product-select w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" onkeydown="handleEnter(event, 'imp-unit')"></select>
         </div>
         <div class="md:col-span-1">
-            <label class="block text-xs font-bold text-blue-800 mb-1">ĐVT</label>
-            <select id="imp-unit" class="w-full border border-blue-200 p-2.5 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" onkeydown="handleEnter(event, 'imp-qty')"><option>Hũ</option><option>Túi</option><option>Kg</option><option>Khay</option><option>Cái</option><option>Hộp</option><option>Lọ</option><option>Chai</option></select>
+            <label class="block text-xs font-bold text-blue-800 dark:text-blue-400 mb-1">ĐVT</label>
+            <select id="imp-unit" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" onkeydown="handleEnter(event, 'imp-qty')"><option>Hũ</option><option>Túi</option><option>Kg</option><option>Khay</option><option>Cái</option><option>Hộp</option><option>Lọ</option><option>Chai</option></select>
         </div>
         <div class="md:col-span-1">
-            <label class="block text-xs font-bold text-blue-800 mb-1">Số Lượng</label>
-            <input type="number" id="imp-qty" class="w-full border border-blue-200 p-2.5 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" onkeydown="handleEnter(event, 'imp-retail')">
+            <label class="block text-xs font-bold text-blue-800 dark:text-blue-400 mb-1">Số Lượng</label>
+            <input type="number" id="imp-qty" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" onkeydown="handleEnter(event, 'imp-retail')">
         </div>
         <div class="md:col-span-1">
-            <label class="block text-xs font-bold text-blue-800 mb-1">Giá Lẻ</label>
-            <input type="number" id="imp-retail" class="w-full border border-blue-200 p-2.5 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" onkeydown="handleEnter(event, 'imp-wholesale')">
+            <label class="block text-xs font-bold text-blue-800 dark:text-blue-400 mb-1">Giá Lẻ</label>
+            <input type="number" id="imp-retail" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" onkeydown="handleEnter(event, 'imp-wholesale')">
         </div>
         <div class="md:col-span-1">
-            <label class="block text-xs font-bold text-blue-800 mb-1">Giá Sỉ</label>
-            <input type="number" id="imp-wholesale" class="w-full border border-blue-200 p-2.5 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" onkeydown="handleEnter(event, 'add-btn')">
+            <label class="block text-xs font-bold text-blue-800 dark:text-blue-400 mb-1">Giá Sỉ</label>
+            <input type="number" id="imp-wholesale" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" onkeydown="handleEnter(event, 'add-btn')">
         </div>
     </div>
     
     <div class="flex flex-col md:flex-row gap-4">
-        <div id="cart-box" class="flex-grow bg-white p-4 rounded-2xl shadow-sm border border-gray-100 overflow-x-auto"></div>
+        <div id="cart-box" class="flex-grow bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-x-auto text-gray-800 dark:text-white"></div>
         <div class="md:w-[200px] flex flex-col gap-3">
             <button id="add-btn" onclick="addToCart()" class="w-full bg-slate-700 text-white py-3 rounded-2xl hover:bg-slate-800 font-bold transition-all shadow-md">Thêm vào giỏ</button>
             <button id="save-import-btn" onclick="saveImport()" class="w-full bg-blue-600 text-white py-3 rounded-2xl font-bold shadow-md hover:bg-blue-700 transition-all">Lưu nhập kho</button>
@@ -835,83 +1637,82 @@ function toggleMoreMenu() {
     </div>
 
 
-    <div class="bg-white p-4 md:p-6 rounded-2xl border border-blue-200 shadow-lg mt-10">
-    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4 border-b pb-4">
-        <h3 class="font-bold text-xl text-slate-800 whitespace-nowrap">📋 DANH SÁCH PHIẾU NHẬP</h3>
+    <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl border border-blue-200 dark:border-slate-700 shadow-lg mt-10">
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4 border-b dark:border-slate-700 pb-4">
+        <h3 class="font-bold text-xl text-slate-800 dark:text-white whitespace-nowrap">📋 DANH SÁCH PHIẾU NHẬP</h3>
         
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100 w-full">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-100 dark:border-slate-700 w-full">
             <div>
-                <label class="block text-[10px] font-bold text-gray-500 uppercase">Tháng</label>
-                <input type="month" id="filter-month" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase">Tháng</label>
+                <input type="month" id="filter-month" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-white rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
             </div>
 
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase">Từ Ngày</label>
-                    <input type="date" id="filter-date-from" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase">Từ Ngày</label>
+                    <input type="date" id="filter-date-from" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-white rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase">Đến Ngày</label>
-                    <input type="date" id="filter-date-to" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase">Đến Ngày</label>
+                    <input type="date" id="filter-date-to" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-white rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
             </div>
 
             <div class="md:col-span-2">
-                <label class="block text-[10px] font-bold text-gray-500 uppercase">Tìm theo số phiếu</label>
-                <input type="text" id="searchReceiptInput" onkeyup="filterReceipts()" placeholder="Nhập số phiếu..." class="w-full p-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase">Tìm theo số phiếu</label>
+                <input type="text" id="searchReceiptInput" onkeyup="filterReceipts()" placeholder="Nhập số phiếu..." class="w-full p-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-white rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
             </div>
         </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
-        <div class="overflow-x-auto border border-blue-100 rounded-xl bg-white p-2 md:p-4">
+        <div class="overflow-x-auto border border-blue-100 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 p-2 md:p-4">
             <table class="w-full text-sm">
-                <thead class="bg-gray-50 border-b">
+                <thead class="bg-gray-50 dark:bg-slate-800 border-b dark:border-slate-700 text-gray-800 dark:text-gray-200">
                     <tr><th class="p-3 text-left">Số phiếu</th><th class="p-3 text-left">Ngày nhập</th><th class="p-3 text-left">Số SP</th><th class="p-3 text-left">Thao tác</th></tr>
                 </thead>
-                <tbody id="list-receipts-left"></tbody>
+                <tbody id="list-receipts-left" class="text-gray-800 dark:text-gray-300"></tbody>
             </table>
         </div>
-        <div class="overflow-x-auto border border-blue-100 rounded-xl bg-white p-2 md:p-4">
+        <div class="overflow-x-auto border border-blue-100 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 p-2 md:p-4">
             <table class="w-full text-sm">
-                <thead class="bg-gray-50 border-b">
+                <thead class="bg-gray-50 dark:bg-slate-800 border-b dark:border-slate-700 text-gray-800 dark:text-gray-200">
                     <tr><th class="p-3 text-left">Số phiếu</th><th class="p-3 text-left">Ngày nhập</th><th class="p-3 text-left">Số SP</th><th class="p-3 text-left">Thao tác</th></tr>
                 </thead>
-                <tbody id="list-receipts-right"></tbody>
+                <tbody id="list-receipts-right" class="text-gray-800 dark:text-gray-300"></tbody>
             </table>
         </div>
     </div>
 </div>
 
 <div id="modal-receipt" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] overflow-y-auto">
-        <div class="flex justify-between items-center mb-4 border-b pb-2">
-            <h3 class="text-lg font-bold">Chi tiết phiếu: <span id="modal-receipt-id"></span></h3>
-            <button onclick="document.getElementById('modal-receipt').classList.add('hidden')" class="text-gray-500 font-bold hover:text-red-500">Đóng (X)</button>
+    <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4 border-b dark:border-slate-700 pb-2">
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white">Chi tiết phiếu: <span id="modal-receipt-id"></span></h3>
+            <button onclick="document.getElementById('modal-receipt').classList.add('hidden')" class="text-gray-500 dark:text-gray-400 font-bold hover:text-red-500">Đóng (X)</button>
         </div>
-        <table class="w-full border-collapse border border-gray-200 text-sm">
+        <table class="w-full border-collapse border border-gray-200 dark:border-slate-700 text-sm">
             <thead>
-                <tr class="bg-gray-100">
-                    <th class="border p-2">Sản phẩm</th><th class="border p-2">ĐVT</th><th class="border p-2">SL</th><th class="border p-2">Giá</th><th class="border p-2">Thao tác</th>
+                <tr class="bg-gray-100 dark:bg-slate-800 text-gray-800 dark:text-gray-200">
+                    <th class="border dark:border-slate-700 p-2">Sản phẩm</th><th class="border dark:border-slate-700 p-2">ĐVT</th><th class="border dark:border-slate-700 p-2">SL</th><th class="border dark:border-slate-700 p-2">Giá</th><th class="border dark:border-slate-700 p-2">Thao tác</th>
                 </tr>
             </thead>
-            <tbody id="modal-receipt-body"></tbody>
+            <tbody id="modal-receipt-body" class="text-gray-800 dark:text-gray-300"></tbody>
         </table>
     </div>
 </div>
 </div>
 
-        <!-- PHẦN 3: KHO HÀNG -->
-		
-       <div id="page-inventory" class="hidden space-y-4 p-2 md:p-6 w-full">
-    <div class="bg-white p-4 md:p-6 rounded-2xl shadow-lg border border-slate-200 w-full">
+       <!-- PHẦN 3: KHO HÀNG -->
+<div id="page-inventory" class="hidden space-y-4 p-2 md:p-6 w-full">
+    <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 w-full">
         
-        <h2 class="text-lg md:text-xl font-bold mb-4 text-slate-800 border-b pb-2">KHO HÀNG THỰC TẾ</h2>
+        <h2 class="text-lg md:text-xl font-bold mb-4 text-slate-800 dark:text-white border-b dark:border-slate-700 pb-2">KHO HÀNG THỰC TẾ</h2>
         
         <div class="grid grid-cols-1 md:grid-cols-12 gap-3 mb-6">
             <div class="col-span-1 md:col-span-9">
                 <input type="text" id="search-inventory" placeholder="🔍 Tìm tên sản phẩm..." 
-                       onkeyup="filterInventory()" class="w-full border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                        onkeyup="filterInventory()" class="w-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-3 rounded-xl text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
             <div class="col-span-1 md:col-span-3">
                 <button onclick="togglePrices()" class="w-full bg-slate-800 text-white py-3 rounded-xl text-sm font-bold hover:bg-slate-900 transition">
@@ -920,13 +1721,13 @@ function toggleMoreMenu() {
             </div>
 
             <div class="col-span-1 md:col-span-3">
-                <input type="month" id="inv-month" onchange="autoFillDates(this.value)" class="w-full border border-slate-200 p-3 rounded-xl text-sm" title="Chọn tháng">
+                <input type="month" id="inv-month" onchange="autoFillDates(this.value)" class="w-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-3 rounded-xl text-sm text-slate-800 dark:text-slate-100" title="Chọn tháng">
             </div>
             <div class="col-span-1 md:col-span-3">
-                <input type="date" id="inv-date-from" class="w-full border border-slate-200 p-3 rounded-xl text-sm" title="Từ ngày">
+                <input type="date" id="inv-date-from" class="w-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-3 rounded-xl text-sm text-slate-800 dark:text-slate-100" title="Từ ngày">
             </div>
             <div class="col-span-1 md:col-span-3">
-                <input type="date" id="inv-date-to" class="w-full border border-slate-200 p-3 rounded-xl text-sm" title="Đến ngày">
+                <input type="date" id="inv-date-to" class="w-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-3 rounded-xl text-sm text-slate-800 dark:text-slate-100" title="Đến ngày">
             </div>
             <div class="col-span-1 md:col-span-3">
                 <button onclick="exportToExcel()" class="w-full bg-green-600 text-white py-3 rounded-xl text-sm font-bold hover:bg-green-700 transition">
@@ -935,20 +1736,20 @@ function toggleMoreMenu() {
             </div>
         </div>
 
-        <div class="w-full bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+        <div class="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
             <div class="max-h-[70vh] overflow-y-auto">
                 <table id="kho-table" class="min-w-full text-left text-xs md:text-sm border-collapse">
-                    <thead class="sticky top-0 bg-slate-100 z-10 border-b border-slate-200">
-						<tr class="text-slate-600 uppercase text-[11px] tracking-wider">
-							<th class="p-4 w-[40%]">Tên SP</th>
-							<th class="p-4 w-[10%] text-center">ĐVT</th>
-							<th class="p-4 w-[10%] text-center">SL</th>
-							<th class="p-4 w-[20%] text-center price-cell">Giá lẻ</th>
-							<th class="p-4 w-[20%] text-center price-cell">Giá sỉ</th>
-						</tr>
-					</thead>
-                    <tbody id="inventory-data" class="divide-y divide-slate-100 text-slate-700">
-                        </tbody>
+                    <thead class="sticky top-0 bg-slate-100 dark:bg-slate-800 z-10 border-b border-slate-200 dark:border-slate-700">
+                        <tr class="text-slate-600 dark:text-slate-400 uppercase text-[11px] tracking-wider">
+                            <th class="p-4 w-[40%]">Tên SP</th>
+                            <th class="p-4 w-[10%] text-center">ĐVT</th>
+                            <th class="p-4 w-[10%] text-center">SL</th>
+                            <th class="p-4 w-[20%] text-center price-cell">Giá lẻ</th>
+                            <th class="p-4 w-[20%] text-center price-cell">Giá sỉ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventory-data" class="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -956,27 +1757,26 @@ function toggleMoreMenu() {
 </div>
         
 <!-- PHẦN 3: BÁN HÀNG -->
-
 <div id="page-sell" class="p-2 md:p-6 space-y-4 w-full">
-    <h2 class="text-2xl font-bold text-gray-800">BÁN HÀNG / XUẤT HOÁ ĐƠN</h2>
+    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">BÁN HÀNG / XUẤT HOÁ ĐƠN</h2>
 
    <div class="flex flex-col lg:flex-row gap-4 w-full">
    <div class="lg:w-1/2 w-full space-y-4 h-auto md:h-[800px]">
-    <div class="bg-white p-3 md:p-4 rounded-2xl border-4 border-red-500 shadow-sm h-full">
+    <div class="bg-white dark:bg-slate-900 p-3 md:p-4 rounded-2xl border-4 border-red-500 shadow-sm h-full">
             
             <div class="flex gap-2 mb-4">
-                <div class="flex-1 bg-yellow-50 p-2 rounded-xl border border-yellow-200 flex items-center gap-1">
-                    <span class="text-[10px] font-bold text-yellow-700 whitespace-nowrap">SCAN:</span>
+                <div class="flex-1 bg-yellow-50 dark:bg-slate-950 p-2 rounded-xl border border-yellow-200 dark:border-slate-700 flex items-center gap-1">
+                    <span class="text-[10px] font-bold text-yellow-700 dark:text-yellow-500 whitespace-nowrap">SCAN:</span>
                     <input type="text" id="barcode-scanner-sell" 
                            placeholder="Mã..." 
-                           class="w-full bg-transparent outline-none text-sm font-bold text-yellow-800">
+                           class="w-full bg-transparent outline-none text-sm font-bold text-yellow-800 dark:text-yellow-200">
                     <button type="button" onclick="startScannerSell()" class="bg-blue-600 text-white px-2 py-1 rounded-lg hover:bg-blue-700 transition">
                         📷
                     </button>
                 </div>
                 <input type="text" id="product-search" placeholder="🔍 Tìm SP..." 
                        onkeyup="filterProducts()" 
-                       class="w-1/4 p-2 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 text-sm">
+                       class="w-1/4 p-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 text-sm dark:text-white">
             </div>
 
             <div id="scanner-container" class="hidden fixed inset-0 z-[9999] bg-black bg-opacity-95 p-4 flex flex-col justify-center items-center">
@@ -988,46 +1788,45 @@ function toggleMoreMenu() {
             </div>
             
             <div id="product-grid" 
-				 class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 h-[250px] md:h-[680px] overflow-y-auto p-1 md:p-2" 
-				 style="align-content: start;">
-			</div>
+                 class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 h-[250px] md:h-[680px] overflow-y-auto p-1 md:p-2" 
+                 style="align-content: start;">
+            </div>
         </div>
     </div>
 
-
         <div class="lg:w-1/2 w-full space-y-4 h-[800px] flex flex-col">
-            <div class="bg-blue-100 p-3 md:p-4 rounded-2xl border-4 border-blue-400 shadow-sm space-y-3">
+            <div class="bg-blue-100 dark:bg-slate-900 p-3 md:p-4 rounded-2xl border-4 border-blue-400 shadow-sm space-y-3">
                 <div class="flex gap-2">
-                    <input type="text" id="sell-receipt" class="w-1/4 border border-gray-300 p-2.5 rounded-xl text-xs" placeholder="Số phiếu" readonly>
+                    <input type="text" id="sell-receipt" class="w-1/4 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-xs dark:text-white" placeholder="Số phiếu" readonly>
                     
                     <div class="relative w-3/4">
                         <input type="text" id="sell-customer" placeholder="Tên khách hàng" 
-						   class="w-full border border-gray-300 p-2.5 rounded-xl text-xs" 
-						   oninput="filterCustomerList(this.value)" 
-						   onclick="this.value=''; filterCustomerList('');"
-						   autocomplete="off"> <!-- THÊM DÒNG NÀY VÀO -->
-                        <div id="dropdown-list" class="absolute z-[100] w-full bg-white border border-gray-300 rounded-xl mt-1 shadow-lg max-h-48 overflow-y-auto hidden text-xs">
+                           class="w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-xs dark:text-white" 
+                           oninput="filterCustomerList(this.value)" 
+                           onclick="this.value=''; filterCustomerList('');"
+                           autocomplete="off">
+                        <div id="dropdown-list" class="absolute z-[100] w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-slate-700 rounded-xl mt-1 shadow-lg max-h-48 overflow-y-auto hidden text-xs dark:text-white">
                         </div>
                     </div>
                 </div>
                 <div class="flex gap-2">
-                    <input type="text" id="sell-address" placeholder="Địa chỉ" class="w-1/2 border border-gray-300 p-2.5 rounded-xl text-xs">
-                    <input type="text" id="sell-phone" placeholder="SĐT" class="w-1/2 border border-gray-300 p-2.5 rounded-xl text-xs">
+                    <input type="text" id="sell-address" placeholder="Địa chỉ" class="w-1/2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-xs dark:text-white">
+                    <input type="text" id="sell-phone" placeholder="SĐT" class="w-1/2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-xs dark:text-white">
                 </div>
                 <div class="flex gap-2">
-                    <select id="payment-method" class="w-1/4 border border-gray-300 p-2 rounded-xl text-xs">
+                    <select id="payment-method" class="w-1/4 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-xl text-xs dark:text-white">
                         <option value="Tiền mặt">Tiền mặt</option>
                         <option value="CK">CK</option>
                         <option value="Công nợ">Công nợ</option>
                     </select>
-                    <input type="text" id="sell-note-global" placeholder="Ghi chú đơn hàng..." class="w-3/4 border border-gray-300 p-2.5 rounded-xl text-xs">
+                    <input type="text" id="sell-note-global" placeholder="Ghi chú đơn hàng..." class="w-3/4 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-xs dark:text-white">
                 </div>
                 <div class="flex gap-2 items-center">
-                    <select id="global-price-type" class="w-1/3 border border-gray-300 p-2 rounded-xl text-xs" onchange="applyGlobalPrice()">
+                    <select id="global-price-type" class="w-1/3 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-xl text-xs dark:text-white" onchange="applyGlobalPrice()">
                         <option value="retail">Bán Lẻ</option>
                         <option value="wholesale">Bán Sỉ</option>
                     </select>
-                    <select id="global-vat" class="w-1/3 border border-gray-300 p-2 rounded-xl text-xs" onchange="updateGrandTotal()">
+                    <select id="global-vat" class="w-1/3 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-xl text-xs dark:text-white" onchange="updateGrandTotal()">
                         <option value="0">Thuế: 0%</option>
                         <option value="5">Thuế: 5%</option>
                         <option value="8">Thuế: 8%</option>
@@ -1037,31 +1836,31 @@ function toggleMoreMenu() {
                 </div>
             </div>
 
-            <div class="bg-white p-3 md:p-4 rounded-2xl shadow-sm border-4 border-blue-400 h-48 md:h-auto md:flex-1 overflow-y-auto">
-				<table class="w-full text-xs border-collapse">
-					<thead class="bg-gray-50 border-b border-gray-300 sticky top-0">
-						<tr>
-							<th class="p-2 text-left w-1/4 border-r border-gray-300">Tên SP</th> 
-							<th class="p-2 w-[50px] border-r border-gray-300">SL</th>
-							<th class="p-2 w-[70px] border-r border-gray-300">Giá</th>
-							<th class="p-2 w-24 border-r border-gray-300">Ghi chú</th>
-							<th class="p-2 w-20 border-r border-gray-300">Thành tiền</th>
-							<th class="p-2 w-8">X</th>
-						</tr>
-					</thead>
-					<tbody id="sell-cart-body" class="divide-y divide-gray-300 text-center">
-					</tbody>
-				</table>
-			</div>
+            <div class="bg-white dark:bg-slate-900 p-3 md:p-4 rounded-2xl shadow-sm border-4 border-blue-400 h-48 md:h-auto md:flex-1 overflow-y-auto">
+                <table class="w-full text-xs border-collapse">
+                    <thead class="bg-gray-50 dark:bg-slate-800 border-b border-gray-300 dark:border-slate-700 sticky top-0">
+                        <tr>
+                            <th class="p-2 text-left w-1/4 border-r border-gray-300 dark:border-slate-700">Tên SP</th> 
+                            <th class="p-2 w-[50px] border-r border-gray-300 dark:border-slate-700">SL</th>
+                            <th class="p-2 w-[70px] border-r border-gray-300 dark:border-slate-700">Giá</th>
+                            <th class="p-2 w-24 border-r border-gray-300 dark:border-slate-700">Ghi chú</th>
+                            <th class="p-2 w-20 border-r border-gray-300 dark:border-slate-700">Thành tiền</th>
+                            <th class="p-2 w-8">X</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sell-cart-body" class="divide-y divide-gray-300 dark:divide-slate-700 text-center dark:text-white">
+                    </tbody>
+                </table>
+            </div>
 
-            <div class="bg-blue-100 p-4 rounded-2xl text-white border-4 border-blue-400">
+            <div class="bg-blue-100 dark:bg-slate-900 p-4 rounded-2xl border-4 border-blue-400">
                 <div class="flex justify-between items-center mb-4">
-                    <span class="text-red-600">Tổng thanh toán:</span>
+                    <span class="text-red-600 dark:text-red-400">Tổng thanh toán:</span>
                     <span id="cart-total-display" class="text-xl font-black text-red-500">0 đ</span>
                 </div>
-                <button id="btn-save-print" onclick="saveAndPrint()" class="w-full bg-green-600 py-4 rounded-xl font-bold text-lg border border-white/20 hover:bg-green-700 transition shadow-lg">
-					LƯU & XUẤT HOÁ ĐƠN (F1)
-				</button>
+                <button id="btn-save-print" onclick="saveAndPrint()" class="w-full bg-green-600 py-4 rounded-xl font-bold text-lg border border-white/20 hover:bg-green-700 transition shadow-lg text-white">
+                    LƯU & XUẤT HOÁ ĐƠN (F1)
+                </button>
             </div>
         </div>
     </div>
@@ -1137,34 +1936,34 @@ function toggleMoreMenu() {
     </div>
 </div>
 
-       <!-- PHẦN 5: KHÁCH HÀNG -->
-      <div id="page-customers" class="space-y-6 p-4 md:p-6 hidden">
-    <h2 class="text-2xl font-bold text-slate-800 border-b pb-2">DS ĐẠI LÝ & CÔNG NỢ</h2>
+      <!-- PHẦN 5: KHÁCH HÀNG -->
+<div id="page-customers" class="space-y-6 p-4 md:p-6 hidden">
+    <h2 class="text-2xl font-bold text-slate-800 dark:text-white border-b border-slate-200 dark:border-slate-700 pb-2">DS ĐẠI LÝ & CÔNG NỢ</h2>
     
-    <div class="bg-white p-4 md:p-6 rounded-2xl shadow-lg border border-slate-200 grid grid-cols-1 md:grid-cols-5 gap-4">
-		<input type="text" id="cust-name" placeholder="Tên đại lý" class="border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none w-full">
-		<input type="text" id="cust-address" placeholder="Địa chỉ" class="border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none w-full">
-		<input type="text" id="cust-phone" placeholder="Số điện thoại" class="border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none w-full">
-		
-		<input type="text" id="cust-search" onkeyup="renderCustomerList()" placeholder="🔍 Tìm kiếm đại lý..." class="border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none w-full">
-		
-		<button onclick="addCustomer()" class="bg-blue-600 text-white p-3 rounded-xl font-bold hover:bg-blue-700 transition w-full">Thêm Đại Lý</button>
-	</div>
+    <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 grid grid-cols-1 md:grid-cols-5 gap-4">
+        <input type="text" id="cust-name" placeholder="Tên đại lý" class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none w-full dark:text-white">
+        <input type="text" id="cust-address" placeholder="Địa chỉ" class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none w-full dark:text-white">
+        <input type="text" id="cust-phone" placeholder="Số điện thoại" class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none w-full dark:text-white">
+        
+        <input type="text" id="cust-search" onkeyup="renderCustomerList()" placeholder="🔍 Tìm kiếm đại lý..." class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none w-full dark:text-white">
+        
+        <button onclick="addCustomer()" class="bg-blue-600 text-white p-3 rounded-xl font-bold hover:bg-blue-700 transition w-full">Thêm Đại Lý</button>
+    </div>
 
-    <div class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
         <div class="max-h-[70vh] overflow-y-auto">
             <table class="w-full text-sm text-left border-collapse">
-                <thead class="sticky top-0 z-20 bg-slate-100 text-slate-700 font-bold uppercase text-[11px] tracking-wider">
-					<tr>
-						<th class="p-4 border-b border-slate-200">Tên đại lý</th>
-						<th class="p-4 border-b border-slate-200">Địa chỉ</th>
-						<th class="p-4 border-b border-slate-200">Số điện thoại</th>
-						<th class="p-4 border-b border-slate-200 text-center text-green-600">Đã trả</th>
-						<th class="p-4 border-b border-slate-200 text-center text-red-600">Công nợ</th>
-						<th class="p-4 border-b border-slate-200 text-center">Thao tác</th>
-					</tr>
-				</thead>
-                <tbody id="customer-list-body" class="divide-y divide-slate-100"></tbody>
+                <thead class="sticky top-0 z-20 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold uppercase text-[11px] tracking-wider">
+                    <tr>
+                        <th class="p-4 border-b border-slate-200 dark:border-slate-700">Tên đại lý</th>
+                        <th class="p-4 border-b border-slate-200 dark:border-slate-700">Địa chỉ</th>
+                        <th class="p-4 border-b border-slate-200 dark:border-slate-700">Số điện thoại</th>
+                        <th class="p-4 border-b border-slate-200 dark:border-slate-700 text-center text-green-600">Đã trả</th>
+                        <th class="p-4 border-b border-slate-200 dark:border-slate-700 text-center text-red-600">Công nợ</th>
+                        <th class="p-4 border-b border-slate-200 dark:border-slate-700 text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="customer-list-body" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody>
             </table>
         </div>
     </div>
@@ -1279,8 +2078,8 @@ function toggleMoreMenu() {
     <tbody id="export-body"></tbody>
 </table>
 
-        <!-- PHẦN 6: BÁO CÁO -->
-<!-- PHẦN 6: BÁO CÁO -->
+       
+		<!-- PHẦN 6: BÁO CÁO -->
 <div id="page-report" class="hidden p-4 md:p-8 space-y-6 md:space-y-8 bg-slate-50 min-h-screen">
     <div class="border-b pb-4 md:pb-6">
         <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900">Trung Tâm Báo Cáo</h2>
@@ -1348,18 +2147,18 @@ function toggleMoreMenu() {
     </div>
 
     <!-- Khối Sổ Lưu Mẫu -->
-    <div class="bg-white p-4 md:p-6 rounded-2xl border border-green-200 shadow-sm hover:shadow-lg transition-all">
-        <h3 class="font-bold text-sm md:text-lg text-slate-800 mb-2 text-center">Sổ Lưu Mẫu</h3>
-        <!-- Đã đổi thành exportExcelLuuMau -->
-        <button onclick="exportExcelLuuMau()" class="w-full bg-green-700 text-white py-3 rounded-xl font-bold text-xs hover:bg-green-800 transition shadow-md">Xuất Excel Lưu Mẫu</button>
-    </div>
-</div>
+		<div class="bg-white p-4 md:p-6 rounded-2xl border border-green-200 shadow-sm hover:shadow-lg transition-all">
+			<h3 class="font-bold text-sm md:text-lg text-slate-800 mb-2 text-center">Sổ Lưu Mẫu</h3>
+			<!-- Đã đổi thành exportExcelLuuMau -->
+			<button onclick="exportExcelLuuMau()" class="w-full bg-green-700 text-white py-3 rounded-xl font-bold text-xs hover:bg-green-800 transition shadow-md">Xuất Excel Lưu Mẫu</button>
+		</div>
+	</div>
 </div>
 
-<!-- PHẦN 6: SẢN XUẤT -->
+		<!-- PHẦN 6: SẢN XUẤT -->
 
 <div id="page-SanXuat" class="page-content hidden p-6 bg-gray-50">
-  <div class="max-w-7xl mx-auto">
+  <div class="max-w-[98%] mx-auto"> <!-- Tăng chiều rộng tại đây -->
     <h3 class="mb-6 font-bold text-2xl text-gray-800">THEO DÕI SẢN XUẤT</h3>
 
     <div class="flex flex-col-reverse lg:flex-row -mx-4">
@@ -1374,20 +2173,20 @@ function toggleMoreMenu() {
                     class="w-full pl-4 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
 		<!-- Bộ lọc mới -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-  <div>
-    <label class="block text-xs font-bold text-gray-500 uppercase">Chọn Tháng</label>
-    <input type="month" id="monthPickerSX" onchange="capNhatNgayTheoThangSanxuat()">
-  </div>
-  <div>
-    <label class="block text-xs font-bold text-gray-500 uppercase">Từ ngày</label>
-    <input type="date" id="dateStartSX" class="w-full p-2 border rounded text-sm" onchange="filterSanXuat()">
-  </div>
-  <div>
-    <label class="block text-xs font-bold text-gray-500 uppercase">Đến ngày</label>
-    <input type="date" id="dateEndSX" class="w-full p-2 border rounded text-sm" onchange="filterSanXuat()">
-  </div>
-</div>
+			<div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+			  <div>
+				<label class="block text-xs font-bold text-gray-500 uppercase">Chọn Tháng</label>
+				<input type="month" id="monthPickerSX" onchange="capNhatNgayTheoThangSanxuat()">
+			  </div>
+			  <div>
+				<label class="block text-xs font-bold text-gray-500 uppercase">Từ ngày</label>
+				<input type="date" id="dateStartSX" class="w-full p-2 border rounded text-sm" onchange="filterSanXuat()">
+			  </div>
+			  <div>
+				<label class="block text-xs font-bold text-gray-500 uppercase">Đến ngày</label>
+				<input type="date" id="dateEndSX" class="w-full p-2 border rounded text-sm" onchange="filterSanXuat()">
+			  </div>
+			</div>
 
           <div class="overflow-y-auto max-h-[65vh] overflow-x-auto border border-gray-100 rounded-lg">
             <table class="w-full text-left border-collapse">
@@ -2032,27 +2831,35 @@ document.addEventListener('DOMContentLoaded', () => {
     if (activeContent) {
         activeContent.classList.remove('hidden');
         if (tabName === 'revenue') {
-            activeContent.classList.add('space-y-6'); // Giữ cấu hình space-y cho biểu đồ
+            activeContent.classList.add('space-y-6'); 
         } else {
             activeContent.classList.add('block');
         }
     }
 
-    // 3. Danh sách class 3D khi Tab được chọn (Chân đế xanh Neon, nảy lên)
+    // 3. Danh sách class 3D khi Tab được chọn (Hỗ trợ cả giao diện Sáng & Tối)
     const activeClasses = [
-        'bg-gradient-to-b', 'from-blue-950/40', 'to-blue-900/30', 
-        'text-blue-400', 'border-t', 'border-l', 'border-blue-500/20', 
-        'border-b-[4px]', 'border-blue-600', 'shadow-[0_6px_15px_rgba(59,130,246,0.25)]', 
+        'bg-gradient-to-b', 'from-blue-100', 'to-blue-200', 'dark:from-blue-950/40', 'dark:to-blue-900/30', 
+        'text-blue-600', 'dark:text-blue-400', 
+        'border-t', 'border-l', 'border-white', 'dark:border-blue-500/20', 
+        'border-b-[4px]', 'border-blue-400', 'dark:border-blue-600', 
+        'shadow-[0_4px_10px_rgba(59,130,246,0.15)]', 'dark:shadow-[0_6px_15px_rgba(59,130,246,0.25)]', 
         '-translate-y-[2px]', 'font-black'
     ];
     
-    // 4. Danh sách class khi Tab KHÔNG được chọn (Chìm xuống khay, mờ tối)
+    // 4. Danh sách class khi Tab KHÔNG được chọn (Hỗ trợ cả giao diện Sáng & Tối)
     const inactiveClasses = [
-        'bg-slate-900/40', 'text-slate-500', 'border-b-[2px]', 
-        'border-slate-950', 'shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]', 
-        'translate-y-0', 'hover:text-slate-300', 'hover:bg-slate-900/80', 
-        'hover:border-b-[4px]', 'hover:border-slate-800', 'hover:-translate-y-[2px]', 
-        'hover:shadow-[0_4px_10px_rgba(0,0,0,0.4)]', 'font-bold'
+        'bg-slate-100/80', 'dark:bg-slate-900/40', 
+        'text-slate-400', 'dark:text-slate-500', 
+        'border-b-[2px]', 'border-slate-300', 'dark:border-slate-950', 
+        'shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]', 'dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]', 
+        'translate-y-0', 
+        'hover:text-slate-700', 'dark:hover:text-slate-300', 
+        'hover:bg-slate-50', 'dark:hover:bg-slate-900/80', 
+        'hover:border-b-[4px]', 'hover:border-slate-400', 'dark:hover:border-slate-800', 
+        'hover:-translate-y-[2px]', 
+        'hover:shadow-[0_4px_10px_rgba(0,0,0,0.1)]', 'dark:shadow-[0_4px_10px_rgba(0,0,0,0.4)]', 
+        'font-bold'
     ];
 
     // 5. Cập nhật trạng thái hiển thị 3D cho từng nút
@@ -2072,10 +2879,8 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 
 async function loadDashboard(filter = 'default') {
-    // 0. Hiển thị trạng thái đang tải (nếu cần)
     console.log("Đang tải dữ liệu dashboard...");
 
-    // Cập nhật để Firebase dùng Cache (tiết kiệm lượt đọc) thay vì luôn ép lấy từ Server
     const [salesSnap, receiptsSnap, suppliersSnap, customersSnap] = await Promise.all([
         db.collection('sales').get({ source: 'default' }),
         db.collection('receipts').get({ source: 'default' }),
@@ -2087,7 +2892,6 @@ async function loadDashboard(filter = 'default') {
     let startDate = new Date();
     let endDate = new Date();
 
-    // 1. Xác định khoảng thời gian lọc 
     if (typeof filter === 'object' && filter !== null) {
         startDate = new Date(filter.from);
         startDate.setHours(0, 0, 0, 0);
@@ -2101,7 +2905,7 @@ async function loadDashboard(filter = 'default') {
     }
     else if (filter === 'today') {
         startDate.setHours(0, 0, 0, 0);
-        endDate = new Date(); // Lấy đến thời điểm hiện tại
+        endDate = new Date();
     } else if (filter === 'week') {
         const day = now.getDay();
         const diff = now.getDate() - (day === 0 ? 6 : day - 1);
@@ -2117,7 +2921,6 @@ async function loadDashboard(filter = 'default') {
         endDate = new Date(year, month, 0, 23, 59, 59);
     }
 
-    // 2. Lọc dữ liệu tài chính
     const allSales = salesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     const filteredSales = allSales.filter(order => {
         const orderDate = order.date?.toDate ? order.date.toDate() : new Date(order.date);
@@ -2126,16 +2929,13 @@ async function loadDashboard(filter = 'default') {
 
     const allSuppliers = suppliersSnap.docs.map(doc => doc.data());
 
-    // 3. Tính toán số liệu
     let totalRevenue = 0;
-    
     let totalDebt = 0;
     customersSnap.forEach(doc => {
         totalDebt += (Number(doc.data().debt) || 0);
     });
 
     const productSalesMap = {};
-
     filteredSales.forEach(order => {
         totalRevenue += (Number(order.total) || 0);
         if (order.items) {
@@ -2152,7 +2952,6 @@ async function loadDashboard(filter = 'default') {
     let totalDebtNCC = allSuppliers.reduce((sum, sup) => sum + (Number(sup.debt) || 0), 0);
     const profit = totalRevenue - totalDebtNCC;
 
-    // 4. Cập nhật UI an toàn
     const updateEl = (id, val) => {
         const el = document.getElementById(id);
         if (el) el.innerText = val.toLocaleString('vi-VN') + ' đ';
@@ -2163,29 +2962,21 @@ async function loadDashboard(filter = 'default') {
     updateEl('total-debt-ncc-summary', totalDebtNCC);
     updateEl('profit-summary', profit);
 
-    // 5. Cập nhật Danh sách khách hàng nợ
     renderDebtCustomers(customersSnap);
 
     if (typeof renderCustomerOrders === 'function') {
         renderCustomerOrders(allSales, customersSnap);
     }
 
-    // ==============================================================================
-    // --- [ĐOẠN MỚI ĐƯỢC THÊM VÀO] ---
-    // Lưu dữ liệu vào biến toàn cục window để hàm showDashboardDetail có thể sử dụng
-    // khi người dùng bấm vào các ô trên giao diện mà không cần load lại dữ liệu.
     window.currentDashboardData = {
-        filteredSales: filteredSales, // Danh sách hóa đơn đã lọc theo thời gian
-        customersSnap: customersSnap, // Snapshot dữ liệu khách hàng
-        allSuppliers: allSuppliers    // Mảng dữ liệu nhà cung cấp
+        filteredSales: filteredSales,
+        customersSnap: customersSnap,
+        allSuppliers: allSuppliers 
     };
-    // ------------------------------------------------------------------------------
 
-    // 6. Cập nhật Biểu đồ
     setTimeout(() => {
         if (typeof updateRevenueChart === 'function') updateRevenueChart(filteredSales);
         if (typeof updateTopProductsChart === 'function') updateTopProductsChart(topProducts);
-        // Cập nhật biểu đồ tháng mới
         if (typeof updateMonthlyRevenueChart === 'function') updateMonthlyRevenueChart(allSales);
     }, 50);
 }
@@ -2195,7 +2986,6 @@ async function loadDashboard(filter = 'default') {
  * Đặt hàm này ở cuối file JS của bạn
  */
 function showDashboardDetail(type) {
-    // 1. Kiểm tra xem dữ liệu đã được load chưa
     if (typeof window.currentDashboardData === 'undefined') {
         console.error("Dữ liệu dashboard chưa sẵn sàng.");
         alert("Dữ liệu chưa sẵn sàng, vui lòng tải lại trang.");
@@ -2207,28 +2997,20 @@ function showDashboardDetail(type) {
     const content = document.getElementById('modal-detail-content');
     const title = document.getElementById('modal-detail-title');
     
-    if (!modal || !content || !title) {
-        console.error("Không tìm thấy các phần tử Modal (HTML) trên trang.");
-        return;
-    }
+    if (!modal || !content || !title) return;
 
-    // 2. Hiển thị Modal và trạng thái tải
     modal.classList.remove('hidden');
-    content.innerHTML = '<p class="text-center text-sm p-4 text-slate-500">Đang tải dữ liệu...</p>';
+    content.innerHTML = '<p class="text-center text-sm p-4 text-slate-500 dark:text-slate-400">Đang tải dữ liệu...</p>';
 
-    // --- XỬ LÝ THEO LOẠI ---
-
-    // TRƯỜNG HỢP 1: DOANH THU THEO SẢN PHẨM
+    // TRƯỜNG HỢP 1: DOANH THU THEO SẢN PHẨM (ĐỒNG BỘ DUAL THEME - NỀN MỜ BLUE)
     if (type === 'revenue') {
         title.innerText = "Doanh thu theo Sản phẩm";
         const productMap = {};
-        let totalItemsValue = 0; // Tổng tiền các items
-        let totalRealRevenue = 0; // Tổng thực tế từ order.total
+        let totalItemsValue = 0;
+        let totalRealRevenue = 0;
 
         filteredSales.forEach(order => {
-            const orderTotal = Number(order.total) || 0;
-            totalRealRevenue += orderTotal;
-
+            totalRealRevenue += Number(order.total) || 0;
             if (order.items && Array.isArray(order.items)) {
                 order.items.forEach(item => {
                     const itemTotal = Number(item.total) || 0;
@@ -2238,38 +3020,34 @@ function showDashboardDetail(type) {
             }
         });
 
-        // Tính phần chênh lệch (Thuế, phí, chiết khấu...)
         const diff = totalRealRevenue - totalItemsValue;
-
-        // Chuyển object thành mảng và sắp xếp giảm dần
         const sortedProducts = Object.entries(productMap).sort((a, b) => b[1] - a[1]);
 
         let html = `
-            <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-xl">
-                <div class="flex justify-between items-center text-blue-900">
-                    <span class="font-bold text-xs uppercase">Tổng cộng</span>
-                    <span class="font-black text-sm">${totalRealRevenue.toLocaleString('vi-VN')} đ</span>
+            <!-- Ô TỔNG CỘNG DOANH THU: NỀN MỜ XANH DƯƠNG DỊU MẮT -->
+            <div class="mb-4 p-3 bg-blue-50/55 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-900/40 rounded-xl">
+                <div class="flex justify-between items-center text-blue-900 dark:text-blue-400">
+                    <span class="font-bold text-xs uppercase">Tổng cộng doanh thu</span>
+                    <span class="font-black text-sm text-blue-700 dark:text-blue-300">${totalRealRevenue.toLocaleString('vi-VN')} đ</span>
                 </div>
             </div>
-            <div class="space-y-1 max-h-[60vh] overflow-y-auto pr-1">
+            <div class="space-y-1 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">
         `;
         
-        // Render danh sách sản phẩm
         sortedProducts.forEach(([name, total]) => {
             html += `
-                <div class="flex justify-between items-center py-1.5 border-b border-slate-100">
-                    <span class="text-xs font-medium text-slate-700 pr-2 line-clamp-2">${name}</span>
-                    <span class="text-xs font-bold text-slate-900 whitespace-nowrap">${total.toLocaleString('vi-VN')} đ</span>
+                <div class="flex justify-between items-center py-1.5 border-b border-slate-100 dark:border-slate-800/60">
+                    <span class="text-xs font-medium text-slate-700 dark:text-slate-300 pr-2 line-clamp-2">${name}</span>
+                    <span class="text-xs font-bold text-slate-900 dark:text-white whitespace-nowrap">${total.toLocaleString('vi-VN')} đ</span>
                 </div>
             `;
         });
 
-        // Nếu có chênh lệch (Thuế/Phí), hiển thị dòng này
         if (Math.abs(diff) > 1) {
             html += `
-                <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-300 bg-slate-50">
-                    <span class="text-xs font-bold text-slate-500 italic pr-2">Thuế / Phí / Khác</span>
-                    <span class="text-xs font-bold text-slate-600 whitespace-nowrap">${diff.toLocaleString('vi-VN')} đ</span>
+                <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40">
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 italic pr-2">Thuế / Phí / Khác</span>
+                    <span class="text-xs font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">${diff.toLocaleString('vi-VN')} đ</span>
                 </div>
             `;
         }
@@ -2278,10 +3056,12 @@ function showDashboardDetail(type) {
         content.innerHTML = html;
     }
 
-    // TRƯỜNG HỢP 2: KHÁCH HÀNG CÔNG NỢ
+    // TRƯỜNG HỢP 2: KHÁCH HÀNG CÔNG NỢ (ĐỒNG BỘ DUAL THEME - NỀN MỜ ROSE)
     else if (type === 'debt-customer') {
         title.innerText = "Công nợ Khách hàng";
-        let html = '<div class="space-y-1 max-h-[60vh] overflow-y-auto pr-1">';
+        
+        let totalDebt = 0;
+        let listHtml = '';
         let hasDebt = false;
 
         customersSnap.forEach(doc => {
@@ -2289,50 +3069,79 @@ function showDashboardDetail(type) {
             const debt = Number(data.debt) || 0;
             if (debt > 0) {
                 hasDebt = true;
-                html += `
-                    <div class="flex justify-between items-center py-1.5 border-b border-slate-100">
-                        <span class="text-xs font-medium text-slate-700 pr-2 line-clamp-2">${data.name || 'Khách hàng'}</span>
-                        <span class="text-xs font-bold text-rose-600 whitespace-nowrap">${debt.toLocaleString('vi-VN')} đ</span>
+                totalDebt += debt;
+                listHtml += `
+                    <div class="flex justify-between items-center py-1.5 border-b border-slate-100 dark:border-slate-800/60">
+                        <span class="text-xs font-medium text-slate-700 dark:text-slate-300 pr-2 line-clamp-2">${data.name || 'Khách hàng'}</span>
+                        <span class="text-xs font-bold text-slate-900 dark:text-white whitespace-nowrap">${debt.toLocaleString('vi-VN')} đ</span>
                     </div>
                 `;
             }
         });
-        html += '</div>';
-        content.innerHTML = !hasDebt ? '<p class="text-center text-sm p-4 text-slate-500">Hiện tại không có khách hàng nào nợ.</p>' : html;
+
+        // Ô TỔNG CỘNG CÔNG NỢ KHÁCH: NỀN MỜ ĐỎ/HỒNG DỊU CHỐNG CHÓI
+        let html = `
+            <div class="mb-4 p-3 bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200/50 dark:border-rose-900/30 rounded-xl">
+                <div class="flex justify-between items-center text-rose-900 dark:text-rose-400">
+                    <span class="font-bold text-xs uppercase">Tổng nợ khách hàng</span>
+                    <span class="font-black text-sm text-rose-600 dark:text-rose-400">${totalDebt.toLocaleString('vi-VN')} đ</span>
+                </div>
+            </div>
+            <div class="space-y-1 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">
+                ${listHtml}
+            </div>
+        `;
+
+        content.innerHTML = !hasDebt ? '<p class="text-center text-sm p-4 text-slate-500 dark:text-slate-400">Hiện tại không có khách hàng nào nợ.</p>' : html;
     }
 
-    // TRƯỜNG HỢP 3: CÔNG NỢ NHÀ CUNG CẤP
+    // TRƯỜNG HỢP 3: CÔNG NỢ NCC (ĐỒNG BỘ DUAL THEME - NỀN MỜ AMBER)
     else if (type === 'debt-ncc') {
         title.innerText = "Nợ Nhà cung cấp";
         const activeDebtSuppliers = allSuppliers.filter(sup => (Number(sup.debt) || 0) > 0);
 
         if (activeDebtSuppliers.length === 0) {
-            content.innerHTML = '<p class="text-center text-sm p-4 text-slate-500">Hiện tại không nợ nhà cung cấp nào.</p>';
+            content.innerHTML = '<p class="text-center text-sm p-4 text-slate-500 dark:text-slate-400">Hiện tại không nợ nhà cung cấp nào.</p>';
         } else {
-            let html = '<div class="space-y-1 max-h-[60vh] overflow-y-auto pr-1">';
+            let totalNCCDebt = 0;
+            let listHtml = '';
+
             activeDebtSuppliers.forEach(sup => {
-                html += `
-                    <div class="flex justify-between items-center py-1.5 border-b border-slate-100">
-                        <span class="text-xs font-medium text-slate-700 pr-2 line-clamp-2">${sup.name || 'NCC'}</span>
-                        <span class="text-xs font-bold text-amber-700 whitespace-nowrap">${Number(sup.debt).toLocaleString('vi-VN')} đ</span>
+                const debt = Number(sup.debt) || 0;
+                totalNCCDebt += debt;
+                listHtml += `
+                    <div class="flex justify-between items-center py-1.5 border-b border-slate-100 dark:border-slate-800/60">
+                        <span class="text-xs font-medium text-slate-700 dark:text-slate-300 pr-2 line-clamp-2">${sup.name || 'NCC'}</span>
+                        <span class="text-xs font-bold text-slate-900 dark:text-white whitespace-nowrap">${debt.toLocaleString('vi-VN')} đ</span>
                     </div>
                 `;
             });
-            html += '</div>';
+
+            // Ô TỔNG CỘNG CÔNG NỢ NCC: NỀN MỜ VÀNG/CAM ẤM DỊU CHỐNG CHÓI
+            let html = `
+                <div class="mb-4 p-3 bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/30 rounded-xl">
+                    <div class="flex justify-between items-center text-amber-900 dark:text-amber-400">
+                        <span class="font-bold text-xs uppercase">Tổng nợ nhà cung cấp</span>
+                        <span class="font-black text-sm text-amber-600 dark:text-amber-400">${totalNCCDebt.toLocaleString('vi-VN')} đ</span>
+                    </div>
+                </div>
+                <div class="space-y-1 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">
+                    ${listHtml}
+                </div>
+            `;
             content.innerHTML = html;
         }
     }
 }
 
-// Bổ sung hàm render bảng phiếu xuất
+// HÀM RENDER PHIẾU XUẤT ĐẠI LÝ (ĐỒNG BỘ DUAL THEME - HOÀN HẢO BO GÓC 100%)
 function renderCustomerOrders(allSales, customersSnap) {
     const container = document.getElementById('customer-orders-table');
     if (!container) return;
 
-    // Đảm bảo container là flexbox để các dòng cách nhau bằng gap
     container.style.display = 'flex';
     container.style.flexDirection = 'column';
-    container.style.gap = '10px'; // Khoảng cách giữa các dòng
+    container.style.gap = '10px'; 
 
     const validCustomers = new Set();
     customersSnap.forEach(doc => validCustomers.add(doc.data().name?.toString().trim()));
@@ -2360,45 +3169,62 @@ function renderCustomerOrders(allSales, customersSnap) {
     }
 
     container.innerHTML = currentOrders.map(order => {
-        // --- THIẾT LẬP MÀU NỀN & CHỮ NEON CHO DARK MODE ---
+        // Màu nền thẻ thích ứng động 2 giao diện Sáng/Tối (Chống lóa tuyệt đối)
         let barBg = order.diffDays >= 20 
-            ? 'bg-rose-950/20 hover:bg-rose-950/35 text-rose-400' 
+            ? 'bg-rose-50/45 dark:bg-rose-950/20 hover:bg-rose-100/60 dark:hover:bg-rose-950/30 text-rose-600 dark:text-rose-400' 
             : (order.diffDays >= 10 
-                ? 'bg-amber-950/20 hover:bg-amber-950/35 text-amber-400' 
-                : 'bg-emerald-950/20 hover:bg-emerald-950/35 text-emerald-400');
+                ? 'bg-amber-50/45 dark:bg-amber-950/20 hover:bg-amber-100/60 dark:hover:bg-amber-950/30 text-amber-600 dark:text-amber-400' 
+                : 'bg-emerald-50/45 dark:bg-emerald-950/20 hover:bg-emerald-100/60 dark:hover:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400');
 
-        let borderColor = order.diffDays >= 20 
-            ? 'border-rose-900/60' 
-            : (order.diffDays >= 10 ? 'border-amber-900/60' : 'border-emerald-900/60');
+        // THIẾT LẬP 2 THANH CHỈ THỊ 3D DẠNG TRỤ NỔI KHỐI (GLOSSY CYLINDER BARS)
+        let accentBgLeft = '';
+        let accentBgRight = '';
+
+        if (order.diffDays >= 20) {
+            // Đỏ nhạt -> đậm dốc gương 3D
+            accentBgLeft = 'bg-gradient-to-r from-rose-300 via-rose-500 to-rose-600 dark:from-rose-400 dark:via-rose-600 dark:to-rose-800 shadow-[inset_-1px_0_1px_rgba(0,0,0,0.15),inset_1px_0_2px_rgba(255,255,255,0.45)]';
+            accentBgRight = 'bg-gradient-to-l from-rose-300 via-rose-500 to-rose-600 dark:from-rose-400 dark:via-rose-600 dark:to-rose-800 shadow-[inset_1px_0_1px_rgba(0,0,0,0.15),inset_-1px_0_2px_rgba(255,255,255,0.45)]';
+        } else if (order.diffDays >= 10) {
+            // Vàng nhạt -> đậm dốc gương 3D
+            accentBgLeft = 'bg-gradient-to-r from-amber-300 via-amber-500 to-amber-600 dark:from-amber-400 dark:via-amber-600 dark:to-amber-800 shadow-[inset_-1px_0_1px_rgba(0,0,0,0.15),inset_1px_0_2px_rgba(255,255,255,0.45)]';
+            accentBgRight = 'bg-gradient-to-l from-amber-300 via-amber-500 to-amber-600 dark:from-amber-400 dark:via-amber-600 dark:to-amber-800 shadow-[inset_1px_0_1px_rgba(0,0,0,0.15),inset_-1px_0_2px_rgba(255,255,255,0.45)]';
+        } else {
+            // Xanh nhạt -> đậm dốc gương 3D
+            accentBgLeft = 'bg-gradient-to-r from-emerald-300 via-emerald-500 to-emerald-600 dark:from-emerald-400 dark:via-emerald-600 dark:to-emerald-800 shadow-[inset_-1px_0_1px_rgba(0,0,0,0.15),inset_1px_0_2px_rgba(255,255,255,0.45)]';
+            accentBgRight = 'bg-gradient-to-l from-emerald-300 via-emerald-500 to-emerald-600 dark:from-emerald-400 dark:via-emerald-600 dark:to-emerald-800 shadow-[inset_1px_0_1px_rgba(0,0,0,0.15),inset_-1px_0_2px_rgba(255,255,255,0.45)]';
+        }
 
         let dayTextColor = order.diffDays >= 20 
-            ? 'text-rose-400 drop-shadow-[0_0_6px_rgba(244,63,94,0.4)]' 
-            : (order.diffDays >= 10 
-                ? 'text-amber-400 drop-shadow-[0_0_6px_rgba(245,158,11,0.4)]' 
-                : 'text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.4)]');
+            ? 'text-rose-600 dark:text-rose-400 font-black' 
+            : (order.diffDays >= 10 ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-emerald-600 dark:text-emerald-400 font-black');
 
         return `
         <div class="block w-full">
             <div onclick="viewOrderDetails('${order.id}')" 
-                 class="flex items-center ${barBg} border-t border-b border-slate-800/80 border-l-4 ${borderColor} border-r-4 ${borderColor} rounded-xl p-2 gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.3)] transition-all duration-200 cursor-pointer text-xs">
-                    
-                <div class="w-[15%] px-2 py-1 rounded text-[11px] font-mono font-bold text-slate-400 truncate">
+                 class="relative overflow-hidden flex items-center ${barBg} border border-slate-200/80 dark:border-slate-800/80 rounded-xl p-2 px-3 gap-2 shadow-sm dark:shadow-[0_4px_12px_rgba(0,0,0,0.3)] transition-all duration-200 cursor-pointer text-xs active:scale-[0.99]">
+                
+                <!-- 2 Thanh màu bo góc dạng 3D nén sâu, loại bỏ hoàn toàn hiện tượng phẳng lóa -->
+                <div class="absolute left-0 top-0 bottom-0 w-1.5 ${accentBgLeft}"></div>
+                <div class="absolute right-0 top-0 bottom-0 w-1.5 ${accentBgRight}"></div>
+                
+                <!-- GIỮ NGUYÊN HOÀN TOÀN TẤT CẢ CÁC CỘT VÀ TỶ LỆ RỘNG % CỦA BẠN -->
+                <div class="w-[15%] pl-2 py-1 rounded text-[11px] font-mono font-bold text-slate-500 dark:text-slate-400 truncate">
                     ${order.invoiceNumber || order.id.slice(-6)}
                 </div>
                 
-                <div class="w-[30%] px-2 py-1 rounded text-[11px] font-bold text-slate-100 truncate">
+                <div class="w-[30%] px-1 py-1 rounded text-[11px] font-bold text-slate-800 dark:text-slate-100 truncate">
                     ${order.customer}
                 </div>
                 
-                <div class="w-[20%] px-2 py-1 rounded text-[11px] font-semibold text-slate-400 text-right">
+                <div class="w-[20%] px-1 py-1 rounded text-[11px] font-semibold text-slate-500 dark:text-slate-400 text-right">
                     ${order.orderDate.toLocaleDateString('vi-VN')}
                 </div>
                 
-                <div class="w-[20%] px-2 py-1 rounded text-[11px] font-bold text-slate-200 text-right">
+                <div class="w-[20%] px-1 py-1 rounded text-[11px] font-bold text-slate-700 dark:text-slate-200 text-right">
                     ${Number(order.total || 0).toLocaleString('vi-VN')}đ
                 </div>
                 
-                <div class="w-[15%] px-2 py-1 rounded text-[11px] font-black ${dayTextColor} text-right">
+                <div class="w-[15%] pr-2 py-1 rounded text-[11px] ${dayTextColor} text-right">
                     ${order.diffDays} ngày
                 </div>
             </div>
@@ -2412,61 +3238,52 @@ function renderCustomerOrders(allSales, customersSnap) {
 }
 
 window.loadOrderData = function(orderId) {
-    // 1. Kiểm tra sự tồn tại của biến toàn cục allSales
     if (typeof allSales === 'undefined') {
         console.error("Biến allSales chưa được định nghĩa!");
         return;
     }
 
-    // 2. Tìm đơn hàng
     const order = allSales.find(o => o.id === orderId);
-    if (!order) {
-        console.error("Không tìm thấy đơn hàng với ID:", orderId);
-        return;
-    }
+    if (!order) return;
 
-    // 3. Cập nhật tiêu đề Modal
     const modalTitle = document.getElementById('modal-title');
     if (modalTitle) {
         modalTitle.innerText = "Chi tiết phiếu: " + (order.invoiceNumber || orderId.slice(-6));
     }
 
-    // 4. Đổ dữ liệu vào Modal
     const modalContent = document.getElementById('modal-content');
     if (modalContent) {
-        // Định dạng ngày an toàn
         const orderDate = (order.date && typeof order.date.toDate === 'function') 
             ? order.date.toDate().toLocaleDateString('vi-VN') 
             : 'N/A';
         
-        // --- RENDERING BẢNG CHI TIẾT SẢN PHẨM SANG DARK MODE ---
         const itemsHtml = (order.items || []).map(item => `
-            <tr class="border-b border-slate-800/80 hover:bg-slate-900/30 transition-colors">
-                <td class="p-2.5 text-slate-300 font-medium">${item.name || 'N/A'}</td>
-                <td class="p-2.5 text-center text-slate-200 font-bold">${item.qty || 0}</td>
-                <td class="p-2.5 text-right text-slate-300 font-mono">${Number(item.price || 0).toLocaleString('vi-VN')}</td>
-                <td class="p-2.5 text-right text-slate-100 font-bold font-mono">${Number(item.total || 0).toLocaleString('vi-VN')}</td>
+            <tr class="border-b border-slate-200 dark:border-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors">
+                <td class="p-2.5 text-slate-700 dark:text-slate-300 font-medium">${item.name || 'N/A'}</td>
+                <td class="p-2.5 text-center text-slate-800 dark:text-slate-200 font-bold">${item.qty || 0}</td>
+                <td class="p-2.5 text-right text-slate-600 dark:text-slate-400 font-mono">${Number(item.price || 0).toLocaleString('vi-VN')}</td>
+                <td class="p-2.5 text-right text-slate-900 dark:text-slate-100 font-bold font-mono">${Number(item.total || 0).toLocaleString('vi-VN')}</td>
             </tr>
         `).join('');
 
         modalContent.innerHTML = `
-            <div class="space-y-2 mb-4 bg-slate-950/80 border border-slate-800/80 p-3.5 rounded-xl text-xs text-slate-300">
-                <p><strong class="text-slate-400">Khách hàng:</strong> <span class="text-slate-100 font-bold">${order.customer || 'Khách lẻ'}</span></p>
-                <p><strong class="text-slate-400">Ngày xuất:</strong> <span class="text-slate-200 font-mono">${orderDate}</span></p>
-                <p><strong class="text-slate-400">Tổng thanh toán:</strong> <span class="text-rose-400 font-black drop-shadow-[0_0_6px_rgba(244,63,94,0.4)] text-[13px]">${Number(order.total || 0).toLocaleString('vi-VN')} đ</span></p>
+            <div class="space-y-2 mb-4 bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800/80 p-3.5 rounded-xl text-xs text-slate-600 dark:text-slate-300">
+                <p><strong class="text-slate-500 dark:text-slate-400">Khách hàng:</strong> <span class="text-slate-900 dark:text-slate-100 font-bold">${order.customer || 'Khách lẻ'}</span></p>
+                <p><strong class="text-slate-500 dark:text-slate-400">Ngày xuất:</strong> <span class="text-slate-700 dark:text-slate-200 font-mono">${orderDate}</span></p>
+                <p><strong class="text-slate-500 dark:text-slate-400">Tổng thanh toán:</strong> <span class="text-rose-600 dark:text-rose-400 font-black text-[13px]">${Number(order.total || 0).toLocaleString('vi-VN')} đ</span></p>
             </div>
             
-            <div class="overflow-y-auto max-h-[40vh] rounded-xl border border-slate-800/80 bg-slate-950/20">
+            <div class="overflow-y-auto max-h-[40vh] rounded-xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-slate-950/20 custom-scrollbar">
                 <table class="w-full text-left border-collapse text-xs">
                     <thead>
-                        <tr class="bg-slate-900 text-slate-400 border-b border-slate-800">
+                        <tr class="bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
                             <th class="p-2.5 font-bold">Sản phẩm</th>
                             <th class="p-2.5 text-center font-bold">SL</th>
                             <th class="p-2.5 text-right font-bold">Giá</th>
                             <th class="p-2.5 text-right font-bold">Tổng</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-800/50">${itemsHtml}</tbody>
+                    <tbody class="divide-y divide-slate-200 dark:divide-slate-800/50">${itemsHtml}</tbody>
                 </table>
             </div>
         `;
@@ -2474,23 +3291,15 @@ window.loadOrderData = function(orderId) {
 };
 
 window.viewOrderDetails = function(orderId) {
-    console.log("Đã bấm xem đơn:", orderId);
-    
     const modal = document.getElementById('order-detail-modal');
-    if (!modal) {
-        console.error("Không tìm thấy phần tử có ID: order-detail-modal");
-        return;
-    }
-    
+    if (!modal) return;
     if (typeof loadOrderData === 'function') {
         loadOrderData(orderId);
     }
-    
     modal.classList.remove('hidden');
-    console.log("Đã xóa class hidden, modal sẽ hiện ra");
 };
 
-// Hàm render danh sách khách hàng nợ (Đã chuyển đổi sang Dark Mode)
+// HÀM RENDER KHÁCH HÀNG CÔNG NỢ (ĐỒNG BỘ DUAL THEME)
 function renderDebtCustomers(customersSnap) {
     const container = document.getElementById('home-debt-customers-list');
     if (!container) return;
@@ -2505,18 +3314,18 @@ function renderDebtCustomers(customersSnap) {
         if (debt > 0) {
             hasDebt = true;
             html += `
-                <div class="flex items-center w-full bg-slate-950/40 border border-slate-800/80 border-l-4 border-l-blue-600/80 border-r-4 border-r-blue-600/80 rounded-xl p-2 mb-3 gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.3)] hover:border-slate-700 transition-all duration-200 text-[10px]">
+                <div class="flex items-center w-full bg-slate-50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800/80 border-l-4 border-l-blue-500 border-r-4 border-r-blue-500 rounded-xl p-2 mb-3 gap-2 shadow-sm dark:shadow-[0_4px_12px_rgba(0,0,0,0.3)] hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200 text-[10px]">
                     
-                    <div class="bg-blue-950/30 border border-blue-900/30 px-2 py-1 rounded text-[10px] font-bold text-slate-100 truncate w-[40%]">
+                    <div class="bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/30 px-2 py-1 rounded text-[10px] font-bold text-slate-800 dark:text-slate-100 truncate w-[40%]">
                         ${customer.name || 'Khách hàng'}
                     </div>
                     
-                    <div class="bg-slate-900/60 border border-slate-800 px-2 py-1 rounded text-[10px] text-slate-400 w-[25%] text-center font-mono">
+                    <div class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 px-2 py-1 rounded text-[10px] text-slate-600 dark:text-slate-400 w-[25%] text-center font-mono">
                         ${customer.phone || 'N/A'}
                     </div>
                     
                     <div class="w-[35%] text-center pr-2">
-                        <span class="font-black text-rose-400 text-[11px] bg-rose-950/50 border border-rose-900/50 px-2 py-1 rounded-md drop-shadow-[0_0_4px_rgba(244,63,94,0.4)]">
+                        <span class="font-black text-rose-600 dark:text-rose-400 text-[11px] bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/50 px-2 py-1 rounded-md">
                             ${debt.toLocaleString('vi-VN')} đ
                         </span>
                     </div>
@@ -2525,7 +3334,7 @@ function renderDebtCustomers(customersSnap) {
         }
     });
 
-    container.innerHTML = hasDebt ? html : '<p class="text-center py-6 text-xs text-slate-500">Không có khách hàng nợ</p>';
+    container.innerHTML = hasDebt ? html : '<p class="text-center py-6 text-xs text-slate-400 dark:text-slate-500">Không có khách hàng nợ</p>';
 }
 
 
@@ -2537,7 +3346,6 @@ function refreshFinance() {
     if (fromEl && toEl && fromEl.value && toEl.value) {
         loadDashboard({ from: fromEl.value, to: toEl.value });
     } else {
-        // Nếu không có input ngày, load mặc định
         loadDashboard('default');
     }
 }
@@ -2546,8 +3354,6 @@ function refreshFinance() {
 function refreshInventory() {
     const from = document.getElementById('inv-from').value;
     const to = document.getElementById('inv-to').value;
-    
-    // Sửa lại: Truyền vào 1 object
     if (from && to) {
         renderInventoryList({ from: from, to: to });
     }
@@ -2556,8 +3362,6 @@ function refreshInventory() {
 // Hàm hỗ trợ tính toán ngày (Bạn có thể tinh chỉnh)
 function getDateRange(filter) {
     const now = new Date();
-    // Logic tính start/end dựa trên filter 'today', 'week', 'month'...
-    // ... Trả về { start: Date, end: Date }
     return { start: now, end: now }; 
 }
 
@@ -2583,12 +3387,10 @@ function renderInventoryList(data) {
 }
 
 async function prepareInventoryData(targetDate) {
-    // 1. Định nghĩa ngày hôm qua để tính Tồn đầu
     const d = new Date(targetDate);
     d.setDate(d.getDate() - 1);
     const yesterday = d.toISOString().split('T')[0];
 
-    // 2. Fetch dữ liệu từ Firestore
     const [salesSnap, receiptsSnap] = await Promise.all([
         db.collection('sales').get(),
         db.collection('receipts').get()
@@ -2596,11 +3398,9 @@ async function prepareInventoryData(targetDate) {
 
     const inventoryMap = {};
 
-    // 3. Tính toán Tồn đầu, Nhập, Xuất
-    // Bạn cần lặp qua tất cả dữ liệu
     salesSnap.forEach(doc => {
         const order = doc.data();
-        const orderDate = order.date.toDate().toISOString().split('T')[0]; // Giả sử là Timestamp
+        const orderDate = order.date.toDate().toISOString().split('T')[0];
         
         order.items.forEach(item => {
             if (!inventoryMap[item.name]) inventoryMap[item.name] = { tonDau: 0, nhap: 0, change: 0, out: 0 };
@@ -2632,28 +3432,27 @@ async function prepareInventoryData(targetDate) {
     return inventoryMap;
 }
 
-// ================TỒN KHO ==============================
+// ================ TỒN KHO (ĐỒNG BỘ DUAL THEME - 3D GLOSSY CHỐNG LÓA) ==============================
 
 async function renderInventoryList(filter = 'today') {
+    const container = document.getElementById('home-inventory-list');
+    if (!container) return;
+
     const receiptsSnap = await db.collection('receipts').get();
     const salesSnap = await db.collection('sales').get();
 
     const inventoryMap = new Map();
     const now = new Date();
-    
-    // Ngày bạn bắt đầu sử dụng phần mềm (tháng 6/2026)
     const START_DATE_STR = '2026-06-01'; 
 
-    // 1. Xác định mốc thời gian lọc (Giờ VN)
     const getVNString = (date) => {
         return new Date(date.getTime() + (7 * 60 * 60 * 1000)).toISOString().split('T')[0];
     };
 
     let startDate = new Date();
-    let endDate = new Date(); // Thêm endDate để lọc khoảng
+    let endDate = new Date();
 
     if (typeof filter === 'object' && filter !== null) {
-        // Trường hợp mới: {from, to}
         startDate = new Date(filter.from);
         endDate = new Date(filter.to);
     } else if (filter === 'today') {
@@ -2677,19 +3476,16 @@ async function renderInventoryList(filter = 'today') {
     const startStr = getVNString(startDate);
     const endStr = getVNString(endDate);
 
-    // 2. Hàm lấy ngày theo múi giờ VN từ Firebase
     const getDocDate = (ts) => {
         const d = ts?.toDate ? ts.toDate() : new Date(ts);
         return getVNString(d);
     };
 
-    // 3. Gộp và Sắp xếp
     let allTransactions = [];
     receiptsSnap.forEach(doc => allTransactions.push({ ...doc.data(), typeDoc: 'receipt', d: getDocDate(doc.data().date) }));
     salesSnap.forEach(doc => allTransactions.push({ ...doc.data(), typeDoc: 'sale', d: getDocDate(doc.data().date) }));
     allTransactions.sort((a, b) => new Date(a.d) - new Date(b.d));
 
-    // 4. XỬ LÝ LOGIC NGHIÊM NGẶT
     allTransactions.forEach(data => {
         data.items.forEach(item => {
             if (!inventoryMap.has(item.name)) {
@@ -2697,14 +3493,12 @@ async function renderInventoryList(filter = 'today') {
             }
             const inv = inventoryMap.get(item.name);
             
-            // Logic tính toán:
             if (data.d < startStr) {
                 if (data.d >= START_DATE_STR) {
                     if (data.typeDoc === 'receipt') inv.tonDau += Number(item.qty || 0);
                     else inv.tonDau -= Number(item.qty || 0);
                 }
             } else if (data.d >= startStr && data.d <= endStr) {
-                // Tính Nhập/Xuất nằm trong khoảng từ startStr đến endStr
                 if (data.typeDoc === 'receipt') {
                     if (data.type === 'Nhập mới') inv.nhap += Number(item.qty || 0);
                     else inv.change += Number(item.qty || 0);
@@ -2715,13 +3509,11 @@ async function renderInventoryList(filter = 'today') {
         });
     });
 
-    // 5. Render giao diện (Đã thiết kế lại đồng bộ Premium Dark Mode)
     let inventoryCardsHtml = '';
     inventoryMap.forEach((item, name) => {
         const tonCuoi = item.tonDau + item.nhap + item.change - item.out;
         const totalNhap = item.nhap + item.change;
         
-        // Chỉ ẩn nếu sản phẩm hoàn toàn không có dữ liệu (tất cả bằng 0)
         if (item.tonDau === 0 && totalNhap === 0 && item.out === 0 && tonCuoi === 0) {
             return;
         }
@@ -2729,39 +3521,52 @@ async function renderInventoryList(filter = 'today') {
         const maxVal = Math.max(item.tonDau + totalNhap + item.out + tonCuoi, 1); 
         const isLowStock = tonCuoi < 5;
 
-        // Hàm vẽ thanh tiến trình tối ưu hóa tương phản Dark Mode
-        const bar = (val, color, label, applyGlow = false, borderClass = 'border-slate-800') => {
+        // Vẽ thanh tiến trình 3D vật lý (Physical Depth) cực nét
+        const bar = (val, color, label, applyGlow = false, borderClass = 'border-slate-200 dark:border-slate-800/80') => {
             const barWidth = val > 0 ? Math.min((val / maxVal) * 100, 100) : 0; 
-            // Nếu dưới mức an toàn: tạo hiệu ứng viền phát sáng đỏ nhấp nháy cơ học
-            const glowClass = applyGlow ? 'ring-1 ring-rose-500/50 ring-inset shadow-[0_0_8px_rgba(244,63,94,0.6)] animate-pulse' : '';
-            let colorBarHtml = barWidth > 0 ? `<div style="width: ${barWidth}%;" class="h-full ${color} ${glowClass} shadow-[inset_0_-2px_3px_rgba(0,0,0,0.4)] transition-all duration-500"></div>` : '';
+            
+            // Đổ bóng phát sáng viền cơ học khi ít hàng
+            const glowClass = applyGlow ? 'ring-1 ring-rose-500/50 ring-inset shadow-[0_0_8px_rgba(244,63,94,0.5)] dark:shadow-[0_0_8px_rgba(244,63,94,0.6)] animate-pulse' : '';
+            
+            // Hiệu ứng đổ bóng nổi khối gương 3D (Mép trên sáng, mép dưới tối)
+            let colorBarHtml = barWidth > 0 
+                ? `<div style="width: ${barWidth}%;" class="h-full ${color} ${glowClass} shadow-[inset_0_2px_4px_rgba(255,255,255,0.35),inset_0_-2px_3px_rgba(0,0,0,0.25)] dark:shadow-[inset_0_2px_3px_rgba(255,255,255,0.15),inset_0_-3px_4px_rgba(0,0,0,0.5)] transition-all duration-500"></div>` 
+                : '';
+            
             return `
-            <div class="flex-1 h-8 bg-slate-950 rounded-lg border ${borderClass} shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)] overflow-hidden relative">
+            <div class="flex-1 h-8 bg-slate-200/85 dark:bg-slate-950 rounded-lg border ${borderClass} shadow-[inset_0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)] overflow-hidden relative">
                 ${colorBarHtml}
-                <div class="absolute inset-0 flex items-center justify-center text-[9px] font-black text-slate-100 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
+                <div class="absolute inset-0 flex items-center justify-center text-[9px] font-black text-slate-700 dark:text-slate-100 drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
                     ${label}:&nbsp;<b>${val}</b>
                 </div>
             </div>`;
         };
 
-        // Thiết lập viền cảnh báo cho Tồn cuối
-        const tcBorderClass = isLowStock ? 'border-rose-500/80' : 'border-slate-800';
+        const tcBorderClass = isLowStock ? 'border-rose-400 dark:border-rose-500/80' : 'border-slate-200 dark:border-slate-800/80';
         
+        // PHỐI MÀU GRADIENT 3D PASTEL CHỐNG CHÓI, CHỐNG QUÁ TRẮNG
+        const colorTonDau  = 'bg-gradient-to-b from-blue-400 to-blue-500 dark:from-blue-600 dark:to-blue-700';
+        const colorNhap    = 'bg-gradient-to-b from-amber-400 to-amber-500 dark:from-amber-500 dark:to-amber-600';
+        const colorXuat    = 'bg-gradient-to-b from-rose-400 to-rose-500 dark:from-rose-500 dark:to-rose-600';
+        const colorTonCuoi = isLowStock 
+            ? 'bg-gradient-to-b from-rose-500 to-rose-600 dark:from-rose-600 dark:to-rose-700' 
+            : 'bg-gradient-to-b from-emerald-400 to-emerald-500 dark:from-emerald-500 dark:to-emerald-600';
+
         inventoryCardsHtml += `
-        <div class="mb-2 bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/80 shadow-[0_4px_6px_rgba(0,0,0,0.2)] hover:border-slate-700 transition-all duration-150">
-            <div class="text-[11px] font-bold text-slate-300 mb-1.5 truncate flex items-center gap-1">
-                ${name} ${isLowStock ? '<span class="text-rose-500 animate-pulse text-[12px]">⚠️</span>' : ''}
+        <div class="mb-2 bg-white dark:bg-slate-950/40 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-[0_4px_6px_rgba(0,0,0,0.2)] hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-150">
+            <div class="text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5 truncate flex items-center gap-1">
+                ${name} ${isLowStock ? '<span class="text-rose-500 animate-pulse text-[12px]">⚠️ Ít hàng</span>' : ''}
             </div>
             <div class="flex w-full gap-1.5">
-                ${bar(item.tonDau, 'bg-blue-600/85', 'T.Đầu')}
-                ${bar(totalNhap, 'bg-amber-600/85', 'Nhập')}
-                ${bar(item.out, 'bg-rose-600/85', 'Xuất')}
-                ${bar(tonCuoi, isLowStock ? 'bg-rose-700/80' : 'bg-emerald-600/85', 'T.Cuối', isLowStock, tcBorderClass)}
+                ${bar(item.tonDau, colorTonDau, 'T.Đầu')}
+                ${bar(totalNhap, colorNhap, 'Nhập')}
+                ${bar(item.out, colorXuat, 'Xuất')}
+                ${bar(tonCuoi, colorTonCuoi, 'T.Cuối', isLowStock, tcBorderClass)}
             </div>
         </div>`;
     });
 
-    document.getElementById('home-inventory-list').innerHTML = inventoryCardsHtml || '<p class="text-center py-6 text-xs text-slate-500">Không có dữ liệu</p>';
+    container.innerHTML = inventoryCardsHtml || '<p class="text-center py-6 text-xs text-slate-400 dark:text-slate-500">Không có dữ liệu tồn kho</p>';
 }
 
 //============================DOANH THU ====================
@@ -2777,9 +3582,11 @@ async function updateFinance() {
     endDate.setHours(23, 59, 59, 999);
 
     try {
-        const [salesSnap, suppliersSnap] = await Promise.all([
+        // Tải thêm cả customersSnap để đồng bộ hiển thị và cập nhật Modal chi tiết
+        const [salesSnap, suppliersSnap, customersSnap] = await Promise.all([
             db.collection('sales').get(),
-            db.collection('suppliers').get()
+            db.collection('suppliers').get(),
+            db.collection('customers').get()
         ]);
 
         const filteredSales = salesSnap.docs.map(doc => doc.data()).filter(order => {
@@ -2788,12 +3595,20 @@ async function updateFinance() {
         });
 
         const allSuppliers = suppliersSnap.docs.map(doc => doc.data());
-        let totalRevenue = 0, totalDebt = 0;
-        const productSalesMap = {};
+        let totalRevenue = 0;
+        
+        // Cách 1: Tính tổng nợ tích lũy thực tế của tất cả khách hàng (Khuyên dùng để đồng nhất hiển thị)
+        let totalDebt = 0;
+        customersSnap.forEach(doc => {
+            totalDebt += (Number(doc.data().debt) || 0);
+        });
 
+        // Ghi chú: Nếu bạn muốn ô này CHỈ hiện nợ phát sinh TRONG KHOẢNG NGÀY LỌC, hãy bỏ comment dòng dưới:
+        // let totalDebt = filteredSales.reduce((sum, order) => order.paymentMethod === "Công nợ" ? sum + (Number(order.total) || 0) : sum, 0);
+
+        const productSalesMap = {};
         filteredSales.forEach(order => {
             totalRevenue += (Number(order.total) || 0);
-            if (order.paymentMethod === "Công nợ") totalDebt += (Number(order.total) || 0);
             if (order.items) {
                 order.items.forEach(item => {
                     productSalesMap[item.name] = (productSalesMap[item.name] || 0) + Number(item.qty || 0);
@@ -2804,22 +3619,37 @@ async function updateFinance() {
         const topProducts = Object.entries(productSalesMap).sort((a, b) => b[1] - a[1]).slice(0, 10);
         let totalDebtNCC = allSuppliers.reduce((sum, sup) => sum + (Number(sup.debt) || 0), 0);
         
+        // Cập nhật dữ liệu hiển thị lên các thẻ tóm tắt
         document.getElementById('total-revenue').innerText = totalRevenue.toLocaleString('vi-VN') + ' đ';
         document.getElementById('total-debt-summary').innerText = totalDebt.toLocaleString('vi-VN') + ' đ';
         document.getElementById('total-debt-ncc-summary').innerText = totalDebtNCC.toLocaleString('vi-VN') + ' đ';
         document.getElementById('profit-summary').innerText = (totalRevenue - totalDebtNCC).toLocaleString('vi-VN') + ' đ';
         
-        // CHỈ VẼ KHI CÓ DỮ LIỆU ĐỂ TRÁNH NHÁY
-        if (filteredSales.length > 0) {
-            updateRevenueChart(filteredSales);
-            updateTopProductsChart(topProducts);
+        // KHẮC PHỤC LỖI 1: Đồng bộ dữ liệu mới vào biến toàn cục để Modal "Xem chi tiết" lấy đúng dữ liệu lọc
+        window.currentDashboardData = {
+            filteredSales: filteredSales,
+            customersSnap: customersSnap,
+            allSuppliers: allSuppliers 
+        };
+
+        // Vẽ lại danh sách công nợ khách hàng (nếu có sự thay đổi dữ liệu)
+        if (typeof renderDebtCustomers === 'function') {
+            renderDebtCustomers(customersSnap);
         }
-    } catch (error) { console.error("Lỗi:", error); }
+        
+        // CHỈ VẼ LẠI BIỂU ĐỒ KHI CÓ DỮ LIỆU ĐỂ TRÁNH NHÁY TRẮNG BIỂU ĐỒ
+        if (filteredSales.length > 0) {
+            if (typeof updateRevenueChart === 'function') updateRevenueChart(filteredSales);
+            if (typeof updateTopProductsChart === 'function') updateTopProductsChart(topProducts);
+        }
+    } catch (error) { 
+        console.error("Lỗi khi cập nhật tài chính:", error); 
+    }
 }
 
 //============================BIỂU ĐỒ ==================================
 
-// Hàm vẽ biểu đồ doanh thu theo ngày
+// Hàm vẽ biểu đồ doanh thu theo ngày (Thích ứng Dual Theme - Đã sửa lỗi biến mất chữ khi sang Dark Mode)
 function updateRevenueChart(filteredSales) {
     const canvas = document.getElementById('revenueChart');
     if (!canvas) {
@@ -2847,6 +3677,9 @@ function updateRevenueChart(filteredSales) {
     });
     const data = sortedDates.map(date => dailyData[date]);
 
+    // Hàm kiểm tra nhanh giao diện hiện tại ở thời điểm vẽ
+    const checkDark = () => document.documentElement.classList.contains('dark') || document.body.classList.contains('dark');
+
     window.revenueChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -2857,7 +3690,8 @@ function updateRevenueChart(filteredSales) {
                     type: 'bar',
                     data: data,
                     order: 2, // Lớp dưới
-                    backgroundColor: 'rgba(239, 68, 68, 0.85)', // Đỏ Neon sáng hơn chút cho Dark Mode
+                    // Màu cột tự động tương thích thời gian thực
+                    backgroundColor: () => checkDark() ? 'rgba(239, 68, 68, 0.85)' : 'rgba(239, 68, 68, 0.75)',
                     borderRadius: { topLeft: 20, topRight: 20, bottomLeft: 0, bottomRight: 0 },
                     barPercentage: 0.3,
                     categoryPercentage: 0.6
@@ -2867,12 +3701,12 @@ function updateRevenueChart(filteredSales) {
                     type: 'line',
                     data: data,
                     order: 1, // Lớp trên
-                    borderColor: '#60a5fa', // Đổi từ xanh tối sang Xanh Neon dịu mắt, cực nổi trên nền tối
+                    borderColor: () => checkDark() ? '#38bdf8' : '#2563eb', // Xanh Neon dịu vs Xanh đậm
                     backgroundColor: 'transparent',
                     borderWidth: 2,
                     tension: 0.3,
                     pointRadius: 4,
-                    pointBackgroundColor: '#3b82f6'
+                    pointBackgroundColor: () => checkDark() ? '#0ea5e9' : '#1d4ed8'
                 }
             ]
         },
@@ -2906,32 +3740,32 @@ function updateRevenueChart(filteredSales) {
 
                     const body = document.getElementById('modalDetailsBody');
                     
-                    // --- ĐỒNG BỘ CHI TIẾT BẢNG SANG PREMIUM DARK MODE ---
+                    // --- ĐỒNG BỘ CHI TIẾT BẢNG SANG CẢ GIAO DIỆN SÁNG VÀ TỐI ---
                     let htmlContent = Object.keys(itemsInDay).map(name => `
-                        <tr class="border-b border-slate-800/60 hover:bg-slate-900/30 transition-colors">
-                            <td class="py-2.5 px-2 text-sm text-slate-300 font-medium">${name}</td>
-                            <td class="text-center py-2.5 px-2 text-sm text-slate-400 font-mono">${itemsInDay[name].qty}</td>
-                            <td class="text-right py-2.5 px-2 text-sm font-bold text-cyan-400 font-mono">${itemsInDay[name].total.toLocaleString('vi-VN')} đ</td>
+                        <tr class="border-b border-slate-200 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors">
+                            <td class="py-2.5 px-2 text-sm text-slate-700 dark:text-slate-300 font-medium">${name}</td>
+                            <td class="text-center py-2.5 px-2 text-sm text-slate-500 dark:text-slate-400 font-mono">${itemsInDay[name].qty}</td>
+                            <td class="text-right py-2.5 px-2 text-sm font-bold text-cyan-600 dark:text-cyan-400 font-mono">${itemsInDay[name].total.toLocaleString('vi-VN')} đ</td>
                         </tr>`).join('');
 
                     htmlContent += `
-                        <tr class="bg-slate-900 font-bold border-t border-slate-800 text-slate-300">
+                        <tr class="bg-slate-50 dark:bg-slate-900 font-bold border-t border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300">
                             <td class="py-2.5 px-2 text-right text-sm" colspan="2">Tổng hàng:</td>
-                            <td class="text-right py-2.5 px-2 text-sm font-mono text-slate-200">${totalGoods.toLocaleString('vi-VN')} đ</td>
+                            <td class="text-right py-2.5 px-2 text-sm font-mono text-slate-800 dark:text-slate-200">${totalGoods.toLocaleString('vi-VN')} đ</td>
                         </tr>`;
                     
                     if (finalTax > 0) {
                         htmlContent += `
-                        <tr class="bg-slate-950/50 text-slate-400">
+                        <tr class="bg-slate-100/50 dark:bg-slate-950/50 text-slate-500 dark:text-slate-400">
                             <td class="py-2 px-2 text-right text-sm" colspan="2">Thuế:</td>
                             <td class="text-right py-2 px-2 text-sm font-mono">${finalTax.toLocaleString('vi-VN')} đ</td>
                         </tr>`;
                     }
                     
                     htmlContent += `
-                        <tr class="bg-blue-950/40 font-black text-blue-400 border-t border-blue-900/60">
+                        <tr class="bg-blue-50/50 dark:bg-blue-950/40 font-black text-blue-600 dark:text-blue-400 border-t border-blue-100 dark:border-blue-900/60">
                             <td class="py-2.5 px-2 text-right text-sm" colspan="2">TỔNG DOANH THU:</td>
-                            <td class="text-right py-2.5 px-2 text-sm font-mono text-blue-300 drop-shadow-[0_0_4px_rgba(59,130,246,0.3)]">${totalRevenue.toLocaleString('vi-VN')} đ</td>
+                            <td class="text-right py-2.5 px-2 text-sm font-mono text-blue-700 dark:text-blue-300 drop-shadow-[0_0_4px_rgba(59,130,246,0.15)] dark:drop-shadow-[0_0_4px_rgba(59,130,246,0.3)]">${totalRevenue.toLocaleString('vi-VN')} đ</td>
                         </tr>`;
 
                     body.innerHTML = htmlContent;
@@ -2940,46 +3774,50 @@ function updateRevenueChart(filteredSales) {
                 }
             },
             scales: {
-                // --- CHỈNH MÀU TRỤC TỌA ĐỘ VÀ ĐƯỜNG LƯỚI CHO DARK MODE ---
                 y: { 
                     beginAtZero: true, 
-                    grid: { color: 'rgba(255, 255, 255, 0.08)' }, // Đường lưới mờ tinh tế màu trắng
+                    grid: { 
+                        color: () => checkDark() ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.06)' 
+                    },
                     ticks: { 
-                        color: '#94a3b8', // Màu chữ trục Y (Slate 400) dễ đọc
+                        color: () => checkDark() ? '#cbd5e1' : '#475569', // Tự động đổi màu thước đo Y
                         callback: v => (v / 1000000) + 'tr' 
                     } 
                 },
                 x: { 
                     grid: { display: false },
                     ticks: {
-                        color: '#94a3b8' // Màu chữ trục X (Slate 400)
+                        color: () => checkDark() ? '#cbd5e1' : '#475569' // Tự động đổi màu thước đo X
                     }
                 }
-            },
-            animation: {
-                onComplete: function() {
-                    const chart = this;
-                    const ctx = chart.ctx;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'bottom';
-                    ctx.font = 'bold 10px Arial';
-                    
-                    // --- ĐỒI SỐ TRÊN ĐẦU CỘT SANG MÀU TRẮNG SÁNG ---
-                    ctx.fillStyle = '#f8fafc'; // Màu trắng Slate cực rõ trên nền tối
-                    
-                    chart.getDatasetMeta(0).data.forEach((bar, index) => {
-                        const val = data[index];
-                        if (val > 0) {
-                            ctx.fillText((val / 1000000).toFixed(2).replace('.00', '') + 'tr', bar.x, bar.y - 5);
-                        }
-                    });
-                }
             }
-        }
+        },
+        // --- SỬ DỤNG CANVAS PLUGIN ĐỂ VẼ CHỮ TRÊN ĐẦU CỘT (QUÉT THEME THỜI GIAN THỰC) ---
+        plugins: [{
+            id: 'barLabels',
+            afterDatasetsDraw: function(chart) {
+                const { ctx } = chart;
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.font = 'bold 10px Arial';
+                
+                // Đọc trực tiếp trạng thái Dark Mode ngay tại tích tắc vẽ hình
+                ctx.fillStyle = checkDark() ? '#f8fafc' : '#0f172a'; // Trắng sáng tinh khôi (Dark) vs Slate tối (Light)
+
+                chart.getDatasetMeta(0).data.forEach((bar, index) => {
+                    const val = data[index];
+                    if (val > 0) {
+                        ctx.fillText((val / 1000000).toFixed(2).replace('.00', '') + 'tr', bar.x, bar.y - 5);
+                    }
+                });
+                ctx.restore();
+            }
+        }]
     });
 }
 
-// Hàm vẽ biểu đồ doanh thu theo tháng
+// Hàm vẽ biểu đồ doanh thu theo tháng (Thích ứng Dual Theme)
 function updateMonthlyRevenueChart(allSales) {
     const canvas = document.getElementById('monthlyRevenueChart');
     if (!canvas) return;
@@ -2998,6 +3836,13 @@ function updateMonthlyRevenueChart(allSales) {
     const sortedMonths = Object.keys(monthlyData).sort();
     const dataValues = sortedMonths.map(m => monthlyData[m]);
 
+    // --- NHẬN DIỆN GIAO DIỆN ĐỘNG (LIGHT / DARK THEME) ---
+    const isDark = document.documentElement.classList.contains('dark');
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.06)';
+    const tickColor = isDark ? '#94a3b8' : '#64748b';
+    const labelColor = isDark ? '#f8fafc' : '#1e293b';
+    const monthlyBarColor = isDark ? '#60a5fa' : '#3b82f6'; // Xanh sáng nổi bật vs Xanh dương chuẩn
+
     window.monthlyChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -3005,7 +3850,7 @@ function updateMonthlyRevenueChart(allSales) {
             datasets: [{
                 label: 'Doanh thu',
                 data: dataValues,
-                backgroundColor: '#3b82f6', // Màu xanh dương tiêu chuẩn rất hợp với Dark Mode
+                backgroundColor: monthlyBarColor,
                 borderRadius: 8
             }]
         },
@@ -3033,19 +3878,18 @@ function updateMonthlyRevenueChart(allSales) {
                 }
             },
             scales: { 
-                // --- CHỈNH MÀU TRỤC TỌA ĐỘ CHO BIỂU ĐỒ THÁNG ---
                 y: { 
                     beginAtZero: true, 
-                    grid: { color: 'rgba(255, 255, 255, 0.08)' }, // Lưới tối mờ
+                    grid: { color: gridColor }, 
                     ticks: { 
-                        color: '#94a3b8', // Chữ trục Y
+                        color: tickColor, 
                         callback: (value) => (value / 1000000) + 'tr' 
                     }
                 },
                 x: { 
                     grid: { display: false },
                     ticks: {
-                        color: '#94a3b8' // Chữ trục X
+                        color: tickColor 
                     }
                 }
             },
@@ -3057,8 +3901,8 @@ function updateMonthlyRevenueChart(allSales) {
                     ctx.textBaseline = 'bottom';
                     ctx.font = 'bold 10px Arial';
                     
-                    // --- ĐỔI CHỮ SỐ TRÊN ĐẦU CỘT THÀNH MÀU TRẮNG SÁNG ---
-                    ctx.fillStyle = '#f8fafc'; // Đổi từ '#1e293b' sang màu trắng sáng
+                    // --- ĐỒI CHỮ SỐ TRÊN ĐẦU CỘT DỰA VÀO THEME ---
+                    ctx.fillStyle = labelColor; 
 
                     chart.data.datasets.forEach((dataset, i) => {
                         chart.getDatasetMeta(i).data.forEach((bar, index) => {
@@ -3086,11 +3930,16 @@ function filterRevenueByDayOfMonth(monthKey, allSales) {
 }
 
 
-//==== =========================TOP SP BÁN CHẠY ====================
+//==== =========================TOP SP BÁN CHẠY (ĐỒNG BỘ GIAO DIỆN SÁNG / TỐI) ====================
 function updateTopProductsChart(topProducts) {
     const ctx = document.getElementById('topProductsChart')?.getContext('2d');
     if (!ctx) return;
     if (window.topProductChartInstance) window.topProductChartInstance.destroy();
+
+    // --- NHẬN DIỆN GIAO DIỆN ĐỘNG (LIGHT / DARK THEME) ---
+    const isDark = document.documentElement.classList.contains('dark');
+    const datalabelsColor = isDark ? '#cbd5e1' : '#475569'; // Slate-300 (sáng) vs Slate-600 (tối)
+    const yTicksColor = isDark ? '#94a3b8' : '#475569';     // Slate-400 (sáng) vs Slate-600 (tối)
 
     window.topProductChartInstance = new Chart(ctx, {
         type: 'bar',
@@ -3099,62 +3948,58 @@ function updateTopProductsChart(topProducts) {
             datasets: [{
                 label: 'Số lượng',
                 data: topProducts.map(p => p[1]),
-                backgroundColor: '#f43f5e',
-                borderRadius: 8, // Tăng nhẹ độ bo tròn để hiện đại hơn
-                barPercentage: 0.8, // Điều chỉnh để cột cân đối, không bị quá sát
+                backgroundColor: '#f43f5e', // Đỏ Rose cực kỳ nổi bật trên cả nền sáng và tối
+                borderRadius: 8, // Bo tròn góc cột hiện đại
+                barPercentage: 0.8, // Tránh các cột dính sát nhau
                 categoryPercentage: 0.9
             }]
         },
         options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    indexAxis: 'y',
-    animation: false,
-    // THÊM ĐOẠN NÀY ĐỂ LOẠI BỎ KHOẢNG TRẮNG THỪA
-    layout: {
-        padding: {
-            left: 0,
-            right: 20, // Chừa một chút không gian cho con số
-            top: 0,
-            bottom: 0
-        }
-    },
-    plugins: {
-        legend: { display: false },
-        datalabels: {
-            anchor: 'end',
-            align: 'right',
-            color: '#475569',
-            font: { weight: 'bold', size: 11 }
-        }
-    },
-    scales: {
-        x: { 
-            grid: { display: false }, 
-            beginAtZero: true,
-            // SỬA ĐOẠN NÀY: Dùng grace để ép biểu đồ dãn rộng
-            grace: '5%', 
-            ticks: { display: false }
-        },
-        y: { 
-            grid: { display: false },
-            ticks: {
-                font: { size: 10 }
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            animation: false,
+            layout: {
+                padding: {
+                    left: 0,
+                    right: 25, // Tăng nhẹ khoảng đệm bên phải để tránh số lượng bị tràn hoặc mất nét
+                    top: 0,
+                    bottom: 0
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                datalabels: {
+                    anchor: 'end',
+                    align: 'right',
+                    color: datalabelsColor, // Thay đổi động theo giao diện hiện tại
+                    font: { weight: 'bold', size: 11 }
+                }
+            },
+            scales: {
+                x: { 
+                    grid: { display: false }, 
+                    beginAtZero: true,
+                    grace: '5%', // Tự động dãn rộng biểu đồ tránh số lượng đè vào viền phải
+                    ticks: { display: false }
+                },
+                y: { 
+                    grid: { display: false },
+                    ticks: {
+                        color: yTicksColor, // Thay đổi động tên sản phẩm theo giao diện hiện tại
+                        font: { size: 10 }
+                    }
+                }
             }
-        }
-    }
-},
+        },
         plugins: [ChartDataLabels] 
     });
 }
 
 
-// ==================================================
-// DÁN ĐOẠN CODE NÀY VÀO DƯỚI CÙNG CỦA FILE JS
-// ==================================================
-// Thay thế đoạn onSnapshot cũ bằng đoạn này để nó cập nhật đồng bộ
-// Dưới cùng file JS:
-// DÁN DUY NHẤT ĐOẠN NÀY Ở CUỐI FILE
+// =========================================================================
+// LẮNG NGHE SỰ KIỆN CO-REALTIME ĐỂ TỰ ĐỘNG CẬP NHẬT KHI CÓ THAY ĐỔI
+// =========================================================================
 db.collection('customers').onSnapshot(() => {
     console.log("Dữ liệu khách hàng thay đổi, cập nhật dashboard...");
     loadDashboard('default');
@@ -9226,6 +10071,82 @@ function markDone() {
 function fixCalendarLayout() {
     if (window.calendar) setTimeout(() => { window.calendar.updateSize(); }, 200);
 }
+
+//==============CHỌN GIAO DIỆN SÁNG TỐI=======================================
+// =========================================================================
+// --- HỆ THỐNG XỬ LÝ CHUYỂN ĐỔI GIAO DIỆN LIGHT / DARK MODE (THEME TOGGLE) ---
+// =========================================================================
+
+// 1. Cấu hình Tailwind nhận diện Dark Mode bằng class (Đặt dòng này ở đầu vùng script)
+if (typeof tailwind !== 'undefined') {
+    tailwind.config = { darkMode: 'class' };
+}
+
+// 2. Hàm khởi tạo giao diện khi vừa tải xong trang web
+function initTheme() {
+    // Kiểm tra xem trước đó người dùng đã chọn theme nào chưa, mặc định ban đầu là chế độ Tối 'dark'
+    const savedTheme = localStorage.getItem('app-theme') || 'dark';
+    const htmlEl = document.documentElement;
+    
+    if (savedTheme === 'dark') {
+        htmlEl.classList.add('dark');
+    } else {
+        htmlEl.classList.remove('dark');
+    }
+    // Cập nhật lại trạng thái hiển thị của nút bấm
+    updateToggleButton(savedTheme);
+}
+
+// 3. Hàm click chuyển đổi qua lại giữa giao diện Sáng và Tối
+function toggleTheme() {
+    const htmlEl = document.documentElement;
+    let newTheme = 'light';
+    
+    if (htmlEl.classList.contains('dark')) {
+        htmlEl.classList.remove('dark');
+        newTheme = 'light';
+    } else {
+        htmlEl.classList.add('dark');
+        newTheme = 'dark';
+    }
+    
+    // Lưu lại cấu hình vào bộ nhớ trình duyệt để lần sau mở lên không bị mất
+    localStorage.setItem('app-theme', newTheme);
+    
+    // Đổi chữ và icon trên nút bấm
+    updateToggleButton(newTheme);
+    
+    // [TÙY CHỌN] Vẽ lại biểu đồ Chart.js nếu có để màu chữ trục X/Y không bị lỗi khi đổi nền
+    if (typeof filteredSales !== 'undefined' && window.revenueChartInstance) {
+        updateRevenueChart(filteredSales); 
+    }
+    if (typeof allSales !== 'undefined' && window.monthlyChartInstance) {
+        updateMonthlyRevenueChart(allSales);
+    }
+}
+
+// 4. Hàm cập nhật Icon (Mặt trăng/Mặt trời) và Chữ hiển thị trên Nút bấm
+function updateToggleButton(theme) {
+    const icon = document.getElementById('theme-icon');
+    const text = document.getElementById('theme-text');
+    if (!icon || !text) return;
+
+    if (theme === 'dark') {
+        icon.setAttribute('data-lucide', 'sun'); // Đang ở chế độ tối thì hiện icon Mặt trời để bấm chuyển sang sáng
+        text.innerText = 'Giao diện: Tối';
+    } else {
+        icon.setAttribute('data-lucide', 'moon'); // Đang ở chế độ sáng thì hiện icon Mặt trăng để bấm chuyển sang tối
+        text.innerText = 'Giao diện: Sáng';
+    }
+    
+    // Ép thư viện Lucide quét và hiển thị lại đúng Icon mới thay đổi
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+
+// 5. Lắng nghe sự kiện tải trang để kích hoạt hệ thống theme ngay lập tức
+document.addEventListener('DOMContentLoaded', initTheme);
 
 // --- KHỞI TẠO HỆ THỐNG ---
 // 1. Cấu hình ban đầu
