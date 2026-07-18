@@ -454,6 +454,8 @@
     .fc .fc-toolbar-chunk:first-child {
         gap: 5px !important;
     }
+	
+	
 </style>
 <style>
 
@@ -994,6 +996,12 @@ html:not(.dark) body:not(.dark) {
 
 .dark #page-NguyenLieu tbody tr {
     border-bottom: 1px solid #334155 !important;
+    transition: background-color 0.2s ease; /* Thêm hiệu ứng chuyển màu mượt */
+}
+
+/* Sửa lỗi hover trắng */
+.dark #page-NguyenLieu tbody tr:hover {
+    background-color: #1e293b !important; 
 }
 
 .dark #page-NguyenLieu .tab-btn {
@@ -1572,8 +1580,17 @@ html:not(.dark) body:not(.dark) {
     <div class="flex flex-col md:flex-row gap-4">
         <div id="cart-box" class="flex-grow bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-x-auto text-gray-800 dark:text-white"></div>
         <div class="md:w-[200px] flex flex-col gap-3">
-            <button id="add-btn" onclick="addToCart()" class="w-full bg-slate-700 text-white py-3 rounded-2xl hover:bg-slate-800 font-bold transition-all shadow-md">Thêm vào giỏ</button>
-            <button id="save-import-btn" onclick="saveImport()" class="w-full bg-blue-600 text-white py-3 rounded-2xl font-bold shadow-md hover:bg-blue-700 transition-all">Lưu nhập kho</button>
+            <!-- Nút Thêm vào giỏ (Đã chuyển sang màu Tím sáng hơn) -->
+			<button id="add-btn" onclick="addToCart()" 
+				class="w-full bg-violet-600 dark:bg-violet-700 text-white py-3 rounded-2xl font-bold transition-all duration-75 border-b-[4px] border-violet-800 dark:border-violet-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+				Thêm vào giỏ
+			</button>
+
+			<!-- Nút Lưu nhập kho (Giữ nguyên màu xanh) -->
+			<button id="save-import-btn" onclick="saveImport()" 
+				class="w-full bg-blue-600 dark:bg-blue-700 text-white py-3 rounded-2xl font-bold transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+				Lưu nhập kho
+			</button>
         </div>
     </div>
 
@@ -1656,9 +1673,11 @@ html:not(.dark) body:not(.dark) {
                         onkeyup="filterInventory()" class="w-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-3 rounded-xl text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
             <div class="col-span-1 md:col-span-3">
-                <button onclick="togglePrices()" class="w-full bg-slate-800 text-white py-3 rounded-xl text-sm font-bold hover:bg-slate-900 transition">
-                    👁️ Ẩn/Hiện Giá
-                </button>
+                <!-- Nút Ẩn/Hiện Giá -->
+<button onclick="togglePrices()" 
+    class="w-full bg-slate-700 dark:bg-slate-800 text-white py-3 rounded-xl text-sm font-bold transition-all duration-75 border-b-[4px] border-slate-900 dark:border-slate-950 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+    👁️ Ẩn/Hiện Giá
+</button>
             </div>
 
             <div class="col-span-1 md:col-span-3">
@@ -1671,9 +1690,11 @@ html:not(.dark) body:not(.dark) {
                 <input type="date" id="inv-date-to" class="w-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-3 rounded-xl text-sm text-slate-800 dark:text-slate-100" title="Đến ngày">
             </div>
             <div class="col-span-1 md:col-span-3">
-                <button onclick="exportToExcel()" class="w-full bg-green-600 text-white py-3 rounded-xl text-sm font-bold hover:bg-green-700 transition">
-                    📊 Xuất Excel
-                </button>
+               <!-- Nút Xuất Excel -->
+<button onclick="exportToExcel()" 
+    class="w-full bg-green-600 dark:bg-green-700 text-white py-3 rounded-xl text-sm font-bold transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+    📊 Xuất Excel
+</button>
             </div>
         </div>
 
@@ -1799,9 +1820,10 @@ html:not(.dark) body:not(.dark) {
                     <span class="text-red-600 dark:text-red-400">Tổng thanh toán:</span>
                     <span id="cart-total-display" class="text-xl font-black text-red-500">0 đ</span>
                 </div>
-                <button id="btn-save-print" onclick="saveAndPrint()" class="w-full bg-green-600 py-4 rounded-xl font-bold text-lg border border-white/20 hover:bg-green-700 transition shadow-lg text-white">
-                    LƯU & XUẤT HOÁ ĐƠN (F1)
-                </button>
+                <button id="btn-save-print" onclick="saveAndPrint()" 
+					class="w-full bg-green-600 dark:bg-green-700 text-white py-4 rounded-xl font-bold text-lg transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-lg">
+					LƯU & XUẤT HOÁ ĐƠN (F1)
+				</button>
             </div>
         </div>
     </div>
@@ -1888,7 +1910,10 @@ html:not(.dark) body:not(.dark) {
         
         <input type="text" id="cust-search" onkeyup="renderCustomerList()" placeholder="🔍 Tìm kiếm đại lý..." class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none w-full dark:text-white">
         
-        <button onclick="addCustomer()" class="bg-blue-600 text-white p-3 rounded-xl font-bold hover:bg-blue-700 transition w-full">Thêm Đại Lý</button>
+        <button onclick="addCustomer()" 
+    class="w-full bg-blue-600 dark:bg-blue-700 text-white p-3 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+    Thêm Đại Lý
+</button>
     </div>
 
     <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
@@ -1924,7 +1949,10 @@ html:not(.dark) body:not(.dark) {
             <button type="button" onclick="startScanner('prod')" class="bg-green-600 text-white px-4 rounded-xl font-bold hover:bg-green-700 transition-all shadow-md">📷</button>
         </div>
         
-        <button onclick="addProduct()" class="bg-blue-600 text-white p-3 rounded-xl font-bold hover:bg-blue-700 w-full transition-all shadow-md">Thêm sản phẩm</button>
+        <button onclick="addProduct()" 
+    class="w-full bg-blue-600 dark:bg-blue-700 text-white p-3 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+    Thêm sản phẩm
+</button>
     </div>
 
     <div id="reader-manage" class="hidden w-full max-w-[300px] mx-auto border-2 border-green-500 rounded-xl overflow-hidden"></div>
@@ -1976,9 +2004,10 @@ html:not(.dark) body:not(.dark) {
             </div>
 
             <div class="col-span-1 md:col-span-2">
-                <button type="button" onclick="exportInvoiceToExcel()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold p-2 rounded-lg transition h-[40px] shadow-sm text-xs md:text-sm">
-                    📊 Xuất
-                </button>
+                <button type="button" onclick="exportInvoiceToExcel()" 
+    class="w-full bg-green-600 dark:bg-green-700 text-white font-bold p-2 rounded-lg transition-all duration-75 h-[40px] text-xs md:text-sm border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+    📊 Xuất
+</button>
             </div>
         </div>
     </div>
@@ -2047,28 +2076,46 @@ html:not(.dark) body:not(.dark) {
         <!-- BC Tổng Hợp -->
         <div class="bg-white p-4 md:p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg transition-all">
             <h3 class="font-bold text-sm md:text-lg text-slate-800 mb-2 md:mb-4 text-center">BC Tổng Hợp</h3>
-            <button onclick="exportFullReport()" class="w-full bg-blue-600 text-white py-3 md:py-4 rounded-xl font-bold text-xs md:text-sm hover:bg-blue-700 transition shadow-md">Xuất File</button>
+           <button onclick="exportFullReport()" 
+    class="w-full bg-blue-600 dark:bg-blue-700 text-white py-3 md:py-4 rounded-xl font-bold text-xs md:text-sm transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+    Xuất File
+</button>
         </div>
 
         <!-- BC Bán Hàng -->
         <div class="bg-white p-4 md:p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg transition-all">
             <h3 class="font-bold text-sm md:text-lg text-slate-800 mb-2 md:mb-4 text-center">BC Bán Hàng</h3>
-            <button onclick="exportSales()" class="w-full bg-green-600 text-white py-3 md:py-4 rounded-xl font-bold text-xs md:text-sm hover:bg-green-700 transition shadow-md">Tải File</button>
+            <button onclick="exportSales()" 
+    class="w-full bg-green-600 dark:bg-green-700 text-white py-3 md:py-4 rounded-xl font-bold text-xs md:text-sm transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+    Tải File
+</button>
         </div>
 
         <!-- BC Công Nợ -->
         <div class="bg-white p-4 md:p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg transition-all flex flex-col justify-between">
             <h3 class="font-bold text-sm md:text-lg text-slate-800 mb-2 text-center">BC Công Nợ</h3>
             <div class="grid grid-cols-1 gap-2">
-                <button onclick="exportDebtReport()" class="w-full bg-indigo-600 text-white py-2 md:py-3 rounded-lg font-bold text-[10px] md:text-xs hover:bg-indigo-700 transition shadow">KH</button>
-                <button onclick="exportSupplierDebtReport()" class="w-full bg-emerald-600 text-white py-2 md:py-3 rounded-lg font-bold text-[10px] md:text-xs hover:bg-emerald-700 transition shadow">NCC</button>
+                <!-- Nút KH (Indigo) -->
+<button onclick="exportDebtReport()" 
+    class="w-full bg-indigo-600 dark:bg-indigo-700 text-white py-2 md:py-3 rounded-lg font-bold text-[10px] md:text-xs transition-all duration-75 border-b-[4px] border-indigo-800 dark:border-indigo-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+    KH
+</button>
+
+<!-- Nút NCC (Emerald) -->
+<button onclick="exportSupplierDebtReport()" 
+    class="w-full bg-emerald-600 dark:bg-emerald-700 text-white py-2 md:py-3 rounded-lg font-bold text-[10px] md:text-xs transition-all duration-75 border-b-[4px] border-emerald-800 dark:border-emerald-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+    NCC
+</button>
             </div>
         </div>
 
         <!-- BC Tồn Kho -->
         <div class="bg-white p-4 md:p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg transition-all">
             <h3 class="font-bold text-sm md:text-lg text-slate-800 mb-2 md:mb-4 text-center">BC Tồn Kho</h3>
-            <button onclick="exportInventory()" class="w-full bg-orange-500 text-white py-3 md:py-4 rounded-xl font-bold text-xs md:text-sm hover:bg-orange-600 transition shadow-md">Tải File</button>
+           <button onclick="exportInventory()" 
+    class="w-full bg-orange-500 dark:bg-orange-600 text-white py-3 md:py-4 rounded-xl font-bold text-xs md:text-sm transition-all duration-75 border-b-[4px] border-orange-700 dark:border-orange-800 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+    Tải File
+</button>
         </div>
     </div>
 
@@ -2078,20 +2125,33 @@ html:not(.dark) body:not(.dark) {
     <div class="bg-white p-4 md:p-6 rounded-2xl border border-blue-200 shadow-sm hover:shadow-lg transition-all">
         <h3 class="font-bold text-sm md:text-lg text-slate-800 mb-4 text-center">Sổ Kiểm Thực (3 Bước)</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-            <!-- Đã đổi thành exportExcelQuyen1 -->
-            <button onclick="exportExcelQuyen1()" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold text-[10px] md:text-xs hover:bg-blue-700 transition shadow">Quyển 1</button>
-            <!-- Đã đổi thành exportExcelQuyen2 -->
-            <button onclick="exportExcelQuyen2()" class="w-full bg-blue-700 text-white py-2 rounded-lg font-bold text-[10px] md:text-xs hover:bg-blue-800 transition shadow">Quyển 2</button>
-            <!-- Đã đổi thành exportExcelQuyen3 -->
-            <button onclick="exportExcelQuyen3()" class="w-full bg-blue-800 text-white py-2 rounded-lg font-bold text-[10px] md:text-xs hover:bg-blue-900 transition shadow">Quyển 3</button>
+            <!-- Quyển 1 -->
+<button onclick="exportExcelQuyen1()" 
+    class="w-full bg-blue-600 dark:bg-blue-700 text-white py-2 rounded-lg font-bold text-[10px] md:text-xs transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+    Quyển 1
+</button>
+
+<!-- Quyển 2 -->
+<button onclick="exportExcelQuyen2()" 
+    class="w-full bg-blue-700 dark:bg-blue-800 text-white py-2 rounded-lg font-bold text-[10px] md:text-xs transition-all duration-75 border-b-[4px] border-blue-900 dark:border-blue-950 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+    Quyển 2
+</button>
+
+<!-- Quyển 3 -->
+<button onclick="exportExcelQuyen3()" 
+    class="w-full bg-blue-800 dark:bg-blue-900 text-white py-2 rounded-lg font-bold text-[10px] md:text-xs transition-all duration-75 border-b-[4px] border-blue-950 dark:border-black hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+    Quyển 3
+</button>
         </div>
     </div>
 
     <!-- Khối Sổ Lưu Mẫu -->
 		<div class="bg-white p-4 md:p-6 rounded-2xl border border-green-200 shadow-sm hover:shadow-lg transition-all">
 			<h3 class="font-bold text-sm md:text-lg text-slate-800 mb-2 text-center">Sổ Lưu Mẫu</h3>
-			<!-- Đã đổi thành exportExcelLuuMau -->
-			<button onclick="exportExcelLuuMau()" class="w-full bg-green-700 text-white py-3 rounded-xl font-bold text-xs hover:bg-green-800 transition shadow-md">Xuất Excel Lưu Mẫu</button>
+			<button onclick="exportExcelLuuMau()" 
+    class="w-full bg-green-700 dark:bg-green-800 text-white py-3 rounded-xl font-bold text-xs transition-all duration-75 border-b-[4px] border-green-900 dark:border-green-950 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+    Xuất Excel Lưu Mẫu
+</button>
 		</div>
 	</div>
 </div>
@@ -2212,9 +2272,10 @@ html:not(.dark) body:not(.dark) {
             </div>
           </div>
 
-          <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition-all shadow-md" onclick="luuSanXuat()">
-            LƯU SẢN XUẤT
-          </button>
+         <button onclick="luuSanXuat()" 
+    class="w-full bg-blue-600 dark:bg-blue-700 text-white font-bold py-2 rounded-lg transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+    LƯU SẢN XUẤT
+</button>
         </div>
       </div>
     </div>
@@ -2241,7 +2302,10 @@ html:not(.dark) body:not(.dark) {
                 <input id="in-ncc" placeholder="Tên NCC" class="border p-2 rounded w-full">
                 <input id="in-sdt" placeholder="SĐT" class="border p-2 rounded w-full">
                 <input id="in-diachi" placeholder="Địa chỉ" class="border p-2 rounded w-full">
-                <button onclick="addNCC()" class="bg-green-600 text-white p-2 rounded font-bold hover:bg-green-700 w-full">THÊM NCC</button>
+               <button onclick="addNCC()" 
+    class="w-full bg-green-600 dark:bg-green-700 text-white p-2 rounded font-bold transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+    THÊM NCC
+</button>
             </div>
             <div class="overflow-x-auto border rounded-lg">
                 <table class="w-full text-sm text-left">
@@ -2265,7 +2329,10 @@ html:not(.dark) body:not(.dark) {
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <input id="in-nl" placeholder="Tên Nguyên Liệu" class="border p-2 rounded w-full">
                 <input id="in-dvt" placeholder="ĐVT" class="border p-2 rounded w-full">
-                <button onclick="addNL()" class="bg-green-600 text-white p-2 rounded font-bold hover:bg-green-700 w-full">THÊM NL</button>
+               <button onclick="addNL()" 
+    class="w-full bg-green-600 dark:bg-green-700 text-white p-2 rounded font-bold transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+    THÊM NL
+</button>
             </div>
             <div class="border rounded-lg overflow-hidden">
                 <table class="w-full text-sm text-left">
@@ -2332,9 +2399,15 @@ html:not(.dark) body:not(.dark) {
                     <input id="in-gia" type="number" placeholder="Đơn giá" class="border border-blue-100 p-2 rounded text-sm bg-white w-full">
                 </div>
             </div>
-            <button type="button" onclick="addNguyenLieuToCart();" class="w-full bg-gray-700 text-white py-2 rounded mb-3 hover:bg-black text-sm font-bold shadow">THÊM VÀO GIỎ</button>
+            <button type="button" onclick="addNguyenLieuToCart();" 
+    class="w-full bg-gray-700 dark:bg-gray-800 text-white py-2 rounded mb-3 text-sm font-bold shadow-md transition-all duration-75 border-b-[4px] border-gray-800 dark:border-gray-950 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px]">
+    THÊM VÀO GIỎ
+</button>
             <div id="gio-hang-nl" class="my-2 border p-2 text-xs bg-white rounded min-h-[50px] max-h-[100px] overflow-y-auto border-blue-100"></div>
-            <button onclick="saveFullInvoice()" class="bg-blue-600 text-white w-full py-3 rounded font-bold text-sm hover:bg-blue-700 shadow-lg mt-2">LƯU PHIẾU NHẬP</button>
+            <button onclick="saveFullInvoice()" 
+    class="w-full bg-blue-600 dark:bg-blue-700 text-white py-3 rounded font-bold text-sm transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-lg mt-2">
+    LƯU PHIẾU NHẬP
+</button>
         </div>
     </div>
 </div>
@@ -2370,9 +2443,10 @@ html:not(.dark) body:not(.dark) {
                             <input type="checkbox" checked class="rounded text-red-600"> <span>Deadline</span>
                         </label>
                     </div>
-                    <button onclick="openEventModal()" class="w-full mt-4 bg-blue-600 text-white py-2 rounded-lg font-bold text-sm hover:bg-blue-700 transition">
-                        + Thêm lịch mới
-                    </button>
+                    <button onclick="openEventModal()" 
+    class="w-full mt-4 bg-blue-600 dark:bg-blue-700 text-white py-2 rounded-lg font-bold text-sm transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+    + Thêm lịch mới
+</button>
                 </div>
             </div>
 
@@ -2778,41 +2852,49 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 3. Danh sách class 3D khi Tab được chọn
+    // 3. Danh sách class khi Tab được chọn (Bao gồm cả Dark mode)
     const activeClasses = [
         'bg-gradient-to-b', 'from-blue-100', 'to-blue-200', 
-        'text-blue-600', 
-        'border-t', 'border-l', 'border-white', 
+        'text-blue-600', 'border-t', 'border-l', 'border-white', 
         'border-b-[4px]', 'border-blue-400', 
         'shadow-[0_4px_10px_rgba(59,130,246,0.15)]', 
-        '-translate-y-[2px]', 'font-black'
+        '-translate-y-[2px]', 'font-black',
+        // Các class cho Dark Mode
+        'dark:from-blue-950/40', 'dark:to-blue-900/30', 'dark:text-blue-400', 
+        'dark:border-blue-500/20', 'dark:border-blue-600', 
+        'dark:shadow-[0_6px_15px_rgba(59,130,246,0.25)]'
     ];
     
-    // 4. Danh sách class khi Tab KHÔNG được chọn
+    // 4. Danh sách class khi Tab KHÔNG được chọn (Bao gồm cả Dark mode)
     const inactiveClasses = [
-        'bg-slate-100/80', 
-        'text-slate-400', 
+        'bg-slate-100/80', 'text-slate-400', 
         'border-b-[2px]', 'border-slate-300', 
         'shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]', 
-        'translate-y-0', 
-        'hover:text-slate-700', 
-        'hover:bg-slate-50', 
-        'hover:border-b-[4px]', 'hover:border-slate-400', 
-        'hover:-translate-y-[2px]', 
-        'hover:shadow-[0_4px_10px_rgba(0,0,0,0.1)]', 
-        'font-bold'
+        'translate-y-0', 'hover:text-slate-700', 
+        'hover:bg-slate-50', 'hover:border-b-[4px]', 
+        'hover:border-slate-400', 'hover:-translate-y-[2px]', 
+        'hover:shadow-[0_4px_10px_rgba(0,0,0,0.1)]', 'font-bold',
+        // Các class cho Dark Mode
+        'dark:bg-slate-900/40', 'dark:text-slate-500', 'dark:border-slate-950', 
+        'dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]', 'dark:hover:text-slate-300', 
+        'dark:hover:bg-slate-900/80', 'dark:hover:border-slate-800', 
+        'dark:hover:shadow-[0_4px_10px_rgba(0,0,0,0.4)]'
     ];
 
-    // 5. Cập nhật trạng thái hiển thị 3D cho từng nút
+    // Tạo danh sách tổng hợp để làm sạch hoàn toàn trạng thái cũ
+    const allClasses = [...activeClasses, ...inactiveClasses];
+
+    // 5. Cập nhật trạng thái hiển thị cho từng nút
     const tabs = ['inventory', 'revenue', 'products'];
     tabs.forEach(t => {
         const btn = document.getElementById('btn-main-' + t);
         if (btn) {
+            // XÓA SẠCH MỌI CLASS CŨ (cả sáng và tối) TRƯỚC KHI THÊM MỚI
+            btn.classList.remove(...allClasses);
+            
             if (t === tabName) {
-                btn.classList.remove(...inactiveClasses);
                 btn.classList.add(...activeClasses);
             } else {
-                btn.classList.remove(...activeClasses);
                 btn.classList.add(...inactiveClasses);
             }
         }
@@ -3758,7 +3840,7 @@ function updateRevenueChart(filteredSales) {
     });
 }
 
-// Hàm vẽ biểu đồ doanh thu theo tháng (Thích ứng Dual Theme)
+// Hàm vẽ biểu đồ doanh thu theo tháng (Đã fix lỗi bị che mất chữ trên đầu cột và lỗi mất chữ khi di chuột)
 function updateMonthlyRevenueChart(allSales) {
     const canvas = document.getElementById('monthlyRevenueChart');
     if (!canvas) return;
@@ -3776,13 +3858,16 @@ function updateMonthlyRevenueChart(allSales) {
 
     const sortedMonths = Object.keys(monthlyData).sort();
     const dataValues = sortedMonths.map(m => monthlyData[m]);
+    
+    // Tính toán giá trị cao nhất để tạo khoảng trống phía trên
+    const maxValue = Math.max(...dataValues, 0);
 
     // --- NHẬN DIỆN GIAO DIỆN ĐỘNG (LIGHT / DARK THEME) ---
     const isDark = document.documentElement.classList.contains('dark');
     const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.06)';
     const tickColor = isDark ? '#94a3b8' : '#64748b';
     const labelColor = isDark ? '#f8fafc' : '#1e293b';
-    const monthlyBarColor = isDark ? '#60a5fa' : '#3b82f6'; // Xanh sáng nổi bật vs Xanh dương chuẩn
+    const monthlyBarColor = isDark ? '#60a5fa' : '#3b82f6';
 
     window.monthlyChartInstance = new Chart(ctx, {
         type: 'bar',
@@ -3802,7 +3887,6 @@ function updateMonthlyRevenueChart(allSales) {
                 if (elements.length > 0) {
                     const index = elements[0].index;
                     const selectedMonth = sortedMonths[index];
-                    // Lọc và vẽ lại biểu đồ doanh thu theo ngày
                     const filtered = allSales.filter(o => {
                         const d = o.date?.toDate ? o.date.toDate() : new Date(o.date);
                         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` === selectedMonth;
@@ -3821,6 +3905,8 @@ function updateMonthlyRevenueChart(allSales) {
             scales: { 
                 y: { 
                     beginAtZero: true, 
+                    // FIX: Thêm khoảng trống 15% so với cột cao nhất
+                    suggestedMax: maxValue * 1.15, 
                     grid: { color: gridColor }, 
                     ticks: { 
                         color: tickColor, 
@@ -3829,32 +3915,31 @@ function updateMonthlyRevenueChart(allSales) {
                 },
                 x: { 
                     grid: { display: false },
-                    ticks: {
-                        color: tickColor 
-                    }
-                }
-            },
-            animation: {
-                onComplete: function() {
-                    const chart = this;
-                    const ctx = chart.ctx;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'bottom';
-                    ctx.font = 'bold 10px Arial';
-                    
-                    // --- ĐỒI CHỮ SỐ TRÊN ĐẦU CỘT DỰA VÀO THEME ---
-                    ctx.fillStyle = labelColor; 
-
-                    chart.data.datasets.forEach((dataset, i) => {
-                        chart.getDatasetMeta(i).data.forEach((bar, index) => {
-                            const data = dataset.data[index];
-                            const text = (data / 1000000).toFixed(1) + 'tr';
-                            ctx.fillText(text, bar.x, bar.y - 5);
-                        });
-                    });
+                    ticks: { color: tickColor }
                 }
             }
-        }
+        },
+        // --- CHUYỂN LOGIC VẼ CHỮ SANG PLUGIN ĐỂ KHÔNG BỊ MẤT KHI DI CHUỘT ---
+        plugins: [{
+            id: 'customLabels',
+            afterDraw: (chart) => {
+                const ctx = chart.ctx;
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.font = 'bold 10px Arial';
+                ctx.fillStyle = labelColor; 
+
+                chart.data.datasets.forEach((dataset, i) => {
+                    chart.getDatasetMeta(i).data.forEach((bar, index) => {
+                        const data = dataset.data[index];
+                        const text = (data / 1000000).toFixed(1) + 'tr';
+                        ctx.fillText(text, bar.x, bar.y - 5);
+                    });
+                });
+                ctx.restore();
+            }
+        }]
     });
 }
 
@@ -6794,8 +6879,11 @@ function renderCustomerList() {
 }
 
 
-// Hàm mở/đóng menu (cách đơn giản nhất)
+// 1. Cập nhật hàm toggleMenu
 function toggleMenu(btn) {
+    // Ngăn chặn sự kiện click này lan ra ngoài (để document listener không đóng menu ngay lập tức)
+    event.stopPropagation(); 
+    
     const menu = btn.nextElementSibling;
     
     // Đóng tất cả menu khác
@@ -6806,6 +6894,14 @@ function toggleMenu(btn) {
     // Đảo trạng thái ẩn/hiện của menu này
     menu.classList.toggle('hidden');
 }
+
+// 2. Thêm sự kiện click cho toàn bộ tài liệu (đặt đoạn này ở ngoài các hàm)
+document.addEventListener('click', function() {
+    // Khi bấm bất kỳ đâu, ẩn tất cả các menu đang mở
+    document.querySelectorAll('.menu-action').forEach(el => {
+        el.classList.add('hidden');
+    });
+});
 
 // Hàm đóng menu chuyên dụng
 function closeAllMenus() {
@@ -9098,8 +9194,9 @@ async function filterSanXuat() {
     const endDate = new Date(endVal + "T23:59:59");
 
     const listBody = document.getElementById('list-sanxuat');
-    listBody.innerHTML = "<tr><td colspan='8' class='text-center'>Đang tải...</td></tr>";
-
+    
+    // BỎ DÒNG "Đang tải..." ĐI ĐỂ KHÔNG BỊ NHÁY KHUNG
+    
     try {
         // Truy vấn dữ liệu theo thời gian
         const snapshot = await db.collection('production')
@@ -9129,7 +9226,10 @@ async function filterSanXuat() {
                 </td>
             </tr>`;
         });
+        
+        // Chỉ cập nhật bảng một lần duy nhất khi đã có dữ liệu mới
         listBody.innerHTML = htmlRows || "<tr><td colspan='8' class='text-center'>Không có dữ liệu trong khoảng này</td></tr>";
+        
     } catch (e) {
         console.error("Lỗi lọc: ", e);
     }
