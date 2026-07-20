@@ -8956,24 +8956,13 @@ async function loadTableNCC() {
                         <div class="p-2 text-sm w-[12%] text-center hidden md:table-cell">${d.phone || ''}</div>
                         <div class="p-2 text-sm w-[12%] text-center font-bold text-red-600">${(d.debt || 0).toLocaleString()}</div>
                         <div class="p-2 text-sm w-[12%] text-center text-green-600 font-bold">${totalPaid.toLocaleString()}</div>
-                        <div class="p-1 text-right w-[14%]">
-                            <div class="flex flex-col md:flex-row gap-1 justify-end">
-                                <button onclick="openPayModal('${doc.id}', '${safeName}')" class="bg-blue-600 text-white px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap hover:bg-blue-700 transition">
-                                    <span class="md:hidden">Trả</span>
-                                    <span class="hidden md:inline">Trả Nợ</span>
-                                </button>
-                                <button onclick="window.openHistory('${safeName}')" class="bg-purple-600 text-white px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap hover:bg-purple-700 transition">
-                                    <span class="md:hidden">Sử</span>
-                                    <span class="hidden md:inline">Lịch sử</span>
-                                </button>
-                                <button onclick="editNCC('${doc.id}', '${safeName}', '${safePhone}', '${safeAddress}')" class="bg-yellow-500 text-white px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap hover:bg-yellow-600 transition">
-                                    <span class="md:hidden">Sửa</span>
-                                    <span class="hidden md:inline">Sửa</span>
-                                </button>
-                                <button onclick="deleteDoc('suppliers', '${doc.id}')" class="bg-red-600 text-white px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap hover:bg-red-700 transition">
-                                    <span class="md:hidden">Xóa</span>
-                                    <span class="hidden md:inline">Xóa</span>
-                                </button>
+                        <div class="p-1 text-center w-[14%] relative">
+                            <button onclick="toggleMenu(this)" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 px-3 rounded text-xs font-bold shadow-sm transition-colors">Thao tác ▼</button>
+                            <div class="hidden absolute menu-action right-0 mt-2 w-32 bg-white dark:bg-slate-800 border border-blue-200 dark:border-slate-700 rounded-lg shadow-2xl p-2 flex flex-col gap-1.5 z-[9999]">
+                                <button onclick="openPayModal('${doc.id}', '${safeName}')" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Trả Nợ</button>
+                                <button onclick="window.openHistory('${safeName}')" class="bg-purple-600 hover:bg-purple-700 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Lịch sử</button>
+                                <button onclick="editNCC('${doc.id}', '${safeName}', '${safePhone}', '${safeAddress}')" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Sửa</button>
+                                <button onclick="deleteDoc('suppliers', '${doc.id}')" class="bg-red-600 hover:bg-red-700 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Xóa</button>
                             </div>
                         </div>
                     </div>
