@@ -38,31 +38,7 @@
         .choices__inner { background-color: white; border-radius: 0.5rem; }
 		
 		/* Dán đoạn CSS mới của bạn vào đây: */
-        @media (max-width: 600px) {
-            .dashboard-container {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-            }
-            .dashboard-card {
-                padding: 10px;
-                font-size: 14px;
-            }
-        }
-        
-        @media (max-width: 600px) {
-            .table-responsive {
-                width: 100%;
-                overflow-x: auto;
-                display: block;
-            }
-            table {
-                width: 100%;
-                min-width: 500px;
-                font-size: 12px;
-            }
-        }
-		
+
 		/* Container của từng ô sản phẩm */
 .product-card {
     background: #ffffff; /* Màu nền trắng */
@@ -124,13 +100,11 @@
 }
 
 @media (max-width: 600px) {
-    /* Ép tất cả các container chính giãn hết cỡ */
-    .w-full, .max-w-4xl, .max-w-6xl, .mx-auto {
+    /* Ép các khung căn giữa (mx-auto) và max-width cố định giãn hết cỡ trên di động */
+    .max-w-4xl, .max-w-6xl, .mx-auto {
         max-width: 100% !important;
         margin-left: 0 !important;
         margin-right: 0 !important;
-        padding-left: 8px !important;
-        padding-right: 8px !important;
     }
     
     /* Làm lưới sản phẩm khít hơn trên mobile */
@@ -169,25 +143,8 @@
 	
 	
     </style>
-	<style>
-    /* Ép buộc thanh cuộn phải hiển thị và có style này */
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 6px !important;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-        background: #f1f1f1 !important;
-        border-radius: 10px !important;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #cbd5e1 !important;
-        border-radius: 10px !important;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8 !important;
-    }
-</style>
 
-<style>
+    <style>
     /* Bất kỳ hàng nào chứa menu đang mở sẽ nổi lên trên tất cả */
     tr:has(.menu-action:not(.hidden)) {
         position: relative;
@@ -394,9 +351,6 @@
         color: #0f172a !important;
         font-size: 1.4rem !important;
         font-weight: 800 !important;
-    }
-	/* 9. Tinh chỉnh tiêu đề và nút chế độ hiển thị */
-    .fc .fc-toolbar-title {
         text-transform: capitalize !important; /* Chữ tháng năm trông mềm mại hơn */
         letter-spacing: -0.02em !important;    /* Tăng độ tinh tế */
     }
@@ -455,7 +409,56 @@
         gap: 5px !important;
     }
 	
-	
+	/* 13. GIỮ MÀU GỐC CHO CÁC ICON CHỨC NĂNG (xem/sửa/xoá/in...) - không bị mờ/ngả xám khi đổi giao diện */
+    .dark .text-amber-400{color:#fbbf24 !important;}
+    .dark .text-amber-600{color:#d97706 !important;}
+    .dark .text-blue-300{color:#93c5fd !important;}
+    .dark .text-blue-400{color:#60a5fa !important;}
+    .dark .text-blue-600{color:#2563eb !important;}
+    .dark .text-blue-700{color:#1d4ed8 !important;}
+    .dark .text-blue-800{color:#1e40af !important;}
+    .dark .text-emerald-400{color:#34d399 !important;}
+    .dark .text-fuchsia-400{color:#e879f9 !important;}
+    .dark .text-green-600{color:#16a34a !important;}
+    .dark .text-green-800{color:#166534 !important;}
+    .dark .text-indigo-400{color:#818cf8 !important;}
+    .dark .text-lime-400{color:#a3e635 !important;}
+    .dark .text-orange-400{color:#fb923c !important;}
+    .dark .text-purple-400{color:#c084fc !important;}
+    .dark .text-red-400{color:#f87171 !important;}
+    .dark .text-red-500{color:#ef4444 !important;}
+    .dark .text-red-600{color:#dc2626 !important;}
+    .dark .text-red-700{color:#b91c1c !important;}
+    .dark .text-red-800{color:#991b1b !important;}
+    .dark .text-rose-400{color:#fb7185 !important;}
+    .dark .text-rose-500{color:#f43f5e !important;}
+    .dark .text-rose-600{color:#e11d48 !important;}
+    .dark .text-sky-400{color:#38bdf8 !important;}
+    .dark .text-teal-400{color:#2dd4bf !important;}
+    .dark .text-yellow-500{color:#eab308 !important;}
+    .dark .text-yellow-700{color:#a16207 !important;}
+    /* Icon dạng nền màu (nút tròn) cũng giữ nguyên độ bão hoà màu, không bị xám hoá */
+    .dark .bg-blue-100{background-color:rgba(37,99,235,0.2) !important;}
+    .dark .bg-green-100{background-color:rgba(22,163,74,0.2) !important;}
+    .dark .bg-red-100{background-color:rgba(220,38,38,0.2) !important;}
+    .dark .bg-amber-100{background-color:rgba(217,119,6,0.2) !important;}
+    .dark .bg-orange-100{background-color:rgba(234,88,12,0.2) !important;}
+    .dark .bg-purple-100{background-color:rgba(147,51,234,0.2) !important;}
+
+	/* 12. GIAO DIỆN TỐI (DARK MODE) CHO LỊCH - Thư viện FullCalendar không tự hỗ trợ dark mode */
+    .dark #calendar-container { background: #1e293b !important; }
+    .dark .fc-theme-standard td, .dark .fc-theme-standard th { border-color: #334155 !important; }
+    .dark .fc .fc-daygrid-day, .dark .fc .fc-col-header-cell { border-color: #334155 !important; }
+    .dark .fc-col-header-cell-cushion, .dark .fc-daygrid-day-number { color: #e2e8f0 !important; }
+    .dark .fc-day-other { background-color: #0f172a !important; }
+    .dark .fc-day-other .fc-daygrid-day-number { color: #64748b !important; }
+    .dark .fc-day-sat, .dark .fc-day-sun { background-color: #3f1d2b !important; }
+    .dark .fc-col-header-cell { background-color: #0f172a !important; }
+    .dark .fc .fc-col-header-cell-cushion { color: #94a3b8 !important; }
+    .dark .fc .fc-toolbar-title { color: #f8fafc !important; }
+    .dark .fc .fc-button-group .fc-button { background-color: #334155 !important; color: #e2e8f0 !important; }
+    .dark .fc .fc-view-harness .fc-button-primary { background-color: #1e293b !important; border-color: #334155 !important; color: #cbd5e1 !important; }
+    .dark .fc-day-today { background-color: #1e3a5f !important; }
 </style>
 <style>
 
@@ -463,7 +466,7 @@
    HỆ THỐNG CSS DUAL THEME (ĐÃ CẬP NHẬT MÀU NỀN & TIÊU ĐỀ)
    ========================================================================== */
 /* --- 1. DARK MODE (Giữ nguyên) --- */
-.dark, .dark body, .dark #page-dashboard, .dark [id*="page-"], .dark .bg-white {
+.dark, .dark body, .dark #page-dashboard, .dark [id*="page-"] {
     background-color: #0f172a !important;
     color: #f8fafc !important;
 }
@@ -475,8 +478,13 @@
 
 /* Chỉ thay đổi màu nền trang để giảm chói */
 html:not(.dark) body:not(.dark) {
-    background-color: #e2e8f0 !important; /* Xám ghi dịu mắt cho cả trang */
+    background-color: #d8dee6 !important; /* Xám ghi đậm hơn 1 chút, dịu mắt hơn cho cả trang */
     color: #1e293b !important;
+}
+
+/* Làm mềm các thẻ card trắng chói (giữ gần như trắng, chỉ bớt gắt) */
+html:not(.dark) .bg-white {
+    background-color: #f8fafc !important;
 }
 
 /* BỎ QUY TẮC ÉP MÀU .bg-white */
@@ -589,7 +597,7 @@ html:not(.dark) body:not(.dark) {
 }
 
 .dark #page-sell .bg-white {
-    background-color: #0f172a !important;
+    background-color: #1e293b !important;
     color: #f8fafc !important;
     border-color: #334155 !important;
 }
@@ -678,6 +686,7 @@ html:not(.dark) body:not(.dark) {
 .dark #customer-list-body tr,
 .dark #customer-list-body td {
     background-color: #0f172a !important;
+    border-bottom: 1px solid #1e293b !important;
     transition: none !important;
 }
 
@@ -690,10 +699,10 @@ html:not(.dark) body:not(.dark) {
     color: #f8fafc !important;
 }
 
-.dark #customer-list-body tr,
-.dark #customer-list-body td {
-    border-bottom: 1px solid #1e293b !important;
-}
+/* Số tiền đã trả (xanh), công nợ (đỏ), tên KH đang nợ (xanh dương) phải giữ đúng màu, không bị ép trắng ở trên */
+.dark #customer-list-body tr td:nth-child(1) div.text-green-600 { color: #16a34a !important; }
+.dark #customer-list-body tr td:nth-child(1) div.text-red-600 { color: #dc2626 !important; }
+.dark #customer-list-body tr td:nth-child(1) div.text-blue-600 { color: #2563eb !important; }
 
 .dark #customer-list-body tr:hover {
     background-color: #0f172a !important;
@@ -701,7 +710,7 @@ html:not(.dark) body:not(.dark) {
 
 /* --- FIX POPUP/MODAL --- */
 .dark .bg-white {
-    background-color: #0f172a !important;
+    background-color: #1e293b !important;
     color: #f8fafc !important;
     border: 1px solid #334155 !important;
 }
@@ -740,7 +749,7 @@ html:not(.dark) body:not(.dark) {
 }
 
 .dark #page-products-manage .bg-white {
-    background-color: #0f172a !important;
+    background-color: #1e293b !important;
     border-color: #334155 !important;
 }
 
@@ -785,6 +794,10 @@ html:not(.dark) body:not(.dark) {
     color: #f8fafc !important;
 }
 
+/* Nút "Gán mã" (xanh dương) và "Xoá" (đỏ) phải giữ đúng màu, không bị luật trên ép trắng */
+.dark #page-products-manage table td button.text-blue-600 { color: #2563eb !important; }
+.dark #page-products-manage table td button.text-red-500 { color: #ef4444 !important; }
+
 .dark #page-products-manage table a {
     color: #60a5fa !important;
     text-decoration: none;
@@ -804,7 +817,7 @@ html:not(.dark) body:not(.dark) {
 }
 
 .dark #page-history .bg-white {
-    background-color: #0f172a !important;
+    background-color: #1e293b !important;
     border-color: #334155 !important;
 }
 
@@ -842,6 +855,14 @@ html:not(.dark) body:not(.dark) {
     color: #fb7185 !important;
 }
 
+/* Icon Xem/In lại/Xoá phải giữ đúng màu gốc, không bị luật nth-child(1) phía trên ép thành trắng */
+.dark #page-history tbody tr td:nth-child(1) button.text-green-600,
+.dark #page-history tbody tr td:nth-child(1) button.text-green-600 * { color: #16a34a !important; }
+.dark #page-history tbody tr td:nth-child(1) button.text-blue-600,
+.dark #page-history tbody tr td:nth-child(1) button.text-blue-600 * { color: #2563eb !important; }
+.dark #page-history tbody tr td:nth-child(1) button.text-red-600,
+.dark #page-history tbody tr td:nth-child(1) button.text-red-600 * { color: #dc2626 !important; }
+
 /* --- CSS: TRANG BÁO CÁO --- */
 .dark #page-report {
     background-color: #0f172a !important;
@@ -857,7 +878,7 @@ html:not(.dark) body:not(.dark) {
 }
 
 .dark #page-report .bg-white {
-    background-color: #0f172a !important;
+    background-color: #1e293b !important;
     border-color: #334155 !important;
 }
 
@@ -898,7 +919,7 @@ html:not(.dark) body:not(.dark) {
 }
 
 .dark #page-SanXuat .bg-white {
-    background-color: #0f172a !important;
+    background-color: #1e293b !important;
     border-color: #334155 !important;
 }
 
@@ -968,7 +989,7 @@ html:not(.dark) body:not(.dark) {
 }
 
 .dark #page-NguyenLieu .bg-white {
-    background-color: #0f172a !important;
+    background-color: #1e293b !important;
     border-color: #334155 !important;
 }
 
@@ -1055,7 +1076,7 @@ html:not(.dark) body:not(.dark) {
 }
 
 .dark #page-LichCongViec .bg-white {
-    background-color: #0f172a !important;
+    background-color: #1e293b !important;
     border: none !important; /* Loại bỏ viền trắng ở khung ngoài */
     color: #f8fafc !important;
 }
@@ -1081,7 +1102,7 @@ html:not(.dark) body:not(.dark) {
 /* Fix Modal */
 .dark #modal-add-event .bg-white,
 .dark #modal-view-event .bg-white {
-    background-color: #0f172a !important;
+    background-color: #1e293b !important;
     color: #f8fafc !important;
     border: 1px solid #334155 !important;
 }
@@ -1094,8 +1115,7 @@ html:not(.dark) body:not(.dark) {
 
 /* --- FIX LỊCH & BẢNG (LOẠI BỎ ÉP MÀU THẺ DIV ĐỂ GIỮ MÀU GHI CHÚ) --- */
 .dark #calendar-container {
-    background-color: #0f172a !important;
-    border: none !important; /* Loại bỏ viền trắng bao quanh lịch */
+    border: none !important; /* Loại bỏ viền trắng bao quanh lịch (màu nền đã set ở khối "GIAO DIỆN TỐI CHO LỊCH" phía trên) */
 }
 
 .dark #calendar-container table {
@@ -1117,7 +1137,8 @@ html:not(.dark) body:not(.dark) {
     border-bottom: 1px solid #334155 !important;
 }
 
-.dark #calendar-container button {
+/* Không ép màu nút .fc-button ở đây nữa - đã có màu riêng ở khối "GIAO DIỆN TỐI CHO LỊCH" phía trên */
+.dark #calendar-container button:not(.fc-button) {
     color: #f8fafc !important;
     background-color: #1e293b !important;
 }
@@ -1203,7 +1224,7 @@ html:not(.dark) body:not(.dark) {
 	<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
 	<script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.8/locales/vi.global.min.js'></script>
 </head>
-<body class="bg-gray-100 flex h-screen">
+<body class="bg-gray-100 dark:bg-slate-950 flex h-screen transition-colors duration-300">
 
   <!-- DI ĐỘNG -->
   <div class="md:hidden fixed bottom-0 left-0 w-full z-[800] bg-slate-900 border-t border-slate-800/80 shadow-[0_-4px_15px_rgba(0,0,0,0.5)]">
@@ -1273,6 +1294,7 @@ html:not(.dark) body:not(.dark) {
   </div>
 
   <script>
+    // Ẩn/hiện menu 'Thêm' trên thanh điều hướng
     function toggleMoreMenu() {
         const menu = document.getElementById('more-menu-list');
         menu.classList.toggle('hidden');
@@ -1283,9 +1305,9 @@ html:not(.dark) body:not(.dark) {
   </script>
 
   <!-- PC SIDEBAR (Thêm flex flex-col) -->
-  <aside id="sidebar" onclick="toggleSidebarMenu()" class="cursor-pointer fixed md:relative w-55 h-full bg-slate-900 border-r border-slate-800/60 text-white p-4 z-[999] transform -translate-x-full md:translate-x-0 transition-all duration-300 flex flex-col">
+  <aside id="sidebar" onclick="toggleSidebarMenu()" class="cursor-pointer fixed md:relative w-55 h-full bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800/60 text-slate-700 dark:text-white p-4 z-[999] transform -translate-x-full md:translate-x-0 transition-all duration-300 flex flex-col">
     
-    <div class="w-full p-2 mb-6 rounded-lg flex items-center gap-3 border-b-[3px] bg-slate-950/80 border-slate-800 shadow-[0_4px_6px_rgba(0,0,0,0.4)] text-blue-400 font-bold mt-4 md:mt-0 select-none">
+    <div class="w-full p-2 mb-6 rounded-lg flex items-center gap-3 border-b-[3px] bg-slate-100 dark:bg-slate-950/80 border-slate-300 dark:border-slate-800 shadow-[0_2px_4px_rgba(0,0,0,0.1)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.4)] text-blue-600 dark:text-blue-400 font-bold mt-4 md:mt-0 select-none">
         <i data-lucide="package" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(96,165,250,0.4)]"></i> 
         <span class="sidebar-text tracking-wider">MENU</span> 
     </div>
@@ -1293,53 +1315,53 @@ html:not(.dark) body:not(.dark) {
     <!-- Nav thêm flex-1 -->
     <nav class="space-y-2 overflow-y-auto max-h-[80vh] flex-1">
         
-        <button onclick="showPage('page-home'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-emerald-950/50 border-emerald-800 hover:bg-emerald-900/60 hover:border-emerald-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-emerald-400">
+        <button onclick="showPage('page-home'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-emerald-50 dark:bg-emerald-950/50 border-emerald-300 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 hover:border-emerald-400 dark:hover:border-emerald-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-emerald-700 dark:text-emerald-400">
             <i data-lucide="home" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(16,185,129,0.4)]"></i> <span class="sidebar-text">Trang Chủ</span>
         </button>
 
-        <button onclick="showPage('page-import'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-amber-950/50 border-amber-800 hover:bg-amber-900/60 hover:border-amber-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-amber-400">
+        <button onclick="showPage('page-import'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-amber-50 dark:bg-amber-950/50 border-amber-300 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/60 hover:border-amber-400 dark:hover:border-amber-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-amber-700 dark:text-amber-400">
             <i data-lucide="arrow-down-circle" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(245,158,11,0.4)]"></i> <span class="sidebar-text">Nhập Kho</span>
         </button>
 
-        <button onclick="showPage('page-inventory'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-blue-950/50 border-blue-800 hover:bg-blue-900/60 hover:border-blue-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-blue-400">
+        <button onclick="showPage('page-inventory'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-blue-50 dark:bg-blue-950/50 border-blue-300 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/60 hover:border-blue-400 dark:hover:border-blue-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-blue-700 dark:text-blue-400">
             <i data-lucide="box" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(59,130,246,0.4)]"></i> <span class="sidebar-text">Kho Hàng</span>
         </button>
 
-        <button onclick="showPage('page-sell'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-rose-950/50 border-rose-800 hover:bg-rose-900/60 hover:border-rose-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-rose-400">
+        <button onclick="showPage('page-sell'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-rose-50 dark:bg-rose-950/50 border-rose-300 dark:border-rose-800 hover:bg-rose-100 dark:hover:bg-rose-900/60 hover:border-rose-400 dark:hover:border-rose-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-rose-700 dark:text-rose-400">
             <i data-lucide="shopping-cart" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(244,63,94,0.4)]"></i> <span class="sidebar-text">Bán Hàng</span>
         </button>
 
-        <button onclick="showPage('page-history'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-purple-950/50 border-purple-800 hover:bg-purple-900/60 hover:border-purple-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-purple-400">
+        <button onclick="showPage('page-history'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-purple-50 dark:bg-purple-950/50 border-purple-300 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/60 hover:border-purple-400 dark:hover:border-purple-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-purple-700 dark:text-purple-400">
             <i data-lucide="history" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(168,85,247,0.4)]"></i> <span class="sidebar-text">Lịch Sử HĐ</span>
         </button>
 
-        <button onclick="showPage('page-customers'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-teal-950/50 border-teal-800 hover:bg-teal-900/60 hover:border-teal-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-teal-400">
+        <button onclick="showPage('page-customers'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-teal-50 dark:bg-teal-950/50 border-teal-300 dark:border-teal-800 hover:bg-teal-100 dark:hover:bg-teal-900/60 hover:border-teal-400 dark:hover:border-teal-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-teal-700 dark:text-teal-400">
             <i data-lucide="users" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(20,184,166,0.4)]"></i> <span class="sidebar-text">KH & Công Nợ</span>
         </button>
 
-        <button onclick="showPage('page-products-manage'); loadProductManage(); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-orange-950/50 border-orange-800 hover:bg-orange-900/60 hover:border-orange-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-orange-400">
+        <button onclick="showPage('page-products-manage'); loadProductManage(); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-orange-50 dark:bg-orange-950/50 border-orange-300 dark:border-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900/60 hover:border-orange-400 dark:hover:border-orange-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-orange-700 dark:text-orange-400">
             <i data-lucide="settings" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(249,115,22,0.4)]"></i> <span class="sidebar-text">Danh Mục SP</span>
         </button>
 
-        <button onclick="showPage('page-SanXuat'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-fuchsia-950/50 border-fuchsia-800 hover:bg-fuchsia-900/60 hover:border-fuchsia-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-fuchsia-400">
+        <button onclick="showPage('page-SanXuat'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-fuchsia-50 dark:bg-fuchsia-950/50 border-fuchsia-300 dark:border-fuchsia-800 hover:bg-fuchsia-100 dark:hover:bg-fuchsia-900/60 hover:border-fuchsia-400 dark:hover:border-fuchsia-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-fuchsia-700 dark:text-fuchsia-400">
             <i data-lucide="factory" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(217,70,239,0.4)]"></i> <span class="sidebar-text">Sản Xuất</span>
         </button>
 
-        <button onclick="showPage('page-NguyenLieu'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-lime-950/50 border-lime-800 hover:bg-lime-900/60 hover:border-lime-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-lime-400">
+        <button onclick="showPage('page-NguyenLieu'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-lime-50 dark:bg-lime-950/50 border-lime-300 dark:border-lime-800 hover:bg-lime-100 dark:hover:bg-lime-900/60 hover:border-lime-400 dark:hover:border-lime-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-lime-700 dark:text-lime-400">
             <i data-lucide="database" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(132,204,22,0.4)]"></i> <span class="sidebar-text">Nguyên Liệu</span>
         </button>
 
-        <button onclick="showPage('page-report'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-sky-950/50 border-sky-800 hover:bg-sky-900/60 hover:border-sky-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-sky-400">
+        <button onclick="showPage('page-report'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-sky-50 dark:bg-sky-950/50 border-sky-300 dark:border-sky-800 hover:bg-sky-100 dark:hover:bg-sky-900/60 hover:border-sky-400 dark:hover:border-sky-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-sky-700 dark:text-sky-400">
             <i data-lucide="bar-chart-3" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(14,165,233,0.4)]"></i> <span class="sidebar-text">Báo Cáo</span>
         </button>
 
-        <button onclick="showPage('page-LichCongViec'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-indigo-950/50 border-indigo-800 hover:bg-indigo-900/60 hover:border-indigo-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-indigo-400">
+        <button onclick="showPage('page-LichCongViec'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-indigo-50 dark:bg-indigo-950/50 border-indigo-300 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 hover:border-indigo-400 dark:hover:border-indigo-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-indigo-700 dark:text-indigo-400">
             <i data-lucide="calendar" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(99,102,241,0.4)]"></i> <span class="sidebar-text">Lịch Công Việc</span>
         </button>
     </nav>
 
     <!-- Nút Giao diện PC (Đã đồng bộ) -->
-<button onclick="toggleTheme()" id="theme-toggle-btn" class="mt-4 w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-slate-950/50 border-slate-800 hover:bg-slate-900/60 hover:border-slate-700 shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-amber-400">
+<button onclick="toggleTheme(); event.stopPropagation()" id="theme-toggle-btn" class="mt-4 w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-slate-100 dark:bg-slate-950/50 border-slate-300 dark:border-slate-800 hover:bg-slate-200 dark:hover:bg-slate-900/60 hover:border-slate-400 dark:hover:border-slate-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-amber-600 dark:text-amber-400">
     <i id="theme-icon" data-lucide="moon" class="w-6 h-6"></i> 
     <span id="theme-text" class="sidebar-text">Giao diện: Tối</span>
 </button>
@@ -1352,7 +1374,7 @@ html:not(.dark) body:not(.dark) {
 
 
     <!-- KHU VỰC NỘI DUNG -->
-    <main class="flex-1 p-2 md:p-8">
+    <main class="flex-1 px-0 py-2 md:p-8">
 	
 	<!-- Trang chủ -->
 <div id="page-home" class="p-2 md:p-8 space-y-6 md:space-y-8 bg-slate-50 dark:bg-slate-950 min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-300">
@@ -1369,27 +1391,27 @@ html:not(.dark) body:not(.dark) {
         
         <!-- Tổng Doanh Thu -->
         <div onclick="showDashboardDetail('revenue')" 
-             class="bg-blue-50/60 dark:bg-blue-950/40 border-b-[4px] border-blue-300 dark:border-blue-800 text-blue-600 dark:text-blue-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(59,130,246,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-blue-100/60 dark:hover:bg-blue-900/40 hover:border-blue-400 dark:hover:border-blue-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
+             class="bg-blue-100/70 dark:bg-blue-900/50 border-b-[4px] border-blue-300 dark:border-blue-800 text-blue-600 dark:text-blue-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(59,130,246,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-blue-200/70 dark:hover:bg-blue-800/60 hover:border-blue-400 dark:hover:border-blue-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
             <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-blue-500 dark:text-blue-300/80">Tổng Doanh Thu</p>
             <h3 id="total-revenue" class="text-md md:text-2xl font-black drop-shadow-[0_1.5px_3px_rgba(59,130,246,0.15)] dark:drop-shadow-[0_2px_4px_rgba(59,130,246,0.3)]">0 đ</h3>
         </div>
         
         <!-- Công Nợ Cần Thu -->
         <div onclick="showDashboardDetail('debt-customer')" 
-             class="bg-rose-50/60 dark:bg-rose-950/40 border-b-[4px] border-rose-300 dark:border-rose-800 text-rose-600 dark:text-rose-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(244,63,94,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-rose-100/60 dark:hover:bg-rose-900/40 hover:border-rose-400 dark:hover:border-rose-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
+             class="bg-rose-100/70 dark:bg-rose-900/50 border-b-[4px] border-rose-300 dark:border-rose-800 text-rose-600 dark:text-rose-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(244,63,94,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-rose-200/70 dark:hover:bg-rose-800/60 hover:border-rose-400 dark:hover:border-rose-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
             <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-rose-500 dark:text-rose-300/80">Công Nợ Cần Thu</p>
             <h3 id="total-debt-summary" class="text-md md:text-2xl font-black drop-shadow-[0_1.5px_3px_rgba(244,63,94,0.15)] dark:drop-shadow-[0_2px_4px_rgba(244,63,94,0.3)]">0 đ</h3>
         </div>
         
         <!-- Tổng Nợ NCC -->
         <div onclick="showDashboardDetail('debt-ncc')" 
-             class="bg-amber-50/60 dark:bg-amber-950/40 border-b-[4px] border-amber-300 dark:border-amber-800 text-amber-600 dark:text-amber-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(245,158,11,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-amber-100/60 dark:hover:bg-amber-900/40 hover:border-amber-400 dark:hover:border-amber-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
+             class="bg-amber-100/70 dark:bg-amber-900/50 border-b-[4px] border-amber-300 dark:border-amber-800 text-amber-600 dark:text-amber-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(245,158,11,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-amber-200/70 dark:hover:bg-amber-800/60 hover:border-amber-400 dark:hover:border-amber-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
             <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-300/80">Tổng Nợ NCC</p>
             <h3 id="total-debt-ncc-summary" class="text-md md:text-2xl font-black drop-shadow-[0_1.5px_3px_rgba(245,158,11,0.15)] dark:drop-shadow-[0_2px_4px_rgba(245,158,11,0.3)]">0 đ</h3>
         </div>
         
         <!-- Lợi Nhuận -->
-        <div class="bg-emerald-50/60 dark:bg-emerald-950/40 border-b-[4px] border-emerald-300 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(16,185,129,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] hover:bg-emerald-100/60 dark:hover:bg-emerald-900/40 hover:border-emerald-400 dark:hover:border-emerald-700 hover:-translate-y-[2px] transition-all duration-150">
+        <div class="bg-emerald-100/70 dark:bg-emerald-900/50 border-b-[4px] border-emerald-300 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(16,185,129,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] hover:bg-emerald-200/70 dark:hover:bg-emerald-800/60 hover:border-emerald-400 dark:hover:border-emerald-700 hover:-translate-y-[2px] transition-all duration-150">
             <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-emerald-500 dark:text-emerald-300/80">Lợi Nhuận</p>
             <h3 id="profit-summary" class="text-md md:text-2xl font-black drop-shadow-[0_1.5px_3px_rgba(16,185,129,0.15)] dark:drop-shadow-[0_2px_4px_rgba(16,185,129,0.3)]">0 đ</h3>
         </div>
@@ -1627,7 +1649,7 @@ html:not(.dark) body:not(.dark) {
         <div class="overflow-x-auto border border-blue-100 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 p-2 md:p-4">
             <table class="w-full text-sm">
                 <thead class="bg-gray-50 dark:bg-slate-800 border-b dark:border-slate-700 text-gray-800 dark:text-gray-200">
-                    <tr><th class="p-3 text-left">Số phiếu</th><th class="p-3 text-left">Ngày nhập</th><th class="p-3 text-left">Số SP</th><th class="p-3 text-left">Thao tác</th></tr>
+                    <tr><th class="py-3 px-2 text-center w-[25%]">Số phiếu</th><th class="py-3 px-2 text-center w-[30%]">Ngày nhập</th><th class="py-3 px-2 text-center w-[20%]">Số SP</th><th class="py-3 px-2 text-center w-[25%]">Thao tác</th></tr>
                 </thead>
                 <tbody id="list-receipts-left" class="text-gray-800 dark:text-gray-300"></tbody>
             </table>
@@ -1635,7 +1657,7 @@ html:not(.dark) body:not(.dark) {
         <div class="overflow-x-auto border border-blue-100 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 p-2 md:p-4">
             <table class="w-full text-sm">
                 <thead class="bg-gray-50 dark:bg-slate-800 border-b dark:border-slate-700 text-gray-800 dark:text-gray-200">
-                    <tr><th class="p-3 text-left">Số phiếu</th><th class="p-3 text-left">Ngày nhập</th><th class="p-3 text-left">Số SP</th><th class="p-3 text-left">Thao tác</th></tr>
+                    <tr><th class="py-3 px-2 text-center w-[25%]">Số phiếu</th><th class="py-3 px-2 text-center w-[30%]">Ngày nhập</th><th class="py-3 px-2 text-center w-[20%]">Số SP</th><th class="py-3 px-2 text-center w-[25%]">Thao tác</th></tr>
                 </thead>
                 <tbody id="list-receipts-right" class="text-gray-800 dark:text-gray-300"></tbody>
             </table>
@@ -1724,7 +1746,7 @@ html:not(.dark) body:not(.dark) {
 
    <div class="flex flex-col lg:flex-row gap-4 w-full">
    <div class="lg:w-1/2 w-full space-y-4 h-auto md:h-[800px]">
-    <div class="bg-white dark:bg-slate-900 p-3 md:p-4 rounded-2xl border-4 border-red-500 shadow-sm h-full">
+    <div class="bg-white dark:bg-slate-900 p-2 md:p-4 rounded-2xl border-4 border-red-500 shadow-sm h-full">
             
             <div class="flex gap-2 mb-4">
                 <div class="flex-1 bg-yellow-50 dark:bg-slate-950 p-2 rounded-xl border border-yellow-200 dark:border-slate-700 flex items-center gap-1">
@@ -1757,7 +1779,7 @@ html:not(.dark) body:not(.dark) {
     </div>
 
         <div class="lg:w-1/2 w-full space-y-4 h-[800px] flex flex-col">
-            <div class="bg-blue-100 dark:bg-slate-900 p-3 md:p-4 rounded-2xl border-4 border-blue-400 shadow-sm space-y-3">
+            <div class="bg-blue-100 dark:bg-slate-900 p-2 md:p-4 rounded-2xl border-4 border-blue-400 shadow-sm space-y-3">
                 <div class="flex gap-2">
                     <input type="text" id="sell-receipt" class="w-1/4 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-xs dark:text-white" placeholder="Số phiếu" readonly>
                     
@@ -1798,7 +1820,7 @@ html:not(.dark) body:not(.dark) {
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-slate-900 p-3 md:p-4 rounded-2xl shadow-sm border-4 border-blue-400 h-48 md:h-auto md:flex-1 overflow-y-auto">
+            <div class="bg-white dark:bg-slate-900 p-2 md:p-4 rounded-2xl shadow-sm border-4 border-blue-400 h-48 md:h-auto md:flex-1 overflow-y-auto">
                 <table class="w-full text-xs border-collapse">
                     <thead class="bg-gray-50 dark:bg-slate-800 border-b border-gray-300 dark:border-slate-700 sticky top-0">
                         <tr>
@@ -1815,7 +1837,7 @@ html:not(.dark) body:not(.dark) {
                 </table>
             </div>
 
-            <div class="bg-blue-100 dark:bg-slate-900 p-4 rounded-2xl border-4 border-blue-400">
+            <div class="bg-blue-100 dark:bg-slate-900 p-2 md:p-4 rounded-2xl border-4 border-blue-400">
                 <div class="flex justify-between items-center mb-4">
                     <span class="text-red-600 dark:text-red-400">Tổng thanh toán:</span>
                     <span id="cart-total-display" class="text-xl font-black text-red-500">0 đ</span>
@@ -1900,7 +1922,7 @@ html:not(.dark) body:not(.dark) {
 </div>
 
       <!-- PHẦN 5: KHÁCH HÀNG -->
-<div id="page-customers" class="space-y-6 p-4 md:p-6 hidden">
+<div id="page-customers" class="space-y-6 p-2 md:p-6 hidden">
     <h2 class="text-2xl font-bold text-slate-800 dark:text-white border-b border-slate-200 dark:border-slate-700 pb-2">DS ĐẠI LÝ & CÔNG NỢ</h2>
     
     <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -1921,12 +1943,12 @@ html:not(.dark) body:not(.dark) {
             <table class="w-full text-sm text-left border-collapse">
                 <thead class="sticky top-0 z-20 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold uppercase text-[11px] tracking-wider">
                     <tr>
-                        <th class="p-4 border-b border-slate-200 dark:border-slate-700">Tên đại lý</th>
-                        <th class="p-4 border-b border-slate-200 dark:border-slate-700">Địa chỉ</th>
-                        <th class="p-4 border-b border-slate-200 dark:border-slate-700">Số điện thoại</th>
-                        <th class="p-4 border-b border-slate-200 dark:border-slate-700 text-center text-green-600">Đã trả</th>
-                        <th class="p-4 border-b border-slate-200 dark:border-slate-700 text-center text-red-600">Công nợ</th>
-                        <th class="p-4 border-b border-slate-200 dark:border-slate-700 text-center">Thao tác</th>
+                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 w-[20%]">Tên đại lý</th>
+                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 w-[20%]">Địa chỉ</th>
+                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 w-[15%]">Số điện thoại</th>
+                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 text-center text-green-600 w-[15%]">Đã trả</th>
+                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 text-center text-red-600 w-[15%]">Công nợ</th>
+                        <th class="py-4 px-1 border-b border-slate-200 dark:border-slate-700 text-center w-[15%]">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody id="customer-list-body" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody>
@@ -1937,7 +1959,7 @@ html:not(.dark) body:not(.dark) {
 
 
 <!-- QUẢN LÝ DANH MỤC SẢN PHẨM -->
-<div id="page-products-manage" class="hidden p-4 md:p-6 space-y-6">
+<div id="page-products-manage" class="hidden p-2 md:p-6 space-y-6">
     <h2 class="text-2xl font-bold text-gray-800">QUẢN LÝ DANH MỤC SẢN PHẨM</h2>
     
     <div class="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -1961,10 +1983,10 @@ html:not(.dark) body:not(.dark) {
         <table class="w-full bg-white text-sm">
             <thead class="sticky top-0 bg-gray-50 z-10">
                 <tr>
-                    <th class="p-4 border-b text-left font-bold text-gray-600">Mã vạch</th>
-                    <th class="p-4 border-b text-left font-bold text-gray-600">Tên sản phẩm</th>
-                    <th class="p-4 border-b text-left font-bold text-gray-600">ĐVT</th>
-                    <th class="p-4 border-b text-center font-bold text-gray-600">Hành động</th>
+                    <th class="py-4 px-2 border-b text-left font-bold text-gray-600 dark:text-slate-300 w-[25%]">Mã vạch</th>
+                    <th class="py-4 px-2 border-b text-left font-bold text-gray-600 dark:text-slate-300 w-[35%]">Tên sản phẩm</th>
+                    <th class="py-4 px-2 border-b text-left font-bold text-gray-600 dark:text-slate-300 w-[15%]">ĐVT</th>
+                    <th class="py-4 px-2 border-b text-center font-bold text-gray-600 dark:text-slate-300 w-[25%]">Hành động</th>
                 </tr>
             </thead>
             <tbody id="prod-manage-body"></tbody>
@@ -1975,7 +1997,7 @@ html:not(.dark) body:not(.dark) {
 
 <!-- LỊCH SỬ HOÁ ĐƠN BÁN HÀNG -->
 
-<div id="page-history" class="hidden p-4 md:p-6 space-y-6">
+<div id="page-history" class="hidden p-2 md:p-6 space-y-6">
     <h2 class="text-2xl font-bold text-slate-800 border-b pb-2">LỊCH SỬ HOÁ ĐƠN</h2>
     
     <div class="bg-white p-4 md:p-6 rounded-2xl shadow-lg border border-blue-200">
@@ -2050,7 +2072,7 @@ html:not(.dark) body:not(.dark) {
 
        
 		<!-- PHẦN 6: BÁO CÁO -->
-<div id="page-report" class="hidden p-4 md:p-8 space-y-6 md:space-y-8 bg-slate-50 min-h-screen">
+<div id="page-report" class="hidden p-2 md:p-8 space-y-6 md:space-y-8 bg-slate-50 dark:bg-slate-950 min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-300">
     <div class="border-b pb-4 md:pb-6">
         <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900">Trung Tâm Báo Cáo</h2>
         <p class="text-slate-500 mt-1 text-sm md:text-base">Xuất dữ liệu chi tiết phục vụ đối soát và quản lý kho</p>
@@ -2158,7 +2180,7 @@ html:not(.dark) body:not(.dark) {
 
 		<!-- PHẦN 6: SẢN XUẤT -->
 
-<div id="page-SanXuat" class="page-content hidden p-6 bg-gray-50">
+<div id="page-SanXuat" class="page-content hidden p-2 md:p-6 bg-gray-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300">
   <div class="max-w-[98%] mx-auto"> <!-- Tăng chiều rộng tại đây -->
     <h3 class="mb-6 font-bold text-2xl text-gray-800">THEO DÕI SẢN XUẤT</h3>
 
@@ -2192,15 +2214,15 @@ html:not(.dark) body:not(.dark) {
           <div class="overflow-y-auto max-h-[65vh] overflow-x-auto border border-gray-100 rounded-lg">
             <table class="w-full text-left border-collapse">
               <thead class="sticky top-0 bg-gray-100 z-10">
-                <tr class="border-b border-gray-200">
-                  <th class="p-3 text-xs md:text-sm font-semibold text-gray-700">Ngày</th>
-                  <th class="p-3 text-xs md:text-sm font-semibold text-gray-700">Số phiếu</th>
-                  <th class="p-3 text-xs md:text-sm font-semibold text-gray-700">Sản phẩm</th>
-                  <th class="p-3 text-xs md:text-sm font-semibold text-gray-700">SL</th>
-                  <th class="p-3 text-xs md:text-sm font-semibold text-gray-700">Mới mua</th>
-                  <th class="p-3 text-xs md:text-sm font-semibold text-gray-700">Chờ đóng</th>
-                  <th class="p-3 text-xs md:text-sm font-semibold text-gray-700">Đóng xong</th>
-                  <th class="p-3 text-xs md:text-sm font-semibold text-gray-700 text-center">Xóa</th>
+                <tr class="border-b border-gray-200 dark:border-slate-700">
+                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[12%]">Ngày</th>
+                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[12%]">Số phiếu</th>
+                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[20%]">Sản phẩm</th>
+                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[8%] text-center">SL</th>
+                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[12%] text-center">Mới mua</th>
+                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[12%] text-center">Chờ đóng</th>
+                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[10%] text-center">Đóng xong</th>
+                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 text-center w-[14%]">Xóa</th>
                 </tr>
               </thead>
               <tbody id="list-sanxuat" class="text-xs md:text-sm text-gray-600 divide-y divide-gray-100"></tbody>
@@ -2283,7 +2305,7 @@ html:not(.dark) body:not(.dark) {
 </div>
 
 <!-- PHẦN 7: NGUYÊN LIỆU & CÔNG NỢ -->
-<div id="page-NguyenLieu" class="page-content hidden p-2 md:p-6 bg-gray-50">
+<div id="page-NguyenLieu" class="page-content hidden p-2 md:p-6 bg-gray-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300">
     <!-- Bỏ max-w-7xl để dùng toàn bộ màn hình -->
     <div class="w-full">
         <h3 class="mb-6 font-bold text-2xl text-gray-800 px-2 md:px-0">QUẢN LÝ NGUYÊN LIỆU</h3>
@@ -2336,7 +2358,7 @@ html:not(.dark) body:not(.dark) {
             </div>
             <div class="border rounded-lg overflow-hidden">
                 <table class="w-full text-sm text-left">
-                    <thead class="bg-gray-100"><tr><th class="p-3">Tên NL</th><th class="p-3">ĐVT</th><th class="p-3">Hành động</th></tr></thead>
+                    <thead class="bg-gray-100 dark:bg-slate-800"><tr><th class="py-3 px-2 w-[55%]">Tên NL</th><th class="py-3 px-2 w-[25%]">ĐVT</th><th class="py-3 px-2 text-center w-[20%]">Hành động</th></tr></thead>
                     <tbody id="body-nl"></tbody>
                 </table>
             </div>
@@ -2424,7 +2446,7 @@ html:not(.dark) body:not(.dark) {
 </div>
 
 <!-- LỊCH VÀ GHI CHÚ -->
-<div id="page-LichCongViec" class="page-content hidden p-2 md:p-6 bg-gray-50">
+<div id="page-LichCongViec" class="page-content hidden p-2 md:p-6 bg-gray-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300">
     <div class="w-full">
         <h3 class="mb-6 font-bold text-2xl text-gray-800 px-2 md:px-0">LỊCH CÔNG VIỆC & GHI CHÚ</h3>
 
@@ -2497,13 +2519,6 @@ html:not(.dark) body:not(.dark) {
 </div>
 
 
-<script>
-    function openNLTab(tabId) {
-        document.querySelectorAll('.nl-tab-pane').forEach(t => t.classList.add('hidden'));
-        document.getElementById(tabId).classList.remove('hidden');
-        if(tabId === 'nhap-tab') loadDropdowns();
-    }
-</script>
 
    		
 <style media="print">
@@ -2517,10 +2532,27 @@ html:not(.dark) body:not(.dark) {
 </style>
 
     </main>
-	</main> <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
    <script src="script.js"></script>
 
     <script>
+    /* ==================================================================================
+       MỤC LỤC (BẢN ĐỒ CODE) - Dò Ctrl+F theo tiêu đề "TRANG ..." bên dưới để nhảy nhanh
+       ==================================================================================
+       1. TRANG CHỦ            - Tổng quan: doanh thu, biểu đồ, top SP bán chạy, tồn kho
+       2. TRANG NHẬP KHO        - addToCart, saveImport, renderCart, findAndFillProduct...
+       3. TRANG KHO HÀNG        - Xem tồn kho thực tế, ẩn/hiện giá, tìm kiếm sản phẩm
+       4. TRANG BÁN HÀNG        - addSellToCart, renderSellCart, quét mã QR, in hoá đơn
+       5. TRANG LỊCH SỬ HĐ      - Danh sách hoá đơn/phiếu, xem lại, xoá, in lại
+       6. TRANG KHÁCH HÀNG      - addCustomer, payDebt, deleteCustomer, editCustomer
+       7. TRANG BÁO CÁO         - Xuất Excel: doanh thu, nhập-xuất-tồn, công nợ
+       8. TRANG QUẢN LÝ SẢN PHẨM- addProduct, loadProductManage, quét mã vạch quản lý
+       9. TRANG SẢN XUẤT        - khoiTaoTrangSanXuat, luuSanXuat, tinhTonCuoi
+      10. TRANG NGUYÊN LIỆU     - addNguyenLieuToCart, saveFullInvoice, filterNhapKho
+      11. LỊCH & GHI CHÚ        - FullCalendar: thêm/sửa/xoá công việc
+      12. GIAO DIỆN SÁNG/TỐI    - initTheme, toggleTheme (cuối file)
+       ================================================================================== */
+
     // --- CẤU HÌNH KẾT NỐI VÀ KHỞI TẠO ---
     const firebaseConfig = { projectId: "quan-ly-pos-pro" };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
@@ -2535,12 +2567,6 @@ html:not(.dark) body:not(.dark) {
     }
 
     // 2. Hàm đóng menu (Dùng cho các nút trong menu)
-    function closeSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebar-overlay');
-        if (sidebar) sidebar.classList.remove('active');
-        if (overlay) overlay.classList.remove('active');
-    }
 	
 	
 	// ẨN HIỆN MENU TRÊN PC ===
@@ -2667,6 +2693,7 @@ function showPage(pageId) {
     }
 }
 
+// Xử lý phím Enter để tự động nhảy sang ô nhập liệu tiếp theo
 function handleEnter(event, nextId) {
     if (event.key === 'Enter') {
         event.preventDefault();
@@ -2684,6 +2711,7 @@ function handleEnter(event, nextId) {
     }
 }
 
+// Làm tròn số về tối đa 2 chữ số thập phân, bỏ số 0 thừa ở cuối
 function formatNumber(num) {
     // Math.round(n * 1000) / 1000 là để giữ tối đa 3 chữ số thập phân, 
     // bạn có thể đổi thành 100 nếu chỉ cần 2 chữ số.
@@ -2901,6 +2929,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 }
 
+// Tải dữ liệu tổng quan (doanh thu, tồn kho...) cho Trang chủ
 async function loadDashboard(filter = 'default') {
     console.log("Đang tải dữ liệu dashboard...");
 
@@ -3281,7 +3310,7 @@ window.loadOrderData = function(orderId) {
             : 'N/A';
         
         const itemsHtml = (order.items || []).map(item => `
-            <tr class="border-b border-slate-200 dark:border-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors">
+            <tr class="border-b border-slate-200 dark:border-slate-800/80">
                 <td class="p-2.5 text-slate-700 dark:text-slate-300 font-medium">${item.name || 'N/A'}</td>
                 <td class="p-2.5 text-center text-slate-800 dark:text-slate-200 font-bold">${item.qty || 0}</td>
                 <td class="p-2.5 text-right text-slate-600 dark:text-slate-400 font-mono">${Number(item.price || 0).toLocaleString('vi-VN')}</td>
@@ -3362,6 +3391,7 @@ function renderDebtCustomers(customersSnap) {
 
 
 
+// Tải lại số liệu tài chính theo khoảng ngày đã chọn
 function refreshFinance() {
     const fromEl = document.getElementById('fin-from');
     const toEl = document.getElementById('fin-to');
@@ -3383,77 +3413,8 @@ function refreshInventory() {
 }
 
 // Hàm hỗ trợ tính toán ngày (Bạn có thể tinh chỉnh)
-function getDateRange(filter) {
-    const now = new Date();
-    return { start: now, end: now }; 
-}
 
-function renderInventoryList(data) {
-    const container = document.getElementById('home-inventory-list');
-    container.innerHTML = ''; // Xóa cũ
-    
-    // Giả sử data là danh sách sản phẩm
-    data.forEach(item => {
-        const div = document.createElement('div');
-        div.className = "bg-white p-3 rounded-xl shadow-sm flex justify-between items-center";
-        div.innerHTML = `
-            <div>
-                <p class="font-bold text-sm">${item.productName || 'Sản phẩm'}</p>
-                <p class="text-[10px] text-slate-400">SL: ${item.quantity || 0}</p>
-            </div>
-            <div class="text-right">
-                <p class="font-black text-blue-600">${(item.totalAmount || 0).toLocaleString()} đ</p>
-            </div>
-        `;
-        container.appendChild(div);
-    });
-}
 
-async function prepareInventoryData(targetDate) {
-    const d = new Date(targetDate);
-    d.setDate(d.getDate() - 1);
-    const yesterday = d.toISOString().split('T')[0];
-
-    const [salesSnap, receiptsSnap] = await Promise.all([
-        db.collection('sales').get(),
-        db.collection('receipts').get()
-    ]);
-
-    const inventoryMap = {};
-
-    salesSnap.forEach(doc => {
-        const order = doc.data();
-        const orderDate = order.date.toDate().toISOString().split('T')[0];
-        
-        order.items.forEach(item => {
-            if (!inventoryMap[item.name]) inventoryMap[item.name] = { tonDau: 0, nhap: 0, change: 0, out: 0 };
-            
-            if (orderDate < targetDate) {
-                inventoryMap[item.name].tonDau -= Number(item.qty);
-            } else if (orderDate === targetDate) {
-                inventoryMap[item.name].out += Number(item.qty);
-            }
-        });
-    });
-
-    receiptsSnap.forEach(doc => {
-        const receipt = doc.data();
-        const recDate = receipt.date.toDate().toISOString().split('T')[0];
-        
-        receipt.items.forEach(item => {
-            if (!inventoryMap[item.name]) inventoryMap[item.name] = { tonDau: 0, nhap: 0, change: 0, out: 0 };
-            
-            if (recDate < targetDate) {
-                inventoryMap[item.name].tonDau += Number(item.qty);
-            } else if (recDate === targetDate) {
-                if (receipt.type === 'Nhập mới') inventoryMap[item.name].nhap += Number(item.qty);
-                else inventoryMap[item.name].change += Number(item.qty);
-            }
-        });
-    });
-
-    return inventoryMap;
-}
 
 // ================ TỒN KHO (ĐỒNG BỘ DUAL THEME - 3D GLOSSY CHỐNG LÓA) ==============================
 
@@ -3595,80 +3556,6 @@ async function renderInventoryList(filter = 'today') {
 //============================DOANH THU ====================
 
 // Hàm cập nhật Tài chính (Gọi khi thay đổi 2 ô input ngày)
-async function updateFinance() {
-    const fromVal = document.getElementById('fin-from')?.value;
-    const toVal = document.getElementById('fin-to')?.value;
-    if (!fromVal || !toVal) return;
-
-    const startDate = new Date(fromVal);
-    const endDate = new Date(toVal);
-    endDate.setHours(23, 59, 59, 999);
-
-    try {
-        // Tải thêm cả customersSnap để đồng bộ hiển thị và cập nhật Modal chi tiết
-        const [salesSnap, suppliersSnap, customersSnap] = await Promise.all([
-            db.collection('sales').get(),
-            db.collection('suppliers').get(),
-            db.collection('customers').get()
-        ]);
-
-        const filteredSales = salesSnap.docs.map(doc => doc.data()).filter(order => {
-            const orderDate = order.date?.toDate ? order.date.toDate() : new Date(order.date);
-            return orderDate >= startDate && orderDate <= endDate;
-        });
-
-        const allSuppliers = suppliersSnap.docs.map(doc => doc.data());
-        let totalRevenue = 0;
-        
-        // Cách 1: Tính tổng nợ tích lũy thực tế của tất cả khách hàng (Khuyên dùng để đồng nhất hiển thị)
-        let totalDebt = 0;
-        customersSnap.forEach(doc => {
-            totalDebt += (Number(doc.data().debt) || 0);
-        });
-
-        // Ghi chú: Nếu bạn muốn ô này CHỈ hiện nợ phát sinh TRONG KHOẢNG NGÀY LỌC, hãy bỏ comment dòng dưới:
-        // let totalDebt = filteredSales.reduce((sum, order) => order.paymentMethod === "Công nợ" ? sum + (Number(order.total) || 0) : sum, 0);
-
-        const productSalesMap = {};
-        filteredSales.forEach(order => {
-            totalRevenue += (Number(order.total) || 0);
-            if (order.items) {
-                order.items.forEach(item => {
-                    productSalesMap[item.name] = (productSalesMap[item.name] || 0) + Number(item.qty || 0);
-                });
-            }
-        });
-
-        const topProducts = Object.entries(productSalesMap).sort((a, b) => b[1] - a[1]).slice(0, 10);
-        let totalDebtNCC = allSuppliers.reduce((sum, sup) => sum + (Number(sup.debt) || 0), 0);
-        
-        // Cập nhật dữ liệu hiển thị lên các thẻ tóm tắt
-        document.getElementById('total-revenue').innerText = totalRevenue.toLocaleString('vi-VN') + ' đ';
-        document.getElementById('total-debt-summary').innerText = totalDebt.toLocaleString('vi-VN') + ' đ';
-        document.getElementById('total-debt-ncc-summary').innerText = totalDebtNCC.toLocaleString('vi-VN') + ' đ';
-        document.getElementById('profit-summary').innerText = (totalRevenue - totalDebtNCC).toLocaleString('vi-VN') + ' đ';
-        
-        // KHẮC PHỤC LỖI 1: Đồng bộ dữ liệu mới vào biến toàn cục để Modal "Xem chi tiết" lấy đúng dữ liệu lọc
-        window.currentDashboardData = {
-            filteredSales: filteredSales,
-            customersSnap: customersSnap,
-            allSuppliers: allSuppliers 
-        };
-
-        // Vẽ lại danh sách công nợ khách hàng (nếu có sự thay đổi dữ liệu)
-        if (typeof renderDebtCustomers === 'function') {
-            renderDebtCustomers(customersSnap);
-        }
-        
-        // CHỈ VẼ LẠI BIỂU ĐỒ KHI CÓ DỮ LIỆU ĐỂ TRÁNH NHÁY TRẮNG BIỂU ĐỒ
-        if (filteredSales.length > 0) {
-            if (typeof updateRevenueChart === 'function') updateRevenueChart(filteredSales);
-            if (typeof updateTopProductsChart === 'function') updateTopProductsChart(topProducts);
-        }
-    } catch (error) { 
-        console.error("Lỗi khi cập nhật tài chính:", error); 
-    }
-}
 
 //============================BIỂU ĐỒ ==================================
 
@@ -3765,7 +3652,7 @@ function updateRevenueChart(filteredSales) {
                     
                     // --- ĐỒNG BỘ CHI TIẾT BẢNG SANG CẢ GIAO DIỆN SÁNG VÀ TỐI ---
                     let htmlContent = Object.keys(itemsInDay).map(name => `
-                        <tr class="border-b border-slate-200 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors">
+                        <tr class="border-b border-slate-200 dark:border-slate-800/60">
                             <td class="py-2.5 px-2 text-sm text-slate-700 dark:text-slate-300 font-medium">${name}</td>
                             <td class="text-center py-2.5 px-2 text-sm text-slate-500 dark:text-slate-400 font-mono">${itemsInDay[name].qty}</td>
                             <td class="text-right py-2.5 px-2 text-sm font-bold text-cyan-600 dark:text-cyan-400 font-mono">${itemsInDay[name].total.toLocaleString('vi-VN')} đ</td>
@@ -3943,17 +3830,6 @@ function updateMonthlyRevenueChart(allSales) {
     });
 }
 
-function filterRevenueByDayOfMonth(monthKey, allSales) {
-    // 1. Lọc đơn hàng thuộc tháng đó
-    const monthSales = allSales.filter(order => {
-        const d = order.date?.toDate ? order.date.toDate() : new Date(order.date);
-        const orderMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-        return orderMonth === monthKey;
-    });
-
-    // 2. Gọi hàm vẽ biểu đồ chi tiết theo ngày
-    updateRevenueChart(monthSales); 
-}
 
 
 //==== =========================TOP SP BÁN CHẠY (ĐỒNG BỘ GIAO DIỆN SÁNG / TỐI) ====================
@@ -4043,6 +3919,7 @@ db.collection('customers').onSnapshot(() => {
         });
     }
 
+    // Thêm sản phẩm vào giỏ hàng của phiếu Nhập kho
     function addToCart() {
     // Lấy giá trị từ các ô nhập liệu
     const item = {
@@ -4087,6 +3964,7 @@ db.collection('customers').onSnapshot(() => {
     document.getElementById('imp-name').focus();
 }
 
+   // Lưu phiếu nhập kho vào Firebase
    async function saveImport() {
     const btn = document.getElementById('save-import-btn');
     const typeValue = document.getElementById('imp-type').value; 
@@ -4165,6 +4043,7 @@ db.collection('customers').onSnapshot(() => {
     }
 }
 
+// Vẽ lại danh sách giỏ hàng của phiếu Nhập kho
 function renderCart() {
     const cartBox = document.getElementById('cart-box');
     
@@ -4188,7 +4067,7 @@ function renderCart() {
 
     cart.forEach((item, index) => {
         html += `
-            <tr class="border-b odd:bg-white even:bg-slate-50 hover:bg-blue-50 transition-colors">
+            <tr class="border-b odd:bg-white even:bg-slate-50">
                 <td class="p-3 font-medium text-slate-800">
                     ${item.name} 
                     <span class="text-xs bg-gray-200 px-2 py-0.5 rounded text-gray-600 ml-1">${item.unit}</span>
@@ -4210,6 +4089,7 @@ function renderCart() {
     html += `</tbody></table>`;
     cartBox.innerHTML = html;
 }
+// Xoá 1 sản phẩm khỏi giỏ hàng Nhập kho
 function removeFromCart(index) {
     // 1. Kiểm tra xem mảng giỏ hàng của bạn tên là gì (ví dụ: 'cart')
     // Nếu bạn dùng tên khác, hãy đổi chữ 'cart' thành tên đó
@@ -4226,6 +4106,7 @@ function removeFromCart(index) {
     }
 }
 
+    // Xoá trắng các ô nhập liệu ở form Nhập kho
     function resetImportFields() {
         document.getElementById('imp-name').value = '';
         document.getElementById('imp-vendor').value = '';
@@ -4236,6 +4117,7 @@ function removeFromCart(index) {
         updateProductList(); 
     }
 
+  // Tải danh sách phiếu nhập/xuất theo tháng
   function loadReceipts() {
     console.log("Đang tải danh sách phiếu theo tháng...");
     const leftBody = document.getElementById('list-receipts-left');
@@ -4289,21 +4171,24 @@ function removeFromCart(index) {
 
             // Không còn dùng class old-receipt hay style display:none nữa
             const rowHtml = `
-				<tr class="border-b hover:bg-gray-50 text-center">
-					<td class="border p-2 font-bold">${displayId}</td>
-					<td class="border p-2">${dateStr}</td>
-					<td class="border p-2">${itemCount} loại</td>
-					<td class="border p-2">
-						<div class="flex justify-center gap-4">
-							<button type="button" onclick="viewReceipt('${doc.id}')" title="Xem" 
-									class="text-blue-600 hover:text-blue-800 transition-transform hover:scale-110">
-								<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-							</button>
-							
-							<button type="button" onclick="event.preventDefault(); deleteReceipt('${doc.id}')" title="Xóa" 
-									class="text-red-600 hover:text-red-800 transition-transform hover:scale-110">
-								<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-							</button>
+				<tr>
+					<td colspan="4" class="p-1">
+						<div class="flex items-center w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2
+								shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]" style="border-left-color:#fbbf24 !important; border-right-color:#fbbf24 !important;">
+							<div class="px-2 w-[25%] text-[12px] font-bold text-slate-800 dark:text-slate-100 text-center">${displayId}</div>
+							<div class="px-2 w-[30%] text-[12px] text-slate-600 dark:text-slate-400 text-center">${dateStr}</div>
+							<div class="px-2 w-[20%] text-[12px] text-slate-600 dark:text-slate-400 text-center">${itemCount} loại</div>
+							<div class="px-2 w-[25%] flex justify-center gap-4">
+								<button type="button" onclick="viewReceipt('${doc.id}')" title="Xem" 
+										class="text-blue-600 hover:text-blue-800 transition-transform hover:scale-110">
+									<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+								</button>
+								
+								<button type="button" onclick="event.preventDefault(); deleteReceipt('${doc.id}')" title="Xóa" 
+										class="text-red-600 hover:text-red-800 transition-transform hover:scale-110">
+									<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+								</button>
+							</div>
 						</div>
 					</td>
 				</tr>
@@ -4352,28 +4237,6 @@ window.deleteReceipt = function(docId) {
     });
 };
 
-function searchReceipts() {
-    let input = document.getElementById("searchReceiptInput");
-    let filter = input.value.toLowerCase();
-    
-    // Lấy tất cả các dòng của cả 2 bảng
-    let allRows = document.querySelectorAll('#list-receipts-left tr, #list-receipts-right tr');
-
-    allRows.forEach(row => {
-        let idCell = row.getElementsByTagName("td")[0];
-        if (idCell) {
-            let txtValue = idCell.textContent || idCell.innerText;
-            
-            // Chỉ cần kiểm tra xem mã phiếu có chứa từ khóa tìm kiếm hay không
-            // Nếu tìm kiếm trống, hiển thị lại tất cả các phiếu của tháng đó
-            if (txtValue.toLowerCase().indexOf(filter) > -1) {
-                row.style.display = "";
-            } else {
-                row.style.display = "none";
-            }
-        }
-    });
-}
 
 
 //===== xem theo tháng , Ngày
@@ -4416,6 +4279,7 @@ function filterReceipts() {
     });
 }
 
+// Tự động tính ngày đầu/cuối tháng khi chọn tháng
 function setDateRangeForMonth(monthValue) {
     if (!monthValue) return;
 
@@ -4448,6 +4312,7 @@ function setDateRangeForMonth(monthValue) {
     if (toEl) toEl.value = lastDay;
 }
 
+    // Cập nhật datalist gợi ý tên sản phẩm (dùng cho ô tìm kiếm)
     function updateProductList() {
     const datalist = document.getElementById('prod-list');
     if (!datalist) return; // Dừng lại nếu trang hiện tại không có phần tử này
@@ -4532,7 +4397,7 @@ function loadInventory() {
                 tbody.innerHTML += `
                 <tr class="transition-all duration-300">
                     <td colspan="5" class="p-0.5">
-                        <div class="flex items-center w-full bg-white border border-slate-200 border-l-4 border-l-blue-400 border-r-4 border-r-blue-400 rounded-lg p-1.5 shadow-[0_4px_6px_-2px_rgba(0,0,0,0.2)] hover:shadow-[0_6px_10px_-2px_rgba(0,0,0,0.25)] hover:scale-[1.002] transition-all duration-300">
+                        <div class="flex items-center w-full bg-white border border-slate-200 border-l-4 border-r-4 rounded-lg p-1.5 shadow-[0_4px_6px_-2px_rgba(0,0,0,0.2)]" style="border-left-color:#60a5fa !important; border-right-color:#60a5fa !important;">
                             <div class="px-2 w-[40%] text-left">
                                 <div class="font-bold text-[13px] text-slate-800 leading-tight">${item.name}</div>
                                 <div class="text-[10px] text-gray-400 font-mono">Mã: ${barcode}</div>
@@ -4619,6 +4484,7 @@ window.updateProductPrice = async function(productName, newValue, type) {
 
 
 
+// Tải danh sách sản phẩm từ Firebase và đổ vào các ô chọn (dropdown) toàn hệ thống
 async function updateProductDropdowns() {
     try {
         const snapshot = await db.collection('products').orderBy('createdAt', 'asc').get();
@@ -4675,82 +4541,6 @@ async function updateProductDropdowns() {
     }
 }
 
-function autoFillDetails(productName) {
-    // 1. CHẶN LỖI: Nếu đang trong quá trình reset giỏ hàng, thoát ngay.
-    // Điều này ngăn chặn việc hàm tự chạy lại khi bạn dùng setChoiceByValue('')
-    if (window.isResetting) {
-        console.log("autoFillDetails: Đang reset, bỏ qua.");
-        return;
-    }
-
-    // 2. CHẶN LỖI: Nếu tên rỗng, không làm gì cả
-    if (!productName || productName.trim() === "") {
-        return;
-    }
-
-    // 3. Tìm sản phẩm dựa trên tên đã chọn
-    const product = window.allProducts.find(p => p.name === productName);
-    
-    // 4. Định nghĩa các ô ĐVT theo ID thực tế trong HTML
-    const sellUnit = document.getElementById('sell-unit');
-    const impUnit = document.getElementById('imp-unit');
-    
-    // --- XỬ LÝ CHO TRANG BÁN HÀNG (Dùng <input>) ---
-    if (sellUnit) {
-        sellUnit.value = product ? product.unit : '';
-    }
-    
-    // --- XỬ LÝ CHO TRANG NHẬP KHO (Dùng <select>) ---
-    if (impUnit) {
-        if (product) {
-            let found = false;
-            for (let i = 0; i < impUnit.options.length; i++) {
-                if (impUnit.options[i].text === product.unit) {
-                    impUnit.selectedIndex = i;
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) console.warn("Không tìm thấy ĐVT: " + product.unit + " trong danh sách chọn.");
-        } else {
-            impUnit.selectedIndex = 0; // Reset về lựa chọn đầu tiên
-        }
-    }
-    
-    // 5. Cập nhật thêm nếu có hàm tính giá/tồn kho liên quan
-    if (typeof updatePriceFromType === 'function') {
-        updatePriceFromType();
-    }
-}
-async function addProduct() {
-    // Lấy giá trị từ trang "Cấu hình" (bạn cần có 2 ô input để nhập tên và đơn vị)
-    const name = document.getElementById('new-prod-name').value;
-    const unit = document.getElementById('new-prod-unit').value;
-
-    if (!name || !unit) {
-        Swal.fire('Lỗi', 'Vui lòng nhập đầy đủ Tên và Đơn vị tính!', 'error');
-        return;
-    }
-
-    try {
-        await db.collection('products').add({
-            name: name,
-            unit: unit,
-            createdAt: new Date()
-        });
-
-        Swal.fire('Thành công', 'Đã thêm sản phẩm mới vào danh mục!', 'success');
-        
-        // Tải lại danh sách dropdown trên các trang Bán hàng/Nhập kho
-        updateProductDropdowns(); 
-        
-        // Xóa ô nhập liệu
-        document.getElementById('new-prod-name').value = '';
-        document.getElementById('new-prod-unit').value = '';
-    } catch (error) {
-        Swal.fire('Lỗi', 'Không thể thêm sản phẩm: ' + error.message, 'error');
-    }
-}
 
 window.viewReceipt = function(docId) {
     // 1. Tìm phiếu trong mảng window.allReceipts bằng docId
@@ -4977,17 +4767,6 @@ async function exportToExcel() {
 
 
 
-function updateVendorList() {
-    const dataList = document.getElementById('vendor-list');
-    dataList.innerHTML = ''; // Xóa danh sách cũ
-    
-    // Giả sử mảng customers của bạn có cấu trúc: [{name: 'NCC A'}, {name: 'NCC B'}]
-    customers.forEach(customer => {
-        const option = document.createElement('option');
-        option.value = customer.name; // Hoặc tên trường dữ liệu bạn dùng
-        dataList.appendChild(option);
-    });
-}
 
 window.renderTopProducts = function(products) {
     const list = document.getElementById('top-products-list');
@@ -4998,7 +4777,7 @@ window.renderTopProducts = function(products) {
     products.forEach(product => {
         // Đã sửa: p-4 -> p-2.5, mb-2 (nếu có thẻ cha wrap), giảm padding thẻ span
         list.innerHTML += `
-            <div class="bg-white p-2.5 mb-2 rounded-2xl flex justify-between items-center shadow-sm border border-slate-100 transition hover:bg-slate-50">
+            <div class="bg-white p-2.5 mb-2 rounded-2xl flex justify-between items-center shadow-sm border border-slate-100">
                 <span class="font-bold text-slate-700 text-sm truncate pr-2">${product.name}</span>
                 <span class="bg-rose-50 px-2 py-0.5 rounded-lg text-[11px] font-bold text-rose-600">
                     ${product.sold} bán
@@ -5011,6 +4790,7 @@ window.renderTopProducts = function(products) {
 // Hàm tìm sản phẩm và điền vào form
 let isProcessing = false; // Thêm biến này ở đầu file JS của bạn
 
+// Tìm sản phẩm theo mã vạch đã quét và tự động điền vào form Nhập kho
 async function findAndFillProduct(decodedText) {
     const scannedBarcode = String(decodedText).trim();
     if (!scannedBarcode) return;
@@ -5058,93 +4838,10 @@ async function findAndFillProduct(decodedText) {
 }
 // Hàm điền dữ liệu "sạch"
 // Chỉ giữ lại 1 bản duy nhất này thôi
-function fillProductToForm(product) {
-    const targetId = 'imp-name';
-    const selectElement = document.getElementById(targetId);
-
-    // Cập nhật Choices.js hoặc Select thường
-    if (window.choicesInstances && window.choicesInstances[targetId]) {
-        window.choicesInstances[targetId].removeActiveItems();
-        window.choicesInstances[targetId].setChoiceByValue(product.name);
-    } else {
-        selectElement.value = product.name;
-    }
-    
-    // Trigger sự kiện để các hàm tính giá/ĐVT cập nhật theo
-    selectElement.dispatchEvent(new Event('change', { bubbles: true }));
-    
-    // Thông báo thành công (chỉ hiện 1 lần)
-    Swal.fire({ 
-        icon: 'success', 
-        title: 'Đã chọn!', 
-        text: product.name, 
-        timer: 1000, 
-        showConfirmButton: false 
-    });
-
-    // Focus vào ô số lượng để nhập nhanh
-    const qtyInput = document.getElementById('imp-qty');
-    if (qtyInput) qtyInput.focus();
-}
 
 
 // Hàm điền dữ liệu vào ô Tên sản phẩm
-function fillForm(productId) {
-    const selectBox = document.getElementById('imp-name');
-    selectBox.value = productId;
-    
-    // Gọi sự kiện change để các hàm khác (nếu có) tự cập nhật ĐVT/Giá
-    selectBox.dispatchEvent(new Event('change'));
-    
-    Swal.fire({ icon: 'success', title: 'Đã tìm thấy', timer: 1000, showConfirmButton: false });
-    document.getElementById('imp-qty').focus(); // Nhảy vào ô số lượng
-}
 
-// Xử lý khi quét bằng máy USB (Nhấn Enter)
-document.getElementById('search-by-barcode').addEventListener('keypress', async (e) => {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        // Chỉ gọi hàm này, không gọi thêm fillForm hay hàm nào khác
-        await findAndFillProduct(e.target.value);
-        e.target.value = '';
-    }
-});
-
-
-
-async function startScanner(pageType) {
-    const targetId = (pageType === 'prod') ? 'reader-manage' : 'reader';
-    const readerDiv = document.getElementById(targetId);
-
-    if (!readerDiv) {
-        Swal.fire('Lỗi', 'Không tìm thấy khung quét camera!', 'error');
-        return;
-    }
-
-    // Chỉ hiện khung camera thôi
-    readerDiv.classList.remove('hidden');
-    
-    window.html5QrCode = new Html5Qrcode(targetId);
-    
-    try {
-        await window.html5QrCode.start(
-            { facingMode: "environment" },
-            { fps: 10, qrbox: 250 },
-            async (decodedText) => {
-                if (pageType === 'prod') {
-                    document.getElementById('new-prod-barcode').value = decodedText;
-                } else {
-                    await findAndFillProduct(decodedText);
-                }
-                stopScanner('import'); 
-            }
-        );
-    } catch (err) {
-        console.error(err);
-        Swal.fire('Lỗi Camera', 'Hãy cấp quyền truy cập!', 'error');
-        stopScanner('import');
-    }
-}
 
 function stopScanner(pageType) {
     // 1. Dừng camera
@@ -5253,23 +4950,8 @@ async function autoFillDetails(name) {
     }
 }
 
-async function loadAllProductsForCache() {
-    try {
-        const snapshot = await db.collection('products').get(); 
-        let products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        
-        // Sắp xếp theo tên để cố định vị trí
-        products.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-        
-        window.productList = products;
-        window.allProductCache = window.productList;
-        
-        // XÓA DÒNG renderProductGrid() Ở ĐÂY
-    } catch (err) {
-        console.error("Lỗi tải cache SP:", err);
-    }
-}
 
+  // Thêm sản phẩm vào giỏ hàng của trang Bán hàng
   async function addSellToCart(productName, qty = 1, priceType = 'retail') {
     // 1. Lấy thông tin sản phẩm từ cache
     const p = window.allProductCache.find(i => i.name === productName);
@@ -5314,6 +4996,7 @@ async function loadAllProductsForCache() {
     Toast.fire({ icon: 'success', title: 'Đã thêm ' + p.name });
 }
 
+// Vẽ lại giỏ hàng của trang Bán hàng
 function renderSellCart() {
     const body = document.getElementById('sell-cart-body');
     if (!body) return;
@@ -5326,7 +5009,7 @@ function renderSellCart() {
     }
 
     body.innerHTML = sellCart.map((i, index) => `
-    <tr class="border-b border-gray-300 hover:bg-slate-50">
+    <tr class="border-b border-gray-300">
         <td class="p-2 text-left font-medium text-slate-800 break-words w-1/4 text-[11px] border-r border-gray-300">${i.name}</td>
         
         <td class="p-2 w-[50px] border-r border-gray-300">
@@ -5358,18 +5041,6 @@ function renderSellCart() {
 
 // HMAF MỚI 
 
-function updatePrice(productId, newPrice) {
-    // 1. Tìm sản phẩm trong giỏ
-    const cartItem = window.sellCart.find(item => item.id === productId);
-    if (cartItem) {
-        // 2. Cập nhật giá mới (đảm bảo là số)
-        cartItem.price = Number(newPrice);
-        
-        // 3. Render lại giỏ hàng để cập nhật "Thành tiền" và "Tổng thanh toán"
-        renderSellCart(); 
-        updateGrandTotal();
-    }
-}
 
 async function calculateAllStock() {
     let inventory = {};
@@ -5418,9 +5089,6 @@ async function calculateAllStock() {
     }
 }
 
-function updateItemNote(index, value) {
-    sellCart[index].note = value;
-}
 
 
 // ==========
@@ -5476,6 +5144,7 @@ function renderProductGrid() {
     });
 }
 
+// Lọc/tìm sản phẩm hiển thị trên lưới sản phẩm trang Bán hàng
 function filterProducts() {
     const searchTerm = document.getElementById('product-search').value.toLowerCase();
     const items = document.querySelectorAll('#product-grid > div');
@@ -5486,6 +5155,7 @@ function filterProducts() {
     });
 }
 
+// Thêm nhanh sản phẩm vào giỏ khi bấm vào ô sản phẩm (trang Bán hàng)
 async function quickAdd(productName, event) {
     const forceNew = event ? event.shiftKey : false;
     const p = window.allProductCache.find(i => i.name === productName);
@@ -5543,6 +5213,7 @@ async function quickAdd(productName, event) {
     Toast.fire({ icon: 'success', title: (forceNew ? 'Thêm mới: ' : 'Đã thêm: ') + p.name });
 }
 
+// Cập nhật tổng tiền hiển thị trên giỏ hàng Bán hàng
 function updateCartTotalDisplay() {
     const totalDisplay = document.getElementById('cart-total-display');
     if (!totalDisplay) return;
@@ -5569,6 +5240,7 @@ function applyGlobalPrice() {
     if (typeof updateCartTotalDisplay === 'function') updateCartTotalDisplay();
 }
 
+// Cập nhật số lượng/giá của 1 dòng trong giỏ hàng Bán hàng
 function updateCartItem(index, field, value) {
     const item = sellCart[index];
     
@@ -5946,7 +5618,7 @@ async function viewInvoiceDetails(docId) {
 				body.innerHTML += `
 					<tr class="hover:bg-transparent transition-colors">
 						<td colspan="5" class="p-2">
-							<div class="flex items-center w-full bg-white border border-slate-200 border-l-4 border-l-blue-400 border-r-4 border-r-blue-400 rounded-lg p-3 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] hover:shadow-xl transition-all duration-200">
+							<div class="flex items-center w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-3 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]" style="border-left-color:#a855f7 !important; border-right-color:#a855f7 !important;">
 								<div class="text-[11px] font-bold text-slate-700 w-[10%] truncate px-2">${data.id || 'N/A'}</div>
 								<div class="text-[11px] font-bold text-slate-900 truncate w-[30%] px-2">${data.customer || 'Khách lẻ'}</div>
 								<div class="text-[11px] font-bold text-slate-700 w-[15%] text-center px-2">${dateStr}</div>
@@ -6003,19 +5675,9 @@ function handleMonthChange() {
 
 
 
-function initSalesPage() {
-    const now = new Date();
-    const monthStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
-    
-    const filterMonth = document.getElementById('filterMonth');
-    if (filterMonth) {
-        filterMonth.value = monthStr;
-        // Gọi hàm handleMonthChange ngay lần đầu để nó tự điền dateFrom/dateTo
-        handleMonthChange(); 
-    }
-}
 
 
+// In lại hóa đơn bán hàng đã lưu
 async function reprintSale(docId) {
     try {
         const doc = await db.collection('sales').doc(docId).get();
@@ -6096,6 +5758,7 @@ async function reprintSale(docId) {
 }
 
 
+// Xoá hóa đơn bán hàng, hoàn lại tồn kho và công nợ liên quan
 async function deleteSale(docId) {
    if (confirm("Xóa hóa đơn này sẽ cộng lại hàng vào kho và điều chỉnh lại công nợ (nếu có). Bạn chắc chắn chứ?")) {
         try {
@@ -6158,6 +5821,7 @@ async function deleteSale(docId) {
     }
 }
 
+// Tự động điền địa chỉ/SĐT khi chọn tên khách hàng có sẵn
 async function autoFillCustomer(customerName) {
     if (!customerName) return;
 
@@ -6181,40 +5845,6 @@ async function autoFillCustomer(customerName) {
     }
 }
 
-function loadCustomers() {
-    const body = document.getElementById('customer-list-body');
-    const datalist = document.getElementById('cust-list');
-    
-    db.collection('customers').get().then(snapshot => {
-        // 1. Render bảng danh sách đại lý (nếu đang ở trang khách hàng)
-        if (body) {
-            body.innerHTML = '';
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                body.innerHTML += `
-                    <tr>
-                        <td class="p-3 border">${data.name}</td>
-                        <td class="p-3 border">${data.address}</td>
-                        <td class="p-3 border">${data.phone}</td>
-                        <td class="p-3 border text-center">
-                            <button onclick="deleteCustomer('${doc.id}')" class="text-red-500 hover:underline">Xóa</button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        // 2. Cập nhật vào ô "Khách hàng" ở trang Bán hàng
-        if (datalist) {
-            datalist.innerHTML = ''; 
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                // Đảm bảo option này chỉ chứa tên
-                datalist.innerHTML += `<option value="${data.name}">`;
-            });
-        }
-    });
-}
 
 // chọn tên KH mới
 
@@ -6259,6 +5889,7 @@ document.addEventListener('click', (e) => {
 
 
 	
+	// Đọc số tiền thành chữ (dùng khi in hóa đơn/phiếu)
 	function docSo(number) {
     if (number == 0) return "Không đồng./.";
     
@@ -6266,6 +5897,7 @@ document.addEventListener('click', (e) => {
     const tens = ["", "mười", "hai mươi", "ba mươi", "bốn mươi", "năm mươi", "sáu mươi", "bảy mươi", "tám mươi", "chín mươi"];
     const groups = ["", "nghìn", "triệu", "tỷ"];
 
+    // Hàm phụ trợ cho docSo(): đọc từng nhóm 3 chữ số thành chữ
     function readGroup(n) {
         let s = "";
         let h = Math.floor(n / 100);
@@ -6315,16 +5947,6 @@ document.addEventListener('click', (e) => {
 // ================QUÉT MÃ QR ==============
 // ===== HÀM HỖ TRỢ TÌM KIẾM CHUẨN XÁC =====
 
-function getProductByBarcode(scannedCode) {
-    const code = String(scannedCode || "").trim();
-    if (!code) return null;
-
-    return window.allProductCache.find(p => {
-        // Kiểm tra mọi biến thể của trường barcode trong Database
-        const dbBarcode = String(p.barcode || p.Barcode || p.BARCODE || "").trim();
-        return dbBarcode === code;
-    });
-}
 
 // ===== QUÉT MÃ QR (CAMERA) =====
 
@@ -6361,6 +5983,7 @@ async function startScannerSell() {
     }
 }
 
+// Tắt camera quét mã vạch ở trang Bán hàng
 async function stopScannerSell() {
     if (window.html5QrCode) {
         try {
@@ -6390,6 +6013,7 @@ document.getElementById('barcode-scanner-sell').addEventListener('keypress', fun
     }
 });
 
+// Tìm sản phẩm trực tiếp theo mã vạch (không qua cache)
 async function findProductDirectly(barcode) {
     try {
         // 1. Tìm tất cả sản phẩm có cùng mã vạch (dùng .where thay vì .limit)
@@ -6430,11 +6054,6 @@ async function findProductDirectly(barcode) {
     }
 }
 // tièm kiếm phiếu xuất bỏ
-function searchInvoice() {
-    // Chỉ cần gọi lại hàm loadSalesList, 
-    // hàm này đã được nâng cấp để tự tìm kiếm trong toàn bộ dữ liệu.
-    loadSalesList();
-}
 
 // Nếu muốn thêm xác nhận khi xóa:
 function removeSellItem(index) {
@@ -6785,6 +6404,7 @@ document.addEventListener('keydown', function(event) {
 // Biến toàn cục để lưu trữ dữ liệu khách hàng
 window.allCustomersData = []; 
 
+// Tải danh sách khách hàng kèm công nợ đã trả, hiển thị bảng khách hàng
 async function loadCustomers() {
     console.log("Đang tải dữ liệu mới nhất...");
     const body = document.getElementById('customer-list-body');
@@ -6851,9 +6471,9 @@ function renderCustomerList() {
        body.innerHTML += `
     <tr class="transition-all duration-300">
         <td colspan="6" class="p-1">
-            <div class="flex items-center w-full bg-white border border-slate-200 border-l-4 border-l-blue-400 border-r-4 border-r-blue-400 rounded-lg p-2 
+            <div class="flex items-center w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2 
                         shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] 
-                        hover:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.15)] hover:scale-[1.005] hover:ring-2 hover:ring-blue-200 transition-all duration-300">
+                        " style="border-left-color:#14b8a6 !important; border-right-color:#14b8a6 !important;">
                         
                 <div class="px-2 text-[11px] font-bold ${debt > 0 ? 'text-blue-600' : 'text-slate-700'} w-[20%] truncate">${data.name || ''}</div>
                 <div class="px-2 text-[11px] text-slate-600 w-[20%] truncate">${data.address || ''}</div>
@@ -6863,12 +6483,12 @@ function renderCustomerList() {
                 
                 <div class="px-1 w-[15%] text-center relative">
                     <button onclick="toggleMenu(this)" class="bg-blue-600 text-white py-0.5 px-2 rounded text-[10px] font-bold shadow-sm">Thao tác ▼</button>
-                    <div class="hidden absolute menu-action right-0 mt-2 w-28 bg-white border border-blue-200 rounded-lg shadow-2xl p-1 flex-col gap-1 z-[9999]">
-                        <button onclick="payDebt('${data.id}', ${debt}, '${data.name}')" class="bg-green-600 text-white py-1 rounded text-[10px] w-full font-bold">Trả nợ</button>
-                        <button onclick="setOpeningDebt('${data.id}', '${data.name}')" class="bg-orange-500 text-white py-1 rounded text-[10px] w-full font-bold">Đầu kỳ</button>
-                        <button onclick="showDebtHistory('${data.id}', '${data.name}')" class="bg-indigo-500 text-white py-1 rounded text-[10px] w-full font-bold">Lịch sử</button>
-                        <button onclick="editCustomer('${data.id}')" class="bg-blue-500 text-white py-1 rounded text-[10px] w-full font-bold">Sửa</button>
-                        <button onclick="deleteCustomer('${data.id}')" class="bg-red-500 text-white py-1 rounded text-[10px] w-full font-bold">Xóa</button>
+                    <div class="hidden absolute menu-action right-0 mt-2 w-32 bg-white dark:bg-slate-800 border border-blue-200 dark:border-slate-700 rounded-lg shadow-2xl p-2 flex flex-col gap-1.5 z-[9999]">
+                        <button onclick="payDebt('${data.id}', ${debt}, '${data.name}')" class="bg-green-600 hover:bg-green-700 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Trả nợ</button>
+                        <button onclick="setOpeningDebt('${data.id}', '${data.name}')" class="bg-orange-500 hover:bg-orange-600 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Đầu kỳ</button>
+                        <button onclick="showDebtHistory('${data.id}', '${data.name}')" class="bg-indigo-500 hover:bg-indigo-600 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Lịch sử</button>
+                        <button onclick="editCustomer('${data.id}')" class="bg-blue-500 hover:bg-blue-600 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Sửa</button>
+                        <button onclick="deleteCustomer('${data.id}')" class="bg-red-500 hover:bg-red-600 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Xóa</button>
                     </div>
                 </div>
             </div>
@@ -6956,6 +6576,7 @@ async function setOpeningDebt(customerId, customerName) {
     }
 }
 
+// Thêm khách hàng/đại lý mới
 function addCustomer() {
     const name = document.getElementById('cust-name').value;
     const address = document.getElementById('cust-address').value;
@@ -6980,6 +6601,7 @@ function addCustomer() {
 }
 
 
+// Ghi nhận khách hàng trả nợ (thanh toán công nợ)
 async function payDebt(id, currentDebt, customerName) {
     const { value: formValues } = await Swal.fire({
         title: 'Ghi nhận trả nợ: ' + customerName,
@@ -7142,6 +6764,7 @@ async function deletePayment(paymentId, customerId, amount) {
     }
 }
 
+// Xoá khách hàng khỏi danh sách
 async function deleteCustomer(id) {
     const doc = await db.collection('customers').doc(id).get();
     const data = doc.data();
@@ -7163,6 +6786,7 @@ async function deleteCustomer(id) {
     }
 }
 
+// Sửa thông tin khách hàng
 async function editCustomer(id) {
     // 1. Tìm thông tin khách hàng trong mảng dữ liệu đã tải sẵn
     const customer = window.allCustomersData.find(c => c.id === id);
@@ -7229,15 +6853,6 @@ async function getDocsByDate(collectionName, from, to) {
         .get();
 }
 
-function formatDateToDDMMYYYY(date) {
-    if (!date) return "";
-    const d = new Date(date);
-    return d.toLocaleDateString('vi-VN', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-    });
-}
 
 // 1. Xuất báo cáo Bán hàng
 async function exportSales() {
@@ -7812,6 +7427,7 @@ async function exportFullReport() {
 document.getElementById('date-from').addEventListener('change', updateDateDisplay);
 document.getElementById('date-to').addEventListener('change', updateDateDisplay);
 
+// Cập nhật hiển thị khoảng ngày đã chọn trên trang Báo cáo
 function updateDateDisplay() {
     let from = document.getElementById('date-from').value;
     let to = document.getElementById('date-to').value;
@@ -8021,6 +7637,7 @@ async function exportDebtReport() {
     } catch (e) { alert("Lỗi: " + e.message); }
 }
 
+// Hàm phụ trợ: kẻ viền cho ô khi xuất file Excel
 function setBorderStyle(cell) {
     cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
 }
@@ -8778,12 +8395,12 @@ async function loadProductManage() {
         
         tbody.innerHTML += `
             <tr>
-                <td colspan="4" class="p-1">
-                    <div class="flex items-center w-full bg-white border border-slate-200 border-l-4 border-l-blue-400 border-r-4 border-r-blue-400 rounded-lg p-2 
-                                shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]">
+                <td colspan="4" class="p-1.5">
+                    <div class="flex items-center w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2 
+                                shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]" style="border-left-color:#f97316 !important; border-right-color:#f97316 !important;">
                         <div class="px-2 w-[25%]">${barcodeDisplay}</div>
-                        <div class="px-2 w-[35%] text-[12px] font-bold text-slate-800 truncate">${p.name}</div>
-                        <div class="px-2 w-[15%] text-[12px] text-slate-600">${p.unit}</div>
+                        <div class="px-2 w-[35%] text-[12px] font-bold text-slate-800 dark:text-slate-100 truncate">${p.name}</div>
+                        <div class="px-2 w-[15%] text-[12px] text-slate-600 dark:text-slate-400">${p.unit}</div>
                         <div class="px-2 w-[25%] text-center">
                             <button onclick="editBarcode('${doc.id}', '${p.name}')" class="text-blue-600 text-[11px] font-bold hover:underline mr-3">Gán mã</button>
                             <button onclick="deleteProduct('${doc.id}')" class="text-red-500 text-[11px] font-bold hover:underline">Xóa</button>
@@ -8816,21 +8433,6 @@ async function editBarcode(id, name) {
 }
 
 // Hàm tìm sản phẩm và điền vào form (Dùng chung cho cả Máy quét và Camera)
-async function searchProductInManage(barcode) {
-    const snapshot = await db.collection('products').where('barcode', '==', barcode).get();
-    
-    if (snapshot.empty) {
-        Swal.fire('Thông báo', 'Không tìm thấy sản phẩm nào với mã này!', 'info');
-        return;
-    }
-
-    // Nếu tìm thấy, bạn có thể highlight dòng đó hoặc cuộn trang đến đó
-    const doc = snapshot.docs[0];
-    Swal.fire('Tìm thấy', `Sản phẩm: ${doc.data().name}`, 'success');
-    
-    // Nếu muốn hiển thị chi tiết, bạn có thể gọi lại loadProductManage 
-    // hoặc filter danh sách đang hiển thị.
-}
 
 // 1. Cho máy quét chuyên dụng (Nhấn Enter)
 document.getElementById('search-by-barcode').addEventListener('keypress', async (e) => {
@@ -8853,10 +8455,10 @@ async function startScanner(pageType) {
 
     readerDiv.classList.remove('hidden');
     
-    const html5QrCode = new Html5Qrcode(targetId);
+    window.html5QrCode = new Html5Qrcode(targetId);
     
     try {
-        await html5QrCode.start(
+        await window.html5QrCode.start(
             { facingMode: "environment" },
             { fps: 10, qrbox: 250 },
             async (decodedText) => {
@@ -8870,7 +8472,7 @@ async function startScanner(pageType) {
                 }
                 
                 // 3. Dừng sau khi quét thành công
-                await html5QrCode.stop().catch(err => console.log(err));
+                await window.html5QrCode.stop().catch(err => console.log(err));
                 readerDiv.classList.add('hidden');
             }
         );
@@ -8922,6 +8524,7 @@ function getRawNumber(id) {
   return parseFloat(val.replace(/\./g, '').replace(',', '.')) || 0;
 }
 
+// Khởi tạo dữ liệu ban đầu cho trang Sản xuất (lấy số phiếu mới nhất...)
 async function khoiTaoTrangSanXuat() {
     console.log("Đang khởi tạo trang sản xuất...");
     
@@ -8958,6 +8561,7 @@ async function khoiTaoTrangSanXuat() {
     }
 }
 
+// Lưu phiếu sản xuất vào Firebase
 async function luuSanXuat() {
     const btn = document.querySelector('.btn-save') || document.querySelector('.btn-primary'); 
     
@@ -9016,6 +8620,7 @@ async function luuSanXuat() {
     }
 }
 
+// Tải danh sách phiếu sản xuất khi mở trang / khởi động hệ thống
 async function loadInitSX() {
     try {
         const listBody = document.getElementById('list-sanxuat');
@@ -9037,17 +8642,22 @@ async function loadInitSX() {
             const isOld = dateObj && dateObj < sevenDaysAgo;
 
             htmlRows += `<tr class="${isOld ? 'old-production' : ''}">
-                <td class="p-3">${ngay}</td>
-                <td class="p-3 fw-bold">${data.soPhieu || "---"}</td>
-                <td class="p-3">${data.tenSP || "---"}</td>
-                <td class="p-3">${data.sl || 0}</td>            
-                <td class="p-3 text-primary">${data.meChuaNau || 0}</td>
-                <td class="p-3 text-warning">${data.meChuaDong || 0}</td>
-                <td class="p-3 text-success">${data.soMe || 0}</td>
-                <td class="p-3 text-center">
-                    <button class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1 rounded-lg transition-colors" onclick="huyPhieuSX('${id}')">
-                        <i class="fas fa-trash-alt"></i> Xóa
-                    </button>
+                <td colspan="8" class="p-1">
+                    <div class="flex items-center w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2
+                                shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] text-[12px]" style="border-left-color:#e879f9 !important; border-right-color:#e879f9 !important;">
+                        <div class="px-1.5 w-[12%] text-slate-600 dark:text-slate-400">${ngay}</div>
+                        <div class="px-1.5 w-[12%] font-bold text-slate-800 dark:text-slate-100">${data.soPhieu || "---"}</div>
+                        <div class="px-1.5 w-[20%] text-slate-700 dark:text-slate-200 truncate">${data.tenSP || "---"}</div>
+                        <div class="px-1.5 w-[8%] text-slate-600 dark:text-slate-400 text-center">${data.sl || 0}</div>
+                        <div class="px-1.5 w-[12%] text-blue-600 dark:text-blue-400 text-center">${data.meChuaNau || 0}</div>
+                        <div class="px-1.5 w-[12%] text-amber-600 dark:text-amber-400 text-center">${data.meChuaDong || 0}</div>
+                        <div class="px-1.5 w-[10%] text-green-600 dark:text-green-400 text-center">${data.soMe || 0}</div>
+                        <div class="px-1.5 w-[14%] text-center">
+                            <button class="bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 px-3 py-1 rounded-lg transition-colors" onclick="huyPhieuSX('${id}')">
+                                <i class="fas fa-trash-alt"></i> Xóa
+                            </button>
+                        </div>
+                    </div>
                 </td>
             </tr>`;
         });
@@ -9087,6 +8697,7 @@ async function loadInitSX() {
     }
 }
 
+// Huỷ (xoá) một phiếu sản xuất
 async function huyPhieuSX(id) {
     if (!id) {
         // Nếu không truyền id, lấy từ select box (nếu vẫn dùng cách cũ)
@@ -9117,6 +8728,7 @@ async function huyPhieuSX(id) {
 }
 
 
+// Tính tồn cuối = tồn đầu + số lượng sản xuất (trang Sản xuất)
 function tinhTonCuoi() {
     const dau = getRawNumber('sxTonDau');
     const sl = getRawNumber('sxSL');
@@ -9125,15 +8737,6 @@ function tinhTonCuoi() {
 }
 
 // Logic Trừ lùi (Ví dụ: Mẻ còn lại = Mẻ cũ - Mẻ đã dùng)
-function tinhTruLui() {
-    // Giả sử bạn muốn tự động trừ lùi mẻ chưa nấu
-    // Bạn có thể tùy chỉnh logic này theo yêu cầu cụ thể của bạn
-    const meChuaNau = getRawNumber('sxMeChuaNau');
-    const meDaNau = getRawNumber('sxSoMe'); // Mẻ đóng xong coi như đã nấu
-    
-    // Ví dụ: Nếu người dùng nhập Mẻ đóng xong, tự động cập nhật Mẻ chưa nấu
-    // Đây là ví dụ logic, bạn hãy sửa lại theo cách tính của xưởng bạn nhé
-}
 
 function tinhSoKgThanhPham() {
     const tenSP = document.getElementById('sxTenSP').value;
@@ -9212,17 +8815,22 @@ async function filterSanXuat() {
             const ngay = dateObj ? dateObj.toLocaleDateString('vi-VN') : "---";
 
             htmlRows += `<tr>
-                <td class="p-3">${ngay}</td>
-                <td class="p-3 font-bold">${data.soPhieu || "---"}</td>
-                <td class="p-3">${data.tenSP || "---"}</td>
-                <td class="p-3">${data.sl || 0}</td>           
-                <td class="p-3 text-primary">${data.meChuaNau || 0}</td>
-                <td class="p-3 text-warning">${data.meChuaDong || 0}</td>
-                <td class="p-3 text-success">${data.soMe || 0}</td>
-                <td class="p-3 text-center">
-                    <button class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1 rounded-lg" onclick="huyPhieuSX('${doc.id}')">
-                        <i class="fas fa-trash-alt"></i> Xóa
-                    </button>
+                <td colspan="8" class="p-1">
+                    <div class="flex items-center w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2
+                                shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] text-[12px]" style="border-left-color:#e879f9 !important; border-right-color:#e879f9 !important;">
+                        <div class="px-1.5 w-[12%] text-slate-600 dark:text-slate-400">${ngay}</div>
+                        <div class="px-1.5 w-[12%] font-bold text-slate-800 dark:text-slate-100">${data.soPhieu || "---"}</div>
+                        <div class="px-1.5 w-[20%] text-slate-700 dark:text-slate-200 truncate">${data.tenSP || "---"}</div>
+                        <div class="px-1.5 w-[8%] text-slate-600 dark:text-slate-400 text-center">${data.sl || 0}</div>
+                        <div class="px-1.5 w-[12%] text-blue-600 dark:text-blue-400 text-center">${data.meChuaNau || 0}</div>
+                        <div class="px-1.5 w-[12%] text-amber-600 dark:text-amber-400 text-center">${data.meChuaDong || 0}</div>
+                        <div class="px-1.5 w-[10%] text-green-600 dark:text-green-400 text-center">${data.soMe || 0}</div>
+                        <div class="px-1.5 w-[14%] text-center">
+                            <button class="bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 px-3 py-1 rounded-lg" onclick="huyPhieuSX('${doc.id}')">
+                                <i class="fas fa-trash-alt"></i> Xóa
+                            </button>
+                        </div>
+                    </div>
                 </td>
             </tr>`;
         });
@@ -9342,7 +8950,7 @@ async function loadTableNCC() {
         bodyNCC.innerHTML += `
             <tr class="transition-all duration-300">
                 <td colspan="6" class="p-1">
-                    <div class="flex items-center w-full bg-white border border-slate-200 border-l-4 border-l-blue-400 border-r-4 border-r-blue-400 rounded-lg p-2 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] hover:shadow-xl hover:scale-[1.002] transition-all duration-300">
+                <div class="flex items-center w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]" style="border-left-color:#84cc16 !important; border-right-color:#84cc16 !important;">
                         <div class="p-2 text-sm w-[25%] font-bold">${d.name}</div>
                         <div class="p-2 text-sm w-[25%] hidden md:table-cell">${d.address || ''}</div>
                         <div class="p-2 text-sm w-[12%] text-center hidden md:table-cell">${d.phone || ''}</div>
@@ -9620,15 +9228,20 @@ async function loadTableNL() {
     
     nlSnap.forEach(doc => {
         const d = doc.data();
-        bodyNL.innerHTML += `<tr class="border-b hover:bg-gray-50">
-            <td class="p-3">${d.name}</td>
-            <td class="p-3">${d.unit}</td>
-            <td class="p-3 text-center">
-                <button onclick="deleteDoc('materials_list', '${doc.id}')" class="text-red-500 hover:text-red-700 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                </button>
+        bodyNL.innerHTML += `<tr>
+            <td colspan="3" class="p-1">
+                <div class="flex items-center w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2
+                            shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] text-[12px]" style="border-left-color:#a3e635 !important; border-right-color:#a3e635 !important;">
+                    <div class="px-2 w-[55%] font-bold text-slate-800 dark:text-slate-100 truncate">${d.name}</div>
+                    <div class="px-2 w-[25%] text-slate-600 dark:text-slate-400">${d.unit}</div>
+                    <div class="px-2 w-[20%] text-center">
+                        <button onclick="deleteDoc('materials_list', '${doc.id}')" class="text-red-500 hover:text-red-700 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
             </td>
         </tr>`;
     });
@@ -9661,6 +9274,7 @@ async function generateInvoiceNumber() {
     document.getElementById('in-so-phieu').value = newId;
 }
 
+// Thêm nguyên liệu vào giỏ của phiếu Nhập nguyên liệu
 function addNguyenLieuToCart() {
     try {
         console.log("Đang chạy hàm addNguyenLieuToCart...");
@@ -9719,6 +9333,7 @@ function xoaNguyenLieu(index) {
     renderCartNL(); // Cập nhật lại list NL
 }
 
+// Lưu phiếu nhập nguyên liệu đầy đủ vào Firebase
 async function saveFullInvoice() {
     const soPhieu = document.getElementById('in-so-phieu').value;
     const nccName = document.getElementById('sel-ncc-nhap').value;
@@ -9781,34 +9396,6 @@ async function saveFullInvoice() {
 }
 
 // Render bảng danh sách phiếu nhập
-async function loadTablePhieu() {
-    const bodyPhieu = document.getElementById('body-phieu');
-    if (!bodyPhieu) return;
-    
-    const phieuSnap = await db.collection('material_imports').orderBy('date', 'desc').get();
-    
-    bodyPhieu.innerHTML = '';
-    phieuSnap.forEach(doc => {
-        const d = doc.data();
-        const dateStr = d.date?.toDate()?.toLocaleDateString() || "N/A";
-        
-        bodyPhieu.innerHTML += `<tr class="border-b hover:bg-gray-50 text-sm">
-    <td class="p-3 w-[12%]">${d.soPhieu || ''}</td>
-    <td class="p-3 w-[15%]">${dateStr}</td>
-    <td class="p-3 w-[25%] font-medium">${d.nl || ''}</td>
-    <td class="p-3 w-[8%] text-center">${d.sl || 0}</td>
-    <td class="p-3 w-[15%] text-right">${(d.gia || 0).toLocaleString()}</td>
-    <td class="p-3 w-[15%] text-right font-bold text-gray-800">${(d.total || 0).toLocaleString()}</td>
-    <td class="p-3 w-[10%] text-center">
-        <button onclick="deleteDoc('material_imports', '${doc.id}')" class="text-red-500 hover:text-red-700 transition-colors duration-200">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-        </button>
-    </td>
-</tr>`;
-    });
-}
 
 window.openHistory = function(name) {
     console.log("Đã bấm vào: " + name);
@@ -9851,6 +9438,7 @@ function capNhatNgayTheoThangNhapKho() {
     filterNhapKho();
 }
 
+// Lọc danh sách phiếu Nhập nguyên liệu theo khoảng ngày
 async function filterNhapKho() {
     const startEl = document.getElementById('dateStartNhapKho');
     const endEl = document.getElementById('dateEndNhapKho');
@@ -9906,23 +9494,28 @@ async function filterNhapKho() {
         }
 
         let htmlRows = keys.map(p => `
-    <tr class="border-b hover:bg-gray-50">
-        <td class="p-3 w-[15%] font-bold">${p.soPhieu}</td>
-        <td class="p-3 w-[15%]">${p.ngay instanceof Date ? p.ngay.toLocaleDateString('vi-VN') : "---"}</td>
-        <td class="p-3 w-[40%]">${p.ncc}</td>
-        <td class="p-3 w-[15%] text-right font-bold">${p.tongTien.toLocaleString('vi-VN')}</td>
-        <td class="p-3 w-[15%] text-center">
-            <div class="flex justify-center gap-3">
-                <button onclick="xemChiTietPhieu('${p.soPhieu}')" class="text-blue-600 hover:text-blue-800">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                    </svg>
-                </button>
-                <button onclick="deleteDoc('material_imports', '${p.soPhieu}')" class="text-red-500 hover:text-red-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                    </svg>
-                </button>
+    <tr>
+        <td colspan="5" class="p-1">
+            <div class="flex items-center w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2
+                        shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] text-[12px]" style="border-left-color:#a3e635 !important; border-right-color:#a3e635 !important;">
+                <div class="px-2 w-[15%] font-bold text-slate-800 dark:text-slate-100">${p.soPhieu}</div>
+                <div class="px-2 w-[15%] text-slate-600 dark:text-slate-400">${p.ngay instanceof Date ? p.ngay.toLocaleDateString('vi-VN') : "---"}</div>
+                <div class="px-2 w-[40%] text-slate-700 dark:text-slate-200 truncate">${p.ncc}</div>
+                <div class="px-2 w-[15%] text-right font-bold text-slate-800 dark:text-slate-100">${p.tongTien.toLocaleString('vi-VN')}</div>
+                <div class="px-2 w-[15%] text-center">
+                    <div class="flex justify-center gap-3">
+                        <button onclick="xemChiTietPhieu('${p.soPhieu}')" class="text-blue-600 hover:text-blue-800">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                        </button>
+                        <button onclick="deleteDoc('material_imports', '${p.soPhieu}')" class="text-red-500 hover:text-red-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
             </div>
         </td>
     </tr>
@@ -9936,6 +9529,7 @@ async function filterNhapKho() {
     }
 }
 
+// Xem chi tiết 1 phiếu nhập nguyên liệu (mở modal)
 function xemChiTietPhieu(soPhieu) {
     const p = window.phieuData[soPhieu];
     if (!p) {
@@ -10109,6 +9703,7 @@ function markDone() {
     }
 }
 
+// Sửa lỗi hiển thị/kích thước của lịch (FullCalendar) sau khi đổi tab
 function fixCalendarLayout() {
     if (window.calendar) setTimeout(() => { window.calendar.updateSize(); }, 200);
 }
