@@ -1670,65 +1670,63 @@ html:not(.dark) .bg-white {
     <div class="flex flex-col md:flex-row gap-4">
         <div id="cart-box" class="flex-grow bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-x-auto text-gray-800 dark:text-white"></div>
         <div class="md:w-[200px] flex flex-col gap-3">
-            <!-- Nút Thêm vào giỏ (Đã chuyển sang màu Tím sáng hơn) -->
-			<button id="add-btn" onclick="addToCart()" 
-				class="w-full bg-violet-600 dark:bg-violet-700 text-white py-3 rounded-2xl font-bold transition-all duration-75 border-b-[4px] border-violet-800 dark:border-violet-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
-				Thêm vào giỏ
-			</button>
-
-			<!-- Nút Lưu nhập kho (Giữ nguyên màu xanh) -->
-			<button id="save-import-btn" onclick="saveImport()" 
-				class="w-full bg-blue-600 dark:bg-blue-700 text-white py-3 rounded-2xl font-bold transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
-				Lưu nhập kho
-			</button>
+            <button id="add-btn" onclick="addToCart()" 
+                class="w-full bg-violet-600 dark:bg-violet-700 text-white py-3 rounded-2xl font-bold transition-all duration-75 border-b-[4px] border-violet-800 dark:border-violet-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+                Thêm vào giỏ
+            </button>
+            <button id="save-import-btn" onclick="saveImport()" 
+                class="w-full bg-blue-600 dark:bg-blue-700 text-white py-3 rounded-2xl font-bold transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+                Lưu nhập kho
+            </button>
         </div>
     </div>
-
 
     <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl border border-blue-200 dark:border-slate-700 shadow-lg mt-10">
-    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4 border-b dark:border-slate-700 pb-4">
-        <h3 class="font-bold text-xl text-slate-800 dark:text-white whitespace-nowrap">📋 DANH SÁCH PHIẾU NHẬP</h3>
-        
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-100 dark:border-slate-700 w-full">
-            <div>
-                <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase">Tháng</label>
-                <input type="month" id="filter-month" onchange="handleReceiptMonthChange()" class="w-full p-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-white rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4 border-b dark:border-slate-700 pb-4">
+            <h3 class="font-bold text-xl text-slate-800 dark:text-white whitespace-nowrap">📋 DANH SÁCH PHIẾU NHẬP</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-100 dark:border-slate-700 w-full">
                 <div>
-                    <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase">Từ Ngày</label>
-                    <input type="date" id="filter-date-from" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-white rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase">Tháng</label>
+                    <input type="month" id="filter-month" onchange="handleReceiptMonthChange()" class="w-full p-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-white rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase">Đến Ngày</label>
-                    <input type="date" id="filter-date-to" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-white rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-            </div>
 
-            <div class="md:col-span-2">
-                <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase">Tìm theo số phiếu</label>
-                <input type="text" id="searchReceiptInput" onkeyup="filterReceipts()" placeholder="Nhập số phiếu..." class="w-full p-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-white rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase">Từ Ngày</label>
+                        <input type="date" id="filter-date-from" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-white rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase">Đến Ngày</label>
+                        <input type="date" id="filter-date-to" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-white rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase">Tìm theo số phiếu</label>
+                    <input type="text" id="searchReceiptInput" onkeyup="filterReceipts()" placeholder="Nhập số phiếu..." class="w-full p-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-white rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
-        <div class="overflow-x-auto overflow-y-auto max-h-[280px] border border-blue-100 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 p-2 md:p-4 custom-scrollbar">
-            <table class="w-full text-sm">
-                <thead class="sticky top-0 z-10 bg-gray-50 dark:bg-slate-800 border-b dark:border-slate-700 text-gray-800 dark:text-gray-200">
-                    <tr><th class="py-3 px-2 text-center w-[25%]">Số phiếu</th><th class="py-3 px-2 text-center w-[30%]">Ngày nhập</th><th class="py-3 px-2 text-center w-[20%]">Số SP</th><th class="py-3 px-2 text-center w-[25%]">Thao tác</th></tr>
-                </thead>
-                <tbody id="list-receipts-left" class="text-gray-800 dark:text-gray-300"></tbody>
-            </table>
-        </div>
-        <div class="overflow-x-auto overflow-y-auto max-h-[280px] border border-blue-100 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 p-2 md:p-4 custom-scrollbar">
-            <table class="w-full text-sm">
-                <thead class="sticky top-0 z-10 bg-gray-50 dark:bg-slate-800 border-b dark:border-slate-700 text-gray-800 dark:text-gray-200">
-                    <tr><th class="py-3 px-2 text-center w-[25%]">Số phiếu</th><th class="py-3 px-2 text-center w-[30%]">Ngày nhập</th><th class="py-3 px-2 text-center w-[20%]">Số SP</th><th class="py-3 px-2 text-center w-[25%]">Thao tác</th></tr>
-                </thead>
-                <tbody id="list-receipts-right" class="text-gray-800 dark:text-gray-300"></tbody>
-            </table>
+        <!-- 2 Bảng Danh Sách Phiếu Nhập (Đã gỡ bỏ p-2 md:p-4 để tiêu đề dính sát đỉnh, đồng bộ màu nền tuyệt đối) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+            <div class="overflow-x-auto overflow-y-auto max-h-[280px] border border-blue-100 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 custom-scrollbar">
+                <table class="w-full text-sm">
+                    <thead class="sticky top-0 z-10 bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-slate-700 text-gray-800 dark:text-gray-200 shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
+                        <tr><th class="py-3 px-2 text-center w-[25%]">Số phiếu</th><th class="py-3 px-2 text-center w-[30%]">Ngày nhập</th><th class="py-3 px-2 text-center w-[20%]">Số SP</th><th class="py-3 px-2 text-center w-[25%]">Thao tác</th></tr>
+                    </thead>
+                    <tbody id="list-receipts-left" class="text-gray-800 dark:text-gray-300"></tbody>
+                </table>
+            </div>
+            <div class="overflow-x-auto overflow-y-auto max-h-[280px] border border-blue-100 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 custom-scrollbar">
+                <table class="w-full text-sm">
+                    <thead class="sticky top-0 z-10 bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-slate-700 text-gray-800 dark:text-gray-200 shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
+                        <tr><th class="py-3 px-2 text-center w-[25%]">Số phiếu</th><th class="py-3 px-2 text-center w-[30%]">Ngày nhập</th><th class="py-3 px-2 text-center w-[20%]">Số SP</th><th class="py-3 px-2 text-center w-[25%]">Thao tác</th></tr>
+                    </thead>
+                    <tbody id="list-receipts-right" class="text-gray-800 dark:text-gray-300"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -1740,15 +1738,12 @@ html:not(.dark) .bg-white {
             <button onclick="document.getElementById('modal-receipt').classList.add('hidden')" class="text-gray-500 dark:text-gray-400 font-bold hover:text-red-500">Đóng (X)</button>
         </div>
         <table class="w-full border-collapse border border-gray-200 dark:border-slate-700 text-sm">
-            <thead>
-                <tr class="bg-gray-100 dark:bg-slate-800 text-gray-800 dark:text-gray-200">
-                    <th class="border dark:border-slate-700 p-2">Sản phẩm</th><th class="border dark:border-slate-700 p-2">ĐVT</th><th class="border dark:border-slate-700 p-2">SL</th><th class="border dark:border-slate-700 p-2">Giá</th><th class="border dark:border-slate-700 p-2">Thao tác</th>
-                </tr>
+            <thead class="sticky top-0 z-10 bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-slate-700 text-gray-800 dark:text-gray-200 shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
+                <tr><th class="border dark:border-slate-700 p-2">Sản phẩm</th><th class="border dark:border-slate-700 p-2">ĐVT</th><th class="border dark:border-slate-700 p-2">SL</th><th class="border dark:border-slate-700 p-2">Giá</th><th class="border dark:border-slate-700 p-2">Thao tác</th></tr>
             </thead>
             <tbody id="modal-receipt-body" class="text-gray-800 dark:text-gray-300"></tbody>
         </table>
     </div>
-</div>
 </div>
 
        <!-- PHẦN 3: KHO HÀNG -->
@@ -2247,41 +2242,43 @@ html:not(.dark) .bg-white {
 </div>
 
 		<!-- PHẦN 6: SẢN XUẤT -->
-
 <div id="page-SanXuat" class="page-content hidden p-2 md:p-6 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300">
-  <div class="max-w-[98%] mx-auto"> <!-- Tăng chiều rộng tại đây -->
-    <h3 class="mb-6 font-bold text-2xl text-gray-800">THEO DÕI SẢN XUẤT</h3>
+  <div class="max-w-[98%] mx-auto">
+    <h3 class="mb-6 font-bold text-2xl text-gray-800 dark:text-white">THEO DÕI SẢN XUẤT</h3>
 
-    <div class="flex flex-col-reverse lg:flex-row -mx-4">
+    <!-- items-stretch giúp 2 khung tự động căng chiều cao bằng nhau -->
+    <div class="flex flex-col-reverse lg:flex-row -mx-4 items-stretch">
+      <!-- Cột Danh sách (2/3 chiều rộng, bảng được làm ngắn lại độ cao max-h-[420px]) -->
       <div class="w-full lg:w-2/3 px-4 mb-6">
-        <div class="bg-white border border-gray-200 shadow-lg p-6 rounded-xl h-full">
-          <h5 class="mb-4 font-bold text-gray-600">DANH SÁCH PHIẾU SẢN XUẤT</h5>
+        <div class="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-lg p-6 rounded-xl flex flex-col h-full">
+          <h5 class="mb-4 font-bold text-gray-600 dark:text-gray-300">DANH SÁCH PHIẾU SẢN XUẤT</h5>
           
           <div class="relative mb-4">
             <input type="text" id="searchInputSX" 
                     placeholder="🔍 Tìm kiếm theo số phiếu (VD: SX01)..." 
                     onkeyup="searchSanXuat()" 
-                    class="w-full pl-4 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    class="w-full pl-4 pr-4 py-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-gray-800 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
-		<!-- Bộ lọc mới -->
-			<div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 p-3 bg-gray-50 dark:bg-slate-950 rounded-lg border border-gray-200 dark:border-slate-700">
-			  <div>
-				<label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Chọn Tháng</label>
-				<input type="month" id="monthPickerSX" onchange="capNhatNgayTheoThangSanxuat()">
-			  </div>
-			  <div>
-				<label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Từ ngày</label>
-				<input type="date" id="dateStartSX" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" onchange="filterSanXuat()">
-			  </div>
-			  <div>
-				<label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Đến ngày</label>
-				<input type="date" id="dateEndSX" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" onchange="filterSanXuat()">
-			  </div>
-			</div>
 
-          <div class="overflow-y-auto max-h-[65vh] overflow-x-auto border border-gray-100 rounded-lg">
+          <!-- Bộ lọc mới -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 p-3 bg-gray-50 dark:bg-slate-950 rounded-lg border border-gray-200 dark:border-slate-700">
+            <div>
+              <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Chọn Tháng</label>
+              <input type="month" id="monthPickerSX" onchange="capNhatNgayTheoThangSanxuat()" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Từ ngày</label>
+              <input type="date" id="dateStartSX" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm" onchange="filterSanXuat()">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Đến ngày</label>
+              <input type="date" id="dateEndSX" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm" onchange="filterSanXuat()">
+            </div>
+          </div>
+
+          <div class="overflow-y-auto max-h-[450px] overflow-x-auto border border-gray-100 dark:border-slate-700 rounded-lg flex-grow custom-scrollbar">
             <table class="w-full text-left border-collapse">
-              <thead class="sticky top-0 bg-gray-100 z-10">
+              <thead class="sticky top-0 bg-gray-100 dark:bg-slate-950 z-10">
                 <tr class="border-b border-gray-200 dark:border-slate-700">
                   <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[12%]">Ngày</th>
                   <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[12%]">Số phiếu</th>
@@ -2293,79 +2290,85 @@ html:not(.dark) .bg-white {
                   <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 text-center w-[14%]">Xóa</th>
                 </tr>
               </thead>
-              <tbody id="list-sanxuat" class="text-xs md:text-sm text-gray-600 divide-y divide-gray-100"></tbody>
+              <tbody id="list-sanxuat" class="text-xs md:text-sm text-gray-600 dark:text-gray-300 divide-y divide-gray-100 dark:divide-slate-800"></tbody>
             </table>
           </div>
         </div>
       </div>
 
+      <!-- Cột Nhập thông tin (1/3 chiều rộng, kéo dài chiều cao cho cân đối bằng khung bên trái) -->
       <div class="w-full lg:w-1/3 px-4 mb-6">
-        <div class="bg-blue-50 border border-blue-200 shadow-lg p-5 rounded-xl">
-          <div class="mb-3">
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Số phiếu hiện tại</label>
-            <input type="text" id="sxSoPhieu" class="w-full p-2 border border-gray-300 rounded bg-gray-50 font-bold text-blue-600" readonly>
-          </div>
+        <div class="bg-blue-50 dark:bg-slate-900 border border-blue-200 dark:border-slate-700 shadow-lg p-5 rounded-xl flex flex-col h-full justify-between">
+          <div>
+            <div class="mb-3">
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Số phiếu hiện tại</label>
+              <input type="text" id="sxSoPhieu" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-950 font-bold text-blue-600 dark:text-blue-400" readonly>
+            </div>
 
-          <div class="mb-3">
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Tên sản phẩm</label>
-            <select id="sxTenSP" class="w-full p-2 border border-gray-300 rounded bg-white" onchange="tinhSoKgThanhPham()">
-              <option value="">-- Chọn sản phẩm --</option>
-              <option>TCMT 450g Thuỷ tinh</option><option>TCMT 450g Nhựa</option>
-              <option>TCMT 275g Thuỷ tinh tròn</option><option>TCMT 275g Thuỷ tinh Lăng</option>
-              <option>TCMT 275g Nhựa</option><option>TCMT 180g Thuỷ tinh</option>
-              <option>TCMT 180g Túi Zip</option><option>TCMT 150g Thuỷ tinh</option>
-              <option>TCMT 90g Khay Nhôm</option><option>Mắm bếp</option>
-            </select>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2 mb-3">
-            <div>
-              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">ĐVT</label>
-              <select id="sxDVT" class="w-full p-2 border border-gray-300 rounded">
-                <option>Hũ</option><option>Túi</option><option>Khay</option><option>Kg</option>
+            <div class="mb-3">
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Tên sản phẩm</label>
+              <select id="sxTenSP" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 text-gray-800 dark:text-white" onchange="tinhSoKgThanhPham()">
+                <option value="">-- Chọn sản phẩm --</option>
+                <option>TCMT 450g Thuỷ tinh</option><option>TCMT 450g Nhựa</option>
+                <option>TCMT 275g Thuỷ tinh tròn</option><option>TCMT 275g Thuỷ tinh Lăng</option>
+                <option>TCMT 275g Nhựa</option><option>TCMT 180g Thuỷ tinh</option>
+                <option>TCMT 180g Túi Zip</option><option>TCMT 150g Thuỷ tinh</option>
+                <option>TCMT 90g Khay Nhôm</option><option>Mắm bếp</option>
               </select>
             </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Tồn đầu</label>
-              <input type="number" id="sxTonDau" class="w-full p-2 border border-gray-300 rounded" placeholder="0" oninput="tinhTonCuoi()">
+
+            <div class="grid grid-cols-2 gap-2 mb-3">
+              <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">ĐVT</label>
+                <select id="sxDVT" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 text-gray-800 dark:text-white">
+                  <option>Hũ</option><option>Túi</option><option>Khay</option><option>Kg</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Tồn đầu</label>
+                <input type="number" id="sxTonDau" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 text-gray-800 dark:text-white" placeholder="0" oninput="tinhTonCuoi()">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 mb-3">
+              <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">SL Sản phẩm</label>
+                <input type="number" id="sxSL" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 text-gray-800 dark:text-white" placeholder="0" oninput="tinhSoKgThanhPham(); tinhTonCuoi();">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Tồn Cuối</label>
+                <input type="text" id="sxTonCuoi" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-950 text-gray-800 dark:text-white" readonly>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Số KG Đã Đóng</label>
+              <input type="number" id="sxSoKg" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 text-gray-800 dark:text-white" placeholder="0.00">
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 mb-2">
+              <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Mẻ Xong</label>
+                <input type="number" id="sxSoMe" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 text-gray-800 dark:text-white" placeholder="0">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Mẻ Chờ</label>
+                <input type="number" id="sxMeChuaDong" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 text-gray-800 dark:text-white" placeholder="0">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Mẻ Mới</label>
+                <input type="number" id="sxMeChuaNau" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 text-gray-800 dark:text-white" placeholder="0">
+              </div>
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-2 mb-3">
-            <div>
-              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">SL Sản phẩm</label>
-              <input type="number" id="sxSL" class="w-full p-2 border border-gray-300 rounded" placeholder="0" oninput="tinhSoKgThanhPham(); tinhTonCuoi();">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Tồn Cuối</label>
-              <input type="text" id="sxTonCuoi" class="w-full p-2 border border-gray-300 rounded bg-gray-50" readonly>
-            </div>
+          <!-- Nút lưu được đẩy xuống đáy, tự động căng đều chiều cao -->
+          <div class="mt-4 pt-2">
+            <button onclick="luuSanXuat()" 
+                class="w-full bg-blue-600 dark:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+                LƯU SẢN XUẤT
+            </button>
           </div>
-
-          <div class="mb-3">
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Số KG Đã Đóng</label>
-            <input type="number" id="sxSoKg" class="w-full p-2 border border-gray-300 rounded" placeholder="0.00">
-          </div>
-
-          <div class="grid grid-cols-3 gap-2 mb-4">
-            <div>
-              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Mẻ Xong</label>
-              <input type="number" id="sxSoMe" class="w-full p-2 border border-gray-300 rounded" placeholder="0">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Mẻ Chờ</label>
-              <input type="number" id="sxMeChuaDong" class="w-full p-2 border border-gray-300 rounded" placeholder="0">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Mẻ Mới</label>
-              <input type="number" id="sxMeChuaNau" class="w-full p-2 border border-gray-300 rounded" placeholder="0">
-            </div>
-          </div>
-
-         <button onclick="luuSanXuat()" 
-    class="w-full bg-blue-600 dark:bg-blue-700 text-white font-bold py-2 rounded-lg transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
-    LƯU SẢN XUẤT
-</button>
         </div>
       </div>
     </div>
@@ -2384,8 +2387,9 @@ html:not(.dark) .bg-white {
 			<button id="btn-dm" onclick="openNLTab('dm-tab')" class="tab-btn py-2.5 px-1 text-[10px] md:text-sm font-bold rounded-xl transition-all duration-150 bg-slate-100/80 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border-b-[2px] border-slate-300 dark:border-slate-950 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] translate-y-0 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/80 hover:border-b-[4px] hover:border-slate-400 dark:hover:border-slate-800 hover:-translate-y-[2px] hover:shadow-[0_4px_10px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_4px_10px_rgba(0,0,0,0.4)] active:translate-y-[1px] active:border-b-[1px] uppercase tracking-wider">DANH MỤC NL</button>
 			<button id="btn-nhap" onclick="openNLTab('nhap-tab')" class="tab-btn py-2.5 px-1 text-[10px] md:text-sm font-bold rounded-xl transition-all duration-150 bg-slate-100/80 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border-b-[2px] border-slate-300 dark:border-slate-950 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] translate-y-0 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/80 hover:border-b-[4px] hover:border-slate-400 dark:hover:border-slate-800 hover:-translate-y-[2px] hover:shadow-[0_4px_10px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_4px_10px_rgba(0,0,0,0.4)] active:translate-y-[1px] active:border-b-[1px] uppercase tracking-wider">NHẬP KHO NL</button>
 		</div>
+
         <!-- Tab 1: Nhà Cung Cấp -->
-        <div id="ncc-tab" class="nl-tab-pane bg-white dark:bg-slate-900 p-4 md:p-6 rounded-xl shadow border border-slate-100 dark:border-slate-700">
+        <div id="ncc-tab" class="nl-tab-pane bg-white dark:bg-slate-900 p-4 md:p-6 rounded-xl shadow border border-slate-100 dark:border-slate-700 min-h-[400px]">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <input id="in-ncc" placeholder="Tên NCC" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
                 <input id="in-sdt" placeholder="SĐT" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
@@ -2395,7 +2399,7 @@ html:not(.dark) .bg-white {
     THÊM NCC
 </button>
             </div>
-            <div class="overflow-x-auto border rounded-lg">
+            <div class="overflow-x-visible overflow-y-visible border rounded-lg min-h-[250px]">
                 <table class="w-full text-sm text-left">
                     <thead class="bg-gray-50 dark:bg-slate-800 text-xs uppercase text-gray-600 dark:text-slate-300">
 						<tr>
@@ -2413,7 +2417,7 @@ html:not(.dark) .bg-white {
         </div>
 
         <!-- Tab 2: Danh mục NL -->
-        <div id="dm-tab" class="nl-tab-pane hidden bg-white dark:bg-slate-900 p-4 md:p-6 rounded-xl shadow border border-slate-100 dark:border-slate-700">
+        <div id="dm-tab" class="nl-tab-pane hidden bg-white dark:bg-slate-900 p-4 md:p-6 rounded-xl shadow border border-slate-100 dark:border-slate-700 min-h-[400px]">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <input id="in-nl" placeholder="Tên Nguyên Liệu" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
                 <input id="in-dvt" placeholder="ĐVT" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
@@ -2422,7 +2426,7 @@ html:not(.dark) .bg-white {
     THÊM NL
 </button>
             </div>
-            <div class="border rounded-lg overflow-hidden">
+            <div class="border rounded-lg overflow-hidden min-h-[250px]">
                 <table class="w-full text-sm text-left">
                     <thead class="bg-gray-100 dark:bg-slate-800"><tr><th class="py-3 px-2 w-[55%]">Tên NL</th><th class="py-3 px-2 w-[25%]">ĐVT</th><th class="py-3 px-2 text-center w-[20%]">Hành động</th></tr></thead>
                     <tbody id="body-nl"></tbody>
@@ -2431,7 +2435,7 @@ html:not(.dark) .bg-white {
         </div>
         
         <!-- Tab 3: Nhập & Công nợ -->
-<div id="nhap-tab" class="nl-tab-pane hidden p-0">
+<div id="nhap-tab" class="nl-tab-pane hidden p-0 min-h-[400px]">
     <div class="flex flex-col-reverse lg:grid lg:grid-cols-12 gap-6">
         <!-- Danh sách: order-2 (nằm dưới trên đt) -->
         <div class="col-span-12 lg:col-span-9 bg-white dark:bg-slate-900 p-4 md:p-5 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700">
@@ -8697,17 +8701,21 @@ function getRawNumber(id) {
 async function khoiTaoTrangSanXuat() {
     console.log("Đang khởi tạo trang sản xuất...");
     
-    // 1. Lấy số phiếu mới nhất từ Firestore
-    const snapshot = await db.collection('production').orderBy('soPhieu', 'desc').limit(1).get();
+    // 1. Lấy phiếu mới nhất dựa vào thời gian tạo (timestamp) thay vì sắp xếp chuỗi soPhieu
+    const snapshot = await db.collection('production').orderBy('timestamp', 'desc').limit(1).get();
     
     let nextNum = 1;
     if (!snapshot.empty) {
         const lastDoc = snapshot.docs[0].data();
         const lastSoPhieu = lastDoc.soPhieu || "SX00"; 
-        const lastNum = parseInt(lastSoPhieu.replace('SX', ''));
         
-        if (!isNaN(lastNum)) {
-            nextNum = lastNum + 1;
+        // Dùng Regex để lấy chính xác phần số ra khỏi chuỗi (an toàn tuyệt đối)
+        const matches = lastSoPhieu.match(/\d+/g);
+        if (matches) {
+            const lastNum = parseInt(matches[matches.length - 1], 10);
+            if (!isNaN(lastNum)) {
+                nextNum = lastNum + 1;
+            }
         }
     }
     
@@ -8718,14 +8726,11 @@ async function khoiTaoTrangSanXuat() {
     const year = now.getFullYear();
     const month = (now.getMonth() + 1).toString().padStart(2, '0');
     
-    // Gán giá trị tháng hiện tại vào input
     const monthPicker = document.getElementById('monthPickerSX');
     if (monthPicker) {
         monthPicker.value = `${year}-${month}`;
-        // Tự động tính ngày và lọc dữ liệu ngay khi khởi tạo
         capNhatNgayTheoThangSanxuat(); 
     } else {
-        // Nếu chưa có tháng thì load mặc định
         loadInitSX();
     }
 }
@@ -8886,15 +8891,18 @@ async function huyPhieuSX(id) {
         await db.collection('production').doc(id).delete();
         alert("Đã xóa!");
         
-        // --- SỬA Ở ĐÂY ---
-        // Thay vì gọi loadInitSX (hàm tải tất cả), 
-        // ta gọi lại filterSanXuat để bảng giữ nguyên bộ lọc đang chọn
+        // Cập nhật lại bảng danh sách
         if (typeof filterSanXuat === 'function') {
             await filterSanXuat();
         } else {
-            // Nếu không dùng bộ lọc thì mới gọi lại hàm load cũ
             loadInitSX();
         }
+
+        // Tự động load lại số phiếu mới nhất vào ô input sau khi xóa
+        if (typeof khoiTaoTrangSanXuat === 'function') {
+            await khoiTaoTrangSanXuat();
+        }
+        
     } catch (e) {
         console.error("Lỗi xóa: ", e);
         alert("Lỗi: " + e.message);
@@ -9259,10 +9267,16 @@ async function paySupplierDebt(docId, nccName) {
         document.getElementById('popup-ncc').classList.add('hidden');
         if (inputElement) inputElement.value = '';
         
-        // --- CHỈ CẦN THÊM 'await' Ở DÒNG NÀY ---
+        // 1. Cập nhật lại dữ liệu bảng trong trang nguyên liệu
         if (typeof loadAllData === 'function') {
             await loadAllData(); 
         }
+
+        // 2. BỔ SUNG DÒNG NÀY ĐỂ TRANG CHỦ TỰ ĐỘNG CẬP NHẬT NGAY LẬP TỨC MÀ KHÔNG CẦN F5
+        if (typeof loadDashboard === 'function') {
+            await loadDashboard();
+        }
+
     } catch (error) {
         console.error("Lỗi khi thanh toán:", error);
         alert("Có lỗi xảy ra: " + error.message);
@@ -9334,8 +9348,13 @@ async function deletePaymentNCC(payId, nccName, amount) {
         
         alert("Xóa thành công!");
         
-        // THÊM await VÀO ĐÂY ĐỂ ĐỢI DỮ LIỆU CẬP NHẬT XONG MỚI RENDER LẠI BẢNG
+        // Đợi dữ liệu cập nhật xong mới render lại bảng
         await loadAllData();
+        
+        // BỔ SUNG DÒNG NÀY ĐỂ TRANG CHỦ TỰ CẬP NHẬT NGAY LẬP TỨC MÀ KHÔNG CẦN F5
+        if (typeof loadDashboard === 'function') {
+            await loadDashboard();
+        }
         
     } catch (error) {
         console.error("Lỗi:", error);
