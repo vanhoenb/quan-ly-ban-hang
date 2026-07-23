@@ -408,6 +408,52 @@
     .fc .fc-toolbar-chunk:first-child {
         gap: 5px !important;
     }
+
+    /* ====== RESPONSIVE CHO LỊCH TRÊN ĐIỆN THOẠI ====== */
+    @media (max-width: 640px) {
+        /* Cho phép thanh công cụ xuống dòng thay vì tràn ra ngoài màn hình */
+        .fc .fc-toolbar {
+            flex-wrap: wrap !important;
+            justify-content: center !important;
+            row-gap: 8px !important;
+        }
+        .fc .fc-toolbar-chunk {
+            flex-shrink: 1 !important;
+        }
+        .fc .fc-toolbar-title {
+            font-size: 1.05rem !important;
+            width: 100%;
+            text-align: center;
+            order: -1; /* Tiêu đề tháng luôn ở hàng trên cùng */
+        }
+        .fc .fc-button {
+            padding: 4px 8px !important;
+            font-size: 0.75rem !important;
+        }
+        /* Thu nhỏ ô ngày lại cho vừa màn hình, không bị lòi ra ngoài */
+        .fc-daygrid-day-frame {
+            min-height: 60px !important;
+            padding: 2px !important;
+        }
+        .fc-daygrid-day-number {
+            font-size: 0.75rem !important;
+            padding: 2px !important;
+        }
+        .fc-col-header-cell-cushion {
+            font-size: 0.7rem !important;
+            padding: 4px 0 !important;
+        }
+        /* Ghi chú trong ô ngày thu gọn lại, không tràn ra ngoài ô */
+        .fc-event, .fc .fc-daygrid-event {
+            font-size: 10px !important;
+            padding: 2px 4px !important;
+            margin: 1px 2px !important;
+        }
+        .fc-daygrid-day-events {
+            min-height: 0 !important;
+        }
+        /* Ẩn bớt ghi chú nếu quá nhiều, hiện "+n sự kiện khác" - FullCalendar tự xử lý qua dayMaxEvents */
+    }
 	
 	/* 13. GIỮ MÀU GỐC CHO CÁC ICON CHỨC NĂNG (xem/sửa/xoá/in...) - không bị mờ/ngả xám khi đổi giao diện */
     .dark .text-amber-400{color:#fbbf24 !important;}
@@ -459,6 +505,32 @@
     .dark .fc .fc-button-group .fc-button { background-color: #334155 !important; color: #e2e8f0 !important; }
     .dark .fc .fc-view-harness .fc-button-primary { background-color: #1e293b !important; border-color: #334155 !important; color: #cbd5e1 !important; }
     .dark .fc-day-today { background-color: #1e3a5f !important; }
+
+    /* ====== GIAO DIỆN CHẾ ĐỘ DANH SÁCH (LIST VIEW) - dùng mặc định trên di động ====== */
+    .fc-list-day-cushion { background-color: #f1f5f9 !important; }
+    .dark .fc-list-day-cushion { background-color: #1e293b !important; }
+    .fc-list-day-text, .fc-list-day-side-text { color: #1e293b; font-weight: 700; }
+    .dark .fc-list-day-text, .dark .fc-list-day-side-text { color: #f1f5f9 !important; }
+    .fc-list-table { border-color: #e2e8f0; }
+    .dark .fc-list-table, .dark .fc-list, .dark .fc-list-table tr, .dark .fc-theme-standard .fc-list { 
+        border-color: #334155 !important; 
+        background-color: #1e293b !important;
+    }
+    .fc-list-event:hover td { background-color: #f8fafc !important; }
+    .dark .fc-list-event td { background-color: #1e293b !important; border-color: #334155 !important; }
+    .dark .fc-list-event:hover td { background-color: #0f172a !important; }
+    .fc-list-event-title a, .fc-list-event-time { color: #334155; }
+    .dark .fc-list-event-title a, .dark .fc-list-event-time { color: #cbd5e1 !important; }
+    .fc-list-event-dot { border-width: 6px !important; }
+    .fc-list-empty { background-color: transparent !important; color: #94a3b8; padding: 2rem 0; }
+
+    @media (max-width: 640px) {
+        /* Mỗi sự kiện trong danh sách trông giống 1 thẻ riêng biệt, dễ đọc hơn trên di động */
+        .fc-list-event td { padding: 10px 8px !important; }
+        .fc-list-day-cushion { padding: 8px 10px !important; }
+        .fc-list-event-time { font-size: 11px !important; white-space: nowrap; }
+        .fc-list-event-title { font-size: 13px !important; }
+    }
 </style>
 <style>
 
@@ -640,13 +712,9 @@ html:not(.dark) .bg-white {
     color: #f8fafc !important;
 }
 
-.dark #product-grid div, 
-.dark #product-grid p {
-    color: #f8fafc !important;
-}
-
-.dark #product-grid span {
-    color: #94a3b8 !important;
+/* Số tồn kho phải giữ màu xanh (còn hàng) / đỏ (hết hàng), không bị ép xám như nhãn "Tồn kho:" phía trên */
+.dark #product-grid .text-blue-700 {
+    color: #60a5fa !important;
 }
 
 .dark #product-grid .text-red-500, 
@@ -1377,7 +1445,7 @@ html:not(.dark) .bg-white {
     <main class="flex-1 px-0 py-2 md:p-8">
 	
 	<!-- Trang chủ -->
-<div id="page-home" class="p-2 md:p-8 space-y-6 md:space-y-8 bg-slate-50 dark:bg-slate-950 min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-300">
+<div id="page-home" class="p-2 md:p-8 space-y-6 md:space-y-8 dark:bg-slate-950 min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-300">
     
     <div class="flex justify-between items-end pb-2 border-b border-slate-200 dark:border-slate-900">
         <div>
@@ -1445,8 +1513,8 @@ html:not(.dark) .bg-white {
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">CHI TIẾT TỒN KHO</h3>
                     <div class="flex gap-2">
-                        <input type="date" id="inv-from" onchange="refreshInventory()" class="text-[10px] bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500 transition-all">
-                        <input type="date" id="inv-to" onchange="refreshInventory()" class="text-[10px] bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500 transition-all">
+                        <input type="date" id="inv-from" onchange="refreshInventory()" class="text-[10px] dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500 transition-all">
+                        <input type="date" id="inv-to" onchange="refreshInventory()" class="text-[10px] dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500 transition-all">
                     </div>
                 </div>
                 <div id="home-inventory-list" class="space-y-2 overflow-y-auto custom-scrollbar pr-2 h-[400px] md:h-[500px]"></div>
@@ -1515,7 +1583,7 @@ html:not(.dark) .bg-white {
     <!-- MODAL KHÁC TRÊN BẢNG ĐIỀU KHIỂN -->
     <div id="dashboard-detail-modal" class="fixed inset-0 z-[9999] bg-black/70 hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[80vh] overflow-hidden flex flex-col">
-            <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-950/50">
+            <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center dark:bg-slate-950/50">
                 <h3 id="modal-detail-title" class="font-black text-slate-900 dark:text-white">Chi tiết</h3>
                 <button onclick="document.getElementById('dashboard-detail-modal').classList.add('hidden')" class="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white text-xl font-bold">✕</button>
             </div>
@@ -1532,7 +1600,7 @@ html:not(.dark) .bg-white {
             </div>
             <div class="overflow-y-auto flex-1">
                 <table class="w-full text-sm">
-                    <thead class="sticky top-0 bg-slate-50 dark:bg-slate-950 text-blue-600 dark:text-blue-400 border-b border-slate-200 dark:border-slate-800">
+                    <thead class="sticky top-0 dark:bg-slate-950 text-blue-600 dark:text-blue-400 border-b border-slate-200 dark:border-slate-800">
                         <tr>
                             <th class="text-left py-3 px-3 font-bold">Tên sản phẩm</th>
                             <th class="text-center py-3 px-3 font-bold">SL</th>
@@ -1624,7 +1692,7 @@ html:not(.dark) .bg-white {
         <div class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-100 dark:border-slate-700 w-full">
             <div>
                 <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase">Tháng</label>
-                <input type="month" id="filter-month" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-white rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="month" id="filter-month" onchange="handleReceiptMonthChange()" class="w-full p-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-white rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
             </div>
 
             <div class="grid grid-cols-2 gap-3">
@@ -1646,17 +1714,17 @@ html:not(.dark) .bg-white {
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
-        <div class="overflow-x-auto border border-blue-100 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 p-2 md:p-4">
+        <div class="overflow-x-auto overflow-y-auto max-h-[280px] border border-blue-100 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 p-2 md:p-4 custom-scrollbar">
             <table class="w-full text-sm">
-                <thead class="bg-gray-50 dark:bg-slate-800 border-b dark:border-slate-700 text-gray-800 dark:text-gray-200">
+                <thead class="sticky top-0 z-10 bg-gray-50 dark:bg-slate-800 border-b dark:border-slate-700 text-gray-800 dark:text-gray-200">
                     <tr><th class="py-3 px-2 text-center w-[25%]">Số phiếu</th><th class="py-3 px-2 text-center w-[30%]">Ngày nhập</th><th class="py-3 px-2 text-center w-[20%]">Số SP</th><th class="py-3 px-2 text-center w-[25%]">Thao tác</th></tr>
                 </thead>
                 <tbody id="list-receipts-left" class="text-gray-800 dark:text-gray-300"></tbody>
             </table>
         </div>
-        <div class="overflow-x-auto border border-blue-100 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 p-2 md:p-4">
+        <div class="overflow-x-auto overflow-y-auto max-h-[280px] border border-blue-100 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 p-2 md:p-4 custom-scrollbar">
             <table class="w-full text-sm">
-                <thead class="bg-gray-50 dark:bg-slate-800 border-b dark:border-slate-700 text-gray-800 dark:text-gray-200">
+                <thead class="sticky top-0 z-10 bg-gray-50 dark:bg-slate-800 border-b dark:border-slate-700 text-gray-800 dark:text-gray-200">
                     <tr><th class="py-3 px-2 text-center w-[25%]">Số phiếu</th><th class="py-3 px-2 text-center w-[30%]">Ngày nhập</th><th class="py-3 px-2 text-center w-[20%]">Số SP</th><th class="py-3 px-2 text-center w-[25%]">Thao tác</th></tr>
                 </thead>
                 <tbody id="list-receipts-right" class="text-gray-800 dark:text-gray-300"></tbody>
@@ -2072,7 +2140,7 @@ html:not(.dark) .bg-white {
 
        
 		<!-- PHẦN 6: BÁO CÁO -->
-<div id="page-report" class="hidden p-2 md:p-8 space-y-6 md:space-y-8 bg-slate-50 dark:bg-slate-950 min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-300">
+<div id="page-report" class="hidden p-2 md:p-8 space-y-6 md:space-y-8 dark:bg-slate-950 min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-300">
     <div class="border-b pb-4 md:pb-6">
         <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900">Trung Tâm Báo Cáo</h2>
         <p class="text-slate-500 mt-1 text-sm md:text-base">Xuất dữ liệu chi tiết phục vụ đối soát và quản lý kho</p>
@@ -2180,7 +2248,7 @@ html:not(.dark) .bg-white {
 
 		<!-- PHẦN 6: SẢN XUẤT -->
 
-<div id="page-SanXuat" class="page-content hidden p-2 md:p-6 bg-gray-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300">
+<div id="page-SanXuat" class="page-content hidden p-2 md:p-6 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300">
   <div class="max-w-[98%] mx-auto"> <!-- Tăng chiều rộng tại đây -->
     <h3 class="mb-6 font-bold text-2xl text-gray-800">THEO DÕI SẢN XUẤT</h3>
 
@@ -2196,18 +2264,18 @@ html:not(.dark) .bg-white {
                     class="w-full pl-4 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
 		<!-- Bộ lọc mới -->
-			<div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+			<div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 p-3 bg-gray-50 dark:bg-slate-950 rounded-lg border border-gray-200 dark:border-slate-700">
 			  <div>
-				<label class="block text-xs font-bold text-gray-500 uppercase">Chọn Tháng</label>
+				<label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Chọn Tháng</label>
 				<input type="month" id="monthPickerSX" onchange="capNhatNgayTheoThangSanxuat()">
 			  </div>
 			  <div>
-				<label class="block text-xs font-bold text-gray-500 uppercase">Từ ngày</label>
-				<input type="date" id="dateStartSX" class="w-full p-2 border rounded text-sm" onchange="filterSanXuat()">
+				<label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Từ ngày</label>
+				<input type="date" id="dateStartSX" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" onchange="filterSanXuat()">
 			  </div>
 			  <div>
-				<label class="block text-xs font-bold text-gray-500 uppercase">Đến ngày</label>
-				<input type="date" id="dateEndSX" class="w-full p-2 border rounded text-sm" onchange="filterSanXuat()">
+				<label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Đến ngày</label>
+				<input type="date" id="dateEndSX" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" onchange="filterSanXuat()">
 			  </div>
 			</div>
 
@@ -2305,25 +2373,23 @@ html:not(.dark) .bg-white {
 </div>
 
 <!-- PHẦN 7: NGUYÊN LIỆU & CÔNG NỢ -->
-<div id="page-NguyenLieu" class="page-content hidden p-2 md:p-6 bg-gray-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300">
+<div id="page-NguyenLieu" class="page-content hidden p-2 md:p-6 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300">
     <!-- Bỏ max-w-7xl để dùng toàn bộ màn hình -->
     <div class="w-full">
         <h3 class="mb-6 font-bold text-2xl text-gray-800 px-2 md:px-0">QUẢN LÝ NGUYÊN LIỆU</h3>
         
         <!-- Tab Menu -->
-		<div class="flex space-x-2 mb-6 px-2 md:px-0 overflow-x-auto">
-			<!-- Thêm tab-btn vào class -->
-			<button id="btn-ncc" onclick="openNLTab('ncc-tab')" class="tab-btn px-4 py-2 bg-blue-600 text-white rounded font-bold text-xs whitespace-nowrap shadow-md">NCC & CÔNG NỢ</button>
-			<button id="btn-dm" onclick="openNLTab('dm-tab')" class="tab-btn px-4 py-2 bg-gray-300 text-gray-700 rounded font-bold text-xs whitespace-nowrap">DANH MỤC NL</button>
-			<button id="btn-nhap" onclick="openNLTab('nhap-tab')" class="tab-btn px-4 py-2 bg-gray-300 text-gray-700 rounded font-bold text-xs whitespace-nowrap">NHẬP KHO NL</button>
+		<div class="grid grid-cols-3 gap-2 md:gap-3 mb-6 bg-slate-200 dark:bg-slate-950 p-1.5 rounded-2xl border border-slate-300 dark:border-slate-900 shadow-[inset_0_2px_6px_rgba(0,0,0,0.15)] dark:shadow-[inset_0_4px_12px_rgba(0,0,0,0.8)] select-none">
+			<button id="btn-ncc" onclick="openNLTab('ncc-tab')" class="tab-btn py-2.5 px-1 text-[10px] md:text-sm font-black rounded-xl transition-all duration-150 bg-gradient-to-b from-blue-100 to-blue-200 dark:from-blue-950/40 dark:to-blue-900/30 text-blue-600 dark:text-blue-400 border-t border-l border-white dark:border-blue-500/20 border-b-[4px] border-blue-400 dark:border-blue-600 shadow-[0_4px_10px_rgba(59,130,246,0.15)] dark:shadow-[0_6px_15px_rgba(59,130,246,0.25)] -translate-y-[2px] active:translate-y-0 active:border-b-[1px] uppercase tracking-wider">NCC & CÔNG NỢ</button>
+			<button id="btn-dm" onclick="openNLTab('dm-tab')" class="tab-btn py-2.5 px-1 text-[10px] md:text-sm font-bold rounded-xl transition-all duration-150 bg-slate-100/80 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border-b-[2px] border-slate-300 dark:border-slate-950 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] translate-y-0 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/80 hover:border-b-[4px] hover:border-slate-400 dark:hover:border-slate-800 hover:-translate-y-[2px] hover:shadow-[0_4px_10px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_4px_10px_rgba(0,0,0,0.4)] active:translate-y-[1px] active:border-b-[1px] uppercase tracking-wider">DANH MỤC NL</button>
+			<button id="btn-nhap" onclick="openNLTab('nhap-tab')" class="tab-btn py-2.5 px-1 text-[10px] md:text-sm font-bold rounded-xl transition-all duration-150 bg-slate-100/80 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border-b-[2px] border-slate-300 dark:border-slate-950 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] translate-y-0 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/80 hover:border-b-[4px] hover:border-slate-400 dark:hover:border-slate-800 hover:-translate-y-[2px] hover:shadow-[0_4px_10px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_4px_10px_rgba(0,0,0,0.4)] active:translate-y-[1px] active:border-b-[1px] uppercase tracking-wider">NHẬP KHO NL</button>
 		</div>
-
         <!-- Tab 1: Nhà Cung Cấp -->
-        <div id="ncc-tab" class="nl-tab-pane bg-white p-4 md:p-6 rounded-xl shadow">
+        <div id="ncc-tab" class="nl-tab-pane bg-white dark:bg-slate-900 p-4 md:p-6 rounded-xl shadow border border-slate-100 dark:border-slate-700">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <input id="in-ncc" placeholder="Tên NCC" class="border p-2 rounded w-full">
-                <input id="in-sdt" placeholder="SĐT" class="border p-2 rounded w-full">
-                <input id="in-diachi" placeholder="Địa chỉ" class="border p-2 rounded w-full">
+                <input id="in-ncc" placeholder="Tên NCC" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                <input id="in-sdt" placeholder="SĐT" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                <input id="in-diachi" placeholder="Địa chỉ" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
                <button onclick="addNCC()" 
     class="w-full bg-green-600 dark:bg-green-700 text-white p-2 rounded font-bold transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
     THÊM NCC
@@ -2331,7 +2397,7 @@ html:not(.dark) .bg-white {
             </div>
             <div class="overflow-x-auto border rounded-lg">
                 <table class="w-full text-sm text-left">
-                    <thead class="bg-gray-50 text-xs uppercase text-gray-600">
+                    <thead class="bg-gray-50 dark:bg-slate-800 text-xs uppercase text-gray-600 dark:text-slate-300">
 						<tr>
 							<th class="p-3 w-[25%]">Tên NCC</th>
 							<th class="p-3 w-[25%] hidden md:table-cell">Địa chỉ</th>
@@ -2347,10 +2413,10 @@ html:not(.dark) .bg-white {
         </div>
 
         <!-- Tab 2: Danh mục NL -->
-        <div id="dm-tab" class="nl-tab-pane hidden bg-white p-4 md:p-6 rounded-xl shadow">
+        <div id="dm-tab" class="nl-tab-pane hidden bg-white dark:bg-slate-900 p-4 md:p-6 rounded-xl shadow border border-slate-100 dark:border-slate-700">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <input id="in-nl" placeholder="Tên Nguyên Liệu" class="border p-2 rounded w-full">
-                <input id="in-dvt" placeholder="ĐVT" class="border p-2 rounded w-full">
+                <input id="in-nl" placeholder="Tên Nguyên Liệu" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                <input id="in-dvt" placeholder="ĐVT" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
                <button onclick="addNL()" 
     class="w-full bg-green-600 dark:bg-green-700 text-white p-2 rounded font-bold transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
     THÊM NL
@@ -2368,28 +2434,28 @@ html:not(.dark) .bg-white {
 <div id="nhap-tab" class="nl-tab-pane hidden p-0">
     <div class="flex flex-col-reverse lg:grid lg:grid-cols-12 gap-6">
         <!-- Danh sách: order-2 (nằm dưới trên đt) -->
-        <div class="col-span-12 lg:col-span-9 bg-white p-4 md:p-5 rounded-xl shadow-sm border border-gray-100">
-            <h4 class="font-bold mb-4 text-gray-700">DANH SÁCH CHI TIẾT NHẬP</h4>
+        <div class="col-span-12 lg:col-span-9 bg-white dark:bg-slate-900 p-4 md:p-5 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700">
+            <h4 class="font-bold mb-4 text-gray-700 dark:text-slate-200">DANH SÁCH CHI TIẾT NHẬP</h4>
             
             <!-- BỘ LỌC MỚI ĐƯỢC THÊM VÀO -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 p-3 bg-gray-50 dark:bg-slate-950 rounded-lg border border-gray-200 dark:border-slate-700">
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase">Chọn Tháng</label>
-                    <input type="month" id="monthPickerNhapKho" class="w-full p-2 border rounded text-sm" onchange="capNhatNgayTheoThangNhapKho()">
+                    <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Chọn Tháng</label>
+                    <input type="month" id="monthPickerNhapKho" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" onchange="capNhatNgayTheoThangNhapKho()">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase">Từ ngày</label>
-                    <input type="date" id="dateStartNhapKho" class="w-full p-2 border rounded text-sm" onchange="filterNhapKho()">
+                    <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Từ ngày</label>
+                    <input type="date" id="dateStartNhapKho" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" onchange="filterNhapKho()">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase">Đến ngày</label>
-                    <input type="date" id="dateEndNhapKho" class="w-full p-2 border rounded text-sm" onchange="filterNhapKho()">
+                    <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Đến ngày</label>
+                    <input type="date" id="dateEndNhapKho" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" onchange="filterNhapKho()">
                 </div>
             </div>
 
             <div class="overflow-y-auto max-h-[500px] border rounded-lg">
                 <table class="w-full text-xs text-left">
-					<thead class="bg-gray-100 text-gray-600 uppercase sticky top-0 text-xs">
+					<thead class="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 uppercase sticky top-0 text-xs">
 						<tr>
 							<th class="p-3 w-[15%]">Số Phiếu</th>
 							<th class="p-3 w-[15%]">Ngày</th>
@@ -2398,34 +2464,34 @@ html:not(.dark) .bg-white {
 							<th class="p-3 w-[15%] text-center">Thao tác</th>
 						</tr>
 					</thead>
-					<tbody id="body-phieu" class="divide-y divide-gray-100"></tbody>
+					<tbody id="body-phieu" class="divide-y divide-gray-100 dark:divide-slate-700"></tbody>
 				</table>
             </div>
         </div>
         
         <!-- Nhập liệu: order-1 (nằm trên trên đt) -->
-        <div class="col-span-12 lg:col-span-3 bg-blue-50 p-4 md:p-5 rounded-xl border-2 border-blue-200 shadow-md">
-            <h4 class="font-bold mb-4 text-blue-800 text-sm flex items-center">📝 NHẬP HÀNG MỚI</h4>
+        <div class="col-span-12 lg:col-span-3 bg-blue-50 dark:bg-slate-900 p-4 md:p-5 rounded-xl border-2 border-blue-200 dark:border-slate-700 shadow-md">
+            <h4 class="font-bold mb-4 text-blue-800 dark:text-blue-400 text-sm flex items-center">📝 NHẬP HÀNG MỚI</h4>
             <div class="grid grid-cols-1 gap-2 mb-4">
-                <input id="in-so-phieu" placeholder="Số phiếu" class="border border-blue-100 p-2 rounded text-sm bg-white w-full">
-                <select id="sel-ncc-nhap" class="border border-blue-100 p-2 rounded text-sm bg-white w-full"><option>Chọn NCC</option></select>
+                <input id="in-so-phieu" placeholder="Số phiếu" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                <select id="sel-ncc-nhap" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"><option>Chọn NCC</option></select>
                 <div class="grid grid-cols-2 gap-2">
-                    <input id="in-so-hd" placeholder="Số HĐ" class="border border-blue-100 p-2 rounded text-sm bg-white w-full">
-                    <input id="in-ngay-hd" type="date" class="border border-blue-100 p-2 rounded text-sm bg-white w-full">
+                    <input id="in-so-hd" placeholder="Số HĐ" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input id="in-ngay-hd" type="date" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
             </div>
             <div class="grid grid-cols-1 gap-2 mb-4">
-                <select id="sel-nl" class="border border-blue-100 p-2 rounded text-sm bg-white w-full"><option>Chọn NL</option></select>
+                <select id="sel-nl" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"><option>Chọn NL</option></select>
                 <div class="grid grid-cols-2 gap-2">
-                    <input id="in-sl" type="number" placeholder="SL" class="border border-blue-100 p-2 rounded text-sm bg-white w-full">
-                    <input id="in-gia" type="number" placeholder="Đơn giá" class="border border-blue-100 p-2 rounded text-sm bg-white w-full">
+                    <input id="in-sl" type="number" placeholder="SL" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input id="in-gia" type="number" placeholder="Đơn giá" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
             </div>
             <button type="button" onclick="addNguyenLieuToCart();" 
     class="w-full bg-gray-700 dark:bg-gray-800 text-white py-2 rounded mb-3 text-sm font-bold shadow-md transition-all duration-75 border-b-[4px] border-gray-800 dark:border-gray-950 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px]">
     THÊM VÀO GIỎ
 </button>
-            <div id="gio-hang-nl" class="my-2 border p-2 text-xs bg-white rounded min-h-[50px] max-h-[100px] overflow-y-auto border-blue-100"></div>
+            <div id="gio-hang-nl" class="my-2 border dark:border-slate-700 p-2 text-xs bg-white dark:bg-slate-950 dark:text-white rounded min-h-[50px] max-h-[100px] overflow-y-auto border-blue-100"></div>
             <button onclick="saveFullInvoice()" 
     class="w-full bg-blue-600 dark:bg-blue-700 text-white py-3 rounded font-bold text-sm transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-lg mt-2">
     LƯU PHIẾU NHẬP
@@ -2446,7 +2512,7 @@ html:not(.dark) .bg-white {
 </div>
 
 <!-- LỊCH VÀ GHI CHÚ -->
-<div id="page-LichCongViec" class="page-content hidden p-2 md:p-6 bg-gray-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300">
+<div id="page-LichCongViec" class="page-content hidden p-2 md:p-6 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300">
     <div class="w-full">
         <h3 class="mb-6 font-bold text-2xl text-gray-800 px-2 md:px-0">LỊCH CÔNG VIỆC & GHI CHÚ</h3>
 
@@ -2473,7 +2539,33 @@ html:not(.dark) .bg-white {
             </div>
 
             <div class="w-full lg:w-3/4">
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 min-h-[600px]">
+                <!-- Giao diện lịch kiểu Agenda cho DI ĐỘNG (giống ảnh mẫu) -->
+                <div class="md:hidden space-y-3">
+                    <div class="flex items-center gap-2 bg-white dark:bg-slate-900 p-1.5 rounded-full shadow-sm border border-gray-100 dark:border-slate-800">
+                        <button id="agenda-btn-week" onclick="setAgendaMode('week')" class="flex-1 py-2.5 rounded-full font-bold text-sm transition-colors bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-300">Tuần</button>
+                        <button id="agenda-btn-month" onclick="setAgendaMode('month')" class="flex-1 py-2.5 rounded-full font-bold text-sm transition-colors text-slate-400 dark:text-slate-500">Tháng</button>
+                        <button onclick="openEventModal()" class="shrink-0 bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-full font-bold text-sm flex items-center gap-1 shadow-sm">+ Thêm buổi</button>
+                    </div>
+
+                    <div class="flex items-center justify-between bg-white dark:bg-slate-900 p-3 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800">
+                        <button onclick="shiftAgenda(-1)" class="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 dark:border-slate-700 text-slate-500 dark:text-slate-300">‹</button>
+                        <span id="agenda-range-label" class="font-bold text-sm text-slate-700 dark:text-slate-200"></span>
+                        <button onclick="shiftAgenda(1)" class="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 dark:border-slate-700 text-slate-500 dark:text-slate-300">›</button>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button onclick="goToToday()" class="flex-1 py-2 rounded-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-bold text-slate-600 dark:text-slate-300">Hôm nay</button>
+                        <button onclick="document.getElementById('agenda-jump-date').showPicker ? document.getElementById('agenda-jump-date').showPicker() : document.getElementById('agenda-jump-date').click()" class="flex-1 py-2 rounded-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-bold text-slate-600 dark:text-slate-300">📅 Vào Lịch</button>
+                        <input type="date" id="agenda-jump-date" class="hidden" onchange="jumpToDate(this.value)">
+                    </div>
+
+                    <div id="agenda-day-strip" class="grid grid-cols-7 gap-1.5"></div>
+
+                    <div id="agenda-event-list" class="space-y-2"></div>
+                </div>
+
+                <!-- FullCalendar cho MÁY TÍNH / TABLET -->
+                <div class="hidden md:block bg-white p-4 rounded-xl shadow-sm border border-gray-100 min-h-[600px]">
                     <div id="calendar-container" class="h-full"></div>
                 </div>
             </div>
@@ -2532,6 +2624,7 @@ html:not(.dark) .bg-white {
 </style>
 
     </main>
+  </main>
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
    <script src="script.js"></script>
 
@@ -3319,7 +3412,7 @@ window.loadOrderData = function(orderId) {
         `).join('');
 
         modalContent.innerHTML = `
-            <div class="space-y-2 mb-4 bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800/80 p-3.5 rounded-xl text-xs text-slate-600 dark:text-slate-300">
+            <div class="space-y-2 mb-4 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800/80 p-3.5 rounded-xl text-xs text-slate-600 dark:text-slate-300">
                 <p><strong class="text-slate-500 dark:text-slate-400">Khách hàng:</strong> <span class="text-slate-900 dark:text-slate-100 font-bold">${order.customer || 'Khách lẻ'}</span></p>
                 <p><strong class="text-slate-500 dark:text-slate-400">Ngày xuất:</strong> <span class="text-slate-700 dark:text-slate-200 font-mono">${orderDate}</span></p>
                 <p><strong class="text-slate-500 dark:text-slate-400">Tổng thanh toán:</strong> <span class="text-rose-600 dark:text-rose-400 font-black text-[13px]">${Number(order.total || 0).toLocaleString('vi-VN')} đ</span></p>
@@ -3366,7 +3459,7 @@ function renderDebtCustomers(customersSnap) {
         if (debt > 0) {
             hasDebt = true;
             html += `
-                <div class="flex items-center w-full bg-slate-50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800/80 border-l-4 border-l-blue-500 border-r-4 border-r-blue-500 rounded-xl p-2 mb-3 gap-2 shadow-sm dark:shadow-[0_4px_12px_rgba(0,0,0,0.3)] hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200 text-[10px]">
+                <div class="flex items-center w-full dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800/80 border-l-4 border-l-blue-500 border-r-4 border-r-blue-500 rounded-xl p-2 mb-3 gap-2 shadow-sm dark:shadow-[0_4px_12px_rgba(0,0,0,0.3)] hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200 text-[10px]">
                     
                     <div class="bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/30 px-2 py-1 rounded text-[10px] font-bold text-slate-800 dark:text-slate-100 truncate w-[40%]">
                         ${customer.name || 'Khách hàng'}
@@ -4118,6 +4211,37 @@ function removeFromCart(index) {
     }
 
   // Tải danh sách phiếu nhập/xuất theo tháng
+  // Dựng HTML cho 1 dòng phiếu nhập kho (dùng chung cho cả tải theo tháng lẫn tìm kiếm toàn bộ)
+  function buildReceiptRowHtml(docId, displayId, dateStr, itemCount) {
+      return `
+				<tr>
+					<td colspan="4" class="p-1">
+						<div class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2
+								shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]" style="border-left-color:#fbbf24 !important; border-right-color:#fbbf24 !important;">
+							<div class="flex items-center justify-between md:contents">
+								<span class="font-bold text-[13px] md:text-[12px] text-slate-800 dark:text-slate-100 md:w-[25%] md:text-center">${displayId}</span>
+								<span class="text-[12px] text-slate-500 dark:text-slate-400 md:w-[30%] md:text-center">${dateStr}</span>
+							</div>
+							<div class="flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700 md:contents">
+								<span class="text-[12px] text-slate-600 dark:text-slate-400 md:w-[20%] md:text-center">${itemCount} loại</span>
+								<div class="md:w-[25%] flex justify-end md:justify-center gap-4">
+									<button type="button" onclick="viewReceipt('${docId}')" title="Xem" 
+											class="text-blue-600 hover:text-blue-800 transition-transform hover:scale-110">
+										<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+									</button>
+									
+									<button type="button" onclick="event.preventDefault(); deleteReceipt('${docId}')" title="Xóa" 
+											class="text-red-600 hover:text-red-800 transition-transform hover:scale-110">
+										<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+									</button>
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+			`;
+  }
+
   function loadReceipts() {
     console.log("Đang tải danh sách phiếu theo tháng...");
     const leftBody = document.getElementById('list-receipts-left');
@@ -4138,8 +4262,22 @@ function removeFromCart(index) {
         leftBody.innerHTML = '';
         rightBody.innerHTML = '';
         window.allReceipts = []; 
+        // LƯU LẠI TOÀN BỘ PHIẾU (mọi tháng) để phục vụ tìm kiếm không giới hạn theo tháng
+        window.allReceiptsFull = [];
 
-        // Lọc danh sách ngay khi lấy dữ liệu về
+        snapshot.docs.forEach(doc => {
+            const data = doc.data();
+            const date = data.date?.toDate ? data.date.toDate() : null;
+            if (!date) return;
+            window.allReceiptsFull.push({
+                docId: doc.id,
+                displayId: data.id || '---',
+                dateStr: date.toLocaleDateString('vi-VN'),
+                itemCount: Array.isArray(data.items) ? data.items.length : 0
+            });
+        });
+
+        // Lọc danh sách theo tháng để hiển thị mặc định
         const filteredDocs = snapshot.docs.filter(doc => {
             const data = doc.data();
             const date = data.date?.toDate ? data.date.toDate() : null;
@@ -4169,30 +4307,7 @@ function removeFromCart(index) {
             const itemCount = Array.isArray(data.items) ? data.items.length : 0;
             const displayId = data.id || '---';
 
-            // Không còn dùng class old-receipt hay style display:none nữa
-            const rowHtml = `
-				<tr>
-					<td colspan="4" class="p-1">
-						<div class="flex items-center w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2
-								shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]" style="border-left-color:#fbbf24 !important; border-right-color:#fbbf24 !important;">
-							<div class="px-2 w-[25%] text-[12px] font-bold text-slate-800 dark:text-slate-100 text-center">${displayId}</div>
-							<div class="px-2 w-[30%] text-[12px] text-slate-600 dark:text-slate-400 text-center">${dateStr}</div>
-							<div class="px-2 w-[20%] text-[12px] text-slate-600 dark:text-slate-400 text-center">${itemCount} loại</div>
-							<div class="px-2 w-[25%] flex justify-center gap-4">
-								<button type="button" onclick="viewReceipt('${doc.id}')" title="Xem" 
-										class="text-blue-600 hover:text-blue-800 transition-transform hover:scale-110">
-									<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-								</button>
-								
-								<button type="button" onclick="event.preventDefault(); deleteReceipt('${doc.id}')" title="Xóa" 
-										class="text-red-600 hover:text-red-800 transition-transform hover:scale-110">
-									<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-								</button>
-							</div>
-						</div>
-					</td>
-				</tr>
-			`;
+            const rowHtml = buildReceiptRowHtml(doc.id, displayId, dateStr, itemCount);
 
 			if (index < midPoint) {
 				leftBody.innerHTML += rowHtml;
@@ -4240,43 +4355,59 @@ window.deleteReceipt = function(docId) {
 
 
 //===== xem theo tháng , Ngày
-function filterReceipts() {
+// Xử lý riêng khi đổi tháng (tách khỏi filterReceipts để tránh phụ thuộc biến event ẩn)
+function handleReceiptMonthChange() {
     const monthInput = document.getElementById('filter-month');
-    
-    // 1. Xử lý khi thay đổi tháng
-    if (event && event.target.id === 'filter-month') {
-        setDateRangeForMonth(monthInput.value); 
-        loadReceipts(); 
-        return;
-    }
+    setDateRangeForMonth(monthInput.value);
+    loadReceipts();
+}
 
-    // 2. Lấy giá trị bộ lọc ngày (nếu rỗng thì mặc định là vô cực để không lọc)
+function filterReceipts() {
+    const leftBody = document.getElementById('list-receipts-left');
+    const rightBody = document.getElementById('list-receipts-right');
+    if (!leftBody || !rightBody) return;
+
     const fromVal = document.getElementById('filter-date-from').value;
     const toVal = document.getElementById('filter-date-to').value;
-    const keyword = document.getElementById('searchReceiptInput')?.value.toLowerCase() || "";
+    const keyword = document.getElementById('searchReceiptInput')?.value.trim().toLowerCase() || "";
 
-    const fromDate = fromVal ? new Date(fromVal) : new Date(0); // Nếu không chọn thì lấy từ năm 1970
-    const toDate = toVal ? new Date(toVal) : new Date(3000, 0, 1); // Nếu không chọn thì lấy đến năm 3000
+    let matched;
 
-    const allRows = document.querySelectorAll('#list-receipts-left tr, #list-receipts-right tr');
-    
-    allRows.forEach(row => {
-        // Lấy dữ liệu từ bảng
-        const id = row.cells[0]?.innerText.toLowerCase() || "";
-        const dateStr = row.cells[1]?.innerText || "";
-        
-        // Chuyển đổi định dạng dd/mm/yyyy từ bảng sang Date object
-        const [d, m, y] = dateStr.split('/');
-        const rowDate = new Date(`${y}-${m}-${d}`);
-        
-        // Kiểm tra khớp từ khóa
-        const matchKeyword = id.includes(keyword);
-        // Kiểm tra khớp khoảng ngày
-        const matchDate = rowDate >= fromDate && rowDate <= toDate;
-        
-        // Cập nhật hiển thị
-        row.style.display = (matchKeyword && matchDate) ? "" : "none";
+    if (keyword !== "") {
+        // CÓ TỪ KHÓA: tìm trên TOÀN BỘ phiếu (mọi tháng), không giới hạn theo tháng/khoảng ngày đang chọn
+        matched = (window.allReceiptsFull || []).filter(r => r.displayId.toLowerCase().includes(keyword));
+    } else {
+        // KHÔNG CÓ TỪ KHÓA: lọc theo khoảng ngày trong phạm vi tháng đang tải (window.allReceipts)
+        const fromDate = fromVal ? new Date(fromVal) : new Date(0);
+        const toDate = toVal ? new Date(toVal) : new Date(3000, 0, 1);
+        matched = (window.allReceipts || [])
+            .filter(r => {
+                const d = r.date?.toDate ? r.date.toDate() : null;
+                return d && d >= fromDate && d <= toDate;
+            })
+            .map(r => ({
+                docId: r.docId,
+                displayId: r.displayId,
+                dateStr: r.date?.toDate ? r.date.toDate().toLocaleDateString('vi-VN') : '---',
+                itemCount: Array.isArray(r.items) ? r.items.length : 0
+            }));
+    }
+
+    leftBody.innerHTML = '';
+    rightBody.innerHTML = '';
+    const midPoint = Math.ceil(matched.length / 2);
+    matched.forEach((r, index) => {
+        const rowHtml = buildReceiptRowHtml(r.docId, r.displayId, r.dateStr, r.itemCount);
+        if (index < midPoint) {
+            leftBody.innerHTML += rowHtml;
+        } else {
+            rightBody.innerHTML += rowHtml;
+        }
     });
+
+    if (matched.length === 0) {
+        leftBody.innerHTML = '<tr><td class="p-4 text-center text-slate-400 text-sm">Không tìm thấy phiếu nào</td></tr>';
+    }
 }
 
 // Tự động tính ngày đầu/cuối tháng khi chọn tháng
@@ -4397,24 +4528,31 @@ function loadInventory() {
                 tbody.innerHTML += `
                 <tr class="transition-all duration-300">
                     <td colspan="5" class="p-0.5">
-                        <div class="flex items-center w-full bg-white border border-slate-200 border-l-4 border-r-4 rounded-lg p-1.5 shadow-[0_4px_6px_-2px_rgba(0,0,0,0.2)]" style="border-left-color:#60a5fa !important; border-right-color:#60a5fa !important;">
-                            <div class="px-2 w-[40%] text-left">
-                                <div class="font-bold text-[13px] text-slate-800 leading-tight">${item.name}</div>
-                                <div class="text-[10px] text-gray-400 font-mono">Mã: ${barcode}</div>
+                        <div class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2 md:p-1.5 shadow-[0_4px_6px_-2px_rgba(0,0,0,0.2)]" style="border-left-color:#60a5fa !important; border-right-color:#60a5fa !important;">
+                            <div class="md:px-2 md:w-[40%] text-left">
+                                <div class="font-bold text-[13px] text-slate-800 dark:text-slate-100 leading-tight">${item.name}</div>
+                                <div class="text-[10px] text-gray-400 dark:text-slate-500 font-mono">Mã: ${barcode}</div>
                             </div>
-                            <div class="px-1 w-[10%] text-center text-[12px] text-slate-600">${item.unit}</div>
-                            <div class="px-1 w-[10%] text-center font-bold text-[13px] ${item.qty < 0 ? 'text-red-600' : 'text-blue-600'}">
-                                ${displayQty}
+                            <div class="flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700">
+                                <span class="text-[11px] text-slate-400 md:hidden">ĐVT: <b class="text-slate-600 dark:text-slate-300">${item.unit}</b></span>
+                                <span class="hidden md:block md:px-1 md:w-[10%] md:text-center text-[12px] text-slate-600 dark:text-slate-400">${item.unit}</span>
+                                <span class="font-bold text-[13px] md:px-1 md:w-[10%] md:text-center ${item.qty < 0 ? 'text-red-600' : 'text-blue-600 dark:text-blue-400'}">
+                                    ${displayQty}
+                                </span>
                             </div>
-                            <div class="px-1 w-[20%] text-center">
-                                <input type="text" value="${retail}" 
-                                       class="w-full text-center text-[12px] text-slate-600 bg-transparent border-b border-dashed border-slate-300 focus:border-blue-500 outline-none"
-                                       onblur="updateProductPrice('${item.name}', this.value, 'retail')">
-                            </div>
-                            <div class="px-1 w-[20%] text-center">
-                                <input type="text" value="${wholesale}" 
-                                       class="w-full text-center text-[12px] text-slate-600 bg-transparent border-b border-dashed border-slate-300 focus:border-blue-500 outline-none"
-                                       onblur="updateProductPrice('${item.name}', this.value, 'wholesale')">
+                            <div class="flex items-center gap-3 md:contents">
+                                <div class="flex-1 md:px-1 md:w-[20%] flex items-center gap-1">
+                                    <span class="text-[10px] text-slate-400 md:hidden">Lẻ:</span>
+                                    <input type="text" value="${retail}" 
+                                           class="w-full text-center text-[12px] text-slate-600 dark:text-slate-300 bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 focus:border-blue-500 outline-none"
+                                           onblur="updateProductPrice('${item.name}', this.value, 'retail')">
+                                </div>
+                                <div class="flex-1 md:px-1 md:w-[20%] flex items-center gap-1">
+                                    <span class="text-[10px] text-slate-400 md:hidden">Sỉ:</span>
+                                    <input type="text" value="${wholesale}" 
+                                           class="w-full text-center text-[12px] text-slate-600 dark:text-slate-300 bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 focus:border-blue-500 outline-none"
+                                           onblur="updateProductPrice('${item.name}', this.value, 'wholesale')">
+                                </div>
                             </div>
                         </div>
                     </td>
@@ -5098,12 +5236,12 @@ function renderProductGrid() {
     grid.innerHTML = '';
     
     const themeClasses = [
-        { l: 'border-l-blue-400', bg: 'bg-white', btn: 'bg-blue-600', shadow: 'shadow-[0_8px_0_0_#1e40af]' },
-        { l: 'border-l-emerald-400', bg: 'bg-white', btn: 'bg-emerald-600', shadow: 'shadow-[0_8px_0_0_#065f46]' },
-        { l: 'border-l-amber-400', bg: 'bg-white', btn: 'bg-amber-600', shadow: 'shadow-[0_8px_0_0_#92400e]' },
-        { l: 'border-l-rose-400', bg: 'bg-white', btn: 'bg-rose-600', shadow: 'shadow-[0_8px_0_0_#9f1239]' },
-        { l: 'border-l-violet-400', bg: 'bg-white', btn: 'bg-violet-600', shadow: 'shadow-[0_8px_0_0_#6d28d9]' },
-        { l: 'border-l-cyan-400', bg: 'bg-white', btn: 'bg-cyan-600', shadow: 'shadow-[0_8px_0_0_#155e75]' }
+        { l: 'border-l-blue-400', bg: 'bg-white dark:bg-slate-800', btn: 'bg-blue-600', shadow: 'shadow-[0_8px_0_0_#1e40af] dark:shadow-[0_8px_0_0_#1e3a8a]' },
+        { l: 'border-l-emerald-400', bg: 'bg-white dark:bg-slate-800', btn: 'bg-emerald-600', shadow: 'shadow-[0_8px_0_0_#065f46] dark:shadow-[0_8px_0_0_#064e3b]' },
+        { l: 'border-l-amber-400', bg: 'bg-white dark:bg-slate-800', btn: 'bg-amber-600', shadow: 'shadow-[0_8px_0_0_#92400e] dark:shadow-[0_8px_0_0_#78350f]' },
+        { l: 'border-l-rose-400', bg: 'bg-white dark:bg-slate-800', btn: 'bg-rose-600', shadow: 'shadow-[0_8px_0_0_#9f1239] dark:shadow-[0_8px_0_0_#881337]' },
+        { l: 'border-l-violet-400', bg: 'bg-white dark:bg-slate-800', btn: 'bg-violet-600', shadow: 'shadow-[0_8px_0_0_#6d28d9] dark:shadow-[0_8px_0_0_#5b21b6]' },
+        { l: 'border-l-cyan-400', bg: 'bg-white dark:bg-slate-800', btn: 'bg-cyan-600', shadow: 'shadow-[0_8px_0_0_#155e75] dark:shadow-[0_8px_0_0_#164e63]' }
     ];
     
     window.allProductCache.forEach((p, index) => {
@@ -5117,13 +5255,13 @@ function renderProductGrid() {
         
         grid.innerHTML += `
             <div onclick="${isOutOfStock ? `alert('Hết hàng!')` : `quickAdd('${safeName}')`}" 
-                 class="group ${b.bg} p-3 md:p-4 rounded-2xl border border-gray-100 ${b.l} border-l-8 
+                 class="group ${b.bg} p-3 md:p-4 rounded-2xl border border-gray-100 dark:border-slate-700 ${b.l} border-l-8 
                         ${b.shadow} flex flex-col justify-between cursor-pointer h-24 md:h-28
                         hover:translate-y-[-4px] hover:shadow-[0_12px_0_0_rgba(0,0,0,0.2)] 
                         active:translate-y-[4px] active:shadow-none transition-all duration-200">
                 
                 <div class="flex justify-between items-start gap-3">
-                    <p class="font-black text-gray-700 text-[12px] md:text-sm leading-tight line-clamp-2 uppercase tracking-tight" title="${p.name}">
+                    <p class="font-black text-gray-700 dark:text-slate-100 text-[12px] md:text-sm leading-tight line-clamp-2 uppercase tracking-tight" title="${p.name}">
                         ${p.name}
                     </p>
                     <button onclick="quickAdd('${safeName}', {shiftKey: true}); event.stopPropagation();" 
@@ -5618,12 +5756,16 @@ async function viewInvoiceDetails(docId) {
 				body.innerHTML += `
 					<tr class="hover:bg-transparent transition-colors">
 						<td colspan="5" class="p-2">
-							<div class="flex items-center w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-3 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]" style="border-left-color:#a855f7 !important; border-right-color:#a855f7 !important;">
-								<div class="text-[11px] font-bold text-slate-700 w-[10%] truncate px-2">${data.id || 'N/A'}</div>
-								<div class="text-[11px] font-bold text-slate-900 truncate w-[30%] px-2">${data.customer || 'Khách lẻ'}</div>
-								<div class="text-[11px] font-bold text-slate-700 w-[15%] text-center px-2">${dateStr}</div>
-								<div class="text-[11px] font-black text-rose-600 w-[25%] text-right px-2">${Number(totalAmount).toLocaleString('vi-VN')} VNĐ</div>
-								<div class="flex justify-center items-center gap-4 w-[20%] px-2">
+							<div class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-3 md:p-3 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]" style="border-left-color:#a855f7 !important; border-right-color:#a855f7 !important;">
+								<div class="flex items-center gap-2 md:contents">
+									<span class="text-[12px] md:text-[11px] font-bold text-slate-700 dark:text-slate-300 md:w-[10%] truncate md:px-2">${data.id || 'N/A'}</span>
+									<span class="text-[12px] md:text-[11px] font-bold text-slate-900 dark:text-slate-100 truncate flex-1 md:w-[30%] md:px-2">${data.customer || 'Khách lẻ'}</span>
+								</div>
+								<div class="flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700">
+									<span class="text-[11px] font-bold text-slate-700 dark:text-slate-400 md:w-[15%] md:text-center md:px-2">${dateStr}</span>
+									<span class="text-[12px] md:text-[11px] font-black text-rose-600 dark:text-rose-400 md:w-[25%] md:text-right md:px-2">${Number(totalAmount).toLocaleString('vi-VN')} VNĐ</span>
+								</div>
+								<div class="flex justify-end md:justify-center items-center gap-4 md:w-[20%] md:px-2">
 									<button onclick="viewInvoiceDetails('${doc.id}')" title="Xem" class="text-green-600 hover:text-green-800 transition-transform hover:scale-110">
 										<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
 									</button>
@@ -6129,8 +6271,14 @@ function filterSales() {
     const rows = document.querySelectorAll('#sales-list-body tr');
 
     rows.forEach(row => {
-        // Giả sử cột Ngày xuất là index 2
-        const dateText = row.cells[2].innerText; 
+        // SỬA LỖI: mỗi dòng hóa đơn chỉ có 1 ô <td colspan="5">, không có cells[2]
+        // nên phải kiểm tra tồn tại trước khi đọc innerText để tránh vỡ lỗi (crash) window.onload
+        const cell = row.cells[2];
+        if (!cell) {
+            row.style.display = "";
+            return;
+        }
+        const dateText = cell.innerText; 
         // Bạn cần convert dateText sang định dạng YYYY-MM-DD để so sánh
         // Nếu ngày của bạn là DD/MM/YYYY, hãy xử lý chuỗi ở đây
         
@@ -6467,28 +6615,45 @@ function renderCustomerList() {
     filteredList.forEach(data => {
         const debt = data.debt || 0;
         const totalPaid = data.totalPaid || 0; 
+        const safeName = (data.name || '').replace(/'/g, "\\'");
         
-       body.innerHTML += `
+        // Tách riêng đoạn hiển thị địa chỉ/SĐT trên mobile để tránh lỗi backtick lồng nhau
+        let mobileAddressPhone = '';
+        if (data.address || data.phone) {
+            mobileAddressPhone = `<div class="text-[11px] text-slate-500 dark:text-slate-400 md:hidden">${data.address || ''}${data.address && data.phone ? ' • ' : ''}${data.phone || ''}</div>`;
+        }
+        
+        body.innerHTML += `
     <tr class="transition-all duration-300">
         <td colspan="6" class="p-1">
-            <div class="flex items-center w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2 
-                        shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] 
-                        " style="border-left-color:#14b8a6 !important; border-right-color:#14b8a6 !important;">
+            <div class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2 
+                        shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]" 
+                 style="border-left-color:#14b8a6 !important; border-right-color:#14b8a6 !important;">
                         
-                <div class="px-2 text-[11px] font-bold ${debt > 0 ? 'text-blue-600' : 'text-slate-700'} w-[20%] truncate">${data.name || ''}</div>
-                <div class="px-2 text-[11px] text-slate-600 w-[20%] truncate">${data.address || ''}</div>
-                <div class="px-2 text-[11px] text-slate-600 w-[15%]">${data.phone || ''}</div>
-                <div class="px-2 text-[11px] font-bold text-green-600 w-[15%] text-center">${totalPaid.toLocaleString('vi-VN')} đ</div>
-                <div class="px-2 text-[11px] font-bold ${debt > 0 ? 'text-red-600' : 'text-slate-500'} w-[15%] text-center">${debt.toLocaleString('vi-VN')} đ</div>
-                
-                <div class="px-1 w-[15%] text-center relative">
-                    <button onclick="toggleMenu(this)" class="bg-blue-600 text-white py-0.5 px-2 rounded text-[10px] font-bold shadow-sm">Thao tác ▼</button>
-                    <div class="hidden absolute menu-action right-0 mt-2 w-32 bg-white dark:bg-slate-800 border border-blue-200 dark:border-slate-700 rounded-lg shadow-2xl p-2 flex flex-col gap-1.5 z-[9999]">
-                        <button onclick="payDebt('${data.id}', ${debt}, '${data.name}')" class="bg-green-600 hover:bg-green-700 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Trả nợ</button>
-                        <button onclick="setOpeningDebt('${data.id}', '${data.name}')" class="bg-orange-500 hover:bg-orange-600 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Đầu kỳ</button>
-                        <button onclick="showDebtHistory('${data.id}', '${data.name}')" class="bg-indigo-500 hover:bg-indigo-600 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Lịch sử</button>
-                        <button onclick="editCustomer('${data.id}')" class="bg-blue-500 hover:bg-blue-600 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Sửa</button>
-                        <button onclick="deleteCustomer('${data.id}')" class="bg-red-500 hover:bg-red-600 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Xóa</button>
+                <div class="md:contents">
+                    <div class="text-[13px] md:text-[11px] font-bold ${debt > 0 ? 'text-blue-600 dark:text-blue-400' : 'text-slate-700 dark:text-slate-200'} md:px-2 md:w-[20%] truncate">${data.name || ''}</div>
+                    ${mobileAddressPhone}
+                    <div class="hidden md:block md:px-2 md:text-[11px] md:text-slate-600 md:dark:text-slate-400 md:w-[20%] md:truncate">${data.address || ''}</div>
+                    <div class="hidden md:block md:px-2 md:text-[11px] md:text-slate-600 md:dark:text-slate-400 md:w-[15%]">${data.phone || ''}</div>
+                </div>
+
+                <div class="flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center gap-3 text-[12px] md:contents">
+                        <span class="text-slate-500 dark:text-slate-400 md:hidden">Đã trả:</span>
+                        <span class="md:px-2 md:text-[11px] font-bold text-green-600 dark:text-green-400 md:w-[15%] md:text-center">${totalPaid.toLocaleString('vi-VN')} đ</span>
+                        <span class="text-slate-500 dark:text-slate-400 md:hidden">Nợ:</span>
+                        <span class="md:px-2 md:text-[11px] font-bold ${debt > 0 ? 'text-red-600' : 'text-slate-500 dark:text-slate-400'} md:w-[15%] md:text-center">${debt.toLocaleString('vi-VN')} đ</span>
+                    </div>
+
+                    <div class="md:px-1 md:w-[15%] text-center relative shrink-0">
+                        <button onclick="toggleMenu(this)" class="bg-blue-600 text-white py-1 px-2.5 md:py-0.5 md:px-2 rounded text-[11px] md:text-[10px] font-bold shadow-sm">Thao tác ▼</button>
+                        <div class="hidden absolute menu-action right-0 mt-2 w-32 bg-white dark:bg-slate-800 border border-blue-200 dark:border-slate-700 rounded-lg shadow-2xl p-2 flex flex-col gap-1.5 z-[9999]">
+                            <button onclick="payDebt('${data.id}', ${debt}, '${safeName}')" class="bg-green-600 hover:bg-green-700 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Trả nợ</button>
+                            <button onclick="setOpeningDebt('${data.id}', '${safeName}')" class="bg-orange-500 hover:bg-orange-600 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Đầu kỳ</button>
+                            <button onclick="showDebtHistory('${data.id}', '${safeName}')" class="bg-indigo-500 hover:bg-indigo-600 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Lịch sử</button>
+                            <button onclick="editCustomer('${data.id}')" class="bg-blue-500 hover:bg-blue-600 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Sửa</button>
+                            <button onclick="deleteCustomer('${data.id}')" class="bg-red-500 hover:bg-red-600 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Xóa</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -8396,14 +8561,18 @@ async function loadProductManage() {
         tbody.innerHTML += `
             <tr>
                 <td colspan="4" class="p-1.5">
-                    <div class="flex items-center w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2 
+                    <div class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2 
                                 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]" style="border-left-color:#f97316 !important; border-right-color:#f97316 !important;">
-                        <div class="px-2 w-[25%]">${barcodeDisplay}</div>
-                        <div class="px-2 w-[35%] text-[12px] font-bold text-slate-800 dark:text-slate-100 truncate">${p.name}</div>
-                        <div class="px-2 w-[15%] text-[12px] text-slate-600 dark:text-slate-400">${p.unit}</div>
-                        <div class="px-2 w-[25%] text-center">
-                            <button onclick="editBarcode('${doc.id}', '${p.name}')" class="text-blue-600 text-[11px] font-bold hover:underline mr-3">Gán mã</button>
-                            <button onclick="deleteProduct('${doc.id}')" class="text-red-500 text-[11px] font-bold hover:underline">Xóa</button>
+                        <div class="flex items-center gap-2 md:contents">
+                            <div class="md:px-2 md:w-[25%]">${barcodeDisplay}</div>
+                            <div class="flex-1 md:px-2 md:w-[35%] text-[13px] md:text-[12px] font-bold text-slate-800 dark:text-slate-100 truncate">${p.name}</div>
+                        </div>
+                        <div class="flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700">
+                            <div class="text-[12px] text-slate-600 dark:text-slate-400 md:px-2 md:w-[15%]">ĐVT: ${p.unit}</div>
+                            <div class="md:px-2 md:w-[25%] text-center">
+                                <button onclick="editBarcode('${doc.id}', '${p.name}')" class="text-blue-600 text-[11px] font-bold hover:underline mr-3">Gán mã</button>
+                                <button onclick="deleteProduct('${doc.id}')" class="text-red-500 text-[11px] font-bold hover:underline">Xóa</button>
+                            </div>
                         </div>
                     </div>
                 </td>
@@ -8643,16 +8812,25 @@ async function loadInitSX() {
 
             htmlRows += `<tr class="${isOld ? 'old-production' : ''}">
                 <td colspan="8" class="p-1">
-                    <div class="flex items-center w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2
+                    <div class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2
                                 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] text-[12px]" style="border-left-color:#e879f9 !important; border-right-color:#e879f9 !important;">
-                        <div class="px-1.5 w-[12%] text-slate-600 dark:text-slate-400">${ngay}</div>
-                        <div class="px-1.5 w-[12%] font-bold text-slate-800 dark:text-slate-100">${data.soPhieu || "---"}</div>
-                        <div class="px-1.5 w-[20%] text-slate-700 dark:text-slate-200 truncate">${data.tenSP || "---"}</div>
-                        <div class="px-1.5 w-[8%] text-slate-600 dark:text-slate-400 text-center">${data.sl || 0}</div>
-                        <div class="px-1.5 w-[12%] text-blue-600 dark:text-blue-400 text-center">${data.meChuaNau || 0}</div>
-                        <div class="px-1.5 w-[12%] text-amber-600 dark:text-amber-400 text-center">${data.meChuaDong || 0}</div>
-                        <div class="px-1.5 w-[10%] text-green-600 dark:text-green-400 text-center">${data.soMe || 0}</div>
-                        <div class="px-1.5 w-[14%] text-center">
+                        <div class="flex items-center justify-between md:contents">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-slate-800 dark:text-slate-100 md:w-[12%] md:px-1.5 md:order-2">${data.soPhieu || "---"}</span>
+                                <span class="text-slate-500 dark:text-slate-400 md:w-[12%] md:px-1.5 md:order-1">${ngay}</span>
+                            </div>
+                            <button class="md:hidden bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 px-2.5 py-1 rounded-lg transition-colors text-[11px]" onclick="huyPhieuSX('${id}')">
+                                <i class="fas fa-trash-alt"></i> Xóa
+                            </button>
+                        </div>
+                        <div class="text-slate-800 dark:text-slate-200 font-semibold truncate md:font-normal md:text-slate-700 md:w-[20%] md:px-1.5 md:order-3">${data.tenSP || "---"}</div>
+                        <div class="grid grid-cols-4 gap-1.5 pt-1.5 mt-1 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700">
+                            <div class="md:w-[8%] md:px-1.5 md:order-4 md:text-center"><span class="block text-[10px] text-slate-400 md:hidden">SL</span><span class="text-slate-600 dark:text-slate-400">${data.sl || 0}</span></div>
+                            <div class="md:w-[12%] md:px-1.5 md:order-5 md:text-center"><span class="block text-[10px] text-slate-400 md:hidden">Mới mua</span><span class="text-blue-600 dark:text-blue-400">${data.meChuaNau || 0}</span></div>
+                            <div class="md:w-[12%] md:px-1.5 md:order-6 md:text-center"><span class="block text-[10px] text-slate-400 md:hidden">Chờ đóng</span><span class="text-amber-600 dark:text-amber-400">${data.meChuaDong || 0}</span></div>
+                            <div class="md:w-[10%] md:px-1.5 md:order-7 md:text-center"><span class="block text-[10px] text-slate-400 md:hidden">Đã đóng</span><span class="text-green-600 dark:text-green-400">${data.soMe || 0}</span></div>
+                        </div>
+                        <div class="hidden md:block md:w-[14%] md:px-1.5 md:order-8 md:text-center">
                             <button class="bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 px-3 py-1 rounded-lg transition-colors" onclick="huyPhieuSX('${id}')">
                                 <i class="fas fa-trash-alt"></i> Xóa
                             </button>
@@ -8682,17 +8860,13 @@ async function loadInitSX() {
     let rows = tableBody.getElementsByTagName("tr");
 
     for (let i = 0; i < rows.length; i++) {
-        // [1] đại diện cho cột thứ 2 (Số phiếu)
-        let td = rows[i].getElementsByTagName("td")[1]; 
-        
-        if (td) {
-            let txtValue = td.textContent || td.innerText;
-            // So sánh nội dung ô Số phiếu với từ khóa tìm kiếm
-            if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                rows[i].style.display = ""; // Hiện dòng nếu khớp
-            } else {
-                rows[i].style.display = "none"; // Ẩn dòng nếu không khớp
-            }
+        // Tìm theo toàn bộ nội dung của dòng (Ngày, Số phiếu, Sản phẩm...)
+        // vì dòng hiện dùng 1 ô <td colspan> duy nhất, không còn tách cột riêng
+        let txtValue = rows[i].textContent || rows[i].innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            rows[i].style.display = ""; // Hiện dòng nếu khớp
+        } else {
+            rows[i].style.display = "none"; // Ẩn dòng nếu không khớp
         }
     }
 }
@@ -8816,16 +8990,25 @@ async function filterSanXuat() {
 
             htmlRows += `<tr>
                 <td colspan="8" class="p-1">
-                    <div class="flex items-center w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2
+                    <div class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2
                                 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] text-[12px]" style="border-left-color:#e879f9 !important; border-right-color:#e879f9 !important;">
-                        <div class="px-1.5 w-[12%] text-slate-600 dark:text-slate-400">${ngay}</div>
-                        <div class="px-1.5 w-[12%] font-bold text-slate-800 dark:text-slate-100">${data.soPhieu || "---"}</div>
-                        <div class="px-1.5 w-[20%] text-slate-700 dark:text-slate-200 truncate">${data.tenSP || "---"}</div>
-                        <div class="px-1.5 w-[8%] text-slate-600 dark:text-slate-400 text-center">${data.sl || 0}</div>
-                        <div class="px-1.5 w-[12%] text-blue-600 dark:text-blue-400 text-center">${data.meChuaNau || 0}</div>
-                        <div class="px-1.5 w-[12%] text-amber-600 dark:text-amber-400 text-center">${data.meChuaDong || 0}</div>
-                        <div class="px-1.5 w-[10%] text-green-600 dark:text-green-400 text-center">${data.soMe || 0}</div>
-                        <div class="px-1.5 w-[14%] text-center">
+                        <div class="flex items-center justify-between md:contents">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-slate-800 dark:text-slate-100 md:w-[12%] md:px-1.5 md:order-2">${data.soPhieu || "---"}</span>
+                                <span class="text-slate-500 dark:text-slate-400 md:w-[12%] md:px-1.5 md:order-1">${ngay}</span>
+                            </div>
+                            <button class="md:hidden bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 px-2.5 py-1 rounded-lg text-[11px]" onclick="huyPhieuSX('${doc.id}')">
+                                <i class="fas fa-trash-alt"></i> Xóa
+                            </button>
+                        </div>
+                        <div class="text-slate-800 dark:text-slate-200 font-semibold truncate md:font-normal md:text-slate-700 md:w-[20%] md:px-1.5 md:order-3">${data.tenSP || "---"}</div>
+                        <div class="grid grid-cols-4 gap-1.5 pt-1.5 mt-1 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700">
+                            <div class="md:w-[8%] md:px-1.5 md:order-4 md:text-center"><span class="block text-[10px] text-slate-400 md:hidden">SL</span><span class="text-slate-600 dark:text-slate-400">${data.sl || 0}</span></div>
+                            <div class="md:w-[12%] md:px-1.5 md:order-5 md:text-center"><span class="block text-[10px] text-slate-400 md:hidden">Mới mua</span><span class="text-blue-600 dark:text-blue-400">${data.meChuaNau || 0}</span></div>
+                            <div class="md:w-[12%] md:px-1.5 md:order-6 md:text-center"><span class="block text-[10px] text-slate-400 md:hidden">Chờ đóng</span><span class="text-amber-600 dark:text-amber-400">${data.meChuaDong || 0}</span></div>
+                            <div class="md:w-[10%] md:px-1.5 md:order-7 md:text-center"><span class="block text-[10px] text-slate-400 md:hidden">Đã đóng</span><span class="text-green-600 dark:text-green-400">${data.soMe || 0}</span></div>
+                        </div>
+                        <div class="hidden md:block md:w-[14%] md:px-1.5 md:order-8 md:text-center">
                             <button class="bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 px-3 py-1 rounded-lg" onclick="huyPhieuSX('${doc.id}')">
                                 <i class="fas fa-trash-alt"></i> Xóa
                             </button>
@@ -8862,10 +9045,13 @@ function openNLTab(tabId) {
     const tab = document.getElementById(tabId);
     if (tab) tab.classList.remove('hidden');
 
-    // 3. Hiệu ứng đổi màu nút (Cập nhật class cho các nút)
+    // 3. Hiệu ứng đổi màu nút kiểu 3D (giống tab Trang chủ)
+    const activeClasses = 'font-black bg-gradient-to-b from-blue-100 to-blue-200 dark:from-blue-950/40 dark:to-blue-900/30 text-blue-600 dark:text-blue-400 border-t border-l border-white dark:border-blue-500/20 border-b-[4px] border-blue-400 dark:border-blue-600 shadow-[0_4px_10px_rgba(59,130,246,0.15)] dark:shadow-[0_6px_15px_rgba(59,130,246,0.25)] -translate-y-[2px]'.split(' ');
+    const inactiveClasses = 'font-bold bg-slate-100/80 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border-b-[2px] border-slate-300 dark:border-slate-950 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] translate-y-0'.split(' ');
+
     document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
-        btn.classList.add('bg-gray-300', 'text-gray-700');
+        btn.classList.remove(...activeClasses);
+        btn.classList.add(...inactiveClasses);
     });
 
     // Xác định id của nút dựa trên tabId
@@ -8877,8 +9063,8 @@ function openNLTab(tabId) {
     
     const activeBtn = document.getElementById(btnMap[tabId]);
     if (activeBtn) {
-        activeBtn.classList.remove('bg-gray-300', 'text-gray-700');
-        activeBtn.classList.add('bg-blue-600', 'text-white', 'shadow-md');
+        activeBtn.classList.remove(...inactiveClasses);
+        activeBtn.classList.add(...activeClasses);
     }
 
     // 4. Các logic cũ của bạn (Giữ nguyên không thiếu cái nào)
@@ -8912,11 +9098,6 @@ async function loadAllData() {
     // Không dùng allSettled nữa, dùng await trực tiếp để đảm bảo thứ tự
     await loadTableNCC(); 
     await loadTableNL();
-    
-    // Nếu có hàm loadDashboard, gọi luôn ở đây cho chắc chắn
-    if (typeof loadDashboard === 'function') {
-        await loadDashboard();
-    }
 }
 /**
  * --- 2. TAB NHÀ CUNG CẤP (NCC) & MODAL POPUP ---
@@ -8935,40 +9116,65 @@ async function loadTableNCC() {
     
     // Lấy dữ liệu nhà cung cấp
     const nccSnap = await db.collection('suppliers').get();
-    bodyNCC.innerHTML = '';
+
+    // Lấy TOÀN BỘ payments 1 lần duy nhất (thay vì mỗi NCC 1 truy vấn riêng) rồi tự cộng dồn theo tên NCC
+    const paymentsSnap = await db.collection('payments').get();
+    const paidBySupplier = {};
+    paymentsSnap.docs.forEach(p => {
+        const pd = p.data();
+        const key = pd.supplierName;
+        paidBySupplier[key] = (paidBySupplier[key] || 0) + (pd.amount || 0);
+    });
     
+    // Dựng toàn bộ HTML vào 1 biến trước, chỉ gán vào trang 1 lần duy nhất ở cuối
+    let html = '';
     for (const doc of nccSnap.docs) {
         const d = doc.data();
-        const payments = await db.collection('payments').where('supplierName', '==', d.name).get();
-        const totalPaid = payments.docs.reduce((sum, p) => sum + p.data().amount, 0);
+        const totalPaid = paidBySupplier[d.name] || 0;
 
         // Tạo biến an toàn cho dữ liệu
         const safeName = d.name.replace(/'/g, "\\'");
         const safePhone = (d.phone || '').replace(/'/g, "\\'");
         const safeAddress = (d.address || '').replace(/'/g, "\\'");
 
-        bodyNCC.innerHTML += `
+        // Tách riêng đoạn hiển thị địa chỉ/SĐT trên mobile để tránh lỗi backtick lồng nhau
+        let mobileAddressPhone = '';
+        if (d.address || d.phone) {
+            mobileAddressPhone = `<div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 md:hidden">${d.address || ''}${d.address && d.phone ? ' • ' : ''}${d.phone || ''}</div>`;
+        }
+
+        html += `
             <tr class="transition-all duration-300">
                 <td colspan="6" class="p-1">
-                <div class="flex items-center w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]" style="border-left-color:#84cc16 !important; border-right-color:#84cc16 !important;">
-                        <div class="p-2 text-sm w-[25%] font-bold">${d.name}</div>
-                        <div class="p-2 text-sm w-[25%] hidden md:table-cell">${d.address || ''}</div>
-                        <div class="p-2 text-sm w-[12%] text-center hidden md:table-cell">${d.phone || ''}</div>
-                        <div class="p-2 text-sm w-[12%] text-center font-bold text-red-600">${(d.debt || 0).toLocaleString()}</div>
-                        <div class="p-2 text-sm w-[12%] text-center text-green-600 font-bold">${totalPaid.toLocaleString()}</div>
-                        <div class="p-1 text-center w-[14%] relative">
-                            <button onclick="toggleMenu(this)" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 px-3 rounded text-xs font-bold shadow-sm transition-colors">Thao tác ▼</button>
-                            <div class="hidden absolute menu-action right-0 mt-2 w-32 bg-white dark:bg-slate-800 border border-blue-200 dark:border-slate-700 rounded-lg shadow-2xl p-2 flex flex-col gap-1.5 z-[9999]">
-                                <button onclick="openPayModal('${doc.id}', '${safeName}')" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Trả Nợ</button>
-                                <button onclick="window.openHistory('${safeName}')" class="bg-purple-600 hover:bg-purple-700 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Lịch sử</button>
-                                <button onclick="editNCC('${doc.id}', '${safeName}', '${safePhone}', '${safeAddress}')" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Sửa</button>
-                                <button onclick="deleteDoc('suppliers', '${doc.id}')" class="bg-red-600 hover:bg-red-700 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Xóa</button>
+                <div class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]" style="border-left-color:#84cc16 !important; border-right-color:#84cc16 !important;">
+                        <div class="md:contents">
+                            <div class="text-sm md:text-[11px] font-bold text-slate-800 dark:text-slate-100 md:w-[25%] md:px-2 md:truncate">${d.name}</div>
+                            ${mobileAddressPhone}
+                            <div class="hidden md:block md:text-[11px] md:text-slate-600 md:dark:text-slate-400 md:w-[25%] md:px-2 md:truncate">${d.address || ''}</div>
+                            <div class="hidden md:block md:text-[11px] md:text-slate-600 md:dark:text-slate-400 md:w-[12%] md:px-2 md:text-center">${d.phone || ''}</div>
+                        </div>
+                        <div class="flex items-center justify-between gap-2 mt-2 pt-2 md:mt-0 md:pt-0 border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700 md:contents">
+                            <div class="flex items-center gap-3 text-xs md:contents">
+                                <span class="text-slate-500 dark:text-slate-400 md:hidden">Nợ: <b class="text-red-600">${(d.debt || 0).toLocaleString()}</b></span>
+                                <span class="hidden md:block md:text-[11px] md:font-bold md:text-red-600 md:w-[12%] md:px-2 md:text-center">${(d.debt || 0).toLocaleString()}</span>
+                                <span class="text-slate-500 dark:text-slate-400 md:hidden">Đã trả: <b class="text-green-600">${totalPaid.toLocaleString()}</b></span>
+                                <span class="hidden md:block md:text-[11px] md:font-bold md:text-green-600 md:w-[12%] md:px-2 md:text-center">${totalPaid.toLocaleString()}</span>
+                            </div>
+                            <div class="relative shrink-0 md:w-[14%] md:px-1 md:text-center">
+                                <button onclick="toggleMenu(this)" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 px-3 md:py-0.5 md:px-2 rounded text-xs md:text-[10px] font-bold shadow-sm transition-colors">Thao tác ▼</button>
+                                <div class="hidden absolute menu-action right-0 mt-2 w-32 bg-white dark:bg-slate-800 border border-blue-200 dark:border-slate-700 rounded-lg shadow-2xl p-2 flex flex-col gap-1.5 z-[9999]">
+                                    <button onclick="openPayModal('${doc.id}', '${safeName}')" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Trả Nợ</button>
+                                    <button onclick="window.openHistory('${safeName}')" class="bg-purple-600 hover:bg-purple-700 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Lịch sử</button>
+                                    <button onclick="editNCC('${doc.id}', '${safeName}', '${safePhone}', '${safeAddress}')" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Sửa</button>
+                                    <button onclick="deleteDoc('suppliers', '${doc.id}')" class="bg-red-600 hover:bg-red-700 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Xóa</button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </td>
             </tr>`;
     }
+    bodyNCC.innerHTML = html;
 }
 
 // Hàm này đưa thông tin lên ô input để bạn sửa
@@ -9485,14 +9691,19 @@ async function filterNhapKho() {
         let htmlRows = keys.map(p => `
     <tr>
         <td colspan="5" class="p-1">
-            <div class="flex items-center w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2
+            <div class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2
                         shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] text-[12px]" style="border-left-color:#a3e635 !important; border-right-color:#a3e635 !important;">
-                <div class="px-2 w-[15%] font-bold text-slate-800 dark:text-slate-100">${p.soPhieu}</div>
-                <div class="px-2 w-[15%] text-slate-600 dark:text-slate-400">${p.ngay instanceof Date ? p.ngay.toLocaleDateString('vi-VN') : "---"}</div>
-                <div class="px-2 w-[40%] text-slate-700 dark:text-slate-200 truncate">${p.ncc}</div>
-                <div class="px-2 w-[15%] text-right font-bold text-slate-800 dark:text-slate-100">${p.tongTien.toLocaleString('vi-VN')}</div>
-                <div class="px-2 w-[15%] text-center">
-                    <div class="flex justify-center gap-3">
+                <div class="flex items-center justify-between gap-2 md:contents">
+                    <div class="flex items-center gap-2 min-w-0 md:contents">
+                        <span class="font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap md:w-[15%] md:px-2">${p.soPhieu}</span>
+                        <span class="text-slate-500 dark:text-slate-400 whitespace-nowrap md:w-[15%] md:px-2">${p.ngay instanceof Date ? p.ngay.toLocaleDateString('vi-VN') : "---"}</span>
+                    </div>
+                    <span class="font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap md:hidden">${p.tongTien.toLocaleString('vi-VN')} đ</span>
+                </div>
+                <div class="flex items-center justify-between gap-2 mt-1.5 pt-1.5 md:mt-0 md:pt-0 border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700 md:contents">
+                    <span class="text-slate-700 dark:text-slate-200 truncate md:w-[40%] md:px-2 md:order-3">${p.ncc}</span>
+                    <span class="hidden md:block md:w-[15%] md:px-2 md:text-right md:order-4 font-bold text-slate-800 dark:text-slate-100">${p.tongTien.toLocaleString('vi-VN')} đ</span>
+                    <div class="flex justify-center gap-3 shrink-0 md:w-[15%] md:px-2 md:justify-center md:order-5">
                         <button onclick="xemChiTietPhieu('${p.soPhieu}')" class="text-blue-600 hover:text-blue-800">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -9586,21 +9797,34 @@ document.addEventListener('DOMContentLoaded', function() {
     const calendarEl = document.getElementById('calendar-container');
     if (!calendarEl) return;
 
+    // Trên di động, mặc định dùng chế độ Danh sách (giống bố cục ảnh mẫu: ngày ở trên, sự kiện xếp danh sách bên dưới)
+    // thay vì lưới ô ngày rất chật hẹp trên màn hình nhỏ
+    const isMobileScreen = window.innerWidth < 640;
+
     window.calendar = new FullCalendar.Calendar(calendarEl, {
         locale: 'vi',
-        initialView: 'dayGridWeek', 
+        initialView: isMobileScreen ? 'listWeek' : 'dayGridWeek', 
         height: 'auto',
         eventDisplay: 'block', 
-        dayMaxEvents: false,
+        dayMaxEvents: 2,
         eventTimeFormat: { hour: '2-digit', minute: '2-digit', meridiem: false },
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
-            right: 'dayGridMonth,dayGridWeek,dayGridDay' // Thêm các nút chuyển view
+            right: 'dayGridMonth,dayGridWeek,listWeek' // Thêm nút "Danh sách" để chuyển qua lại
         },
-        buttonText: { today: 'Hôm nay', month: 'Tháng', week: 'Tuần', day: 'Ngày' },
+        buttonText: { today: 'Hôm nay', month: 'Tháng', week: 'Tuần', day: 'Ngày', list: 'Danh sách' },
         editable: true,
         selectable: true,
+        // Tự động chuyển chế độ khi xoay màn hình / đổi kích thước cửa sổ
+        windowResize: function(view) {
+            const nowMobile = window.innerWidth < 640;
+            if (nowMobile && view.type !== 'listWeek') {
+                window.calendar.changeView('listWeek');
+            } else if (!nowMobile && view.type === 'listWeek') {
+                window.calendar.changeView('dayGridWeek');
+            }
+        },
         // THÊM: Lưu khi kéo thả sự kiện
         eventDrop: function(info) { updateFirebaseEventDate(info.event); },
         eventResize: function(info) { updateFirebaseEventDate(info.event); },
@@ -9636,8 +9860,163 @@ document.addEventListener('DOMContentLoaded', function() {
                 extendedProps: { status: data.status }
             });
         });
+        // Đồng bộ lại giao diện Agenda trên di động mỗi khi dữ liệu thay đổi
+        if (typeof renderMobileAgenda === 'function') renderMobileAgenda();
     });
 });
+
+// ================= GIAO DIỆN AGENDA CHO DI ĐỘNG (LỊCH CÔNG VIỆC) =================
+window.agendaState = { mode: 'week', currentDate: new Date(), selectedDate: new Date() };
+
+function setAgendaMode(mode) {
+    window.agendaState.mode = mode;
+    const wBtn = document.getElementById('agenda-btn-week');
+    const mBtn = document.getElementById('agenda-btn-month');
+    if (mode === 'week') {
+        wBtn.className = "flex-1 py-2.5 rounded-full font-bold text-sm transition-colors bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-300";
+        mBtn.className = "flex-1 py-2.5 rounded-full font-bold text-sm transition-colors text-slate-400 dark:text-slate-500";
+    } else {
+        mBtn.className = "flex-1 py-2.5 rounded-full font-bold text-sm transition-colors bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-300";
+        wBtn.className = "flex-1 py-2.5 rounded-full font-bold text-sm transition-colors text-slate-400 dark:text-slate-500";
+    }
+    renderMobileAgenda();
+}
+
+function shiftAgenda(direction) {
+    const d = new Date(window.agendaState.currentDate);
+    if (window.agendaState.mode === 'week') {
+        d.setDate(d.getDate() + direction * 7);
+    } else {
+        d.setMonth(d.getMonth() + direction);
+    }
+    window.agendaState.currentDate = d;
+    renderMobileAgenda();
+}
+
+function goToToday() {
+    window.agendaState.currentDate = new Date();
+    window.agendaState.selectedDate = new Date();
+    renderMobileAgenda();
+}
+
+function jumpToDate(value) {
+    if (!value) return;
+    const d = new Date(value + 'T00:00:00');
+    window.agendaState.currentDate = d;
+    window.agendaState.selectedDate = d;
+    renderMobileAgenda();
+}
+
+function selectAgendaDay(dateStr) {
+    window.agendaState.selectedDate = new Date(dateStr + 'T00:00:00');
+    renderMobileAgenda();
+}
+
+// Trả về Thứ 2 của tuần chứa ngày truyền vào
+function getMondayOfWeek(date) {
+    const d = new Date(date);
+    const day = d.getDay(); // 0 = CN
+    const diff = day === 0 ? -6 : 1 - day;
+    d.setDate(d.getDate() + diff);
+    d.setHours(0, 0, 0, 0);
+    return d;
+}
+
+function sameDay(a, b) {
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
+function renderMobileAgenda() {
+    const stripEl = document.getElementById('agenda-day-strip');
+    const listEl = document.getElementById('agenda-event-list');
+    const rangeLabel = document.getElementById('agenda-range-label');
+    if (!stripEl || !listEl || !window.calendar) return;
+
+    const allEvents = window.calendar.getEvents();
+    const dayLabels = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+
+    // Xác định 7 ngày hiển thị trên dải ngày (luôn theo tuần chứa currentDate, kể cả ở chế độ Tháng để dễ chọn nhanh)
+    const monday = getMondayOfWeek(window.agendaState.currentDate);
+    const weekDates = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(monday);
+        d.setDate(d.getDate() + i);
+        return d;
+    });
+
+    // Nhãn khoảng ngày phía trên
+    if (window.agendaState.mode === 'week') {
+        const sun = weekDates[6];
+        const fmt = d => String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+        rangeLabel.innerText = `${fmt(monday)} – ${fmt(sun)}/${sun.getFullYear()}`;
+    } else {
+        rangeLabel.innerText = `Tháng ${window.agendaState.currentDate.getMonth() + 1} Năm ${window.agendaState.currentDate.getFullYear()}`;
+    }
+
+    // Vẽ dải 7 ngày
+    stripEl.innerHTML = weekDates.map((d, i) => {
+        const isSelected = sameDay(d, window.agendaState.selectedDate);
+        const hasEvents = allEvents.some(ev => ev.start && sameDay(ev.start, d));
+        const dStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        
+        // Tách riêng đoạn chấm tròn sự kiện để tránh lỗi lồng backtick
+        let eventDotHtml = '<span class="w-1.5 h-1.5 mt-0.5"></span>';
+        if (hasEvents) {
+            eventDotHtml = `<span class="w-1.5 h-1.5 rounded-full mt-0.5 ${isSelected ? 'bg-white' : 'bg-rose-500'}"></span>`;
+        }
+
+        return `
+            <button onclick="selectAgendaDay('${dStr}')" 
+                class="flex flex-col items-center py-2 rounded-xl border transition-colors
+                       ${isSelected ? 'bg-rose-600 border-rose-600 text-white shadow-md' : 'bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'}">
+                <span class="text-[10px] font-bold ${isSelected ? 'text-rose-100' : 'text-slate-400'}">${dayLabels[i]}</span>
+                <span class="text-base font-bold">${d.getDate()}</span>
+                ${eventDotHtml}
+            </button>
+        `;
+    }).join('');
+
+    // Danh sách sự kiện của ngày đang chọn
+    const dayEvents = allEvents.filter(ev => ev.start && sameDay(ev.start, window.agendaState.selectedDate))
+        .sort((a, b) => (a.start || 0) - (b.start || 0));
+
+    const weekdayNames = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
+    const selD = window.agendaState.selectedDate;
+    const headerHtml = `
+        <div class="flex items-center justify-between px-1 pt-2">
+            <span class="font-bold text-slate-700 dark:text-slate-200">${weekdayNames[selD.getDay()]} · ${String(selD.getDate()).padStart(2,'0')}/${String(selD.getMonth()+1).padStart(2,'0')}</span>
+            <span class="text-xs text-slate-400">${dayEvents.length} lịch</span>
+        </div>`;
+
+    if (dayEvents.length === 0) {
+        listEl.innerHTML = headerHtml + `<div class="text-center text-slate-400 text-sm py-8 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800">Không có lịch nào trong ngày này</div>`;
+        return;
+    }
+
+    listEl.innerHTML = headerHtml + dayEvents.map(ev => {
+        const timeStr = ev.allDay ? 'Cả ngày' : ev.start.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        const bg = ev.backgroundColor || '#fde68a';
+        const isDone = ev.classNames && ev.classNames.includes('event-done');
+        return `
+            <div onclick="openMobileEventView('${ev.id}')"
+                 class="p-3 rounded-2xl cursor-pointer ${isDone ? 'opacity-60 line-through' : ''}" style="background-color:${bg};">
+                <div class="text-[10px] font-bold uppercase opacity-70">Bắt đầu</div>
+                <div class="font-bold text-base">${timeStr}</div>
+                <div class="text-sm mt-0.5">${(ev.title || '').replace('✅ ', '')}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Mở modal xem chi tiết sự kiện khi bấm vào 1 thẻ trong danh sách Agenda di động
+function openMobileEventView(eventId) {
+    const ev = window.calendar.getEventById(eventId);
+    if (!ev) return;
+    selectedEvent = ev;
+    document.getElementById('view-event-title').innerText = (ev.title || '').replace('✅ ', '').replace(' (Đã xong)', '');
+    const timeStr = ev.start ? ev.start.toLocaleString('vi-VN') : 'Cả ngày';
+    document.getElementById('view-event-time').innerText = "Thời gian: " + timeStr;
+    document.getElementById('modal-view-event').classList.remove('hidden');
+}
 
 // Thêm: Hàm tự động cập nhật ngày khi kéo thả
 function updateFirebaseEventDate(event) {
