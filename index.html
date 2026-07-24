@@ -151,6 +151,7 @@
     }
 	
 	
+    }
     </style>
 
     <style>
@@ -1220,70 +1221,33 @@ html:not(.dark) .bg-white {
     background-color: #1e293b !important;
 }
 
-/* --- CSS TỔNG - ĐỒNG BỘ NỀN VÀ TIÊU ĐỀ (ĐÃ SỬA: TIÊU ĐỀ TRONG SUỐT) --- */
+/* --- CSS TỔNG - ĐỒNG BỘ TIÊU ĐỀ (đã gộp các bản trùng lặp trước đây, bỏ padding: 20px vì xung đột với phần giảm khoảng trắng 2 bên) --- */
 
-.dark #page-import, 
-.dark #page-sales, 
-.dark #page-sell, 
-.dark #page-customers, 
-.dark #page-kho-hang, 
-.dark #page-dashboard,
-.dark [id*="page-"] { 
-    background-color: #0f172a !important;
-    color: #f8fafc !important;
-    min-height: 100vh;
-    padding: 20px;
-}
-
-/* ĐÃ SỬA: BỎ NỀN & BỎ VIỀN TIÊU ĐỀ H2 */
+/* ĐÃ SỬA: BỎ NỀN & BỎ VIỀN TIÊU ĐỀ H2 (đã gộp 3 khối trùng lặp thành 1) */
 .dark #page-import h2, 
-.dark #page-sales h2, 
-.dark #page-sell h2, 
-.dark #page-customers h2, 
-.dark #page-kho-hang h2,
 .dark [id*="page-"] h2, 
 .dark .page-title, 
 .dark .header-title {
     background-color: transparent !important; 
-    color: #ffffff !important;            
-    padding: 20px 0 !important;          
-    margin-bottom: 25px !important;      
+    color: #ffffff !important;
     border: none !important;             
     display: block !important;            
     width: 100% !important;               
     font-size: 24px !important;
     font-weight: bold !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+    margin-top: -15px !important;
+    margin-bottom: 10px !important;
 }
 
-.dark #page-sell, 
-.dark #page-sales {
-    background-color: #0f172a !important;
-}
-
-/* 1. Giảm padding và margin của tiêu đề H2 */
-.dark [id*="page-"] h2,
-.dark .page-title, 
-.dark .header-title {
-    padding-top: 10px !important;      /* Giảm từ 20px xuống 10px */
-    padding-bottom: 5px !important;    /* Giảm từ 20px xuống 5px */
-    margin-bottom: 5px !important;     /* Giảm từ 25px xuống 5px */
-}
-
-/* 2. Đẩy dòng chữ Tổng quan sát lên sát tiêu đề */
+/* Đẩy dòng chữ mô tả (Tổng quan...) sát lên tiêu đề */
 .dark [id*="page-"] h2 + p,
 .dark .page-title + p {
-    margin-top: 0px !important;        /* Ép không có khoảng cách trên */
+    margin-top: 0px !important;
     padding-top: 0px !important;
-}
-
-/* ĐẨY TIÊU ĐỀ LÊN CAO ĐỂ NỘI DUNG BÊN DƯỚI ĐẦY LÊN */
-.dark [id*="page-"] h2, 
-.dark .page-title, 
-.dark .header-title {
-    margin-top: -15px !important;    /* Kéo tiêu đề lên trên 15px */
-    margin-bottom: 10px !important;  /* Thu hẹp khoảng cách với nội dung bên dưới */
-    padding-top: 5px !important;     /* Giảm khoảng cách phía trên */
-    padding-bottom: 5px !important;  /* Giảm khoảng cách phía dưới */
 }
 
 </style>
