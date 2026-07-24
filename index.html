@@ -99,6 +99,15 @@
     background: #1d4ed8;
 }
 
+@media (min-width: 601px) {
+    /* Giảm khoảng trắng 2 bên và phía trên cho toàn bộ các trang nội dung (đè lên p-2 md:p-8 lặp lại ở từng trang) */
+    main > [id^="page-"] {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        padding-top: 0.75rem !important;
+    }
+}
+
 @media (max-width: 600px) {
     /* Ép các khung căn giữa (mx-auto) và max-width cố định giãn hết cỡ trên di động */
     .max-w-4xl, .max-w-6xl, .mx-auto {
@@ -531,8 +540,6 @@
         .fc-list-event-time { font-size: 11px !important; white-space: nowrap; }
         .fc-list-event-title { font-size: 13px !important; }
     }
-	
-	
 </style>
 <style>
 
@@ -1279,8 +1286,6 @@ html:not(.dark) .bg-white {
     padding-bottom: 5px !important;  /* Giảm khoảng cách phía dưới */
 }
 
-
-
 </style>
 
 
@@ -1360,8 +1365,8 @@ html:not(.dark) .bg-white {
             <i data-lucide="calendar" class="w-4 h-4 drop-shadow-[0_1px_2px_rgba(99,102,241,0.4)]"></i> Lịch Công Việc
         </button>
 		<button onclick="showPage('page-user-management'); toggleMoreMenu()" data-perm="page-user-management" class="admin-only-nav hidden w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-red-950/40 border-red-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-red-400 text-xs font-bold">
-    <i data-lucide="shield" class="w-4 h-4 drop-shadow-[0_1px_2px_rgba(239,68,68,0.4)]"></i> Quản Lý
-</button>
+			<i data-lucide="shield" class="w-4 h-4 drop-shadow-[0_1px_2px_rgba(239,68,68,0.4)]"></i> Quản Lý
+		</button>
 
         <!-- NÚT GIAO DIỆN DI ĐỘNG (Đã đồng bộ) -->
 <button onclick="toggleTheme(); toggleMoreMenu()" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-slate-950/40 border-slate-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-amber-400 text-xs font-bold">
@@ -1503,8 +1508,7 @@ html:not(.dark) .bg-white {
 
 
     <!-- KHU VỰC NỘI DUNG -->
-    <main class="flex-1 px-0 py-2 md:p-8">
-	
+    <main class="flex-1 px-0 py-2 md:px-4 md:py-3">	
 	<!-- Trang chủ -->
 <div id="page-home" class="p-2 md:p-8 space-y-6 md:space-y-8 dark:bg-slate-950 min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-300">
     
@@ -2763,7 +2767,6 @@ html:not(.dark) .bg-white {
         { id: 'page-report',           label: 'Báo Cáo' },
         { id: 'page-LichCongViec',     label: 'Lịch Công Việc' }
     ];
-    const CURRENT_USER_KEY = 'pos_current_user';
 
     // --- MÃ HÓA MẬT KHẨU (SHA-256, chạy phía trình duyệt) ---
     async function sha256Hex(text) {
@@ -2776,17 +2779,16 @@ html:not(.dark) .bg-white {
         return String(str == null ? '' : str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
     }
 
-    // --- LƯU / ĐỌC PHIÊN ĐĂNG NHẬP (localStorage) ---
     // --- PHIÊN ĐĂNG NHẬP: CHỈ LƯU TRONG BỘ NHỚ, MẤT KHI TẢI LẠI TRANG (bắt buộc gõ mật khẩu mỗi lần mở) ---
-let CURRENT_USER = null;
-function getCurrentUser() { return CURRENT_USER; }
-function setCurrentUser(u) { CURRENT_USER = u; }
-function clearCurrentUser() { CURRENT_USER = null; }
+    let CURRENT_USER = null;
+    function getCurrentUser() { return CURRENT_USER; }
+    function setCurrentUser(u) { CURRENT_USER = u; }
+    function clearCurrentUser() { CURRENT_USER = null; }
 
-// --- CHỈ GHI NHỚ TÊN ĐĂNG NHẬP (không lưu mật khẩu) ĐỂ TỰ ĐIỀN LẦN SAU ---
-const REMEMBERED_USERNAME_KEY = 'pos_remembered_username';
-function getRememberedUsername() { return localStorage.getItem(REMEMBERED_USERNAME_KEY) || ''; }
-function setRememberedUsername(u) { localStorage.setItem(REMEMBERED_USERNAME_KEY, u); }
+    // --- CHỈ GHI NHỚ TÊN ĐĂNG NHẬP (không lưu mật khẩu) ĐỂ TỰ ĐIỀN LẦN SAU ---
+    const REMEMBERED_USERNAME_KEY = 'pos_remembered_username';
+    function getRememberedUsername() { return localStorage.getItem(REMEMBERED_USERNAME_KEY) || ''; }
+    function setRememberedUsername(u) { localStorage.setItem(REMEMBERED_USERNAME_KEY, u); }
 
     // --- TỰ ĐỘNG TẠO TÀI KHOẢN ADMIN MẶC ĐỊNH NẾU CHƯA CÓ ---
     async function ensureDefaultAdmin() {
@@ -2831,6 +2833,14 @@ function setRememberedUsername(u) { localStorage.setItem(REMEMBERED_USERNAME_KEY
         if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
+    // --- KIỂM TRA QUYỀN XÓA DỮ LIỆU (phiếu, hóa đơn, sản phẩm...) ---
+    function canUserDelete() {
+        const u = getCurrentUser();
+        if (!u) return false;
+        if (u.role === 'admin') return true;
+        return u.canDelete === true;
+    }
+
     // --- CHUYỂN ĐẾN TRANG ĐẦU TIÊN NGƯỜI DÙNG ĐƯỢC PHÉP XEM SAU KHI ĐĂNG NHẬP ---
     function goToFirstAllowedPage(user) {
         const target = (user.role === 'admin' || (user.permissions || []).includes('page-home'))
@@ -2862,7 +2872,7 @@ function setRememberedUsername(u) { localStorage.setItem(REMEMBERED_USERNAME_KEY
             if (data.active === false) throw new Error('Tài khoản đã bị khóa. Vui lòng liên hệ Admin.');
             if (data.password !== hash) throw new Error('Sai tên đăng nhập hoặc mật khẩu!');
 
-            const userObj = { username: doc.id, displayName: data.displayName || doc.id, role: data.role || 'staff', permissions: data.permissions || [] };
+            const userObj = { username: doc.id, displayName: data.displayName || doc.id, role: data.role || 'staff', permissions: data.permissions || [], canDelete: data.canDelete === true };
             setCurrentUser(userObj);
             setRememberedUsername(username);
             document.getElementById('login-screen').style.display = 'none';
@@ -3035,8 +3045,15 @@ async function loadUserList() {
                 </div>
                 <div id="swal-perm-wrap">
                   <label class="text-xs font-bold text-slate-500">Các trang được truy cập</label>
+                  <div class="mb-1">
+                    <button type="button" id="swal-check-all-btn" class="text-[11px] font-bold text-blue-600 underline">Chọn tất cả các trang</button>
+                  </div>
                   <div class="grid grid-cols-2 gap-1.5 mt-1 max-h-48 overflow-y-auto p-1">${checkboxesHtml}</div>
                 </div>
+                <label class="flex items-center gap-2 text-sm p-2 rounded-lg border border-rose-200 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/30">
+                  <input type="checkbox" id="swal-can-delete" ${existing && existing.canDelete === true ? 'checked' : ''}>
+                  <span>Cho phép <b>xóa</b> dữ liệu (phiếu, hóa đơn, sản phẩm, khách hàng...)</span>
+                </label>
                 <label class="flex items-center gap-2 text-sm">
                   <input type="checkbox" id="swal-active" ${(!existing || existing.active !== false) ? 'checked' : ''}> Tài khoản đang hoạt động
                 </label>
@@ -3051,6 +3068,12 @@ async function loadUserList() {
                 const toggle = () => { permWrap.style.display = roleSel.value === 'admin' ? 'none' : 'block'; };
                 roleSel.addEventListener('change', toggle);
                 toggle();
+                const checkAllBtn = document.getElementById('swal-check-all-btn');
+                if (checkAllBtn) {
+                    checkAllBtn.addEventListener('click', () => {
+                        document.querySelectorAll('.user-perm-checkbox').forEach(el => { el.checked = true; });
+                    });
+                }
             },
             preConfirm: () => {
                 const username2 = existing ? existing.id : document.getElementById('swal-username').value.trim().toLowerCase();
@@ -3058,6 +3081,7 @@ async function loadUserList() {
                 const password = document.getElementById('swal-password').value;
                 const role = document.getElementById('swal-role').value;
                 const active = document.getElementById('swal-active').checked;
+                const canDelete = document.getElementById('swal-can-delete').checked;
                 const perms = Array.from(document.querySelectorAll('.user-perm-checkbox:checked')).map(el => el.value);
 
                 if (!username2 || !/^[a-z0-9_.]+$/.test(username2)) {
@@ -3072,7 +3096,7 @@ async function loadUserList() {
                     Swal.showValidationMessage('Vui lòng nhập họ tên hiển thị!');
                     return false;
                 }
-                return { username: username2, displayName, password, role, active, permissions: perms };
+                return { username: username2, displayName, password, role, active, canDelete, permissions: perms };
             }
         });
 
@@ -3088,6 +3112,7 @@ async function loadUserList() {
                 displayName: formValues.displayName,
                 role: formValues.role,
                 permissions: formValues.role === 'admin' ? ALL_PAGES.map(p => p.id) : formValues.permissions,
+                canDelete: formValues.canDelete,
                 active: formValues.active
             };
             if (formValues.password) {
@@ -3103,7 +3128,7 @@ async function loadUserList() {
             // Nếu tự sửa chính mình, cập nhật lại phiên đăng nhập hiện tại
             const cur = getCurrentUser();
             if (cur && cur.username === formValues.username) {
-                const updated = { ...cur, displayName: dataToSave.displayName, role: dataToSave.role, permissions: dataToSave.permissions };
+                const updated = { ...cur, displayName: dataToSave.displayName, role: dataToSave.role, permissions: dataToSave.permissions, canDelete: dataToSave.canDelete };
                 setCurrentUser(updated);
                 applyPermissionsToUI(updated);
             }
@@ -3129,7 +3154,7 @@ async function loadUserList() {
     }
 
     // --- KHỞI ĐỘNG HỆ THỐNG ĐĂNG NHẬP ---
-   async function initAuthSystem() {
+    async function initAuthSystem() {
         await ensureDefaultAdmin();
         // Luôn yêu cầu đăng nhập lại mỗi khi mở trang - không tự động đăng nhập
         setAppVisible(false);
@@ -6418,6 +6443,7 @@ async function reprintSale(docId) {
 
 // Xoá hóa đơn bán hàng, hoàn lại tồn kho và công nợ liên quan
 async function deleteSale(docId) {
+    if (typeof canUserDelete === 'function' && !canUserDelete()) { if (typeof Swal !== 'undefined') Swal.fire({ icon: 'warning', title: 'Không có quyền', text: 'Bạn không có quyền xóa dữ liệu. Vui lòng liên hệ Admin.' }); return; }
    if (confirm("Xóa hóa đơn này sẽ cộng lại hàng vào kho và điều chỉnh lại công nợ (nếu có). Bạn chắc chắn chứ?")) {
         try {
             // 1. Lấy thông tin hóa đơn
@@ -7405,6 +7431,7 @@ async function showDebtHistory(customerId, customerName) {
 
 // xoá nợ đầu kỳ 
 async function deleteOpeningDebt(id, customerId, amount) {
+    if (typeof canUserDelete === 'function' && !canUserDelete()) { if (typeof Swal !== 'undefined') Swal.fire({ icon: 'warning', title: 'Không có quyền', text: 'Bạn không có quyền xóa dữ liệu. Vui lòng liên hệ Admin.' }); return; }
     if (!confirm("Bạn có chắc muốn xóa nợ đầu kỳ này và trừ số tiền khỏi tổng nợ hiện tại?")) return;
 
     try {
@@ -7428,6 +7455,7 @@ async function deleteOpeningDebt(id, customerId, amount) {
 
 // Hàm xóa phiếu trả nợ (dùng để sửa lỗi khi gõ nhầm)
 async function deletePayment(paymentId, customerId, amount) {
+    if (typeof canUserDelete === 'function' && !canUserDelete()) { if (typeof Swal !== 'undefined') Swal.fire({ icon: 'warning', title: 'Không có quyền', text: 'Bạn không có quyền xóa dữ liệu. Vui lòng liên hệ Admin.' }); return; }
     if (!confirm("Xóa phiếu này và cộng ngược tiền lại vào công nợ?")) return;
 
     try {
@@ -7447,6 +7475,7 @@ async function deletePayment(paymentId, customerId, amount) {
 
 // Xoá khách hàng khỏi danh sách
 async function deleteCustomer(id) {
+    if (typeof canUserDelete === 'function' && !canUserDelete()) { if (typeof Swal !== 'undefined') Swal.fire({ icon: 'warning', title: 'Không có quyền', text: 'Bạn không có quyền xóa dữ liệu. Vui lòng liên hệ Admin.' }); return; }
     const doc = await db.collection('customers').doc(id).get();
     const data = doc.data();
     
@@ -9170,6 +9199,7 @@ async function startScanner(pageType) {
 
 // 3. Hàm xóa sản phẩm
 async function deleteProduct(id) {
+    if (typeof canUserDelete === 'function' && !canUserDelete()) { if (typeof Swal !== 'undefined') Swal.fire({ icon: 'warning', title: 'Không có quyền', text: 'Bạn không có quyền xóa dữ liệu. Vui lòng liên hệ Admin.' }); return; }
     const result = await Swal.fire({ title: 'Xác nhận xóa?', icon: 'warning', showCancelButton: true });
     if (result.isConfirmed) {
         await db.collection('products').doc(id).delete();
@@ -9832,6 +9862,7 @@ async function openHistoryModal(nccName) {
 
 // Đổi tên thành deletePaymentNCC để tách biệt hoàn toàn với deletePayment của KH
 async function deletePaymentNCC(payId, nccName, amount) {
+    if (typeof canUserDelete === 'function' && !canUserDelete()) { if (typeof Swal !== 'undefined') Swal.fire({ icon: 'warning', title: 'Không có quyền', text: 'Bạn không có quyền xóa dữ liệu. Vui lòng liên hệ Admin.' }); return; }
     if (!confirm("Xác nhận xóa lần trả nợ này?")) return;
     
     try {
@@ -9894,6 +9925,7 @@ async function addNCC() {
 
 // Hàm xóa đa năng cho mọi collection
 async function deleteDoc(col, soPhieu) {
+    if (typeof canUserDelete === 'function' && !canUserDelete()) { if (typeof Swal !== 'undefined') Swal.fire({ icon: 'warning', title: 'Không có quyền', text: 'Bạn không có quyền xóa dữ liệu. Vui lòng liên hệ Admin.' }); return; }
     if (!confirm("Xác nhận xóa phiếu nhập " + soPhieu + " và trừ nợ NCC?")) return;
     
     try {
@@ -10061,6 +10093,7 @@ function renderCartNL() {
 
 // 3. Hàm xóa riêng
 function xoaNguyenLieu(index) {
+    if (typeof canUserDelete === 'function' && !canUserDelete()) { if (typeof Swal !== 'undefined') Swal.fire({ icon: 'warning', title: 'Không có quyền', text: 'Bạn không có quyền xóa dữ liệu. Vui lòng liên hệ Admin.' }); return; }
     cartNL.splice(index, 1);
     renderCartNL(); // Cập nhật lại list NL
 }
@@ -10586,6 +10619,7 @@ function saveNewEvent() {
 
 // Hàm xóa trên Firebase
 function deleteEvent() {
+    if (typeof canUserDelete === 'function' && !canUserDelete()) { if (typeof Swal !== 'undefined') Swal.fire({ icon: 'warning', title: 'Không có quyền', text: 'Bạn không có quyền xóa dữ liệu. Vui lòng liên hệ Admin.' }); return; }
     if (selectedEvent && confirm("Bạn có chắc chắn muốn xóa công việc này?")) {
         db.collection('calendar_events').doc(selectedEvent.id).delete().then(() => {
             document.getElementById('modal-view-event').classList.add('hidden');
