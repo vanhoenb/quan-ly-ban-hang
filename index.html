@@ -1355,6 +1355,9 @@ html:not(.dark) .bg-white {
         <button onclick="showPage('page-LichCongViec'); toggleMoreMenu()" data-perm="page-LichCongViec" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-indigo-950/40 border-indigo-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-indigo-400 text-xs font-bold">
             <i data-lucide="calendar" class="w-4 h-4 drop-shadow-[0_1px_2px_rgba(99,102,241,0.4)]"></i> Lịch Công Việc
         </button>
+		<button onclick="showPage('page-user-management'); toggleMoreMenu()" data-perm="page-user-management" class="admin-only-nav hidden w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-red-950/40 border-red-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-red-400 text-xs font-bold">
+    <i data-lucide="shield" class="w-4 h-4 drop-shadow-[0_1px_2px_rgba(239,68,68,0.4)]"></i> Quản Lý
+</button>
 
         <!-- NÚT GIAO DIỆN DI ĐỘNG (Đã đồng bộ) -->
 <button onclick="toggleTheme(); toggleMoreMenu()" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-slate-950/40 border-slate-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-amber-400 text-xs font-bold">
@@ -1457,7 +1460,7 @@ html:not(.dark) .bg-white {
         </button>
 
         <button onclick="showPage('page-user-management'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" data-perm="page-user-management" class="admin-only-nav hidden w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-red-50 dark:bg-red-950/50 border-red-300 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/60 hover:border-red-400 dark:hover:border-red-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-red-700 dark:text-red-400">
-            <i data-lucide="shield" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(239,68,68,0.4)]"></i> <span class="sidebar-text">Quản Lý Người Dùng</span>
+            <i data-lucide="shield" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(239,68,68,0.4)]"></i> <span class="sidebar-text">Quản Lý </span>
         </button>
     </nav>
 
