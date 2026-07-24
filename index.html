@@ -1294,36 +1294,65 @@ html:not(.dark) .bg-white {
 </head>
 <body class="bg-gray-100 dark:bg-slate-950 flex h-screen transition-colors duration-300">
 
+  <!-- ===================== MÀN HÌNH ĐĂNG NHẬP ===================== -->
+  <div id="login-screen" class="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-950 p-4">
+    <div class="w-full max-w-sm bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-8 space-y-6">
+        <div class="text-center space-y-1">
+            <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-lg">
+                <i data-lucide="lock" class="w-7 h-7 text-white"></i>
+            </div>
+            <h1 class="text-xl font-bold text-slate-800 dark:text-white mt-3">POS Pro</h1>
+            <p class="text-sm text-slate-400">Đăng nhập để tiếp tục</p>
+        </div>
+        <form id="login-form" onsubmit="return handleLogin(event)" class="space-y-4">
+            <div>
+                <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">Tên đăng nhập</label>
+                <input id="login-username" type="text" autocomplete="username" required
+                    class="mt-1 w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="admin">
+            </div>
+            <div>
+                <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">Mật khẩu</label>
+                <input id="login-password" type="password" autocomplete="current-password" required
+                    class="mt-1 w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="••••••••">
+            </div>
+            <p id="login-error" class="hidden text-sm text-rose-500 font-medium"></p>
+            <button type="submit" id="login-submit-btn" class="w-full p-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold transition flex items-center justify-center gap-2">
+                <i data-lucide="log-in" class="w-4 h-4"></i> <span>Đăng nhập</span>
+            </button>
+        </form>
+    </div>
+  </div>
+
   <!-- DI ĐỘNG -->
   <div class="md:hidden fixed bottom-0 left-0 w-full z-[800] bg-slate-900 border-t border-slate-800/80 shadow-[0_-4px_15px_rgba(0,0,0,0.5)]">
     
     <div id="more-menu-list" class="hidden absolute bottom-full right-2 w-max bg-slate-900 border border-slate-800 rounded-xl shadow-[0_-5px_20px_rgba(0,0,0,0.5)] flex flex-col p-2 gap-2 mb-2 select-none">
         
-        <button onclick="showPage('page-inventory'); toggleMoreMenu()" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-blue-950/40 border-blue-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-blue-400 text-xs font-bold">
+        <button onclick="showPage('page-inventory'); toggleMoreMenu()" data-perm="page-inventory" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-blue-950/40 border-blue-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-blue-400 text-xs font-bold">
             <i data-lucide="box" class="w-4 h-4 drop-shadow-[0_1px_2px_rgba(59,130,246,0.4)]"></i> Kho Hàng
         </button>
         
-        <button onclick="showPage('page-history'); toggleMoreMenu()" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-purple-950/40 border-purple-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-purple-400 text-xs font-bold">
+        <button onclick="showPage('page-history'); toggleMoreMenu()" data-perm="page-history" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-purple-950/40 border-purple-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-purple-400 text-xs font-bold">
             <i data-lucide="history" class="w-4 h-4 drop-shadow-[0_1px_2px_rgba(168,85,247,0.4)]"></i> Lịch Sử HĐ
         </button>
         
-        <button onclick="showPage('page-customers'); toggleMoreMenu()" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-teal-950/40 border-teal-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-teal-400 text-xs font-bold">
+        <button onclick="showPage('page-customers'); toggleMoreMenu()" data-perm="page-customers" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-teal-950/40 border-teal-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-teal-400 text-xs font-bold">
             <i data-lucide="users" class="w-4 h-4 drop-shadow-[0_1px_2px_rgba(20,184,166,0.4)]"></i> Khách Hàng
         </button>
         
-        <button onclick="showPage('page-products-manage'); loadProductManage(); toggleMoreMenu()" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-orange-950/40 border-orange-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-orange-400 text-xs font-bold">
+        <button onclick="showPage('page-products-manage'); loadProductManage(); toggleMoreMenu()" data-perm="page-products-manage" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-orange-950/40 border-orange-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-orange-400 text-xs font-bold">
             <i data-lucide="settings" class="w-4 h-4 drop-shadow-[0_1px_2px_rgba(249,115,22,0.4)]"></i> Danh Mục SP
         </button>
         
-        <button onclick="showPage('page-SanXuat'); toggleMoreMenu()" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-fuchsia-950/40 border-fuchsia-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-fuchsia-400 text-xs font-bold">
+        <button onclick="showPage('page-SanXuat'); toggleMoreMenu()" data-perm="page-SanXuat" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-fuchsia-950/40 border-fuchsia-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-fuchsia-400 text-xs font-bold">
             <i data-lucide="factory" class="w-4 h-4 drop-shadow-[0_1px_2px_rgba(217,70,239,0.4)]"></i> Sản Xuất
         </button>
         
-        <button onclick="showPage('page-NguyenLieu'); toggleMoreMenu()" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-lime-950/40 border-lime-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-lime-400 text-xs font-bold">
+        <button onclick="showPage('page-NguyenLieu'); toggleMoreMenu()" data-perm="page-NguyenLieu" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-lime-950/40 border-lime-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-lime-400 text-xs font-bold">
             <i data-lucide="database" class="w-4 h-4 drop-shadow-[0_1px_2px_rgba(132,204,22,0.4)]"></i> Nguyên Liệu
         </button>
         
-        <button onclick="showPage('page-LichCongViec'); toggleMoreMenu()" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-indigo-950/40 border-indigo-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-indigo-400 text-xs font-bold">
+        <button onclick="showPage('page-LichCongViec'); toggleMoreMenu()" data-perm="page-LichCongViec" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-indigo-950/40 border-indigo-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-indigo-400 text-xs font-bold">
             <i data-lucide="calendar" class="w-4 h-4 drop-shadow-[0_1px_2px_rgba(99,102,241,0.4)]"></i> Lịch Công Việc
         </button>
 
@@ -1334,22 +1363,22 @@ html:not(.dark) .bg-white {
     </div>
 
     <div class="flex justify-around items-center px-2 py-3 gap-1.5 select-none">
-        <button onclick="showPage('page-home')" class="flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] bg-emerald-950/40 border-emerald-800 text-emerald-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]">
+        <button onclick="showPage('page-home')" data-perm="page-home" class="flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] bg-emerald-950/40 border-emerald-800 text-emerald-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]">
             <i data-lucide="home" class="w-5 h-5 drop-shadow-[0_1.5px_3px_rgba(16,185,129,0.4)]"></i>
             <span class="text-[8px] md:text-[9px] font-bold tracking-wider mt-0.5">Trang Chủ</span>
         </button>
         
-        <button onclick="showPage('page-sell')" class="flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] bg-rose-950/40 border-rose-800 text-rose-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]">
+        <button onclick="showPage('page-sell')" data-perm="page-sell" class="flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] bg-rose-950/40 border-rose-800 text-rose-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]">
             <i data-lucide="shopping-cart" class="w-5 h-5 drop-shadow-[0_1.5px_3px_rgba(244,63,94,0.4)]"></i>
             <span class="text-[8px] md:text-[9px] font-bold tracking-wider mt-0.5">Bán Hàng</span>
         </button>
         
-        <button onclick="showPage('page-import')" class="flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] bg-amber-950/40 border-amber-800 text-amber-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]">
+        <button onclick="showPage('page-import')" data-perm="page-import" class="flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] bg-amber-950/40 border-amber-800 text-amber-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]">
             <i data-lucide="arrow-down-circle" class="w-5 h-5 drop-shadow-[0_1.5px_3px_rgba(245,158,11,0.4)]"></i>
             <span class="text-[8px] md:text-[9px] font-bold tracking-wider mt-0.5">Nhập Kho</span>
         </button>
         
-        <button onclick="showPage('page-report')" class="flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] bg-sky-950/40 border-sky-800 text-sky-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]">
+        <button onclick="showPage('page-report')" data-perm="page-report" class="flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] bg-sky-950/40 border-sky-800 text-sky-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]">
             <i data-lucide="bar-chart-3" class="w-5 h-5 drop-shadow-[0_1.5px_3px_rgba(14,165,233,0.4)]"></i>
             <span class="text-[8px] md:text-[9px] font-bold tracking-wider mt-0.5">Báo Cáo</span>
         </button>
@@ -1383,48 +1412,52 @@ html:not(.dark) .bg-white {
     <!-- Nav thêm flex-1 -->
     <nav class="space-y-2 overflow-y-auto max-h-[80vh] flex-1">
         
-        <button onclick="showPage('page-home'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-emerald-50 dark:bg-emerald-950/50 border-emerald-300 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 hover:border-emerald-400 dark:hover:border-emerald-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-emerald-700 dark:text-emerald-400">
+        <button onclick="showPage('page-home'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" data-perm="page-home" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-emerald-50 dark:bg-emerald-950/50 border-emerald-300 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 hover:border-emerald-400 dark:hover:border-emerald-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-emerald-700 dark:text-emerald-400">
             <i data-lucide="home" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(16,185,129,0.4)]"></i> <span class="sidebar-text">Trang Chủ</span>
         </button>
 
-        <button onclick="showPage('page-import'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-amber-50 dark:bg-amber-950/50 border-amber-300 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/60 hover:border-amber-400 dark:hover:border-amber-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-amber-700 dark:text-amber-400">
+        <button onclick="showPage('page-import'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" data-perm="page-import" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-amber-50 dark:bg-amber-950/50 border-amber-300 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/60 hover:border-amber-400 dark:hover:border-amber-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-amber-700 dark:text-amber-400">
             <i data-lucide="arrow-down-circle" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(245,158,11,0.4)]"></i> <span class="sidebar-text">Nhập Kho</span>
         </button>
 
-        <button onclick="showPage('page-inventory'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-blue-50 dark:bg-blue-950/50 border-blue-300 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/60 hover:border-blue-400 dark:hover:border-blue-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-blue-700 dark:text-blue-400">
+        <button onclick="showPage('page-inventory'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" data-perm="page-inventory" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-blue-50 dark:bg-blue-950/50 border-blue-300 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/60 hover:border-blue-400 dark:hover:border-blue-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-blue-700 dark:text-blue-400">
             <i data-lucide="box" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(59,130,246,0.4)]"></i> <span class="sidebar-text">Kho Hàng</span>
         </button>
 
-        <button onclick="showPage('page-sell'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-rose-50 dark:bg-rose-950/50 border-rose-300 dark:border-rose-800 hover:bg-rose-100 dark:hover:bg-rose-900/60 hover:border-rose-400 dark:hover:border-rose-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-rose-700 dark:text-rose-400">
+        <button onclick="showPage('page-sell'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" data-perm="page-sell" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-rose-50 dark:bg-rose-950/50 border-rose-300 dark:border-rose-800 hover:bg-rose-100 dark:hover:bg-rose-900/60 hover:border-rose-400 dark:hover:border-rose-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-rose-700 dark:text-rose-400">
             <i data-lucide="shopping-cart" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(244,63,94,0.4)]"></i> <span class="sidebar-text">Bán Hàng</span>
         </button>
 
-        <button onclick="showPage('page-history'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-purple-50 dark:bg-purple-950/50 border-purple-300 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/60 hover:border-purple-400 dark:hover:border-purple-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-purple-700 dark:text-purple-400">
+        <button onclick="showPage('page-history'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" data-perm="page-history" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-purple-50 dark:bg-purple-950/50 border-purple-300 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/60 hover:border-purple-400 dark:hover:border-purple-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-purple-700 dark:text-purple-400">
             <i data-lucide="history" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(168,85,247,0.4)]"></i> <span class="sidebar-text">Lịch Sử HĐ</span>
         </button>
 
-        <button onclick="showPage('page-customers'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-teal-50 dark:bg-teal-950/50 border-teal-300 dark:border-teal-800 hover:bg-teal-100 dark:hover:bg-teal-900/60 hover:border-teal-400 dark:hover:border-teal-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-teal-700 dark:text-teal-400">
+        <button onclick="showPage('page-customers'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" data-perm="page-customers" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-teal-50 dark:bg-teal-950/50 border-teal-300 dark:border-teal-800 hover:bg-teal-100 dark:hover:bg-teal-900/60 hover:border-teal-400 dark:hover:border-teal-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-teal-700 dark:text-teal-400">
             <i data-lucide="users" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(20,184,166,0.4)]"></i> <span class="sidebar-text">KH & Công Nợ</span>
         </button>
 
-        <button onclick="showPage('page-products-manage'); loadProductManage(); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-orange-50 dark:bg-orange-950/50 border-orange-300 dark:border-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900/60 hover:border-orange-400 dark:hover:border-orange-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-orange-700 dark:text-orange-400">
+        <button onclick="showPage('page-products-manage'); loadProductManage(); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" data-perm="page-products-manage" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-orange-50 dark:bg-orange-950/50 border-orange-300 dark:border-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900/60 hover:border-orange-400 dark:hover:border-orange-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-orange-700 dark:text-orange-400">
             <i data-lucide="settings" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(249,115,22,0.4)]"></i> <span class="sidebar-text">Danh Mục SP</span>
         </button>
 
-        <button onclick="showPage('page-SanXuat'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-fuchsia-50 dark:bg-fuchsia-950/50 border-fuchsia-300 dark:border-fuchsia-800 hover:bg-fuchsia-100 dark:hover:bg-fuchsia-900/60 hover:border-fuchsia-400 dark:hover:border-fuchsia-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-fuchsia-700 dark:text-fuchsia-400">
+        <button onclick="showPage('page-SanXuat'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" data-perm="page-SanXuat" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-fuchsia-50 dark:bg-fuchsia-950/50 border-fuchsia-300 dark:border-fuchsia-800 hover:bg-fuchsia-100 dark:hover:bg-fuchsia-900/60 hover:border-fuchsia-400 dark:hover:border-fuchsia-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-fuchsia-700 dark:text-fuchsia-400">
             <i data-lucide="factory" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(217,70,239,0.4)]"></i> <span class="sidebar-text">Sản Xuất</span>
         </button>
 
-        <button onclick="showPage('page-NguyenLieu'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-lime-50 dark:bg-lime-950/50 border-lime-300 dark:border-lime-800 hover:bg-lime-100 dark:hover:bg-lime-900/60 hover:border-lime-400 dark:hover:border-lime-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-lime-700 dark:text-lime-400">
+        <button onclick="showPage('page-NguyenLieu'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" data-perm="page-NguyenLieu" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-lime-50 dark:bg-lime-950/50 border-lime-300 dark:border-lime-800 hover:bg-lime-100 dark:hover:bg-lime-900/60 hover:border-lime-400 dark:hover:border-lime-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-lime-700 dark:text-lime-400">
             <i data-lucide="database" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(132,204,22,0.4)]"></i> <span class="sidebar-text">Nguyên Liệu</span>
         </button>
 
-        <button onclick="showPage('page-report'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-sky-50 dark:bg-sky-950/50 border-sky-300 dark:border-sky-800 hover:bg-sky-100 dark:hover:bg-sky-900/60 hover:border-sky-400 dark:hover:border-sky-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-sky-700 dark:text-sky-400">
+        <button onclick="showPage('page-report'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" data-perm="page-report" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-sky-50 dark:bg-sky-950/50 border-sky-300 dark:border-sky-800 hover:bg-sky-100 dark:hover:bg-sky-900/60 hover:border-sky-400 dark:hover:border-sky-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-sky-700 dark:text-sky-400">
             <i data-lucide="bar-chart-3" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(14,165,233,0.4)]"></i> <span class="sidebar-text">Báo Cáo</span>
         </button>
 
-        <button onclick="showPage('page-LichCongViec'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-indigo-50 dark:bg-indigo-950/50 border-indigo-300 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 hover:border-indigo-400 dark:hover:border-indigo-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-indigo-700 dark:text-indigo-400">
+        <button onclick="showPage('page-LichCongViec'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" data-perm="page-LichCongViec" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-indigo-50 dark:bg-indigo-950/50 border-indigo-300 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 hover:border-indigo-400 dark:hover:border-indigo-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-indigo-700 dark:text-indigo-400">
             <i data-lucide="calendar" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(99,102,241,0.4)]"></i> <span class="sidebar-text">Lịch Công Việc</span>
+        </button>
+
+        <button onclick="showPage('page-user-management'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" data-perm="page-user-management" class="admin-only-nav hidden w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-red-50 dark:bg-red-950/50 border-red-300 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/60 hover:border-red-400 dark:hover:border-red-700 shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] text-red-700 dark:text-red-400">
+            <i data-lucide="shield" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(239,68,68,0.4)]"></i> <span class="sidebar-text">Quản Lý Người Dùng</span>
         </button>
     </nav>
 
@@ -1433,6 +1466,20 @@ html:not(.dark) .bg-white {
     <i id="theme-icon" data-lucide="moon" class="w-6 h-6"></i> 
     <span id="theme-text" class="sidebar-text">Giao diện: Tối</span>
 </button>
+
+    <!-- Khối tài khoản đang đăng nhập -->
+    <div class="mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2" onclick="event.stopPropagation()">
+        <div class="px-1 flex items-center gap-2 text-slate-500 dark:text-slate-400">
+            <i data-lucide="user-circle" class="w-5 h-5 shrink-0"></i>
+            <span id="current-user-label" class="sidebar-text text-xs font-bold truncate">—</span>
+        </div>
+        <button onclick="openChangePasswordForm()" class="w-full text-left p-2 rounded-lg flex items-center gap-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900/60 transition-all">
+            <i data-lucide="key-round" class="w-5 h-5 shrink-0"></i> <span class="sidebar-text text-sm">Đổi mật khẩu</span>
+        </button>
+        <button onclick="doLogout()" class="w-full text-left p-2 rounded-lg flex items-center gap-3 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-all">
+            <i data-lucide="log-out" class="w-5 h-5 shrink-0"></i> <span class="sidebar-text text-sm">Đăng xuất</span>
+        </button>
+    </div>
   </aside>
 
   <div id="sidebar-overlay" onclick="toggleSidebar()" class="md:hidden hidden fixed inset-0 bg-black/50 z-[998]"></div>
@@ -2614,6 +2661,33 @@ html:not(.dark) .bg-white {
     </div>
 </div>
 
+<!-- ===================== QUẢN LÝ NGƯỜI DÙNG (CHỈ ADMIN) ===================== -->
+<div id="page-user-management" class="hidden space-y-6 p-2 md:p-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pb-2 border-b border-slate-200 dark:border-slate-700">
+        <h2 class="text-2xl font-bold text-slate-800 dark:text-white">QUẢN LÝ NGƯỜI DÙNG & PHÂN QUYỀN</h2>
+        <button onclick="openUserForm()" class="bg-blue-600 dark:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2 justify-center">
+            <i data-lucide="user-plus" class="w-4 h-4"></i> Thêm Người Dùng
+        </button>
+    </div>
+
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div class="max-h-[70vh] overflow-y-auto">
+            <table class="w-full text-sm text-left border-collapse">
+                <thead class="sticky top-0 z-20 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold uppercase text-[11px] tracking-wider">
+                    <tr>
+                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 w-[18%]">Tên đăng nhập</th>
+                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 w-[20%]">Họ tên hiển thị</th>
+                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 text-center w-[12%]">Vai trò</th>
+                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 w-[30%]">Trang được cấp quyền</th>
+                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 text-center w-[10%]">Trạng thái</th>
+                        <th class="py-4 px-1 border-b border-slate-200 dark:border-slate-700 text-center w-[10%]">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="user-list-body" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
 
    		
@@ -2655,6 +2729,413 @@ html:not(.dark) .bg-white {
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    /* ==================================================================================
+       HỆ THỐNG ĐĂNG NHẬP - PHÂN QUYỀN - QUẢN LÝ NGƯỜI DÙNG
+       Đăng nhập bằng tên tài khoản tự tạo (không dùng email), lưu tại collection 'app_users'.
+       Tài khoản admin mặc định: admin / admin123 (đổi mật khẩu ngay ở mục "Đổi mật khẩu").
+       ================================================================================== */
+
+    // Danh sách toàn bộ các trang có thể phân quyền (khớp với data-perm gắn trên các nút menu)
+    const ALL_PAGES = [
+        { id: 'page-home',             label: 'Trang Chủ' },
+        { id: 'page-import',           label: 'Nhập Kho' },
+        { id: 'page-inventory',        label: 'Kho Hàng' },
+        { id: 'page-sell',             label: 'Bán Hàng' },
+        { id: 'page-history',          label: 'Lịch Sử HĐ' },
+        { id: 'page-customers',        label: 'KH & Công Nợ' },
+        { id: 'page-products-manage',  label: 'Danh Mục SP' },
+        { id: 'page-SanXuat',          label: 'Sản Xuất' },
+        { id: 'page-NguyenLieu',       label: 'Nguyên Liệu' },
+        { id: 'page-report',           label: 'Báo Cáo' },
+        { id: 'page-LichCongViec',     label: 'Lịch Công Việc' }
+    ];
+    const CURRENT_USER_KEY = 'pos_current_user';
+
+    // --- MÃ HÓA MẬT KHẨU (SHA-256, chạy phía trình duyệt) ---
+    async function sha256Hex(text) {
+        const enc = new TextEncoder().encode(text);
+        const hashBuf = await crypto.subtle.digest('SHA-256', enc);
+        return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function escapeHtml(str) {
+        return String(str == null ? '' : str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+    }
+
+    // --- LƯU / ĐỌC PHIÊN ĐĂNG NHẬP (localStorage) ---
+    // --- PHIÊN ĐĂNG NHẬP: CHỈ LƯU TRONG BỘ NHỚ, MẤT KHI TẢI LẠI TRANG (bắt buộc gõ mật khẩu mỗi lần mở) ---
+let CURRENT_USER = null;
+function getCurrentUser() { return CURRENT_USER; }
+function setCurrentUser(u) { CURRENT_USER = u; }
+function clearCurrentUser() { CURRENT_USER = null; }
+
+// --- CHỈ GHI NHỚ TÊN ĐĂNG NHẬP (không lưu mật khẩu) ĐỂ TỰ ĐIỀN LẦN SAU ---
+const REMEMBERED_USERNAME_KEY = 'pos_remembered_username';
+function getRememberedUsername() { return localStorage.getItem(REMEMBERED_USERNAME_KEY) || ''; }
+function setRememberedUsername(u) { localStorage.setItem(REMEMBERED_USERNAME_KEY, u); }
+
+    // --- TỰ ĐỘNG TẠO TÀI KHOẢN ADMIN MẶC ĐỊNH NẾU CHƯA CÓ ---
+    async function ensureDefaultAdmin() {
+        try {
+            const ref = db.collection('app_users').doc('admin');
+            const doc = await ref.get();
+            if (!doc.exists) {
+                const hash = await sha256Hex('admin123');
+                await ref.set({
+                    username: 'admin',
+                    displayName: 'Quản trị viên',
+                    role: 'admin',
+                    password: hash,
+                    permissions: ALL_PAGES.map(p => p.id),
+                    active: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                console.log('%cĐã tạo tài khoản Admin mặc định: admin / admin123 - Hãy đổi mật khẩu ngay!', 'color:red;font-weight:bold;');
+            }
+        } catch (e) {
+            console.error('Lỗi khởi tạo tài khoản Admin:', e);
+        }
+    }
+
+    // --- ẨN / HIỆN TOÀN BỘ GIAO DIỆN ỨNG DỤNG (trừ màn hình đăng nhập) ---
+    function setAppVisible(visible) {
+        Array.from(document.body.children).forEach(el => {
+            if (el.id === 'login-screen') return;
+            el.style.display = visible ? '' : 'none';
+        });
+    }
+
+    // --- ÁP DỤNG PHÂN QUYỀN LÊN GIAO DIỆN (ẩn/hiện các nút menu) ---
+    function applyPermissionsToUI(user) {
+        const label = document.getElementById('current-user-label');
+        if (label) label.textContent = (user.displayName || user.username) + (user.role === 'admin' ? ' (Admin)' : ' (Nhân viên)');
+        document.querySelectorAll('[data-perm]').forEach(el => {
+            const pid = el.getAttribute('data-perm');
+            const allowed = user.role === 'admin' || (user.permissions || []).includes(pid);
+            el.classList.toggle('hidden', !allowed);
+        });
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // --- CHUYỂN ĐẾN TRANG ĐẦU TIÊN NGƯỜI DÙNG ĐƯỢC PHÉP XEM SAU KHI ĐĂNG NHẬP ---
+    function goToFirstAllowedPage(user) {
+        const target = (user.role === 'admin' || (user.permissions || []).includes('page-home'))
+            ? 'page-home'
+            : ((user.permissions && user.permissions[0]) || null);
+        if (target) {
+            showPage(target);
+        } else if (typeof Swal !== 'undefined') {
+            Swal.fire('Chưa được cấp quyền', 'Tài khoản của bạn chưa được cấp quyền truy cập trang nào. Vui lòng liên hệ Admin.', 'info');
+        }
+    }
+
+    // --- XỬ LÝ ĐĂNG NHẬP ---
+    async function handleLogin(event) {
+        event.preventDefault();
+        const username = document.getElementById('login-username').value.trim().toLowerCase();
+        const password = document.getElementById('login-password').value;
+        const errEl = document.getElementById('login-error');
+        const btn = document.getElementById('login-submit-btn');
+        errEl.classList.add('hidden');
+        if (!username || !password) return false;
+
+        btn.disabled = true; btn.classList.add('opacity-60');
+        try {
+            const hash = await sha256Hex(password);
+            const doc = await db.collection('app_users').doc(username).get();
+            if (!doc.exists) throw new Error('Sai tên đăng nhập hoặc mật khẩu!');
+            const data = doc.data();
+            if (data.active === false) throw new Error('Tài khoản đã bị khóa. Vui lòng liên hệ Admin.');
+            if (data.password !== hash) throw new Error('Sai tên đăng nhập hoặc mật khẩu!');
+
+            const userObj = { username: doc.id, displayName: data.displayName || doc.id, role: data.role || 'staff', permissions: data.permissions || [] };
+            setCurrentUser(userObj);
+            setRememberedUsername(username);
+            document.getElementById('login-screen').style.display = 'none';
+            setAppVisible(true);
+            applyPermissionsToUI(userObj);
+            goToFirstAllowedPage(userObj);
+        } catch (e) {
+            errEl.textContent = e.message || 'Đăng nhập thất bại!';
+            errEl.classList.remove('hidden');
+        } finally {
+            btn.disabled = false; btn.classList.remove('opacity-60');
+        }
+        return false;
+    }
+
+    // --- ĐĂNG XUẤT ---
+    function doLogout() {
+        const goLogout = () => { clearCurrentUser(); location.reload(); };
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({ title: 'Đăng xuất?', text: 'Bạn có chắc muốn đăng xuất khỏi hệ thống?', icon: 'question', showCancelButton: true, confirmButtonText: 'Đăng xuất', cancelButtonText: 'Hủy' })
+                .then(r => { if (r.isConfirmed) goLogout(); });
+        } else {
+            goLogout();
+        }
+    }
+
+    // --- ĐỔI MẬT KHẨU (cho chính tài khoản đang đăng nhập) ---
+    async function openChangePasswordForm() {
+        const cur = getCurrentUser();
+        if (!cur) return;
+        const { value: formValues } = await Swal.fire({
+            title: 'Đổi mật khẩu',
+            html: `
+              <div class="text-left space-y-3">
+                <div>
+                  <label class="text-xs font-bold text-slate-500">Mật khẩu hiện tại</label>
+                  <input id="swal-old-pass" type="password" class="swal2-input !m-0 !w-full" placeholder="••••••••">
+                </div>
+                <div>
+                  <label class="text-xs font-bold text-slate-500">Mật khẩu mới</label>
+                  <input id="swal-new-pass" type="password" class="swal2-input !m-0 !w-full" placeholder="••••••••">
+                </div>
+                <div>
+                  <label class="text-xs font-bold text-slate-500">Nhập lại mật khẩu mới</label>
+                  <input id="swal-new-pass2" type="password" class="swal2-input !m-0 !w-full" placeholder="••••••••">
+                </div>
+              </div>`,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: 'Đổi mật khẩu',
+            cancelButtonText: 'Hủy',
+            preConfirm: async () => {
+                const oldPass = document.getElementById('swal-old-pass').value;
+                const newPass = document.getElementById('swal-new-pass').value;
+                const newPass2 = document.getElementById('swal-new-pass2').value;
+                if (!oldPass || !newPass || !newPass2) { Swal.showValidationMessage('Vui lòng nhập đầy đủ thông tin!'); return false; }
+                if (newPass !== newPass2) { Swal.showValidationMessage('Mật khẩu mới nhập lại không khớp!'); return false; }
+                if (newPass.length < 4) { Swal.showValidationMessage('Mật khẩu mới cần tối thiểu 4 ký tự!'); return false; }
+                try {
+                    const doc = await db.collection('app_users').doc(cur.username).get();
+                    if (!doc.exists) { Swal.showValidationMessage('Không tìm thấy tài khoản!'); return false; }
+                    const oldHash = await sha256Hex(oldPass);
+                    if (doc.data().password !== oldHash) { Swal.showValidationMessage('Mật khẩu hiện tại không đúng!'); return false; }
+                    return { newPass };
+                } catch (e) {
+                    Swal.showValidationMessage('Lỗi: ' + e.message);
+                    return false;
+                }
+            }
+        });
+        if (!formValues) return;
+        try {
+            const newHash = await sha256Hex(formValues.newPass);
+            await db.collection('app_users').doc(cur.username).update({ password: newHash });
+            Swal.fire({ icon: 'success', title: 'Đổi mật khẩu thành công!', timer: 1500, showConfirmButton: false });
+        } catch (e) {
+            Swal.fire('Lỗi', 'Không thể đổi mật khẩu: ' + e.message, 'error');
+        }
+    }
+
+    // --- TẢI DANH SÁCH NGƯỜI DÙNG (trang Quản Lý Người Dùng) ---
+async function loadUserList() {
+    const body = document.getElementById('user-list-body');
+    if (!body) return;
+    body.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-400">Đang tải...</td></tr>';
+    try {
+        const snap = await db.collection('app_users').get();
+        let rows = '';
+        
+        snap.forEach(doc => {
+            const d = doc.data();
+            const permLabel = (d.role === 'admin')
+                ? 'Tất cả (Admin)'
+                : ((d.permissions || []).map(pid => { const p = ALL_PAGES.find(x => x.id === pid); return p ? p.label : pid; }).join(', ') || 'Chưa cấp quyền');
+            
+            // Tách các đoạn phức tạp ra biến riêng để không bị lỗi màu trong Notepad++
+            const roleBadge = d.role === 'admin'
+                ? '<span class="px-2 py-1 rounded-full text-[11px] font-bold bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400">Admin</span>'
+                : '<span class="px-2 py-1 rounded-full text-[11px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400">Nhân viên</span>';
+
+            const statusBadge = d.active === false 
+                ? '<span class="text-rose-500 font-bold text-xs">Đã khóa</span>' 
+                : '<span class="text-emerald-500 font-bold text-xs">Hoạt động</span>';
+
+            const deleteBtn = doc.id === 'admin' ? '' : `
+                <button onclick="deleteUserAccount('${doc.id}')" class="p-2 rounded-lg bg-rose-100 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 hover:bg-rose-200 dark:hover:bg-rose-900" title="Xóa">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>`;
+
+            rows += `<tr>
+                <td class="py-3 px-2 font-bold text-slate-800 dark:text-white">${escapeHtml(doc.id)}</td>
+                <td class="py-3 px-2 text-slate-600 dark:text-slate-300">${escapeHtml(d.displayName || '')}</td>
+                <td class="py-3 px-2 text-center">${roleBadge}</td>
+                <td class="py-3 px-2 text-xs text-slate-500 dark:text-slate-400">${escapeHtml(permLabel)}</td>
+                <td class="py-3 px-2 text-center">${statusBadge}</td>
+                <td class="py-3 px-1 text-center">
+                    <div class="flex gap-1 justify-center">
+                        <button onclick="openUserForm('${doc.id}')" class="p-2 rounded-lg bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900" title="Sửa">
+                            <i data-lucide="pencil" class="w-4 h-4"></i>
+                        </button>
+                        ${deleteBtn}
+                    </div>
+                </td>
+            </tr>`;
+        });
+
+        body.innerHTML = rows || '<tr><td colspan="6" class="text-center py-6 text-slate-400">Chưa có người dùng nào.</td></tr>';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    } catch (e) {
+        body.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-rose-500">Lỗi tải danh sách: ' + escapeHtml(e.message) + '</td></tr>';
+    }
+}
+
+    // --- THÊM / SỬA NGƯỜI DÙNG ---
+    async function openUserForm(username) {
+        let existing = null;
+        if (username) {
+            const doc = await db.collection('app_users').doc(username).get();
+            if (doc.exists) existing = { id: doc.id, ...doc.data() };
+        }
+        const checkboxesHtml = ALL_PAGES.map(p => {
+            const checked = existing ? ((existing.permissions || []).includes(p.id) ? 'checked' : '') : (p.id === 'page-home' ? 'checked' : '');
+            return `<label class="flex items-center gap-2 text-sm p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer">
+                <input type="checkbox" class="user-perm-checkbox" value="${p.id}" ${checked}> ${p.label}
+            </label>`;
+        }).join('');
+
+        const { value: formValues } = await Swal.fire({
+            title: existing ? 'Sửa Người Dùng' : 'Thêm Người Dùng Mới',
+            html: `
+              <div class="text-left space-y-3">
+                <div>
+                  <label class="text-xs font-bold text-slate-500">Tên đăng nhập</label>
+                  <input id="swal-username" class="swal2-input !m-0 !w-full" value="${existing ? escapeHtml(existing.id) : ''}" ${existing ? 'disabled' : ''} placeholder="vd: nhanvien1">
+                </div>
+                <div>
+                  <label class="text-xs font-bold text-slate-500">Họ tên hiển thị</label>
+                  <input id="swal-displayname" class="swal2-input !m-0 !w-full" value="${existing ? escapeHtml(existing.displayName || '') : ''}" placeholder="vd: Nguyễn Văn A">
+                </div>
+                <div>
+                  <label class="text-xs font-bold text-slate-500">${existing ? 'Mật khẩu mới (để trống nếu không đổi)' : 'Mật khẩu'}</label>
+                  <input id="swal-password" type="password" class="swal2-input !m-0 !w-full" placeholder="••••••••">
+                </div>
+                <div>
+                  <label class="text-xs font-bold text-slate-500">Vai trò</label>
+                  <select id="swal-role" class="swal2-input !m-0 !w-full">
+                    <option value="staff" ${existing && existing.role !== 'admin' ? 'selected' : ''}>Nhân viên</option>
+                    <option value="admin" ${existing && existing.role === 'admin' ? 'selected' : ''}>Admin (toàn quyền)</option>
+                  </select>
+                </div>
+                <div id="swal-perm-wrap">
+                  <label class="text-xs font-bold text-slate-500">Các trang được truy cập</label>
+                  <div class="grid grid-cols-2 gap-1.5 mt-1 max-h-48 overflow-y-auto p-1">${checkboxesHtml}</div>
+                </div>
+                <label class="flex items-center gap-2 text-sm">
+                  <input type="checkbox" id="swal-active" ${(!existing || existing.active !== false) ? 'checked' : ''}> Tài khoản đang hoạt động
+                </label>
+              </div>`,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: existing ? 'Lưu thay đổi' : 'Tạo tài khoản',
+            cancelButtonText: 'Hủy',
+            didOpen: () => {
+                const roleSel = document.getElementById('swal-role');
+                const permWrap = document.getElementById('swal-perm-wrap');
+                const toggle = () => { permWrap.style.display = roleSel.value === 'admin' ? 'none' : 'block'; };
+                roleSel.addEventListener('change', toggle);
+                toggle();
+            },
+            preConfirm: () => {
+                const username2 = existing ? existing.id : document.getElementById('swal-username').value.trim().toLowerCase();
+                const displayName = document.getElementById('swal-displayname').value.trim();
+                const password = document.getElementById('swal-password').value;
+                const role = document.getElementById('swal-role').value;
+                const active = document.getElementById('swal-active').checked;
+                const perms = Array.from(document.querySelectorAll('.user-perm-checkbox:checked')).map(el => el.value);
+
+                if (!username2 || !/^[a-z0-9_.]+$/.test(username2)) {
+                    Swal.showValidationMessage('Tên đăng nhập chỉ gồm chữ thường, số, dấu chấm, gạch dưới!');
+                    return false;
+                }
+                if (!existing && !password) {
+                    Swal.showValidationMessage('Vui lòng nhập mật khẩu!');
+                    return false;
+                }
+                if (!displayName) {
+                    Swal.showValidationMessage('Vui lòng nhập họ tên hiển thị!');
+                    return false;
+                }
+                return { username: username2, displayName, password, role, active, permissions: perms };
+            }
+        });
+
+        if (!formValues) return;
+
+        try {
+            if (!existing) {
+                const check = await db.collection('app_users').doc(formValues.username).get();
+                if (check.exists) { Swal.fire('Lỗi', 'Tên đăng nhập đã tồn tại!', 'error'); return; }
+            }
+            const dataToSave = {
+                username: formValues.username,
+                displayName: formValues.displayName,
+                role: formValues.role,
+                permissions: formValues.role === 'admin' ? ALL_PAGES.map(p => p.id) : formValues.permissions,
+                active: formValues.active
+            };
+            if (formValues.password) {
+                dataToSave.password = await sha256Hex(formValues.password);
+            }
+            if (!existing) {
+                dataToSave.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+            }
+            await db.collection('app_users').doc(formValues.username).set(dataToSave, { merge: true });
+            Swal.fire({ icon: 'success', title: existing ? 'Đã cập nhật!' : 'Đã tạo tài khoản!', timer: 1200, showConfirmButton: false });
+            loadUserList();
+
+            // Nếu tự sửa chính mình, cập nhật lại phiên đăng nhập hiện tại
+            const cur = getCurrentUser();
+            if (cur && cur.username === formValues.username) {
+                const updated = { ...cur, displayName: dataToSave.displayName, role: dataToSave.role, permissions: dataToSave.permissions };
+                setCurrentUser(updated);
+                applyPermissionsToUI(updated);
+            }
+        } catch (e) {
+            Swal.fire('Lỗi', 'Không thể lưu: ' + e.message, 'error');
+        }
+    }
+
+    // --- XÓA NGƯỜI DÙNG ---
+    async function deleteUserAccount(username) {
+        if (username === 'admin') { Swal.fire('Không thể xóa', 'Không thể xóa tài khoản Admin gốc!', 'warning'); return; }
+        const cur = getCurrentUser();
+        if (cur && cur.username === username) { Swal.fire('Không thể xóa', 'Bạn không thể tự xóa tài khoản đang đăng nhập!', 'warning'); return; }
+        const r = await Swal.fire({ title: 'Xóa người dùng?', text: `Xóa tài khoản "${username}"? Hành động này không thể hoàn tác.`, icon: 'warning', showCancelButton: true, confirmButtonText: 'Xóa', cancelButtonText: 'Hủy', confirmButtonColor: '#dc2626' });
+        if (!r.isConfirmed) return;
+        try {
+            await db.collection('app_users').doc(username).delete();
+            Swal.fire({ icon: 'success', title: 'Đã xóa!', timer: 1000, showConfirmButton: false });
+            loadUserList();
+        } catch (e) {
+            Swal.fire('Lỗi', 'Không thể xóa: ' + e.message, 'error');
+        }
+    }
+
+    // --- KHỞI ĐỘNG HỆ THỐNG ĐĂNG NHẬP ---
+   async function initAuthSystem() {
+        await ensureDefaultAdmin();
+        // Luôn yêu cầu đăng nhập lại mỗi khi mở trang - không tự động đăng nhập
+        setAppVisible(false);
+        document.getElementById('login-screen').style.display = 'flex';
+        const rememberedUser = getRememberedUsername();
+        if (rememberedUser) {
+            const el = document.getElementById('login-username');
+            if (el) el.value = rememberedUser;
+        }
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        setTimeout(() => {
+            const passEl = document.getElementById('login-password');
+            const userEl = document.getElementById('login-username');
+            if (rememberedUser && passEl) passEl.focus();
+            else if (userEl) userEl.focus();
+        }, 100);
+    }
+    initAuthSystem();
+    /* ================================ HẾT HỆ THỐNG ĐĂNG NHẬP ================================ */
+
   // 1. Hàm bật/tắt menu (Dùng cho nút 3 gạch và Overlay)
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
@@ -2684,6 +3165,19 @@ html:not(.dark) .bg-white {
   
 // --- HÀM ĐIỀU HƯỚNG TRANG ---
 function showPage(pageId) {
+    // 0. KIỂM TRA PHÂN QUYỀN TRƯỚC KHI CHO XEM TRANG
+    const _curUser = (typeof getCurrentUser === 'function') ? getCurrentUser() : null;
+    if (_curUser) {
+        if (pageId === 'page-user-management' && _curUser.role !== 'admin') {
+            if (typeof Swal !== 'undefined') Swal.fire({ icon: 'warning', title: 'Không có quyền', text: 'Chỉ Admin mới có thể truy cập trang này.' });
+            return;
+        }
+        if (_curUser.role !== 'admin' && pageId !== 'page-user-management' && !(_curUser.permissions || []).includes(pageId)) {
+            if (pageId !== 'page-home' && typeof Swal !== 'undefined') Swal.fire({ icon: 'warning', title: 'Không có quyền', text: 'Bạn không có quyền truy cập trang này. Vui lòng liên hệ Admin.' });
+            return;
+        }
+    }
+
     // 1. Ẩn tất cả các trang
     document.querySelectorAll('main > div').forEach(div => div.classList.add('hidden'));
     
@@ -2782,6 +3276,10 @@ function showPage(pageId) {
         case 'page-LichCongViec':
             if (typeof fixCalendarLayout === 'function') fixCalendarLayout();
             break;	
+
+        case 'page-user-management':
+            if (typeof loadUserList === 'function') loadUserList();
+            break;
     }
     
     // Cập nhật lại các biểu tượng (nếu dùng Lucide)
@@ -3656,7 +4154,7 @@ async function renderInventoryList(filter = 'today') {
 
 //============================BIỂU ĐỒ ==================================
 
-// Hàm vẽ biểu đồ doanh thu theo ngày (Thích ứng Dual Theme - Đã sửa lỗi biến mất chữ khi sang Dark Mode)
+// Hàm vẽ biểu đồ doanh thu theo ngày (Hiển thị số tiền trên đầu cột ở PC, tự động ẩn trên Điện thoại)
 function updateRevenueChart(filteredSales) {
     const canvas = document.getElementById('revenueChart');
     if (!canvas) {
@@ -3697,7 +4195,6 @@ function updateRevenueChart(filteredSales) {
                     type: 'bar',
                     data: data,
                     order: 2, // Lớp dưới
-                    // Màu cột tự động tương thích thời gian thực
                     backgroundColor: () => checkDark() ? 'rgba(239, 68, 68, 0.85)' : 'rgba(239, 68, 68, 0.75)',
                     borderRadius: { topLeft: 20, topRight: 20, bottomLeft: 0, bottomRight: 0 },
                     barPercentage: 0.3,
@@ -3747,7 +4244,6 @@ function updateRevenueChart(filteredSales) {
 
                     const body = document.getElementById('modalDetailsBody');
                     
-                    // --- ĐỒNG BỘ CHI TIẾT BẢNG SANG CẢ GIAO DIỆN SÁNG VÀ TỐI ---
                     let htmlContent = Object.keys(itemsInDay).map(name => `
                         <tr class="border-b border-slate-200 dark:border-slate-800/60">
                             <td class="py-2.5 px-2 text-sm text-slate-700 dark:text-slate-300 font-medium">${name}</td>
@@ -3787,30 +4283,32 @@ function updateRevenueChart(filteredSales) {
                         color: () => checkDark() ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.06)' 
                     },
                     ticks: { 
-                        color: () => checkDark() ? '#cbd5e1' : '#475569', // Tự động đổi màu thước đo Y
+                        color: () => checkDark() ? '#cbd5e1' : '#475569', 
                         callback: v => (v / 1000000) + 'tr' 
                     } 
                 },
                 x: { 
                     grid: { display: false },
                     ticks: {
-                        color: () => checkDark() ? '#cbd5e1' : '#475569' // Tự động đổi màu thước đo X
+                        color: () => checkDark() ? '#cbd5e1' : '#475569' 
                     }
                 }
             }
         },
-        // --- SỬ DỤNG CANVAS PLUGIN ĐỂ VẼ CHỮ TRÊN ĐẦU CỘT (QUÉT THEME THỜI GIAN THỰC) ---
+        // --- PLUGIN HIỂN THỊ SỐ TIỀN TRÊN ĐẦU CỘT (CHỈ CHẠY KHI LÀ MÀN HÌNH PC >= 768px) ---
         plugins: [{
             id: 'barLabels',
             afterDatasetsDraw: function(chart) {
+                // Nếu chiều rộng màn hình nhỏ hơn 768px (Điện thoại) thì bỏ qua không vẽ chữ
+                if (window.innerWidth < 768) return;
+
                 const { ctx } = chart;
                 ctx.save();
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'bottom';
                 ctx.font = 'bold 10px Arial';
                 
-                // Đọc trực tiếp trạng thái Dark Mode ngay tại tích tắc vẽ hình
-                ctx.fillStyle = checkDark() ? '#f8fafc' : '#0f172a'; // Trắng sáng tinh khôi (Dark) vs Slate tối (Light)
+                ctx.fillStyle = checkDark() ? '#f8fafc' : '#0f172a'; 
 
                 chart.getDatasetMeta(0).data.forEach((bar, index) => {
                     const val = data[index];
