@@ -718,12 +718,14 @@ html:not(.dark) .bg-white {
 }
 
 .dark #page-sell .bg-blue-100 {
-    background-color: #0f172a !important;
+    background-color: #1e293b !important;
     color: #f8fafc !important;
+    border-color: #334155 !important;
 }
 
 .dark #page-sell .bg-gray-50 {
-    background-color: #1e293b !important;
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
 }
 
 .dark #page-sell table {
@@ -749,10 +751,6 @@ html:not(.dark) .bg-white {
 .dark #dropdown-list div:hover * {
     background-color: #1e3a8a !important;
     color: #ffffff !important;
-}
-
-.dark #sell-cart-body td {
-    color: #f8fafc !important;
 }
 
 /* Số tồn kho phải giữ màu xanh (còn hàng) / đỏ (hết hàng), không bị ép xám như nhãn "Tồn kho:" phía trên */
@@ -1815,16 +1813,9 @@ html:not(.dark) .bg-white {
         <h2 class="text-lg md:text-xl font-bold mb-4 text-slate-800 dark:text-white border-b dark:border-slate-700 pb-2">KHO HÀNG THỰC TẾ</h2>
         
         <div class="grid grid-cols-1 md:grid-cols-12 gap-3 mb-6">
-            <div class="col-span-1 md:col-span-9">
+            <div class="col-span-1 md:col-span-12">
                 <input type="text" id="search-inventory" placeholder="🔍 Tìm tên sản phẩm..." 
                         onkeyup="filterInventory()" class="w-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-3 rounded-xl text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 outline-none">
-            </div>
-            <div class="col-span-1 md:col-span-3">
-                <!-- Nút Ẩn/Hiện Giá -->
-<button onclick="togglePrices()" 
-    class="w-full bg-slate-700 dark:bg-slate-800 text-white py-3 rounded-xl text-sm font-bold transition-all duration-75 border-b-[4px] border-slate-900 dark:border-slate-950 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
-    👁️ Ẩn/Hiện Giá
-</button>
             </div>
 
             <div class="col-span-1 md:col-span-3">
@@ -1906,36 +1897,36 @@ html:not(.dark) .bg-white {
         <div class="lg:w-1/2 w-full space-y-4 h-[800px] flex flex-col">
             <div class="bg-blue-100 dark:bg-slate-900 p-2 md:p-4 rounded-2xl border-4 border-blue-400 shadow-sm space-y-3">
                 <div class="flex gap-2">
-                    <input type="text" id="sell-receipt" class="w-1/4 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-xs dark:text-white" placeholder="Số phiếu" readonly>
+                    <input type="text" id="sell-receipt" class="w-1/4 border border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-xs dark:text-white" placeholder="Số phiếu" readonly>
                     
                     <div class="relative w-3/4">
                         <input type="text" id="sell-customer" placeholder="Tên khách hàng" 
-                           class="w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-xs dark:text-white" 
+                           class="w-full border border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-xs dark:text-white" 
                            oninput="filterCustomerList(this.value)" 
                            onclick="this.value=''; filterCustomerList('');"
                            autocomplete="off">
-                        <div id="dropdown-list" class="absolute z-[100] w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-slate-700 rounded-xl mt-1 shadow-lg max-h-48 overflow-y-auto hidden text-xs dark:text-white">
+                        <div id="dropdown-list" class="absolute z-[100] w-full bg-gray-50 dark:bg-slate-950 border border-gray-300 dark:border-slate-700 rounded-xl mt-1 shadow-lg max-h-48 overflow-y-auto hidden text-xs dark:text-white">
                         </div>
                     </div>
                 </div>
                 <div class="flex gap-2">
-                    <input type="text" id="sell-address" placeholder="Địa chỉ" class="w-1/2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-xs dark:text-white">
-                    <input type="text" id="sell-phone" placeholder="SĐT" class="w-1/2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-xs dark:text-white">
+                    <input type="text" id="sell-address" placeholder="Địa chỉ" class="w-1/2 border border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-xs dark:text-white">
+                    <input type="text" id="sell-phone" placeholder="SĐT" class="w-1/2 border border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-xs dark:text-white">
                 </div>
                 <div class="flex gap-2">
-                    <select id="payment-method" class="w-1/4 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-xl text-xs dark:text-white">
+                    <select id="payment-method" class="w-1/4 border border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2 rounded-xl text-xs dark:text-white">
                         <option value="Tiền mặt">Tiền mặt</option>
                         <option value="CK">CK</option>
                         <option value="Công nợ">Công nợ</option>
                     </select>
-                    <input type="text" id="sell-note-global" placeholder="Ghi chú đơn hàng..." class="w-3/4 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-xs dark:text-white">
+                    <input type="text" id="sell-note-global" placeholder="Ghi chú đơn hàng..." class="w-3/4 border border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-xs dark:text-white">
                 </div>
                 <div class="flex gap-2 items-center">
-                    <select id="global-price-type" class="w-1/3 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-xl text-xs dark:text-white" onchange="applyGlobalPrice()">
+                    <select id="global-price-type" class="w-1/3 border border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2 rounded-xl text-xs dark:text-white" onchange="applyGlobalPrice()">
                         <option value="retail">Bán Lẻ</option>
                         <option value="wholesale">Bán Sỉ</option>
                     </select>
-                    <select id="global-vat" class="w-1/3 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-xl text-xs dark:text-white" onchange="updateGrandTotal()">
+                    <select id="global-vat" class="w-1/3 border border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2 rounded-xl text-xs dark:text-white" onchange="updateGrandTotal()">
                         <option value="0">Thuế: 0%</option>
                         <option value="5">Thuế: 5%</option>
                         <option value="8">Thuế: 8%</option>
@@ -1945,7 +1936,7 @@ html:not(.dark) .bg-white {
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-slate-900 p-2 md:p-4 rounded-2xl shadow-sm border-4 border-blue-400 h-48 md:h-auto md:flex-1 overflow-y-auto">
+            <div id="sell-cart-container" class="bg-white dark:bg-slate-900 p-2 md:p-4 rounded-2xl shadow-sm border-4 border-blue-400 h-48 md:h-auto md:flex-1 overflow-y-auto" style="border-width:4px;border-style:solid;border-color:#60a5fa;">
                 <table class="w-full text-xs border-collapse">
                     <thead class="bg-gray-50 dark:bg-slate-800 border-b border-gray-300 dark:border-slate-700 sticky top-0">
                         <tr>
@@ -2369,7 +2360,7 @@ html:not(.dark) .bg-white {
 
             <div class="mb-3">
               <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Tên sản phẩm</label>
-              <select id="sxTenSP" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 text-gray-800 dark:text-white" onchange="tinhSoKgThanhPham()">
+              <select id="sxTenSP" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-950 text-gray-800 dark:text-white" onchange="tinhSoKgThanhPham()">
                 <option value="">-- Chọn sản phẩm --</option>
                 <option>TCMT 450g Thuỷ tinh</option><option>TCMT 450g Nhựa</option>
                 <option>TCMT 275g Thuỷ tinh tròn</option><option>TCMT 275g Thuỷ tinh Lăng</option>
@@ -2382,20 +2373,20 @@ html:not(.dark) .bg-white {
             <div class="grid grid-cols-2 gap-2 mb-3">
               <div>
                 <label class="block text-xs font-bold text-gray-400 uppercase mb-1">ĐVT</label>
-                <select id="sxDVT" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 text-gray-800 dark:text-white">
+                <select id="sxDVT" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-950 text-gray-800 dark:text-white">
                   <option>Hũ</option><option>Túi</option><option>Khay</option><option>Kg</option>
                 </select>
               </div>
               <div>
                 <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Tồn đầu</label>
-                <input type="number" id="sxTonDau" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 text-gray-800 dark:text-white" placeholder="0" oninput="tinhTonCuoi()">
+                <input type="number" id="sxTonDau" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-950 text-gray-800 dark:text-white" placeholder="0" oninput="tinhTonCuoi()">
               </div>
             </div>
 
             <div class="grid grid-cols-2 gap-2 mb-3">
               <div>
                 <label class="block text-xs font-bold text-gray-400 uppercase mb-1">SL Sản phẩm</label>
-                <input type="number" id="sxSL" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 text-gray-800 dark:text-white" placeholder="0" oninput="tinhSoKgThanhPham(); tinhTonCuoi();">
+                <input type="number" id="sxSL" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-950 text-gray-800 dark:text-white" placeholder="0" oninput="tinhSoKgThanhPham(); tinhTonCuoi();">
               </div>
               <div>
                 <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Tồn Cuối</label>
@@ -2405,21 +2396,21 @@ html:not(.dark) .bg-white {
 
             <div class="mb-3">
               <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Số KG Đã Đóng</label>
-              <input type="number" id="sxSoKg" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 text-gray-800 dark:text-white" placeholder="0.00">
+              <input type="number" id="sxSoKg" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-950 text-gray-800 dark:text-white" placeholder="0.00">
             </div>
 
             <div class="grid grid-cols-3 gap-2 mb-2">
               <div>
                 <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Mẻ Xong</label>
-                <input type="number" id="sxSoMe" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 text-gray-800 dark:text-white" placeholder="0">
+                <input type="number" id="sxSoMe" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-950 text-gray-800 dark:text-white" placeholder="0">
               </div>
               <div>
                 <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Mẻ Chờ</label>
-                <input type="number" id="sxMeChuaDong" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 text-gray-800 dark:text-white" placeholder="0">
+                <input type="number" id="sxMeChuaDong" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-950 text-gray-800 dark:text-white" placeholder="0">
               </div>
               <div>
                 <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Mẻ Mới</label>
-                <input type="number" id="sxMeChuaNau" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 text-gray-800 dark:text-white" placeholder="0">
+                <input type="number" id="sxMeChuaNau" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-950 text-gray-800 dark:text-white" placeholder="0">
               </div>
             </div>
           </div>
@@ -2554,8 +2545,8 @@ html:not(.dark) .bg-white {
                 </div>
             </div>
             <button type="button" onclick="addNguyenLieuToCart();" 
-    class="w-full bg-gray-700 dark:bg-gray-800 text-white py-2 rounded mb-3 text-sm font-bold shadow-md transition-all duration-75 border-b-[4px] border-gray-800 dark:border-gray-950 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px]">
-    THÊM VÀO GIỎ
+    class="w-full bg-gradient-to-b from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700 text-white py-2.5 rounded-xl mb-3 text-sm font-bold shadow-md transition-all duration-75 border-b-[4px] border-emerald-700 dark:border-emerald-900 hover:-translate-y-1 hover:brightness-110 active:translate-y-[2px] active:border-b-[2px]">
+    ➕ THÊM VÀO GIỎ
 </button>
             <div id="gio-hang-nl" class="my-2 border dark:border-slate-700 p-2 text-xs bg-white dark:bg-slate-950 dark:text-white rounded min-h-[50px] max-h-[100px] overflow-y-auto border-blue-100"></div>
             <button onclick="saveFullInvoice()" 
@@ -5346,16 +5337,7 @@ function filterInventory() {
     }
 }
 
-// 2. Hàm Ẩn/Hiện giá
-function togglePrices() {
-    const cells = document.querySelectorAll('.price-cell');
-    cells.forEach(cell => {
-        // Toggle visibility của cột giá
-        cell.style.display = (cell.style.display === 'none') ? '' : 'none';
-    });
-}
-
-// 3. Hàm Xuất Excel (Đảm bảo đã thêm thư viện XLSX vào thẻ head)
+// 2. Hàm Xuất Excel (Đảm bảo đã thêm thư viện XLSX vào thẻ head)
 async function exportToExcel() {
     const table = document.getElementById("kho-table");
     if (!table) return Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Không tìm thấy bảng dữ liệu!' });
@@ -5684,33 +5666,36 @@ function renderSellCart() {
         return;
     }
 
-    body.innerHTML = sellCart.map((i, index) => `
-    <tr class="border-b border-gray-300">
-        <td class="p-2 text-left font-medium text-slate-800 break-words w-1/4 text-[11px] border-r border-gray-300">${i.name}</td>
+    body.innerHTML = sellCart.map((i, index) => {
+        const rowBg = index % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50 dark:bg-slate-800/70';
+        return `
+    <tr class="${rowBg} border-b border-gray-300 dark:border-slate-700">
+        <td class="p-2 text-left font-medium text-slate-800 dark:text-slate-100 break-words w-1/4 text-[11px] border-r border-gray-300 dark:border-slate-700">${i.name}</td>
         
-        <td class="p-2 w-[50px] border-r border-gray-300">
+        <td class="p-2 w-[50px] border-r border-gray-300 dark:border-slate-700">
             <!-- ĐÃ SỬA: Thay min="1" bằng step="any" -->
-            <input type="number" value="${i.qty}" step="any" class="w-full border border-gray-300 rounded text-center text-xs p-1" 
+            <input type="number" value="${i.qty}" step="any" class="w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded text-center text-xs p-1" 
                    onchange="updateCartItem(${index}, 'qty', this.value)">
         </td>
         
-        <td class="p-2 w-[70px] border-r border-gray-300">
-            <input type="number" value="${i.price}" class="w-full border border-gray-300 rounded text-right text-xs p-1" 
+        <td class="p-2 w-[70px] border-r border-gray-300 dark:border-slate-700">
+            <input type="number" value="${i.price}" class="w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded text-right text-xs p-1" 
                    onchange="updateCartItem(${index}, 'price', this.value)">
         </td>
         
-        <td class="p-2 w-24 border-r border-gray-300">
-            <input type="text" value="${i.note || ''}" class="w-full border border-gray-300 rounded text-xs p-1" 
+        <td class="p-2 w-24 border-r border-gray-300 dark:border-slate-700">
+            <input type="text" value="${i.note || ''}" class="w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded text-xs p-1" 
                    onchange="updateCartItem(${index}, 'note', this.value)">
         </td>
         
-        <td class="p-2 text-right font-bold text-green-700 w-20 text-[11px] border-r border-gray-300">${i.total.toLocaleString('vi-VN')}</td>
+        <td class="p-2 text-right font-bold text-green-700 dark:text-emerald-400 w-20 text-[11px] border-r border-gray-300 dark:border-slate-700">${i.total.toLocaleString('vi-VN')}</td>
         
         <td class="p-2 text-center w-8">
             <button onclick="removeSellItem(${index})" class="text-red-500 hover:text-red-700 font-bold">X</button>
         </td>
     </tr>
-`).join('');
+`;
+    }).join('');
 
     updateGrandTotal();
 }
@@ -5772,47 +5757,55 @@ function renderProductGrid() {
     const grid = document.getElementById('product-grid');
     if (!grid) return;
     grid.innerHTML = '';
-    
+
+    // Bảng màu 3D glossy: nền gradient nhạt, viền, huy hiệu tồn kho, nút cộng gradient + đổ bóng khối
     const themeClasses = [
-        { l: 'border-l-blue-400', bg: 'bg-white dark:bg-slate-800', btn: 'bg-blue-600', shadow: 'shadow-[0_8px_0_0_#1e40af] dark:shadow-[0_8px_0_0_#1e3a8a]' },
-        { l: 'border-l-emerald-400', bg: 'bg-white dark:bg-slate-800', btn: 'bg-emerald-600', shadow: 'shadow-[0_8px_0_0_#065f46] dark:shadow-[0_8px_0_0_#064e3b]' },
-        { l: 'border-l-amber-400', bg: 'bg-white dark:bg-slate-800', btn: 'bg-amber-600', shadow: 'shadow-[0_8px_0_0_#92400e] dark:shadow-[0_8px_0_0_#78350f]' },
-        { l: 'border-l-rose-400', bg: 'bg-white dark:bg-slate-800', btn: 'bg-rose-600', shadow: 'shadow-[0_8px_0_0_#9f1239] dark:shadow-[0_8px_0_0_#881337]' },
-        { l: 'border-l-violet-400', bg: 'bg-white dark:bg-slate-800', btn: 'bg-violet-600', shadow: 'shadow-[0_8px_0_0_#6d28d9] dark:shadow-[0_8px_0_0_#5b21b6]' },
-        { l: 'border-l-cyan-400', bg: 'bg-white dark:bg-slate-800', btn: 'bg-cyan-600', shadow: 'shadow-[0_8px_0_0_#155e75] dark:shadow-[0_8px_0_0_#164e63]' }
+        { top: 'from-blue-100 to-blue-50/60 dark:from-blue-950/70 dark:to-slate-900',    ring: 'ring-blue-200 dark:ring-blue-500/20',    badge: 'bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300',    btn: 'from-blue-400 to-blue-600 dark:from-blue-500 dark:to-blue-700',    shadow: 'shadow-[0_6px_0_0_#1e40af,0_10px_16px_-4px_rgba(37,99,235,0.35)] dark:shadow-[0_6px_0_0_#1e3a8a,0_10px_16px_-4px_rgba(0,0,0,0.5)]' },
+        { top: 'from-emerald-100 to-emerald-50/60 dark:from-emerald-950/70 dark:to-slate-900', ring: 'ring-emerald-200 dark:ring-emerald-500/20', badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300', btn: 'from-emerald-400 to-emerald-600 dark:from-emerald-500 dark:to-emerald-700', shadow: 'shadow-[0_6px_0_0_#065f46,0_10px_16px_-4px_rgba(5,150,105,0.35)] dark:shadow-[0_6px_0_0_#064e3b,0_10px_16px_-4px_rgba(0,0,0,0.5)]' },
+        { top: 'from-amber-100 to-amber-50/60 dark:from-amber-950/70 dark:to-slate-900',   ring: 'ring-amber-200 dark:ring-amber-500/20',   badge: 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',   btn: 'from-amber-400 to-amber-600 dark:from-amber-500 dark:to-amber-700',   shadow: 'shadow-[0_6px_0_0_#92400e,0_10px_16px_-4px_rgba(217,119,6,0.35)] dark:shadow-[0_6px_0_0_#78350f,0_10px_16px_-4px_rgba(0,0,0,0.5)]' },
+        { top: 'from-rose-100 to-rose-50/60 dark:from-rose-950/70 dark:to-slate-900',    ring: 'ring-rose-200 dark:ring-rose-500/20',    badge: 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300',    btn: 'from-rose-400 to-rose-600 dark:from-rose-500 dark:to-rose-700',    shadow: 'shadow-[0_6px_0_0_#9f1239,0_10px_16px_-4px_rgba(225,29,72,0.35)] dark:shadow-[0_6px_0_0_#881337,0_10px_16px_-4px_rgba(0,0,0,0.5)]' },
+        { top: 'from-violet-100 to-violet-50/60 dark:from-violet-950/70 dark:to-slate-900', ring: 'ring-violet-200 dark:ring-violet-500/20', badge: 'bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300', btn: 'from-violet-400 to-violet-600 dark:from-violet-500 dark:to-violet-700', shadow: 'shadow-[0_6px_0_0_#6d28d9,0_10px_16px_-4px_rgba(124,58,237,0.35)] dark:shadow-[0_6px_0_0_#5b21b6,0_10px_16px_-4px_rgba(0,0,0,0.5)]' },
+        { top: 'from-cyan-100 to-cyan-50/60 dark:from-cyan-950/70 dark:to-slate-900',    ring: 'ring-cyan-200 dark:ring-cyan-500/20',    badge: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-300',    btn: 'from-cyan-400 to-cyan-600 dark:from-cyan-500 dark:to-cyan-700',    shadow: 'shadow-[0_6px_0_0_#155e75,0_10px_16px_-4px_rgba(8,145,178,0.35)] dark:shadow-[0_6px_0_0_#164e63,0_10px_16px_-4px_rgba(0,0,0,0.5)]' }
     ];
-    
+
     window.allProductCache.forEach((p, index) => {
         const rawStock = window.currentStockMap ? (window.currentStockMap[p.name] || 0) : 0;
         const realStock = Number(Math.round(rawStock * 100) / 100);
-        
+
         const safeName = p.name.replace(/'/g, "\\'");
         const idName = p.name.replace(/ /g, '_');
         const isOutOfStock = realStock <= 0;
         const b = themeClasses[index % themeClasses.length];
-        
+
         grid.innerHTML += `
-            <div onclick="${isOutOfStock ? `alert('Hết hàng!')` : `quickAdd('${safeName}')`}" 
-                 class="group ${b.bg} p-3 md:p-4 rounded-2xl border border-gray-100 dark:border-slate-700 ${b.l} border-l-8 
-                        ${b.shadow} flex flex-col justify-between cursor-pointer h-24 md:h-28
-                        hover:translate-y-[-4px] hover:shadow-[0_12px_0_0_rgba(0,0,0,0.2)] 
-                        active:translate-y-[4px] active:shadow-none transition-all duration-200">
-                
-                <div class="flex justify-between items-start gap-3">
+            <div onclick="${isOutOfStock ? `alert('Hết hàng!')` : `quickAdd('${safeName}')`}"
+                 class="group relative bg-gradient-to-b ${b.top} p-3 md:p-4 rounded-2xl border border-white/60 dark:border-slate-700 ring-1 ${b.ring}
+                        ${b.shadow} flex flex-col justify-between cursor-pointer h-24 md:h-28 overflow-hidden
+                        transition-all duration-200 ease-out
+                        hover:-translate-y-1.5 hover:shadow-[0_10px_0_0_rgba(0,0,0,0.15),0_16px_22px_-6px_rgba(0,0,0,0.3)]
+                        active:translate-y-[3px] active:shadow-none
+                        ${isOutOfStock ? 'grayscale opacity-70' : ''}">
+
+                <!-- Vệt sáng bóng ở góc trên để tạo cảm giác nổi khối/glossy -->
+                <div class="pointer-events-none absolute -top-6 -left-6 w-20 h-20 bg-white/50 dark:bg-white/10 rounded-full blur-xl"></div>
+
+                <div class="relative flex justify-between items-start gap-3">
                     <p class="font-black text-gray-700 dark:text-slate-100 text-[12px] md:text-sm leading-tight line-clamp-2 uppercase tracking-tight" title="${p.name}">
                         ${p.name}
                     </p>
-                    <button onclick="quickAdd('${safeName}', {shiftKey: true}); event.stopPropagation();" 
-                            class="flex-shrink-0 w-8 h-8 flex items-center justify-center ${b.btn} text-white rounded-xl hover:brightness-125 transition-all text-lg font-black shadow-lg active:scale-95"
+                    <button onclick="quickAdd('${safeName}', {shiftKey: true}); event.stopPropagation();"
+                            class="flex-shrink-0 w-9 h-9 flex items-center justify-center bg-gradient-to-b ${b.btn} text-white rounded-full
+                                   shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),inset_0_-2px_3px_rgba(0,0,0,0.2),0_3px_6px_rgba(0,0,0,0.25)]
+                                   hover:brightness-110 hover:scale-105 active:scale-90 transition-all text-lg font-black"
                             title="Thêm dòng mới">
                         +
                     </button>
                 </div>
-                
-                <div class="flex items-center gap-2 mt-1">
-                    <span class="text-[10px] uppercase font-black ${isOutOfStock ? 'text-red-500' : 'text-slate-400'}">Tồn kho:</span>
-                    <span id="stock-display-${idName}" class="text-[12px] font-black ${isOutOfStock ? 'text-red-600' : 'text-blue-700'}">
-                        ${isOutOfStock ? 'HẾT' : realStock}
+
+                <div class="relative flex items-center gap-1.5 mt-1">
+                    <span class="text-[9px] uppercase font-black ${isOutOfStock ? 'text-red-500' : 'text-slate-400 dark:text-slate-400'}">Tồn kho</span>
+                    <span id="stock-display-${idName}" class="text-[11px] font-black px-2 py-0.5 rounded-full ${isOutOfStock ? 'bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400' : b.badge}">
+                        ${isOutOfStock ? 'HẾT HÀNG' : realStock}
                     </span>
                 </div>
             </div>
