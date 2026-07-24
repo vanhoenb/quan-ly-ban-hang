@@ -1308,15 +1308,15 @@ html:not(.dark) .bg-white {
             <h1 class="text-xl font-bold text-slate-800 dark:text-white mt-3">POS Pro</h1>
             <p class="text-sm text-slate-400">Đăng nhập để tiếp tục</p>
         </div>
-        <form id="login-form" onsubmit="return handleLogin(event)" class="space-y-4">
+        <form id="login-form" onsubmit="return handleLogin(event)" class="space-y-4" autocomplete="off">
             <div>
                 <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">Tên đăng nhập</label>
-                <input id="login-username" type="text" autocomplete="username" required
+                <input id="login-username" type="text" autocomplete="off" required
                     class="mt-1 w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="admin">
             </div>
             <div>
                 <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">Mật khẩu</label>
-                <input id="login-password" type="password" autocomplete="current-password" required
+                <input id="login-password" type="password" autocomplete="new-password" required
                     class="mt-1 w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="••••••••">
             </div>
             <p id="login-error" class="hidden text-sm text-rose-500 font-medium"></p>
