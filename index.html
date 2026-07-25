@@ -1958,9 +1958,26 @@ html:not(.dark) .bg-white {
                     <span class="text-red-600 dark:text-red-400">Tổng thanh toán:</span>
                     <span id="cart-total-display" class="text-xl font-black text-red-500">0 đ</span>
                 </div>
+
+                <!-- CHỌN LOẠI CHỨNG TỪ CẦN IN -->
+                <div class="mb-3">
+                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">Chọn chứng từ cần in</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" id="btn-print-type-hoadon" onclick="selectPrintDocType('hoadon')"
+                            class="flex items-center justify-center gap-2 p-2.5 rounded-xl border-2 text-sm font-bold transition-colors bg-blue-600 text-white border-blue-700">
+                            <i data-lucide="receipt" class="w-4 h-4"></i> Hóa Đơn
+                        </button>
+                        <button type="button" id="btn-print-type-xuatkho" onclick="selectPrintDocType('xuatkho')"
+                            class="flex items-center justify-center gap-2 p-2.5 rounded-xl border-2 text-sm font-bold transition-colors bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-amber-500">
+                            <i data-lucide="package" class="w-4 h-4"></i> Phiếu Xuất Kho
+                        </button>
+                    </div>
+                    <input type="hidden" id="print-doc-type-value" value="hoadon">
+                </div>
+
                 <button id="btn-save-print" onclick="saveAndPrint()" 
 					class="w-full bg-green-600 dark:bg-green-700 text-white py-4 rounded-xl font-bold text-lg transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-lg">
-					LƯU & XUẤT HOÁ ĐƠN (F1)
+					LƯU & IN (F1)
 				</button>
             </div>
         </div>
@@ -2033,6 +2050,88 @@ html:not(.dark) .bg-white {
             <p style="margin: 0;">Ninh Bình, ngày <span id="print-day"></span> tháng <span id="print-month"></span> năm <span id="print-year"></span></p>
             <p style="margin: 0;"><strong>Người bán hàng</strong></p>
             <p style="font-size: 12px; font-style: italic;">(Ký, đóng dấu, ghi rõ họ tên)</p>
+        </div>
+    </div>
+</div>
+
+<!-- ===================== MẪU PHIẾU XUẤT KHO ===================== -->
+<div id="print-area-xuatkho" style="display: none; padding: 40px; font-family: 'Times New Roman', serif; color: #000;">
+    <div style="border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 20px; font-family: 'Goldman', sans-serif;">
+        <div style="text-align: center;">
+            <h2 style="margin: 0; font-size: 18px; font-weight: bold;">HỢP TÁC XÃ SẢN XUẤT VÀ KINH DOANH NÔNG SẢN THANH NGUYỄN </h2>
+            <p style="margin: 5px 0; font-size: 13px;">Địa chỉ: Số 9, ngõ 456, đường Xuân Thành, Phố Thượng , Phường Hoa Lư, Ninh Bình</p>
+            <p style="margin: 2px 0; font-size: 13px;">Hotline: 0982 998 474 - 0949 558 525</p>
+        </div>
+    </div>
+
+    <!-- Khối Mẫu số góc phải kiểu chứng từ kế toán -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+        <div style="width: 60%;"></div>
+        <div style="width: 38%; font-size: 12px; text-align: left; border: 1px dashed #999; padding: 8px 10px; border-radius: 6px;">
+            <p style="margin: 2px 0;">Mẫu số 02 - VT</p>
+            <p style="margin: 2px 0; font-style: italic;">(Ban hành theo Thông tư 133/2016/TT-BTC)</p>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-bottom: 20px; font-family: 'Goldman', sans-serif;">
+        <h1 style="margin: 10px 0; font-size: 32px; text-transform: uppercase; letter-spacing: 2px;">PHIẾU XUẤT KHO</h1>
+        <p style="margin: 0; font-size: 14px;">Ngày <span id="xk-day"></span> tháng <span id="xk-month"></span> năm <span id="xk-year"></span></p>
+        <p style="margin: 5px 0 0 0; font-size: 13px;">Số phiếu: <strong id="xk-receipt-id"></strong> &nbsp;&nbsp;|&nbsp;&nbsp; Số HĐ liên quan: <strong id="xk-sale-ref"></strong></p>
+    </div>
+
+    <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px; background-color: #fafafa; font-size: 14px;">
+        <p style="margin: 5px 0;"><strong>Họ tên người nhận hàng:</strong> <span id="xk-customer"></span></p>
+        <p style="margin: 5px 0;"><strong>Địa chỉ / Đơn vị:</strong> <span id="xk-address"></span> &nbsp;&nbsp; <strong>SĐT:</strong> <span id="xk-phone"></span></p>
+        <p style="margin: 5px 0;"><strong>Lý do xuất kho:</strong> Xuất bán hàng hóa cho khách hàng</p>
+        <p style="margin: 5px 0;"><strong>Xuất tại kho:</strong> Kho Hợp tác xã Thanh Nguyễn &nbsp;&nbsp; <strong>Ghi chú:</strong> <span id="xk-note"></span></p>
+    </div>
+
+    <table border="1" style="width: 100%; border-collapse: collapse; text-align: center; margin-bottom: 20px; font-size: 13px;">
+        <thead style="background: #eee; font-weight: bold; font-family: 'Goldman', sans-serif;">
+            <tr>
+                <th style="padding: 10px 4px;" rowspan="2">STT</th>
+                <th style="padding: 10px 4px;" rowspan="2">Tên, nhãn hiệu, quy cách<br>vật tư, hàng hoá</th>
+                <th style="padding: 10px 4px;" rowspan="2">ĐVT</th>
+                <th style="padding: 10px 4px;" colspan="2">Số lượng</th>
+                <th style="padding: 10px 4px;" rowspan="2">Đơn giá</th>
+                <th style="padding: 10px 4px;" rowspan="2">Thành tiền</th>
+                <th style="padding: 10px 4px;" rowspan="2">Ghi chú</th>
+            </tr>
+            <tr>
+                <th style="padding: 6px 4px;">Yêu cầu</th>
+                <th style="padding: 6px 4px;">Thực xuất</th>
+            </tr>
+        </thead>
+        <tbody id="xk-items"></tbody>
+    </table>
+
+    <div style="float: right; width: 350px; font-size: 14px;">
+        <div id="xk-subtotal-row" style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+            <span>Thành tiền trước thuế:</span> <span id="xk-subtotal"></span>
+        </div>
+        <div id="xk-tax-row" style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+            <span>Tiền thuế GTGT:</span> <span id="xk-tax"></span>
+        </div>
+        <div style="display: flex; justify-content: space-between; border-top: 2px solid #000; margin-top: 10px; padding-top: 10px; font-size: 16px; font-weight: bold;">
+            <span>Tổng cộng:</span> <span id="xk-total"></span>
+        </div>
+        <p style="margin: 10px 0 0 0; font-style: italic; font-size: 13px;">Bằng chữ: <span id="xk-total-word"></span></p>
+    </div>
+    <div style="clear: both;"></div>
+
+    <div style="margin-top: 40px; display: flex; justify-content: space-between; text-align: center; font-size: 13px;">
+        <div style="width: 30%;">
+            <p style="margin: 0;"><strong>Người lập phiếu</strong></p>
+            <p style="font-size: 12px; font-style: italic;">(Ký, ghi rõ họ tên)</p>
+        </div>
+        <div style="width: 30%;">
+            <p style="margin: 0;"><strong>Thủ kho</strong></p>
+            <p style="font-size: 12px; font-style: italic;">(Ký, ghi rõ họ tên)</p>
+        </div>
+        <div style="width: 30%;">
+            <p style="margin: 0 0 4px 0;">Ninh Bình, ngày <span id="xk-day2"></span> tháng <span id="xk-month2"></span> năm <span id="xk-year2"></span></p>
+            <p style="margin: 0;"><strong>Người nhận hàng</strong></p>
+            <p style="font-size: 12px; font-style: italic;">(Ký, ghi rõ họ tên)</p>
         </div>
     </div>
 </div>
@@ -2781,12 +2880,17 @@ html:not(.dark) .bg-white {
    		
 <style media="print">
     body * { visibility: hidden; }
-    #print-area, #print-area * { visibility: visible; }
-    #print-area { position: absolute; left: 0; top: 0; width: 100%; display: block !important; }
+    #print-area, #print-area-xuatkho { display: none; position: absolute; left: 0; top: 0; width: 100%; }
+
+    body.print-mode-hoadon #print-area { display: block !important; visibility: visible; }
+    body.print-mode-hoadon #print-area * { visibility: visible; }
+
+    body.print-mode-xuatkho #print-area-xuatkho { display: block !important; visibility: visible; }
+    body.print-mode-xuatkho #print-area-xuatkho * { visibility: visible; }
     
     /* Thêm các dòng này để bảng in đẹp hơn */
-    #print-area table { border: 1px solid #000; margin-top: 15px; }
-    #print-area th, #print-area td { padding: 8px; border: 1px solid #000; }
+    #print-area table, #print-area-xuatkho table { border: 1px solid #000; margin-top: 15px; }
+    #print-area th, #print-area td, #print-area-xuatkho th, #print-area-xuatkho td { padding: 8px; border: 1px solid #000; }
 </style>
 
     </main>
@@ -6229,6 +6333,173 @@ function updateCartItem(index, field, value) {
 }
 
     // Hàm lưu hóa đơn, in phiếu và trừ kho
+// --- CHỌN LOẠI CHỨNG TỪ CẦN IN Ở TRANG BÁN HÀNG (điều khiển trực tiếp bằng JS để hiển thị đúng ở mọi giao diện sáng/tối) ---
+function selectPrintDocType(type) {
+    const valueEl = document.getElementById('print-doc-type-value');
+    if (valueEl) valueEl.value = type;
+
+    const btnHD = document.getElementById('btn-print-type-hoadon');
+    const btnXK = document.getElementById('btn-print-type-xuatkho');
+    if (!btnHD || !btnXK) return;
+
+    const activeHD = ['bg-blue-600', 'text-white', 'border-blue-700'];
+    const inactiveHD = ['bg-white', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-200', 'border-blue-500'];
+    const activeXK = ['bg-amber-600', 'text-white', 'border-amber-700'];
+    const inactiveXK = ['bg-white', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-200', 'border-amber-500'];
+
+    if (type === 'xuatkho') {
+        btnHD.classList.remove(...activeHD); btnHD.classList.add(...inactiveHD);
+        btnXK.classList.remove(...inactiveXK); btnXK.classList.add(...activeXK);
+    } else {
+        btnXK.classList.remove(...activeXK); btnXK.classList.add(...inactiveXK);
+        btnHD.classList.remove(...inactiveHD); btnHD.classList.add(...activeHD);
+    }
+}
+
+// --- KÍCH HOẠT IN AN TOÀN (Tăng độ trễ lên 300ms để chờ hộp thoại Lịch sử đóng hẳn) ---
+function triggerPrint(modeClass) {
+    document.body.classList.remove('print-mode-hoadon', 'print-mode-xuatkho');
+    document.body.classList.add(modeClass);
+
+    let cleaned = false;
+    const cleanup = () => {
+        if (cleaned) return;
+        cleaned = true;
+        document.body.classList.remove('print-mode-hoadon', 'print-mode-xuatkho');
+        window.removeEventListener('afterprint', cleanup);
+    };
+    window.addEventListener('afterprint', cleanup);
+
+    // Tăng từ 100ms lên 300ms để khắc phục triệt để lỗi in trắng khi gọi từ Lịch sử (có SweetAlert)
+    setTimeout(() => {
+        window.print();
+    }, 300);
+
+    // Phòng trường hợp trình duyệt không bắn sự kiện afterprint
+    setTimeout(cleanup, 15000);
+}
+
+// --- ĐIỀN DỮ LIỆU + IN MẪU HÓA ĐƠN BÁN HÀNG (dùng chung cho Bán Hàng và In lại ở Lịch Sử HĐ) ---
+function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items, vatRate, dateObj }) {
+    const d = dateObj || new Date();
+    const formattedDate = d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const ngayStr = String(d.getDate()).padStart(2, '0');
+    const thangStr = String(d.getMonth() + 1).padStart(2, '0');
+    const namStr = d.getFullYear();
+    const vr = vatRate || 0;
+
+    const fields = {
+        'print-customer': customer || '',
+        'print-address': address || '',
+        'print-phone': phone || '',
+        'print-receipt-id': receiptId || '',
+        'print-date': formattedDate,
+        'print-day': ngayStr,
+        'print-month': thangStr,
+        'print-year': namStr,
+        'print-note-global': note || ''
+    };
+    for (const [id, value] of Object.entries(fields)) {
+        const el = document.getElementById(id);
+        if (el) el.innerText = value;
+    }
+
+    let subTotalAll = 0;
+    const elItems = document.getElementById('print-items');
+    if (elItems) {
+        elItems.innerHTML = (items || []).map((i, index) => {
+            const subTotal = i.qty * i.price;
+            const taxAmount = subTotal * (vr / 100);
+            subTotalAll += subTotal;
+            return `<tr>
+                <td style="padding: 5px;">${index + 1}</td>
+                <td style="padding: 5px; text-align: left;">${i.name || ''}</td>
+                <td style="padding: 5px;">${i.unit || 'Cái'}</td>
+                <td style="padding: 5px;">${i.qty}</td>
+                <td style="padding: 5px;">${i.price.toLocaleString('vi-VN')}</td>
+                <td style="padding: 5px;">${subTotal.toLocaleString('vi-VN')}</td>
+                <td style="padding: 5px;">${vr}%</td>
+                <td style="padding: 5px;">${taxAmount.toLocaleString('vi-VN')}</td>
+                <td style="padding: 5px;">${i.note || ''}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    const taxTotalAll = subTotalAll * (vr / 100);
+    const grandTotal = subTotalAll + taxTotalAll;
+
+    if (document.getElementById('print-subtotal')) document.getElementById('print-subtotal').innerText = subTotalAll.toLocaleString('vi-VN');
+    if (document.getElementById('print-tax-total')) document.getElementById('print-tax-total').innerText = taxTotalAll.toLocaleString('vi-VN');
+    if (document.getElementById('print-total')) document.getElementById('print-total').innerText = grandTotal.toLocaleString('vi-VN') + " đ";
+    if (document.getElementById('print-total-word')) document.getElementById('print-total-word').innerText = docSo(grandTotal);
+
+    triggerPrint('print-mode-hoadon');
+}
+
+// --- ĐIỀN DỮ LIỆU + IN MẪU PHIẾU XUẤT KHO (dùng chung cho Bán Hàng và In lại ở Lịch Sử HĐ) ---
+function renderXuatKhoTemplate({ receiptId, customer, address, phone, note, items, vatRate, dateObj }) {
+    const d = dateObj || new Date();
+    const ngayStr = String(d.getDate()).padStart(2, '0');
+    const thangStr = String(d.getMonth() + 1).padStart(2, '0');
+    const namStr = d.getFullYear();
+
+    const xkFields = {
+        'xk-day': ngayStr, 'xk-month': thangStr, 'xk-year': namStr,
+        'xk-day2': ngayStr, 'xk-month2': thangStr, 'xk-year2': namStr,
+        'xk-receipt-id': receiptId || '',
+        'xk-sale-ref': receiptId || '',
+        'xk-customer': customer || '',
+        'xk-address': address || '',
+        'xk-phone': phone || '',
+        'xk-note': note || ''
+    };
+    for (const [id, value] of Object.entries(xkFields)) {
+        const el = document.getElementById(id);
+        if (el) el.innerText = value;
+    }
+
+    let subTotalAll = 0;
+    const xkItemsEl = document.getElementById('xk-items');
+    if (xkItemsEl) {
+        xkItemsEl.innerHTML = (items || []).map((i, index) => {
+            const thanhTien = i.qty * i.price;
+            subTotalAll += thanhTien;
+            return `<tr>
+                <td style="padding: 5px;">${index + 1}</td>
+                <td style="padding: 5px; text-align: left;">${i.name || ''}</td>
+                <td style="padding: 5px;">${i.unit || 'Cái'}</td>
+                <td style="padding: 5px;">${i.qty}</td>
+                <td style="padding: 5px;">${i.qty}</td>
+                <td style="padding: 5px;">${i.price.toLocaleString('vi-VN')}</td>
+                <td style="padding: 5px;">${thanhTien.toLocaleString('vi-VN')}</td>
+                <td style="padding: 5px;">${i.note || ''}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    // Nếu đơn hàng có tính thuế GTGT thì hiện thêm dòng thuế + tổng tiền đã gồm thuế; không thì chỉ hiện Tổng cộng
+    const vr = vatRate || 0;
+    const taxTotalAll = subTotalAll * (vr / 100);
+    const grandTotal = subTotalAll + taxTotalAll;
+
+    const subtotalRow = document.getElementById('xk-subtotal-row');
+    const taxRow = document.getElementById('xk-tax-row');
+    if (vr > 0) {
+        if (subtotalRow) subtotalRow.style.display = 'flex';
+        if (taxRow) taxRow.style.display = 'flex';
+        if (document.getElementById('xk-subtotal')) document.getElementById('xk-subtotal').innerText = subTotalAll.toLocaleString('vi-VN') + " đ";
+        if (document.getElementById('xk-tax')) document.getElementById('xk-tax').innerText = taxTotalAll.toLocaleString('vi-VN') + " đ (" + vr + "%)";
+    } else {
+        if (subtotalRow) subtotalRow.style.display = 'none';
+        if (taxRow) taxRow.style.display = 'none';
+    }
+
+    if (document.getElementById('xk-total')) document.getElementById('xk-total').innerText = grandTotal.toLocaleString('vi-VN') + " đ";
+    if (document.getElementById('xk-total-word')) document.getElementById('xk-total-word').innerText = docSo(grandTotal);
+
+    triggerPrint('print-mode-xuatkho');
+}
+
 async function saveAndPrint() {
     if (sellCart.length === 0) {
         alert("Giỏ hàng đang trống!");
@@ -6310,65 +6581,19 @@ async function saveAndPrint() {
 
         alert("Lưu thành công!");
 
-        // 1. Điền thông tin chung
-        const now = new Date();
-        
-        // Tạo định dạng dd/mm/yyyy
-        const formattedDate = now.toLocaleDateString('vi-VN', { 
-            day: '2-digit', 
-            month: '2-digit', 
-            year: 'numeric' 
-        });
+        // Xác định loại chứng từ người dùng chọn in: 'hoadon' hoặc 'xuatkho'
+        const printType = (document.getElementById('print-doc-type-value') || {}).value || 'hoadon';
 
-        const fields = {
-            'print-customer': customer,
-            'print-address': address,          
-            'print-phone': phone,               
-            'print-receipt-id': receiptId,  
-            'print-date': formattedDate, // Đã chuyển thành 05/07/2026
-            'print-day': String(now.getDate()).padStart(2, '0'),   // Thêm số 0 phía trước
-            'print-month': String(now.getMonth() + 1).padStart(2, '0'), // Thêm số 0 phía trước
-            'print-year': now.getFullYear(),
-            'print-note-global': noteGlobal
+        const printOpts = {
+            receiptId, customer, address, phone, note: noteGlobal,
+            items: sellCart, vatRate, dateObj: new Date()
         };
-        for (const [id, value] of Object.entries(fields)) {
-            const el = document.getElementById(id);
-            if (el) el.innerText = value;
+
+        if (printType === 'xuatkho') {
+            renderXuatKhoTemplate(printOpts);
+        } else {
+            renderHoaDonTemplate(printOpts);
         }
-
-        // 2. Render danh sách sản phẩm
-        const elItems = document.getElementById('print-items');
-        if (elItems) {
-            elItems.innerHTML = sellCart.map((i, index) => {
-                const subTotal = i.qty * i.price;
-                const taxAmount = subTotal * (vatRate / 100);
-                
-                return `<tr>
-                    <td style="padding: 5px;">${index + 1}</td>
-                    <td style="padding: 5px; text-align: left;">${i.name}</td>
-                    <td style="padding: 5px;">${i.unit || 'Cái'}</td>
-                    <td style="padding: 5px;">${i.qty}</td>
-                    <td style="padding: 5px;">${i.price.toLocaleString('vi-VN')}</td>
-                    <td style="padding: 5px;">${subTotal.toLocaleString('vi-VN')}</td>
-                    <td style="padding: 5px;">${vatRate}%</td>
-                    <td style="padding: 5px;">${taxAmount.toLocaleString('vi-VN')}</td>
-                    <td style="padding: 5px;">${i.note || ''}</td>
-                </tr>`;
-            }).join('');
-        }
-
-        // 3. Cập nhật tổng tiền
-        if (document.getElementById('print-subtotal')) 
-            document.getElementById('print-subtotal').innerText = subTotalAll.toLocaleString('vi-VN');
-        if (document.getElementById('print-tax-total')) 
-            document.getElementById('print-tax-total').innerText = taxTotalAll.toLocaleString('vi-VN');
-        if (document.getElementById('print-total')) 
-            document.getElementById('print-total').innerText = grandTotal.toLocaleString('vi-VN') + " đ";
-        
-        if (document.getElementById('print-total-word'))
-            document.getElementById('print-total-word').innerText = docSo(grandTotal);
-
-        window.print();
         
        // 4. RESET DỮ LIỆU
         sellCart = [];
@@ -6395,6 +6620,9 @@ async function saveAndPrint() {
             priceTypeEl.value = 'retail';
             if (typeof applyGlobalPrice === 'function') applyGlobalPrice();
         }
+
+        // Reset lựa chọn chứng từ in về mặc định "Hóa Đơn"
+        if (typeof selectPrintDocType === 'function') selectPrintDocType('hoadon');
         
         renderSellCart();
 		
@@ -6424,7 +6652,7 @@ async function saveAndPrint() {
     } finally {
         if (btn) {
             btn.disabled = false;
-            btn.innerText = "Lưu & Xuất Hóa Đơn";
+            btn.innerText = "LƯU & IN (F1)";
             btn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
     }
@@ -6628,75 +6856,41 @@ async function reprintSale(docId) {
     try {
         const doc = await db.collection('sales').doc(docId).get();
         if (!doc.exists) return alert("Không tìm thấy hóa đơn!");
-        
+
         const data = doc.data();
-        
-        // --- THÊM DÒNG NÀY ĐỂ HIỆN SỐ PHIẾU ---
-        if (document.getElementById('print-receipt-id')) {
-            document.getElementById('print-receipt-id').innerText = data.id || docId;
-        }
-        // -------------------------------------
-        
-        // Lấy mức thuế đã lưu...
-        const vatRate = data.vatRate || 0; 
-        
-        // 1. Điền thông tin khách hàng, ngày và GHI CHÚ
-        if (document.getElementById('print-customer')) document.getElementById('print-customer').innerText = data.customer || '';
-        if (document.getElementById('print-note-global')) document.getElementById('print-note-global').innerText = data.note || '';
-        
-        const date = data.date.toDate();
-        
-        // Cập nhật định dạng ngày: 05/07/2026
-        const formattedDate = date.toLocaleDateString('vi-VN', { 
-            day: '2-digit', 
-            month: '2-digit', 
-            year: 'numeric' 
+        const dateObj = data.date && typeof data.date.toDate === 'function' ? data.date.toDate() : new Date();
+
+        const printOpts = {
+            receiptId: data.id || docId,
+            customer: data.customer || '',
+            address: data.address || '',
+            phone: data.phone || '',
+            note: data.note || '',
+            items: data.items || [],
+            vatRate: data.vatRate || 0,
+            dateObj: dateObj
+        };
+
+        // Hỏi người dùng muốn in Hóa Đơn hay Phiếu Xuất Kho
+        const result = await Swal.fire({
+            title: 'Chọn chứng từ cần in',
+            icon: 'question',
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-receipt"></i> Hóa Đơn',
+            denyButtonText: '<i class="fas fa-box"></i> Phiếu Xuất Kho',
+            cancelButtonText: 'Hủy',
+            confirmButtonColor: '#2563eb',
+            denyButtonColor: '#d97706'
         });
-        
-        if (document.getElementById('print-date')) document.getElementById('print-date').innerText = formattedDate;
-        
-        // Thêm số 0 phía trước nếu ngày/tháng là số đơn vị (ví dụ: 05, 07)
-        if (document.getElementById('print-day')) document.getElementById('print-day').innerText = String(date.getDate()).padStart(2, '0');
-        if (document.getElementById('print-month')) document.getElementById('print-month').innerText = String(date.getMonth() + 1).padStart(2, '0');
-        if (document.getElementById('print-year')) document.getElementById('print-year').innerText = date.getFullYear();
 
-        // 2. Render lại bảng sản phẩm
-        let subTotalAll = 0;
-        const elItems = document.getElementById('print-items');
-        
-        elItems.innerHTML = data.items.map((i, index) => {
-            let subTotal = i.qty * i.price;
-            let taxAmount = subTotal * (vatRate / 100); // Tính thuế dựa trên VAT toàn cục của đơn đó
-            subTotalAll += subTotal;
-
-            return `<tr>
-                <td style="padding: 5px;">${index + 1}</td>
-                <td style="padding: 5px; text-align: left;">${i.name || ''}</td>
-                <td style="padding: 5px;">${i.unit || 'Cái'}</td>
-                <td style="padding: 5px;">${i.qty}</td>
-                <td style="padding: 5px;">${i.price.toLocaleString('vi-VN')}</td>
-                <td style="padding: 5px;">${subTotal.toLocaleString('vi-VN')}</td>
-                <td style="padding: 5px;">${vatRate}%</td>
-                <td style="padding: 5px;">${taxAmount.toLocaleString('vi-VN')}</td>
-                <td style="padding: 5px;">${i.note || ''}</td>
-            </tr>`;
-        }).join('');
-
-        // 3. Điền tổng tiền
-        const taxTotalAll = subTotalAll * (vatRate / 100);
-        let grandTotal = subTotalAll + taxTotalAll;
-        
-        if (document.getElementById('print-subtotal')) document.getElementById('print-subtotal').innerText = subTotalAll.toLocaleString('vi-VN');
-        if (document.getElementById('print-tax-total')) document.getElementById('print-tax-total').innerText = taxTotalAll.toLocaleString('vi-VN');
-        if (document.getElementById('print-total')) document.getElementById('print-total').innerText = grandTotal.toLocaleString('vi-VN') + " đ";
-        
-        if (typeof docSo === 'function' && document.getElementById('print-total-word')) {
-            document.getElementById('print-total-word').innerText = docSo(grandTotal);
+        if (result.isConfirmed) {
+            renderHoaDonTemplate(printOpts);
+        } else if (result.isDenied) {
+            renderXuatKhoTemplate(printOpts);
         }
+        // Nếu bấm Hủy thì không làm gì cả
 
-        // 4. In
-        window.print();
-        
     } catch (error) {
         console.error("Lỗi in lại:", error);
         alert("Có lỗi khi tải hóa đơn để in!");
