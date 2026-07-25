@@ -1103,7 +1103,7 @@ html:not(.dark) .bg-white {
 }
 
 .dark #page-NguyenLieu .bg-gray-50 {
-    background-color: #1e293b !important;
+    background-color: #0f172a !important;
     border-color: #334155 !important;
 }
 
@@ -1308,15 +1308,15 @@ html:not(.dark) .bg-white {
             <h1 class="text-xl font-bold text-slate-800 dark:text-white mt-3">POS Pro</h1>
             <p class="text-sm text-slate-400">Đăng nhập để tiếp tục</p>
         </div>
-        <form id="login-form" onsubmit="return handleLogin(event)" class="space-y-4" autocomplete="off">
+        <form id="login-form" onsubmit="return handleLogin(event)" class="space-y-4">
             <div>
                 <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">Tên đăng nhập</label>
-                <input id="login-username" type="text" autocomplete="off" required
+                <input id="login-username" type="text" autocomplete="username" required
                     class="mt-1 w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="admin">
             </div>
             <div>
                 <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">Mật khẩu</label>
-                <input id="login-password" type="password" autocomplete="new-password" required
+                <input id="login-password" type="password" autocomplete="current-password" required
                     class="mt-1 w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="••••••••">
             </div>
             <p id="login-error" class="hidden text-sm text-rose-500 font-medium"></p>
@@ -2330,7 +2330,7 @@ html:not(.dark) .bg-white {
           </div>
 
           <div class="overflow-y-auto max-h-[450px] overflow-x-auto border border-gray-100 dark:border-slate-700 rounded-lg flex-grow custom-scrollbar">
-            <table class="w-full text-left border-collapse">
+            <table class="w-full text-left border-collapse table-fixed">
               <thead class="sticky top-0 bg-gray-100 dark:bg-slate-950 z-10">
                 <tr class="border-b border-gray-200 dark:border-slate-700">
                   <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[12%]">Ngày</th>
@@ -2415,6 +2415,19 @@ html:not(.dark) .bg-white {
             </div>
           </div>
 
+          <!-- Nút Thêm Vào Giỏ + Giỏ hàng sản xuất -->
+          <div class="mt-3">
+            <button onclick="themSanPhamVaoGioSX()" 
+                class="w-full bg-gradient-to-b from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700 text-white font-bold py-2.5 rounded-xl transition-all duration-75 border-b-[4px] border-emerald-700 dark:border-emerald-900 hover:-translate-y-1 hover:brightness-110 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+                ➕ THÊM VÀO GIỎ
+            </button>
+
+            <div class="mt-2 text-xs font-bold text-gray-400 uppercase">Giỏ hàng phiếu <span id="sx-cart-sophieu" class="text-blue-500 dark:text-blue-400"></span> (<span id="sx-cart-count">0</span> dòng)</div>
+            <div id="sx-cart-list" class="mt-1 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-xl p-1.5 min-h-[60px] max-h-[220px] overflow-y-auto space-y-1.5">
+                <div class="text-center text-gray-400 text-xs italic py-3">Giỏ hàng đang trống</div>
+            </div>
+          </div>
+
           <!-- Nút lưu được đẩy xuống đáy, tự động căng đều chiều cao -->
           <div class="mt-4 pt-2">
             <button onclick="luuSanXuat()" 
@@ -2444,9 +2457,9 @@ html:not(.dark) .bg-white {
         <!-- Tab 1: Nhà Cung Cấp -->
         <div id="ncc-tab" class="nl-tab-pane bg-white dark:bg-slate-900 p-4 md:p-6 rounded-xl shadow border border-slate-100 dark:border-slate-700 min-h-[400px]">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <input id="in-ncc" placeholder="Tên NCC" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
-                <input id="in-sdt" placeholder="SĐT" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
-                <input id="in-diachi" placeholder="Địa chỉ" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                <input id="in-ncc" placeholder="Tên NCC" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                <input id="in-sdt" placeholder="SĐT" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                <input id="in-diachi" placeholder="Địa chỉ" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
                <button onclick="addNCC()" 
     class="w-full bg-green-600 dark:bg-green-700 text-white p-2 rounded font-bold transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
     THÊM NCC
@@ -2472,8 +2485,8 @@ html:not(.dark) .bg-white {
         <!-- Tab 2: Danh mục NL -->
         <div id="dm-tab" class="nl-tab-pane hidden bg-white dark:bg-slate-900 p-4 md:p-6 rounded-xl shadow border border-slate-100 dark:border-slate-700 min-h-[400px]">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <input id="in-nl" placeholder="Tên Nguyên Liệu" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
-                <input id="in-dvt" placeholder="ĐVT" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                <input id="in-nl" placeholder="Tên Nguyên Liệu" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                <input id="in-dvt" placeholder="ĐVT" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
                <button onclick="addNL()" 
     class="w-full bg-green-600 dark:bg-green-700 text-white p-2 rounded font-bold transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
     THÊM NL
@@ -2495,18 +2508,18 @@ html:not(.dark) .bg-white {
             <h4 class="font-bold mb-4 text-gray-700 dark:text-slate-200">DANH SÁCH CHI TIẾT NHẬP</h4>
             
             <!-- BỘ LỌC MỚI ĐƯỢC THÊM VÀO -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 p-3 bg-gray-50 dark:bg-slate-950 rounded-lg border border-gray-200 dark:border-slate-700">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 p-3 bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-slate-700">
                 <div>
                     <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Chọn Tháng</label>
-                    <input type="month" id="monthPickerNhapKho" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" onchange="capNhatNgayTheoThangNhapKho()">
+                    <input type="month" id="monthPickerNhapKho" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" onchange="capNhatNgayTheoThangNhapKho()">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Từ ngày</label>
-                    <input type="date" id="dateStartNhapKho" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" onchange="filterNhapKho()">
+                    <input type="date" id="dateStartNhapKho" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" onchange="filterNhapKho()">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Đến ngày</label>
-                    <input type="date" id="dateEndNhapKho" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" onchange="filterNhapKho()">
+                    <input type="date" id="dateEndNhapKho" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" onchange="filterNhapKho()">
                 </div>
             </div>
 
@@ -2530,25 +2543,25 @@ html:not(.dark) .bg-white {
         <div class="col-span-12 lg:col-span-3 bg-blue-50 dark:bg-slate-900 p-4 md:p-5 rounded-xl border-2 border-blue-200 dark:border-slate-700 shadow-md">
             <h4 class="font-bold mb-4 text-blue-800 dark:text-blue-400 text-sm flex items-center">📝 NHẬP HÀNG MỚI</h4>
             <div class="grid grid-cols-1 gap-2 mb-4">
-                <input id="in-so-phieu" placeholder="Số phiếu" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
-                <select id="sel-ncc-nhap" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"><option>Chọn NCC</option></select>
+                <input id="in-so-phieu" placeholder="Số phiếu" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                <select id="sel-ncc-nhap" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"><option>Chọn NCC</option></select>
                 <div class="grid grid-cols-2 gap-2">
-                    <input id="in-so-hd" placeholder="Số HĐ" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
-                    <input id="in-ngay-hd" type="date" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input id="in-so-hd" placeholder="Số HĐ" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input id="in-ngay-hd" type="date" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
             </div>
             <div class="grid grid-cols-1 gap-2 mb-4">
-                <select id="sel-nl" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"><option>Chọn NL</option></select>
+                <select id="sel-nl" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"><option>Chọn NL</option></select>
                 <div class="grid grid-cols-2 gap-2">
-                    <input id="in-sl" type="number" placeholder="SL" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
-                    <input id="in-gia" type="number" placeholder="Đơn giá" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input id="in-sl" type="number" placeholder="SL" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input id="in-gia" type="number" placeholder="Đơn giá" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
             </div>
             <button type="button" onclick="addNguyenLieuToCart();" 
     class="w-full bg-gradient-to-b from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700 text-white py-2.5 rounded-xl mb-3 text-sm font-bold shadow-md transition-all duration-75 border-b-[4px] border-emerald-700 dark:border-emerald-900 hover:-translate-y-1 hover:brightness-110 active:translate-y-[2px] active:border-b-[2px]">
     ➕ THÊM VÀO GIỎ
 </button>
-            <div id="gio-hang-nl" class="my-2 border dark:border-slate-700 p-2 text-xs bg-white dark:bg-slate-950 dark:text-white rounded min-h-[50px] max-h-[100px] overflow-y-auto border-blue-100"></div>
+            <div id="gio-hang-nl" class="my-2 border dark:border-slate-700 p-2 text-xs bg-gray-50 dark:bg-slate-950 dark:text-white rounded min-h-[50px] max-h-[100px] overflow-y-auto border-blue-100"></div>
             <button onclick="saveFullInvoice()" 
     class="w-full bg-blue-600 dark:bg-blue-700 text-white py-3 rounded font-bold text-sm transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-lg mt-2">
     LƯU PHIẾU NHẬP
@@ -5666,32 +5679,46 @@ function renderSellCart() {
         return;
     }
 
+    const accentColors = [
+        { l: 'border-blue-400', chip: 'bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300' },
+        { l: 'border-emerald-400', chip: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300' },
+        { l: 'border-amber-400', chip: 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300' },
+        { l: 'border-rose-400', chip: 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300' },
+        { l: 'border-violet-400', chip: 'bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300' },
+        { l: 'border-cyan-400', chip: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-300' }
+    ];
+
     body.innerHTML = sellCart.map((i, index) => {
         const rowBg = index % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50 dark:bg-slate-800/70';
+        const c = accentColors[index % accentColors.length];
         return `
-    <tr class="${rowBg} border-b border-gray-300 dark:border-slate-700">
-        <td class="p-2 text-left font-medium text-slate-800 dark:text-slate-100 break-words w-1/4 text-[11px] border-r border-gray-300 dark:border-slate-700">${i.name}</td>
+    <tr class="${rowBg} border-b-2 border-gray-200 dark:border-slate-700 ${c.l} border-l-4 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors">
+        <td class="p-2 w-1/4">
+            <div class="w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-left font-bold break-words text-[11px] p-1.5">${i.name}</div>
+        </td>
         
-        <td class="p-2 w-[50px] border-r border-gray-300 dark:border-slate-700">
+        <td class="p-2 w-[50px]">
             <!-- ĐÃ SỬA: Thay min="1" bằng step="any" -->
-            <input type="number" value="${i.qty}" step="any" class="w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded text-center text-xs p-1" 
+            <input type="number" value="${i.qty}" step="any" class="w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-center font-bold text-xs p-1.5 focus:ring-2 focus:ring-blue-400 outline-none" 
                    onchange="updateCartItem(${index}, 'qty', this.value)">
         </td>
         
-        <td class="p-2 w-[70px] border-r border-gray-300 dark:border-slate-700">
-            <input type="number" value="${i.price}" class="w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded text-right text-xs p-1" 
+        <td class="p-2 w-[70px]">
+            <input type="number" value="${i.price}" class="w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-right text-xs p-1.5 focus:ring-2 focus:ring-blue-400 outline-none" 
                    onchange="updateCartItem(${index}, 'price', this.value)">
         </td>
         
-        <td class="p-2 w-24 border-r border-gray-300 dark:border-slate-700">
-            <input type="text" value="${i.note || ''}" class="w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded text-xs p-1" 
+        <td class="p-2 w-24">
+            <input type="text" value="${i.note || ''}" placeholder="..." class="w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-xs p-1.5 focus:ring-2 focus:ring-blue-400 outline-none" 
                    onchange="updateCartItem(${index}, 'note', this.value)">
         </td>
         
-        <td class="p-2 text-right font-bold text-green-700 dark:text-emerald-400 w-20 text-[11px] border-r border-gray-300 dark:border-slate-700">${i.total.toLocaleString('vi-VN')}</td>
+        <td class="p-2 w-20">
+            <div class="w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 rounded-lg text-right font-black text-[11px] p-1.5 ${c.chip.split(' ').filter(x => x.includes('text-')).join(' ')}">${i.total.toLocaleString('vi-VN')}</div>
+        </td>
         
-        <td class="p-2 text-center w-8">
-            <button onclick="removeSellItem(${index})" class="text-red-500 hover:text-red-700 font-bold">X</button>
+        <td class="p-2 w-8">
+            <button onclick="removeSellItem(${index})" class="w-full h-full min-h-[30px] flex items-center justify-center border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 rounded-lg text-red-500 hover:bg-red-500 hover:text-white font-bold transition-colors">✕</button>
         </td>
     </tr>
 `;
@@ -9223,6 +9250,8 @@ document.addEventListener('keydown', function(event) {
 // ======================= TRANG SẢN XUẤT ================
 //========================================================
 
+// Giỏ hàng tạm cho phiếu sản xuất (nhiều sản phẩm/mẻ dùng chung 1 số phiếu)
+let sxCart = [];
 
 function getRawNumber(id) {
   const val = document.getElementById(id).value;
@@ -9253,6 +9282,10 @@ async function khoiTaoTrangSanXuat() {
     
     document.getElementById('sxSoPhieu').value = "SX" + nextNum.toString().padStart(2, '0');
 
+    // Reset giỏ hàng tạm mỗi khi có số phiếu mới
+    sxCart = [];
+    if (typeof renderGioHangSX === 'function') renderGioHangSX();
+
     // 2. Thiết lập tháng hiện tại và Load danh sách
     const now = new Date();
     const year = now.getFullYear();
@@ -9268,29 +9301,90 @@ async function khoiTaoTrangSanXuat() {
 }
 
 // Lưu phiếu sản xuất vào Firebase
-async function luuSanXuat() {
-    const btn = document.querySelector('.btn-save') || document.querySelector('.btn-primary'); 
-    
-    // Đảm bảo lấy đúng giá trị, nếu để trống thì trả về 0
-    const data = {
-        soPhieu: document.getElementById('sxSoPhieu').value || "",
-        tenSP: document.getElementById('sxTenSP').value || "",
-        dvt: document.getElementById('sxDVT').value || "",
-        tonDau: parseInt(document.getElementById('sxTonDau').value) || 0,
-        sl: parseInt(document.getElementById('sxSL').value) || 0, // Cột SL
-        tonCuoi: parseInt(document.getElementById('sxTonCuoi').value) || 0,
-        soKg: document.getElementById('sxSoKg').value || "0",
-        soMe: parseInt(document.getElementById('sxSoMe').value) || 0, // Đóng xong
-        meChuaDong: parseInt(document.getElementById('sxMeChuaDong').value) || 0, // Chờ đóng
-        meChuaNau: parseInt(document.getElementById('sxMeChuaNau').value) || 0, // Mới mua
-        timestamp: new Date()
-    };
+// Thêm 1 dòng sản phẩm/mẻ vào giỏ hàng tạm của phiếu sản xuất hiện tại
+function themSanPhamVaoGioSX() {
+    const tenSP = document.getElementById('sxTenSP').value;
+    const dvt = document.getElementById('sxDVT').value;
+    const tonDau = parseInt(document.getElementById('sxTonDau').value) || 0;
+    const sl = parseInt(document.getElementById('sxSL').value) || 0;
+    const tonCuoi = getRawNumber('sxTonCuoi');
+    const soKg = document.getElementById('sxSoKg').value || "0";
+    const soMe = parseInt(document.getElementById('sxSoMe').value) || 0;
+    const meChuaDong = parseInt(document.getElementById('sxMeChuaDong').value) || 0;
+    const meChuaNau = parseInt(document.getElementById('sxMeChuaNau').value) || 0;
 
     // Kiểm tra: nếu là phiếu sp thì phải có tên, nếu là phiếu mẻ thì phải có ít nhất 1 giá trị mẻ
-    if (!data.tenSP && data.soMe === 0 && data.meChuaDong === 0 && data.meChuaNau === 0) {
-        alert("⚠️ Vui lòng chọn sản phẩm hoặc nhập thông số mẻ!");
+    if (!tenSP && soMe === 0 && meChuaDong === 0 && meChuaNau === 0) {
+        alert("⚠️ Vui lòng chọn sản phẩm hoặc nhập thông số mẻ trước khi thêm vào giỏ!");
         return;
     }
+
+    sxCart.push({ tenSP, dvt, tonDau, sl, tonCuoi, soKg, soMe, meChuaDong, meChuaNau });
+
+    // Reset các ô liên quan tới sản phẩm để nhập dòng tiếp theo (giữ nguyên số phiếu hiện tại)
+    document.getElementById('sxTenSP').value = "";
+    document.getElementById('sxTonDau').value = "";
+    document.getElementById('sxSL').value = "";
+    document.getElementById('sxSoKg').value = "";
+    document.getElementById('sxSoMe').value = "";
+    document.getElementById('sxMeChuaDong').value = "";
+    document.getElementById('sxMeChuaNau').value = "";
+    document.getElementById('sxTonCuoi').value = "";
+
+    renderGioHangSX();
+}
+
+// Vẽ lại danh sách giỏ hàng tạm của phiếu sản xuất
+function renderGioHangSX() {
+    const box = document.getElementById('sx-cart-list');
+    const countEl = document.getElementById('sx-cart-count');
+    const sophieuEl = document.getElementById('sx-cart-sophieu');
+    const soPhieuInput = document.getElementById('sxSoPhieu');
+
+    if (sophieuEl) sophieuEl.innerText = soPhieuInput ? soPhieuInput.value : "";
+    if (countEl) countEl.innerText = sxCart.length;
+    if (!box) return;
+
+    if (sxCart.length === 0) {
+        box.innerHTML = `<div class="text-center text-gray-400 text-xs italic py-3">Giỏ hàng đang trống</div>`;
+        return;
+    }
+
+    const accent = ['border-blue-400', 'border-emerald-400', 'border-amber-400', 'border-rose-400', 'border-violet-400', 'border-cyan-400'];
+
+    box.innerHTML = sxCart.map((it, idx) => {
+        const c = accent[idx % accent.length];
+        const label = it.tenSP || "(Chỉ cập nhật số mẻ)";
+        return `
+        <div class="flex items-center justify-between gap-2 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 ${c} border-l-4 rounded-lg p-2">
+            <div class="min-w-0">
+                <div class="font-bold text-[11px] text-slate-800 dark:text-slate-100 truncate">${label}</div>
+                <div class="text-[10px] text-slate-500 dark:text-slate-400">
+                    SL: ${it.sl} ${it.dvt || ''} • Đóng: ${it.soMe} • Chờ: ${it.meChuaDong} • Mới: ${it.meChuaNau}
+                </div>
+            </div>
+            <button onclick="xoaGioHangSX(${idx})" class="w-6 h-6 flex-shrink-0 flex items-center justify-center rounded-full bg-red-100 text-red-600 hover:bg-red-500 hover:text-white dark:bg-red-500/15 dark:text-red-400 dark:hover:bg-red-500 dark:hover:text-white font-bold transition-colors">✕</button>
+        </div>`;
+    }).join('');
+}
+
+// Xoá 1 dòng khỏi giỏ hàng tạm (trước khi lưu)
+function xoaGioHangSX(idx) {
+    sxCart.splice(idx, 1);
+    renderGioHangSX();
+}
+
+async function luuSanXuat() {
+    const btn = document.querySelector('.btn-save') || document.querySelector('.btn-primary'); 
+
+    // Bắt buộc phải thêm vào giỏ trước khi lưu
+    if (sxCart.length === 0) {
+        alert("⚠️ Giỏ hàng đang trống! Vui lòng bấm \"THÊM VÀO GIỎ\" trước khi lưu phiếu.");
+        return;
+    }
+
+    const soPhieu = document.getElementById('sxSoPhieu').value || "";
+    const timestamp = new Date();
 
     try {
         if (btn) {
@@ -9298,22 +9392,41 @@ async function luuSanXuat() {
             btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang lưu...';
         }
 
-        await db.collection('production').add(data);
-        alert("✅ Đã lưu thành công!");
-        
-        // Reset form
+        // Lưu lần lượt từng dòng trong giỏ, dùng chung 1 số phiếu + 1 thời điểm tạo
+        for (const item of sxCart) {
+            const data = {
+                soPhieu,
+                tenSP: item.tenSP,
+                dvt: item.dvt,
+                tonDau: item.tonDau,
+                sl: item.sl,
+                tonCuoi: item.tonCuoi,
+                soKg: item.soKg,
+                soMe: item.soMe,
+                meChuaDong: item.meChuaDong,
+                meChuaNau: item.meChuaNau,
+                timestamp
+            };
+            await db.collection('production').add(data);
+        }
+
+        alert("✅ Đã lưu " + sxCart.length + " dòng vào phiếu " + soPhieu + "!");
+
+        // Reset giỏ + form
+        sxCart = [];
         document.getElementById('sxTenSP').value = "";
+        document.getElementById('sxTonDau').value = "";
         document.getElementById('sxSL').value = "";
         document.getElementById('sxSoKg').value = "";
         document.getElementById('sxSoMe').value = "";
         document.getElementById('sxMeChuaDong').value = "";
         document.getElementById('sxMeChuaNau').value = "";
         document.getElementById('sxTonCuoi').value = "";
-        
+
         if (typeof loadInitSX === 'function') await loadInitSX(); 
-        // Gọi lại khởi tạo để nhảy sang số phiếu tiếp theo (SX01 -> SX02...)
+        // Gọi lại khởi tạo để nhảy sang số phiếu tiếp theo (SX01 -> SX02...) + reset giỏ hàng
         if (typeof khoiTaoTrangSanXuat === 'function') await khoiTaoTrangSanXuat();
-        
+
     } catch (e) {
         console.error("Lỗi: ", e);
         alert("Có lỗi: " + e.message);
@@ -9326,56 +9439,188 @@ async function luuSanXuat() {
     }
 }
 
+// Gom các dòng sản xuất (có thể nhiều dòng cùng 1 số phiếu) thành từng nhóm theo số phiếu,
+// lưu vào window.sxPhieuData để popup "Xem chi tiết" sử dụng, và trả về HTML danh sách (1 dòng/phiếu)
+function groupAndRenderSX(docs) {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const groups = {};
+    const order = [];
+
+    docs.forEach(doc => {
+        const data = doc.data();
+        const id = doc.id;
+        const soPhieu = data.soPhieu || "---";
+        const dateObj = data.timestamp
+            ? (typeof data.timestamp.toDate === 'function' ? data.timestamp.toDate() : new Date(data.timestamp.seconds * 1000))
+            : null;
+
+        if (!groups[soPhieu]) {
+            groups[soPhieu] = {
+                soPhieu,
+                dateObj,
+                ngay: dateObj ? dateObj.toLocaleDateString('vi-VN') : "---",
+                items: []
+            };
+            order.push(soPhieu);
+        }
+
+        groups[soPhieu].items.push({
+            id,
+            tenSP: data.tenSP || "",
+            dvt: data.dvt || "",
+            tonDau: data.tonDau || 0,
+            sl: data.sl || 0,
+            tonCuoi: data.tonCuoi || 0,
+            soKg: data.soKg || "0",
+            soMe: data.soMe || 0,
+            meChuaDong: data.meChuaDong || 0,
+            meChuaNau: data.meChuaNau || 0
+        });
+    });
+
+    window.sxPhieuData = groups;
+
+    let htmlRows = "";
+    order.forEach(soPhieu => {
+        const g = groups[soPhieu];
+        const isOld = g.dateObj && g.dateObj < sevenDaysAgo;
+
+        const sumSL = g.items.reduce((s, it) => s + (it.sl || 0), 0);
+        const sumMoi = g.items.reduce((s, it) => s + (it.meChuaNau || 0), 0);
+        const sumCho = g.items.reduce((s, it) => s + (it.meChuaDong || 0), 0);
+        const sumDong = g.items.reduce((s, it) => s + (it.soMe || 0), 0);
+
+        const firstName = g.items[0].tenSP || "(Chỉ mẻ)";
+        const tenHienThi = g.items.length > 1 ? `${firstName} +${g.items.length - 1} SP khác` : firstName;
+
+        htmlRows += `<tr class="${isOld ? 'old-production' : ''} border-b border-gray-100 dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800/50">
+            <td class="py-2.5 px-1.5 w-[12%] text-slate-500 dark:text-slate-400 align-middle">${g.ngay}</td>
+            <td class="py-2.5 px-1.5 w-[12%] font-bold text-slate-800 dark:text-slate-100 align-middle">${soPhieu}</td>
+            <td class="py-2.5 px-1.5 w-[20%] text-slate-700 dark:text-slate-300 align-middle truncate" title="${tenHienThi}">${tenHienThi}</td>
+            <td class="py-2.5 px-1.5 w-[8%] text-center text-slate-600 dark:text-slate-400 align-middle">${sumSL}</td>
+            <td class="py-2.5 px-1.5 w-[12%] text-center text-blue-600 dark:text-blue-400 align-middle">${sumMoi}</td>
+            <td class="py-2.5 px-1.5 w-[12%] text-center text-amber-600 dark:text-amber-400 align-middle">${sumCho}</td>
+            <td class="py-2.5 px-1.5 w-[10%] text-center text-green-600 dark:text-green-400 align-middle">${sumDong}</td>
+            <td class="py-2.5 px-1.5 w-[14%] align-middle">
+                <div class="flex items-center justify-center gap-1.5">
+                    <button class="bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-600 dark:text-blue-400 px-2.5 py-1 rounded-lg transition-colors whitespace-nowrap" onclick="xemChiTietPhieuSX('${soPhieu}')">
+                        <i class="fas fa-eye"></i> Xem
+                    </button>
+                    <button class="bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 px-2.5 py-1 rounded-lg transition-colors whitespace-nowrap" onclick="huyPhieuSXGroup('${soPhieu}')">
+                        <i class="fas fa-trash-alt"></i> Xóa
+                    </button>
+                </div>
+            </td>
+        </tr>`;
+    });
+
+    return htmlRows;
+}
+
+// Xem chi tiết toàn bộ sản phẩm/mẻ đã nhập trong 1 số phiếu (giống popup Lịch Sử HĐ)
+function xemChiTietPhieuSX(soPhieu) {
+    const group = window.sxPhieuData ? window.sxPhieuData[soPhieu] : null;
+    if (!group) { alert("Không tìm thấy dữ liệu phiếu " + soPhieu); return; }
+
+    const rows = group.items.map(it => `
+        <tr>
+            <td class="p-2 border text-left">${it.tenSP || '(Chỉ cập nhật mẻ)'}</td>
+            <td class="p-2 border text-center">${it.dvt || ''}</td>
+            <td class="p-2 border text-center">${it.sl || 0}</td>
+            <td class="p-2 border text-center text-blue-600">${it.meChuaNau || 0}</td>
+            <td class="p-2 border text-center text-amber-600">${it.meChuaDong || 0}</td>
+            <td class="p-2 border text-center text-green-600">${it.soMe || 0}</td>
+            <td class="p-2 border text-center">
+                <button onclick="xoaDongTrongPhieuSX('${it.id}', '${soPhieu}')" class="text-red-500 hover:text-red-700 font-bold">✕</button>
+            </td>
+        </tr>`).join('');
+
+    const content = `
+        <table class="w-full text-xs border-collapse">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="p-2 border">Sản phẩm</th>
+                    <th class="p-2 border">ĐVT</th>
+                    <th class="p-2 border">SL</th>
+                    <th class="p-2 border">Mới mua</th>
+                    <th class="p-2 border">Chờ đóng</th>
+                    <th class="p-2 border">Đóng xong</th>
+                    <th class="p-2 border">Xóa</th>
+                </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+        </table>
+    `;
+
+    Swal.fire({
+        title: `Chi tiết phiếu: ${soPhieu}`,
+        html: content,
+        width: '800px',
+        confirmButtonText: 'Đóng'
+    });
+}
+
+// Xoá 1 dòng sản phẩm/mẻ bên trong phiếu (mở từ popup xem chi tiết), rồi cập nhật lại danh sách + popup
+async function xoaDongTrongPhieuSX(id, soPhieu) {
+    if (!confirm("Xóa dòng này khỏi phiếu " + soPhieu + "?")) return;
+    try {
+        await db.collection('production').doc(id).delete();
+
+        if (typeof filterSanXuat === 'function') {
+            await filterSanXuat();
+        } else {
+            await loadInitSX();
+        }
+
+        if (window.sxPhieuData && window.sxPhieuData[soPhieu]) {
+            xemChiTietPhieuSX(soPhieu);
+        } else {
+            Swal.close();
+        }
+    } catch (e) {
+        console.error("Lỗi xoá dòng: ", e);
+        alert("Lỗi: " + e.message);
+    }
+}
+
+// Xoá toàn bộ 1 phiếu sản xuất (gồm tất cả sản phẩm/mẻ bên trong cùng số phiếu)
+async function huyPhieuSXGroup(soPhieu) {
+    if (!confirm(`Xóa toàn bộ phiếu ${soPhieu} (gồm tất cả sản phẩm/mẻ bên trong)?`)) return;
+
+    try {
+        const snap = await db.collection('production').where('soPhieu', '==', soPhieu).get();
+        await Promise.all(snap.docs.map(d => d.ref.delete()));
+
+        alert("Đã xóa phiếu " + soPhieu + "!");
+
+        if (typeof filterSanXuat === 'function') {
+            await filterSanXuat();
+        } else {
+            await loadInitSX();
+        }
+
+        if (typeof khoiTaoTrangSanXuat === 'function') {
+            await khoiTaoTrangSanXuat();
+        }
+    } catch (e) {
+        console.error("Lỗi xóa phiếu: ", e);
+        alert("Lỗi: " + e.message);
+    }
+}
+
 // Tải danh sách phiếu sản xuất khi mở trang / khởi động hệ thống
 async function loadInitSX() {
     try {
         const listBody = document.getElementById('list-sanxuat');
         if (!listBody) return;
 
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
         const snapshot = await db.collection('production')
                                  .orderBy('timestamp', 'desc')
                                  .get();
-        
-        let htmlRows = "";
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            const id = doc.id;
-            const dateObj = data.timestamp ? new Date(data.timestamp.seconds * 1000) : null;
-            const ngay = dateObj ? dateObj.toLocaleDateString('vi-VN') : "---";
-            const isOld = dateObj && dateObj < sevenDaysAgo;
 
-            htmlRows += `<tr class="${isOld ? 'old-production' : ''}">
-                <td colspan="8" class="p-1">
-                    <div class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2
-                                shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] text-[12px]" style="border-left-color:#e879f9 !important; border-right-color:#e879f9 !important;">
-                        <div class="flex items-center justify-between md:contents">
-                            <div class="flex items-center gap-2">
-                                <span class="font-bold text-slate-800 dark:text-slate-100 md:w-[12%] md:px-1.5 md:order-2">${data.soPhieu || "---"}</span>
-                                <span class="text-slate-500 dark:text-slate-400 md:w-[12%] md:px-1.5 md:order-1">${ngay}</span>
-                            </div>
-                            <button class="md:hidden bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 px-2.5 py-1 rounded-lg transition-colors text-[11px]" onclick="huyPhieuSX('${id}')">
-                                <i class="fas fa-trash-alt"></i> Xóa
-                            </button>
-                        </div>
-                        <div class="text-slate-800 dark:text-slate-200 font-semibold truncate md:font-normal md:text-slate-700 md:w-[20%] md:px-1.5 md:order-3">${data.tenSP || "---"}</div>
-                        <div class="grid grid-cols-4 gap-1.5 pt-1.5 mt-1 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700">
-                            <div class="md:w-[8%] md:px-1.5 md:order-4 md:text-center"><span class="block text-[10px] text-slate-400 md:hidden">SL</span><span class="text-slate-600 dark:text-slate-400">${data.sl || 0}</span></div>
-                            <div class="md:w-[12%] md:px-1.5 md:order-5 md:text-center"><span class="block text-[10px] text-slate-400 md:hidden">Mới mua</span><span class="text-blue-600 dark:text-blue-400">${data.meChuaNau || 0}</span></div>
-                            <div class="md:w-[12%] md:px-1.5 md:order-6 md:text-center"><span class="block text-[10px] text-slate-400 md:hidden">Chờ đóng</span><span class="text-amber-600 dark:text-amber-400">${data.meChuaDong || 0}</span></div>
-                            <div class="md:w-[10%] md:px-1.5 md:order-7 md:text-center"><span class="block text-[10px] text-slate-400 md:hidden">Đã đóng</span><span class="text-green-600 dark:text-green-400">${data.soMe || 0}</span></div>
-                        </div>
-                        <div class="hidden md:block md:w-[14%] md:px-1.5 md:order-8 md:text-center">
-                            <button class="bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 px-3 py-1 rounded-lg transition-colors" onclick="huyPhieuSX('${id}')">
-                                <i class="fas fa-trash-alt"></i> Xóa
-                            </button>
-                        </div>
-                    </div>
-                </td>
-            </tr>`;
-        });
+        const htmlRows = groupAndRenderSX(snapshot.docs);
 
         listBody.innerHTML = htmlRows || "<tr><td colspan='8' class='text-center'>Chưa có dữ liệu sản xuất</td></tr>";
         
@@ -9522,45 +9767,7 @@ async function filterSanXuat() {
             .orderBy('timestamp', 'desc')
             .get();
 
-        let htmlRows = "";
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            const dateObj = data.timestamp ? data.timestamp.toDate() : null;
-            const ngay = dateObj ? dateObj.toLocaleDateString('vi-VN') : "---";
-
-            htmlRows += `<tr>
-                <td colspan="8" class="p-1">
-                    <div class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2
-                                shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] text-[12px]" style="border-left-color:#e879f9 !important; border-right-color:#e879f9 !important;">
-                        
-                        <div class="flex items-center justify-between md:contents">
-                            <div class="md:contents">
-                                <span class="text-slate-500 dark:text-slate-400 md:w-[12%] md:px-1.5">${ngay}</span>
-                                <span class="font-bold text-slate-800 dark:text-slate-100 md:w-[12%] md:px-1.5">${data.soPhieu || "---"}</span>
-                            </div>
-                            <button class="md:hidden bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 px-2.5 py-1 rounded-lg text-[11px]" onclick="huyPhieuSX('${doc.id}')">
-                                <i class="fas fa-trash-alt"></i> Xóa
-                            </button>
-                        </div>
-
-                        <div class="text-slate-800 dark:text-slate-200 font-semibold truncate md:font-normal md:text-slate-700 md:w-[20%] md:px-1.5">${data.tenSP || "---"}</div>
-                        
-                        <div class="grid grid-cols-4 gap-1.5 pt-1.5 mt-1 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700">
-                            <div class="md:w-[8%] md:px-1.5 md:text-center"><span class="block text-[10px] text-slate-400 md:hidden">SL</span><span class="text-slate-600 dark:text-slate-400">${data.sl || 0}</span></div>
-                            <div class="md:w-[12%] md:px-1.5 md:text-center"><span class="block text-[10px] text-slate-400 md:hidden">Mới mua</span><span class="text-blue-600 dark:text-blue-400">${data.meChuaNau || 0}</span></div>
-                            <div class="md:w-[12%] md:px-1.5 md:text-center"><span class="block text-[10px] text-slate-400 md:hidden">Chờ đóng</span><span class="text-amber-600 dark:text-amber-400">${data.meChuaDong || 0}</span></div>
-                            <div class="md:w-[10%] md:px-1.5 md:text-center"><span class="block text-[10px] text-slate-400 md:hidden">Đã đóng</span><span class="text-green-600 dark:text-green-400">${data.soMe || 0}</span></div>
-                        </div>
-
-                        <div class="hidden md:block md:w-[14%] md:px-1.5 md:text-center">
-                            <button class="bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 px-3 py-1 rounded-lg" onclick="huyPhieuSX('${doc.id}')">
-                                <i class="fas fa-trash-alt"></i> Xóa
-                            </button>
-                        </div>
-                    </div>
-                </td>
-            </tr>`;
-        });
+        const htmlRows = groupAndRenderSX(snapshot.docs);
         
         // Chỉ cập nhật bảng một lần duy nhất khi đã có dữ liệu mới
         listBody.innerHTML = htmlRows || "<tr><td colspan='8' class='text-center'>Không có dữ liệu trong khoảng này</td></tr>";
