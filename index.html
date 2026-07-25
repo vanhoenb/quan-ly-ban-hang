@@ -1308,15 +1308,15 @@ html:not(.dark) .bg-white {
             <h1 class="text-xl font-bold text-slate-800 dark:text-white mt-3">POS Pro</h1>
             <p class="text-sm text-slate-400">Đăng nhập để tiếp tục</p>
         </div>
-        <form id="login-form" onsubmit="return handleLogin(event)" class="space-y-4">
+        <form id="login-form" onsubmit="return handleLogin(event)" class="space-y-4" autocomplete="off">
             <div>
                 <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">Tên đăng nhập</label>
-                <input id="login-username" type="text" autocomplete="username" required
+                <input id="login-username" type="text" autocomplete="off" required
                     class="mt-1 w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="admin">
             </div>
             <div>
                 <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">Mật khẩu</label>
-                <input id="login-password" type="password" autocomplete="current-password" required
+                <input id="login-password" type="password" autocomplete="new-password" required
                     class="mt-1 w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="••••••••">
             </div>
             <p id="login-error" class="hidden text-sm text-rose-500 font-medium"></p>
@@ -2684,26 +2684,95 @@ html:not(.dark) .bg-white {
 <div id="page-user-management" class="hidden space-y-6 p-2 md:p-6">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pb-2 border-b border-slate-200 dark:border-slate-700">
         <h2 class="text-2xl font-bold text-slate-800 dark:text-white">QUẢN LÝ NGƯỜI DÙNG & PHÂN QUYỀN</h2>
-        <button onclick="openUserForm()" class="bg-blue-600 dark:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2 justify-center">
+        <button id="btn-add-user-header" onclick="openUserForm()" class="bg-blue-600 dark:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2 justify-center">
             <i data-lucide="user-plus" class="w-4 h-4"></i> Thêm Người Dùng
         </button>
     </div>
 
-    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
-        <div class="max-h-[70vh] overflow-y-auto">
-            <table class="w-full text-sm text-left border-collapse">
-                <thead class="sticky top-0 z-20 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold uppercase text-[11px] tracking-wider">
-                    <tr>
-                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 w-[18%]">Tên đăng nhập</th>
-                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 w-[20%]">Họ tên hiển thị</th>
-                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 text-center w-[12%]">Vai trò</th>
-                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 w-[30%]">Trang được cấp quyền</th>
-                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 text-center w-[10%]">Trạng thái</th>
-                        <th class="py-4 px-1 border-b border-slate-200 dark:border-slate-700 text-center w-[10%]">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody id="user-list-body" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody>
-            </table>
+    <!-- Tab điều hướng -->
+    <div class="flex gap-2 border-b border-slate-200 dark:border-slate-700">
+        <button id="tab-btn-users" onclick="switchQuanLyTab('users')" class="px-4 py-2.5 font-bold text-sm rounded-t-lg border-b-2 border-blue-600 text-blue-600 dark:text-blue-400 flex items-center gap-2">
+            <i data-lucide="users" class="w-4 h-4"></i> Người Dùng & Phân Quyền
+        </button>
+        <button id="tab-btn-activitylog" onclick="switchQuanLyTab('activitylog')" class="px-4 py-2.5 font-bold text-sm rounded-t-lg border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center gap-2">
+            <i data-lucide="history" class="w-4 h-4"></i> Nhật Ký Hoạt Động
+        </button>
+    </div>
+
+    <!-- TAB 1: DANH SÁCH NGƯỜI DÙNG -->
+    <div id="quanly-tab-users">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
+            <div class="max-h-[70vh] overflow-y-auto">
+                <table class="w-full text-sm text-left border-collapse">
+                    <thead class="sticky top-0 z-20 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold uppercase text-[11px] tracking-wider">
+                        <tr>
+                            <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 w-[18%]">Tên đăng nhập</th>
+                            <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 w-[20%]">Họ tên hiển thị</th>
+                            <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 text-center w-[12%]">Vai trò</th>
+                            <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 w-[30%]">Trang được cấp quyền</th>
+                            <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 text-center w-[10%]">Trạng thái</th>
+                            <th class="py-4 px-1 border-b border-slate-200 dark:border-slate-700 text-center w-[10%]">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-list-body" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: NHẬT KÝ HOẠT ĐỘNG (AI SỬA/XÓA GÌ) -->
+    <div id="quanly-tab-activitylog" class="hidden space-y-4">
+        <!-- Bộ lọc -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 p-3 bg-gray-50 dark:bg-slate-950 rounded-lg border border-gray-200 dark:border-slate-700">
+            <div>
+                <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Nhân viên</label>
+                <select id="logFilterUser" onchange="filterActivityLog()" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white text-sm outline-none">
+                    <option value="">-- Tất cả --</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Khu vực</label>
+                <select id="logFilterModule" onchange="filterActivityLog()" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white text-sm outline-none">
+                    <option value="">-- Tất cả --</option>
+                    <option value="Sản Xuất">Sản Xuất</option>
+                    <option value="Nhập Kho">Nhập Kho</option>
+                    <option value="Nguyên Liệu">Nguyên Liệu</option>
+                    <option value="Bán Hàng">Bán Hàng</option>
+                    <option value="Khách Hàng">Khách Hàng</option>
+                    <option value="Sản Phẩm">Sản Phẩm</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Từ ngày</label>
+                <input type="date" id="logFilterFrom" onchange="filterActivityLog()" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white text-sm outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Đến ngày</label>
+                <input type="date" id="logFilterTo" onchange="filterActivityLog()" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white text-sm outline-none">
+            </div>
+            <div class="md:col-span-4 flex justify-end">
+                <button onclick="clearActivityLogFilter()" class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+                    <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Bỏ lọc - Xem tất cả
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
+            <div class="max-h-[65vh] overflow-y-auto">
+                <table class="w-full text-sm text-left border-collapse table-fixed">
+                    <thead class="sticky top-0 z-20 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold uppercase text-[11px] tracking-wider">
+                        <tr>
+                            <th class="py-3 px-2 border-b border-slate-200 dark:border-slate-700 w-[13%]">Thời gian</th>
+                            <th class="py-3 px-2 border-b border-slate-200 dark:border-slate-700 w-[13%]">Nhân viên</th>
+                            <th class="py-3 px-2 border-b border-slate-200 dark:border-slate-700 text-center w-[10%]">Khu vực</th>
+                            <th class="py-3 px-2 border-b border-slate-200 dark:border-slate-700 text-center w-[8%]">Hành động</th>
+                            <th class="py-3 px-2 border-b border-slate-200 dark:border-slate-700 w-[12%]">Đối tượng</th>
+                            <th class="py-3 px-2 border-b border-slate-200 dark:border-slate-700 w-[44%]">Chi tiết</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activity-log-body" class="divide-y divide-slate-100 dark:divide-slate-700 text-xs md:text-sm"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -2785,6 +2854,28 @@ html:not(.dark) .bg-white {
     function getCurrentUser() { return CURRENT_USER; }
     function setCurrentUser(u) { CURRENT_USER = u; }
     function clearCurrentUser() { CURRENT_USER = null; }
+
+    // --- GHI NHẬT KÝ HOẠT ĐỘNG: AI SỬA/XÓA GÌ, KHI NÀO (dùng cho tab "Nhật Ký Hoạt Động") ---
+    // module: 'Sản Xuất' | 'Nhập Kho' | 'Nguyên Liệu' | 'Bán Hàng' | 'Khách Hàng' | 'Sản Phẩm'
+    // action: 'Xóa' | 'Sửa'
+    // target: số phiếu / tên đối tượng bị tác động
+    // detail: mô tả chi tiết (vd: nội dung trước/sau khi sửa)
+    async function ghiLog(module, action, target, detail) {
+        try {
+            const u = getCurrentUser();
+            await db.collection('activity_logs').add({
+                username: u ? u.username : 'unknown',
+                displayName: u ? (u.displayName || u.username) : 'Không xác định',
+                module: module,
+                action: action,
+                target: target || '',
+                detail: detail || '',
+                time: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        } catch (e) {
+            console.error('Lỗi ghi nhật ký hoạt động:', e);
+        }
+    }
 
     // --- CHỈ GHI NHỚ TÊN ĐĂNG NHẬP (không lưu mật khẩu) ĐỂ TỰ ĐIỀN LẦN SAU ---
     const REMEMBERED_USERNAME_KEY = 'pos_remembered_username';
@@ -3005,6 +3096,151 @@ async function loadUserList() {
     } catch (e) {
         body.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-rose-500">Lỗi tải danh sách: ' + escapeHtml(e.message) + '</td></tr>';
     }
+}
+
+// --- CHUYỂN TAB TRONG TRANG QUẢN LÝ (Người dùng <-> Nhật ký hoạt động) ---
+function switchQuanLyTab(tab) {
+    const tabUsers = document.getElementById('quanly-tab-users');
+    const tabLog = document.getElementById('quanly-tab-activitylog');
+    const btnUsers = document.getElementById('tab-btn-users');
+    const btnLog = document.getElementById('tab-btn-activitylog');
+    const addBtn = document.getElementById('btn-add-user-header');
+
+    const activeCls = ['border-blue-600', 'text-blue-600', 'dark:text-blue-400'];
+    const inactiveCls = ['border-transparent', 'text-slate-500', 'dark:text-slate-400'];
+
+    if (tab === 'activitylog') {
+        tabUsers.classList.add('hidden');
+        tabLog.classList.remove('hidden');
+        if (addBtn) addBtn.classList.add('hidden');
+        btnLog.classList.remove(...inactiveCls); btnLog.classList.add(...activeCls);
+        btnUsers.classList.remove(...activeCls); btnUsers.classList.add(...inactiveCls);
+        loadActivityLog();
+    } else {
+        tabLog.classList.add('hidden');
+        tabUsers.classList.remove('hidden');
+        if (addBtn) addBtn.classList.remove('hidden');
+        btnUsers.classList.remove(...inactiveCls); btnUsers.classList.add(...activeCls);
+        btnLog.classList.remove(...activeCls); btnLog.classList.add(...inactiveCls);
+    }
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+// --- TẢI NHẬT KÝ HOẠT ĐỘNG (AI SỬA/XÓA GÌ, KHI NÀO) ---
+window.activityLogCache = [];
+async function loadActivityLog() {
+    const body = document.getElementById('activity-log-body');
+    if (!body) return;
+    body.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-400">Đang tải...</td></tr>';
+    try {
+        // 1. Nạp danh sách nhân viên thật (từ app_users) để lọc luôn hiện đủ tất cả, kể cả người chưa có nhật ký nào
+        const selUser = document.getElementById('logFilterUser');
+        if (selUser && selUser.options.length <= 1) {
+            const usersSnap = await db.collection('app_users').get();
+            const userList = [];
+            usersSnap.forEach(doc => {
+                const d = doc.data();
+                userList.push({ username: doc.id, displayName: d.displayName || doc.id });
+            });
+            userList.sort((a, b) => a.displayName.localeCompare(b.displayName, 'vi'));
+            userList.forEach(u => {
+                const opt = document.createElement('option');
+                opt.value = u.username; opt.textContent = u.displayName;
+                selUser.appendChild(opt);
+            });
+        }
+
+        // 2. Mặc định lọc theo ngày hôm nay (nếu người dùng chưa tự chọn ngày khác)
+        const fromEl = document.getElementById('logFilterFrom');
+        const toEl = document.getElementById('logFilterTo');
+        if (fromEl && toEl && !fromEl.value && !toEl.value) {
+            const todayStr = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD theo giờ máy
+            fromEl.value = todayStr;
+            toEl.value = todayStr;
+        }
+
+        // 3. Nạp dữ liệu nhật ký
+        const snap = await db.collection('activity_logs').orderBy('time', 'desc').limit(500).get();
+        const logs = [];
+        snap.forEach(doc => {
+            const d = doc.data();
+            const dateObj = d.time && typeof d.time.toDate === 'function' ? d.time.toDate() : null;
+            logs.push({
+                id: doc.id,
+                username: d.username || 'unknown',
+                displayName: d.displayName || d.username || 'Không xác định',
+                module: d.module || '',
+                action: d.action || '',
+                target: d.target || '',
+                detail: d.detail || '',
+                dateObj: dateObj
+            });
+        });
+        window.activityLogCache = logs;
+
+        filterActivityLog();
+    } catch (e) {
+        console.error('Lỗi tải nhật ký hoạt động:', e);
+        body.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-rose-500">Lỗi tải nhật ký: ' + escapeHtml(e.message) + '</td></tr>';
+    }
+}
+
+function renderActivityLog(logs) {
+    const body = document.getElementById('activity-log-body');
+    if (!body) return;
+
+    if (!logs.length) {
+        body.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-400">Chưa có hoạt động nào được ghi nhận.</td></tr>';
+        return;
+    }
+
+    const actionBadge = (action) => action === 'Xóa'
+        ? '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-400">Xóa</span>'
+        : '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400">Sửa</span>';
+
+    body.innerHTML = logs.map(l => {
+        const timeStr = l.dateObj ? l.dateObj.toLocaleString('vi-VN') : '---';
+        return `<tr>
+            <td class="py-2.5 px-2 text-slate-500 dark:text-slate-400 whitespace-nowrap">${timeStr}</td>
+            <td class="py-2.5 px-2 font-bold text-slate-800 dark:text-slate-100 truncate" title="${escapeHtml(l.displayName)}">${escapeHtml(l.displayName)}</td>
+            <td class="py-2.5 px-2 text-center text-slate-600 dark:text-slate-300">${escapeHtml(l.module)}</td>
+            <td class="py-2.5 px-2 text-center">${actionBadge(l.action)}</td>
+            <td class="py-2.5 px-2 text-slate-700 dark:text-slate-300 truncate" title="${escapeHtml(l.target)}">${escapeHtml(l.target)}</td>
+            <td class="py-2.5 px-2 text-slate-600 dark:text-slate-400">${escapeHtml(l.detail)}</td>
+        </tr>`;
+    }).join('');
+}
+
+// --- LỌC NHẬT KÝ HOẠT ĐỘNG THEO NHÂN VIÊN / KHU VỰC / NGÀY ---
+function filterActivityLog() {
+    const userVal = document.getElementById('logFilterUser').value;
+    const moduleVal = document.getElementById('logFilterModule').value;
+    const fromVal = document.getElementById('logFilterFrom').value;
+    const toVal = document.getElementById('logFilterTo').value;
+
+    let filtered = window.activityLogCache || [];
+
+    if (userVal) filtered = filtered.filter(l => l.username === userVal);
+    if (moduleVal) filtered = filtered.filter(l => l.module === moduleVal);
+    if (fromVal) {
+        const fromDate = new Date(fromVal); fromDate.setHours(0, 0, 0, 0);
+        filtered = filtered.filter(l => l.dateObj && l.dateObj >= fromDate);
+    }
+    if (toVal) {
+        const toDate = new Date(toVal); toDate.setHours(23, 59, 59, 999);
+        filtered = filtered.filter(l => l.dateObj && l.dateObj <= toDate);
+    }
+
+    renderActivityLog(filtered);
+}
+
+// --- XÓA BỘ LỌC, XEM TẤT CẢ NHẬT KÝ (không giới hạn theo ngày) ---
+function clearActivityLogFilter() {
+    document.getElementById('logFilterUser').value = '';
+    document.getElementById('logFilterModule').value = '';
+    document.getElementById('logFilterFrom').value = '';
+    document.getElementById('logFilterTo').value = '';
+    renderActivityLog(window.activityLogCache || []);
 }
 
     // --- THÊM / SỬA NGƯỜI DÙNG ---
@@ -3319,6 +3555,7 @@ function showPage(pageId) {
 
         case 'page-user-management':
             if (typeof loadUserList === 'function') loadUserList();
+            if (typeof switchQuanLyTab === 'function') switchQuanLyTab('users');
             break;
     }
     
@@ -4874,6 +5111,12 @@ window.deleteReceipt = function(docId) {
         cancelButtonText: 'Hủy'
     }).then((result) => {
         if (result.isConfirmed) {
+            // Lấy thông tin phiếu TRƯỚC khi xóa để ghi nhật ký cho đầy đủ
+            db.collection('receipts').doc(docId).get().then(snap => {
+                const d = snap.exists ? snap.data() : null;
+                const soPhieu = d ? (d.id || docId) : docId;
+                const soLuongSP = d && Array.isArray(d.items) ? d.items.length : 0;
+
             // Bây giờ docId chính là chuỗi mã hệ thống (ví dụ: EkVQfGh5...)
             db.collection('receipts').doc(docId).delete().then(async () => {
                 console.log("Xóa thành công ID hệ thống:", docId);
@@ -4886,9 +5129,12 @@ window.deleteReceipt = function(docId) {
                 // ---------------------------------------------
                 
                 loadReceipts(); 
+
+                if (typeof ghiLog === 'function') ghiLog('Nhập Kho', 'Xóa', soPhieu, `Xóa phiếu nhập kho ${soPhieu} (${soLuongSP} sản phẩm)`);
             }).catch(err => {
                 console.error("Lỗi xóa từ Firebase:", err);
                 Swal.fire('Lỗi', 'Không thể xóa phiếu này.', 'error');
+            });
             });
         }
     });
@@ -6506,6 +6752,8 @@ async function deleteSale(docId) {
             
             alert("Đã xóa hóa đơn, hoàn kho và điều chỉnh công nợ thành công!");
             
+            if (typeof ghiLog === 'function') ghiLog('Bán Hàng', 'Xóa', data.id || docId, `Xóa hóa đơn bán hàng ${data.id || docId} (KH: ${customerName || 'Khách lẻ'}, tổng tiền: ${total.toLocaleString('vi-VN')}đ)`);
+            
             // --- CẬP NHẬT GIAO DIỆN ---
             await calculateAllStock(); 
             if (typeof renderProductGrid === 'function') renderProductGrid(); 
@@ -7507,6 +7755,7 @@ async function deleteCustomer(id) {
             await db.collection('customers').doc(id).delete();
             loadCustomers();
             alert("Đã xóa đại lý.");
+            if (typeof ghiLog === 'function') ghiLog('Khách Hàng', 'Xóa', data.name || id, `Xóa khách hàng/đại lý "${data.name || id}"`);
         } catch (error) {
             alert("Lỗi khi xóa: " + error.message);
         }
@@ -7552,6 +7801,14 @@ async function editCustomer(id) {
             });
 
             Swal.fire('Thành công', 'Đã cập nhật thông tin!', 'success');
+
+            if (typeof ghiLog === 'function') {
+                const changes = [];
+                if (customer.name !== formValues.name) changes.push(`Tên: "${customer.name || ''}" → "${formValues.name}"`);
+                if (customer.address !== formValues.address) changes.push(`Địa chỉ: "${customer.address || ''}" → "${formValues.address}"`);
+                if (customer.phone !== formValues.phone) changes.push(`SĐT: "${customer.phone || ''}" → "${formValues.phone}"`);
+                ghiLog('Khách Hàng', 'Sửa', formValues.name, changes.length ? changes.join('; ') : 'Cập nhật thông tin khách hàng');
+            }
             
             // Tải lại dữ liệu để cập nhật giao diện
             loadCustomers();
@@ -9160,6 +9417,7 @@ async function editBarcode(id, name) {
         Swal.fire('Thành công', 'Đã cập nhật mã vạch!', 'success');
         loadProductManage(); // Tải lại danh sách
         updateProductDropdowns(); // Cập nhật lại dropdown ở trang Nhập kho
+        if (typeof ghiLog === 'function') ghiLog('Sản Phẩm', 'Sửa', name, `Gán mã vạch "${barcode}" cho sản phẩm "${name}"`);
     }
 }
 
@@ -9219,9 +9477,12 @@ async function deleteProduct(id) {
     if (typeof canUserDelete === 'function' && !canUserDelete()) { if (typeof Swal !== 'undefined') Swal.fire({ icon: 'warning', title: 'Không có quyền', text: 'Bạn không có quyền xóa dữ liệu. Vui lòng liên hệ Admin.' }); return; }
     const result = await Swal.fire({ title: 'Xác nhận xóa?', icon: 'warning', showCancelButton: true });
     if (result.isConfirmed) {
+        const snap = await db.collection('products').doc(id).get();
+        const prodName = snap.exists ? (snap.data().name || id) : id;
         await db.collection('products').doc(id).delete();
         loadProductManage();
         updateProductDropdowns();
+        if (typeof ghiLog === 'function') ghiLog('Sản Phẩm', 'Xóa', prodName, `Xóa sản phẩm "${prodName}" khỏi danh mục`);
     }
 }
 
@@ -9566,6 +9827,9 @@ function xemChiTietPhieuSX(soPhieu) {
 async function xoaDongTrongPhieuSX(id, soPhieu) {
     if (!confirm("Xóa dòng này khỏi phiếu " + soPhieu + "?")) return;
     try {
+        const snapDoc = await db.collection('production').doc(id).get();
+        const tenSP = snapDoc.exists ? (snapDoc.data().tenSP || '(Chỉ mẻ)') : '';
+
         await db.collection('production').doc(id).delete();
 
         if (typeof filterSanXuat === 'function') {
@@ -9573,6 +9837,8 @@ async function xoaDongTrongPhieuSX(id, soPhieu) {
         } else {
             await loadInitSX();
         }
+
+        if (typeof ghiLog === 'function') ghiLog('Sản Xuất', 'Xóa', soPhieu, `Xóa dòng "${tenSP}" trong phiếu ${soPhieu}`);
 
         if (window.sxPhieuData && window.sxPhieuData[soPhieu]) {
             xemChiTietPhieuSX(soPhieu);
@@ -9591,6 +9857,7 @@ async function huyPhieuSXGroup(soPhieu) {
 
     try {
         const snap = await db.collection('production').where('soPhieu', '==', soPhieu).get();
+        const soDong = snap.docs.length;
         await Promise.all(snap.docs.map(d => d.ref.delete()));
 
         alert("Đã xóa phiếu " + soPhieu + "!");
@@ -9604,6 +9871,8 @@ async function huyPhieuSXGroup(soPhieu) {
         if (typeof khoiTaoTrangSanXuat === 'function') {
             await khoiTaoTrangSanXuat();
         }
+
+        if (typeof ghiLog === 'function') ghiLog('Sản Xuất', 'Xóa', soPhieu, `Xóa toàn bộ phiếu sản xuất ${soPhieu} (${soDong} dòng sản phẩm/mẻ)`);
     } catch (e) {
         console.error("Lỗi xóa phiếu: ", e);
         alert("Lỗi: " + e.message);
@@ -9665,6 +9934,11 @@ async function huyPhieuSX(id) {
     if (!confirm("Xóa phiếu này?")) return;
 
     try {
+        const snapDoc = await db.collection('production').doc(id).get();
+        const d = snapDoc.exists ? snapDoc.data() : null;
+        const soPhieu = d ? (d.soPhieu || id) : id;
+        const tenSP = d ? (d.tenSP || '') : '';
+
         await db.collection('production').doc(id).delete();
         alert("Đã xóa!");
         
@@ -9679,6 +9953,8 @@ async function huyPhieuSX(id) {
         if (typeof khoiTaoTrangSanXuat === 'function') {
             await khoiTaoTrangSanXuat();
         }
+
+        if (typeof ghiLog === 'function') ghiLog('Sản Xuất', 'Xóa', soPhieu, `Xóa dòng "${tenSP}" trong phiếu ${soPhieu}`);
         
     } catch (e) {
         console.error("Lỗi xóa: ", e);
@@ -9958,6 +10234,8 @@ async function updateNCC(docId) {
         await db.collection('suppliers').doc(docId).update({ name, phone, address });
         alert("Cập nhật thành công!");
 
+        if (typeof ghiLog === 'function') ghiLog('Nguyên Liệu', 'Sửa', name, `Cập nhật thông tin nhà cung cấp "${name}" (SĐT: ${phone || '-'}, Địa chỉ: ${address || '-'})`);
+
         // Reset nút về trạng thái ban đầu
         const updateBtn = document.querySelector(`button[onclick="updateNCC('${docId}')"]`);
         if (updateBtn) {
@@ -10155,11 +10433,19 @@ async function deleteDoc(col, soPhieu) {
             await batch.commit();
             
             alert("Đã xóa phiếu và cập nhật nợ!");
+
+            if (typeof ghiLog === 'function') ghiLog('Nguyên Liệu', 'Xóa', soPhieu, `Xóa phiếu nhập nguyên liệu ${soPhieu} (${snapshot.docs.length} dòng, tổng tiền ${totalPhiếu.toLocaleString('vi-VN')}đ)`);
         } 
         else {
             // Xử lý xóa các collection khác (suppliers, etc...)
             await db.collection(col).doc(soPhieu).delete();
             alert("Đã xóa thành công!");
+
+            if (typeof ghiLog === 'function') {
+                const tenModule = col === 'suppliers' ? 'Nguyên Liệu' : 'Nguyên Liệu';
+                const moTa = col === 'suppliers' ? `Xóa nhà cung cấp (ID: ${soPhieu})` : `Xóa mục "${soPhieu}" khỏi ${col}`;
+                ghiLog(tenModule, 'Xóa', soPhieu, moTa);
+            }
         }
 
         // Cập nhật giao diện
