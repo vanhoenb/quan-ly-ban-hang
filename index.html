@@ -2893,6 +2893,8 @@ html:not(.dark) .bg-white {
     #print-area th, #print-area td, #print-area-xuatkho th, #print-area-xuatkho td { padding: 8px; border: 1px solid #000; }
 </style>
 
+
+
     </main>
   </main>
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -6370,6 +6372,53 @@ function selectPrintDocType(type) {
 
 // --- KÍCH HOẠT IN AN TOÀN (Tăng độ trễ lên 300ms để chờ hộp thoại Lịch sử đóng hẳn) ---
 function triggerPrint(modeClass) {
+    // 1. Kiểm tra nếu là điện thoại -> Dùng Iframe ẩn để in (Chống lỗi văng sự cố trên Android)
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+
+    if (isMobile) {
+        const areaId = (modeClass === 'print-mode-xuatkho') ? 'print-area-xuatkho' : 'print-area';
+        const printElement = document.getElementById(areaId);
+        
+        if (!printElement) {
+            alert("Không tìm thấy vùng dữ liệu cần in!");
+            return;
+        }
+
+        // Tạo hoặc lấy khung iframe ẩn chuyên dụng cho di động
+        let iframe = document.getElementById('mobile-print-iframe');
+        if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.id = 'mobile-print-iframe';
+            iframe.style.position = 'fixed';
+            iframe.style.right = '0';
+            iframe.style.bottom = '0';
+            iframe.style.width = '0';
+            iframe.style.height = '0';
+            iframe.style.border = 'none';
+            document.body.appendChild(iframe);
+        }
+
+        // Đổ nội dung cần in vào iframe
+        const doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write('<html><head><title>In chứng từ</title>');
+        doc.write('<meta name="viewport" content="width=device-width, initial-scale=1.0">');
+        doc.write('<style>body{font-family:Arial,sans-serif;padding:15px;color:#000;background:#fff;}table{border-collapse:collapse!important;width:100%!important;margin-top:15px;}th,td{padding:8px!important;border:1px solid #000!important;font-size:14px;}</style>');
+        doc.write('</head><body>');
+        doc.write(printElement.innerHTML);
+        doc.write('</body></html>');
+        doc.close();
+
+        // Gọi lệnh in trực tiếp từ nội bộ trang
+        setTimeout(() => {
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+        }, 500);
+
+        return; // Dừng lại, không chạy code PC bên dưới
+    }
+
+    // 2. GIỮ NGUYÊN 100% CODE CŨ DÙNG CHO PC (Đang chạy ổn định)
     document.body.classList.remove('print-mode-hoadon', 'print-mode-xuatkho');
     document.body.classList.add(modeClass);
 
@@ -6382,12 +6431,10 @@ function triggerPrint(modeClass) {
     };
     window.addEventListener('afterprint', cleanup);
 
-    // Tăng từ 100ms lên 300ms để khắc phục triệt để lỗi in trắng khi gọi từ Lịch sử (có SweetAlert)
     setTimeout(() => {
         window.print();
-    }, 300);
+    }, 600);
 
-    // Phòng trường hợp trình duyệt không bắn sự kiện afterprint
     setTimeout(cleanup, 15000);
 }
 
