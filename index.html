@@ -2064,26 +2064,26 @@ html:not(.dark) .bg-white {
         </div>
     </div>
 
-    <!-- Khối Mẫu số góc phải kiểu chứng từ kế toán -->
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-        <div style="width: 60%;"></div>
-        <div style="width: 38%; font-size: 12px; text-align: left; border: 1px dashed #999; padding: 8px 10px; border-radius: 6px;">
-            <p style="margin: 2px 0;">Mẫu số 02 - VT</p>
-            <p style="margin: 2px 0; font-style: italic;">(Ban hành theo Thông tư 133/2016/TT-BTC)</p>
-        </div>
-    </div>
-
     <div style="text-align: center; margin-bottom: 20px; font-family: 'Goldman', sans-serif;">
         <h1 style="margin: 10px 0; font-size: 32px; text-transform: uppercase; letter-spacing: 2px;">PHIẾU XUẤT KHO</h1>
-        <p style="margin: 0; font-size: 14px;">Ngày <span id="xk-day"></span> tháng <span id="xk-month"></span> năm <span id="xk-year"></span></p>
-        <p style="margin: 5px 0 0 0; font-size: 13px;">Số phiếu: <strong id="xk-receipt-id"></strong> &nbsp;&nbsp;|&nbsp;&nbsp; Số HĐ liên quan: <strong id="xk-sale-ref"></strong></p>
     </div>
 
-    <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px; background-color: #fafafa; font-size: 14px;">
-        <p style="margin: 5px 0;"><strong>Họ tên người nhận hàng:</strong> <span id="xk-customer"></span></p>
-        <p style="margin: 5px 0;"><strong>Địa chỉ / Đơn vị:</strong> <span id="xk-address"></span> &nbsp;&nbsp; <strong>SĐT:</strong> <span id="xk-phone"></span></p>
-        <p style="margin: 5px 0;"><strong>Lý do xuất kho:</strong> Xuất bán hàng hóa cho khách hàng</p>
-        <p style="margin: 5px 0;"><strong>Xuất tại kho:</strong> Kho Hợp tác xã Thanh Nguyễn &nbsp;&nbsp; <strong>Ghi chú:</strong> <span id="xk-note"></span></p>
+    <!-- Khối thông tin chia thành 2 cột cân đối -->
+    <div style="border: 1px solid #ccc; padding: 12px 15px; margin-bottom: 20px; border-radius: 6px; background-color: #fafafa; font-size: 13px; display: flex; justify-content: space-between;">
+        <!-- Cột bên trái -->
+        <div style="width: 58%;">
+            <p style="margin: 5px 0;"><strong>Họ tên người nhận hàng:</strong> <span id="xk-customer"></span></p>
+            <p style="margin: 5px 0;"><strong>Địa chỉ / Đơn vị:</strong> <span id="xk-address"></span></p>
+            <p style="margin: 5px 0;"><strong>Lý do xuất kho:</strong> Xuất bán hàng hóa cho khách hàng</p>
+            <p style="margin: 5px 0;"><strong>Xuất tại kho:</strong> Kho Hợp tác xã Thanh Nguyễn</p>
+        </div>
+        <!-- Cột bên phải -->
+        <div style="width: 38%; border-left: 1px dashed #ccc; padding-left: 15px;">
+            <p style="margin: 5px 0;"><strong>Số phiếu:</strong> <span id="xk-receipt-id"></span></p>
+            <p style="margin: 5px 0;"><strong>Ngày:</strong> <span id="xk-day"></span>/<span id="xk-month"></span>/<span id="xk-year"></span></p>
+            <p style="margin: 5px 0;"><strong>SĐT:</strong> <span id="xk-phone"></span></p>
+            <p style="margin: 5px 0;"><strong>Ghi chú:</strong> <span id="xk-note"></span></p>
+        </div>
     </div>
 
     <table border="1" style="width: 100%; border-collapse: collapse; text-align: center; margin-bottom: 20px; font-size: 13px;">
@@ -6407,12 +6407,28 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
     let subTotalAll = 0;
     const elItems = document.getElementById('print-items');
     if (elItems) {
-        elItems.innerHTML = (items || []).map((i, index) => {
+        const listItems = items || [];
+        
+        // Hàm kiểm tra ghi chú có chứa "date" hoặc "đate" không
+        const isDateNote = (noteText) => {
+            if (!noteText) return false;
+            const lower = noteText.toLowerCase();
+            return lower.includes('date') || lower.includes('đate');
+        };
+
+        const normalItems = listItems.filter(i => !isDateNote(i.note));
+        const changeDateItems = listItems.filter(i => isDateNote(i.note));
+
+        let html = '';
+        let stt = 1;
+
+        // 1. Render sản phẩm bình thường
+        normalItems.forEach(i => {
             const subTotal = i.qty * i.price;
             const taxAmount = subTotal * (vr / 100);
             subTotalAll += subTotal;
-            return `<tr>
-                <td style="padding: 5px;">${index + 1}</td>
+            html += `<tr>
+                <td style="padding: 5px;">${stt++}</td>
                 <td style="padding: 5px; text-align: left;">${i.name || ''}</td>
                 <td style="padding: 5px;">${i.unit || 'Cái'}</td>
                 <td style="padding: 5px;">${i.qty}</td>
@@ -6422,7 +6438,33 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
                 <td style="padding: 5px;">${taxAmount.toLocaleString('vi-VN')}</td>
                 <td style="padding: 5px;">${i.note || ''}</td>
             </tr>`;
-        }).join('');
+        });
+
+        // 2. Render nhóm sản phẩm có ghi chú date xuống dưới (nếu có)
+        if (changeDateItems.length > 0) {
+            html += `<tr>
+                <td colspan="9" style="text-align: left; font-weight: bold; background-color: #f8f9fa; padding: 6px 10px; font-style: italic; border-top: 2px solid #000;">
+                    🔄 Các sản phẩm đổi date:
+                </td>
+            </tr>`;
+            changeDateItems.forEach(i => {
+                const subTotal = i.qty * i.price;
+                const taxAmount = subTotal * (vr / 100);
+                subTotalAll += subTotal;
+                html += `<tr>
+                    <td style="padding: 5px;">${stt++}</td>
+                    <td style="padding: 5px; text-align: left;">${i.name || ''}</td>
+                    <td style="padding: 5px;">${i.unit || 'Cái'}</td>
+                    <td style="padding: 5px;">${i.qty}</td>
+                    <td style="padding: 5px;">${i.price.toLocaleString('vi-VN')}</td>
+                    <td style="padding: 5px;">${subTotal.toLocaleString('vi-VN')}</td>
+                    <td style="padding: 5px;">${vr}%</td>
+                    <td style="padding: 5px;">${taxAmount.toLocaleString('vi-VN')}</td>
+                    <td style="padding: 5px; color: #d9534f; font-weight: bold;">${i.note || ''}</td>
+                </tr>`;
+            });
+        }
+        elItems.innerHTML = html;
     }
 
     const taxTotalAll = subTotalAll * (vr / 100);
@@ -6461,11 +6503,27 @@ function renderXuatKhoTemplate({ receiptId, customer, address, phone, note, item
     let subTotalAll = 0;
     const xkItemsEl = document.getElementById('xk-items');
     if (xkItemsEl) {
-        xkItemsEl.innerHTML = (items || []).map((i, index) => {
+        const listItems = items || [];
+
+        // Hàm kiểm tra ghi chú có chứa "date" hoặc "đate" không
+        const isDateNote = (noteText) => {
+            if (!noteText) return false;
+            const lower = noteText.toLowerCase();
+            return lower.includes('date') || lower.includes('đate');
+        };
+
+        const normalItems = listItems.filter(i => !isDateNote(i.note));
+        const changeDateItems = listItems.filter(i => isDateNote(i.note));
+
+        let html = '';
+        let stt = 1;
+
+        // 1. Render sản phẩm bình thường
+        normalItems.forEach(i => {
             const thanhTien = i.qty * i.price;
             subTotalAll += thanhTien;
-            return `<tr>
-                <td style="padding: 5px;">${index + 1}</td>
+            html += `<tr>
+                <td style="padding: 5px;">${stt++}</td>
                 <td style="padding: 5px; text-align: left;">${i.name || ''}</td>
                 <td style="padding: 5px;">${i.unit || 'Cái'}</td>
                 <td style="padding: 5px;">${i.qty}</td>
@@ -6474,7 +6532,31 @@ function renderXuatKhoTemplate({ receiptId, customer, address, phone, note, item
                 <td style="padding: 5px;">${thanhTien.toLocaleString('vi-VN')}</td>
                 <td style="padding: 5px;">${i.note || ''}</td>
             </tr>`;
-        }).join('');
+        });
+
+        // 2. Render nhóm sản phẩm có ghi chú date xuống dưới (nếu có)
+        if (changeDateItems.length > 0) {
+            html += `<tr>
+                <td colspan="8" style="text-align: left; font-weight: bold; background-color: #f8f9fa; padding: 6px 10px; font-style: italic; border-top: 2px solid #000;">
+                    🔄 Các sản phẩm đổi date:
+                </td>
+            </tr>`;
+            changeDateItems.forEach(i => {
+                const thanhTien = i.qty * i.price;
+                subTotalAll += thanhTien;
+                html += `<tr>
+                    <td style="padding: 5px;">${stt++}</td>
+                    <td style="padding: 5px; text-align: left;">${i.name || ''}</td>
+                    <td style="padding: 5px;">${i.unit || 'Cái'}</td>
+                    <td style="padding: 5px;">${i.qty}</td>
+                    <td style="padding: 5px;">${i.qty}</td>
+                    <td style="padding: 5px;">${i.price.toLocaleString('vi-VN')}</td>
+                    <td style="padding: 5px;">${thanhTien.toLocaleString('vi-VN')}</td>
+                    <td style="padding: 5px; color: #d9534f; font-weight: bold;">${i.note || ''}</td>
+                </tr>`;
+            });
+        }
+        xkItemsEl.innerHTML = html;
     }
 
     // Nếu đơn hàng có tính thuế GTGT thì hiện thêm dòng thuế + tổng tiền đã gồm thuế; không thì chỉ hiện Tổng cộng
