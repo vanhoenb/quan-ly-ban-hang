@@ -6264,8 +6264,20 @@ function updateCartTotalDisplay() {
     const totalDisplay = document.getElementById('cart-total-display');
     if (!totalDisplay) return;
 
-    const total = sellCart.reduce((sum, item) => sum + item.total, 0);
-    totalDisplay.innerText = total.toLocaleString('vi-VN') + ' đ';
+    // Tính tổng tiền hàng: nếu ghi chú có "date" hoặc "đate" thì đơn giá tính bằng 0
+    const subTotal = sellCart.reduce((sum, item) => {
+        const lowerNote = (item.note || '').toLowerCase();
+        const effectivePrice = (lowerNote.includes('date') || lowerNote.includes('đate')) ? 0 : item.price;
+        return sum + (item.qty * effectivePrice);
+    }, 0);
+
+    // Cộng thêm thuế VAT (giống như giao diện đang hiển thị)
+    const vatEl = document.getElementById('global-vat');
+    const vatRate = vatEl ? parseFloat(vatEl.value) || 0 : 0;
+    const taxTotal = subTotal * (vatRate / 100);
+    const grandTotal = subTotal + taxTotal;
+
+    totalDisplay.innerText = grandTotal.toLocaleString('vi-VN') + ' đ';
 }
 
 // Lưu ý: Hãy gọi hàm này bên trong hàm renderSellCart() của bạn
@@ -6440,7 +6452,7 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
             </tr>`;
         });
 
-        // 2. Render nhóm sản phẩm có ghi chú date xuống dưới (nếu có)
+        // 2. Render nhóm sản phẩm có ghi chú date xuống dưới (KHÔNG TÍNH TIỀN - GIÁ VÀ THÀNH TIỀN = 0)
         if (changeDateItems.length > 0) {
             html += `<tr>
                 <td colspan="9" style="text-align: left; font-weight: bold; background-color: #f8f9fa; padding: 6px 10px; font-style: italic; border-top: 2px solid #000;">
@@ -6448,15 +6460,16 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
                 </td>
             </tr>`;
             changeDateItems.forEach(i => {
-                const subTotal = i.qty * i.price;
-                const taxAmount = subTotal * (vr / 100);
-                subTotalAll += subTotal;
+                const itemPrice = 0;
+                const subTotal = 0;
+                const taxAmount = 0;
+                // subTotalAll không cộng thêm tiền của nhóm này
                 html += `<tr>
                     <td style="padding: 5px;">${stt++}</td>
                     <td style="padding: 5px; text-align: left;">${i.name || ''}</td>
                     <td style="padding: 5px;">${i.unit || 'Cái'}</td>
                     <td style="padding: 5px;">${i.qty}</td>
-                    <td style="padding: 5px;">${i.price.toLocaleString('vi-VN')}</td>
+                    <td style="padding: 5px;">${itemPrice.toLocaleString('vi-VN')}</td>
                     <td style="padding: 5px;">${subTotal.toLocaleString('vi-VN')}</td>
                     <td style="padding: 5px;">${vr}%</td>
                     <td style="padding: 5px;">${taxAmount.toLocaleString('vi-VN')}</td>
@@ -6534,7 +6547,7 @@ function renderXuatKhoTemplate({ receiptId, customer, address, phone, note, item
             </tr>`;
         });
 
-        // 2. Render nhóm sản phẩm có ghi chú date xuống dưới (nếu có)
+        // 2. Render nhóm sản phẩm có ghi chú date xuống dưới (KHÔNG TÍNH TIỀN - GIÁ VÀ THÀNH TIỀN = 0)
         if (changeDateItems.length > 0) {
             html += `<tr>
                 <td colspan="8" style="text-align: left; font-weight: bold; background-color: #f8f9fa; padding: 6px 10px; font-style: italic; border-top: 2px solid #000;">
@@ -6542,15 +6555,16 @@ function renderXuatKhoTemplate({ receiptId, customer, address, phone, note, item
                 </td>
             </tr>`;
             changeDateItems.forEach(i => {
-                const thanhTien = i.qty * i.price;
-                subTotalAll += thanhTien;
+                const itemPrice = 0;
+                const thanhTien = 0;
+                // subTotalAll không cộng thêm tiền của nhóm này
                 html += `<tr>
                     <td style="padding: 5px;">${stt++}</td>
                     <td style="padding: 5px; text-align: left;">${i.name || ''}</td>
                     <td style="padding: 5px;">${i.unit || 'Cái'}</td>
                     <td style="padding: 5px;">${i.qty}</td>
                     <td style="padding: 5px;">${i.qty}</td>
-                    <td style="padding: 5px;">${i.price.toLocaleString('vi-VN')}</td>
+                    <td style="padding: 5px;">${itemPrice.toLocaleString('vi-VN')}</td>
                     <td style="padding: 5px;">${thanhTien.toLocaleString('vi-VN')}</td>
                     <td style="padding: 5px; color: #d9534f; font-weight: bold;">${i.note || ''}</td>
                 </tr>`;
@@ -6627,8 +6641,18 @@ async function saveAndPrint() {
     const vatRate = vatEl ? parseFloat(vatEl.value) || 0 : 0;
 
     try {
+        // --- XỬ LÝ: ÉP ĐƠN GIÁ SẢN PHẨM ĐỔI DATE VỀ 0 ĐỂ LỊCH SỬ KHÔNG TÍNH TIỀN ---
+        const itemsToSave = sellCart.map(i => {
+            const lowerNote = (i.note || '').toLowerCase();
+            if (lowerNote.includes('date') || lowerNote.includes('đate')) {
+                return { ...i, price: 0 };
+            }
+            return i;
+        });
+        // ------------------------------------------------------------------------
+
         let subTotalAll = 0;
-        sellCart.forEach(i => {
+        itemsToSave.forEach(i => {
             subTotalAll += (i.qty * i.price);
         });
 
@@ -6642,7 +6666,7 @@ async function saveAndPrint() {
             address: address, 
             phone: phone, 
             note: noteGlobal, 
-            items: sellCart,
+            items: itemsToSave, // LƯU MẢNG ĐÃ ĐƯỢC ÉP GIÁ = 0 VÀO LỊCH SỬ
             vatRate: vatRate,
             total: grandTotal, 
             date: firebase.firestore.FieldValue.serverTimestamp() 
@@ -6666,9 +6690,10 @@ async function saveAndPrint() {
         // Xác định loại chứng từ người dùng chọn in: 'hoadon' hoặc 'xuatkho'
         const printType = (document.getElementById('print-doc-type-value') || {}).value || 'hoadon';
 
+        // Khi in truyền mảng itemsToSave để phiếu in và lịch sử khớp hệt nhau
         const printOpts = {
             receiptId, customer, address, phone, note: noteGlobal,
-            items: sellCart, vatRate, dateObj: new Date()
+            items: itemsToSave, vatRate, dateObj: new Date()
         };
 
         if (printType === 'xuatkho') {
@@ -6686,9 +6711,9 @@ async function saveAndPrint() {
         });
 
         // Reset thuế về 0 và cập nhật lại giao diện thuế
-        const vatEl = document.getElementById('global-vat');
-        if (vatEl) {
-            vatEl.value = '0';
+        const vatElReset = document.getElementById('global-vat');
+        if (vatElReset) {
+            vatElReset.value = '0';
             if (typeof updateGrandTotal === 'function') updateGrandTotal();
         }
         
@@ -6707,9 +6732,8 @@ async function saveAndPrint() {
         if (typeof selectPrintDocType === 'function') selectPrintDocType('hoadon');
         
         renderSellCart();
-		
-		
-       // --- THAY ĐỔI ĐOẠN NÀY ---
+        
+        // --- THAY ĐỔI ĐOẠN NÀY ---
         setTimeout(async () => {
             console.log("Đang làm mới dữ liệu...");
             
@@ -7322,18 +7346,21 @@ function updateGrandTotal() {
     const vatSelect = document.getElementById('global-vat');
     const vatPercent = vatSelect ? parseInt(vatSelect.value) || 0 : 0;
 
-    // 2. Tính tổng tiền hàng (chưa VAT)
+    // 2. Tính tổng tiền hàng (chưa VAT) - TỰ ĐỘNG BỎ QUA TIỀN SẢN PHẨM ĐỔI DATE
     let subTotalAll = 0;
     sellCart.forEach(i => {
-        i.total = i.qty * i.price; 
+        const lowerNote = (i.note || '').toLowerCase();
+        const effectivePrice = (lowerNote.includes('date') || lowerNote.includes('đate')) ? 0 : i.price;
+        
+        i.total = i.qty * effectivePrice; 
         subTotalAll += i.total;
     });
 
-    // 3. Tính tiền thuế dựa trên tổng tiền hàng
+    // 3. Tính tiền thuế dựa trên tổng tiền hàng thực tế
     const taxTotalAll = subTotalAll * (vatPercent / 100);
     const grandTotal = subTotalAll + taxTotalAll;
     
-    // 4. Cập nhật hiển thị tiền thuế (mới)
+    // 4. Cập nhật hiển thị tiền thuế (sẽ hiển thị chuẩn 16.000 đ thay vì 32.000 đ)
     const taxDisplay = document.getElementById('tax-display');
     if (taxDisplay) {
         taxDisplay.innerText = "Thuế: " + taxTotalAll.toLocaleString('vi-VN') + " đ";
