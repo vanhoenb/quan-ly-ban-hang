@@ -1710,9 +1710,9 @@ html:not(.dark) .bg-white {
             <select id="imp-name" class="product-select w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" onkeydown="handleEnter(event, 'imp-unit')"></select>
         </div>
         <div class="md:col-span-1">
-            <label class="block text-xs font-bold text-blue-800 dark:text-blue-400 mb-1">ĐVT</label>
-            <select id="imp-unit" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" onkeydown="handleEnter(event, 'imp-qty')"><option>Hũ</option><option>Túi</option><option>Kg</option><option>Khay</option><option>Cái</option><option>Hộp</option><option>Lọ</option><option>Chai</option></select>
-        </div>
+    <label class="block text-xs font-bold text-blue-800 dark:text-blue-400 mb-1">ĐVT</label>
+    <input type="text" id="imp-unit" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" readonly onkeydown="handleEnter(event, 'imp-qty')">
+</div>
         <div class="md:col-span-1">
             <label class="block text-xs font-bold text-blue-800 dark:text-blue-400 mb-1">Số Lượng</label>
             <input type="number" id="imp-qty" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" onkeydown="handleEnter(event, 'imp-retail')">
@@ -5913,17 +5913,49 @@ async function findAndFillProduct(decodedText) {
 
     selectBox.dispatchEvent(new Event('change', { bubbles: true }));
     
+    // --- BỔ SUNG: TỰ ĐỘNG ĐIỀN ĐVT VÀ GIÁ (Không ảnh hưởng code gốc) ---
+    const unitBox = document.getElementById('imp-unit');
+    if (unitBox) {
+        unitBox.value = product.unit || '';
+    }
+
+    const retailBox = document.getElementById('imp-retail');
+    if (retailBox) {
+        retailBox.value = product.retail || product.gia_le || '';
+    }
+
+    const wholesaleBox = document.getElementById('imp-wholesale');
+    if (wholesaleBox) {
+        wholesaleBox.value = product.wholesale || product.gia_si || '';
+    }
+    // -------------------------------------------------------------
+
     // THÔNG BÁO DUY NHẤT
     Swal.fire({ icon: 'success', title: 'Đã tìm thấy', text: product.name, timer: 1000, showConfirmButton: false });
     
     // Focus vào ô số lượng
     document.getElementById('imp-qty').focus();
 }
-// Hàm điền dữ liệu "sạch"
-// Chỉ giữ lại 1 bản duy nhất này thôi
 
-
-// Hàm điền dữ liệu vào ô Tên sản phẩm
+document.addEventListener('change', function(e) {
+    if (e.target && e.target.id === 'imp-name') {
+        const selectedName = e.target.value;
+        if (!window.allProducts) return;
+        
+        const product = window.allProducts.find(p => p.name === selectedName);
+        if (product) {
+            // Điền ĐVT
+            const unitBox = document.getElementById('imp-unit');
+            if (unitBox) {
+                unitBox.value = product.unit || '';
+            }
+            
+            // ⭐ BỔ SUNG: TỰ ĐỘNG ĐIỀN GIÁ LẺ & GIÁ SỈ KHI CHỌN THỦ CÔNG
+            document.getElementById('imp-retail').value = product.retail || product.gia_le || '';
+            document.getElementById('imp-wholesale').value = product.wholesale || product.gia_si || '';
+        }
+    }
+});
 
 
 function stopScanner(pageType) {
