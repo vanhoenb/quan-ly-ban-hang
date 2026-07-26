@@ -5049,9 +5049,6 @@ db.collection('customers').onSnapshot(() => {
         };
         await db.collection('receipts').add(receipt);
 
-        // 2b. CỘNG VÀO BỘ ĐẾM TỒN KHO (stock_counters) NGAY LẬP TỨC
-        if (typeof adjustStockCounters === 'function') await adjustStockCounters(cart, +1);
-
         // 3. ĐỒNG BỘ CACHE
         await refreshCache(); 
 
@@ -5291,10 +5288,7 @@ window.deleteReceipt = function(docId) {
                 console.log("Xóa thành công ID hệ thống:", docId);
                 if(typeof updateReceiptNum === 'function') updateReceiptNum();
                 
-                // --- TRỪ LẠI BỘ ĐẾM TỒN KHO ĐÚNG BẰNG SỐ LƯỢNG PHIẾU NÀY ĐÃ CỘNG VÀO LÚC NHẬP ---
-                if (d && Array.isArray(d.items) && typeof adjustStockCounters === 'function') {
-                    await adjustStockCounters(d.items, -1);
-                }
+                // --- THÊM CÁC DÒNG NÀY ĐỂ CẬP NHẬT TỒN KHO ---
                 await calculateAllStock();
                 if(typeof renderProductGrid === 'function') renderProductGrid();
                 if(typeof loadInventory === 'function') loadInventory();
@@ -6145,149 +6139,66 @@ function renderSellCart() {
     updateGrandTotal();
 }
 
-// ============================================================
-// HỆ THỐNG ĐẾM TỒN KHO THEO THỜI GIAN THỰC ('stock_counters')
-// ------------------------------------------------------------
-// TRƯỚC ĐÂY: mỗi lần cần biết tồn kho, ứng dụng phải quét lại TOÀN BỘ
-// lịch sử phiếu nhập ('receipts') và phiếu xuất ('sales') để cộng/trừ ra
-// số tồn hiện tại. Cách này càng ngày càng CHẬM khi lịch sử càng nhiều
-// (đọc cả nghìn phiếu mỗi lần), và không AN TOÀN khi 2 người cùng bán
-// 1 sản phẩm cùng lúc (có thể dẫn tới âm kho vì không có kiểm tra nguyên tử).
-//
-// BÂY GIỜ: mỗi sản phẩm có 1 "bộ đếm" riêng trong collection 'stock_counters'
-// (field 'qty' = tồn kho thực tế), được cộng/trừ NGAY khi có phiếu nhập/xuất
-// được tạo hoặc xóa. Muốn biết tồn kho chỉ cần đọc các bộ đếm này (số lượng
-// = số sản phẩm, gần như không đổi) thay vì đọc lại toàn bộ lịch sử giao dịch
-// (tăng dần mãi mãi theo thời gian).
-// ============================================================
+// HMAF MỚI 
 
-// Chuyển tên sản phẩm thành 1 ID hợp lệ cho Firestore document
-function stockDocId(name) {
-    return 'p_' + encodeURIComponent(String(name || ''));
-}
-function getStockRef(name) {
-    return db.collection('stock_counters').doc(stockDocId(name));
-}
 
-// Cộng/trừ vào bộ đếm tồn kho (dùng khi nhập kho / xóa phiếu nhập / hoàn kho khi xóa hóa đơn).
-// Dùng FieldValue.increment nên là phép cộng NGUYÊN TỬ ở phía server - an toàn kể cả khi
-// nhiều người thao tác cùng lúc, không cần transaction vì đây chỉ là cộng dồn, không có
-// điều kiện cần kiểm tra trước (khác với lúc bán hàng - xem saveAndPrint bên dưới).
-async function adjustStockCounters(items, sign) {
-    const qtyByName = {};
-    (items || []).forEach(item => {
-        qtyByName[item.name] = (qtyByName[item.name] || 0) + (parseFloat(item.qty) || 0);
-    });
-    const names = Object.keys(qtyByName);
-    if (names.length === 0) return;
+async function calculateAllStock() {
+    let inventory = {};
 
-    // Chia lô tối đa 400 lệnh ghi/batch để không vượt giới hạn 500 của Firestore
-    for (let i = 0; i < names.length; i += 400) {
-        const batch = db.batch();
-        names.slice(i, i + 400).forEach(name => {
-            batch.set(getStockRef(name), {
-                name: name,
-                qty: firebase.firestore.FieldValue.increment(sign * qtyByName[name]),
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
-        });
-        await batch.commit();
-    }
-}
-
-// Khởi tạo bộ đếm tồn kho từ lịch sử cũ - CHỈ CHẠY ĐÚNG 1 LẦN DUY NHẤT sau khi
-// cập nhật lên phiên bản này (đánh dấu lại bằng document app_meta/stock_migration_v1).
-// Những lần mở ứng dụng sau sẽ tự động bỏ qua bước này.
-async function migrateStockCountersIfNeeded() {
     try {
-        const metaRef = db.collection('app_meta').doc('stock_migration_v1');
-        const metaSnap = await metaRef.get();
-        if (metaSnap.exists) return; // Đã khởi tạo rồi, không cần quét lại lịch sử nữa
-
-        console.log('Đang khởi tạo hệ thống đếm tồn kho lần đầu (chỉ chạy 1 lần duy nhất)...');
-        let inventory = {};
-
-        const snapNhap = await db.collection('receipts').get();
-        snapNhap.forEach(doc => {
-            (doc.data().items || []).forEach(item => {
-                inventory[item.name] = (inventory[item.name] || 0) + (parseFloat(item.qty) || 0);
-            });
+        // 1. LẤY PHIẾU NHẬP (Dùng parseFloat để giữ số lẻ 1.5, 2.5...)
+        const snapshotNhap = await db.collection('receipts').get();
+        snapshotNhap.forEach(doc => {
+            const data = doc.data();
+            if (data.items) {
+                data.items.forEach(item => {
+                    inventory[item.name] = (inventory[item.name] || 0) + (parseFloat(item.qty) || 0);
+                });
+            }
         });
 
-        const snapXuat = await db.collection('sales').get();
-        snapXuat.forEach(doc => {
-            (doc.data().items || []).forEach(item => {
+        // 2. LẤY PHIẾU XUẤT (Dùng parseFloat để giữ số lẻ)
+        const snapshotXuat = await db.collection('sales').get(); 
+        snapshotXuat.forEach(doc => {
+            const data = doc.data();
+            if (data.items) {
+                data.items.forEach(item => {
+                    inventory[item.name] = (inventory[item.name] || 0) - (parseFloat(item.qty) || 0);
+                });
+            }
+        });
+
+        // 3. TRỪ GIỎ HÀNG ĐANG LÀM VIỆC (Để nhân viên nhìn thấy số tồn thực tế sau khi đã trừ hàng đang bán)
+        // Lưu ý: Chỉ trừ nếu giỏ hàng có hàng
+        if (typeof sellCart !== 'undefined' && Array.isArray(sellCart)) {
+            sellCart.forEach(item => {
                 inventory[item.name] = (inventory[item.name] || 0) - (parseFloat(item.qty) || 0);
             });
-        });
-
-        const names = Object.keys(inventory);
-        for (let i = 0; i < names.length; i += 400) {
-            const batch = db.batch();
-            names.slice(i, i + 400).forEach(name => {
-                batch.set(getStockRef(name), {
-                    name: name,
-                    qty: Math.round((inventory[name] || 0) * 100) / 100,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            });
-            await batch.commit();
         }
 
-        await metaRef.set({ done: true, time: firebase.firestore.FieldValue.serverTimestamp() });
-        console.log('Đã khởi tạo xong hệ thống đếm tồn kho:', inventory);
-    } catch (e) {
-        console.error('Lỗi khởi tạo hệ thống đếm tồn kho:', e);
-    }
-}
+        // 3b. TRỪ THÊM GIỎ HÀNG CỦA CÁC "HÓA ĐƠN CHỜ" KHÁC (để hàng đang được giữ chỗ
+        // cho khách khác không bị hiển thị nhầm là còn tồn trong danh sách sản phẩm)
+        // Bỏ qua đơn đang active vì nội dung mới nhất của nó đã nằm trong sellCart ở bước 3.
+        if (Array.isArray(window.heldOrders)) {
+            window.heldOrders.forEach(order => {
+                if (order.id === window.activeHeldOrderId) return;
+                (order.cart || []).forEach(item => {
+                    inventory[item.name] = (inventory[item.name] || 0) - (parseFloat(item.qty) || 0);
+                });
+            });
+        }
 
-// Đọc tồn kho GỐC (chưa trừ giỏ hàng đang bán) trực tiếp từ 'stock_counters'.
-// Nhanh hơn nhiều so với cách cũ: chỉ đọc 1 document/sản phẩm thay vì quét lại
-// toàn bộ lịch sử phiếu nhập/xuất mỗi lần gọi hàm này.
-async function calculateAllStock() {
-    try {
-        await migrateStockCountersIfNeeded(); // tự bỏ qua nếu đã khởi tạo rồi
-
-        const snap = await db.collection('stock_counters').get();
-        let inventory = {};
-        snap.forEach(doc => {
-            const d = doc.data();
-            if (d && d.name) inventory[d.name] = parseFloat(d.qty || 0);
-        });
-
-        window.baseInventoryMap = inventory;
-        recomputeCurrentStock();
-        console.log("Đã cập nhật tồn kho gốc từ stock_counters:", inventory);
+        // 4. Gán vào biến toàn cục
+        window.currentStockMap = inventory;
+        
+        // 5. Cập nhật lại giao diện ngay để số tồn nhảy theo thời gian thực
+        if (typeof renderProductGrid === 'function') renderProductGrid();
+        
+        console.log("Đã cập nhật tồn kho (đã trừ giỏ):", window.currentStockMap);
+        
     } catch (error) {
         console.error("Lỗi khi tính toán tồn kho:", error);
     }
-}
-
-// Tính lại số tồn HIỂN THỊ (đã trừ giỏ hàng đang bán + các hóa đơn chờ khác)
-// từ dữ liệu gốc đã có sẵn trong bộ nhớ - KHÔNG đọc lại Firestore.
-// Dùng khi chuyển đổi/xóa hóa đơn chờ hoặc bắt đầu đơn mới: lúc này tổng tồn
-// kho thật không đổi, chỉ đổi giỏ hàng nào đang được xem là "active" mà thôi,
-// nên không cần tốn 1 lượt đọc Firestore mỗi lần thao tác.
-function recomputeCurrentStock() {
-    let inventory = { ...(window.baseInventoryMap || {}) };
-
-    if (typeof sellCart !== 'undefined' && Array.isArray(sellCart)) {
-        sellCart.forEach(item => {
-            inventory[item.name] = (inventory[item.name] || 0) - (parseFloat(item.qty) || 0);
-        });
-    }
-
-    if (Array.isArray(window.heldOrders)) {
-        window.heldOrders.forEach(order => {
-            if (order.id === window.activeHeldOrderId) return;
-            (order.cart || []).forEach(item => {
-                inventory[item.name] = (inventory[item.name] || 0) - (parseFloat(item.qty) || 0);
-            });
-        });
-    }
-
-    window.currentStockMap = inventory;
-    if (typeof renderProductGrid === 'function') renderProductGrid();
 }
 
 
@@ -6308,10 +6219,7 @@ function renderProductGrid() {
         { top: 'from-cyan-100 to-cyan-50/60 dark:from-cyan-950/70 dark:to-slate-900',    ring: 'ring-cyan-200 dark:ring-cyan-500/20',    badge: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-300',    btn: 'from-cyan-400 to-cyan-600 dark:from-cyan-500 dark:to-cyan-700',    shadow: 'shadow-[0_6px_0_0_#155e75,0_10px_16px_-4px_rgba(8,145,178,0.35)] dark:shadow-[0_6px_0_0_#164e63,0_10px_16px_-4px_rgba(0,0,0,0.5)]' }
     ];
 
-    // Gom HTML vào 1 mảng rồi gán "innerHTML" đúng 1 lần ở cuối - nhanh hơn nhiều so với
-    // "innerHTML +=" lặp lại trong vòng for (mỗi lần += là trình duyệt phải phân tích lại
-    // TOÀN BỘ nội dung đã có trước đó, càng nhiều sản phẩm càng giật lag).
-    const cardsHtml = window.allProductCache.map((p, index) => {
+    window.allProductCache.forEach((p, index) => {
         const rawStock = window.currentStockMap ? (window.currentStockMap[p.name] || 0) : 0;
         const realStock = Number(Math.round(rawStock * 100) / 100);
 
@@ -6320,7 +6228,7 @@ function renderProductGrid() {
         const isOutOfStock = realStock <= 0;
         const b = themeClasses[index % themeClasses.length];
 
-        return `
+        grid.innerHTML += `
             <div onclick="${isOutOfStock ? `alert('Hết hàng!')` : `quickAdd('${safeName}')`}"
                  class="group relative bg-gradient-to-b ${b.top} p-3 md:p-4 rounded-2xl border border-white/60 dark:border-slate-700 ring-1 ${b.ring}
                         ${b.shadow} flex flex-col justify-between cursor-pointer h-24 md:h-28 overflow-hidden
@@ -6354,8 +6262,6 @@ function renderProductGrid() {
             </div>
         `;
     });
-
-    grid.innerHTML = cardsHtml.join('');
 }
 
 // Lọc/tìm sản phẩm hiển thị trên lưới sản phẩm trang Bán hàng
@@ -6895,9 +6801,7 @@ function startNewSellOrder() {
     renderSellCart();
     if (typeof updateGrandTotal === 'function') updateGrandTotal();
     renderHeldOrdersBar();
-    // Không cần đọc lại Firestore: tổng tồn kho gốc không đổi khi chỉ chuyển đơn,
-    // chỉ cần tính lại từ dữ liệu đã có sẵn trong bộ nhớ.
-    if (typeof recomputeCurrentStock === 'function') recomputeCurrentStock();
+    if (typeof calculateAllStock === 'function') calculateAllStock();
 }
 
 // Chuyển sang tiếp tục bán cho 1 khách đang ở trạng thái "chờ"
@@ -6912,7 +6816,7 @@ function switchToHeldOrder(id) {
     applySellState(target);
     window.activeHeldOrderId = id;
     renderHeldOrdersBar();
-    if (typeof recomputeCurrentStock === 'function') recomputeCurrentStock();
+    if (typeof calculateAllStock === 'function') calculateAllStock();
 }
 
 // Bỏ 1 hóa đơn chờ khỏi danh sách (huỷ hẳn, không phải thanh toán)
@@ -6946,9 +6850,7 @@ async function removeHeldOrder(id, evt) {
 
     // QUAN TRỌNG: Tính lại tồn kho ngay lập tức để giải phóng số lượng của đơn vừa xóa,
     // không cần phải chuyển sang trang khác rồi quay lại mới thấy cập nhật.
-    // Không cần đọc lại Firestore ở đây: tổng tồn kho gốc không đổi, chỉ có giỏ hàng
-    // của đơn vừa xóa không còn bị trừ nữa - tính lại từ dữ liệu sẵn có là đủ và nhanh hơn.
-    if (typeof recomputeCurrentStock === 'function') recomputeCurrentStock();
+    if (typeof calculateAllStock === 'function') calculateAllStock();
 }
 
 // Vẽ lại thanh "Hóa đơn chờ"
@@ -6992,14 +6894,20 @@ async function saveAndPrint() {
         return;
     }
 
-    // --- KIỂM TRA NHANH TỒN KHO (chỉ để báo lỗi sớm cho gọn, dùng số liệu đã có sẵn
-    // trong bộ nhớ, KHÔNG tốn thêm 1 lượt đọc mạng ở đây). Việc kiểm tra THẬT SỰ để
-    // đảm bảo không bao giờ bị bán trùng/âm kho nằm trong transaction bên dưới,
-    // vì đó mới là lúc đọc đúng số tồn kho tại thời điểm ghi vào cơ sở dữ liệu.
+    // --- MỚI THÊM: KIỂM TRA TỒN KHO TRƯỚC KHI LƯU ---
+    await calculateAllStock(); 
+
     for (const item of sellCart) {
+        // 1. Lấy tồn kho hiện tại (đã bị trừ giỏ hàng)
         let stock = window.currentStockMap ? parseFloat(window.currentStockMap[item.name] || 0) : 0;
+        
+        // 2. CỘNG NGƯỢC GIỎ HÀNG VÀO ĐỂ CÓ TỒN KHO GỐC TRƯỚC KHI BÁN
+        // Vì currentStockMap đã trừ giỏ, nên giờ ta cộng lại đúng số lượng trong giỏ
+        // để có con số tồn kho thực tế trước khi bấm lưu
         const qtyInCart = parseFloat(item.qty || 0);
         const realStockBeforeSale = stock + qtyInCart;
+
+        // 3. So sánh
         if (qtyInCart > realStockBeforeSale + 0.000001) {
             alert(`LỖI: Sản phẩm ${item.name} chỉ còn ${realStockBeforeSale} trong kho, nhưng bạn xuất ${qtyInCart}. Vui lòng kiểm tra lại!`);
             return;
@@ -7055,58 +6963,7 @@ async function saveAndPrint() {
             total: grandTotal, 
             date: firebase.firestore.FieldValue.serverTimestamp() 
         };
-        // --- GHI HÓA ĐƠN + TRỪ KHO TRONG 1 TRANSACTION DUY NHẤT (NGUYÊN TỬ) ---
-        // Đây là điểm mấu chốt để chống bán trùng/âm kho: việc "kiểm tra còn đủ hàng
-        // không" và "trừ kho" diễn ra CÙNG LÚC trong 1 giao dịch được Firestore đảm bảo
-        // không thể bị chen ngang - nếu 2 người cùng bán sản phẩm cuối cùng trong cùng
-        // 1 khoảnh khắc, chỉ 1 giao dịch được thành công, giao dịch còn lại sẽ báo lỗi
-        // ngay để nhân viên biết và kiểm tra lại, thay vì cả 2 đều lưu được và kho bị âm.
-
-        // Gộp số lượng theo tên sản phẩm (phòng khi giỏ hàng có nhiều dòng cùng 1 sản
-        // phẩm, ví dụ dùng nút "Thêm dòng mới") để kiểm tra tồn kho cho chính xác.
-        const qtyByName = {};
-        itemsToSave.forEach(i => {
-            qtyByName[i.name] = (qtyByName[i.name] || 0) + (parseFloat(i.qty) || 0);
-        });
-        const productNames = Object.keys(qtyByName);
-        const saleRef = db.collection('sales').doc();
-
-        await db.runTransaction(async (transaction) => {
-            const refs = productNames.map(name => getStockRef(name));
-            // Tất cả các lệnh "đọc" (transaction.get) phải thực hiện trước mọi lệnh "ghi"
-            const snaps = await Promise.all(refs.map(ref => transaction.get(ref)));
-
-            // Kiểm tra tồn kho THẬT tại đúng thời điểm ghi (không dùng số liệu cũ trên
-            // giao diện) - nếu người khác vừa bán trước đó 1 tích tắc, số liệu ở đây
-            // đã phản ánh đúng và sẽ chặn lại nếu không đủ hàng.
-            for (let i = 0; i < productNames.length; i++) {
-                const currentQty = parseFloat((snaps[i].data() || {}).qty || 0);
-                const needQty = qtyByName[productNames[i]];
-                if (needQty > currentQty + 0.000001) {
-                    throw new Error(`Sản phẩm "${productNames[i]}" chỉ còn ${currentQty} trong kho (có thể vừa được bán ở máy khác). Vui lòng kiểm tra lại giỏ hàng.`);
-                }
-            }
-
-            productNames.forEach((name, i) => {
-                const currentQty = parseFloat((snaps[i].data() || {}).qty || 0);
-                const newQty = Math.round((currentQty - qtyByName[name]) * 100) / 100;
-                transaction.set(refs[i], {
-                    name: name,
-                    qty: newQty,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
-            });
-
-            transaction.set(saleRef, saleData);
-        });
-
-        // Cập nhật lại số tồn kho gốc trong bộ nhớ cho khớp với những gì vừa trừ ở trên,
-        // không cần đọc lại Firestore (đỡ tốn 1 lượt đọc mạng ngay sau khi vừa ghi xong).
-        if (!window.baseInventoryMap) window.baseInventoryMap = {};
-        productNames.forEach(name => {
-            window.baseInventoryMap[name] = (window.baseInventoryMap[name] || 0) - qtyByName[name];
-        });
-        // ------------------------------------------------------------------
+        await db.collection('sales').add(saleData);
 
         // --- MỚI: CẬP NHẬT CÔNG NỢ NẾU CHỌN "Công nợ" ---
         if (paymentMethod === 'Công nợ' && customer) {
@@ -7146,9 +7003,6 @@ async function saveAndPrint() {
         }
 
         sellCart = [];
-        // Tính lại số tồn hiển thị từ baseInventoryMap vừa cập nhật ở trên (không tốn mạng),
-        // đảm bảo lưới sản phẩm phản ánh đúng ngay sau khi bán xong.
-        if (typeof recomputeCurrentStock === 'function') recomputeCurrentStock();
         const clearFields = ['sell-customer', 'sell-address', 'sell-phone', 'sell-note', 'sell-note-global', 'sell-name', 'sell-qty', 'sell-price'];
         clearFields.forEach(id => {
             const el = document.getElementById(id);
@@ -7476,15 +7330,24 @@ async function deleteSale(docId) {
                 }
             }
 
-            // 3. HOÀN KHO: cộng lại đúng số lượng đã bán vào bộ đếm tồn kho (stock_counters).
-            // (Trước đây đoạn này cập nhật vào collection 'inventory', nhưng collection đó
-            // không được bất kỳ chỗ nào khác trong ứng dụng đọc tới nên hoàn toàn không có
-            // tác dụng - đã thay bằng adjustStockCounters để hoàn kho thật sự.)
-            if (typeof adjustStockCounters === 'function') {
-                await adjustStockCounters(items, +1);
+            // 3. Hoàn kho (Sử dụng batch)
+            const batch = db.batch(); 
+            for (const item of items) {
+                const prodQuery = await db.collection('inventory').where('name', '==', item.name).get();
+                if (!prodQuery.empty) {
+                    const prodDoc = prodQuery.docs[0];
+                    // Dùng parseFloat để không bị làm tròn số lẻ (ví dụ 1.5 vẫn là 1.5)
+                    const currentQty = parseFloat(prodDoc.data().qty || 0);
+                    const qtyToRestore = parseFloat(item.qty || 0);
+                    
+                    batch.update(prodDoc.ref, { 
+                        qty: currentQty + qtyToRestore 
+                    });
+                }
             }
 
-            // 4. Thực hiện xóa hóa đơn
+            // 4. Thực hiện xóa và cập nhật
+            await batch.commit();
             await docRef.delete();
             
             alert("Đã xóa hóa đơn, hoàn kho và điều chỉnh công nợ thành công!");
