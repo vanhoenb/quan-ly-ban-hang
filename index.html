@@ -1295,6 +1295,7 @@ html:not(.dark) .bg-white {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 	<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
 	<script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.8/locales/vi.global.min.js'></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body class="bg-gray-100 dark:bg-slate-950 flex h-screen transition-colors duration-300">
 
@@ -1979,6 +1980,17 @@ html:not(.dark) .bg-white {
                     </div>
                     <input type="hidden" id="print-doc-type-value" value="hoadon">
                 </div>
+				<!-- CỤM NÚT LƯU & IN VÀ NÚT ZALO -->
+                <div class="flex gap-2 items-center">
+                    <!-- Nút Zalo nhỏ gọn có biểu tượng -->
+                    <button type="button" onclick="shareInvoiceToZalo()" 
+                        class="bg-[#0068ff] hover:bg-[#0052cc] text-white px-3.5 py-4 rounded-xl font-bold text-sm transition-all duration-75 border-b-[4px] border-[#0047b3] hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-lg flex items-center justify-center gap-1.5 whitespace-nowrap"
+                        title="Chia sẻ nhanh qua Zalo">
+                        <svg class="w-5 h-5 fill-current" viewBox="0 0 48 48">
+                            <path d="M24 4C12.95 4 4 12.95 4 24c0 4.81 1.74 9.23 4.64 12.69L6.15 42.6c-.3.9.57 1.77 1.47 1.47l5.91-2.49C16.94 43.14 20.35 44 24 44c11.05 0 20-8.95 20-20S35.05 4 24 4zm9.6 24.3c-.32.88-1.51 1.63-2.34 1.81-.8.18-1.84.34-5.32-1.07-2.73-1.12-4.48-3.92-4.62-4.11-.14-.19-1.1-1.46-1.1-2.78 0-1.32.69-1.97.94-2.24.25-.27.55-.34.73-.34.18 0 .37 0 .53.01.17.01.4-.06.63.48.24.57.82 2.01.89 2.16.07.15.12.33 0 .53-.12.2-.18.33-.36.54-.18.21-.38.47-.54.63-.18.18-.37.38-.16.74.21.36.94 1.55 2.02 2.51 1.39 1.24 2.56 1.63 2.93 1.81.37.18.59.15.81-.1.22-.25.94-1.09 1.19-1.46.25-.37.5-.31.84-.18.34.13 2.15 1.02 2.52 1.2.37.18.62.27.71.42.09.15.09.87-.23 1.75z"/>
+                        </svg>
+                        <span>Zalo</span>
+                    </button>
 
                 <button id="btn-save-print" onclick="saveAndPrint()" 
 					class="w-full bg-green-600 dark:bg-green-700 text-white py-4 rounded-xl font-bold text-lg transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-lg">
@@ -1987,6 +1999,7 @@ html:not(.dark) .bg-white {
             </div>
         </div>
     </div>
+</div>
 </div>
 
 <div id="print-area" style="display: none; padding: 40px; font-family: 'Times New Roman', serif; color: #000;">
@@ -11840,6 +11853,78 @@ function updateToggleButton(theme) {
 
 // 5. Lắng nghe sự kiện tải trang để kích hoạt hệ thống theme ngay lập tức
 document.addEventListener('DOMContentLoaded', initTheme);
+
+
+// chia sẻ HD qua ZALO
+async function shareInvoiceToZalo() {
+    // 1. Tự động gọi lệnh lưu đơn và trừ kho của hệ thống
+    if (typeof saveAndPrint === 'function') {
+        saveAndPrint(); 
+    }
+
+    const receiptId = document.getElementById('sell-receipt')?.value || 'HoaDon';
+    
+    // Lấy tên khách hàng từ ô nhập liệu và làm sạch ký tự đặc biệt
+    let customerInput = document.getElementById('sell-customer')?.value || 'Khách lẻ';
+    let safeCustomerName = customerInput.replace(/[\/\\?%*:|"<>]/g, '').trim().replace(/\s+/g, '_');
+    
+    // Lấy ngày hiện tại (Định dạng: DD-MM-YYYY)
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    const dateStr = `${day}-${month}-${year}`;
+    
+    // Tên file chỉ còn: [TênKhách]_[Ngày].pdf (Đã bỏ chữ HoaDon_)
+    const customFileName = `${safeCustomerName}_${dateStr}.pdf`;
+
+    // Lấy khung chứa nội dung hóa đơn để chuyển thành PDF
+    const element = document.getElementById('sell-cart-container'); 
+
+    // Cấu hình tối ưu tốc độ và khổ giấy PDF
+    const opt = {
+        margin:       10,
+        filename:     customFileName,
+        image:        { type: 'jpeg', quality: 0.95 },
+        html2canvas:  { scale: 1.5, useCORS: true, logging: false }, 
+        jsPDF:        { unit: 'mm', format: 'a5', orientation: 'portrait' }
+    };
+
+    try {
+        // Tiến hành tạo file PDF ngầm
+        const pdfBlob = await html2pdf().from(element).set(opt).outputPdf('blob');
+        const file = new File([pdfBlob], customFileName, { type: 'application/pdf' });
+
+        const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+
+        // 2. Phân biệt thiết bị để gửi file PDF
+        if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
+            // --- TRÊN ĐIỆN THOẠI: Bật bảng chia sẻ gửi thẳng file PDF qua Zalo ---
+            await navigator.share({
+                files: [file],
+                title: 'Hóa đơn bán hàng',
+                text: `Gửi bạn hóa đơn của ${customerInput} (Ngày ${dateStr}).`
+            });
+        } else {
+            // --- TRÊN MÁY TÍNH (PC): Tải file PDF về với tên mới gọn gàng ---
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(pdfBlob);
+            link.download = customFileName;
+            link.click();
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Đã xuất PDF thành công!',
+                text: `File "${customFileName}" đã tải xong.`,
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+    } catch (err) {
+        console.error("Lỗi xuất PDF:", err);
+        alert('Không thể tạo file PDF hóa đơn!');
+    }
+}
 
 // --- KHỞI TẠO HỆ THỐNG ---
 // 1. Cấu hình ban đầu
