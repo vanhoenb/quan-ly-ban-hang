@@ -1873,7 +1873,7 @@ html:not(.dark) .bg-white {
     <h2 class="text-2xl font-bold text-gray-800 dark:text-white">BÁN HÀNG / XUẤT HOÁ ĐƠN</h2>
 
    <div class="flex flex-col lg:flex-row gap-4 w-full">
-   <div class="lg:w-1/2 w-full space-y-4 h-auto md:h-[850px]">
+   <div class="lg:w-1/2 w-full space-y-4 h-auto md:h-[800px]">
     <div class="bg-white dark:bg-slate-900 p-2 md:p-4 rounded-2xl border-4 border-red-500 shadow-sm h-full">
             
             <div class="flex gap-2 mb-4">
@@ -1900,13 +1900,13 @@ html:not(.dark) .bg-white {
             </div>
             
             <div id="product-grid" 
-                 class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 h-[250px] md:h-[735px] overflow-y-auto p-1 md:p-2" 
+                 class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 h-[250px] md:h-[680px] overflow-y-auto p-1 md:p-2" 
                  style="align-content: start;">
             </div>
         </div>
     </div>
 
-        <div class="lg:w-1/2 w-full space-y-4 h-[850px] flex flex-col">
+        <div class="lg:w-1/2 w-full space-y-4 h-[800px] flex flex-col">
             <!-- HÓA ĐƠN CHỜ: cho phép tạm giữ đơn đang bán để phục vụ khách khác, rồi quay lại sau -->
             <div class="bg-white dark:bg-slate-900 rounded-2xl border-2 border-blue-200 dark:border-slate-700 p-2 shadow-sm">
                 <div id="held-orders-bar" class="flex items-center gap-2 overflow-x-auto pb-0.5"></div>
@@ -2036,15 +2036,15 @@ html:not(.dark) .bg-white {
     <table border="1" style="width: 100%; border-collapse: collapse; text-align: center; margin-bottom: 20px; font-size: 13px;">
         <thead style="background: #eee; font-weight: bold; font-family: 'Goldman', sans-serif;">
             <tr>
-                <th style="padding: 10px 4px;">STT</th>
-                <th style="padding: 10px 4px;">Tên hàng</th>
-                <th style="padding: 10px 4px;">ĐVT</th>
-                <th style="padding: 10px 4px;">SL</th>
-                <th style="padding: 10px 4px;">Đơn giá</th>
-                <th style="padding: 10px 4px;">Thành tiền</th>
-                <th style="padding: 10px 4px;">Thuế%</th>
-                <th style="padding: 10px 4px;">Tiền thuế</th>
-                <th style="padding: 10px 4px;">Ghi chú</th>
+                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">STT</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Tên hàng</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">ĐVT</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">SL</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Đơn giá</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Thành tiền</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Thuế%</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Tiền thuế</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Ghi chú</div></th>
             </tr>
         </thead>
         <tbody id="print-items"></tbody>
@@ -2112,17 +2112,17 @@ html:not(.dark) .bg-white {
     <table border="1" style="width: 100%; border-collapse: collapse; text-align: center; margin-bottom: 20px; font-size: 13px;">
         <thead style="background: #eee; font-weight: bold; font-family: 'Goldman', sans-serif;">
             <tr>
-                <th style="padding: 10px 4px;" rowspan="2">STT</th>
-                <th style="padding: 10px 4px;" rowspan="2">Tên, nhãn hiệu, quy cách<br>vật tư, hàng hoá</th>
-                <th style="padding: 10px 4px;" rowspan="2">ĐVT</th>
-                <th style="padding: 10px 4px;" colspan="2">Số lượng</th>
-                <th style="padding: 10px 4px;" rowspan="2">Đơn giá</th>
-                <th style="padding: 10px 4px;" rowspan="2">Thành tiền</th>
-                <th style="padding: 10px 4px;" rowspan="2">Ghi chú</th>
+                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;" rowspan="2"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">STT</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;" rowspan="2"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Tên, nhãn hiệu, quy cách<br>vật tư, hàng hoá</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;" rowspan="2"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">ĐVT</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;" colspan="2"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Số lượng</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;" rowspan="2"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Đơn giá</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;" rowspan="2"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Thành tiền</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;" rowspan="2"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Ghi chú</div></th>
             </tr>
             <tr>
-                <th style="padding: 6px 4px;">Yêu cầu</th>
-                <th style="padding: 6px 4px;">Thực xuất</th>
+                <th style="padding: 6px 4px; vertical-align: middle; height: 40px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Yêu cầu</div></th>
+                <th style="padding: 6px 4px; vertical-align: middle; height: 40px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Thực xuất</div></th>
             </tr>
         </thead>
         <tbody id="xk-items"></tbody>
@@ -4092,6 +4092,14 @@ async function loadDashboard(filter = 'default') {
     ]);
 
     const allSales = salesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // Lưu lại để popup "Chi tiết phiếu" (mở từ "Thời gian cấp hàng đại lý") tìm được
+    // đúng phiếu, kể cả phiếu từ vài tháng trước - TRƯỚC ĐÂY popup chỉ tìm trong
+    // window.allSales (dữ liệu của trang Lịch Sử HĐ, chỉ có đúng tháng đang chọn ở đó),
+    // nên phiếu ngoài tháng hiện tại của Lịch Sử HĐ bị hiện trống, phải qua bên đó đổi
+    // tháng thì mới tìm thấy.
+    window.dashboardSalesCache = allSales;
+
     const filteredSales = allSales.filter(order => {
         const orderDate = order.date?.toDate ? order.date.toDate() : new Date(order.date);
         return orderDate >= startDate && orderDate <= endDate;
@@ -4408,13 +4416,25 @@ function renderCustomerOrders(allSales, customersSnap) {
 }
 
 window.loadOrderData = function(orderId) {
-    if (typeof allSales === 'undefined') {
-        console.error("Biến allSales chưa được định nghĩa!");
+    // TRƯỚC ĐÂY: chỉ tìm trong "allSales" (biến toàn cục của trang Lịch Sử HĐ, chỉ chứa
+    // đúng tháng đang chọn ở trang đó) - nên phiếu cũ hơn tháng hiện tại của Lịch Sử HĐ
+    // sẽ không tìm thấy, popup hiện trống dù người dùng bấm đúng phiếu.
+    // BÂY GIỜ: ưu tiên tìm trong window.dashboardSalesCache (dữ liệu Trang Chủ, có sẵn
+    // tới ~4 tháng gần đây), nếu không thấy mới tìm tiếp trong window.allSales.
+    const dashboardCache = window.dashboardSalesCache || [];
+    const historyCache = (typeof allSales !== 'undefined' && allSales) ? allSales : (window.allSales || []);
+
+    let order = dashboardCache.find(o => o.id === orderId);
+    if (!order) order = historyCache.find(o => o.id === orderId);
+
+    if (!order) {
+        console.error("Không tìm thấy phiếu:", orderId);
+        const modalContent = document.getElementById('modal-content');
+        if (modalContent) {
+            modalContent.innerHTML = '<p class="text-center text-sm p-4 text-slate-500 dark:text-slate-400">Không tìm thấy dữ liệu phiếu này (có thể phiếu quá cũ). Vui lòng thử lại hoặc xem ở trang Lịch Sử HĐ.</p>';
+        }
         return;
     }
-
-    const order = allSales.find(o => o.id === orderId);
-    if (!order) return;
 
     const modalTitle = document.getElementById('modal-title');
     if (modalTitle) {
@@ -4577,24 +4597,29 @@ async function renderInventoryList(filter = 'today') {
         startDate = new Date(filter.from);
         startDate.setHours(0, 0, 0, 0);
         endDate = new Date(filter.to);
+        // QUAN TRỌNG: input ngày dạng "YYYY-MM-DD" bị trình duyệt hiểu là 00:00 giờ UTC,
+        // mà UTC lệch 7 tiếng so với giờ Việt Nam -> nếu không chỉnh về cuối ngày, mốc
+        // "đến ngày" sẽ chỉ tính tới 7 GIỜ SÁNG (giờ VN) của ngày đó, cắt mất toàn bộ
+        // giao dịch phát sinh sau 7h sáng - đây chính là lý do "hôm nay có nhập/xuất mà
+        // NXT không hiện". Đặt về cuối ngày (23:59:59) theo giờ máy đang chạy (giờ VN)
+        // để lấy đủ trọn ngày.
         endDate.setHours(23, 59, 59, 999);
     } else if (filter === 'today') {
         startDate.setHours(0, 0, 0, 0);
-        endDate.setHours(23, 59, 59, 999);
+        endDate = new Date();
     } else if (filter === 'week') {
         const day = now.getDay();
         const diff = now.getDate() - (day === 0 ? 6 : day - 1);
         startDate = new Date(now.setDate(diff));
         startDate.setHours(0, 0, 0, 0);
         endDate = new Date();
-        endDate.setHours(23, 59, 59, 999);
     } else if (filter === 'month') {
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
-        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-    } else if (typeof filter === 'string' && filter.includes('-')) {
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+    } else if (filter.includes('-')) {
         const [year, month] = filter.split('-');
-        startDate = new Date(year, month - 1, 1, 0, 0, 0, 0);
-        endDate = new Date(year, month, 0, 23, 59, 59, 999);
+        startDate = new Date(year, month - 1, 1);
+        endDate = new Date(year, month, 0, 23, 59, 59);
     }
 
     const getDocDate = (ts) => {
@@ -6909,19 +6934,7 @@ async function shareInvoiceViaZalo(areaId, modeClass, fileNamePrefix, receiptId)
             canvas.toBlob(async (blob) => {
                 if (!blob) { alert('Không tạo được ảnh hóa đơn!'); resolve(); return; }
 
-                // Lấy tên khách hàng và ngày từ vùng in để đặt tên file
-                const custEl = el.querySelector('.print-customer-name, #print-customer, [data-customer], .customer-name') || document.getElementById('sell-customer');
-                let customerName = (custEl ? (custEl.innerText || custEl.value) : '').trim() || 'KhachHang';
-                customerName = customerName.replace(/[\s\/\\?%*:|"<>]/g, '_');
-
-                const dateEl = el.querySelector('.print-date, #print-date, [data-date]');
-                let dateStr = dateEl ? dateEl.innerText.trim().replace(/[\s\/\\?%*:|"<>]/g, '-') : '';
-                if (!dateStr) {
-                    const now = new Date();
-                    dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-                }
-
-                const fileName = `${customerName}_${dateStr}.png`;
+                const fileName = `${fileNamePrefix}_${receiptId || 'hoadon'}.png`;
                 const file = new File([blob], fileName, { type: 'image/png' });
 
                 if (showLoading) Swal.close();
@@ -7037,6 +7050,20 @@ function triggerPrint(modeClass) {
             document.body.appendChild(iframe);
         }
 
+        // TRƯỚC ĐÂY: chờ mù 500ms rồi mới in, dù trang có thể đã sẵn sàng sớm hơn nhiều
+        // (hoặc trên máy/mạng chậm thì 500ms lại chưa chắc đã đủ). BÂY GIỜ: in ngay khi
+        // iframe báo đã tải xong nội dung (sự kiện 'load'), thường chỉ mất vài chục mili
+        // giây - nhanh hơn hẳn mà vẫn chắc chắn nội dung đã sẵn sàng. Vẫn giữ 1 mốc dự
+        // phòng 500ms để phòng trường hợp hiếm gặp trình duyệt không bắn sự kiện 'load'.
+        let printed = false;
+        const doPrint = () => {
+            if (printed) return;
+            printed = true;
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+        };
+        iframe.onload = doPrint;
+
         // Đổ nội dung cần in vào iframe
         const doc = iframe.contentWindow.document;
         doc.open();
@@ -7048,16 +7075,13 @@ function triggerPrint(modeClass) {
         doc.write('</body></html>');
         doc.close();
 
-        // Gọi lệnh in trực tiếp từ nội bộ trang
-        setTimeout(() => {
-            iframe.contentWindow.focus();
-            iframe.contentWindow.print();
-        }, 500);
+        // Mốc dự phòng - chỉ chạy nếu sự kiện 'load' vì lý do gì đó không bắn ra
+        setTimeout(doPrint, 500);
 
         return; // Dừng lại, không chạy code PC bên dưới
     }
 
-    // 2. GIỮ NGUYÊN 100% CODE CŨ DÙNG CHO PC (Đang chạy ổn định)
+    // 2. IN TRÊN PC
     document.body.classList.remove('print-mode-hoadon', 'print-mode-xuatkho');
     document.body.classList.add(modeClass);
 
@@ -7070,9 +7094,20 @@ function triggerPrint(modeClass) {
     };
     window.addEventListener('afterprint', cleanup);
 
-    setTimeout(() => {
-        window.print();
-    }, 600);
+    // TRƯỚC ĐÂY: chờ mù 600ms trước khi in - đoán đại 1 khoảng thời gian "chắc là đủ" để
+    // trình duyệt kịp áp CSS chế độ in (đổi class body) và vẽ lại trang, dù thực tế việc
+    // này thường chỉ mất 1 khung hình (~16ms).
+    // BÂY GIỜ: dùng requestAnimationFrame lồng 2 lần - đây là cách chuẩn để "chờ đúng lúc
+    // trình duyệt đã áp xong CSS và vẽ xong khung hình mới" thay vì chờ mù 1 khoảng thời
+    // gian cố định: lần rAF thứ nhất chạy ngay trước khi trình duyệt vẽ khung hình kế
+    // tiếp (lúc này CSS mới đã được tính toán xong), lần rAF thứ hai chạy sau khi khung
+    // hình đó đã thực sự được vẽ lên màn hình - đảm bảo hộp thoại in chụp đúng nội dung
+    // đã lên hình, mà không phải đợi lâu như trước.
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            window.print();
+        });
+    });
 
     setTimeout(cleanup, 15000);
 }
@@ -7126,15 +7161,15 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
             const taxAmount = subTotal * (vr / 100);
             subTotalAll += subTotal;
             html += `<tr>
-                <td style="padding: 5px;">${stt++}</td>
-                <td style="padding: 5px; text-align: left;">${i.name || ''}</td>
-                <td style="padding: 5px;">${i.unit || 'Cái'}</td>
-                <td style="padding: 5px;">${i.qty}</td>
-                <td style="padding: 5px;">${i.price.toLocaleString('vi-VN')}</td>
-                <td style="padding: 5px;">${subTotal.toLocaleString('vi-VN')}</td>
-                <td style="padding: 5px;">${vr}%</td>
-                <td style="padding: 5px;">${taxAmount.toLocaleString('vi-VN')}</td>
-                <td style="padding: 5px;">${i.note || ''}</td>
+                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${stt++}</div></td>
+                <td style="padding: 5px; text-align: left; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:flex-start;height:100%;line-height:1.3;">${i.name || ''}</div></td>
+                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.unit || 'Cái'}</div></td>
+                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.qty}</div></td>
+                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.price.toLocaleString('vi-VN')}</div></td>
+                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${subTotal.toLocaleString('vi-VN')}</div></td>
+                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${vr}%</div></td>
+                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${taxAmount.toLocaleString('vi-VN')}</div></td>
+                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.note || ''}</div></td>
             </tr>`;
         });
 
@@ -7151,15 +7186,15 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
                 const taxAmount = 0;
                 // subTotalAll không cộng thêm tiền của nhóm này
                 html += `<tr>
-                    <td style="padding: 5px;">${stt++}</td>
-                    <td style="padding: 5px; text-align: left;">${i.name || ''}</td>
-                    <td style="padding: 5px;">${i.unit || 'Cái'}</td>
-                    <td style="padding: 5px;">${i.qty}</td>
-                    <td style="padding: 5px;">${itemPrice.toLocaleString('vi-VN')}</td>
-                    <td style="padding: 5px;">${subTotal.toLocaleString('vi-VN')}</td>
-                    <td style="padding: 5px;">${vr}%</td>
-                    <td style="padding: 5px;">${taxAmount.toLocaleString('vi-VN')}</td>
-                    <td style="padding: 5px; color: #d9534f; font-weight: bold;">${i.note || ''}</td>
+                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${stt++}</div></td>
+                    <td style="padding: 5px; text-align: left; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:flex-start;height:100%;line-height:1.3;">${i.name || ''}</div></td>
+                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.unit || 'Cái'}</div></td>
+                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.qty}</div></td>
+                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${itemPrice.toLocaleString('vi-VN')}</div></td>
+                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${subTotal.toLocaleString('vi-VN')}</div></td>
+                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${vr}%</div></td>
+                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${taxAmount.toLocaleString('vi-VN')}</div></td>
+                    <td style="padding: 5px; color: #d9534f; font-weight: bold; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.note || ''}</div></td>
                 </tr>`;
             });
         }
@@ -7226,14 +7261,14 @@ function renderXuatKhoTemplate({ receiptId, customer, address, phone, note, item
             const thanhTien = i.qty * i.price;
             subTotalAll += thanhTien;
             html += `<tr>
-                <td style="padding: 5px;">${stt++}</td>
-                <td style="padding: 5px; text-align: left;">${i.name || ''}</td>
-                <td style="padding: 5px;">${i.unit || 'Cái'}</td>
-                <td style="padding: 5px;">${i.qty}</td>
-                <td style="padding: 5px;">${i.qty}</td>
-                <td style="padding: 5px;">${i.price.toLocaleString('vi-VN')}</td>
-                <td style="padding: 5px;">${thanhTien.toLocaleString('vi-VN')}</td>
-                <td style="padding: 5px;">${i.note || ''}</td>
+                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${stt++}</div></td>
+                <td style="padding: 5px; text-align: left; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:flex-start;height:100%;line-height:1.3;">${i.name || ''}</div></td>
+                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.unit || 'Cái'}</div></td>
+                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.qty}</div></td>
+                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.qty}</div></td>
+                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.price.toLocaleString('vi-VN')}</div></td>
+                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${thanhTien.toLocaleString('vi-VN')}</div></td>
+                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.note || ''}</div></td>
             </tr>`;
         });
 
@@ -7249,14 +7284,14 @@ function renderXuatKhoTemplate({ receiptId, customer, address, phone, note, item
                 const thanhTien = 0;
                 // subTotalAll không cộng thêm tiền của nhóm này
                 html += `<tr>
-                    <td style="padding: 5px;">${stt++}</td>
-                    <td style="padding: 5px; text-align: left;">${i.name || ''}</td>
-                    <td style="padding: 5px;">${i.unit || 'Cái'}</td>
-                    <td style="padding: 5px;">${i.qty}</td>
-                    <td style="padding: 5px;">${i.qty}</td>
-                    <td style="padding: 5px;">${itemPrice.toLocaleString('vi-VN')}</td>
-                    <td style="padding: 5px;">${thanhTien.toLocaleString('vi-VN')}</td>
-                    <td style="padding: 5px; color: #d9534f; font-weight: bold;">${i.note || ''}</td>
+                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${stt++}</div></td>
+                    <td style="padding: 5px; text-align: left; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:flex-start;height:100%;line-height:1.3;">${i.name || ''}</div></td>
+                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.unit || 'Cái'}</div></td>
+                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.qty}</div></td>
+                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.qty}</div></td>
+                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${itemPrice.toLocaleString('vi-VN')}</div></td>
+                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${thanhTien.toLocaleString('vi-VN')}</div></td>
+                    <td style="padding: 5px; color: #d9534f; font-weight: bold; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.note || ''}</div></td>
                 </tr>`;
             });
         }
@@ -7473,7 +7508,10 @@ async function saveAndPrint() {
         return;
     }
 
-    // --- KIỂM TRA NHANH TỒN KHO (dùng số liệu trên bộ nhớ, không tốn mạng) ---
+    // --- KIỂM TRA NHANH TỒN KHO (chỉ để báo lỗi sớm cho gọn, dùng số liệu đã có sẵn
+    // trong bộ nhớ, KHÔNG tốn thêm 1 lượt đọc mạng ở đây). Việc kiểm tra THẬT SỰ để
+    // đảm bảo không bao giờ bị bán trùng/âm kho nằm trong transaction bên dưới,
+    // vì đó mới là lúc đọc đúng số tồn kho tại thời điểm ghi vào cơ sở dữ liệu.
     for (const item of sellCart) {
         let stock = window.currentStockMap ? parseFloat(window.currentStockMap[item.name] || 0) : 0;
         const qtyInCart = parseFloat(item.qty || 0);
@@ -7533,8 +7571,15 @@ async function saveAndPrint() {
             total: grandTotal, 
             date: firebase.firestore.FieldValue.serverTimestamp() 
         };
+        // --- GHI HÓA ĐƠN + TRỪ KHO TRONG 1 TRANSACTION DUY NHẤT (NGUYÊN TỬ) ---
+        // Đây là điểm mấu chốt để chống bán trùng/âm kho: việc "kiểm tra còn đủ hàng
+        // không" và "trừ kho" diễn ra CÙNG LÚC trong 1 giao dịch được Firestore đảm bảo
+        // không thể bị chen ngang - nếu 2 người cùng bán sản phẩm cuối cùng trong cùng
+        // 1 khoảnh khắc, chỉ 1 giao dịch được thành công, giao dịch còn lại sẽ báo lỗi
+        // ngay để nhân viên biết và kiểm tra lại, thay vì cả 2 đều lưu được và kho bị âm.
 
-        // Gộp số lượng theo tên sản phẩm
+        // Gộp số lượng theo tên sản phẩm (phòng khi giỏ hàng có nhiều dòng cùng 1 sản
+        // phẩm, ví dụ dùng nút "Thêm dòng mới") để kiểm tra tồn kho cho chính xác.
         const qtyByName = {};
         itemsToSave.forEach(i => {
             qtyByName[i.name] = (qtyByName[i.name] || 0) + (parseFloat(i.qty) || 0);
@@ -7542,37 +7587,88 @@ async function saveAndPrint() {
         const productNames = Object.keys(qtyByName);
         const saleRef = db.collection('sales').doc();
 
-        // --- TỐI ƯU TỐC ĐỘ: DÙNG BATCH WRITE (GỘP GHI TRONG 1 REQUEST DUY NHẤT) ---
-        // Thay vì dùng transaction phải đọc lại toàn bộ kho của từng sản phẩm qua mạng gây chậm,
-        // ta dùng batch write kết hợp FieldValue.increment vì hệ thống đã kiểm tra tồn kho ở bước đầu.
-        const batch = db.batch();
-        productNames.forEach(name => {
-            batch.set(getStockRef(name), {
-                name: name,
-                qty: firebase.firestore.FieldValue.increment(-qtyByName[name]),
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
-        });
-        batch.set(saleRef, saleData);
-        await batch.commit();
+        try {
+            await db.runTransaction(async (transaction) => {
+                const refs = productNames.map(name => getStockRef(name));
+                // Tất cả các lệnh "đọc" (transaction.get) phải thực hiện trước mọi lệnh "ghi"
+                const snaps = await Promise.all(refs.map(ref => transaction.get(ref)));
 
-        // Cập nhật lại số tồn kho gốc trong bộ nhớ ngay lập tức (không cần đọc lại Firestore)
+                // Kiểm tra tồn kho THẬT tại đúng thời điểm ghi (không dùng số liệu cũ trên
+                // giao diện) - nếu người khác vừa bán trước đó 1 tích tắc, số liệu ở đây
+                // đã phản ánh đúng và sẽ chặn lại nếu không đủ hàng.
+                for (let i = 0; i < productNames.length; i++) {
+                    const currentQty = parseFloat((snaps[i].data() || {}).qty || 0);
+                    const needQty = qtyByName[productNames[i]];
+                    if (needQty > currentQty + 0.000001) {
+                        throw new Error(`Sản phẩm "${productNames[i]}" chỉ còn ${currentQty} trong kho (có thể vừa được bán ở máy khác). Vui lòng kiểm tra lại giỏ hàng.`);
+                    }
+                }
+
+                productNames.forEach((name, i) => {
+                    const currentQty = parseFloat((snaps[i].data() || {}).qty || 0);
+                    const newQty = Math.round((currentQty - qtyByName[name]) * 100) / 100;
+                    transaction.set(refs[i], {
+                        name: name,
+                        qty: newQty,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                });
+
+                transaction.set(saleRef, saleData);
+            });
+        } catch (txError) {
+            // PHƯƠNG ÁN DỰ PHÒNG: nếu lỗi là do HẾT LƯỢT ĐỌC (quota) chứ không phải do
+            // thật sự không đủ hàng, vẫn cho phép lưu hóa đơn để không làm gián đoạn việc
+            // bán hàng - chỉ là bỏ qua bước "kiểm tra tồn kho tại đúng thời điểm ghi" (đổi
+            // lại: dùng phép CỘNG/TRỪ nguyên tử FieldValue.increment, không cần đọc trước,
+            // giống hệt cách bản gốc trước đây vẫn hoạt động được ngay cả khi hết quota đọc).
+            const isQuotaError = txError && (txError.code === 'resource-exhausted' || /quota/i.test(txError.message || ''));
+            if (!isQuotaError) {
+                throw txError; // Lỗi khác (ví dụ thật sự không đủ hàng) -> báo lỗi bình thường, dừng lại
+            }
+
+            console.warn('Không đọc được tồn kho (hết quota) - chuyển sang ghi trực tiếp không kiểm tra:', txError);
+
+            const batch = db.batch();
+            productNames.forEach(name => {
+                batch.set(getStockRef(name), {
+                    name: name,
+                    qty: firebase.firestore.FieldValue.increment(-qtyByName[name]),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            });
+            batch.set(saleRef, saleData);
+            await batch.commit();
+
+            console.warn('Đã lưu hóa đơn bằng phương án dự phòng (không kiểm tra tồn kho theo thời gian thực do hết quota đọc).');
+        }
+
+        // Cập nhật lại số tồn kho gốc trong bộ nhớ cho khớp với những gì vừa trừ ở trên,
+        // không cần đọc lại Firestore (đỡ tốn 1 lượt đọc mạng ngay sau khi vừa ghi xong).
         if (!window.baseInventoryMap) window.baseInventoryMap = {};
         productNames.forEach(name => {
             window.baseInventoryMap[name] = (window.baseInventoryMap[name] || 0) - qtyByName[name];
         });
         // ------------------------------------------------------------------
 
-        // CỘNG BỘ ĐẾM SỐ HOÁ ĐƠN (app_meta/sales_counter)
+        // CỘNG BỘ ĐẾM SỐ HOÁ ĐƠN (app_meta/sales_counter) NGAY LẬP TỨC - phép cộng
+        // nguyên tử, không cần đọc gì trước, luôn chạy được kể cả khi hết quota đọc.
+        // Số hoá đơn vừa dùng (receiptId) là số hệ thống tự gán (ô readonly) nên luôn
+        // đúng bằng maxNum + 1 hiện tại.
         try {
             await db.collection('app_meta').doc('sales_counter').set({
                 maxNum: firebase.firestore.FieldValue.increment(1)
             }, { merge: true });
         } catch (counterErr) {
-            console.warn('Không cập nhật được bộ đếm số hoá đơn:', counterErr);
+            console.warn('Không cập nhật được bộ đếm số hoá đơn (hoá đơn vẫn đã lưu đúng):', counterErr);
         }
 
-        // --- CẬP NHẬT CÔNG NỢ NẾU CHỌN "Công nợ" ---
+        // --- MỚI: CẬP NHẬT CÔNG NỢ NẾU CHỌN "Công nợ" ---
+        // Hoá đơn ĐÃ được lưu thành công ở transaction phía trên rồi (đây chỉ là bước
+        // PHỤ để cộng thêm công nợ khách hàng). Bọc riêng trong try/catch: nếu bước này
+        // lỗi (ví dụ hết quota đọc khi tìm khách hàng), KHÔNG được làm gián đoạn phần
+        // in hoá đơn / reset giao diện bên dưới - tránh làm nhân viên tưởng nhầm là bán
+        // hàng thất bại trong khi hoá đơn đã lưu đúng.
         if (paymentMethod === 'Công nợ' && customer) {
             try {
                 const querySnapshot = await db.collection('customers').where('name', '==', customer).get();
@@ -7584,20 +7680,33 @@ async function saveAndPrint() {
                     });
                 }
             } catch (debtErr) {
-                console.warn('Không cập nhật được công nợ khách hàng:', debtErr);
+                console.warn('Không cập nhật được công nợ khách hàng (có thể do hết quota đọc) - hoá đơn vẫn đã lưu đúng, cần cộng nợ thủ công khi quota hồi phục:', debtErr);
             }
         }
 
-        alert("Lưu thành công!");
+        // TRƯỚC ĐÂY dùng alert("Lưu thành công!") - alert() của trình duyệt là LỆNH CHẶN
+        // (block), toàn bộ code phía dưới (kể cả lệnh IN) phải ĐỢI nhân viên bấm "OK"
+        // mới chạy tiếp. Đây chính là nguyên nhân chính khiến "lưu & in" cảm giác chậm/lag
+        // - hoá đơn đã lưu xong từ lâu nhưng máy vẫn đứng im chờ 1 cú click chuột.
+        // BÂY GIỜ: dùng thông báo dạng toast (Swal, không chặn code) ở góc màn hình, tự
+        // biến mất sau 1.2s, không cần bấm gì cả - lệnh in chạy ngay lập tức phía dưới.
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'success', title: 'Lưu thành công!',
+                toast: true, position: 'top-end',
+                timer: 1200, showConfirmButton: false
+            });
+        }
 
         // Xác định loại chứng từ người dùng chọn in: 'hoadon' hoặc 'xuatkho'
         const printType = (document.getElementById('print-doc-type-value') || {}).value || 'hoadon';
 
+        // Khi in truyền mảng itemsToSave để phiếu in và lịch sử khớp hệt nhau
         const printOpts = {
             receiptId, customer, address, phone, note: noteGlobal,
             items: itemsToSave, vatRate, dateObj: new Date()
         };
-        // Lưu lại để nút "Chia sẻ Zalo" dùng ngay
+        // Lưu lại để nút "Chia sẻ Zalo" dùng ngay, khỏi phải đọc lại Firestore
         window.__lastInvoicePrintOpts = printOpts;
 
         if (printType === 'xuatkho') {
@@ -7606,7 +7715,8 @@ async function saveAndPrint() {
             renderHoaDonTemplate(printOpts);
         }
         
-        // 4. RESET DỮ LIỆU
+       // 4. RESET DỮ LIỆU
+        // Nếu đơn vừa thanh toán là 1 "hóa đơn chờ" -> xóa nó khỏi danh sách chờ vì đã bán xong
         if (window.activeHeldOrderId) {
             window.heldOrders = window.heldOrders.filter(o => o.id !== window.activeHeldOrderId);
             saveHeldOrdersToStorage();
@@ -7614,6 +7724,8 @@ async function saveAndPrint() {
         }
 
         sellCart = [];
+        // Tính lại số tồn hiển thị từ baseInventoryMap vừa cập nhật ở trên (không tốn mạng),
+        // đảm bảo lưới sản phẩm phản ánh đúng ngay sau khi bán xong.
         if (typeof recomputeCurrentStock === 'function') recomputeCurrentStock();
         const clearFields = ['sell-customer', 'sell-address', 'sell-phone', 'sell-note', 'sell-note-global', 'sell-name', 'sell-qty', 'sell-price'];
         clearFields.forEach(id => {
@@ -7632,7 +7744,7 @@ async function saveAndPrint() {
         const payEl = document.getElementById('payment-method');
         if (payEl) payEl.value = 'Tiền mặt';
         
-        // Reset loại giá về Bán Lẻ (retail)
+        // Reset loại giá về Bán Lẻ (retail) và cập nhật lại đơn giá trong giỏ
         const priceTypeEl = document.getElementById('global-price-type');
         if (priceTypeEl) {
             priceTypeEl.value = 'retail';
@@ -7645,9 +7757,11 @@ async function saveAndPrint() {
         renderSellCart();
         if (typeof renderHeldOrdersBar === 'function') renderHeldOrdersBar();
         
+        // --- THAY ĐỔI ĐOẠN NÀY ---
         setTimeout(async () => {
             console.log("Đang làm mới dữ liệu...");
             
+            // Ép load lại dashboard với filter hiện tại
             const from = document.getElementById('fin-from')?.value;
             const to = document.getElementById('fin-to')?.value;
             
@@ -7659,7 +7773,7 @@ async function saveAndPrint() {
 
             if(typeof updateSellReceiptNum === 'function') updateSellReceiptNum();
             if(typeof loadSalesList === 'function') loadSalesList();
-            if(typeof loadCustomers === 'function'); loadCustomers(); 
+            if(typeof loadCustomers === 'function') loadCustomers(); 
         }, 1000);
         
     } catch (error) {
@@ -7906,6 +8020,14 @@ async function reprintSale(docId) {
             confirmButtonColor: '#2563eb',
             denyButtonColor: '#d97706'
         });
+
+        if (result.isConfirmed || result.isDenied) {
+            // QUAN TRỌNG: hộp thoại SweetAlert2 vừa đóng vẫn cần ~300ms để chạy xong hiệu
+            // ứng đóng và dọn hẳn ra khỏi trang. Lệnh in giờ chạy rất nhanh (chỉ 1-2 khung
+            // hình) nên nếu in ngay lập tức sẽ in đúng lúc hộp thoại còn đang đóng dở dang,
+            // ra trang trắng. Đợi 1 nhịp ngắn để chắc chắn hộp thoại đã đóng hẳn rồi mới in.
+            await new Promise(r => setTimeout(r, 300));
+        }
 
         if (result.isConfirmed) {
             renderHoaDonTemplate(printOpts);
@@ -8518,6 +8640,18 @@ window.addEventListener('dataChanged', async () => {
         // 4. Nếu ở trang Bán hàng thì nó sẽ tự chạy renderProductGrid
         if (typeof renderProductGrid === 'function') {
             renderProductGrid();
+        }
+
+        // 5. Nếu ở Trang Chủ thì làm mới tab "NXT KHO" - TRƯỚC ĐÂY BỊ THIẾU BƯỚC NÀY nên
+        // sau khi nhập/xuất kho, cột Nhập/Xuất và Tồn cuối ở Trang Chủ không tự cập nhật,
+        // phải bấm đổi ngày hoặc tải lại trang mới thấy đúng số.
+        if (typeof refreshInventory === 'function') {
+            refreshInventory();
+        }
+
+        // 6. Làm mới luôn Tổng doanh thu / Lợi nhuận ở Trang Chủ cho đồng bộ
+        if (typeof refreshFinance === 'function') {
+            refreshFinance();
         }
     } catch (error) {
         console.error("Lỗi khi cập nhật dữ liệu sau khi thay đổi:", error);
