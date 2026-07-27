@@ -160,17 +160,6 @@
         position: relative;
         z-index: 9999 !important;
     }
-
-    /* Đảm bảo danh sách sổ xuống chọn Tên Sản Phẩm (thư viện Choices.js) luôn nổi lên
-       trên các bảng/khối nội dung bên dưới (ví dụ bảng danh sách phiếu nhập ở trang
-       Nhập Kho), không bị che khuất phần cuối danh sách. */
-    .choices {
-        position: relative;
-        z-index: 50;
-    }
-    .choices__list--dropdown {
-        z-index: 9999 !important;
-    }
 	
 </style>
 
@@ -1304,9 +1293,9 @@ html:not(.dark) .bg-white {
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 	<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
 	<script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.8/locales/vi.global.min.js'></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body class="bg-gray-100 dark:bg-slate-950 flex h-screen transition-colors duration-300">
 
@@ -1722,9 +1711,9 @@ html:not(.dark) .bg-white {
             <select id="imp-name" class="product-select w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" onkeydown="handleEnter(event, 'imp-unit')"></select>
         </div>
         <div class="md:col-span-1">
-            <label class="block text-xs font-bold text-blue-800 dark:text-blue-400 mb-1">ĐVT</label>
-            <select id="imp-unit" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" onkeydown="handleEnter(event, 'imp-qty')"><option>Hũ</option><option>Túi</option><option>Kg</option><option>Khay</option><option>Cái</option><option>Hộp</option><option>Lọ</option><option>Chai</option></select>
-        </div>
+    <label class="block text-xs font-bold text-blue-800 dark:text-blue-400 mb-1">ĐVT</label>
+    <input type="text" id="imp-unit" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" readonly onkeydown="handleEnter(event, 'imp-qty')">
+</div>
         <div class="md:col-span-1">
             <label class="block text-xs font-bold text-blue-800 dark:text-blue-400 mb-1">Số Lượng</label>
             <input type="number" id="imp-qty" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" onkeydown="handleEnter(event, 'imp-retail')">
@@ -1992,16 +1981,10 @@ html:not(.dark) .bg-white {
                     <input type="hidden" id="print-doc-type-value" value="hoadon">
                 </div>
 
-                <div class="flex gap-2">
-                    <button id="btn-save-print" onclick="saveAndPrint()" 
-						class="flex-1 bg-green-600 dark:bg-green-700 text-white py-4 rounded-xl font-bold text-lg transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-lg">
-						LƯU & IN (F1)
-					</button>
-                    <button type="button" onclick="shareLastInvoiceToZalo()" title="Chia sẻ hóa đơn vừa lưu qua Zalo"
-                        class="shrink-0 bg-sky-500 dark:bg-sky-600 text-white px-4 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-sky-700 dark:border-sky-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-lg flex items-center gap-2">
-                        <i data-lucide="share-2" class="w-5 h-5"></i>
-                    </button>
-                </div>
+                <button id="btn-save-print" onclick="saveAndPrint()" 
+					class="w-full bg-green-600 dark:bg-green-700 text-white py-4 rounded-xl font-bold text-lg transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-lg">
+					LƯU & IN (F1)
+				</button>
             </div>
         </div>
     </div>
@@ -2804,23 +2787,6 @@ html:not(.dark) .bg-white {
 
 <!-- ===================== QUẢN LÝ NGƯỜI DÙNG (CHỈ ADMIN) ===================== -->
 <div id="page-user-management" class="hidden space-y-6 p-2 md:p-6">
-    <!-- KHỐI BẢO TRÌ HỆ THỐNG: sửa lại tồn kho nếu bị sai số do lỗi hệ thống trước đó -->
-    <div class="bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-800 rounded-2xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <div>
-            <p class="font-bold text-amber-800 dark:text-amber-300 flex items-center gap-2">
-                <i data-lucide="wrench" class="w-4 h-4"></i> Sửa lại tồn kho (nếu số tồn ở trang Bán Hàng bị sai)
-            </p>
-            <p class="text-xs text-amber-700 dark:text-amber-400 mt-1">
-                Bấm nút này sẽ tính lại chính xác tồn kho của TẤT CẢ sản phẩm từ toàn bộ lịch sử phiếu nhập/xuất
-                rồi ghi đè lại số liệu đang hiển thị ở trang Bán Hàng. Chỉ cần bấm khi thấy số tồn hiển thị
-                sai so với thực tế.
-            </p>
-        </div>
-        <button id="btn-fix-stock" onclick="runForceResyncStockCountersUI()" class="shrink-0 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-amber-700 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2 justify-center">
-            <i data-lucide="refresh-ccw" class="w-4 h-4"></i> Sửa lại tồn kho ngay
-        </button>
-    </div>
-
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pb-2 border-b border-slate-200 dark:border-slate-700">
         <h2 class="text-2xl font-bold text-slate-800 dark:text-white">QUẢN LÝ NGƯỜI DÙNG & PHÂN QUYỀN</h2>
         <button id="btn-add-user-header" onclick="openUserForm()" class="bg-blue-600 dark:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2 justify-center">
@@ -2962,24 +2928,6 @@ html:not(.dark) .bg-white {
     const firebaseConfig = { projectId: "quan-ly-pos-pro" };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-
-    // --- BẬT LƯU OFFLINE (Firestore Offline Persistence) ---
-    // Khi bật, mọi dữ liệu đã từng đọc thành công sẽ được lưu lại trong bộ nhớ đệm của
-    // trình duyệt (IndexedDB). Nhờ vậy, khi hết quota đọc trong ngày (hoặc mất mạng),
-    // các lệnh .get() vẫn trả về được dữ liệu ĐÃ TỪNG TẢI trước đó thay vì báo lỗi thẳng
-    // - ví dụ: danh mục sản phẩm, tồn kho, lịch sử phiếu gần đây vẫn xem được bình
-    // thường, chỉ là không có dữ liệu MỚI PHÁT SINH sau khi hết quota mà thôi.
-    // synchronizeTabs: true để không bị lỗi khi người dùng mở nhiều tab/cửa sổ cùng lúc
-    // (ví dụ vừa mở trang Bán Hàng vừa mở trang Kho ở 2 tab).
-    db.enablePersistence({ synchronizeTabs: true }).catch((err) => {
-        if (err.code === 'failed-precondition') {
-            console.warn('Không bật được lưu offline: trình duyệt đang chặn (hiếm khi xảy ra khi đã bật synchronizeTabs).');
-        } else if (err.code === 'unimplemented') {
-            console.warn('Trình duyệt này không hỗ trợ lưu offline (IndexedDB) - ứng dụng vẫn hoạt động bình thường, chỉ là không có dữ liệu dự phòng khi hết quota/mất mạng.');
-        } else {
-            console.warn('Không bật được lưu offline:', err);
-        }
-    });
 
     /* ==================================================================================
        HỆ THỐNG ĐĂNG NHẬP - PHÂN QUYỀN - QUẢN LÝ NGƯỜI DÙNG
@@ -3818,24 +3766,12 @@ async function fillProductDetails(name) {
     
     // 1. Điền ĐVT (Logic cũ của bạn)
     const product = window.allProducts.find(p => p.name === name);
-    if (product && unitSelect && product.unit) {
-        let matched = false;
+    if (product && unitSelect) {
         for (let i = 0; i < unitSelect.options.length; i++) {
             if (unitSelect.options[i].text === product.unit) {
                 unitSelect.selectedIndex = i;
-                matched = true;
                 break;
             }
-        }
-        // Nếu ĐVT của sản phẩm này không nằm trong danh sách có sẵn (ví dụ "Lít", hoặc
-        // bất kỳ đơn vị nào khác được gõ tự do ở trang "Danh Mục SP") - tự động thêm
-        // vào danh sách rồi chọn luôn, thay vì bỏ qua và giữ nguyên lựa chọn mặc định.
-        if (!matched) {
-            const newOpt = document.createElement('option');
-            newOpt.text = product.unit;
-            newOpt.value = product.unit;
-            unitSelect.add(newOpt);
-            unitSelect.selectedIndex = unitSelect.options.length - 1;
         }
     }
 
@@ -3845,12 +3781,9 @@ async function fillProductDetails(name) {
         if (wholesaleInput) wholesaleInput.value = product.wholesale || '';
         console.log("Đã lấy giá từ danh mục Kho cho:", name);
     } else {
-        // Nếu danh mục chưa có giá, tìm trong lịch sử phiếu nhập (Logic cũ).
-        // Giới hạn 300 phiếu gần nhất thay vì đọc TOÀN BỘ lịch sử: sản phẩm mới thường
-        // đã có giá trong danh mục ngay từ lần nhập kho đầu tiên (bước 3b của saveImport
-        // luôn ghi giá vào 'products'), nên nhánh này chỉ còn là phòng hờ cho dữ liệu cũ.
+        // Nếu danh mục chưa có giá, tìm trong lịch sử phiếu nhập (Logic cũ)
         try {
-            const snapshot = await db.collection('receipts').orderBy('date', 'desc').limit(300).get();
+            const snapshot = await db.collection('receipts').orderBy('date', 'desc').get();
             let found = false;
             
             for (let doc of snapshot.docs) {
@@ -4039,7 +3972,13 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadDashboard(filter = 'default') {
     console.log("Đang tải dữ liệu dashboard...");
 
-    // Tính khoảng ngày cần hiển thị TRƯỚC (thay vì đọc hết dữ liệu rồi mới lọc như cũ)
+    const [salesSnap, receiptsSnap, suppliersSnap, customersSnap] = await Promise.all([
+        db.collection('sales').get({ source: 'default' }),
+        db.collection('receipts').get({ source: 'default' }),
+        db.collection('suppliers').get({ source: 'default' }),
+        db.collection('customers').get({ source: 'default' }) 
+    ]);
+    
     const now = new Date();
     let startDate = new Date();
     let endDate = new Date();
@@ -4072,24 +4011,6 @@ async function loadDashboard(filter = 'default') {
         startDate = new Date(year, month - 1, 1);
         endDate = new Date(year, month, 0, 23, 59, 59);
     }
-
-    // Biểu đồ "Doanh thu theo tháng" cần dữ liệu vài tháng gần đây - giới hạn 5 tháng
-    // gần nhất (theo yêu cầu) thay vì đọc TOÀN BỘ lịch sử từ ngày đầu mở app tới giờ -
-    // việc này sẽ ngày càng nặng/tốn quota nếu không giới hạn lại, vì 'sales' tăng dần
-    // mãi mãi theo thời gian, còn khoảng đọc ở đây thì không.
-    const monthsAgoLimit = new Date(now.getFullYear(), now.getMonth() - 4, 1);
-    // Nếu người dùng lọc theo 1 khoảng ngày cũ hơn 5 tháng (ví dụ xem báo cáo cũ hơn),
-    // vẫn phải đọc đủ từ khoảng đó để không bị thiếu số liệu, nên lấy mốc SỚM HƠN giữa
-    // 2 giá trị làm điểm bắt đầu truy vấn.
-    const queryStartDate = startDate < monthsAgoLimit ? startDate : monthsAgoLimit;
-
-    const [salesSnap, suppliersSnap, customersSnap] = await Promise.all([
-        db.collection('sales')
-            .where('date', '>=', queryStartDate)
-            .get({ source: 'default' }),
-        db.collection('suppliers').get({ source: 'default' }),
-        db.collection('customers').get({ source: 'default' }) 
-    ]);
 
     const allSales = salesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     const filteredSales = allSales.filter(order => {
@@ -4534,37 +4455,18 @@ function refreshInventory() {
 
 
 
-// ================ THỨ TỰ SẮP XẾP SẢN PHẨM CHUẨN (DÙNG CHUNG CHO KHO HÀNG + NXT TRANG CHỦ) ========
-// Quy tắc: khối lượng (số gram trong tên) càng LỚN càng ở TRÊN. Cùng khối lượng thì
-// Thuỷ tinh > Nhựa > các loại khác. Sản phẩm không có số gram (Khay, CCQC, Trà, Túi Quà...)
-// xếp cuối, giữ nguyên thứ tự vốn có giữa chúng với nhau (sort ổn định - stable sort).
-function getProductWeightForSort(name) {
-    const s = (name || '').toString();
-    const m = s.match(/(\d+(?:[.,]\d+)?)\s*(?:g|gr|gram)\b/i);
-    return m ? parseFloat(m[1].replace(',', '.')) : -1; // -1 = không có số gram -> xếp cuối
-}
-function getProductMaterialPriority(name) {
-    const s = (name || '').toString().toLowerCase();
-    if (s.includes('thuỷ tinh') || s.includes('thủy tinh')) return 0;
-    if (s.includes('nhựa')) return 1;
-    return 2;
-}
-function compareProductDisplayOrder(nameA, nameB) {
-    const wa = getProductWeightForSort(nameA), wb = getProductWeightForSort(nameB);
-    if (wa !== wb) return wb - wa; // khối lượng giảm dần
-    const pa = getProductMaterialPriority(nameA), pb = getProductMaterialPriority(nameB);
-    if (pa !== pb) return pa - pb; // Thuỷ tinh > Nhựa > khác
-    return 0; // giữ nguyên thứ tự cũ (sort ổn định)
-}
-
 // ================ TỒN KHO (ĐỒNG BỘ DUAL THEME - 3D GLOSSY CHỐNG LÓA) ==============================
 
 async function renderInventoryList(filter = 'today') {
     const container = document.getElementById('home-inventory-list');
     if (!container) return;
 
+    const receiptsSnap = await db.collection('receipts').get();
+    const salesSnap = await db.collection('sales').get();
+
     const inventoryMap = new Map();
     const now = new Date();
+    const START_DATE_STR = '2026-06-01'; 
 
     const getVNString = (date) => {
         return new Date(date.getTime() + (7 * 60 * 60 * 1000)).toISOString().split('T')[0];
@@ -4593,90 +4495,45 @@ async function renderInventoryList(filter = 'today') {
         startDate = new Date(year, month - 1, 1);
         endDate = new Date(year, month, 0, 23, 59, 59);
     }
+    
+    const startStr = getVNString(startDate);
+    const endStr = getVNString(endDate);
 
     const getDocDate = (ts) => {
         const d = ts?.toDate ? ts.toDate() : new Date(ts);
         return getVNString(d);
     };
 
-    // --- TỐI ƯU QUAN TRỌNG ---
-    // TRƯỚC ĐÂY: đọc TOÀN BỘ lịch sử phiếu nhập + phiếu xuất mỗi lần xem NXT, để tự tính
-    // "tồn đầu kỳ" bằng cách cộng dồn từ ngày đầu tiên mở app tới trước ngày bắt đầu kỳ
-    // xem - càng nhiều lịch sử càng đọc nhiều, tốn quota tăng dần mãi mãi.
-    //
-    // BÂY GIỜ: chỉ đọc đúng các giao dịch NẰM TRONG khoảng ngày đang xem (nhẹ, không phụ
-    // thuộc độ dài lịch sử), rồi suy ra "tồn đầu kỳ" từ TỒN KHO THỰC TẾ HIỆN TẠI (đọc từ
-    // 'stock_counters' - chỉ 1 dòng/sản phẩm, rất nhẹ) theo công thức:
-    //   tồn cuối kỳ = tồn thực tế hiện tại - (phát sinh SAU ngày kết thúc kỳ, nếu xem kỳ
-    //                 đã qua) - nếu xem tới hiện tại thì phần này = 0.
-    //   tồn đầu kỳ  = tồn cuối kỳ - (nhập + đổi trong kỳ) + (xuất trong kỳ)
-    // Kết quả toán học giống hệt cách tính cũ, chỉ khác cách lấy ra mà thôi.
-    const queryFrom = new Date(startDate); queryFrom.setHours(0, 0, 0, 0);
-    const isCurrentPeriod = endDate >= now; // Xem tới hiện tại -> không có gì phát sinh sau đó
-    const gapFrom = new Date(endDate); gapFrom.setSeconds(gapFrom.getSeconds() + 1);
+    let allTransactions = [];
+    receiptsSnap.forEach(doc => allTransactions.push({ ...doc.data(), typeDoc: 'receipt', d: getDocDate(doc.data().date) }));
+    salesSnap.forEach(doc => allTransactions.push({ ...doc.data(), typeDoc: 'sale', d: getDocDate(doc.data().date) }));
+    allTransactions.sort((a, b) => new Date(a.d) - new Date(b.d));
 
-    const fetchRange = async (from, to) => {
-        const [rSnap, sSnap] = await Promise.all([
-            db.collection('receipts').where('date', '>=', from).where('date', '<=', to).get(),
-            db.collection('sales').where('date', '>=', from).where('date', '<=', to).get()
-        ]);
-        const list = [];
-        rSnap.forEach(doc => list.push({ ...doc.data(), typeDoc: 'receipt', d: getDocDate(doc.data().date) }));
-        sSnap.forEach(doc => list.push({ ...doc.data(), typeDoc: 'sale', d: getDocDate(doc.data().date) }));
-        return list;
-    };
-
-    const periodTransactions = await fetchRange(queryFrom, endDate);
-    const gapTransactions = isCurrentPeriod ? [] : await fetchRange(gapFrom, now);
-
-    // Tồn kho THỰC TẾ hiện tại - đọc từ bộ đếm 'stock_counters' (rất nhẹ, không phụ
-    // thuộc số lượng lịch sử giao dịch).
-    const currentStockSnap = await db.collection('stock_counters').get();
-    const currentStockMap = {};
-    currentStockSnap.forEach(doc => {
-        const d = doc.data();
-        if (d && d.name) currentStockMap[d.name] = parseFloat(d.qty || 0);
-    });
-
-    const ensureItem = (name) => {
-        if (!inventoryMap.has(name)) inventoryMap.set(name, { tonDau: 0, nhap: 0, change: 0, out: 0, gapNet: 0 });
-        return inventoryMap.get(name);
-    };
-
-    periodTransactions.forEach(data => {
-        (data.items || []).forEach(item => {
-            const inv = ensureItem(item.name);
-            if (data.typeDoc === 'receipt') {
-                if (data.type === 'Nhập mới') inv.nhap += Number(item.qty || 0);
-                else inv.change += Number(item.qty || 0);
-            } else {
-                inv.out += Number(item.qty || 0);
+    allTransactions.forEach(data => {
+        data.items.forEach(item => {
+            if (!inventoryMap.has(item.name)) {
+                inventoryMap.set(item.name, { tonDau: 0, nhap: 0, change: 0, out: 0 });
+            }
+            const inv = inventoryMap.get(item.name);
+            
+            if (data.d < startStr) {
+                if (data.d >= START_DATE_STR) {
+                    if (data.typeDoc === 'receipt') inv.tonDau += Number(item.qty || 0);
+                    else inv.tonDau -= Number(item.qty || 0);
+                }
+            } else if (data.d >= startStr && data.d <= endStr) {
+                if (data.typeDoc === 'receipt') {
+                    if (data.type === 'Nhập mới') inv.nhap += Number(item.qty || 0);
+                    else inv.change += Number(item.qty || 0);
+                } else {
+                    inv.out += Number(item.qty || 0);
+                }
             }
         });
     });
 
-    gapTransactions.forEach(data => {
-        (data.items || []).forEach(item => {
-            const inv = ensureItem(item.name);
-            if (data.typeDoc === 'receipt') inv.gapNet += Number(item.qty || 0);
-            else inv.gapNet -= Number(item.qty || 0);
-        });
-    });
-
-    // Đảm bảo mọi sản phẩm đang có tồn kho thực tế cũng xuất hiện, kể cả khi không có
-    // giao dịch nào trong đúng khoảng ngày đang xem.
-    Object.keys(currentStockMap).forEach(name => ensureItem(name));
-
-    inventoryMap.forEach((inv, name) => {
-        const currentStock = currentStockMap[name] || 0;
-        const tonCuoiKy = currentStock - inv.gapNet;
-        inv.tonDau = tonCuoiKy - inv.nhap - inv.change + inv.out;
-    });
-
     let inventoryCardsHtml = '';
-    const sortedInventoryEntries = Array.from(inventoryMap.entries())
-        .sort((a, b) => compareProductDisplayOrder(a[0], b[0]));
-    sortedInventoryEntries.forEach(([name, item]) => {
+    inventoryMap.forEach((item, name) => {
         const tonCuoi = item.tonDau + item.nhap + item.change - item.out;
         const totalNhap = item.nhap + item.change;
         
@@ -5094,20 +4951,11 @@ db.collection('customers').onSnapshot(() => {
 //==========================TRANG NHẬP KHO ===============================
 //========================================================================
 	
-    async function updateReceiptNum() {
-        // TRƯỚC ĐÂY: đọc TOÀN BỘ 'receipts' mỗi lần cần biết số phiếu tiếp theo (lúc mở
-        // trang VÀ sau MỖI LẦN lưu phiếu nhập) - càng nhiều phiếu càng tốn quota.
-        // BÂY GIỜ: đọc bộ đếm nhẹ app_meta/receipt_counter (chỉ 1 dòng), quét toàn bộ
-        // lịch sử chỉ 1 lần duy nhất đầu tiên (nếu chưa từng khởi tạo) để đảm bảo đúng.
-        try {
-            await migrateReceiptCounterIfNeeded(); // tự bỏ qua nếu đã khởi tạo rồi
-            const counterSnap = await db.collection('app_meta').doc('receipt_counter').get();
-            const maxNum = counterSnap.exists ? parseInt(counterSnap.data().maxNum || 0) : 0;
-            const nextNum = maxNum + 1;
-            document.getElementById('imp-receipt').value = 'PN' + nextNum.toString().padStart(2, '0');
-        } catch (err) {
-            console.warn('Không lấy được số phiếu tiếp theo (có thể do hết quota đọc):', err);
-        }
+    function updateReceiptNum() {
+        db.collection('receipts').get().then(snapshot => {
+            const count = snapshot.size + 1;
+            document.getElementById('imp-receipt').value = 'PN' + count.toString().padStart(2, '0');
+        });
     }
 
     // Thêm sản phẩm vào giỏ hàng của phiếu Nhập kho
@@ -5173,8 +5021,27 @@ db.collection('customers').onSnapshot(() => {
     }
 
     try {
-        // 1. LƯU PHIẾU NHẬP NGAY (đây là việc QUAN TRỌNG NHẤT - phải luôn thành công dù
-        // có đang hết quota đọc hay không, vì đây chỉ là 1 lệnh GHI, không cần đọc gì cả)
+        // 1. CẬP NHẬT GIÁ VÀO DATABASE (products collection)
+        // Việc này đảm bảo giá bán mới nhất cho sản phẩm được lưu lại làm mặc định
+        for (const item of cart) {
+            const snapshot = await db.collection('products')
+                .where('name', '==', item.name)
+                .where('unit', '==', item.unit)
+                .get();
+
+            if (!snapshot.empty) {
+                // Ép kiểu số cẩn thận, nếu không nhập giá thì giữ nguyên giá cũ hoặc mặc định 0
+                const newRetail = parseFloat(item.retail) || 0;
+                const newWholesale = parseFloat(item.wholesale) || 0;
+
+                await db.collection('products').doc(snapshot.docs[0].id).update({
+                    retail: newRetail,
+                    wholesale: newWholesale
+                });
+            }
+        }
+
+        // 2. LƯU PHIẾU NHẬP (Lưu giá tại thời điểm nhập vào phiếu để đối soát sau này)
         const receipt = { 
             id: receiptNum, 
             items: cart, // cart chứa giá retail/wholesale tại lúc nhập
@@ -5183,73 +5050,25 @@ db.collection('customers').onSnapshot(() => {
         };
         await db.collection('receipts').add(receipt);
 
-        // 1b. CỘNG BỘ ĐẾM SỐ PHIẾU (app_meta/receipt_counter) NGAY LẬP TỨC - cũng chỉ là
-        // phép cộng nguyên tử (FieldValue.increment), không cần đọc gì trước, nên luôn
-        // chạy được kể cả khi hết quota đọc. Số phiếu vừa dùng (receiptNum) là số hệ
-        // thống tự gán (ô readonly) nên luôn đúng bằng maxNum + 1 hiện tại.
-        try {
-            await db.collection('app_meta').doc('receipt_counter').set({
-                maxNum: firebase.firestore.FieldValue.increment(1)
-            }, { merge: true });
-        } catch (counterErr) {
-            console.warn('Không cập nhật được bộ đếm số phiếu (phiếu nhập vẫn đã lưu đúng):', counterErr);
-        }
+        // 3. ĐỒNG BỘ CACHE
+        await refreshCache(); 
 
-        // 2. CỘNG VÀO BỘ ĐẾM TỒN KHO (stock_counters) NGAY LẬP TỨC - cũng chỉ là phép
-        // cộng nguyên tử (FieldValue.increment), không cần đọc gì trước, nên luôn chạy
-        // được kể cả khi hết quota đọc.
-        if (typeof adjustStockCounters === 'function') await adjustStockCounters(cart, +1);
-
-        // Tới đây, phiếu nhập ĐÃ LƯU THÀNH CÔNG và tồn kho ĐÃ CỘNG ĐÚNG - báo thành công
-        // ngay, không để các bước "phụ" bên dưới (cần đọc dữ liệu) làm ảnh hưởng.
         Swal.fire({
             icon: 'success',
             title: 'Thành công',
-            text: 'Đã lưu phiếu nhập!',
+            text: 'Đã lưu phiếu nhập và cập nhật giá!',
             timer: 1500,
             showConfirmButton: false
         });
-
-        // 3. RESET GIAO DIỆN NGAY (không phụ thuộc đọc dữ liệu)
-        const savedCart = cart;
+        
+        // 4. RESET GIAO DIỆN
         cart = []; 
         resetImportFields();
+        updateReceiptNum();
+        loadReceipts();
 
-        // --- TỪ ĐÂY TRỞ XUỐNG LÀ CÁC BƯỚC "PHỤ" (cần đọc dữ liệu từ Firestore) ---
-        // Bọc riêng từng bước trong try/catch: nếu bước nào lỗi (ví dụ hết quota đọc),
-        // CHỈ bước đó bị ảnh hưởng - phiếu nhập và tồn kho ở trên vẫn đã lưu đúng, không
-        // bị mất và không hiện nhầm thông báo "lưu thất bại".
-
-        // 3b. Cập nhật giá bán mới nhất vào danh mục sản phẩm (nếu đọc được)
-        try {
-            for (const item of savedCart) {
-                const snapshot = await db.collection('products')
-                    .where('name', '==', item.name)
-                    .where('unit', '==', item.unit)
-                    .get();
-
-                if (!snapshot.empty) {
-                    const newRetail = parseFloat(item.retail) || 0;
-                    const newWholesale = parseFloat(item.wholesale) || 0;
-                    await db.collection('products').doc(snapshot.docs[0].id).update({
-                        retail: newRetail,
-                        wholesale: newWholesale
-                    });
-                }
-            }
-        } catch (priceErr) {
-            console.warn('Không cập nhật được giá mới vào Danh Mục SP (có thể do hết quota đọc) - phiếu nhập vẫn đã lưu đúng:', priceErr);
-        }
-
-        try {
-            updateReceiptNum();
-            loadReceipts();
-            await refreshCache();
-            if (typeof calculateAllStock === 'function') await calculateAllStock();
-            window.dispatchEvent(new CustomEvent('dataChanged'));
-        } catch (refreshErr) {
-            console.warn('Không tải lại được danh sách hiển thị (có thể do hết quota đọc) - phiếu nhập vẫn đã lưu đúng, tải lại trang (F5) khi quota hồi phục để xem đủ:', refreshErr);
-        }
+        if (typeof calculateAllStock === 'function') await calculateAllStock();
+        window.dispatchEvent(new CustomEvent('dataChanged'));
         
     } catch (error) {
         console.error("Lỗi lưu phiếu nhập: ", error);
@@ -5384,30 +5203,39 @@ function removeFromCart(index) {
     const targetMonth = filterMonth || currentMonth;
     if (!filterMonth) document.getElementById('filter-month').value = currentMonth;
 
-    // TỐI ƯU QUAN TRỌNG: trước đây đọc TOÀN BỘ lịch sử phiếu nhập (mọi tháng từ trước
-    // tới giờ) mỗi lần mở trang hoặc sau mỗi lần nhập/xóa phiếu - đây là 1 trong những
-    // nguồn tốn quota lớn nhất vì hàm này chạy rất thường xuyên. Giờ chỉ đọc ĐÚNG THÁNG
-    // đang xem trực tiếp từ truy vấn Firestore. Việc "tìm kiếm trên toàn bộ phiếu" (mọi
-    // tháng) được tách riêng, chỉ tải khi người dùng thực sự gõ tìm kiếm (xem hàm
-    // ensureAllReceiptsFullLoaded + filterReceipts bên dưới).
-    const [ty, tm] = targetMonth.split('-').map(Number);
-    const monthStart = new Date(ty, tm - 1, 1);
-    const monthEnd = new Date(ty, tm, 0, 23, 59, 59);
-
-    db.collection('receipts')
-      .where('date', '>=', monthStart)
-      .where('date', '<=', monthEnd)
-      .orderBy('date', 'desc')
-      .get()
+    db.collection('receipts').orderBy('date', 'desc').get()
     .then(snapshot => {
         leftBody.innerHTML = '';
         rightBody.innerHTML = '';
         window.allReceipts = []; 
+        // LƯU LẠI TOÀN BỘ PHIẾU (mọi tháng) để phục vụ tìm kiếm không giới hạn theo tháng
+        window.allReceiptsFull = [];
 
-        const total = snapshot.docs.length;
+        snapshot.docs.forEach(doc => {
+            const data = doc.data();
+            const date = data.date?.toDate ? data.date.toDate() : null;
+            if (!date) return;
+            window.allReceiptsFull.push({
+                docId: doc.id,
+                displayId: data.id || '---',
+                dateStr: date.toLocaleDateString('vi-VN'),
+                itemCount: Array.isArray(data.items) ? data.items.length : 0
+            });
+        });
+
+        // Lọc danh sách theo tháng để hiển thị mặc định
+        const filteredDocs = snapshot.docs.filter(doc => {
+            const data = doc.data();
+            const date = data.date?.toDate ? data.date.toDate() : null;
+            if (!date) return false;
+            const docMonth = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
+            return docMonth === targetMonth;
+        });
+
+        const total = filteredDocs.length;
         const midPoint = Math.ceil(total / 2);
 
-        snapshot.docs.forEach((doc, index) => {
+        filteredDocs.forEach((doc, index) => {
             const data = doc.data();
             
             window.allReceipts.push({
@@ -5439,31 +5267,6 @@ function removeFromCart(index) {
     });
 }
 
-// Tải TOÀN BỘ lịch sử phiếu nhập (mọi tháng) - CHỈ để phục vụ tìm kiếm không giới hạn
-// theo tháng. Chỉ thực sự đọc Firestore ở LẦN ĐẦU tiên người dùng gõ tìm kiếm trong
-// phiên làm việc này (sau đó dùng lại bản đã tải, không đọc lại nữa) - tránh việc phải
-// tải toàn bộ lịch sử mỗi khi mở trang/nhập/xóa phiếu như trước đây.
-async function ensureAllReceiptsFullLoaded() {
-    if (window.__allReceiptsFullLoaded) {
-        return window.allReceiptsFull;
-    }
-    const snapshot = await db.collection('receipts').orderBy('date', 'desc').get();
-    window.allReceiptsFull = [];
-    snapshot.docs.forEach(doc => {
-        const data = doc.data();
-        const date = data.date?.toDate ? data.date.toDate() : null;
-        if (!date) return;
-        window.allReceiptsFull.push({
-            docId: doc.id,
-            displayId: data.id || '---',
-            dateStr: date.toLocaleDateString('vi-VN'),
-            itemCount: Array.isArray(data.items) ? data.items.length : 0
-        });
-    });
-    window.__allReceiptsFullLoaded = true;
-    return window.allReceiptsFull;
-}
-
 
 window.deleteReceipt = function(docId) {
     Swal.fire({
@@ -5486,19 +5289,8 @@ window.deleteReceipt = function(docId) {
                 console.log("Xóa thành công ID hệ thống:", docId);
                 if(typeof updateReceiptNum === 'function') updateReceiptNum();
                 
-                // --- TRỪ LẠI BỘ ĐẾM TỒN KHO ĐÚNG BẰNG SỐ LƯỢNG PHIẾU NÀY ĐÃ CỘNG VÀO LÚC NHẬP ---
-                // QUAN TRỌNG: bọc riêng trong try/catch - nếu bước này gặp lỗi (mạng chậm,
-                // quota tạm thời...) thì phiếu VẪN ĐÃ XÓA THÀNH CÔNG rồi, nên các bước làm
-                // mới danh sách phiếu / Kho Hàng bên dưới vẫn phải chạy tiếp bình thường,
-                // không được để 1 lỗi nhỏ ở đây làm gãy toàn bộ giao diện sau khi xóa.
-                try {
-                    if (d && Array.isArray(d.items) && typeof adjustStockCounters === 'function') {
-                        await adjustStockCounters(d.items, -1);
-                    }
-                    if (typeof calculateAllStock === 'function') await calculateAllStock();
-                } catch (stockErr) {
-                    console.error('Lỗi khi cập nhật lại tồn kho sau khi xóa phiếu (phiếu vẫn đã xóa thành công, hãy bấm "Sửa lại tồn kho ngay" ở trang Quản Lý để đồng bộ lại):', stockErr);
-                }
+                // --- THÊM CÁC DÒNG NÀY ĐỂ CẬP NHẬT TỒN KHO ---
+                await calculateAllStock();
                 if(typeof renderProductGrid === 'function') renderProductGrid();
                 if(typeof loadInventory === 'function') loadInventory();
                 // ---------------------------------------------
@@ -5525,7 +5317,7 @@ function handleReceiptMonthChange() {
     loadReceipts();
 }
 
-async function filterReceipts() {
+function filterReceipts() {
     const leftBody = document.getElementById('list-receipts-left');
     const rightBody = document.getElementById('list-receipts-right');
     if (!leftBody || !rightBody) return;
@@ -5537,10 +5329,8 @@ async function filterReceipts() {
     let matched;
 
     if (keyword !== "") {
-        // CÓ TỪ KHÓA: tìm trên TOÀN BỘ phiếu (mọi tháng) - chỉ tải 1 lần duy nhất trong
-        // phiên làm việc (nếu chưa tải), không phải lúc nào cũng đọc lại toàn bộ lịch sử.
-        const fullList = await ensureAllReceiptsFullLoaded();
-        matched = (fullList || []).filter(r => r.displayId.toLowerCase().includes(keyword));
+        // CÓ TỪ KHÓA: tìm trên TOÀN BỘ phiếu (mọi tháng), không giới hạn theo tháng/khoảng ngày đang chọn
+        matched = (window.allReceiptsFull || []).filter(r => r.displayId.toLowerCase().includes(keyword));
     } else {
         // KHÔNG CÓ TỪ KHÓA: lọc theo khoảng ngày trong phạm vi tháng đang tải (window.allReceipts)
         const fromDate = fromVal ? new Date(fromVal) : new Date(0);
@@ -5613,91 +5403,123 @@ function setDateRangeForMonth(monthValue) {
     const datalist = document.getElementById('prod-list');
     if (!datalist) return; // Dừng lại nếu trang hiện tại không có phần tử này
 
-    // TRƯỚC ĐÂY: đọc TOÀN BỘ phiếu nhập mỗi lần chỉ để lấy danh sách tên SP gợi ý -
-    // rất tốn quota và bị gọi lại sau MỖI lần lưu phiếu nhập. BÂY GIỜ: lấy thẳng từ
-    // danh mục sản phẩm đã có sẵn trong bộ nhớ (window.allProducts), không đọc gì
-    // thêm từ Firestore nên vẫn hoạt động đúng kể cả khi hết quota đọc.
-    const names = (window.allProducts || []).map(p => p.name).filter(Boolean);
-    datalist.innerHTML = names.map(name => `<option value="${name}">`).join('');
+    db.collection('receipts').get().then(snapshot => {
+        const names = new Set();
+        snapshot.forEach(doc => { 
+            if(doc.data().items) doc.data().items.forEach(item => names.add(item.name)); 
+        });
+        
+        datalist.innerHTML = Array.from(names).map(name => `<option value="${name}">`).join('');
+    }).catch(err => {
+        console.error("Lỗi khi tải danh sách sản phẩm:", err);
+    });
 }
 
     // Cập nhật hàm loadInventory trong index.html
-async function loadInventory() {
-    // --- TỐI ƯU QUAN TRỌNG ---
-    // TRƯỚC ĐÂY: đọc TOÀN BỘ phiếu nhập + phiếu xuất mỗi lần mở trang Kho Hàng để tự cộng
-    // trừ ra tồn kho hiện tại - càng nhiều lịch sử càng nặng, tốn quota tăng dần mãi mãi.
-    //
-    // BÂY GIỜ: lấy tồn kho hiện tại trực tiếp từ bộ đếm 'stock_counters' (chỉ 1 dòng cho
-    // mỗi sản phẩm, rất nhẹ, không phụ thuộc độ dài lịch sử), và lấy tên/ĐVT/giá từ cache
-    // sản phẩm đã có sẵn trong bộ nhớ (window.allProductCache - đã được tải sẵn lúc mở
-    // app), không cần đọc thêm gì từ 'receipts'/'sales' nữa.
-    try {
-        const stockSnap = await db.collection('stock_counters').get();
-        const stockMap = {};
-        stockSnap.forEach(doc => {
-            const d = doc.data();
-            if (d && d.name) stockMap[d.name] = parseFloat(d.qty || 0);
+function loadInventory() {
+    // 1. Lấy toàn bộ phiếu nhập - Sắp xếp theo ngày tăng dần để ghi đè giá mới nhất vào cuối
+    db.collection('receipts').orderBy('date', 'asc').get().then(snapshotNhap => {
+        const inventory = {};
+        const orderList = []; // Giữ thứ tự xuất hiện lần đầu
+
+        snapshotNhap.forEach(doc => {
+            doc.data().items.forEach(item => {
+                const key = (item.name + "_" + item.unit).toLowerCase().trim();
+                
+                // Chuyển parseInt thành parseFloat
+                const qtyValue = parseFloat(item.qty || 0);
+                
+                if (!inventory[key]) {
+                    // Lần đầu thấy: khởi tạo object và ghi nhớ thứ tự
+                    inventory[key] = { ...item, qty: qtyValue };
+                    orderList.push(key);
+                } else {
+                    // Đã thấy: cộng dồn số lượng
+                    inventory[key].qty += qtyValue;
+                    
+                    // QUAN TRỌNG: Ghi đè giá mới nhất từ phiếu nhập sau
+                    inventory[key].retail = item.retail;
+                    inventory[key].wholesale = item.wholesale;
+                }
+            });
         });
 
-        const productsSource = (window.allProductCache && window.allProductCache.length)
-            ? [...window.allProductCache].sort((a, b) => compareProductDisplayOrder(a.name, b.name))
-            : [];
+        // 2. Lấy toàn bộ phiếu xuất (để trừ kho)
+        db.collection('sales').get().then(snapshotXuat => {
+            snapshotXuat.forEach(doc => {
+                doc.data().items.forEach(item => {
+                    const key = (item.name + "_" + item.unit).toLowerCase().trim();
+                    if (inventory[key]) {
+                        inventory[key].qty -= parseFloat(item.qty || 0);
+                    }
+                });
+            });
 
-        const tbody = document.getElementById('inventory-data');
-        if (!tbody) return;
-        tbody.innerHTML = '';
+            // 3. Hiển thị kết quả
+            const tbody = document.getElementById('inventory-data');
+            tbody.innerHTML = '';
+            
+            orderList.forEach(key => {
+                const item = inventory[key];
+                
+                // --- BẮT ĐẦU ĐOẠN SỬA ---
+                // Tìm sản phẩm trong allProducts để lấy giá mới nhất nếu có
+                const productData = window.allProducts.find(p => p.name === item.name);
+                
+                // Ưu tiên giá từ productData (nếu đã sửa ở kho), nếu không có mới dùng giá từ phiếu nhập (item)
+                const rVal = (productData && productData.retail) ? productData.retail : (item.retail || 0);
+                const wVal = (productData && productData.wholesale) ? productData.wholesale : (item.wholesale || 0);
+                
+                const retail = Number(rVal).toLocaleString('vi-VN');
+                const wholesale = Number(wVal).toLocaleString('vi-VN');
+                // --- KẾT THÚC ĐOẠN SỬA ---
+                
+                const qtyNum = parseFloat(item.qty || 0);
+                const displayQty = (Math.round(qtyNum * 100) / 100).toString();
+                
+                const barcode = (productData && productData.barcode) ? productData.barcode : '---';
 
-        productsSource.forEach(item => {
-            const qtyNum = stockMap[item.name] !== undefined ? stockMap[item.name] : 0;
-
-            const productData = (window.allProducts || []).find(p => p.name === item.name);
-
-            const rVal = (productData && productData.retail) ? productData.retail : (item.retail || 0);
-            const wVal = (productData && productData.wholesale) ? productData.wholesale : (item.wholesale || 0);
-
-            const retail = Number(rVal).toLocaleString('vi-VN');
-            const wholesale = Number(wVal).toLocaleString('vi-VN');
-
-            const displayQty = (Math.round(qtyNum * 100) / 100).toString();
-            const barcode = (productData && productData.barcode) ? productData.barcode : '---';
-
-            tbody.innerHTML += `
-            <tr class="transition-all duration-300">
-                <td colspan="5" class="p-0.5">
-                    <div class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2 md:p-1.5 shadow-[0_4px_6px_-2px_rgba(0,0,0,0.2)]" style="border-left-color:#60a5fa !important; border-right-color:#60a5fa !important;">
-                        <div class="md:px-2 md:w-[40%] text-left">
-                            <div class="font-bold text-[13px] text-slate-800 dark:text-slate-100 leading-tight">${item.name}</div>
-                            <div class="text-[10px] text-gray-400 dark:text-slate-500 font-mono">Mã: ${barcode}</div>
-                        </div>
-                        <div class="flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700">
-                            <span class="text-[11px] text-slate-400 md:hidden">ĐVT: <b class="text-slate-600 dark:text-slate-300">${item.unit}</b></span>
-                            <span class="hidden md:block md:px-1 md:w-[10%] md:text-center text-[12px] text-slate-600 dark:text-slate-400">${item.unit}</span>
-                            <span class="font-bold text-[13px] md:px-1 md:w-[10%] md:text-center ${qtyNum < 0 ? 'text-red-600' : 'text-blue-600 dark:text-blue-400'}">
-                                ${displayQty}
-                            </span>
-                        </div>
-                        <div class="flex items-center gap-3 md:contents">
-                            <div class="flex-1 md:px-1 md:w-[20%] flex items-center gap-1">
-                                <span class="text-[10px] text-slate-400 md:hidden">Lẻ:</span>
-                                <input type="text" value="${retail}" 
-                                       class="w-full text-center text-[12px] text-slate-600 dark:text-slate-300 bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 focus:border-blue-500 outline-none"
-                                       onblur="updateProductPrice('${item.name}', this.value, 'retail')">
+                // Cấu trúc hiển thị (giữ nguyên, dùng biến retail/wholesale vừa tính ở trên)
+                tbody.innerHTML += `
+                <tr class="transition-all duration-300">
+                    <td colspan="5" class="p-0.5">
+                        <div class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2 md:p-1.5 shadow-[0_4px_6px_-2px_rgba(0,0,0,0.2)]" style="border-left-color:#60a5fa !important; border-right-color:#60a5fa !important;">
+                            <div class="md:px-2 md:w-[40%] text-left">
+                                <div class="font-bold text-[13px] text-slate-800 dark:text-slate-100 leading-tight">${item.name}</div>
+                                <div class="text-[10px] text-gray-400 dark:text-slate-500 font-mono">Mã: ${barcode}</div>
                             </div>
-                            <div class="flex-1 md:px-1 md:w-[20%] flex items-center gap-1">
-                                <span class="text-[10px] text-slate-400 md:hidden">Sỉ:</span>
-                                <input type="text" value="${wholesale}" 
-                                       class="w-full text-center text-[12px] text-slate-600 dark:text-slate-300 bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 focus:border-blue-500 outline-none"
-                                       onblur="updateProductPrice('${item.name}', this.value, 'wholesale')">
+                            <div class="flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700">
+                                <span class="text-[11px] text-slate-400 md:hidden">ĐVT: <b class="text-slate-600 dark:text-slate-300">${item.unit}</b></span>
+                                <span class="hidden md:block md:px-1 md:w-[10%] md:text-center text-[12px] text-slate-600 dark:text-slate-400">${item.unit}</span>
+                                <span class="font-bold text-[13px] md:px-1 md:w-[10%] md:text-center ${item.qty < 0 ? 'text-red-600' : 'text-blue-600 dark:text-blue-400'}">
+                                    ${displayQty}
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-3 md:contents">
+                                <div class="flex-1 md:px-1 md:w-[20%] flex items-center gap-1">
+                                    <span class="text-[10px] text-slate-400 md:hidden">Lẻ:</span>
+                                    <input type="text" value="${retail}" 
+                                           class="w-full text-center text-[12px] text-slate-600 dark:text-slate-300 bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 focus:border-blue-500 outline-none"
+                                           onblur="updateProductPrice('${item.name}', this.value, 'retail')">
+                                </div>
+                                <div class="flex-1 md:px-1 md:w-[20%] flex items-center gap-1">
+                                    <span class="text-[10px] text-slate-400 md:hidden">Sỉ:</span>
+                                    <input type="text" value="${wholesale}" 
+                                           class="w-full text-center text-[12px] text-slate-600 dark:text-slate-300 bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 focus:border-blue-500 outline-none"
+                                           onblur="updateProductPrice('${item.name}', this.value, 'wholesale')">
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </td>
-            </tr>
-            `;
+                    </td>
+                </tr>
+                `;
+            });
+        }).catch(err => {
+            console.error("Lỗi khi tải phiếu xuất: ", err);
         });
-    } catch (err) {
-        console.error("Lỗi khi tải Kho Hàng: ", err);
-    }
+    }).catch(err => {
+        console.error("Lỗi khi tải phiếu nhập: ", err);
+    });
 }
 
 // Hàm này lấy danh sách từ Firebase và đổ vào tất cả các ô chọn có class "product-select"
@@ -6092,17 +5914,49 @@ async function findAndFillProduct(decodedText) {
 
     selectBox.dispatchEvent(new Event('change', { bubbles: true }));
     
+    // --- BỔ SUNG: TỰ ĐỘNG ĐIỀN ĐVT VÀ GIÁ (Không ảnh hưởng code gốc) ---
+    const unitBox = document.getElementById('imp-unit');
+    if (unitBox) {
+        unitBox.value = product.unit || '';
+    }
+
+    const retailBox = document.getElementById('imp-retail');
+    if (retailBox) {
+        retailBox.value = product.retail || product.gia_le || '';
+    }
+
+    const wholesaleBox = document.getElementById('imp-wholesale');
+    if (wholesaleBox) {
+        wholesaleBox.value = product.wholesale || product.gia_si || '';
+    }
+    // -------------------------------------------------------------
+
     // THÔNG BÁO DUY NHẤT
     Swal.fire({ icon: 'success', title: 'Đã tìm thấy', text: product.name, timer: 1000, showConfirmButton: false });
     
     // Focus vào ô số lượng
     document.getElementById('imp-qty').focus();
 }
-// Hàm điền dữ liệu "sạch"
-// Chỉ giữ lại 1 bản duy nhất này thôi
 
-
-// Hàm điền dữ liệu vào ô Tên sản phẩm
+document.addEventListener('change', function(e) {
+    if (e.target && e.target.id === 'imp-name') {
+        const selectedName = e.target.value;
+        if (!window.allProducts) return;
+        
+        const product = window.allProducts.find(p => p.name === selectedName);
+        if (product) {
+            // Điền ĐVT
+            const unitBox = document.getElementById('imp-unit');
+            if (unitBox) {
+                unitBox.value = product.unit || '';
+            }
+            
+            // ⭐ BỔ SUNG: TỰ ĐỘNG ĐIỀN GIÁ LẺ & GIÁ SỈ KHI CHỌN THỦ CÔNG
+            document.getElementById('imp-retail').value = product.retail || product.gia_le || '';
+            document.getElementById('imp-wholesale').value = product.wholesale || product.gia_si || '';
+        }
+    }
+});
 
 
 function stopScanner(pageType) {
@@ -6125,23 +5979,30 @@ function stopScanner(pageType) {
 //=============================TRANG BÁN HÀNG ====================
 //================================================================	
 
-     async function updateSellReceiptNum() {
-    // TRƯỚC ĐÂY: đọc TOÀN BỘ 'sales' mỗi lần cần biết số hoá đơn tiếp theo (lúc mở
-    // trang VÀ sau MỖI LẦN bán hàng) - càng nhiều hoá đơn càng tốn quota.
-    // BÂY GIỜ: đọc bộ đếm nhẹ app_meta/sales_counter (chỉ 1 dòng), quét toàn bộ lịch sử
-    // chỉ 1 lần duy nhất đầu tiên (nếu chưa từng khởi tạo) để đảm bảo đúng.
-    try {
-        await migrateSalesCounterIfNeeded(); // tự bỏ qua nếu đã khởi tạo rồi
-        const counterSnap = await db.collection('app_meta').doc('sales_counter').get();
-        const maxNum = counterSnap.exists ? parseInt(counterSnap.data().maxNum || 0) : 0;
+     function updateSellReceiptNum() {
+    db.collection('sales').get().then(snapshot => {
+        let maxNum = 0;
+        
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            // Lấy ID phiếu (giả sử định dạng là PX01, PX02...)
+            const id = data.id || ""; 
+            // Cắt chữ "PX" ra chỉ lấy phần số
+            const currentNum = parseInt(id.replace('PX', '')) || 0;
+            
+            // Tìm số lớn nhất
+            if (currentNum > maxNum) {
+                maxNum = currentNum;
+            }
+        });
+
+        // Tạo số tiếp theo: Lấy số lớn nhất + 1
         const nextNum = (maxNum + 1).toString().padStart(2, '0');
         const receiptInput = document.getElementById('sell-receipt');
         if (receiptInput) {
             receiptInput.value = 'PX' + nextNum;
         }
-    } catch (err) {
-        console.warn('Không lấy được số hoá đơn tiếp theo (có thể do hết quota đọc):', err);
-    }
+    });
 }
 
     // 2. Cập nhật hàm autoFillDetails
@@ -6175,14 +6036,33 @@ async function autoFillDetails(name) {
     }
 
     // 3. TÍNH TỒN KHO TỐI ƯU
-    // TRƯỚC ĐÂY: đọc TOÀN BỘ phiếu nhập + phiếu xuất mỗi lần chọn 1 sản phẩm để bán -
-    // đây là nơi TỐN QUOTA ĐỌC NHIỀU NHẤT trong cả hệ thống (chạy rất nhiều lần/ngày,
-    // mỗi lần đọc toàn bộ lịch sử). BÂY GIỜ: lấy thẳng từ window.currentStockMap - số
-    // liệu này đã được tính sẵn và luôn cập nhật đúng từ 'stock_counters' (rất nhẹ),
-    // không cần đọc gì thêm từ Firestore nên vẫn chạy đúng kể cả khi hết quota đọc.
-    currentStock = window.currentStockMap ? (window.currentStockMap[cleanName] || 0) : 0;
-    if (currentStock <= 0) {
-        console.warn("Sản phẩm hết hàng hoặc chưa có dữ liệu nhập!");
+    try {
+        const snapshotNhap = await db.collection('receipts').get();
+        const snapshotXuat = await db.collection('sales').get();
+        
+        let nhap = 0, xuat = 0;
+        
+        snapshotNhap.forEach(doc => {
+            (doc.data().items || []).forEach(i => { 
+                if(i.name && i.name.trim() === cleanName) nhap += parseInt(i.qty || 0); 
+            });
+        });
+        
+        snapshotXuat.forEach(doc => {
+            (doc.data().items || []).forEach(i => { 
+                if(i.name && i.name.trim() === cleanName) xuat += parseInt(i.qty || 0); 
+            });
+        });
+        
+        currentStock = nhap - xuat;
+        
+        console.log(`Kết quả tồn kho cho ${cleanName}: Nhập=${nhap}, Xuất=${xuat}, Còn=${currentStock}`);
+        
+        if (currentStock <= 0) {
+            console.warn("Sản phẩm hết hàng hoặc chưa có dữ liệu nhập!");
+        }
+    } catch (err) {
+        console.error("Lỗi khi tính tồn kho:", err);
     }
 }
 
@@ -6292,306 +6172,66 @@ function renderSellCart() {
     updateGrandTotal();
 }
 
-// ============================================================
-// HỆ THỐNG ĐẾM TỒN KHO THEO THỜI GIAN THỰC ('stock_counters')
-// ------------------------------------------------------------
-// TRƯỚC ĐÂY: mỗi lần cần biết tồn kho, ứng dụng phải quét lại TOÀN BỘ
-// lịch sử phiếu nhập ('receipts') và phiếu xuất ('sales') để cộng/trừ ra
-// số tồn hiện tại. Cách này càng ngày càng CHẬM khi lịch sử càng nhiều
-// (đọc cả nghìn phiếu mỗi lần), và không AN TOÀN khi 2 người cùng bán
-// 1 sản phẩm cùng lúc (có thể dẫn tới âm kho vì không có kiểm tra nguyên tử).
-//
-// BÂY GIỜ: mỗi sản phẩm có 1 "bộ đếm" riêng trong collection 'stock_counters'
-// (field 'qty' = tồn kho thực tế), được cộng/trừ NGAY khi có phiếu nhập/xuất
-// được tạo hoặc xóa. Muốn biết tồn kho chỉ cần đọc các bộ đếm này (số lượng
-// = số sản phẩm, gần như không đổi) thay vì đọc lại toàn bộ lịch sử giao dịch
-// (tăng dần mãi mãi theo thời gian).
-// ============================================================
+// HMAF MỚI 
 
-// Chuyển tên sản phẩm thành 1 ID hợp lệ cho Firestore document
-function stockDocId(name) {
-    return 'p_' + encodeURIComponent(String(name || ''));
-}
-function getStockRef(name) {
-    return db.collection('stock_counters').doc(stockDocId(name));
-}
 
-// Cộng/trừ vào bộ đếm tồn kho (dùng khi nhập kho / xóa phiếu nhập / hoàn kho khi xóa hóa đơn).
-// Dùng FieldValue.increment nên là phép cộng NGUYÊN TỬ ở phía server - an toàn kể cả khi
-// nhiều người thao tác cùng lúc, không cần transaction vì đây chỉ là cộng dồn, không có
-// điều kiện cần kiểm tra trước (khác với lúc bán hàng - xem saveAndPrint bên dưới).
-async function adjustStockCounters(items, sign) {
-    const qtyByName = {};
-    (items || []).forEach(item => {
-        qtyByName[item.name] = (qtyByName[item.name] || 0) + (parseFloat(item.qty) || 0);
-    });
-    const names = Object.keys(qtyByName);
-    if (names.length === 0) return;
-
-    // Chia lô tối đa 400 lệnh ghi/batch để không vượt giới hạn 500 của Firestore
-    for (let i = 0; i < names.length; i += 400) {
-        const batch = db.batch();
-        names.slice(i, i + 400).forEach(name => {
-            batch.set(getStockRef(name), {
-                name: name,
-                qty: firebase.firestore.FieldValue.increment(sign * qtyByName[name]),
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
-        });
-        await batch.commit();
-    }
-}
-
-// Chốt chặn: đảm bảo trong 1 phiên làm việc (1 lần mở trang), hàm khởi tạo bên dưới
-// chỉ được PHÉP THỬ ĐÚNG 1 LẦN - dù thành công hay thất bại. Đây là điểm mấu chốt để
-// tránh việc nếu lần khởi tạo bị lỗi giữa chừng (mất mạng, quá tải...) mà không kịp đánh
-// dấu "đã xong", thì các lần gọi calculateAllStock() sau đó (mỗi lần vào lại trang Bán
-// Hàng) sẽ LẶP LẠI việc quét toàn bộ lịch sử + ghi đè tồn kho, gây tốn quota rất nhanh.
-let __stockMigrationAttempted = false;
-
-// ============================================================
-// BỘ ĐẾM SỐ PHIẾU NHẬP (app_meta/receipt_counter)
-// TRƯỚC ĐÂY: mỗi lần cần biết "số phiếu tiếp theo" (lúc mở trang VÀ sau MỖI LẦN lưu
-// phiếu nhập), code đọc TOÀN BỘ collection 'receipts' để tìm số PN lớn nhất - càng
-// nhiều phiếu càng tốn quota, tăng dần mãi mãi.
-// BÂY GIỜ: giữ 1 bộ đếm duy nhất tại app_meta/receipt_counter (field 'maxNum'), chỉ
-// quét toàn bộ lịch sử ĐÚNG 1 LẦN DUY NHẤT để khởi tạo (giống hệt cách làm với
-// stock_counters ở trên), sau đó chỉ đọc 1 dòng rất nhẹ + cộng nguyên tử
-// (FieldValue.increment) mỗi khi lưu phiếu mới - ô "Số phiếu" là readonly (hệ thống tự
-// gán), nên số được cộng luôn khớp đúng số đã hiển thị cho người dùng.
-let __receiptCounterMigrationAttempted = false;
-
-async function migrateReceiptCounterIfNeeded() {
-    if (__receiptCounterMigrationAttempted) return;
-    __receiptCounterMigrationAttempted = true;
-
-    try {
-        const metaRef = db.collection('app_meta').doc('receipt_counter_migration_v1');
-        const metaSnap = await metaRef.get();
-        if (metaSnap.exists) return; // Đã khởi tạo rồi, không cần quét lại lịch sử nữa
-
-        console.log('Đang khởi tạo bộ đếm số phiếu nhập lần đầu (chỉ chạy 1 lần duy nhất)...');
-        const snap = await db.collection('receipts').get();
-        let maxNum = 0;
-        snap.forEach(doc => {
-            const idStr = doc.data().id || '';
-            const currentNum = parseInt(idStr.replace('PN', '')) || 0;
-            if (currentNum > maxNum) maxNum = currentNum;
-        });
-
-        await db.collection('app_meta').doc('receipt_counter').set({ maxNum: maxNum }, { merge: true });
-        await metaRef.set({ done: true, time: firebase.firestore.FieldValue.serverTimestamp() });
-        console.log('Đã khởi tạo xong bộ đếm số phiếu nhập, số lớn nhất hiện có:', maxNum);
-    } catch (e) {
-        console.error('Lỗi khởi tạo bộ đếm số phiếu nhập:', e);
-    }
-}
-
-// Bộ đếm số HOÁ ĐƠN BÁN (app_meta/sales_counter) - hoàn toàn tương tự bộ đếm số phiếu
-// nhập ở trên, chỉ khác collection nguồn ('sales') và tiền tố ('PX').
-let __salesCounterMigrationAttempted = false;
-
-async function migrateSalesCounterIfNeeded() {
-    if (__salesCounterMigrationAttempted) return;
-    __salesCounterMigrationAttempted = true;
-
-    try {
-        const metaRef = db.collection('app_meta').doc('sales_counter_migration_v1');
-        const metaSnap = await metaRef.get();
-        if (metaSnap.exists) return; // Đã khởi tạo rồi, không cần quét lại lịch sử nữa
-
-        console.log('Đang khởi tạo bộ đếm số hoá đơn bán lần đầu (chỉ chạy 1 lần duy nhất)...');
-        const snap = await db.collection('sales').get();
-        let maxNum = 0;
-        snap.forEach(doc => {
-            const idStr = doc.data().id || '';
-            const currentNum = parseInt(idStr.replace('PX', '')) || 0;
-            if (currentNum > maxNum) maxNum = currentNum;
-        });
-
-        await db.collection('app_meta').doc('sales_counter').set({ maxNum: maxNum }, { merge: true });
-        await metaRef.set({ done: true, time: firebase.firestore.FieldValue.serverTimestamp() });
-        console.log('Đã khởi tạo xong bộ đếm số hoá đơn bán, số lớn nhất hiện có:', maxNum);
-    } catch (e) {
-        console.error('Lỗi khởi tạo bộ đếm số hoá đơn bán:', e);
-    }
-}
-
-// Khởi tạo bộ đếm tồn kho từ lịch sử cũ - CHỈ CHẠY ĐÚNG 1 LẦN DUY NHẤT sau khi
-// cập nhật lên phiên bản này (đánh dấu lại bằng document app_meta/stock_migration_v1).
-// Những lần mở ứng dụng sau sẽ tự động bỏ qua bước này.
-async function migrateStockCountersIfNeeded() {
-    if (__stockMigrationAttempted) return; // Đã thử trong phiên này rồi - không thử lại nữa
-    __stockMigrationAttempted = true;
-
-    try {
-        const metaRef = db.collection('app_meta').doc('stock_migration_v1');
-        const metaSnap = await metaRef.get();
-        if (metaSnap.exists) return; // Đã khởi tạo rồi, không cần quét lại lịch sử nữa
-
-        console.log('Đang khởi tạo hệ thống đếm tồn kho lần đầu (chỉ chạy 1 lần duy nhất)...');
-        let inventory = {};
-
-        const snapNhap = await db.collection('receipts').get();
-        snapNhap.forEach(doc => {
-            (doc.data().items || []).forEach(item => {
-                inventory[item.name] = (inventory[item.name] || 0) + (parseFloat(item.qty) || 0);
-            });
-        });
-
-        const snapXuat = await db.collection('sales').get();
-        snapXuat.forEach(doc => {
-            (doc.data().items || []).forEach(item => {
-                inventory[item.name] = (inventory[item.name] || 0) - (parseFloat(item.qty) || 0);
-            });
-        });
-
-        const names = Object.keys(inventory);
-        for (let i = 0; i < names.length; i += 400) {
-            const batch = db.batch();
-            names.slice(i, i + 400).forEach(name => {
-                batch.set(getStockRef(name), {
-                    name: name,
-                    qty: Math.round((inventory[name] || 0) * 100) / 100,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            });
-            await batch.commit();
-        }
-
-        await metaRef.set({ done: true, time: firebase.firestore.FieldValue.serverTimestamp() });
-        console.log('Đã khởi tạo xong hệ thống đếm tồn kho:', inventory);
-    } catch (e) {
-        console.error('Lỗi khởi tạo hệ thống đếm tồn kho:', e);
-    }
-}
-
-// ============================================================
-// HÀM SỬA LẠI TỒN KHO (chạy TAY, 1 LẦN) - dùng để khắc phục số liệu
-// đang bị sai do các lần khởi tạo trước đó bị lỗi giữa chừng (ví dụ do
-// hết quota Firestore). Hàm này tính lại tồn kho CHÍNH XÁC từ toàn bộ
-// lịch sử phiếu nhập/xuất hiện có rồi GHI ĐÈ lại toàn bộ 'stock_counters'.
-//
-// CÁCH DÙNG: Mở Console trình duyệt (F12) ở trang này, gõ:
-//     forceResyncStockCounters()
-// rồi bấm Enter, đợi thông báo "Đã sửa xong" rồi tải lại trang.
-// ============================================================
-window.forceResyncStockCounters = async function () {
-    console.log('Đang tính lại tồn kho chính xác từ lịch sử, vui lòng đợi...');
-    try {
-        let inventory = {};
-
-        const snapNhap = await db.collection('receipts').get();
-        snapNhap.forEach(doc => {
-            (doc.data().items || []).forEach(item => {
-                inventory[item.name] = (inventory[item.name] || 0) + (parseFloat(item.qty) || 0);
-            });
-        });
-
-        const snapXuat = await db.collection('sales').get();
-        snapXuat.forEach(doc => {
-            (doc.data().items || []).forEach(item => {
-                inventory[item.name] = (inventory[item.name] || 0) - (parseFloat(item.qty) || 0);
-            });
-        });
-
-        const names = Object.keys(inventory);
-        for (let i = 0; i < names.length; i += 400) {
-            const batch = db.batch();
-            names.slice(i, i + 400).forEach(name => {
-                batch.set(getStockRef(name), {
-                    name: name,
-                    qty: Math.round((inventory[name] || 0) * 100) / 100,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            });
-            await batch.commit();
-        }
-
-        // Đánh dấu lại "đã khởi tạo" để khỏi bị chạy lại tự động lần nữa
-        await db.collection('app_meta').doc('stock_migration_v1').set({
-            done: true, time: firebase.firestore.FieldValue.serverTimestamp(), manualResync: true
-        });
-
-        console.log('✅ Đã sửa xong tồn kho:', inventory);
-        alert('Đã sửa xong tồn kho! Vui lòng tải lại trang (F5) để thấy số liệu mới.');
-    } catch (e) {
-        console.error('Lỗi khi sửa tồn kho:', e);
-        alert('Có lỗi khi sửa tồn kho: ' + e.message + '\nNếu là lỗi "quota", vui lòng đợi vài giờ rồi thử lại (quota Firestore miễn phí reset theo ngày).');
-    }
-};
-
-// Hàm gọi từ NÚT BẤM trên trang Quản Lý (thay vì phải mở Console trình duyệt).
-// Tự vô hiệu hoá nút trong lúc chạy và cập nhật lại tồn kho hiển thị ngay khi xong,
-// không cần F5 tải lại trang.
-window.runForceResyncStockCountersUI = async function () {
-    const btn = document.getElementById('btn-fix-stock');
-    if (btn) {
-        btn.disabled = true;
-        btn.classList.add('opacity-50', 'cursor-not-allowed');
-        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang sửa...';
-    }
-    try {
-        await window.forceResyncStockCounters();
-        // Cập nhật lại tồn kho hiển thị ngay tại đây, khỏi cần chờ người dùng F5
-        if (typeof calculateAllStock === 'function') await calculateAllStock();
-    } finally {
-        if (btn) {
-            btn.disabled = false;
-            btn.classList.remove('opacity-50', 'cursor-not-allowed');
-            btn.innerHTML = '<i data-lucide="refresh-ccw" class="w-4 h-4"></i> Sửa lại tồn kho ngay';
-            if (typeof lucide !== 'undefined') lucide.createIcons();
-        }
-    }
-};
-
-// Đọc tồn kho GỐC (chưa trừ giỏ hàng đang bán) trực tiếp từ 'stock_counters'.
-// Nhanh hơn nhiều so với cách cũ: chỉ đọc 1 document/sản phẩm thay vì quét lại
-// toàn bộ lịch sử phiếu nhập/xuất mỗi lần gọi hàm này.
 async function calculateAllStock() {
-    try {
-        await migrateStockCountersIfNeeded(); // tự bỏ qua nếu đã khởi tạo rồi
+    let inventory = {};
 
-        const snap = await db.collection('stock_counters').get();
-        let inventory = {};
-        snap.forEach(doc => {
-            const d = doc.data();
-            if (d && d.name) inventory[d.name] = parseFloat(d.qty || 0);
+    try {
+        // 1. LẤY PHIẾU NHẬP (Dùng parseFloat để giữ số lẻ 1.5, 2.5...)
+        const snapshotNhap = await db.collection('receipts').get();
+        snapshotNhap.forEach(doc => {
+            const data = doc.data();
+            if (data.items) {
+                data.items.forEach(item => {
+                    inventory[item.name] = (inventory[item.name] || 0) + (parseFloat(item.qty) || 0);
+                });
+            }
         });
 
-        window.baseInventoryMap = inventory;
-        recomputeCurrentStock();
-        console.log("Đã cập nhật tồn kho gốc từ stock_counters:", inventory);
+        // 2. LẤY PHIẾU XUẤT (Dùng parseFloat để giữ số lẻ)
+        const snapshotXuat = await db.collection('sales').get(); 
+        snapshotXuat.forEach(doc => {
+            const data = doc.data();
+            if (data.items) {
+                data.items.forEach(item => {
+                    inventory[item.name] = (inventory[item.name] || 0) - (parseFloat(item.qty) || 0);
+                });
+            }
+        });
+
+        // 3. TRỪ GIỎ HÀNG ĐANG LÀM VIỆC (Để nhân viên nhìn thấy số tồn thực tế sau khi đã trừ hàng đang bán)
+        // Lưu ý: Chỉ trừ nếu giỏ hàng có hàng
+        if (typeof sellCart !== 'undefined' && Array.isArray(sellCart)) {
+            sellCart.forEach(item => {
+                inventory[item.name] = (inventory[item.name] || 0) - (parseFloat(item.qty) || 0);
+            });
+        }
+
+        // 3b. TRỪ THÊM GIỎ HÀNG CỦA CÁC "HÓA ĐƠN CHỜ" KHÁC (để hàng đang được giữ chỗ
+        // cho khách khác không bị hiển thị nhầm là còn tồn trong danh sách sản phẩm)
+        // Bỏ qua đơn đang active vì nội dung mới nhất của nó đã nằm trong sellCart ở bước 3.
+        if (Array.isArray(window.heldOrders)) {
+            window.heldOrders.forEach(order => {
+                if (order.id === window.activeHeldOrderId) return;
+                (order.cart || []).forEach(item => {
+                    inventory[item.name] = (inventory[item.name] || 0) - (parseFloat(item.qty) || 0);
+                });
+            });
+        }
+
+        // 4. Gán vào biến toàn cục
+        window.currentStockMap = inventory;
+        
+        // 5. Cập nhật lại giao diện ngay để số tồn nhảy theo thời gian thực
+        if (typeof renderProductGrid === 'function') renderProductGrid();
+        
+        console.log("Đã cập nhật tồn kho (đã trừ giỏ):", window.currentStockMap);
+        
     } catch (error) {
         console.error("Lỗi khi tính toán tồn kho:", error);
     }
-}
-
-// Tính lại số tồn HIỂN THỊ (đã trừ giỏ hàng đang bán + các hóa đơn chờ khác)
-// từ dữ liệu gốc đã có sẵn trong bộ nhớ - KHÔNG đọc lại Firestore.
-// Dùng khi chuyển đổi/xóa hóa đơn chờ hoặc bắt đầu đơn mới: lúc này tổng tồn
-// kho thật không đổi, chỉ đổi giỏ hàng nào đang được xem là "active" mà thôi,
-// nên không cần tốn 1 lượt đọc Firestore mỗi lần thao tác.
-function recomputeCurrentStock() {
-    let inventory = { ...(window.baseInventoryMap || {}) };
-
-    if (typeof sellCart !== 'undefined' && Array.isArray(sellCart)) {
-        sellCart.forEach(item => {
-            inventory[item.name] = (inventory[item.name] || 0) - (parseFloat(item.qty) || 0);
-        });
-    }
-
-    if (Array.isArray(window.heldOrders)) {
-        window.heldOrders.forEach(order => {
-            if (order.id === window.activeHeldOrderId) return;
-            (order.cart || []).forEach(item => {
-                inventory[item.name] = (inventory[item.name] || 0) - (parseFloat(item.qty) || 0);
-            });
-        });
-    }
-
-    window.currentStockMap = inventory;
-    if (typeof renderProductGrid === 'function') renderProductGrid();
 }
 
 
@@ -6612,10 +6252,7 @@ function renderProductGrid() {
         { top: 'from-cyan-100 to-cyan-50/60 dark:from-cyan-950/70 dark:to-slate-900',    ring: 'ring-cyan-200 dark:ring-cyan-500/20',    badge: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-300',    btn: 'from-cyan-400 to-cyan-600 dark:from-cyan-500 dark:to-cyan-700',    shadow: 'shadow-[0_6px_0_0_#155e75,0_10px_16px_-4px_rgba(8,145,178,0.35)] dark:shadow-[0_6px_0_0_#164e63,0_10px_16px_-4px_rgba(0,0,0,0.5)]' }
     ];
 
-    // Gom HTML vào 1 mảng rồi gán "innerHTML" đúng 1 lần ở cuối - nhanh hơn nhiều so với
-    // "innerHTML +=" lặp lại trong vòng for (mỗi lần += là trình duyệt phải phân tích lại
-    // TOÀN BỘ nội dung đã có trước đó, càng nhiều sản phẩm càng giật lag).
-    const cardsHtml = window.allProductCache.map((p, index) => {
+    window.allProductCache.forEach((p, index) => {
         const rawStock = window.currentStockMap ? (window.currentStockMap[p.name] || 0) : 0;
         const realStock = Number(Math.round(rawStock * 100) / 100);
 
@@ -6624,7 +6261,7 @@ function renderProductGrid() {
         const isOutOfStock = realStock <= 0;
         const b = themeClasses[index % themeClasses.length];
 
-        return `
+        grid.innerHTML += `
             <div onclick="${isOutOfStock ? `alert('Hết hàng!')` : `quickAdd('${safeName}')`}"
                  class="group relative bg-gradient-to-b ${b.top} p-3 md:p-4 rounded-2xl border border-white/60 dark:border-slate-700 ring-1 ${b.ring}
                         ${b.shadow} flex flex-col justify-between cursor-pointer h-24 md:h-28 overflow-hidden
@@ -6658,8 +6295,6 @@ function renderProductGrid() {
             </div>
         `;
     });
-
-    grid.innerHTML = cardsHtml.join('');
 }
 
 // Lọc/tìm sản phẩm hiển thị trên lưới sản phẩm trang Bán hàng
@@ -6840,160 +6475,6 @@ function selectPrintDocType(type) {
     }
 }
 
-// --- CHIA SẺ HÓA ĐƠN / PHIẾU XUẤT KHO QUA ZALO (hoặc bất kỳ app nào khác) ---
-// Cách hoạt động: chụp lại đúng vùng nội dung đang dùng để in (#print-area hoặc
-// #print-area-xuatkho) thành 1 ảnh, rồi:
-//  - Trên điện thoại (hoặc trình duyệt hỗ trợ Web Share API với file): mở bảng chia sẻ
-//    của hệ điều hành, người dùng chọn Zalo (hoặc Messenger, Gmail...) để gửi ảnh đi.
-//  - Trên máy tính (Chrome/Edge Windows hiện chưa hỗ trợ chia sẻ file kiểu này): tự động
-//    tải ảnh hóa đơn về máy + mở Zalo Web ở tab mới để người dùng tự đính kèm ảnh gửi đi.
-async function shareInvoiceViaZalo(areaId, modeClass, fileNamePrefix, receiptId) {
-    if (typeof html2canvas === 'undefined') {
-        alert('Chưa tải được công cụ chụp ảnh hóa đơn (html2canvas). Vui lòng kiểm tra kết nối mạng rồi thử lại.');
-        return;
-    }
-    const el = document.getElementById(areaId);
-    if (!el) {
-        alert('Không tìm thấy nội dung hóa đơn để chia sẻ!');
-        return;
-    }
-
-    // Hiển thị "Đang tạo ảnh hóa đơn..." để người dùng biết hệ thống đang xử lý, đỡ cảm
-    // giác đứng máy/chậm (việc chụp + dựng ảnh thường mất 1-3 giây là bình thường).
-    const showLoading = typeof Swal !== 'undefined';
-    if (showLoading) {
-        Swal.fire({
-            title: 'Đang tạo ảnh hóa đơn...',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            didOpen: () => Swal.showLoading()
-        });
-    }
-
-    // QUAN TRỌNG: đoạn CSS làm hiện vùng in (#print-area) chỉ có tác dụng lúc IN THẬT
-    // (nằm trong <style media="print">), không áp dụng khi xem bình thường trên màn
-    // hình - nên KHÔNG dùng cách thêm class như lúc in nữa. Thay vào đó, chỉnh thẳng
-    // style của phần tử để nó thực sự hiển thị (có kích thước thật) nhưng đặt ra ngoài
-    // vùng nhìn thấy của màn hình (left: -9999px) để người dùng không thấy nó chớp lên.
-    const oldStyle = el.getAttribute('style') || '';
-    el.style.display = 'block';
-    el.style.position = 'fixed';
-    el.style.left = '-9999px';
-    el.style.top = '0';
-    el.style.zIndex = '-1';
-    el.style.backgroundColor = '#ffffff';
-
-    // CSS kẻ khung bảng (border) trong file gốc chỉ nằm trong <style media="print">,
-    // nên cũng chỉ có tác dụng lúc IN THẬT, không áp dụng khi chụp ảnh để chia sẻ -
-    // đó là lý do ảnh chia sẻ trước đây bị thiếu khung bảng. Thêm 1 khối CSS tạm để
-    // đảm bảo ảnh chia sẻ có khung bảng giống hệt bản in, rồi xóa đi sau khi chụp xong.
-    const tempStyle = document.createElement('style');
-    tempStyle.id = 'temp-share-invoice-style';
-    tempStyle.innerHTML = `
-        #${areaId} table { border-collapse: collapse; width: 100%; margin-top: 15px; }
-        #${areaId} table, #${areaId} th, #${areaId} td { border: 1px solid #000; }
-        #${areaId} th, #${areaId} td { padding: 8px; }
-    `;
-    document.head.appendChild(tempStyle);
-
-    try {
-        // Đợi 1 nhịp để trình duyệt kịp tính toán lại layout trước khi chụp
-        await new Promise(r => setTimeout(r, 50));
-
-        const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
-
-        await new Promise(resolve => {
-            canvas.toBlob(async (blob) => {
-                if (!blob) { alert('Không tạo được ảnh hóa đơn!'); resolve(); return; }
-
-                const fileName = `${fileNamePrefix}_${receiptId || 'hoadon'}.png`;
-                const file = new File([blob], fileName, { type: 'image/png' });
-
-                if (showLoading) Swal.close();
-
-                // 1. Thử dùng Web Share API (hoạt động tốt trên điện thoại) - mở bảng chia sẻ
-                // của hệ điều hành, trong đó có Zalo nếu máy đã cài app Zalo.
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    try {
-                        await navigator.share({
-                            files: [file],
-                            title: `Hóa đơn ${receiptId || ''}`,
-                            text: `Hóa đơn ${receiptId || ''} - Gửi qua Zalo`
-                        });
-                        resolve();
-                        return;
-                    } catch (shareErr) {
-                        // Người dùng bấm hủy chia sẻ hoặc lỗi khác -> rơi xuống phương án dự phòng bên dưới
-                        console.warn('navigator.share bị hủy hoặc lỗi:', shareErr);
-                    }
-                }
-
-                // 2. Phương án dự phòng cho máy tính (chưa hỗ trợ chia sẻ file trực tiếp):
-                // tự tải ảnh về máy + mở Zalo Web để người dùng tự đính kèm gửi đi.
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = fileName;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-
-                alert('Đã tải ảnh hóa đơn về máy (kiểm tra thư mục Downloads). Zalo Web sẽ mở ở tab mới - bạn hãy đính kèm ảnh vừa tải để gửi cho khách.');
-                window.open('https://chat.zalo.me/', '_blank');
-                resolve();
-            }, 'image/png');
-        });
-    } catch (err) {
-        if (showLoading) Swal.close();
-        console.error('Lỗi khi chụp ảnh hóa đơn để chia sẻ:', err);
-        alert('Có lỗi khi tạo ảnh hóa đơn để chia sẻ: ' + err.message);
-    } finally {
-        // Trả lại đúng style ban đầu (ẩn đi như cũ)
-        el.setAttribute('style', oldStyle);
-        if (tempStyle && tempStyle.parentNode) tempStyle.parentNode.removeChild(tempStyle);
-    }
-}
-
-// Chia sẻ hóa đơn VỪA LƯU XONG ở trang Bán Hàng (dùng lại đúng dữ liệu vừa lưu, không
-// cần đọc lại từ Firestore - không tốn thêm quota).
-window.shareLastInvoiceToZalo = async function () {
-    const opts = window.__lastInvoicePrintOpts;
-    if (!opts) {
-        alert('Chưa có hóa đơn nào vừa lưu trong phiên làm việc này để chia sẻ. Hãy bấm "Lưu & In" trước.');
-        return;
-    }
-    const printType = (document.getElementById('print-doc-type-value') || {}).value || 'hoadon';
-    if (printType === 'xuatkho') {
-        renderXuatKhoTemplate(opts, 'share');
-    } else {
-        renderHoaDonTemplate(opts, 'share');
-    }
-};
-
-// Chia sẻ 1 hóa đơn CŨ từ trang Lịch Sử HĐ (đọc lại đúng 1 hóa đơn đó theo docId,
-// không đọc cả danh sách nên rất nhẹ).
-window.shareSaleZalo = async function (docId) {
-    try {
-        const doc = await db.collection('sales').doc(docId).get();
-        if (!doc.exists) return alert('Không tìm thấy hóa đơn!');
-        const data = doc.data();
-        const dateObj = data.date && typeof data.date.toDate === 'function' ? data.date.toDate() : new Date();
-        const printOpts = {
-            receiptId: data.id || docId,
-            customer: data.customer || '',
-            address: data.address || '',
-            phone: data.phone || '',
-            note: data.note || '',
-            items: data.items || [],
-            vatRate: data.vatRate || 0,
-            dateObj: dateObj
-        };
-        renderHoaDonTemplate(printOpts, 'share');
-    } catch (error) {
-        console.error('Lỗi khi chia sẻ hóa đơn:', error);
-        alert('Có lỗi khi tải hóa đơn để chia sẻ!');
-    }
-};
-
 // --- KÍCH HOẠT IN AN TOÀN (Tăng độ trễ lên 300ms để chờ hộp thoại Lịch sử đóng hẳn) ---
 function triggerPrint(modeClass) {
     // 1. Kiểm tra nếu là điện thoại -> Dùng Iframe ẩn để in (Chống lỗi văng sự cố trên Android)
@@ -7063,7 +6544,7 @@ function triggerPrint(modeClass) {
 }
 
 // --- ĐIỀN DỮ LIỆU + IN MẪU HÓA ĐƠN BÁN HÀNG (dùng chung cho Bán Hàng và In lại ở Lịch Sử HĐ) ---
-function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items, vatRate, dateObj }, action = 'print') {
+function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items, vatRate, dateObj }) {
     const d = dateObj || new Date();
     const formattedDate = d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const ngayStr = String(d.getDate()).padStart(2, '0');
@@ -7159,15 +6640,11 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
     if (document.getElementById('print-total')) document.getElementById('print-total').innerText = grandTotal.toLocaleString('vi-VN') + " đ";
     if (document.getElementById('print-total-word')) document.getElementById('print-total-word').innerText = docSo(grandTotal);
 
-    if (action === 'share') {
-        shareInvoiceViaZalo('print-area', 'print-mode-hoadon', 'HoaDon', receiptId);
-    } else {
-        triggerPrint('print-mode-hoadon');
-    }
+    triggerPrint('print-mode-hoadon');
 }
 
 // --- ĐIỀN DỮ LIỆU + IN MẪU PHIẾU XUẤT KHO (dùng chung cho Bán Hàng và In lại ở Lịch Sử HĐ) ---
-function renderXuatKhoTemplate({ receiptId, customer, address, phone, note, items, vatRate, dateObj }, action = 'print') {
+function renderXuatKhoTemplate({ receiptId, customer, address, phone, note, items, vatRate, dateObj }) {
     const d = dateObj || new Date();
     const ngayStr = String(d.getDate()).padStart(2, '0');
     const thangStr = String(d.getMonth() + 1).padStart(2, '0');
@@ -7268,11 +6745,7 @@ function renderXuatKhoTemplate({ receiptId, customer, address, phone, note, item
     if (document.getElementById('xk-total')) document.getElementById('xk-total').innerText = grandTotal.toLocaleString('vi-VN') + " đ";
     if (document.getElementById('xk-total-word')) document.getElementById('xk-total-word').innerText = docSo(grandTotal);
 
-    if (action === 'share') {
-        shareInvoiceViaZalo('print-area-xuatkho', 'print-mode-xuatkho', 'PhieuXuatKho', receiptId);
-    } else {
-        triggerPrint('print-mode-xuatkho');
-    }
+    triggerPrint('print-mode-xuatkho');
 }
 
 // ============================================================
@@ -7361,9 +6834,7 @@ function startNewSellOrder() {
     renderSellCart();
     if (typeof updateGrandTotal === 'function') updateGrandTotal();
     renderHeldOrdersBar();
-    // Không cần đọc lại Firestore: tổng tồn kho gốc không đổi khi chỉ chuyển đơn,
-    // chỉ cần tính lại từ dữ liệu đã có sẵn trong bộ nhớ.
-    if (typeof recomputeCurrentStock === 'function') recomputeCurrentStock();
+    if (typeof calculateAllStock === 'function') calculateAllStock();
 }
 
 // Chuyển sang tiếp tục bán cho 1 khách đang ở trạng thái "chờ"
@@ -7378,7 +6849,7 @@ function switchToHeldOrder(id) {
     applySellState(target);
     window.activeHeldOrderId = id;
     renderHeldOrdersBar();
-    if (typeof recomputeCurrentStock === 'function') recomputeCurrentStock();
+    if (typeof calculateAllStock === 'function') calculateAllStock();
 }
 
 // Bỏ 1 hóa đơn chờ khỏi danh sách (huỷ hẳn, không phải thanh toán)
@@ -7412,9 +6883,7 @@ async function removeHeldOrder(id, evt) {
 
     // QUAN TRỌNG: Tính lại tồn kho ngay lập tức để giải phóng số lượng của đơn vừa xóa,
     // không cần phải chuyển sang trang khác rồi quay lại mới thấy cập nhật.
-    // Không cần đọc lại Firestore ở đây: tổng tồn kho gốc không đổi, chỉ có giỏ hàng
-    // của đơn vừa xóa không còn bị trừ nữa - tính lại từ dữ liệu sẵn có là đủ và nhanh hơn.
-    if (typeof recomputeCurrentStock === 'function') recomputeCurrentStock();
+    if (typeof calculateAllStock === 'function') calculateAllStock();
 }
 
 // Vẽ lại thanh "Hóa đơn chờ"
@@ -7458,14 +6927,20 @@ async function saveAndPrint() {
         return;
     }
 
-    // --- KIỂM TRA NHANH TỒN KHO (chỉ để báo lỗi sớm cho gọn, dùng số liệu đã có sẵn
-    // trong bộ nhớ, KHÔNG tốn thêm 1 lượt đọc mạng ở đây). Việc kiểm tra THẬT SỰ để
-    // đảm bảo không bao giờ bị bán trùng/âm kho nằm trong transaction bên dưới,
-    // vì đó mới là lúc đọc đúng số tồn kho tại thời điểm ghi vào cơ sở dữ liệu.
+    // --- MỚI THÊM: KIỂM TRA TỒN KHO TRƯỚC KHI LƯU ---
+    await calculateAllStock(); 
+
     for (const item of sellCart) {
+        // 1. Lấy tồn kho hiện tại (đã bị trừ giỏ hàng)
         let stock = window.currentStockMap ? parseFloat(window.currentStockMap[item.name] || 0) : 0;
+        
+        // 2. CỘNG NGƯỢC GIỎ HÀNG VÀO ĐỂ CÓ TỒN KHO GỐC TRƯỚC KHI BÁN
+        // Vì currentStockMap đã trừ giỏ, nên giờ ta cộng lại đúng số lượng trong giỏ
+        // để có con số tồn kho thực tế trước khi bấm lưu
         const qtyInCart = parseFloat(item.qty || 0);
         const realStockBeforeSale = stock + qtyInCart;
+
+        // 3. So sánh
         if (qtyInCart > realStockBeforeSale + 0.000001) {
             alert(`LỖI: Sản phẩm ${item.name} chỉ còn ${realStockBeforeSale} trong kho, nhưng bạn xuất ${qtyInCart}. Vui lòng kiểm tra lại!`);
             return;
@@ -7521,116 +6996,17 @@ async function saveAndPrint() {
             total: grandTotal, 
             date: firebase.firestore.FieldValue.serverTimestamp() 
         };
-        // --- GHI HÓA ĐƠN + TRỪ KHO TRONG 1 TRANSACTION DUY NHẤT (NGUYÊN TỬ) ---
-        // Đây là điểm mấu chốt để chống bán trùng/âm kho: việc "kiểm tra còn đủ hàng
-        // không" và "trừ kho" diễn ra CÙNG LÚC trong 1 giao dịch được Firestore đảm bảo
-        // không thể bị chen ngang - nếu 2 người cùng bán sản phẩm cuối cùng trong cùng
-        // 1 khoảnh khắc, chỉ 1 giao dịch được thành công, giao dịch còn lại sẽ báo lỗi
-        // ngay để nhân viên biết và kiểm tra lại, thay vì cả 2 đều lưu được và kho bị âm.
-
-        // Gộp số lượng theo tên sản phẩm (phòng khi giỏ hàng có nhiều dòng cùng 1 sản
-        // phẩm, ví dụ dùng nút "Thêm dòng mới") để kiểm tra tồn kho cho chính xác.
-        const qtyByName = {};
-        itemsToSave.forEach(i => {
-            qtyByName[i.name] = (qtyByName[i.name] || 0) + (parseFloat(i.qty) || 0);
-        });
-        const productNames = Object.keys(qtyByName);
-        const saleRef = db.collection('sales').doc();
-
-        try {
-            await db.runTransaction(async (transaction) => {
-                const refs = productNames.map(name => getStockRef(name));
-                // Tất cả các lệnh "đọc" (transaction.get) phải thực hiện trước mọi lệnh "ghi"
-                const snaps = await Promise.all(refs.map(ref => transaction.get(ref)));
-
-                // Kiểm tra tồn kho THẬT tại đúng thời điểm ghi (không dùng số liệu cũ trên
-                // giao diện) - nếu người khác vừa bán trước đó 1 tích tắc, số liệu ở đây
-                // đã phản ánh đúng và sẽ chặn lại nếu không đủ hàng.
-                for (let i = 0; i < productNames.length; i++) {
-                    const currentQty = parseFloat((snaps[i].data() || {}).qty || 0);
-                    const needQty = qtyByName[productNames[i]];
-                    if (needQty > currentQty + 0.000001) {
-                        throw new Error(`Sản phẩm "${productNames[i]}" chỉ còn ${currentQty} trong kho (có thể vừa được bán ở máy khác). Vui lòng kiểm tra lại giỏ hàng.`);
-                    }
-                }
-
-                productNames.forEach((name, i) => {
-                    const currentQty = parseFloat((snaps[i].data() || {}).qty || 0);
-                    const newQty = Math.round((currentQty - qtyByName[name]) * 100) / 100;
-                    transaction.set(refs[i], {
-                        name: name,
-                        qty: newQty,
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true });
-                });
-
-                transaction.set(saleRef, saleData);
-            });
-        } catch (txError) {
-            // PHƯƠNG ÁN DỰ PHÒNG: nếu lỗi là do HẾT LƯỢT ĐỌC (quota) chứ không phải do
-            // thật sự không đủ hàng, vẫn cho phép lưu hóa đơn để không làm gián đoạn việc
-            // bán hàng - chỉ là bỏ qua bước "kiểm tra tồn kho tại đúng thời điểm ghi" (đổi
-            // lại: dùng phép CỘNG/TRỪ nguyên tử FieldValue.increment, không cần đọc trước,
-            // giống hệt cách bản gốc trước đây vẫn hoạt động được ngay cả khi hết quota đọc).
-            const isQuotaError = txError && (txError.code === 'resource-exhausted' || /quota/i.test(txError.message || ''));
-            if (!isQuotaError) {
-                throw txError; // Lỗi khác (ví dụ thật sự không đủ hàng) -> báo lỗi bình thường, dừng lại
-            }
-
-            console.warn('Không đọc được tồn kho (hết quota) - chuyển sang ghi trực tiếp không kiểm tra:', txError);
-
-            const batch = db.batch();
-            productNames.forEach(name => {
-                batch.set(getStockRef(name), {
-                    name: name,
-                    qty: firebase.firestore.FieldValue.increment(-qtyByName[name]),
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
-            });
-            batch.set(saleRef, saleData);
-            await batch.commit();
-
-            console.warn('Đã lưu hóa đơn bằng phương án dự phòng (không kiểm tra tồn kho theo thời gian thực do hết quota đọc).');
-        }
-
-        // Cập nhật lại số tồn kho gốc trong bộ nhớ cho khớp với những gì vừa trừ ở trên,
-        // không cần đọc lại Firestore (đỡ tốn 1 lượt đọc mạng ngay sau khi vừa ghi xong).
-        if (!window.baseInventoryMap) window.baseInventoryMap = {};
-        productNames.forEach(name => {
-            window.baseInventoryMap[name] = (window.baseInventoryMap[name] || 0) - qtyByName[name];
-        });
-        // ------------------------------------------------------------------
-
-        // CỘNG BỘ ĐẾM SỐ HOÁ ĐƠN (app_meta/sales_counter) NGAY LẬP TỨC - phép cộng
-        // nguyên tử, không cần đọc gì trước, luôn chạy được kể cả khi hết quota đọc.
-        // Số hoá đơn vừa dùng (receiptId) là số hệ thống tự gán (ô readonly) nên luôn
-        // đúng bằng maxNum + 1 hiện tại.
-        try {
-            await db.collection('app_meta').doc('sales_counter').set({
-                maxNum: firebase.firestore.FieldValue.increment(1)
-            }, { merge: true });
-        } catch (counterErr) {
-            console.warn('Không cập nhật được bộ đếm số hoá đơn (hoá đơn vẫn đã lưu đúng):', counterErr);
-        }
+        await db.collection('sales').add(saleData);
 
         // --- MỚI: CẬP NHẬT CÔNG NỢ NẾU CHỌN "Công nợ" ---
-        // Hoá đơn ĐÃ được lưu thành công ở transaction phía trên rồi (đây chỉ là bước
-        // PHỤ để cộng thêm công nợ khách hàng). Bọc riêng trong try/catch: nếu bước này
-        // lỗi (ví dụ hết quota đọc khi tìm khách hàng), KHÔNG được làm gián đoạn phần
-        // in hoá đơn / reset giao diện bên dưới - tránh làm nhân viên tưởng nhầm là bán
-        // hàng thất bại trong khi hoá đơn đã lưu đúng.
         if (paymentMethod === 'Công nợ' && customer) {
-            try {
-                const querySnapshot = await db.collection('customers').where('name', '==', customer).get();
-                if (!querySnapshot.empty) {
-                    const doc = querySnapshot.docs[0];
-                    const currentDebt = doc.data().debt || 0;
-                    await db.collection('customers').doc(doc.id).update({
-                        debt: currentDebt + grandTotal
-                    });
-                }
-            } catch (debtErr) {
-                console.warn('Không cập nhật được công nợ khách hàng (có thể do hết quota đọc) - hoá đơn vẫn đã lưu đúng, cần cộng nợ thủ công khi quota hồi phục:', debtErr);
+            const querySnapshot = await db.collection('customers').where('name', '==', customer).get();
+            if (!querySnapshot.empty) {
+                const doc = querySnapshot.docs[0];
+                const currentDebt = doc.data().debt || 0;
+                await db.collection('customers').doc(doc.id).update({
+                    debt: currentDebt + grandTotal
+                });
             }
         }
 
@@ -7644,8 +7020,6 @@ async function saveAndPrint() {
             receiptId, customer, address, phone, note: noteGlobal,
             items: itemsToSave, vatRate, dateObj: new Date()
         };
-        // Lưu lại để nút "Chia sẻ Zalo" dùng ngay, khỏi phải đọc lại Firestore
-        window.__lastInvoicePrintOpts = printOpts;
 
         if (printType === 'xuatkho') {
             renderXuatKhoTemplate(printOpts);
@@ -7662,9 +7036,6 @@ async function saveAndPrint() {
         }
 
         sellCart = [];
-        // Tính lại số tồn hiển thị từ baseInventoryMap vừa cập nhật ở trên (không tốn mạng),
-        // đảm bảo lưới sản phẩm phản ánh đúng ngay sau khi bán xong.
-        if (typeof recomputeCurrentStock === 'function') recomputeCurrentStock();
         const clearFields = ['sell-customer', 'sell-address', 'sell-phone', 'sell-note', 'sell-note-global', 'sell-name', 'sell-qty', 'sell-price'];
         clearFields.forEach(id => {
             const el = document.getElementById(id);
@@ -7806,38 +7177,7 @@ async function viewInvoiceDetails(docId) {
     const searchQuery = document.getElementById('searchInput')?.value.toLowerCase() || '';
 
     try {
-        let snapshot;
-
-        if (searchQuery !== '') {
-            // Tìm theo số phiếu/tên khách cần quét toàn bộ lịch sử vì chưa có dịch vụ tìm
-            // kiếm chuyên dụng (Firestore không hỗ trợ tìm "chứa đoạn văn bản" trực tiếp) -
-            // việc này chỉ xảy ra khi người dùng chủ động gõ vào ô tìm kiếm, không tự động.
-            snapshot = await db.collection('sales').orderBy('date', 'desc').get();
-        } else {
-            // TỐI ƯU QUAN TRỌNG: trước đây luôn đọc TOÀN BỘ lịch sử hóa đơn rồi mới lọc
-            // theo ngày/tháng ở phía trình duyệt - càng nhiều lịch sử càng nặng, tốn quota
-            // tăng dần mãi mãi. Giờ chỉ đọc đúng khoảng ngày/tháng đang chọn (hoặc mặc định
-            // 7 ngày gần nhất) ngay từ truy vấn Firestore.
-            let queryFrom, queryTo;
-            if (filterMonth) {
-                const [y, m] = filterMonth.split('-');
-                queryFrom = new Date(y, m - 1, 1);
-                queryTo = new Date(y, m, 0, 23, 59, 59);
-            } else if (dateFrom || dateTo) {
-                queryFrom = dateFrom ? new Date(dateFrom + 'T00:00:00') : new Date(2000, 0, 1);
-                queryTo = dateTo ? new Date(dateTo + 'T23:59:59') : new Date();
-            } else {
-                queryTo = new Date();
-                queryFrom = new Date();
-                queryFrom.setDate(queryFrom.getDate() - 7);
-            }
-            snapshot = await db.collection('sales')
-                .where('date', '>=', queryFrom)
-                .where('date', '<=', queryTo)
-                .orderBy('date', 'desc')
-                .get();
-        }
-
+        const snapshot = await db.collection('sales').orderBy('date', 'desc').get();
         window.allSales = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         body.innerHTML = '';
 
@@ -7846,11 +7186,38 @@ async function viewInvoiceDetails(docId) {
             const dateObj = data.date?.toDate ? data.date.toDate() : null;
             if (!dateObj) return;
 
-            // Đã lọc đúng phạm vi ngay ở truy vấn Firestore (hoặc đang tìm kiếm toàn bộ),
-            // ở đây chỉ cần lọc thêm theo từ khóa tìm kiếm (nếu có).
+            const rowDateISO = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD
+            const rowMonth = rowDateISO.substring(0, 7); // YYYY-MM
+            
+            // THÊM: Kiểm tra nội dung tìm kiếm trong Số phiếu hoặc Tên khách hàng
             const receiptId = (data.id || '').toLowerCase();
             const customerName = (data.customer || '').toLowerCase();
-            const isVisible = searchQuery === '' || receiptId.includes(searchQuery) || customerName.includes(searchQuery);
+            const isMatchSearch = (receiptId.includes(searchQuery) || customerName.includes(searchQuery));
+
+            // --- LOGIC LỌC MỚI ---
+            let isVisible = true;
+
+            // NẾU ĐANG CÓ TỪ KHÓA TÌM KIẾM -> Bỏ qua mọi bộ lọc tháng/ngày, chỉ hiện kết quả tìm được
+            if (searchQuery !== "") {
+                isVisible = isMatchSearch;
+            } else {
+                // NẾU KHÔNG TÌM KIẾM -> Mới chạy bộ lọc tháng/ngày bình thường
+                // 1. Lọc theo tháng (nếu có chọn)
+                if (filterMonth && rowMonth !== filterMonth) {
+                    isVisible = false;
+                }
+
+                // 2. Lọc theo ngày (nếu có chọn)
+                if (dateFrom && rowDateISO < dateFrom) isVisible = false;
+                if (dateTo && rowDateISO > dateTo) isVisible = false;
+
+                // 3. Nếu người dùng không chọn gì cả (tất cả các ô trống) -> Lọc 7 ngày gần nhất
+                if (!filterMonth && !dateFrom && !dateTo) {
+                    const oneWeekAgo = new Date();
+                    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                    isVisible = (dateObj >= oneWeekAgo);
+                }
+            }
 
             // Render
 			if (isVisible) {
@@ -7875,9 +7242,6 @@ async function viewInvoiceDetails(docId) {
 									</button>
 									<button onclick="reprintSale('${doc.id}')" title="In lại" class="text-blue-600 hover:text-blue-800 transition-transform hover:scale-110">
 										<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
-									</button>
-									<button onclick="shareSaleZalo('${doc.id}')" title="Chia sẻ Zalo" class="text-sky-600 hover:text-sky-800 transition-transform hover:scale-110">
-										<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
 									</button>
 									<button onclick="deleteSale('${doc.id}')" title="Xóa" class="text-red-600 hover:text-red-800 transition-transform hover:scale-110">
 										<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -7978,16 +7342,10 @@ async function deleteSale(docId) {
     if (typeof canUserDelete === 'function' && !canUserDelete()) { if (typeof Swal !== 'undefined') Swal.fire({ icon: 'warning', title: 'Không có quyền', text: 'Bạn không có quyền xóa dữ liệu. Vui lòng liên hệ Admin.' }); return; }
    if (confirm("Xóa hóa đơn này sẽ cộng lại hàng vào kho và điều chỉnh lại công nợ (nếu có). Bạn chắc chắn chứ?")) {
         try {
-            // 1. Lấy thông tin hóa đơn - ưu tiên dùng dữ liệu đã có sẵn trong bộ nhớ
-            // (window.allSales, đã tải khi mở trang Lịch Sử HĐ) để đỡ phải đọc lại từ
-            // Firestore; chỉ đọc lại khi không tìm thấy trong bộ nhớ (ví dụ vừa tải lại
-            // trang chưa kịp load danh sách).
+            // 1. Lấy thông tin hóa đơn
             const docRef = db.collection('sales').doc(docId);
-            let data = (window.allSales || []).find(s => s.id === docId);
-            if (!data) {
-                const doc = await docRef.get();
-                data = doc.data();
-            }
+            const doc = await docRef.get();
+            const data = doc.data();
             const items = data.items;
             const total = data.total || 0;
             const customerName = data.customer;
@@ -8005,15 +7363,24 @@ async function deleteSale(docId) {
                 }
             }
 
-            // 3. HOÀN KHO: cộng lại đúng số lượng đã bán vào bộ đếm tồn kho (stock_counters).
-            // (Trước đây đoạn này cập nhật vào collection 'inventory', nhưng collection đó
-            // không được bất kỳ chỗ nào khác trong ứng dụng đọc tới nên hoàn toàn không có
-            // tác dụng - đã thay bằng adjustStockCounters để hoàn kho thật sự.)
-            if (typeof adjustStockCounters === 'function') {
-                await adjustStockCounters(items, +1);
+            // 3. Hoàn kho (Sử dụng batch)
+            const batch = db.batch(); 
+            for (const item of items) {
+                const prodQuery = await db.collection('inventory').where('name', '==', item.name).get();
+                if (!prodQuery.empty) {
+                    const prodDoc = prodQuery.docs[0];
+                    // Dùng parseFloat để không bị làm tròn số lẻ (ví dụ 1.5 vẫn là 1.5)
+                    const currentQty = parseFloat(prodDoc.data().qty || 0);
+                    const qtyToRestore = parseFloat(item.qty || 0);
+                    
+                    batch.update(prodDoc.ref, { 
+                        qty: currentQty + qtyToRestore 
+                    });
+                }
             }
 
-            // 4. Thực hiện xóa hóa đơn
+            // 4. Thực hiện xóa và cập nhật
+            await batch.commit();
             await docRef.delete();
             
             alert("Đã xóa hóa đơn, hoàn kho và điều chỉnh công nợ thành công!");
@@ -8021,20 +7388,13 @@ async function deleteSale(docId) {
             if (typeof ghiLog === 'function') ghiLog('Bán Hàng', 'Xóa', data.id || docId, `Xóa hóa đơn bán hàng ${data.id || docId} (KH: ${customerName || 'Khách lẻ'}, tổng tiền: ${total.toLocaleString('vi-VN')}đ)`);
             
             // --- CẬP NHẬT GIAO DIỆN ---
-            // Bọc riêng trong try/catch: việc xóa hóa đơn + hoàn kho ở trên ĐÃ THÀNH CÔNG
-            // rồi, nên nếu bước làm mới giao diện này lỗi (ví dụ hết quota đọc tạm thời),
-            // không được để nó hiện nhầm thông báo "có lỗi xảy ra" - dữ liệu vẫn đúng.
-            try {
-                await calculateAllStock(); 
-                if (typeof renderProductGrid === 'function') renderProductGrid(); 
-                if (typeof loadDashboard === 'function') loadDashboard(); 
-                if (typeof loadCustomers === 'function') loadCustomers(); // Cập nhật lại danh sách nợ khách hàng
-                
-                loadSalesList();
-                updateSellReceiptNum();
-            } catch (refreshErr) {
-                console.warn('Không làm mới được giao diện sau khi xóa hóa đơn (có thể do hết quota đọc) - việc xóa vẫn đã thành công:', refreshErr);
-            }
+            await calculateAllStock(); 
+            if (typeof renderProductGrid === 'function') renderProductGrid(); 
+            if (typeof loadDashboard === 'function') loadDashboard(); 
+            if (typeof loadCustomers === 'function') loadCustomers(); // Cập nhật lại danh sách nợ khách hàng
+            
+            loadSalesList();
+            updateSellReceiptNum();
             
         } catch (error) {
             console.error("Lỗi khi xóa hóa đơn: ", error);
@@ -8554,8 +7914,26 @@ window.addEventListener('dataChanged', async () => {
     console.log("Dữ liệu thay đổi, đang làm mới cache và cập nhật giao diện...");
     
     try {
-        // 1. LÀM MỚI DANH MỤC SẢN PHẨM (nhẹ, không phụ thuộc độ dài lịch sử)
-        await refreshCache();
+        // 1. TẢI LẠI TOÀN BỘ DỮ LIỆU ĐỂ ĐẢM BẢO GIÁ MỚI NHẤT VÀ THỨ TỰ CHUẨN
+        const snapshot = await db.collection('receipts').orderBy('date', 'asc').get();
+        
+        let productMap = new Map();
+        let orderList = [];
+
+        snapshot.forEach(doc => {
+            (doc.data().items || []).forEach(i => {
+                const key = (i.name + "_" + i.unit).toLowerCase().trim();
+                if (!productMap.has(key)) {
+                    orderList.push(key);
+                }
+                // Ghi đè để lấy giá mới nhất từ phiếu nhập gần nhất
+                productMap.set(key, i);
+            });
+        });
+
+        // Cập nhật lại biến toàn cục để các hàm render sử dụng
+        window.allProductCache = orderList.map(key => productMap.get(key));
+        window.productList = window.allProductCache;
 
         // 2. Cập nhật lại tồn kho (vì dữ liệu đã thay đổi)
         if (typeof calculateAllStock === 'function') {
@@ -8577,33 +7955,24 @@ window.addEventListener('dataChanged', async () => {
 });
 
 // HÀM DÙNG CHUNG ĐỂ LẤY DỮ LIỆU ĐÚNG THỨ TỰ VÀ GIÁ
-//
-// TRƯỚC ĐÂY: đọc TOÀN BỘ lịch sử phiếu nhập (orderBy date asc) mỗi lần cần làm mới
-// danh mục sản phẩm - hàm này bị gọi lại sau MỖI LẦN nhập/xuất kho (sự kiện
-// 'dataChanged') VÀ mỗi lần mở app, nên càng nhiều lịch sử càng tốn quota đọc, tăng
-// dần mãi mãi - đây từng là nguồn tốn quota lớn nhất chỉ sau autoFillDetails.
-//
-// BÂY GIỜ: đọc từ collection 'products' - danh mục sản phẩm, chỉ 1 dòng cho mỗi sản
-// phẩm (rất nhẹ), KHÔNG phụ thuộc số lượng phiếu nhập/xuất đã phát sinh, nên chi phí
-// đọc luôn cố định dù cửa hàng dùng bao lâu. Đồng thời sắp xếp sẵn theo thứ tự chuẩn
-// (khối lượng giảm dần, Thuỷ tinh > Nhựa) để Kho Hàng và NXT Trang Chủ hiển thị đúng
-// thứ tự mong muốn.
 async function refreshCache() {
-    try {
-        const snapshot = await db.collection('products').get();
-        const products = [];
-        snapshot.forEach(doc => products.push(doc.data()));
-        products.sort((a, b) => compareProductDisplayOrder(a.name, b.name));
+    const snapshot = await db.collection('receipts').orderBy('date', 'asc').get();
+    let productMap = new Map();
+    let orderList = [];
 
-        window.allProducts = products;
-        window.allProductCache = products;
-        window.productList = products;
-    } catch (err) {
-        // Hết quota đọc (hoặc mất mạng): GIỮ NGUYÊN cache hiện có (đã tải sẵn từ đầu
-        // phiên làm việc) thay vì xoá trắng - Kho Hàng / Bán Hàng vẫn hiển thị đúng
-        // dữ liệu đã có, chỉ là chưa thấy ngay sản phẩm vừa thêm mới (nếu có) mà thôi.
-        console.warn('Không làm mới được danh mục sản phẩm (có thể do hết quota đọc) - vẫn dùng cache cũ:', err);
-    }
+    snapshot.forEach(doc => {
+        (doc.data().items || []).forEach(i => {
+            const key = (i.name + "_" + i.unit).toLowerCase().trim();
+            if (!productMap.has(key)) {
+                orderList.push(key);
+            }
+            // Luôn ghi đè để lấy giá mới nhất
+            productMap.set(key, i);
+        });
+    });
+
+    window.allProductCache = orderList.map(key => productMap.get(key));
+    window.productList = window.allProductCache;
 }
 
 // --- PHÍM TẮT ---
@@ -9204,67 +8573,54 @@ async function exportInventory() {
         const toDate = new Date(to);
         toDate.setHours(23, 59, 59, 999);
 
-        // --- TỐI ƯU QUAN TRỌNG (giống hệt cách tính NXT ở Trang Chủ) ---
-        // TRƯỚC ĐÂY: đọc TOÀN BỘ collection 'receipts' và 'sales' không giới hạn ngày dù
-        // chỉ xem báo cáo 1 tháng - càng nhiều lịch sử càng tốn quota, và sẽ XUẤT BÁO CÁO
-        // THẤT BẠI HOÀN TOÀN nếu đã hết quota đọc trong ngày.
-        //
-        // BÂY GIỜ: chỉ đọc đúng các giao dịch NẰM TRONG khoảng ngày đang xem (nhẹ, không
-        // phụ thuộc độ dài lịch sử), rồi suy ra "tồn đầu kỳ" từ TỒN KHO THỰC TẾ HIỆN TẠI
-        // (đọc từ 'stock_counters' - chỉ 1 dòng/sản phẩm, rất nhẹ). Kết quả toán học giống
-        // hệt cách tính cũ, chỉ khác cách lấy ra mà thôi - vẫn CHÍNH XÁC 100%.
-        const now = new Date();
-        const isCurrentPeriod = toDate >= now;
-        const gapFrom = new Date(toDate); gapFrom.setSeconds(gapFrom.getSeconds() + 1);
-
-        const fetchRange = async (f, t) => Promise.all([
-            db.collection('receipts').where('date', '>=', f).where('date', '<=', t).get(),
-            db.collection('sales').where('date', '>=', f).where('date', '<=', t).get()
-        ]);
-
-        const [periodReceiptsSnap, periodSalesSnap] = await fetchRange(fromDate, toDate);
-        const [gapReceiptsSnap, gapSalesSnap] = isCurrentPeriod ? [null, null] : await fetchRange(gapFrom, now);
-
-        const currentStockSnap = await db.collection('stock_counters').get();
-        const currentStockMap = {};
-        currentStockSnap.forEach(doc => {
-            const d = doc.data();
-            if (d && d.name) currentStockMap[d.name] = parseFloat(d.qty || 0);
-        });
-
+        const [receiptsSnap, salesSnap] = await Promise.all([db.collection('receipts').get(), db.collection('sales').get()]);
+        
         let inventory = {};
-        const initItem = (name) => {
-            if (!inventory[name]) inventory[name] = { nhapMoi: 0, nhapDoi: 0, xuat: 0, gapNet: 0 };
-            return inventory[name];
+        let firstAppearance = {}; // Lưu mốc thời gian xuất hiện đầu tiên của mỗi SP
+
+        // Hàm hỗ trợ khởi tạo SP
+        const initItem = (name, date) => {
+            if (!inventory[name]) {
+                inventory[name] = { tonDau: 0, nhapMoi: 0, nhapDoi: 0, xuat: 0 };
+                firstAppearance[name] = date;
+            } else {
+                if (date < firstAppearance[name]) firstAppearance[name] = date;
+            }
         };
 
-        // 1. Phát sinh TRONG kỳ đang xem
-        periodReceiptsSnap.forEach(doc => {
+        // 1. Xử lý RECEIPTS (Nhập)
+        receiptsSnap.forEach(doc => {
             const data = doc.data();
-            const type = data.type || 'Nhập mới';
-            (data.items || []).forEach(i => {
-                const inv = initItem(i.name);
+            const d = data.date?.toDate ? data.date.toDate() : new Date(data.date);
+            const type = data.type || 'Nhập mới'; 
+            
+            data.items?.forEach(i => {
+                initItem(i.name, d);
                 const qty = parseFloat(i.qty || 0);
-                if (type === 'Nhập đổi') inv.nhapDoi += qty; else inv.nhapMoi += qty;
+                if (d < fromDate) {
+                    inventory[i.name].tonDau += qty;
+                } else if (d <= toDate) {
+                    if (type === 'Nhập đổi') inventory[i.name].nhapDoi += qty;
+                    else inventory[i.name].nhapMoi += qty;
+                }
             });
         });
-        periodSalesSnap.forEach(doc => {
-            (doc.data().items || []).forEach(i => { initItem(i.name).xuat += parseFloat(i.qty || 0); });
+
+        // 2. Xử lý SALES (Xuất)
+        salesSnap.forEach(doc => {
+            const data = doc.data();
+            const d = data.date?.toDate ? data.date.toDate() : new Date(data.date);
+            
+            data.items?.forEach(i => {
+                initItem(i.name, d);
+                const qty = parseFloat(i.qty || 0);
+                if (d < fromDate) {
+                    inventory[i.name].tonDau -= qty;
+                } else if (d <= toDate) {
+                    inventory[i.name].xuat += qty;
+                }
+            });
         });
-
-        // 2. Phát sinh SAU kỳ (để lùi từ tồn thực tế hiện tại về đúng tồn cuối kỳ)
-        if (gapReceiptsSnap) {
-            gapReceiptsSnap.forEach(doc => {
-                (doc.data().items || []).forEach(i => { initItem(i.name).gapNet += parseFloat(i.qty || 0); });
-            });
-            gapSalesSnap.forEach(doc => {
-                (doc.data().items || []).forEach(i => { initItem(i.name).gapNet -= parseFloat(i.qty || 0); });
-            });
-        }
-
-        // Đảm bảo mọi sản phẩm đang có tồn kho thực tế cũng xuất hiện, kể cả khi không
-        // có giao dịch nào trong đúng khoảng ngày đang xem.
-        Object.keys(currentStockMap).forEach(name => initItem(name));
 
         // 3. Xuất Excel
         const workbook = new ExcelJS.Workbook();
@@ -9284,20 +8640,14 @@ async function exportInventory() {
             c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
         });
 
-        // Sắp xếp theo thứ tự chuẩn: khối lượng giảm dần, cùng khối lượng thì Thuỷ tinh > Nhựa
-        const sortedNames = Object.keys(inventory).sort(compareProductDisplayOrder);
+        // Sắp xếp sản phẩm theo thời gian xuất hiện sớm nhất (firstAppearance)
+        const sortedNames = Object.keys(inventory).sort((a, b) => firstAppearance[a] - firstAppearance[b]);
 
-        let stt = 0;
-        sortedNames.forEach((name) => {
-            const item = inventory[name];
-            const currentStock = currentStockMap[name] || 0;
-            const tonCuoi = currentStock - item.gapNet;
-            const tonDau = tonCuoi - item.nhapMoi - item.nhapDoi + item.xuat;
-
-            if (tonDau === 0 && item.nhapMoi === 0 && item.nhapDoi === 0 && item.xuat === 0 && tonCuoi === 0) return;
-
-            stt += 1;
-            const row = sheet.addRow([stt, name, tonDau, item.nhapMoi, item.nhapDoi, item.xuat, tonCuoi]);
+        sortedNames.forEach((name, index) => {
+            let item = inventory[name];
+            let tonCuoi = item.tonDau + item.nhapMoi + item.nhapDoi - item.xuat;
+            
+            const row = sheet.addRow([index + 1, name, item.tonDau, item.nhapMoi, item.nhapDoi, item.xuat, tonCuoi]);
             
             // Kẻ bảng cho từng dòng dữ liệu
             row.eachCell((cell) => {
@@ -9747,7 +9097,7 @@ async function exportDebtReport() {
 
     try {
         const [salesSnap, historySnap, openSnap] = await Promise.all([
-            db.collection('sales').where('date', '<=', toDate).get(),
+            db.collection('sales').get(),
             db.collection('debt_history').get(),
             db.collection('opening_balances').get()
         ]);
@@ -9796,10 +9146,9 @@ async function exportDebtReport() {
             
             if (dDate < fromDate) {
                 reportData[d.customer].openingBalance += calculatedTotal;
-            } else if (dDate <= toDate) {
+            } else {
                 reportData[d.customer].items.push({ ...d, totalAmount: calculatedTotal, dateObj: dDate });
             }
-            // dDate > toDate: giao dịch sau kỳ báo cáo -> không tính vào kỳ này
         });
 
         // 4. Trừ Thanh toán
@@ -9811,10 +9160,9 @@ async function exportDebtReport() {
             
             if (pDate < fromDate) {
                 reportData[d.customerName].openingBalance -= amt;
-            } else if (pDate <= toDate) {
+            } else {
                 reportData[d.customerName].pays.push({ ...d, dateObj: pDate });
             }
-            // pDate > toDate: thanh toán sau kỳ báo cáo -> không tính vào kỳ này
         });
 
         // D. LÀM SẠCH NỢ ĐẦU KỲ: 
@@ -12493,6 +11841,9 @@ function updateToggleButton(theme) {
 
 // 5. Lắng nghe sự kiện tải trang để kích hoạt hệ thống theme ngay lập tức
 document.addEventListener('DOMContentLoaded', initTheme);
+
+
+
 
 // --- KHỞI TẠO HỆ THỐNG ---
 // 1. Cấu hình ban đầu
