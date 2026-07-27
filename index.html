@@ -6909,7 +6909,19 @@ async function shareInvoiceViaZalo(areaId, modeClass, fileNamePrefix, receiptId)
             canvas.toBlob(async (blob) => {
                 if (!blob) { alert('Không tạo được ảnh hóa đơn!'); resolve(); return; }
 
-                const fileName = `${fileNamePrefix}_${receiptId || 'hoadon'}.png`;
+                // Lấy tên khách hàng và ngày từ vùng in để đặt tên file
+                const custEl = el.querySelector('.print-customer-name, #print-customer, [data-customer], .customer-name') || document.getElementById('sell-customer');
+                let customerName = (custEl ? (custEl.innerText || custEl.value) : '').trim() || 'KhachHang';
+                customerName = customerName.replace(/[\s\/\\?%*:|"<>]/g, '_');
+
+                const dateEl = el.querySelector('.print-date, #print-date, [data-date]');
+                let dateStr = dateEl ? dateEl.innerText.trim().replace(/[\s\/\\?%*:|"<>]/g, '-') : '';
+                if (!dateStr) {
+                    const now = new Date();
+                    dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+                }
+
+                const fileName = `${customerName}_${dateStr}.png`;
                 const file = new File([blob], fileName, { type: 'image/png' });
 
                 if (showLoading) Swal.close();
