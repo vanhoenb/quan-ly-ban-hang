@@ -1145,15 +1145,11 @@ html:not(.dark) .bg-white {
     background-color: #1e293b !important; 
 }
 
-.dark #page-NguyenLieu .tab-btn {
-    background-color: #334155 !important;
-    color: #94a3b8 !important;
-}
-
-.dark #page-NguyenLieu .tab-btn.bg-blue-600 {
-    background-color: #2563eb !important;
-    color: #ffffff !important;
-}
+/* Trước đây có 1 quy tắc CSS cũ ở đây ép cứng màu xám cho MỌI tab (kể cả tab đang chọn)
+   trong trang Nguyên Liệu ở giao diện tối, vì nó kiểm tra class "bg-blue-600" - class này
+   không còn được dùng nữa (tab hiện tại dùng "bg-gradient-to-b" nên rule cũ không bao giờ
+   nhận diện đúng tab đang active), khiến toàn bộ 3 tab Nguyên Liệu bị đồng loạt sai màu so
+   với các tab Trang Chủ. Đã bỏ để 2 nơi dùng chung đúng 1 kiểu tô màu qua Tailwind. */
 
 .dark #page-NguyenLieu input,
 .dark #page-NguyenLieu select {
@@ -1561,7 +1557,7 @@ html:not(.dark) .bg-white {
 <div class="grid grid-cols-3 gap-2 md:gap-3 bg-slate-200 dark:bg-slate-950 p-1.5 rounded-2xl border border-slate-300 dark:border-slate-900 shadow-[inset_0_2px_6px_rgba(0,0,0,0.15)] dark:shadow-[inset_0_4px_12px_rgba(0,0,0,0.8)] select-none">
     <!-- Tab 1: NXT KHO (Mặc định đang Active) -->
     <button onclick="switchMainTab('inventory')" id="btn-main-inventory" 
-        class="py-2.5 px-1 text-[10px] md:text-sm font-black rounded-xl transition-all duration-150 bg-gradient-to-b from-blue-100 to-blue-200 dark:from-blue-950/40 dark:to-blue-900/30 text-blue-600 dark:text-blue-400 border-t border-l border-white dark:border-blue-500/20 border-b-[4px] border-blue-400 dark:border-blue-600 shadow-[0_4px_10px_rgba(59,130,246,0.15)] dark:shadow-[0_6px_15px_rgba(59,130,246,0.25)] uppercase tracking-wider">
+        class="py-2.5 px-1 text-[10px] md:text-sm font-black rounded-xl transition-all duration-150 bg-gradient-to-b from-blue-300 to-blue-400 dark:from-blue-900/60 dark:to-blue-800/50 text-blue-800 dark:text-blue-400 border-t border-l border-white dark:border-blue-500/20 border-b-[4px] border-blue-400 dark:border-blue-600 shadow-[0_4px_10px_rgba(59,130,246,0.15)] dark:shadow-[0_6px_15px_rgba(59,130,246,0.25)] uppercase tracking-wider">
         NXT KHO
     </button>
     
@@ -1873,7 +1869,7 @@ html:not(.dark) .bg-white {
     <h2 class="text-2xl font-bold text-gray-800 dark:text-white">BÁN HÀNG / XUẤT HOÁ ĐƠN</h2>
 
    <div class="flex flex-col lg:flex-row gap-4 w-full">
-   <div class="lg:w-1/2 w-full space-y-4 h-auto md:h-[900px]">
+   <div class="lg:w-1/2 w-full space-y-4 h-auto md:h-[800px]">
     <div class="bg-white dark:bg-slate-900 p-2 md:p-4 rounded-2xl border-4 border-red-500 shadow-sm h-full">
             
             <div class="flex gap-2 mb-4">
@@ -1900,13 +1896,13 @@ html:not(.dark) .bg-white {
             </div>
             
             <div id="product-grid" 
-                 class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 h-[250px] md:h-[780px] overflow-y-auto p-1 md:p-2" 
+                 class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 h-[250px] md:h-[680px] overflow-y-auto p-1 md:p-2" 
                  style="align-content: start;">
             </div>
         </div>
     </div>
 
-        <div class="lg:w-1/2 w-full space-y-4 h-[900px] flex flex-col">
+        <div class="lg:w-1/2 w-full space-y-4 h-[800px] flex flex-col">
             <!-- HÓA ĐƠN CHỜ: cho phép tạm giữ đơn đang bán để phục vụ khách khác, rồi quay lại sau -->
             <div class="bg-white dark:bg-slate-900 rounded-2xl border-2 border-blue-200 dark:border-slate-700 p-2 shadow-sm">
                 <div id="held-orders-bar" class="flex items-center gap-2 overflow-x-auto pb-0.5"></div>
@@ -2036,15 +2032,15 @@ html:not(.dark) .bg-white {
     <table border="1" style="width: 100%; border-collapse: collapse; text-align: center; margin-bottom: 20px; font-size: 13px;">
         <thead style="background: #eee; font-weight: bold; font-family: 'Goldman', sans-serif;">
             <tr>
-                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">STT</div></th>
-                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Tên hàng</div></th>
-                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">ĐVT</div></th>
-                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">SL</div></th>
-                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Đơn giá</div></th>
-                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Thành tiền</div></th>
-                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Thuế%</div></th>
-                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Tiền thuế</div></th>
-                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Ghi chú</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">STT</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Tên hàng</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">ĐVT</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">SL</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Đơn giá</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Thành tiền</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Thuế%</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Tiền thuế</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Ghi chú</div></th>
             </tr>
         </thead>
         <tbody id="print-items"></tbody>
@@ -2112,17 +2108,17 @@ html:not(.dark) .bg-white {
     <table border="1" style="width: 100%; border-collapse: collapse; text-align: center; margin-bottom: 20px; font-size: 13px;">
         <thead style="background: #eee; font-weight: bold; font-family: 'Goldman', sans-serif;">
             <tr>
-                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;" rowspan="2"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">STT</div></th>
-                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;" rowspan="2"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Tên, nhãn hiệu, quy cách<br>vật tư, hàng hoá</div></th>
-                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;" rowspan="2"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">ĐVT</div></th>
-                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;" colspan="2"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Số lượng</div></th>
-                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;" rowspan="2"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Đơn giá</div></th>
-                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;" rowspan="2"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Thành tiền</div></th>
-                <th style="padding: 10px 4px; vertical-align: middle; height: 40px;" rowspan="2"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Ghi chú</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle;" rowspan="2"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">STT</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle;" rowspan="2"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Tên, nhãn hiệu, quy cách<br>vật tư, hàng hoá</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle;" rowspan="2"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">ĐVT</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle;" colspan="2"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Số lượng</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle;" rowspan="2"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Đơn giá</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle;" rowspan="2"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Thành tiền</div></th>
+                <th style="padding: 10px 4px; vertical-align: middle;" rowspan="2"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Ghi chú</div></th>
             </tr>
             <tr>
-                <th style="padding: 6px 4px; vertical-align: middle; height: 40px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Yêu cầu</div></th>
-                <th style="padding: 6px 4px; vertical-align: middle; height: 40px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Thực xuất</div></th>
+                <th style="padding: 6px 4px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Yêu cầu</div></th>
+                <th style="padding: 6px 4px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">Thực xuất</div></th>
             </tr>
         </thead>
         <tbody id="xk-items"></tbody>
@@ -2451,7 +2447,7 @@ html:not(.dark) .bg-white {
             </div>
           </div>
 
-          <div class="overflow-y-auto max-h-[500px] overflow-x-auto border border-gray-100 dark:border-slate-700 rounded-lg flex-grow custom-scrollbar">
+          <div class="overflow-y-auto max-h-[450px] overflow-x-auto border border-gray-100 dark:border-slate-700 rounded-lg flex-grow custom-scrollbar">
             <table class="w-full text-left border-collapse table-fixed">
               <thead class="sticky top-0 bg-gray-100 dark:bg-slate-950 z-10">
                 <tr class="border-b border-gray-200 dark:border-slate-700">
@@ -2571,7 +2567,7 @@ html:not(.dark) .bg-white {
         
         <!-- Tab Menu -->
 <div class="grid grid-cols-3 gap-2 md:gap-3 mb-6 bg-slate-200 dark:bg-slate-950 p-1.5 rounded-2xl border border-slate-300 dark:border-slate-900 shadow-[inset_0_2px_6px_rgba(0,0,0,0.15)] dark:shadow-[inset_0_4px_12px_rgba(0,0,0,0.8)] select-none">
-    <button id="btn-ncc" onclick="openNLTab('ncc-tab')" class="tab-btn py-2.5 px-1 text-[10px] md:text-sm font-black rounded-xl transition-all duration-150 bg-gradient-to-b from-blue-100 to-blue-200 dark:from-blue-950/40 dark:to-blue-900/30 text-blue-600 dark:text-blue-400 border-t border-l border-white dark:border-blue-500/20 border-b-[4px] border-blue-400 dark:border-blue-600 shadow-[0_4px_10px_rgba(59,130,246,0.15)] dark:shadow-[0_6px_15px_rgba(59,130,246,0.25)] uppercase tracking-wider">NCC & CÔNG NỢ</button>
+    <button id="btn-ncc" onclick="openNLTab('ncc-tab')" class="tab-btn py-2.5 px-1 text-[10px] md:text-sm font-black rounded-xl transition-all duration-150 bg-gradient-to-b from-blue-300 to-blue-400 dark:from-blue-900/60 dark:to-blue-800/50 text-blue-800 dark:text-blue-400 border-t border-l border-white dark:border-blue-500/20 border-b-[4px] border-blue-400 dark:border-blue-600 shadow-[0_4px_10px_rgba(59,130,246,0.15)] dark:shadow-[0_6px_15px_rgba(59,130,246,0.25)] uppercase tracking-wider">NCC & CÔNG NỢ</button>
     <button id="btn-dm" onclick="openNLTab('dm-tab')" class="tab-btn py-2.5 px-1 text-[10px] md:text-sm font-bold rounded-xl transition-all duration-150 bg-slate-100/80 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border-b-[2px] border-slate-300 dark:border-slate-950 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/80 hover:border-b-[4px] hover:border-slate-400 dark:hover:border-slate-800 uppercase tracking-wider">DANH MỤC NL</button>
     <button id="btn-nhap" onclick="openNLTab('nhap-tab')" class="tab-btn py-2.5 px-1 text-[10px] md:text-sm font-bold rounded-xl transition-all duration-150 bg-slate-100/80 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border-b-[2px] border-slate-300 dark:border-slate-950 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/80 hover:border-b-[4px] hover:border-slate-400 dark:hover:border-slate-800 uppercase tracking-wider">NHẬP KHO NL</button>
 </div>
@@ -2583,7 +2579,7 @@ html:not(.dark) .bg-white {
                 <input id="in-sdt" placeholder="SĐT" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
                 <input id="in-diachi" placeholder="Địa chỉ" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
                <button onclick="addNCC()" 
-    class="w-full bg-green-600 dark:bg-green-700 text-white p-2 rounded font-bold transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+    class="w-full bg-green-600 dark:bg-green-700 text-white p-2 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
     THÊM NCC
 </button>
             </div>
@@ -2610,7 +2606,7 @@ html:not(.dark) .bg-white {
                 <input id="in-nl" placeholder="Tên Nguyên Liệu" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
                 <input id="in-dvt" placeholder="ĐVT" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
                <button onclick="addNL()" 
-    class="w-full bg-green-600 dark:bg-green-700 text-white p-2 rounded font-bold transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+    class="w-full bg-green-600 dark:bg-green-700 text-white p-2 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
     THÊM NL
 </button>
             </div>
@@ -2685,7 +2681,7 @@ html:not(.dark) .bg-white {
 </button>
             <div id="gio-hang-nl" class="my-2 border dark:border-slate-700 p-2 text-xs bg-gray-50 dark:bg-slate-950 dark:text-white rounded min-h-[50px] max-h-[100px] overflow-y-auto border-blue-100"></div>
             <button onclick="saveFullInvoice()" 
-    class="w-full bg-blue-600 dark:bg-blue-700 text-white py-3 rounded font-bold text-sm transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-lg mt-2">
+    class="w-full bg-blue-600 dark:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-lg mt-2">
     LƯU PHIẾU NHẬP
 </button>
         </div>
@@ -2697,7 +2693,7 @@ html:not(.dark) .bg-white {
             <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm">
                 <h3 id="popup-title" class="font-bold text-lg mb-4 text-center"></h3>
                 <div id="popup-content" class="mb-4"></div>
-                <button onclick="document.getElementById('popup-ncc').classList.add('hidden')" class="w-full bg-gray-500 text-white py-2 rounded">Đóng</button>
+                <button onclick="document.getElementById('popup-ncc').classList.add('hidden')" class="w-full bg-gray-500 text-white py-2 rounded-xl">Đóng</button>
             </div>
         </div>
     </div>
@@ -2783,8 +2779,8 @@ html:not(.dark) .bg-white {
 </select>
 
             <div class="flex gap-2">
-                <button onclick="document.getElementById('modal-add-event').classList.add('hidden')" class="flex-1 bg-gray-200 py-2 rounded font-bold">Hủy</button>
-                <button onclick="saveNewEvent()" class="flex-1 bg-blue-600 text-white py-2 rounded font-bold">Lưu</button>
+                <button onclick="document.getElementById('modal-add-event').classList.add('hidden')" class="flex-1 bg-gray-200 py-2 rounded-xl font-bold">Hủy</button>
+                <button onclick="saveNewEvent()" class="flex-1 bg-blue-600 text-white py-2 rounded-xl font-bold">Lưu</button>
             </div>
         </div>
     </div>
@@ -2794,9 +2790,9 @@ html:not(.dark) .bg-white {
             <h3 id="view-event-title" class="font-bold text-lg mb-2 text-gray-800"></h3>
             <p id="view-event-time" class="text-gray-500 text-sm mb-6"></p>
             <div class="flex gap-2">
-                <button onclick="document.getElementById('modal-view-event').classList.add('hidden')" class="flex-1 bg-gray-200 py-2 rounded font-bold">Đóng</button>
-                <button onclick="markDone()" class="flex-1 bg-green-600 text-white py-2 rounded font-bold">Hoàn thành</button>
-                <button onclick="deleteEvent()" class="flex-1 bg-red-600 text-white py-2 rounded font-bold">Xóa</button>
+                <button onclick="document.getElementById('modal-view-event').classList.add('hidden')" class="flex-1 bg-gray-200 py-2 rounded-xl font-bold">Đóng</button>
+                <button onclick="markDone()" class="flex-1 bg-green-600 text-white py-2 rounded-xl font-bold">Hoàn thành</button>
+                <button onclick="deleteEvent()" title="Xóa" class="flex-1 bg-red-600 text-white py-2 rounded-xl font-bold flex items-center justify-center"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
             </div>
         </div>
     </div>
@@ -2823,7 +2819,7 @@ html:not(.dark) .bg-white {
 
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pb-2 border-b border-slate-200 dark:border-slate-700">
         <h2 class="text-2xl font-bold text-slate-800 dark:text-white">QUẢN LÝ NGƯỜI DÙNG & PHÂN QUYỀN</h2>
-        <button id="btn-add-user-header" onclick="openUserForm()" class="bg-blue-600 dark:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2 justify-center">
+        <button id="btn-add-user-header" onclick="openUserForm()" class="shrink-0 whitespace-nowrap bg-blue-600 dark:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2 justify-center">
             <i data-lucide="user-plus" class="w-4 h-4"></i> Thêm Người Dùng
         </button>
     </div>
@@ -3250,8 +3246,8 @@ async function loadUserList() {
                 <td class="py-3 px-2 text-slate-600 dark:text-slate-300">${escapeHtml(d.displayName || '')}</td>
                 <td class="py-3 px-2 text-center">${roleBadge}</td>
                 <td class="py-3 px-2 text-center">
-                    <button onclick="xemQuyenNguoiDung('${doc.id}')" class="px-2.5 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-xs font-bold inline-flex items-center gap-1">
-                        <i data-lucide="eye" class="w-3.5 h-3.5"></i> Xem
+                    <button onclick="xemQuyenNguoiDung('${doc.id}')" title="Xem" class="p-2 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/60 inline-flex items-center justify-center">
+                        <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                     </button>
                 </td>
                 <td class="py-3 px-2 text-center">${statusBadge}</td>
@@ -3401,8 +3397,8 @@ function renderActivityLog(logs) {
             <td class="py-2.5 px-2 text-center">${actionBadge(l.action)}</td>
             <td class="py-2.5 px-2 text-slate-700 dark:text-slate-300 truncate" title="${escapeHtml(l.target)}">${escapeHtml(l.target)}</td>
             <td class="py-2.5 px-2 text-center">
-                <button onclick="xemChiTietNhatKy('${l.id}')" class="px-2.5 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-xs font-bold inline-flex items-center gap-1">
-                    <i data-lucide="eye" class="w-3.5 h-3.5"></i> Xem
+                <button onclick="xemChiTietNhatKy('${l.id}')" title="Xem" class="p-2 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/60 inline-flex items-center justify-center">
+                    <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                 </button>
             </td>
         </tr>`;
@@ -3988,13 +3984,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3. Danh sách class khi Tab được chọn (Bao gồm cả Dark mode)
     const activeClasses = [
-        'bg-gradient-to-b', 'from-blue-100', 'to-blue-200', 
-        'text-blue-600', 'border-t', 'border-l', 'border-white', 
+        'bg-gradient-to-b', 'from-blue-300', 'to-blue-400', 
+        'text-blue-800', 'border-t', 'border-l', 'border-white', 
         'border-b-[4px]', 'border-blue-400', 
         'shadow-[0_4px_10px_rgba(59,130,246,0.15)]', 
         '-translate-y-[2px]', 'font-black',
         // Các class cho Dark Mode
-        'dark:from-blue-950/40', 'dark:to-blue-900/30', 'dark:text-blue-400', 
+        'dark:from-blue-900/60', 'dark:to-blue-800/50', 'dark:text-blue-400', 
         'dark:border-blue-500/20', 'dark:border-blue-600', 
         'dark:shadow-[0_6px_15px_rgba(59,130,246,0.25)]'
     ];
@@ -4348,29 +4344,17 @@ function renderCustomerOrders(allSales, customersSnap) {
 
     container.innerHTML = currentOrders.map(order => {
         // Màu nền thẻ thích ứng động 2 giao diện Sáng/Tối (Chống lóa tuyệt đối)
+        // Giao diện Sáng dùng -100 thay vì -50/45 cũ vì -50/45 gần như trong suốt trên
+        // nền trắng, nhìn không thấy nền màu - -100 đậm vừa đủ để thấy rõ mà vẫn nhẹ nhàng.
         let barBg = order.diffDays >= 20 
-            ? 'bg-rose-50/45 dark:bg-rose-950/20 hover:bg-rose-100/60 dark:hover:bg-rose-950/30 text-rose-600 dark:text-rose-400' 
+            ? 'bg-rose-100 dark:bg-rose-950/20 hover:bg-rose-200/80 dark:hover:bg-rose-950/30 text-rose-600 dark:text-rose-400' 
             : (order.diffDays >= 10 
-                ? 'bg-amber-50/45 dark:bg-amber-950/20 hover:bg-amber-100/60 dark:hover:bg-amber-950/30 text-amber-600 dark:text-amber-400' 
-                : 'bg-emerald-50/45 dark:bg-emerald-950/20 hover:bg-emerald-100/60 dark:hover:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400');
+                ? 'bg-amber-100 dark:bg-amber-950/20 hover:bg-amber-200/80 dark:hover:bg-amber-950/30 text-amber-600 dark:text-amber-400' 
+                : 'bg-emerald-100 dark:bg-emerald-950/20 hover:bg-emerald-200/80 dark:hover:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400');
 
-        // THIẾT LẬP 2 THANH CHỈ THỊ 3D DẠNG TRỤ NỔI KHỐI (GLOSSY CYLINDER BARS)
-        let accentBgLeft = '';
-        let accentBgRight = '';
-
-        if (order.diffDays >= 20) {
-            // Đỏ nhạt -> đậm dốc gương 3D
-            accentBgLeft = 'bg-gradient-to-r from-rose-300 via-rose-500 to-rose-600 dark:from-rose-400 dark:via-rose-600 dark:to-rose-800 shadow-[inset_-1px_0_1px_rgba(0,0,0,0.15),inset_1px_0_2px_rgba(255,255,255,0.45)]';
-            accentBgRight = 'bg-gradient-to-l from-rose-300 via-rose-500 to-rose-600 dark:from-rose-400 dark:via-rose-600 dark:to-rose-800 shadow-[inset_1px_0_1px_rgba(0,0,0,0.15),inset_-1px_0_2px_rgba(255,255,255,0.45)]';
-        } else if (order.diffDays >= 10) {
-            // Vàng nhạt -> đậm dốc gương 3D
-            accentBgLeft = 'bg-gradient-to-r from-amber-300 via-amber-500 to-amber-600 dark:from-amber-400 dark:via-amber-600 dark:to-amber-800 shadow-[inset_-1px_0_1px_rgba(0,0,0,0.15),inset_1px_0_2px_rgba(255,255,255,0.45)]';
-            accentBgRight = 'bg-gradient-to-l from-amber-300 via-amber-500 to-amber-600 dark:from-amber-400 dark:via-amber-600 dark:to-amber-800 shadow-[inset_1px_0_1px_rgba(0,0,0,0.15),inset_-1px_0_2px_rgba(255,255,255,0.45)]';
-        } else {
-            // Xanh nhạt -> đậm dốc gương 3D
-            accentBgLeft = 'bg-gradient-to-r from-emerald-300 via-emerald-500 to-emerald-600 dark:from-emerald-400 dark:via-emerald-600 dark:to-emerald-800 shadow-[inset_-1px_0_1px_rgba(0,0,0,0.15),inset_1px_0_2px_rgba(255,255,255,0.45)]';
-            accentBgRight = 'bg-gradient-to-l from-emerald-300 via-emerald-500 to-emerald-600 dark:from-emerald-400 dark:via-emerald-600 dark:to-emerald-800 shadow-[inset_1px_0_1px_rgba(0,0,0,0.15),inset_-1px_0_2px_rgba(255,255,255,0.45)]';
-        }
+        // MÀU VIỀN TRÁI/PHẢI (theo đúng kiểu đã dùng ở danh sách Nhập Kho NL: viền 4px 2
+        // bên, bo tròn theo góc thẻ - không dùng thanh nổi tách rời như trước nữa)
+        let accentColor = order.diffDays >= 20 ? '#f43f5e' : (order.diffDays >= 10 ? '#f59e0b' : '#10b981');
 
         let dayTextColor = order.diffDays >= 20 
             ? 'text-rose-600 dark:text-rose-400 font-black' 
@@ -4379,11 +4363,7 @@ function renderCustomerOrders(allSales, customersSnap) {
         return `
         <div class="block w-full">
             <div onclick="viewOrderDetails('${order.id}')" 
-                 class="relative overflow-hidden flex items-center ${barBg} border border-slate-200/80 dark:border-slate-800/80 rounded-xl p-2 px-3 gap-2 shadow-sm dark:shadow-[0_4px_12px_rgba(0,0,0,0.3)] transition-all duration-200 cursor-pointer text-xs active:scale-[0.99]">
-                
-                <!-- 2 Thanh màu bo góc dạng 3D nén sâu, loại bỏ hoàn toàn hiện tượng phẳng lóa -->
-                <div class="absolute left-0 top-0 bottom-0 w-1.5 ${accentBgLeft}"></div>
-                <div class="absolute right-0 top-0 bottom-0 w-1.5 ${accentBgRight}"></div>
+                 class="relative flex items-center ${barBg} border border-slate-200/80 dark:border-slate-800/80 border-l-4 border-r-4 rounded-xl p-2 px-3 gap-2 shadow-sm dark:shadow-[0_4px_12px_rgba(0,0,0,0.3)] transition-all duration-200 cursor-pointer text-xs active:scale-[0.99]" style="border-left-color:${accentColor} !important; border-right-color:${accentColor} !important;">
                 
                 <!-- GIỮ NGUYÊN HOÀN TOÀN TẤT CẢ CÁC CỘT VÀ TỶ LỆ RỘNG % CỦA BẠN -->
                 <div class="w-[15%] pl-2 py-1 rounded text-[11px] font-mono font-bold text-slate-500 dark:text-slate-400 truncate">
@@ -5869,7 +5849,7 @@ window.viewReceipt = function(docId) {
                     <td class="p-2"><input type="number" id="edit-qty-${index}" value="${item.qty}" class="w-16 border p-1 rounded"></td>
                     <td class="p-2"><input type="number" id="edit-price-${index}" value="${item.price}" class="w-20 border p-1 rounded"></td>
                     <td class="p-2">
-                        <button onclick="saveItemEdit('${docId}', ${index})" class="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700">Lưu</button>
+                        <button onclick="saveItemEdit('${docId}', ${index})" class="bg-green-600 text-white px-2 py-1 rounded-xl text-xs hover:bg-green-700">Lưu</button>
                     </td>
                 </tr>
             `;
@@ -5899,12 +5879,28 @@ window.saveItemEdit = async function(docId, index) {
         
         let items = doc.data().items;
         
+        // QUAN TRỌNG: phải nhớ số lượng CŨ trước khi ghi đè, để tính đúng phần chênh
+        // lệch cần cộng/trừ vào tồn kho thực tế (stock_counters). TRƯỚC ĐÂY hàm này chỉ
+        // sửa số lượng trên PHIẾU mà QUÊN cập nhật kho, khiến tồn kho thực tế (đã cộng
+        // đúng lúc nhập ban đầu) và số liệu tính lại từ phiếu (bị lệch theo giá trị vừa
+        // sửa) không còn khớp nhau nữa - đây chính là nguyên nhân tồn đầu/tồn cuối bị trừ
+        // sai sau khi sửa số lượng ở đây.
+        const oldQty = parseFloat(items[index].qty) || 0;
+        const productName = items[index].name;
+
         // Cập nhật giá trị mới
         items[index].qty = newQty;
         items[index].price = newPrice;
         
         // Lưu vào Firebase
         await receiptRef.update({ items: items });
+
+        // Cộng/trừ đúng PHẦN CHÊNH LỆCH (newQty - oldQty) vào tồn kho thực tế - không phải
+        // cộng/trừ lại toàn bộ newQty, vì oldQty đã được cộng vào kho từ lúc lưu phiếu ban đầu rồi.
+        const delta = newQty - oldQty;
+        if (delta !== 0 && productName) {
+            await adjustStockCounters([{ name: productName, qty: delta }], 1);
+        }
         
         // Cập nhật dữ liệu ngay trong mảng local để giao diện đồng bộ
         const receiptIndex = window.allReceipts.findIndex(r => r.docId === docId);
@@ -5913,6 +5909,11 @@ window.saveItemEdit = async function(docId, index) {
         }
         
         alert("Đã cập nhật!");
+
+        // Báo cho toàn bộ ứng dụng biết dữ liệu vừa thay đổi để Kho Hàng / NXT Trang Chủ
+        // tự làm mới theo đúng số tồn kho mới - trước đây thiếu bước này nên phải tự tải
+        // lại trang mới thấy đúng.
+        window.dispatchEvent(new CustomEvent('dataChanged'));
         
         // Gọi lại hàm xem để refresh modal với dữ liệu mới
         viewReceipt(docId); 
@@ -6640,10 +6641,20 @@ function renderProductGrid() {
         { top: 'from-cyan-100 to-cyan-50/60 dark:from-cyan-950/70 dark:to-slate-900',    ring: 'ring-cyan-200 dark:ring-cyan-500/20',    badge: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-300',    btn: 'from-cyan-400 to-cyan-600 dark:from-cyan-500 dark:to-cyan-700',    shadow: 'shadow-[0_6px_0_0_#155e75,0_10px_16px_-4px_rgba(8,145,178,0.35)] dark:shadow-[0_6px_0_0_#164e63,0_10px_16px_-4px_rgba(0,0,0,0.5)]' }
     ];
 
+    // Đưa sản phẩm HẾT HÀNG xuống cuối danh sách, GIỮ NGUYÊN thứ tự vốn có giữa các sản
+    // phẩm còn lại (không xáo trộn) - chỉ tách thành 2 nhóm: còn hàng trước, hết hàng sau.
+    const inStockList = [];
+    const outOfStockList = [];
+    window.allProductCache.forEach(p => {
+        const rawStock = window.currentStockMap ? (window.currentStockMap[p.name] || 0) : 0;
+        if (rawStock <= 0) outOfStockList.push(p); else inStockList.push(p);
+    });
+    const sortedProductList = inStockList.concat(outOfStockList);
+
     // Gom HTML vào 1 mảng rồi gán "innerHTML" đúng 1 lần ở cuối - nhanh hơn nhiều so với
     // "innerHTML +=" lặp lại trong vòng for (mỗi lần += là trình duyệt phải phân tích lại
     // TOÀN BỘ nội dung đã có trước đó, càng nhiều sản phẩm càng giật lag).
-    const cardsHtml = window.allProductCache.map((p, index) => {
+    const cardsHtml = sortedProductList.map((p, index) => {
         const rawStock = window.currentStockMap ? (window.currentStockMap[p.name] || 0) : 0;
         const realStock = Number(Math.round(rawStock * 100) / 100);
 
@@ -6678,8 +6689,8 @@ function renderProductGrid() {
                 </div>
 
                 <div class="relative flex items-center gap-1.5 mt-1">
-                    <span class="text-[9px] uppercase font-black ${isOutOfStock ? 'text-red-500' : 'text-slate-400 dark:text-slate-400'}">Tồn kho</span>
-                    <span id="stock-display-${idName}" class="text-[11px] font-black px-2 py-0.5 rounded-full ${isOutOfStock ? 'bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400' : b.badge}">
+                    <span class="text-[9px] uppercase font-black ${isOutOfStock ? 'text-red-600 dark:text-red-400' : 'text-slate-400 dark:text-slate-400'}">Tồn kho</span>
+                    <span id="stock-display-${idName}" class="font-black rounded-full border-2 shadow-sm ${isOutOfStock ? 'text-[9px] px-1.5 py-0.5 bg-red-50 border-red-300 text-red-600 dark:bg-red-500/10 dark:border-red-500/40 dark:text-red-400' : `text-sm px-2.5 py-1 ${b.badge} border-white/70 dark:border-slate-900/40`}">
                         ${isOutOfStock ? 'HẾT HÀNG' : realStock}
                     </span>
                 </div>
@@ -6747,8 +6758,11 @@ async function quickAdd(productName, event) {
     if (stockDisplay) {
         const newStock = window.currentStockMap[productName];
         const displayValue = Number(newStock);
-        stockDisplay.innerText = displayValue <= 0 ? 'HẾT' : displayValue;
-        stockDisplay.className = `text-[10px] font-black ${displayValue <= 0 ? 'text-red-600' : 'text-blue-700'}`;
+        const isNowOut = displayValue <= 0;
+        stockDisplay.innerText = isNowOut ? 'HẾT HÀNG' : displayValue;
+        // Giữ nguyên kiểu khoanh tròn (giống lúc mới hiển thị), tránh bị mất khung tròn
+        // khi số tồn cập nhật lại sau khi thêm vào giỏ hàng.
+        stockDisplay.className = `font-black rounded-full border-2 shadow-sm ${isNowOut ? 'text-[9px] px-1.5 py-0.5 bg-red-50 border-red-300 text-red-600 dark:bg-red-500/10 dark:border-red-500/40 dark:text-red-400' : 'text-sm px-2.5 py-1 bg-blue-100 text-blue-700 border-white/70 dark:bg-blue-500/15 dark:text-blue-300 dark:border-slate-900/40'}`;
     }
 
     renderSellCart();
@@ -6875,7 +6889,7 @@ function selectPrintDocType(type) {
 //    của hệ điều hành, người dùng chọn Zalo (hoặc Messenger, Gmail...) để gửi ảnh đi.
 //  - Trên máy tính (Chrome/Edge Windows hiện chưa hỗ trợ chia sẻ file kiểu này): tự động
 //    tải ảnh hóa đơn về máy + mở Zalo Web ở tab mới để người dùng tự đính kèm ảnh gửi đi.
-async function shareInvoiceViaZalo(areaId, modeClass, fileNamePrefix, receiptId) {
+async function shareInvoiceViaZalo(areaId, modeClass, fileNamePrefix, receiptId, customerName, dateObj) {
     if (typeof html2canvas === 'undefined') {
         alert('Chưa tải được công cụ chụp ảnh hóa đơn (html2canvas). Vui lòng kiểm tra kết nối mạng rồi thử lại.');
         return;
@@ -6928,20 +6942,58 @@ async function shareInvoiceViaZalo(areaId, modeClass, fileNamePrefix, receiptId)
         // Đợi 1 nhịp để trình duyệt kịp tính toán lại layout trước khi chụp
         await new Promise(r => setTimeout(r, 50));
 
+        // QUAN TRỌNG: html2canvas không tính đúng "height:100%" của các thẻ div đặt bên
+        // trong <td>/<th> (đây là lỗi đã biết của thư viện này) - đó là lý do dù đã dùng
+        // flexbox để căn giữa, ảnh chụp ra vẫn bị dồn chữ xuống đáy ô. Cách khắc phục:
+        // đo chiều cao THẬT SỰ của từng ô (bằng pixel cụ thể) rồi gán cứng cho div bên
+        // trong, thay vì để "100%" - html2canvas xử lý số pixel cụ thể chính xác hơn nhiều.
+        const cellDivs = el.querySelectorAll('td > div, th > div');
+        cellDivs.forEach(div => {
+            const cell = div.parentElement;
+            if (!cell) return;
+            // QUAN TRỌNG: clientHeight của ô đã BAO GỒM padding trên/dưới của chính ô đó.
+            // Div nằm BÊN TRONG phần đệm đó, nên phải TRỪ ĐI padding trước khi gán, nếu
+            // không div sẽ to bằng cả ô (kể cả phần đệm), làm ô bị đẩy phồng to thêm 1 lần
+            // padding nữa mỗi hàng - dồn lại nhiều hàng làm cả bảng bị kéo dài như ảnh.
+            const cs = window.getComputedStyle(cell);
+            const padTop = parseFloat(cs.paddingTop) || 0;
+            const padBottom = parseFloat(cs.paddingBottom) || 0;
+            const innerHeight = cell.clientHeight - padTop - padBottom;
+            div.style.height = Math.max(innerHeight, 0) + 'px';
+        });
+
         const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
 
         await new Promise(resolve => {
             canvas.toBlob(async (blob) => {
                 if (!blob) { alert('Không tạo được ảnh hóa đơn!'); resolve(); return; }
 
-                const fileName = `${fileNamePrefix}_${receiptId || 'hoadon'}.png`;
+                // Tên file chia sẻ = Tên khách hàng + Ngày lập hoá đơn (thay vì
+                // "HoaDon_PX..." như trước) - loại bỏ các ký tự không hợp lệ trong tên
+                // file (/ \ : * ? " < > |). Nếu vì lý do gì đó không có tên khách hoặc
+                // ngày, tự động quay về cách đặt tên cũ (an toàn, không bao giờ lỗi).
+                const sanitizeForFileName = (s) => (s || '').toString().trim().replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, ' ');
+                const safeCustomer = sanitizeForFileName(customerName);
+                const d = dateObj instanceof Date && !isNaN(dateObj) ? dateObj : new Date();
+                const dateStr = `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
+                const fileName = safeCustomer
+                    ? `${safeCustomer} - ${dateStr}.png`
+                    : `${fileNamePrefix}_${receiptId || 'hoadon'}.png`;
                 const file = new File([blob], fileName, { type: 'image/png' });
 
                 if (showLoading) Swal.close();
 
-                // 1. Thử dùng Web Share API (hoạt động tốt trên điện thoại) - mở bảng chia sẻ
-                // của hệ điều hành, trong đó có Zalo nếu máy đã cài app Zalo.
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                // QUAN TRỌNG: navigator.share (bảng chia sẻ của hệ điều hành) chỉ hữu ích
+                // trên ĐIỆN THOẠI, nơi Zalo xuất hiện sẵn trong danh sách ứng dụng để chia
+                // sẻ. Trên MÁY TÍNH (kể cả khi cài app này thành ứng dụng riêng từ Chrome),
+                // bảng chia sẻ của Windows KHÔNG có Zalo trong danh sách - bấm vào chỉ ra
+                // màn hình "No contacts" vô dụng. Vì vậy trên máy tính, bỏ qua bước này,
+                // luôn tải ảnh thẳng về Downloads + mở Zalo Web như cách làm cũ (ổn định).
+                const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+                // 1. Thử dùng Web Share API (CHỈ trên điện thoại) - mở bảng chia sẻ của hệ
+                // điều hành, trong đó có Zalo nếu máy đã cài app Zalo.
+                if (isMobileDevice && navigator.canShare && navigator.canShare({ files: [file] })) {
                     try {
                         await navigator.share({
                             files: [file],
@@ -6956,8 +7008,8 @@ async function shareInvoiceViaZalo(areaId, modeClass, fileNamePrefix, receiptId)
                     }
                 }
 
-                // 2. Phương án dự phòng cho máy tính (chưa hỗ trợ chia sẻ file trực tiếp):
-                // tự tải ảnh về máy + mở Zalo Web để người dùng tự đính kèm gửi đi.
+                // 2. Phương án cho máy tính (và điện thoại không hỗ trợ chia sẻ file trực
+                // tiếp): tự tải ảnh về máy + mở Zalo Web để người dùng tự đính kèm gửi đi.
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
                 link.download = fileName;
@@ -6975,6 +7027,9 @@ async function shareInvoiceViaZalo(areaId, modeClass, fileNamePrefix, receiptId)
         console.error('Lỗi khi chụp ảnh hóa đơn để chia sẻ:', err);
         alert('Có lỗi khi tạo ảnh hóa đơn để chia sẻ: ' + err.message);
     } finally {
+        // Trả lại chiều cao "100%" ban đầu cho div bên trong các ô (đã tạm đổi thành số
+        // pixel cụ thể ngay trước khi chụp ảnh ở trên).
+        el.querySelectorAll('td > div, th > div').forEach(div => { div.style.height = '100%'; });
         // Trả lại đúng style ban đầu (ẩn đi như cũ)
         el.setAttribute('style', oldStyle);
         if (tempStyle && tempStyle.parentNode) tempStyle.parentNode.removeChild(tempStyle);
@@ -6989,12 +7044,33 @@ window.shareLastInvoiceToZalo = async function () {
         alert('Chưa có hóa đơn nào vừa lưu trong phiên làm việc này để chia sẻ. Hãy bấm "Lưu & In" trước.');
         return;
     }
-    const printType = (document.getElementById('print-doc-type-value') || {}).value || 'hoadon';
-    if (printType === 'xuatkho') {
-        renderXuatKhoTemplate(opts, 'share');
-    } else {
-        renderHoaDonTemplate(opts, 'share');
+
+    if (typeof Swal === 'undefined') {
+        // Không có SweetAlert2 (hiếm khi xảy ra) - dùng lại loại chứng từ đã chọn lúc lưu
+        const printType = (document.getElementById('print-doc-type-value') || {}).value || 'hoadon';
+        if (printType === 'xuatkho') { renderXuatKhoTemplate(opts, 'share'); } else { renderHoaDonTemplate(opts, 'share'); }
+        return;
     }
+
+    // Cho phép chọn muốn chia sẻ Hóa Đơn hay Phiếu Xuất Kho, không tự động lấy theo loại
+    // đã chọn lúc "Lưu & In" nữa - vì nhiều lúc muốn chia sẻ loại khác với loại đã in.
+    const result = await Swal.fire({
+        title: 'Chia sẻ chứng từ nào?',
+        showDenyButton: true,
+        showCancelButton: true,
+        confirmButtonText: '📄 Hóa Đơn',
+        denyButtonText: '📦 Phiếu Xuất Kho',
+        cancelButtonText: 'Hủy',
+        confirmButtonColor: '#2563eb',
+        denyButtonColor: '#d97706'
+    });
+
+    if (result.isConfirmed) {
+        renderHoaDonTemplate(opts, 'share');
+    } else if (result.isDenied) {
+        renderXuatKhoTemplate(opts, 'share');
+    }
+    // Nếu bấm Hủy thì không làm gì cả
 };
 
 // Chia sẻ 1 hóa đơn CŨ từ trang Lịch Sử HĐ (đọc lại đúng 1 hóa đơn đó theo docId,
@@ -7015,7 +7091,30 @@ window.shareSaleZalo = async function (docId) {
             vatRate: data.vatRate || 0,
             dateObj: dateObj
         };
-        renderHoaDonTemplate(printOpts, 'share');
+
+        if (typeof Swal === 'undefined') {
+            renderHoaDonTemplate(printOpts, 'share');
+            return;
+        }
+
+        // Cho phép chọn chia sẻ Hóa Đơn hay Phiếu Xuất Kho, giống hệt lựa chọn khi in lại
+        const result = await Swal.fire({
+            title: 'Chia sẻ chứng từ nào?',
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: '📄 Hóa Đơn',
+            denyButtonText: '📦 Phiếu Xuất Kho',
+            cancelButtonText: 'Hủy',
+            confirmButtonColor: '#2563eb',
+            denyButtonColor: '#d97706'
+        });
+
+        if (result.isConfirmed) {
+            renderHoaDonTemplate(printOpts, 'share');
+        } else if (result.isDenied) {
+            renderXuatKhoTemplate(printOpts, 'share');
+        }
+        // Nếu bấm Hủy thì không làm gì cả
     } catch (error) {
         console.error('Lỗi khi chia sẻ hóa đơn:', error);
         alert('Có lỗi khi tải hóa đơn để chia sẻ!');
@@ -7161,15 +7260,15 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
             const taxAmount = subTotal * (vr / 100);
             subTotalAll += subTotal;
             html += `<tr>
-                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${stt++}</div></td>
-                <td style="padding: 5px; text-align: left; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:flex-start;height:100%;line-height:1.3;">${i.name || ''}</div></td>
-                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.unit || 'Cái'}</div></td>
-                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.qty}</div></td>
-                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.price.toLocaleString('vi-VN')}</div></td>
-                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${subTotal.toLocaleString('vi-VN')}</div></td>
-                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${vr}%</div></td>
-                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${taxAmount.toLocaleString('vi-VN')}</div></td>
-                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.note || ''}</div></td>
+                <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${stt++}</div></td>
+                <td style="padding: 5px; text-align: left; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:flex-start;height:100%;line-height:1.3;">${i.name || ''}</div></td>
+                <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.unit || 'Cái'}</div></td>
+                <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.qty}</div></td>
+                <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.price.toLocaleString('vi-VN')}</div></td>
+                <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${subTotal.toLocaleString('vi-VN')}</div></td>
+                <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${vr}%</div></td>
+                <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${taxAmount.toLocaleString('vi-VN')}</div></td>
+                <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.note || ''}</div></td>
             </tr>`;
         });
 
@@ -7186,15 +7285,15 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
                 const taxAmount = 0;
                 // subTotalAll không cộng thêm tiền của nhóm này
                 html += `<tr>
-                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${stt++}</div></td>
-                    <td style="padding: 5px; text-align: left; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:flex-start;height:100%;line-height:1.3;">${i.name || ''}</div></td>
-                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.unit || 'Cái'}</div></td>
-                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.qty}</div></td>
-                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${itemPrice.toLocaleString('vi-VN')}</div></td>
-                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${subTotal.toLocaleString('vi-VN')}</div></td>
-                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${vr}%</div></td>
-                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${taxAmount.toLocaleString('vi-VN')}</div></td>
-                    <td style="padding: 5px; color: #d9534f; font-weight: bold; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.note || ''}</div></td>
+                    <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${stt++}</div></td>
+                    <td style="padding: 5px; text-align: left; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:flex-start;height:100%;line-height:1.3;">${i.name || ''}</div></td>
+                    <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.unit || 'Cái'}</div></td>
+                    <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.qty}</div></td>
+                    <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${itemPrice.toLocaleString('vi-VN')}</div></td>
+                    <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${subTotal.toLocaleString('vi-VN')}</div></td>
+                    <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${vr}%</div></td>
+                    <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${taxAmount.toLocaleString('vi-VN')}</div></td>
+                    <td style="padding: 5px; color: #d9534f; font-weight: bold; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.note || ''}</div></td>
                 </tr>`;
             });
         }
@@ -7210,7 +7309,7 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
     if (document.getElementById('print-total-word')) document.getElementById('print-total-word').innerText = docSo(grandTotal);
 
     if (action === 'share') {
-        shareInvoiceViaZalo('print-area', 'print-mode-hoadon', 'HoaDon', receiptId);
+        shareInvoiceViaZalo('print-area', 'print-mode-hoadon', 'HoaDon', receiptId, customer, d);
     } else {
         triggerPrint('print-mode-hoadon');
     }
@@ -7261,14 +7360,14 @@ function renderXuatKhoTemplate({ receiptId, customer, address, phone, note, item
             const thanhTien = i.qty * i.price;
             subTotalAll += thanhTien;
             html += `<tr>
-                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${stt++}</div></td>
-                <td style="padding: 5px; text-align: left; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:flex-start;height:100%;line-height:1.3;">${i.name || ''}</div></td>
-                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.unit || 'Cái'}</div></td>
-                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.qty}</div></td>
-                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.qty}</div></td>
-                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.price.toLocaleString('vi-VN')}</div></td>
-                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${thanhTien.toLocaleString('vi-VN')}</div></td>
-                <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.note || ''}</div></td>
+                <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${stt++}</div></td>
+                <td style="padding: 5px; text-align: left; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:flex-start;height:100%;line-height:1.3;">${i.name || ''}</div></td>
+                <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.unit || 'Cái'}</div></td>
+                <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.qty}</div></td>
+                <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.qty}</div></td>
+                <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.price.toLocaleString('vi-VN')}</div></td>
+                <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${thanhTien.toLocaleString('vi-VN')}</div></td>
+                <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.note || ''}</div></td>
             </tr>`;
         });
 
@@ -7284,14 +7383,14 @@ function renderXuatKhoTemplate({ receiptId, customer, address, phone, note, item
                 const thanhTien = 0;
                 // subTotalAll không cộng thêm tiền của nhóm này
                 html += `<tr>
-                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${stt++}</div></td>
-                    <td style="padding: 5px; text-align: left; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:flex-start;height:100%;line-height:1.3;">${i.name || ''}</div></td>
-                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.unit || 'Cái'}</div></td>
-                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.qty}</div></td>
-                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.qty}</div></td>
-                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${itemPrice.toLocaleString('vi-VN')}</div></td>
-                    <td style="padding: 5px; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${thanhTien.toLocaleString('vi-VN')}</div></td>
-                    <td style="padding: 5px; color: #d9534f; font-weight: bold; vertical-align: middle; height: 30px;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.note || ''}</div></td>
+                    <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${stt++}</div></td>
+                    <td style="padding: 5px; text-align: left; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:flex-start;height:100%;line-height:1.3;">${i.name || ''}</div></td>
+                    <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.unit || 'Cái'}</div></td>
+                    <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.qty}</div></td>
+                    <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.qty}</div></td>
+                    <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${itemPrice.toLocaleString('vi-VN')}</div></td>
+                    <td style="padding: 5px; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${thanhTien.toLocaleString('vi-VN')}</div></td>
+                    <td style="padding: 5px; color: #d9534f; font-weight: bold; vertical-align: middle;"><div style="display:flex;align-items:center;justify-content:center;height:100%;line-height:1.3;">${i.note || ''}</div></td>
                 </tr>`;
             });
         }
@@ -7319,7 +7418,7 @@ function renderXuatKhoTemplate({ receiptId, customer, address, phone, note, item
     if (document.getElementById('xk-total-word')) document.getElementById('xk-total-word').innerText = docSo(grandTotal);
 
     if (action === 'share') {
-        shareInvoiceViaZalo('print-area-xuatkho', 'print-mode-xuatkho', 'PhieuXuatKho', receiptId);
+        shareInvoiceViaZalo('print-area-xuatkho', 'print-mode-xuatkho', 'PhieuXuatKho', receiptId, customer, d);
     } else {
         triggerPrint('print-mode-xuatkho');
     }
@@ -8802,13 +8901,13 @@ function renderCustomerList() {
                     </div>
 
                     <div class="md:px-1 md:w-[15%] text-center relative shrink-0">
-                        <button onclick="toggleMenu(this)" class="bg-blue-600 text-white py-1 px-2.5 md:py-0.5 md:px-2 rounded text-[11px] md:text-[10px] font-bold shadow-sm">Thao tác ▼</button>
+                        <button onclick="toggleMenu(this)" class="bg-blue-600 text-white py-1 px-2.5 md:py-0.5 md:px-2 rounded-xl text-[11px] md:text-[10px] font-bold shadow-sm">Thao tác ▼</button>
                         <div class="hidden absolute menu-action right-0 mt-2 w-32 bg-white dark:bg-slate-800 border border-blue-200 dark:border-slate-700 rounded-lg shadow-2xl p-2 flex flex-col gap-1.5 z-[9999]">
-                            <button onclick="payDebt('${data.id}', ${debt}, '${safeName}')" class="bg-green-600 hover:bg-green-700 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Trả nợ</button>
-                            <button onclick="setOpeningDebt('${data.id}', '${safeName}')" class="bg-orange-500 hover:bg-orange-600 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Đầu kỳ</button>
-                            <button onclick="showDebtHistory('${data.id}', '${safeName}')" class="bg-indigo-500 hover:bg-indigo-600 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Lịch sử</button>
-                            <button onclick="editCustomer('${data.id}')" class="bg-blue-500 hover:bg-blue-600 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Sửa</button>
-                            <button onclick="deleteCustomer('${data.id}')" class="bg-red-500 hover:bg-red-600 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Xóa</button>
+                            <button onclick="payDebt('${data.id}', ${debt}, '${safeName}')" class="bg-green-600 hover:bg-green-700 text-white py-1.5 rounded-xl text-[11px] w-full font-bold transition-colors">Trả nợ</button>
+                            <button onclick="setOpeningDebt('${data.id}', '${safeName}')" class="bg-orange-500 hover:bg-orange-600 text-white py-1.5 rounded-xl text-[11px] w-full font-bold transition-colors">Đầu kỳ</button>
+                            <button onclick="showDebtHistory('${data.id}', '${safeName}')" class="bg-indigo-500 hover:bg-indigo-600 text-white py-1.5 rounded-xl text-[11px] w-full font-bold transition-colors">Lịch sử</button>
+                            <button onclick="editCustomer('${data.id}')" class="bg-blue-500 hover:bg-blue-600 text-white py-1.5 rounded-xl text-[11px] w-full font-bold transition-colors">Sửa</button>
+                            <button onclick="deleteCustomer('${data.id}')" title="Xóa" class="bg-red-500 hover:bg-red-600 text-white py-1.5 rounded-xl text-[11px] w-full font-bold transition-colors flex items-center justify-center"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                         </div>
                     </div>
                 </div>
@@ -8817,6 +8916,7 @@ function renderCustomerList() {
     </tr>
 `;
     });
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 
@@ -10760,13 +10860,18 @@ async function loadProductManage() {
                             <div class="text-[12px] text-slate-600 dark:text-slate-400 md:px-2 md:w-[15%]">ĐVT: ${p.unit}</div>
                             <div class="md:px-2 md:w-[25%] text-center">
                                 <button onclick="editBarcode('${doc.id}', '${p.name}')" class="text-blue-600 text-[11px] font-bold hover:underline mr-3">Gán mã</button>
-                                <button onclick="deleteProduct('${doc.id}')" class="text-red-500 text-[11px] font-bold hover:underline">Xóa</button>
+                                <button onclick="deleteProduct('${doc.id}')" title="Xóa" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                             </div>
                         </div>
                     </div>
                 </td>
             </tr>`;
     });
+
+    // TRƯỚC ĐÂY: thiếu dòng này - icon thùng rác chỉ hiện được khi có 1 hành động KHÁC ở
+    // đâu đó (trang khác) vô tình gọi lucide.createIcons() giúp sau đó, nên lúc thấy lúc
+    // không tuỳ may rủi. Luôn gọi ngay sau khi render xong danh sách để icon hiện chắc chắn.
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 // Hàm hỗ trợ để gán mã cho sản phẩm cũ
@@ -11136,11 +11241,11 @@ function groupAndRenderSX(docs) {
             <td class="py-2.5 px-1.5 w-[10%] text-center text-green-600 dark:text-green-400 align-middle">${sumDong}</td>
             <td class="py-2.5 px-1.5 w-[14%] align-middle">
                 <div class="flex items-center justify-center gap-1.5">
-                    <button class="bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-600 dark:text-blue-400 px-2.5 py-1 rounded-lg transition-colors whitespace-nowrap" onclick="xemChiTietPhieuSX('${soPhieu}')">
-                        <i class="fas fa-eye"></i> Xem
+                    <button title="Xem" class="bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-600 dark:text-blue-400 p-2 rounded-lg transition-colors" onclick="xemChiTietPhieuSX('${soPhieu}')">
+                        <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                     </button>
-                    <button class="bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 px-2.5 py-1 rounded-lg transition-colors whitespace-nowrap" onclick="huyPhieuSXGroup('${soPhieu}')">
-                        <i class="fas fa-trash-alt"></i> Xóa
+                    <button title="Xóa" class="bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 p-2 rounded-lg transition-colors" onclick="huyPhieuSXGroup('${soPhieu}')">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                     </button>
                 </div>
             </td>
@@ -11262,6 +11367,7 @@ async function loadInitSX() {
         const htmlRows = groupAndRenderSX(snapshot.docs);
 
         listBody.innerHTML = htmlRows || "<tr><td colspan='8' class='text-center'>Chưa có dữ liệu sản xuất</td></tr>";
+        if (typeof lucide !== 'undefined') lucide.createIcons();
         
         // --- THÊM ĐOẠN NÀY ĐỂ ÉP TRÌNH DUYỆT ẨN HÀNG CŨ MỘT LẦN NỮA ---
         document.querySelectorAll('.old-production').forEach(row => {
@@ -11417,6 +11523,7 @@ async function filterSanXuat() {
         
         // Chỉ cập nhật bảng một lần duy nhất khi đã có dữ liệu mới
         listBody.innerHTML = htmlRows || "<tr><td colspan='8' class='text-center'>Không có dữ liệu trong khoảng này</td></tr>";
+        if (typeof lucide !== 'undefined') lucide.createIcons();
         
     } catch (e) {
         console.error("Lỗi lọc: ", e);
@@ -11444,7 +11551,7 @@ function openNLTab(tabId) {
 
     // 3. Hiệu ứng đổi màu nút 3D đã cố định kích thước (KHÔNG CÒN RUNG LẮC)
     // Cả active và inactive đều dùng chung border-b-[4px] để kích thước nút luôn đứng yên tuyệt đối
-    const activeClasses = 'font-black bg-gradient-to-b from-blue-100 to-blue-200 dark:from-blue-950/40 dark:to-blue-900/30 text-blue-600 dark:text-blue-400 border-b-[4px] border-blue-400 dark:border-blue-600 shadow-[0_4px_10px_rgba(59,130,246,0.15)] dark:shadow-[0_6px_15px_rgba(59,130,246,0.25)]'.split(' ');
+    const activeClasses = 'font-black bg-gradient-to-b from-blue-300 to-blue-400 dark:from-blue-900/60 dark:to-blue-800/50 text-blue-800 dark:text-blue-400 border-b-[4px] border-blue-400 dark:border-blue-600 shadow-[0_4px_10px_rgba(59,130,246,0.15)] dark:shadow-[0_6px_15px_rgba(59,130,246,0.25)]'.split(' ');
     
     const inactiveClasses = 'font-bold bg-slate-100/80 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border-b-[4px] border-transparent shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]'.split(' ');
 
@@ -11560,12 +11667,12 @@ async function loadTableNCC() {
                                 <span class="hidden md:block md:text-[11px] md:font-bold md:text-green-600 md:w-[12%] md:px-2 md:text-center">${totalPaid.toLocaleString()}</span>
                             </div>
                             <div class="relative shrink-0 md:w-[14%] md:px-1 md:text-center">
-                                <button onclick="toggleMenu(this)" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 px-3 md:py-0.5 md:px-2 rounded text-xs md:text-[10px] font-bold shadow-sm transition-colors">Thao tác ▼</button>
+                                <button onclick="toggleMenu(this)" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 px-3 md:py-0.5 md:px-2 rounded-xl text-xs md:text-[10px] font-bold shadow-sm transition-colors">Thao tác ▼</button>
                                 <div class="hidden absolute menu-action right-0 mt-2 w-32 bg-white dark:bg-slate-800 border border-blue-200 dark:border-slate-700 rounded-lg shadow-2xl p-2 flex flex-col gap-1.5 z-[9999]">
-                                    <button onclick="openPayModal('${doc.id}', '${safeName}')" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Trả Nợ</button>
-                                    <button onclick="window.openHistory('${safeName}')" class="bg-purple-600 hover:bg-purple-700 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Lịch sử</button>
-                                    <button onclick="editNCC('${doc.id}', '${safeName}', '${safePhone}', '${safeAddress}')" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Sửa</button>
-                                    <button onclick="deleteDoc('suppliers', '${doc.id}')" class="bg-red-600 hover:bg-red-700 text-white py-1.5 rounded text-[11px] w-full font-bold transition-colors">Xóa</button>
+                                    <button onclick="openPayModal('${doc.id}', '${safeName}')" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded-xl text-[11px] w-full font-bold transition-colors">Trả Nợ</button>
+                                    <button onclick="window.openHistory('${safeName}')" class="bg-purple-600 hover:bg-purple-700 text-white py-1.5 rounded-xl text-[11px] w-full font-bold transition-colors">Lịch sử</button>
+                                    <button onclick="editNCC('${doc.id}', '${safeName}', '${safePhone}', '${safeAddress}')" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1.5 rounded-xl text-[11px] w-full font-bold transition-colors">Sửa</button>
+                                    <button onclick="deleteDoc('suppliers', '${doc.id}')" title="Xóa" class="bg-red-600 hover:bg-red-700 text-white py-1.5 rounded-xl text-[11px] w-full font-bold transition-colors flex items-center justify-center"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                                 </div>
                             </div>
                         </div>
@@ -11574,6 +11681,7 @@ async function loadTableNCC() {
             </tr>`;
     }
     bodyNCC.innerHTML = html;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 // Hàm này đưa thông tin lên ô input để bạn sửa
@@ -11630,7 +11738,7 @@ function openPayModal(docId, nccName) {
     // Lưu ý: Đã đổi payDebt thành paySupplierDebt ở dòng bên dưới
     const content = `
         <input type="number" id="in-pay-modal" class="border p-2 w-full mb-4" placeholder="Nhập số tiền">
-        <button onclick="paySupplierDebt('${docId}', '${nccName}')" class="bg-blue-600 text-white w-full py-2 rounded">Xác nhận trả nợ</button>
+        <button onclick="paySupplierDebt('${docId}', '${nccName}')" class="bg-blue-600 text-white w-full py-2 rounded-xl">Xác nhận trả nợ</button>
     `;
     showPopup("Trả nợ: " + nccName, content);
 }
@@ -11693,7 +11801,7 @@ async function openHistoryModal(nccName) {
                 html += `<div class="flex justify-between border-b py-2 text-sm">
                     <span>${dateStr}: ${d.amount?.toLocaleString()}</span>
                     <button onclick="deletePaymentNCC('${doc.id}', '${nccName.replace(/'/g, "\\'")}', ${d.amount})" 
-                            class="text-red-500 font-bold hover:underline">Xóa</button>
+                            title="Xóa" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                 </div>`;
             });
         }
