@@ -129,11 +129,11 @@
     }
 
 /* Định nghĩa độ rộng cố định hoặc % cho các cột trong bảng */
-    #invoiceTable th:nth-child(1), #invoiceTable td:nth-child(1) { width: 10%; } /* Số phiếu */
-    #invoiceTable th:nth-child(2), #invoiceTable td:nth-child(2) { width: 30%; } /* Khách hàng */
+    #invoiceTable th:nth-child(1), #invoiceTable td:nth-child(1) { width: 12%; } /* Số phiếu */
+    #invoiceTable th:nth-child(2), #invoiceTable td:nth-child(2) { width: 33%; } /* Khách hàng */
     #invoiceTable th:nth-child(3), #invoiceTable td:nth-child(3) { width: 15%; } /* Ngày xuất */
-    #invoiceTable th:nth-child(4), #invoiceTable td:nth-child(4) { width: 25%; } /* Tổng tiền */
-    #invoiceTable th:nth-child(5), #invoiceTable td:nth-child(5) { width: 20%; } /* Thao tác */
+    #invoiceTable th:nth-child(4), #invoiceTable td:nth-child(4) { width: 15%; } /* Số SP */
+    #invoiceTable th:nth-child(5), #invoiceTable td:nth-child(5) { width: 25%; } /* Tổng tiền */
     
     /* Đảm bảo nội dung không bị vỡ và căn lề đúng */
     #invoiceTable td {
@@ -1782,7 +1782,7 @@ html:not(.dark) .bg-white {
             <div class="overflow-x-auto overflow-y-auto max-h-[280px] border border-blue-100 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 custom-scrollbar">
                 <table class="w-full text-sm">
                     <thead class="sticky top-0 z-10 bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-slate-700 text-gray-800 dark:text-gray-200 shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
-                        <tr><th class="py-3 px-2 text-center w-[25%]">Số phiếu</th><th class="py-3 px-2 text-center w-[30%]">Ngày nhập</th><th class="py-3 px-2 text-center w-[20%]">Số SP</th><th class="py-3 px-2 text-center w-[25%]">Thao tác</th></tr>
+                        <tr><th class="py-3 px-2 text-center w-[30%]">Số phiếu</th><th class="py-3 px-2 text-center w-[40%]">Ngày nhập</th><th class="py-3 px-2 text-center w-[30%]">Số SP</th></tr>
                     </thead>
                     <tbody id="list-receipts-left" class="text-gray-800 dark:text-gray-300"></tbody>
                 </table>
@@ -1790,7 +1790,7 @@ html:not(.dark) .bg-white {
             <div class="overflow-x-auto overflow-y-auto max-h-[280px] border border-blue-100 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 custom-scrollbar">
                 <table class="w-full text-sm">
                     <thead class="sticky top-0 z-10 bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-slate-700 text-gray-800 dark:text-gray-200 shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
-                        <tr><th class="py-3 px-2 text-center w-[25%]">Số phiếu</th><th class="py-3 px-2 text-center w-[30%]">Ngày nhập</th><th class="py-3 px-2 text-center w-[20%]">Số SP</th><th class="py-3 px-2 text-center w-[25%]">Thao tác</th></tr>
+                        <tr><th class="py-3 px-2 text-center w-[30%]">Số phiếu</th><th class="py-3 px-2 text-center w-[40%]">Ngày nhập</th><th class="py-3 px-2 text-center w-[30%]">Số SP</th></tr>
                     </thead>
                     <tbody id="list-receipts-right" class="text-gray-800 dark:text-gray-300"></tbody>
                 </table>
@@ -1811,6 +1811,11 @@ html:not(.dark) .bg-white {
             </thead>
             <tbody id="modal-receipt-body" class="text-gray-800 dark:text-gray-300"></tbody>
         </table>
+        <div class="flex justify-end mt-4 pt-3 border-t dark:border-slate-700">
+            <button id="modal-receipt-delete-btn" onclick="deleteReceipt(window.__currentViewReceiptDocId)" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-1.5">
+                <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa cả phiếu này
+            </button>
+        </div>
     </div>
 </div>
 
@@ -1896,7 +1901,7 @@ html:not(.dark) .bg-white {
             </div>
             
             <div id="product-grid" 
-                 class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 h-[250px] md:h-[800px] overflow-y-auto p-1 md:p-2" 
+                 class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 h-[250px] md:h-[780px] overflow-y-auto p-1 md:p-2" 
                  style="align-content: start;">
             </div>
         </div>
@@ -2177,12 +2182,11 @@ html:not(.dark) .bg-white {
             <table class="w-full text-sm text-left border-collapse">
                 <thead class="sticky top-0 z-20 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold uppercase text-[11px] tracking-wider">
                     <tr>
-                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 w-[20%]">Tên đại lý</th>
+                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 w-[25%]">Tên đại lý</th>
                         <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 w-[20%]">Địa chỉ</th>
                         <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 w-[15%]">Số điện thoại</th>
-                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 text-center text-green-600 w-[15%]">Đã trả</th>
-                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 text-center text-red-600 w-[15%]">Công nợ</th>
-                        <th class="py-4 px-1 border-b border-slate-200 dark:border-slate-700 text-center w-[15%]">Thao tác</th>
+                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 text-center text-green-600 w-[20%]">Đã trả</th>
+                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 text-center text-red-600 w-[20%]">Công nợ</th>
                     </tr>
                 </thead>
                 <tbody id="customer-list-body" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody>
@@ -2218,9 +2222,8 @@ html:not(.dark) .bg-white {
             <thead class="sticky top-0 bg-gray-50 z-10">
                 <tr>
                     <th class="py-4 px-2 border-b text-left font-bold text-gray-600 dark:text-slate-300 w-[25%]">Mã vạch</th>
-                    <th class="py-4 px-2 border-b text-left font-bold text-gray-600 dark:text-slate-300 w-[35%]">Tên sản phẩm</th>
-                    <th class="py-4 px-2 border-b text-left font-bold text-gray-600 dark:text-slate-300 w-[15%]">ĐVT</th>
-                    <th class="py-4 px-2 border-b text-center font-bold text-gray-600 dark:text-slate-300 w-[25%]">Hành động</th>
+                    <th class="py-4 px-2 border-b text-left font-bold text-gray-600 dark:text-slate-300 w-[45%]">Tên sản phẩm</th>
+                    <th class="py-4 px-2 border-b text-left font-bold text-gray-600 dark:text-slate-300 w-[30%]">ĐVT</th>
                 </tr>
             </thead>
             <tbody id="prod-manage-body"></tbody>
@@ -2273,11 +2276,11 @@ html:not(.dark) .bg-white {
             <table class="w-full text-sm border-collapse" id="invoiceTable">
 				<thead class="sticky top-0 bg-slate-100 z-10 text-slate-700 font-bold uppercase text-[11px]">
 					<tr>
-						<th class="p-3 border-b text-left w-[10%]">Số phiếu</th>
-						<th class="p-3 border-b text-left w-[30%]">Khách hàng</th>
+						<th class="p-3 border-b text-left w-[12%]">Số phiếu</th>
+						<th class="p-3 border-b text-left w-[33%]">Khách hàng</th>
 						<th class="p-3 border-b text-center w-[15%]">Ngày xuất</th>
-						<th class="p-3 border-b text-right w-[25%]">Tổng tiền</th>
-						<th class="p-3 border-b text-center w-[20%]">Thao tác</th>
+						<th class="p-3 border-b text-center w-[15%]">Số SP</th>
+						<th class="p-3 pr-4 border-b text-right w-[25%]">Tổng tiền</th>
 					</tr>
 				</thead>
 				<tbody id="sales-list-body" class="divide-y divide-slate-100 text-slate-600">
@@ -2451,14 +2454,12 @@ html:not(.dark) .bg-white {
             <table class="w-full text-left border-collapse table-fixed">
               <thead class="sticky top-0 bg-gray-100 dark:bg-slate-950 z-10">
                 <tr class="border-b border-gray-200 dark:border-slate-700">
-                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[12%]">Ngày</th>
-                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[12%]">Số phiếu</th>
-                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[20%]">Sản phẩm</th>
+                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[26%]">Ngày / Số phiếu</th>
+                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[26%]">Sản phẩm</th>
                   <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[8%] text-center">SL</th>
-                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[12%] text-center">Mới mua</th>
-                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[12%] text-center">Chờ đóng</th>
-                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[10%] text-center">Đóng xong</th>
-                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 text-center w-[14%]">Xóa</th>
+                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[14%] text-center">Mới mua</th>
+                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[14%] text-center">Chờ đóng</th>
+                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[12%] text-center">Đóng xong</th>
                 </tr>
               </thead>
               <tbody id="list-sanxuat" class="text-xs md:text-sm text-gray-600 dark:text-gray-300 divide-y divide-gray-100 dark:divide-slate-800"></tbody>
@@ -2587,12 +2588,11 @@ html:not(.dark) .bg-white {
                 <table class="w-full text-sm text-left">
                     <thead class="bg-gray-50 dark:bg-slate-800 text-xs uppercase text-gray-600 dark:text-slate-300">
 						<tr>
-							<th class="p-3 w-[25%]">Tên NCC</th>
-							<th class="p-3 w-[25%] hidden md:table-cell">Địa chỉ</th>
-							<th class="p-3 w-[12%] text-center hidden md:table-cell">SĐT</th>
-							<th class="p-3 w-[12%] text-center">Nợ NCC</th>
-							<th class="p-3 w-[12%] text-center">Đã trả</th>
-							<th class="p-3 w-[14%] text-center">Hành động</th>
+							<th class="p-3 w-[30%]">Tên NCC</th>
+							<th class="p-3 w-[28%] hidden md:table-cell">Địa chỉ</th>
+							<th class="p-3 w-[14%] text-center hidden md:table-cell">SĐT</th>
+							<th class="p-3 w-[14%] text-center">Nợ NCC</th>
+							<th class="p-3 w-[14%] text-center">Đã trả</th>
 						</tr>
 					</thead>
                     <tbody id="body-ncc"></tbody>
@@ -2645,11 +2645,10 @@ html:not(.dark) .bg-white {
                 <table class="w-full text-xs text-left">
 					<thead class="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 uppercase sticky top-0 text-xs">
 						<tr>
-							<th class="p-3 w-[15%]">Số Phiếu</th>
-							<th class="p-3 w-[15%]">Ngày</th>
-							<th class="p-3 w-[40%]">NCC</th>
-							<th class="p-3 w-[15%] text-right">Tổng Tiền</th>
-							<th class="p-3 w-[15%] text-center">Thao tác</th>
+							<th class="p-3 w-[18%]">Số Phiếu</th>
+							<th class="p-3 w-[17%]">Ngày</th>
+							<th class="p-3 w-[45%]">NCC</th>
+							<th class="p-3 pr-4 w-[20%] text-right">Tổng Tiền</th>
 						</tr>
 					</thead>
 					<tbody id="body-phieu" class="divide-y divide-gray-100 dark:divide-slate-700"></tbody>
@@ -5350,26 +5349,15 @@ function removeFromCart(index) {
   function buildReceiptRowHtml(docId, displayId, dateStr, itemCount) {
       return `
 				<tr>
-					<td colspan="4" class="p-1">
-						<div class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2
+					<td colspan="3" class="p-1">
+						<div onclick="viewReceipt('${docId}')" class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2 cursor-pointer transition-all hover:-translate-y-0.5
 								shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]" style="border-left-color:#fbbf24 !important; border-right-color:#fbbf24 !important;">
 							<div class="flex items-center justify-between md:contents">
-								<span class="font-bold text-[13px] md:text-[12px] text-slate-800 dark:text-slate-100 md:w-[25%] md:text-center">${displayId}</span>
-								<span class="text-[12px] text-slate-500 dark:text-slate-400 md:w-[30%] md:text-center">${dateStr}</span>
+								<span class="font-bold text-[13px] md:text-[12px] text-slate-800 dark:text-slate-100 md:w-[30%] md:text-center">${displayId}</span>
+								<span class="text-[12px] text-slate-500 dark:text-slate-400 md:w-[40%] md:text-center">${dateStr}</span>
 							</div>
 							<div class="flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700 md:contents">
-								<span class="text-[12px] text-slate-600 dark:text-slate-400 md:w-[20%] md:text-center">${itemCount} loại</span>
-								<div class="md:w-[25%] flex justify-end md:justify-center gap-4">
-									<button type="button" onclick="viewReceipt('${docId}')" title="Xem" 
-											class="text-blue-600 hover:text-blue-800 transition-transform hover:scale-110">
-										<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-									</button>
-									
-									<button type="button" onclick="event.preventDefault(); deleteReceipt('${docId}')" title="Xóa" 
-											class="text-red-600 hover:text-red-800 transition-transform hover:scale-110">
-										<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-									</button>
-								</div>
+								<span class="text-[12px] text-slate-600 dark:text-slate-400 md:w-[30%] md:text-center">${itemCount} loại</span>
 							</div>
 						</div>
 					</td>
@@ -5512,6 +5500,10 @@ window.deleteReceipt = function(docId) {
                 // ---------------------------------------------
                 
                 loadReceipts(); 
+
+                // Đóng bảng chi tiết lại (vì nút Xóa giờ nằm trong đó)
+                const modalEl = document.getElementById('modal-receipt');
+                if (modalEl) modalEl.classList.add('hidden');
 
                 if (typeof ghiLog === 'function') ghiLog('Nhập Kho', 'Xóa', soPhieu, `Xóa phiếu nhập kho ${soPhieu} (${soLuongSP} sản phẩm)`);
             }).catch(err => {
@@ -5833,6 +5825,7 @@ window.viewReceipt = function(docId) {
     }
 
     // 2. Hiển thị ID lên Modal
+    window.__currentViewReceiptDocId = docId;
     const modalIdEl = document.getElementById('modal-receipt-id');
     if (modalIdEl) modalIdEl.innerText = receipt.displayId || '---';
     
@@ -5861,6 +5854,7 @@ window.viewReceipt = function(docId) {
     // 4. HIỆN MODAL
     const modal = document.getElementById('modal-receipt');
     if (modal) modal.classList.remove('hidden');
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 };
 
 window.saveItemEdit = async function(docId, index) {
@@ -7943,9 +7937,15 @@ async function viewInvoiceDetails(docId) {
                     <p><b>Tổng cộng:</b> ${Number(total).toLocaleString()} VNĐ</p>
                 </div>
                 ${itemsHtml}
+                <div class="grid grid-cols-2 gap-2 mt-4">
+                    <button onclick="Swal.close(); reprintSale('${docId}')" class="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">🖨️ In lại</button>
+                    <button onclick="Swal.close(); shareSaleZalo('${docId}')" class="bg-sky-500 hover:bg-sky-600 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">💬 Chia sẻ Zalo</button>
+                </div>
+                <button onclick="Swal.close(); deleteSale('${docId}')" class="mt-2 w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-bold">🗑️ Xóa phiếu này</button>
             `,
             width: '800px',
-            confirmButtonText: 'Đóng'
+            showConfirmButton: false,
+            showCloseButton: true
         });
     } catch (e) {
         console.error(e);
@@ -8017,32 +8017,22 @@ async function viewInvoiceDetails(docId) {
 			if (isVisible) {
 				const dateStr = dateObj.toLocaleDateString('vi-VN');
 				const totalAmount = data.grandTotal || data.total || 0;
+				const itemCount = (data.items && Array.isArray(data.items)) ? data.items.length : 0;
 
 				body.innerHTML += `
 					<tr class="hover:bg-transparent transition-colors">
 						<td colspan="5" class="p-2">
-							<div class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-3 md:p-3 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]" style="border-left-color:#a855f7 !important; border-right-color:#a855f7 !important;">
+							<div onclick="viewInvoiceDetails('${doc.id}')" class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-3 md:p-3 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] cursor-pointer transition-all hover:-translate-y-0.5" style="border-left-color:#a855f7 !important; border-right-color:#a855f7 !important;">
 								<div class="flex items-center gap-2 md:contents">
-									<span class="text-[12px] md:text-[11px] font-bold text-slate-700 dark:text-slate-300 md:w-[10%] truncate md:px-2">${data.id || 'N/A'}</span>
-									<span class="text-[12px] md:text-[11px] font-bold text-slate-900 dark:text-slate-100 truncate flex-1 md:w-[30%] md:px-2">${data.customer || 'Khách lẻ'}</span>
+									<span class="text-[12px] md:text-[11px] font-bold text-slate-700 dark:text-slate-300 md:w-[12%] truncate md:px-2">${data.id || 'N/A'}</span>
+									<span class="text-[12px] md:text-[11px] font-bold text-slate-900 dark:text-slate-100 truncate flex-1 md:w-[33%] md:px-2">${data.customer || 'Khách lẻ'}</span>
 								</div>
 								<div class="flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700">
-									<span class="text-[11px] font-bold text-slate-700 dark:text-slate-400 md:w-[15%] md:text-center md:px-2">${dateStr}</span>
-									<span class="text-[12px] md:text-[11px] font-black text-rose-600 dark:text-rose-400 md:w-[25%] md:text-right md:px-2">${Number(totalAmount).toLocaleString('vi-VN')} VNĐ</span>
-								</div>
-								<div class="flex justify-end md:justify-center items-center gap-4 md:w-[20%] md:px-2">
-									<button onclick="viewInvoiceDetails('${doc.id}')" title="Xem" class="text-green-600 hover:text-green-800 transition-transform hover:scale-110">
-										<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-									</button>
-									<button onclick="reprintSale('${doc.id}')" title="In lại" class="text-blue-600 hover:text-blue-800 transition-transform hover:scale-110">
-										<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
-									</button>
-									<button onclick="shareSaleZalo('${doc.id}')" title="Chia sẻ Zalo" class="text-sky-600 hover:text-sky-800 transition-transform hover:scale-110">
-										<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-									</button>
-									<button onclick="deleteSale('${doc.id}')" title="Xóa" class="text-red-600 hover:text-red-800 transition-transform hover:scale-110">
-										<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-									</button>
+									<div class="flex items-center gap-3 md:contents">
+										<span class="text-[11px] font-bold text-slate-700 dark:text-slate-400 md:w-[15%] md:text-center md:px-2">${dateStr}</span>
+										<span class="text-[11px] text-slate-500 dark:text-slate-400 md:w-[15%] md:text-center md:px-2">${itemCount} SP</span>
+									</div>
+									<span class="text-[12px] md:text-[11px] font-black text-rose-600 dark:text-rose-400 md:w-[25%] md:text-right md:pl-2 md:pr-4">${Number(totalAmount).toLocaleString('vi-VN')} VNĐ</span>
 								</div>
 							</div>
 						</td>
@@ -8880,13 +8870,13 @@ function renderCustomerList() {
         
         body.innerHTML += `
     <tr class="transition-all duration-300">
-        <td colspan="6" class="p-1">
-            <div class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2 
+        <td colspan="5" class="p-1">
+            <div onclick="xemChiTietDaiLy('${data.id}')" class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2 cursor-pointer transition-all hover:-translate-y-0.5
                         shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]" 
                  style="border-left-color:#14b8a6 !important; border-right-color:#14b8a6 !important;">
                         
                 <div class="md:contents">
-                    <div class="text-[13px] md:text-[11px] font-bold ${debt > 0 ? 'text-blue-600 dark:text-blue-400' : 'text-slate-700 dark:text-slate-200'} md:px-2 md:w-[20%] truncate">${data.name || ''}</div>
+                    <div class="text-[13px] md:text-[11px] font-bold ${debt > 0 ? 'text-blue-600 dark:text-blue-400' : 'text-slate-700 dark:text-slate-200'} md:px-2 md:w-[25%] truncate">${data.name || ''}</div>
                     ${mobileAddressPhone}
                     <div class="hidden md:block md:px-2 md:text-[11px] md:text-slate-600 md:dark:text-slate-400 md:w-[20%] md:truncate">${data.address || ''}</div>
                     <div class="hidden md:block md:px-2 md:text-[11px] md:text-slate-600 md:dark:text-slate-400 md:w-[15%]">${data.phone || ''}</div>
@@ -8895,26 +8885,55 @@ function renderCustomerList() {
                 <div class="flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700">
                     <div class="flex items-center gap-3 text-[12px] md:contents">
                         <span class="text-slate-500 dark:text-slate-400 md:hidden">Đã trả:</span>
-                        <span class="md:px-2 md:text-[11px] font-bold text-green-600 dark:text-green-400 md:w-[15%] md:text-center">${totalPaid.toLocaleString('vi-VN')} đ</span>
+                        <span class="md:px-2 md:text-[11px] font-bold text-green-600 dark:text-green-400 md:w-[20%] md:text-center">${totalPaid.toLocaleString('vi-VN')} đ</span>
                         <span class="text-slate-500 dark:text-slate-400 md:hidden">Nợ:</span>
-                        <span class="md:px-2 md:text-[11px] font-bold ${debt > 0 ? 'text-red-600' : 'text-slate-500 dark:text-slate-400'} md:w-[15%] md:text-center">${debt.toLocaleString('vi-VN')} đ</span>
-                    </div>
-
-                    <div class="md:px-1 md:w-[15%] text-center relative shrink-0">
-                        <button onclick="toggleMenu(this)" class="bg-blue-600 text-white py-1 px-2.5 md:py-0.5 md:px-2 rounded-xl text-[11px] md:text-[10px] font-bold shadow-sm">Thao tác ▼</button>
-                        <div class="hidden absolute menu-action right-0 mt-2 w-32 bg-white dark:bg-slate-800 border border-blue-200 dark:border-slate-700 rounded-lg shadow-2xl p-2 flex flex-col gap-1.5 z-[9999]">
-                            <button onclick="payDebt('${data.id}', ${debt}, '${safeName}')" class="bg-green-600 hover:bg-green-700 text-white py-1.5 rounded-xl text-[11px] w-full font-bold transition-colors">Trả nợ</button>
-                            <button onclick="setOpeningDebt('${data.id}', '${safeName}')" class="bg-orange-500 hover:bg-orange-600 text-white py-1.5 rounded-xl text-[11px] w-full font-bold transition-colors">Đầu kỳ</button>
-                            <button onclick="showDebtHistory('${data.id}', '${safeName}')" class="bg-indigo-500 hover:bg-indigo-600 text-white py-1.5 rounded-xl text-[11px] w-full font-bold transition-colors">Lịch sử</button>
-                            <button onclick="editCustomer('${data.id}')" class="bg-blue-500 hover:bg-blue-600 text-white py-1.5 rounded-xl text-[11px] w-full font-bold transition-colors">Sửa</button>
-                            <button onclick="deleteCustomer('${data.id}')" title="Xóa" class="bg-red-500 hover:bg-red-600 text-white py-1.5 rounded-xl text-[11px] w-full font-bold transition-colors flex items-center justify-center"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-                        </div>
+                        <span class="md:px-2 md:text-[11px] font-bold ${debt > 0 ? 'text-red-600' : 'text-slate-500 dark:text-slate-400'} md:w-[20%] md:text-center">${debt.toLocaleString('vi-VN')} đ</span>
                     </div>
                 </div>
             </div>
         </td>
     </tr>
 `;
+    });
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+// Bấm vào 1 dòng đại lý -> mở bảng chi tiết có đầy đủ nút thao tác bên trong (thay cho
+// dropdown "Thao tác ▾" cũ) - đỡ lo bấm nhầm khi đang lướt danh sách.
+function xemChiTietDaiLy(id) {
+    const data = (window.allCustomersData || []).find(c => c.id === id);
+    if (!data) return;
+
+    const debt = data.debt || 0;
+    const totalPaid = data.totalPaid || 0;
+    const safeName = (data.name || '').replace(/'/g, "\\'");
+
+    const content = `
+        <div class="text-left text-sm space-y-1 mb-4">
+            <div><b>Địa chỉ:</b> ${data.address || '(chưa có)'}</div>
+            <div><b>SĐT:</b> ${data.phone || '(chưa có)'}</div>
+            <div class="pt-2 flex gap-4">
+                <div><b class="text-green-600">Đã trả:</b> ${totalPaid.toLocaleString('vi-VN')} đ</div>
+                <div><b class="text-red-600">Còn nợ:</b> ${debt.toLocaleString('vi-VN')} đ</div>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+            <button onclick="Swal.close(); payDebt('${id}', ${debt}, '${safeName}')" class="bg-green-600 hover:bg-green-700 text-white py-2 rounded-xl text-sm font-bold">💰 Trả nợ</button>
+            <button onclick="Swal.close(); setOpeningDebt('${id}', '${safeName}')" class="bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-xl text-sm font-bold">📋 Đầu kỳ</button>
+            <button onclick="Swal.close(); showDebtHistory('${id}', '${safeName}')" class="bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-xl text-sm font-bold">🕒 Lịch sử</button>
+            <button onclick="Swal.close(); editCustomer('${id}')" class="bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-xl text-sm font-bold">✏️ Sửa</button>
+        </div>
+        <button onclick="Swal.close(); deleteCustomer('${id}')" class="mt-2 w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
+            <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa đại lý này
+        </button>
+    `;
+
+    Swal.fire({
+        title: data.name || '',
+        html: content,
+        showConfirmButton: false,
+        showCloseButton: true,
+        width: '420px'
     });
     if (typeof lucide !== 'undefined') lucide.createIcons();
 }
@@ -10846,22 +10865,19 @@ async function loadProductManage() {
         let barcodeDisplay = p.barcode ? 
             `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold text-[11px]">${p.barcode}</span>` : 
             '<span class="text-gray-400 italic text-[11px]">Chưa có</span>';
+        const safeName = (p.name || '').replace(/'/g, "\\'");
         
         tbody.innerHTML += `
             <tr>
-                <td colspan="4" class="p-1.5">
-                    <div class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2 
+                <td colspan="3" class="p-1.5">
+                    <div onclick="xemChiTietSP('${doc.id}')" class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2 cursor-pointer transition-all hover:-translate-y-0.5
                                 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]" style="border-left-color:#f97316 !important; border-right-color:#f97316 !important;">
                         <div class="flex items-center gap-2 md:contents">
                             <div class="md:px-2 md:w-[25%]">${barcodeDisplay}</div>
-                            <div class="flex-1 md:px-2 md:w-[35%] text-[13px] md:text-[12px] font-bold text-slate-800 dark:text-slate-100 truncate">${p.name}</div>
+                            <div class="flex-1 md:px-2 md:w-[45%] text-[13px] md:text-[12px] font-bold text-slate-800 dark:text-slate-100 truncate">${p.name}</div>
                         </div>
                         <div class="flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700">
-                            <div class="text-[12px] text-slate-600 dark:text-slate-400 md:px-2 md:w-[15%]">ĐVT: ${p.unit}</div>
-                            <div class="md:px-2 md:w-[25%] text-center">
-                                <button onclick="editBarcode('${doc.id}', '${p.name}')" class="text-blue-600 text-[11px] font-bold hover:underline mr-3">Gán mã</button>
-                                <button onclick="deleteProduct('${doc.id}')" title="Xóa" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-                            </div>
+                            <div class="text-[12px] text-slate-600 dark:text-slate-400 md:px-2 md:w-[30%]">ĐVT: ${p.unit}</div>
                         </div>
                     </div>
                 </td>
@@ -10872,6 +10888,38 @@ async function loadProductManage() {
     // đâu đó (trang khác) vô tình gọi lucide.createIcons() giúp sau đó, nên lúc thấy lúc
     // không tuỳ may rủi. Luôn gọi ngay sau khi render xong danh sách để icon hiện chắc chắn.
     if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+// Bấm vào 1 dòng sản phẩm -> mở bảng chi tiết có nút Gán mã / Xóa bên trong (thay cho
+// hiện sẵn 2 nút đó ngoài danh sách như trước) - đỡ lo bấm nhầm khi đang lướt danh sách.
+function xemChiTietSP(id) {
+    // Lấy lại dữ liệu trực tiếp từ Firestore để đảm bảo luôn đúng, thay vì dò DOM
+    db.collection('products').doc(id).get().then(doc => {
+        if (!doc.exists) return;
+        const p = doc.data();
+        const safeName = (p.name || '').replace(/'/g, "\\'");
+        const barcodeText = p.barcode || '(chưa có)';
+
+        const content = `
+            <div class="text-left text-sm space-y-1 mb-4">
+                <div><b>ĐVT:</b> ${p.unit || ''}</div>
+                <div><b>Mã vạch:</b> ${barcodeText}</div>
+            </div>
+            <button onclick="Swal.close(); editBarcode('${id}', '${safeName}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl text-sm font-bold mb-2">🏷️ Gán / Sửa mã vạch</button>
+            <button onclick="Swal.close(); deleteProduct('${id}')" class="w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
+                <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa sản phẩm này
+            </button>
+        `;
+
+        Swal.fire({
+            title: p.name || '',
+            html: content,
+            showConfirmButton: false,
+            showCloseButton: true,
+            width: '400px'
+        });
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    });
 }
 
 // Hàm hỗ trợ để gán mã cho sản phẩm cũ
@@ -11231,22 +11279,30 @@ function groupAndRenderSX(docs) {
         const firstName = g.items[0].tenSP || "(Chỉ mẻ)";
         const tenHienThi = g.items.length > 1 ? `${firstName} +${g.items.length - 1} SP khác` : firstName;
 
-        htmlRows += `<tr class="${isOld ? 'old-production' : ''} border-b border-gray-100 dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800/50">
-            <td class="py-2.5 px-1.5 w-[12%] text-slate-500 dark:text-slate-400 align-middle">${g.ngay}</td>
-            <td class="py-2.5 px-1.5 w-[12%] font-bold text-slate-800 dark:text-slate-100 align-middle">${soPhieu}</td>
-            <td class="py-2.5 px-1.5 w-[20%] text-slate-700 dark:text-slate-300 align-middle truncate" title="${tenHienThi}">${tenHienThi}</td>
-            <td class="py-2.5 px-1.5 w-[8%] text-center text-slate-600 dark:text-slate-400 align-middle">${sumSL}</td>
-            <td class="py-2.5 px-1.5 w-[12%] text-center text-blue-600 dark:text-blue-400 align-middle">${sumMoi}</td>
-            <td class="py-2.5 px-1.5 w-[12%] text-center text-amber-600 dark:text-amber-400 align-middle">${sumCho}</td>
-            <td class="py-2.5 px-1.5 w-[10%] text-center text-green-600 dark:text-green-400 align-middle">${sumDong}</td>
-            <td class="py-2.5 px-1.5 w-[14%] align-middle">
-                <div class="flex items-center justify-center gap-1.5">
-                    <button title="Xem" class="bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-600 dark:text-blue-400 p-2 rounded-lg transition-colors" onclick="xemChiTietPhieuSX('${soPhieu}')">
-                        <i data-lucide="eye" class="w-3.5 h-3.5"></i>
-                    </button>
-                    <button title="Xóa" class="bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 p-2 rounded-lg transition-colors" onclick="huyPhieuSXGroup('${soPhieu}')">
-                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                    </button>
+        // Màu thanh 3D bo góc bên trái theo tiến độ đóng gói của phiếu (đồng bộ kiểu với
+        // các danh sách khác trong app: viền màu 4px, bo tròn theo góc thẻ)
+        let accentColor = '#94a3b8'; // xám: chưa đóng gói gì
+        if (sumSL > 0 && sumDong >= sumSL) accentColor = '#10b981'; // xanh lá: đã đóng xong hết
+        else if (sumDong > 0 || sumCho > 0) accentColor = '#f59e0b'; // vàng cam: đang dở dang
+
+        htmlRows += `<tr class="${isOld ? 'old-production' : ''} hover:bg-transparent transition-colors">
+            <td colspan="6" class="p-1.5 md:p-1">
+                <div onclick="xemChiTietPhieuSX('${soPhieu}')"
+                     class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-3 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] cursor-pointer transition-all hover:-translate-y-0.5"
+                     style="border-left-color:${accentColor} !important; border-right-color:${accentColor} !important;">
+                    <div class="flex items-center gap-2 md:contents">
+                        <span class="text-[11px] text-slate-500 dark:text-slate-400 md:w-[13%] md:px-2">${g.ngay}</span>
+                        <span class="text-[12px] font-bold text-slate-800 dark:text-slate-100 md:w-[13%] md:px-2">${soPhieu}</span>
+                    </div>
+                    <div class="text-[12px] text-slate-700 dark:text-slate-300 truncate md:w-[26%] md:px-2 pt-1 md:pt-0 border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700" title="${tenHienThi}">${tenHienThi}</div>
+                    <div class="flex items-center justify-between md:contents">
+                        <div class="flex items-center gap-3 md:contents">
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400 md:w-[8%] md:text-center md:px-2">SL: <b class="text-slate-700 dark:text-slate-200">${sumSL}</b></span>
+                            <span class="text-[11px] text-blue-600 dark:text-blue-400 font-bold md:w-[14%] md:text-center md:px-2">Mới: ${sumMoi}</span>
+                            <span class="text-[11px] text-amber-600 dark:text-amber-400 font-bold md:w-[14%] md:text-center md:px-2">Chờ: ${sumCho}</span>
+                            <span class="text-[11px] text-green-600 dark:text-green-400 font-bold md:w-[12%] md:text-center md:px-2">Xong: ${sumDong}</span>
+                        </div>
+                    </div>
                 </div>
             </td>
         </tr>`;
@@ -11274,6 +11330,7 @@ function xemChiTietPhieuSX(soPhieu) {
         </tr>`).join('');
 
     const content = `
+        <p class="text-left text-sm text-slate-500 mb-2">Ngày: ${group.ngay}</p>
         <table class="w-full text-xs border-collapse">
             <thead>
                 <tr class="bg-gray-100">
@@ -11283,18 +11340,28 @@ function xemChiTietPhieuSX(soPhieu) {
                     <th class="p-2 border">Mới mua</th>
                     <th class="p-2 border">Chờ đóng</th>
                     <th class="p-2 border">Đóng xong</th>
-                    <th class="p-2 border">Xóa</th>
+                    <th class="p-2 border">Xóa dòng</th>
                 </tr>
             </thead>
             <tbody>${rows}</tbody>
         </table>
     `;
 
+    // Nút "Xóa cả phiếu" giờ nằm TRONG bảng chi tiết này (không còn hiện sẵn ở ngoài danh
+    // sách nữa) - bấm vào cả dòng mới mở được bảng này, nên đỡ lo bấm nhầm xóa khi đang
+    // lướt/cuộn danh sách.
     Swal.fire({
         title: `Chi tiết phiếu: ${soPhieu}`,
         html: content,
         width: '800px',
+        showDenyButton: true,
+        denyButtonText: '🗑️ Xóa cả phiếu này',
+        denyButtonColor: '#dc2626',
         confirmButtonText: 'Đóng'
+    }).then((result) => {
+        if (result.isDenied) {
+            huyPhieuSXGroup(soPhieu);
+        }
     });
 }
 
@@ -11328,14 +11395,25 @@ async function xoaDongTrongPhieuSX(id, soPhieu) {
 
 // Xoá toàn bộ 1 phiếu sản xuất (gồm tất cả sản phẩm/mẻ bên trong cùng số phiếu)
 async function huyPhieuSXGroup(soPhieu) {
-    if (!confirm(`Xóa toàn bộ phiếu ${soPhieu} (gồm tất cả sản phẩm/mẻ bên trong)?`)) return;
+    // TRƯỚC ĐÂY dùng confirm() của trình duyệt - hộp thoại xấu, không nằm giữa màn hình
+    // giống các bảng khác trong app. Đổi sang SweetAlert2 để đồng bộ giao diện.
+    const result = await Swal.fire({
+        title: 'Bạn có chắc chắn?',
+        html: `Xóa toàn bộ phiếu <b>${soPhieu}</b> (gồm tất cả sản phẩm/mẻ bên trong)?<br>Thao tác này không thể hoàn tác!`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Xóa',
+        cancelButtonText: 'Hủy',
+        confirmButtonColor: '#dc2626'
+    });
+    if (!result.isConfirmed) return;
 
     try {
         const snap = await db.collection('production').where('soPhieu', '==', soPhieu).get();
         const soDong = snap.docs.length;
         await Promise.all(snap.docs.map(d => d.ref.delete()));
 
-        alert("Đã xóa phiếu " + soPhieu + "!");
+        Swal.fire({ icon: 'success', title: 'Đã xóa phiếu ' + soPhieu + '!', toast: true, position: 'top-end', timer: 1500, showConfirmButton: false });
 
         if (typeof filterSanXuat === 'function') {
             await filterSanXuat();
@@ -11350,7 +11428,7 @@ async function huyPhieuSXGroup(soPhieu) {
         if (typeof ghiLog === 'function') ghiLog('Sản Xuất', 'Xóa', soPhieu, `Xóa toàn bộ phiếu sản xuất ${soPhieu} (${soDong} dòng sản phẩm/mẻ)`);
     } catch (e) {
         console.error("Lỗi xóa phiếu: ", e);
-        alert("Lỗi: " + e.message);
+        Swal.fire({ icon: 'error', title: 'Lỗi', text: e.message });
     }
 }
 
@@ -11634,6 +11712,7 @@ async function loadTableNCC() {
     
     // Dựng toàn bộ HTML vào 1 biến trước, chỉ gán vào trang 1 lần duy nhất ở cuối
     let html = '';
+    window.allSuppliersData = {};
     for (const doc of nccSnap.docs) {
         const d = doc.data();
         const totalPaid = paidBySupplier[d.name] || 0;
@@ -11643,6 +11722,9 @@ async function loadTableNCC() {
         const safePhone = (d.phone || '').replace(/'/g, "\\'");
         const safeAddress = (d.address || '').replace(/'/g, "\\'");
 
+        // Lưu lại để bảng chi tiết (mở khi bấm vào dòng) tìm được đúng dữ liệu NCC
+        window.allSuppliersData[doc.id] = { name: d.name, phone: d.phone || '', address: d.address || '', debt: d.debt || 0, totalPaid };
+
         // Tách riêng đoạn hiển thị địa chỉ/SĐT trên mobile để tránh lỗi backtick lồng nhau
         let mobileAddressPhone = '';
         if (d.address || d.phone) {
@@ -11651,29 +11733,20 @@ async function loadTableNCC() {
 
         html += `
             <tr class="transition-all duration-300">
-                <td colspan="6" class="p-1">
-                <div class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]" style="border-left-color:#84cc16 !important; border-right-color:#84cc16 !important;">
+                <td colspan="5" class="p-1">
+                <div onclick="xemChiTietNCC('${doc.id}')" class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2 cursor-pointer transition-all hover:-translate-y-0.5 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]" style="border-left-color:#84cc16 !important; border-right-color:#84cc16 !important;">
                         <div class="md:contents">
-                            <div class="text-sm md:text-[11px] font-bold text-slate-800 dark:text-slate-100 md:w-[25%] md:px-2 md:truncate">${d.name}</div>
+                            <div class="text-sm md:text-[11px] font-bold text-slate-800 dark:text-slate-100 md:w-[30%] md:px-2 md:truncate">${d.name}</div>
                             ${mobileAddressPhone}
-                            <div class="hidden md:block md:text-[11px] md:text-slate-600 md:dark:text-slate-400 md:w-[25%] md:px-2 md:truncate">${d.address || ''}</div>
-                            <div class="hidden md:block md:text-[11px] md:text-slate-600 md:dark:text-slate-400 md:w-[12%] md:px-2 md:text-center">${d.phone || ''}</div>
+                            <div class="hidden md:block md:text-[11px] md:text-slate-600 md:dark:text-slate-400 md:w-[28%] md:px-2 md:truncate">${d.address || ''}</div>
+                            <div class="hidden md:block md:text-[11px] md:text-slate-600 md:dark:text-slate-400 md:w-[14%] md:px-2 md:text-center">${d.phone || ''}</div>
                         </div>
                         <div class="flex items-center justify-between gap-2 mt-2 pt-2 md:mt-0 md:pt-0 border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700 md:contents">
                             <div class="flex items-center gap-3 text-xs md:contents">
                                 <span class="text-slate-500 dark:text-slate-400 md:hidden">Nợ: <b class="text-red-600">${(d.debt || 0).toLocaleString()}</b></span>
-                                <span class="hidden md:block md:text-[11px] md:font-bold md:text-red-600 md:w-[12%] md:px-2 md:text-center">${(d.debt || 0).toLocaleString()}</span>
+                                <span class="hidden md:block md:text-[11px] md:font-bold md:text-red-600 md:w-[14%] md:px-2 md:text-center">${(d.debt || 0).toLocaleString()}</span>
                                 <span class="text-slate-500 dark:text-slate-400 md:hidden">Đã trả: <b class="text-green-600">${totalPaid.toLocaleString()}</b></span>
-                                <span class="hidden md:block md:text-[11px] md:font-bold md:text-green-600 md:w-[12%] md:px-2 md:text-center">${totalPaid.toLocaleString()}</span>
-                            </div>
-                            <div class="relative shrink-0 md:w-[14%] md:px-1 md:text-center">
-                                <button onclick="toggleMenu(this)" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 px-3 md:py-0.5 md:px-2 rounded-xl text-xs md:text-[10px] font-bold shadow-sm transition-colors">Thao tác ▼</button>
-                                <div class="hidden absolute menu-action right-0 mt-2 w-32 bg-white dark:bg-slate-800 border border-blue-200 dark:border-slate-700 rounded-lg shadow-2xl p-2 flex flex-col gap-1.5 z-[9999]">
-                                    <button onclick="openPayModal('${doc.id}', '${safeName}')" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded-xl text-[11px] w-full font-bold transition-colors">Trả Nợ</button>
-                                    <button onclick="window.openHistory('${safeName}')" class="bg-purple-600 hover:bg-purple-700 text-white py-1.5 rounded-xl text-[11px] w-full font-bold transition-colors">Lịch sử</button>
-                                    <button onclick="editNCC('${doc.id}', '${safeName}', '${safePhone}', '${safeAddress}')" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1.5 rounded-xl text-[11px] w-full font-bold transition-colors">Sửa</button>
-                                    <button onclick="deleteDoc('suppliers', '${doc.id}')" title="Xóa" class="bg-red-600 hover:bg-red-700 text-white py-1.5 rounded-xl text-[11px] w-full font-bold transition-colors flex items-center justify-center"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-                                </div>
+                                <span class="hidden md:block md:text-[11px] md:font-bold md:text-green-600 md:w-[14%] md:px-2 md:text-center">${totalPaid.toLocaleString()}</span>
                             </div>
                         </div>
                     </div>
@@ -11681,6 +11754,45 @@ async function loadTableNCC() {
             </tr>`;
     }
     bodyNCC.innerHTML = html;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+// Bấm vào 1 dòng NCC -> mở bảng chi tiết có đầy đủ nút thao tác bên trong (thay cho
+// dropdown "Thao tác ▾" cũ) - đỡ lo bấm nhầm khi đang lướt danh sách.
+function xemChiTietNCC(id) {
+    const d = (window.allSuppliersData || {})[id];
+    if (!d) return;
+
+    const safeName = (d.name || '').replace(/'/g, "\\'");
+    const safePhone = (d.phone || '').replace(/'/g, "\\'");
+    const safeAddress = (d.address || '').replace(/'/g, "\\'");
+
+    const content = `
+        <div class="text-left text-sm space-y-1 mb-4">
+            <div><b>Địa chỉ:</b> ${d.address || '(chưa có)'}</div>
+            <div><b>SĐT:</b> ${d.phone || '(chưa có)'}</div>
+            <div class="pt-2 flex gap-4">
+                <div><b class="text-green-600">Đã trả:</b> ${d.totalPaid.toLocaleString('vi-VN')} đ</div>
+                <div><b class="text-red-600">Còn nợ:</b> ${d.debt.toLocaleString('vi-VN')} đ</div>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+            <button onclick="Swal.close(); openPayModal('${id}', '${safeName}')" class="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl text-sm font-bold">💰 Trả Nợ</button>
+            <button onclick="Swal.close(); window.openHistory('${safeName}')" class="bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-xl text-sm font-bold">🕒 Lịch sử</button>
+            <button onclick="Swal.close(); editNCC('${id}', '${safeName}', '${safePhone}', '${safeAddress}')" class="col-span-2 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-xl text-sm font-bold">✏️ Sửa</button>
+        </div>
+        <button onclick="Swal.close(); deleteDoc('suppliers', '${id}')" class="mt-2 w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
+            <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa nhà cung cấp này
+        </button>
+    `;
+
+    Swal.fire({
+        title: d.name || '',
+        html: content,
+        showConfirmButton: false,
+        showCloseButton: true,
+        width: '420px'
+    });
     if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
@@ -12215,37 +12327,25 @@ async function filterNhapKho() {
 
         const keys = Object.values(grouped);
         if (keys.length === 0) {
-            listBody.innerHTML = "<tr><td colspan='5' class='text-center p-4'>Không có dữ liệu trong khoảng này</td></tr>";
+            listBody.innerHTML = "<tr><td colspan='4' class='text-center p-4'>Không có dữ liệu trong khoảng này</td></tr>";
             return;
         }
 
         let htmlRows = keys.map(p => `
     <tr>
-        <td colspan="5" class="p-1">
-            <div class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2
+        <td colspan="4" class="p-1">
+            <div onclick="xemChiTietPhieu('${p.soPhieu}')" class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2 cursor-pointer transition-all hover:-translate-y-0.5
                         shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] text-[12px]" style="border-left-color:#a3e635 !important; border-right-color:#a3e635 !important;">
                 <div class="flex items-center justify-between gap-2 md:contents">
                     <div class="flex items-center gap-2 min-w-0 md:contents">
-                        <span class="font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap md:w-[15%] md:px-2">${p.soPhieu}</span>
-                        <span class="text-slate-500 dark:text-slate-400 whitespace-nowrap md:w-[15%] md:px-2">${p.ngay instanceof Date ? p.ngay.toLocaleDateString('vi-VN') : "---"}</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap md:w-[18%] md:px-2">${p.soPhieu}</span>
+                        <span class="text-slate-500 dark:text-slate-400 whitespace-nowrap md:w-[17%] md:px-2">${p.ngay instanceof Date ? p.ngay.toLocaleDateString('vi-VN') : "---"}</span>
                     </div>
                     <span class="font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap md:hidden">${p.tongTien.toLocaleString('vi-VN')} đ</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 mt-1.5 pt-1.5 md:mt-0 md:pt-0 border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700 md:contents">
-                    <span class="text-slate-700 dark:text-slate-200 truncate md:w-[40%] md:px-2 md:order-3">${p.ncc}</span>
-                    <span class="hidden md:block md:w-[15%] md:px-2 md:text-right md:order-4 font-bold text-slate-800 dark:text-slate-100">${p.tongTien.toLocaleString('vi-VN')} đ</span>
-                    <div class="flex justify-center gap-3 shrink-0 md:w-[15%] md:px-2 md:justify-center md:order-5">
-                        <button onclick="xemChiTietPhieu('${p.soPhieu}')" class="text-blue-600 hover:text-blue-800">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                            </svg>
-                        </button>
-                        <button onclick="deleteDoc('material_imports', '${p.soPhieu}')" class="text-red-500 hover:text-red-700">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                            </svg>
-                        </button>
-                    </div>
+                    <span class="text-slate-700 dark:text-slate-200 truncate md:w-[45%] md:px-2 md:order-3">${p.ncc}</span>
+                    <span class="hidden md:block md:w-[20%] md:pl-2 md:pr-4 md:text-right md:order-4 font-bold text-slate-800 dark:text-slate-100">${p.tongTien.toLocaleString('vi-VN')} đ</span>
                 </div>
             </div>
         </td>
@@ -12253,6 +12353,7 @@ async function filterNhapKho() {
 `).join('');
 
         listBody.innerHTML = htmlRows;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
 
     } catch (e) {
         console.error("Lỗi filter:", e);
@@ -12292,9 +12393,13 @@ function xemChiTietPhieu(soPhieu) {
                 ${rows}
             </tbody>
         </table>
+        <button onclick="document.getElementById('popup-ncc').classList.add('hidden'); deleteDoc('material_imports', '${soPhieu}')" class="mt-4 w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
+            <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa cả phiếu này
+        </button>
     `;
     
     showPopup("Chi tiết phiếu: " + soPhieu, content);
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 
