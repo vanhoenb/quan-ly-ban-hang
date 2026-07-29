@@ -1803,7 +1803,7 @@ html:not(.dark) .bg-white {
     <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-4 border-b dark:border-slate-700 pb-2">
             <h3 class="text-lg font-bold text-gray-800 dark:text-white">Chi tiết phiếu: <span id="modal-receipt-id"></span></h3>
-            <button onclick="document.getElementById('modal-receipt').classList.add('hidden')" class="text-gray-500 dark:text-gray-400 font-bold hover:text-red-500">Đóng (X)</button>
+            <button onclick="document.getElementById('modal-receipt').classList.add('hidden')" class="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white font-bold text-xl">✕</button>
         </div>
         <table class="w-full border-collapse border border-gray-200 dark:border-slate-700 text-sm">
             <thead class="sticky top-0 z-10 bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-slate-700 text-gray-800 dark:text-gray-200 shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
@@ -1811,10 +1811,11 @@ html:not(.dark) .bg-white {
             </thead>
             <tbody id="modal-receipt-body" class="text-gray-800 dark:text-gray-300"></tbody>
         </table>
-        <div class="flex justify-end mt-4 pt-3 border-t dark:border-slate-700">
-            <button id="modal-receipt-delete-btn" onclick="deleteReceipt(window.__currentViewReceiptDocId)" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-1.5">
+        <div class="grid grid-cols-2 gap-2 mt-4 pt-3 border-t dark:border-slate-700">
+            <button id="modal-receipt-delete-btn" onclick="deleteReceipt(window.__currentViewReceiptDocId)" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
                 <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa cả phiếu này
             </button>
+            <button onclick="document.getElementById('modal-receipt').classList.add('hidden')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 border border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-700 py-2 rounded-xl text-sm font-bold">Đóng</button>
         </div>
     </div>
 </div>
@@ -1874,7 +1875,7 @@ html:not(.dark) .bg-white {
     <h2 class="text-2xl font-bold text-gray-800 dark:text-white">BÁN HÀNG / XUẤT HOÁ ĐƠN</h2>
 
    <div class="flex flex-col lg:flex-row gap-4 w-full">
-   <div class="lg:w-1/2 w-full space-y-4 h-auto md:h-[900px]">
+   <div class="lg:w-1/2 w-full space-y-4 h-auto md:h-[800px]">
     <div class="bg-white dark:bg-slate-900 p-2 md:p-4 rounded-2xl border-4 border-red-500 shadow-sm h-full">
             
             <div class="flex gap-2 mb-4">
@@ -1901,13 +1902,13 @@ html:not(.dark) .bg-white {
             </div>
             
             <div id="product-grid" 
-                 class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 h-[250px] md:h-[780px] overflow-y-auto p-1 md:p-2" 
+                 class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 h-[250px] md:h-[680px] overflow-y-auto p-1 md:p-2" 
                  style="align-content: start;">
             </div>
         </div>
     </div>
 
-        <div class="lg:w-1/2 w-full space-y-4 h-[900px] flex flex-col">
+        <div class="lg:w-1/2 w-full space-y-4 h-[800px] flex flex-col">
             <!-- HÓA ĐƠN CHỜ: cho phép tạm giữ đơn đang bán để phục vụ khách khác, rồi quay lại sau -->
             <div class="bg-white dark:bg-slate-900 rounded-2xl border-2 border-blue-200 dark:border-slate-700 p-2 shadow-sm">
                 <div id="held-orders-bar" class="flex items-center gap-2 overflow-x-auto pb-0.5"></div>
@@ -2071,7 +2072,7 @@ html:not(.dark) .bg-white {
             <p style="font-size: 12px; font-style: italic;">(Ký, ghi rõ họ tên)</p>
         </div>
         <div style="width: 45%;">
-            <p style="margin: 0;">Ninh Bình, ngày <span id="print-day"></span> tháng <span id="print-month"></span> năm <span id="print-year"></span></p>
+            <p style="margin: 0; white-space: nowrap;">Ninh Bình, ngày <span id="print-day"></span> tháng <span id="print-month"></span> năm <span id="print-year"></span></p>
             <p style="margin: 0;"><strong>Người bán hàng</strong></p>
             <p style="font-size: 12px; font-style: italic;">(Ký, đóng dấu, ghi rõ họ tên)</p>
         </div>
@@ -2143,7 +2144,8 @@ html:not(.dark) .bg-white {
     </div>
     <div style="clear: both;"></div>
 
-    <div style="margin-top: 40px; display: flex; justify-content: space-between; text-align: center; font-size: 13px;">
+    <p style="margin: 40px 0 6px 0; text-align: right; font-size: 13px; white-space: nowrap;">Ninh Bình, ngày <span id="xk-day2"></span> tháng <span id="xk-month2"></span> năm <span id="xk-year2"></span></p>
+    <div style="display: flex; justify-content: space-between; text-align: center; font-size: 13px;">
         <div style="width: 30%;">
             <p style="margin: 0;"><strong>Người lập phiếu</strong></p>
             <p style="font-size: 12px; font-style: italic;">(Ký, ghi rõ họ tên)</p>
@@ -2153,7 +2155,6 @@ html:not(.dark) .bg-white {
             <p style="font-size: 12px; font-style: italic;">(Ký, ghi rõ họ tên)</p>
         </div>
         <div style="width: 30%;">
-            <p style="margin: 0 0 4px 0;">Ninh Bình, ngày <span id="xk-day2"></span> tháng <span id="xk-month2"></span> năm <span id="xk-year2"></span></p>
             <p style="margin: 0;"><strong>Người nhận hàng</strong></p>
             <p style="font-size: 12px; font-style: italic;">(Ký, ghi rõ họ tên)</p>
         </div>
@@ -2689,10 +2690,13 @@ html:not(.dark) .bg-white {
 
         <!-- Popup -->
         <div id="popup-ncc" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center p-4 z-50">
-            <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm">
+            <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm relative">
+                <button onclick="document.getElementById('popup-ncc').classList.add('hidden')" class="absolute top-3 right-3 text-slate-400 hover:text-slate-700 transition-colors" title="Đóng" aria-label="Đóng">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
                 <h3 id="popup-title" class="font-bold text-lg mb-4 text-center"></h3>
                 <div id="popup-content" class="mb-4"></div>
-                <button onclick="document.getElementById('popup-ncc').classList.add('hidden')" class="w-full bg-gray-500 text-white py-2 rounded-xl">Đóng</button>
+                <button id="popup-close-btn" onclick="document.getElementById('popup-ncc').classList.add('hidden')" class="w-full bg-gray-500 text-white py-2 rounded-xl">Đóng</button>
             </div>
         </div>
     </div>
@@ -4694,29 +4698,8 @@ async function renderInventoryList(filter = 'today') {
         const maxVal = Math.max(item.tonDau + totalNhap + item.out + tonCuoi, 1); 
         const isLowStock = tonCuoi < 5;
 
-        // Vẽ thanh tiến trình 3D vật lý (Physical Depth) cực nét
-        const bar = (val, color, label, applyGlow = false, borderClass = 'border-slate-200 dark:border-slate-800/80') => {
-            const barWidth = val > 0 ? Math.min((val / maxVal) * 100, 100) : 0; 
-            
-            // Đổ bóng phát sáng viền cơ học khi ít hàng
-            const glowClass = applyGlow ? 'ring-1 ring-rose-500/50 ring-inset shadow-[0_0_8px_rgba(244,63,94,0.5)] dark:shadow-[0_0_8px_rgba(244,63,94,0.6)] animate-pulse' : '';
-            
-            // Hiệu ứng đổ bóng nổi khối gương 3D (Mép trên sáng, mép dưới tối)
-            let colorBarHtml = barWidth > 0 
-                ? `<div style="width: ${barWidth}%;" class="h-full ${color} ${glowClass} shadow-[inset_0_2px_4px_rgba(255,255,255,0.35),inset_0_-2px_3px_rgba(0,0,0,0.25)] dark:shadow-[inset_0_2px_3px_rgba(255,255,255,0.15),inset_0_-3px_4px_rgba(0,0,0,0.5)] transition-all duration-500"></div>` 
-                : '';
-            
-            return `
-            <div class="flex-1 h-8 bg-slate-200/85 dark:bg-slate-950 rounded-lg border ${borderClass} shadow-[inset_0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)] overflow-hidden relative">
-                ${colorBarHtml}
-                <div class="absolute inset-0 flex items-center justify-center text-[9px] font-black text-slate-700 dark:text-slate-100 drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
-                    ${label}:&nbsp;<b>${val}</b>
-                </div>
-            </div>`;
-        };
-
         const tcBorderClass = isLowStock ? 'border-rose-400 dark:border-rose-500/80' : 'border-slate-200 dark:border-slate-800/80';
-        
+
         // PHỐI MÀU GRADIENT 3D PASTEL CHỐNG CHÓI, CHỐNG QUÁ TRẮNG
         const colorTonDau  = 'bg-gradient-to-b from-blue-400 to-blue-500 dark:from-blue-600 dark:to-blue-700';
         const colorNhap    = 'bg-gradient-to-b from-amber-400 to-amber-500 dark:from-amber-500 dark:to-amber-600';
@@ -4725,16 +4708,33 @@ async function renderInventoryList(filter = 'today') {
             ? 'bg-gradient-to-b from-rose-500 to-rose-600 dark:from-rose-600 dark:to-rose-700' 
             : 'bg-gradient-to-b from-emerald-400 to-emerald-500 dark:from-emerald-500 dark:to-emerald-600';
 
+        // Vẽ 1 THANH NXT DUY NHẤT chia thành các đoạn màu theo tỉ lệ (trước đây là 4 khối
+        // "viên thuốc" tách rời cạnh nhau) - vẫn giữ nguyên màu riêng từng mục, vẫn giữ
+        // hiệu ứng tăng/giảm màu khi sắp hết hàng, và vẫn có ghi chú (nhãn: giá trị) ngay
+        // trong từng đoạn của thanh, chỉ khác là giờ nối liền thành 1 khối duy nhất.
+        const segments = [
+            { val: item.tonDau, color: colorTonDau, label: 'T.Đầu' },
+            { val: totalNhap, color: colorNhap, label: 'Nhập' },
+            { val: item.out, color: colorXuat, label: 'Xuất' },
+            { val: tonCuoi, color: colorTonCuoi, label: 'T.Cuối', glow: isLowStock }
+        ];
+
+        const segmentsHtml = segments.map(seg => {
+            const growVal = seg.val > 0 ? seg.val : 0.001;
+            const glowClass = seg.glow ? 'ring-1 ring-rose-500/50 ring-inset shadow-[0_0_8px_rgba(244,63,94,0.5)] dark:shadow-[0_0_8px_rgba(244,63,94,0.6)] animate-pulse' : '';
+            return `
+            <div style="flex: ${growVal} 1 0%; min-width: 44px;" class="h-full ${seg.color} ${glowClass} shadow-[inset_0_2px_4px_rgba(255,255,255,0.35),inset_0_-2px_3px_rgba(0,0,0,0.25)] dark:shadow-[inset_0_2px_3px_rgba(255,255,255,0.15),inset_0_-3px_4px_rgba(0,0,0,0.5)] transition-all duration-500 border-r border-white/40 dark:border-black/40 last:border-r-0 flex items-center justify-center overflow-hidden">
+                <span class="text-[9px] font-black text-slate-900 drop-shadow-[0_1px_1px_rgba(255,255,255,0.55)] dark:text-white dark:drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)] whitespace-nowrap px-0.5">${seg.label}:&nbsp;<b>${seg.val}</b></span>
+            </div>`;
+        }).join('');
+
         inventoryCardsHtml += `
         <div class="mb-2 bg-white dark:bg-slate-950/40 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-[0_4px_6px_rgba(0,0,0,0.2)] hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-150">
             <div class="text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5 truncate flex items-center gap-1">
                 ${name} ${isLowStock ? '<span class="text-rose-500 animate-pulse text-[12px]">⚠️ Ít hàng</span>' : ''}
             </div>
-            <div class="flex w-full gap-1.5">
-                ${bar(item.tonDau, colorTonDau, 'T.Đầu')}
-                ${bar(totalNhap, colorNhap, 'Nhập')}
-                ${bar(item.out, colorXuat, 'Xuất')}
-                ${bar(tonCuoi, colorTonCuoi, 'T.Cuối', isLowStock, tcBorderClass)}
+            <div class="flex w-full h-8 bg-slate-200/85 dark:bg-slate-950 rounded-lg border ${tcBorderClass} shadow-[inset_0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)] overflow-hidden">
+                ${segmentsHtml}
             </div>
         </div>`;
     });
@@ -6989,9 +6989,15 @@ async function shareInvoiceViaZalo(areaId, modeClass, fileNamePrefix, receiptId,
                 // điều hành, trong đó có Zalo nếu máy đã cài app Zalo.
                 if (isMobileDevice && navigator.canShare && navigator.canShare({ files: [file] })) {
                     try {
+                        // QUAN TRỌNG: một số ứng dụng nhận chia sẻ trên điện thoại (Zalo, Messenger...)
+                        // không lấy tên file thật của ảnh (fileName ở trên) mà lại dùng "title"/"text"
+                        // để đặt tên khi lưu/hiển thị - trước đây để "Hóa đơn {receiptId}" nên trên điện
+                        // thoại chỉ hiện đúng SỐ PHIẾU. Đổi "title" thành đúng tên file (Khách hàng - Ngày)
+                        // để đồng bộ với tên file khi tải về trên máy tính.
+                        const shareTitle = fileName.replace(/\.png$/i, '');
                         await navigator.share({
                             files: [file],
-                            title: `Hóa đơn ${receiptId || ''}`,
+                            title: shareTitle,
                             text: `Hóa đơn ${receiptId || ''} - Gửi qua Zalo`
                         });
                         resolve();
@@ -7941,7 +7947,10 @@ async function viewInvoiceDetails(docId) {
                     <button onclick="Swal.close(); reprintSale('${docId}')" class="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">🖨️ In lại</button>
                     <button onclick="Swal.close(); shareSaleZalo('${docId}')" class="bg-sky-500 hover:bg-sky-600 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">💬 Chia sẻ Zalo</button>
                 </div>
-                <button onclick="Swal.close(); deleteSale('${docId}')" class="mt-2 w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-bold">🗑️ Xóa phiếu này</button>
+                <div class="grid grid-cols-2 gap-2 mt-2">
+                    <button onclick="Swal.close(); deleteSale('${docId}')" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">🗑️ Xóa phiếu này</button>
+                    <button onclick="Swal.close()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 border border-slate-300 py-2 rounded-xl text-sm font-bold">Đóng</button>
+                </div>
             `,
             width: '800px',
             showConfirmButton: false,
@@ -8923,9 +8932,12 @@ function xemChiTietDaiLy(id) {
             <button onclick="Swal.close(); showDebtHistory('${id}', '${safeName}')" class="bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-xl text-sm font-bold">🕒 Lịch sử</button>
             <button onclick="Swal.close(); editCustomer('${id}')" class="bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-xl text-sm font-bold">✏️ Sửa</button>
         </div>
-        <button onclick="Swal.close(); deleteCustomer('${id}')" class="mt-2 w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
-            <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa đại lý này
-        </button>
+        <div class="grid grid-cols-2 gap-2 mt-2">
+            <button onclick="Swal.close(); deleteCustomer('${id}')" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
+                <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa đại lý
+            </button>
+            <button onclick="Swal.close()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 border border-slate-300 py-2 rounded-xl text-sm font-bold">Đóng</button>
+        </div>
     `;
 
     Swal.fire({
@@ -10906,9 +10918,12 @@ function xemChiTietSP(id) {
                 <div><b>Mã vạch:</b> ${barcodeText}</div>
             </div>
             <button onclick="Swal.close(); editBarcode('${id}', '${safeName}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl text-sm font-bold mb-2">🏷️ Gán / Sửa mã vạch</button>
-            <button onclick="Swal.close(); deleteProduct('${id}')" class="w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
-                <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa sản phẩm này
-            </button>
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="Swal.close(); deleteProduct('${id}')" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa
+                </button>
+                <button onclick="Swal.close()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 border border-slate-300 py-2 rounded-xl text-sm font-bold">Đóng</button>
+            </div>
         `;
 
         Swal.fire({
@@ -11354,7 +11369,9 @@ function xemChiTietPhieuSX(soPhieu) {
         title: `Chi tiết phiếu: ${soPhieu}`,
         html: content,
         width: '800px',
+        showCloseButton: true,
         showDenyButton: true,
+        reverseButtons: true,
         denyButtonText: '🗑️ Xóa cả phiếu này',
         denyButtonColor: '#dc2626',
         confirmButtonText: 'Đóng'
@@ -11687,10 +11704,15 @@ async function loadAllData() {
  * --- 2. TAB NHÀ CUNG CẤP (NCC) & MODAL POPUP ---
  */
 // Hiển thị nội dung vào khung Modal chung
-function showPopup(title, content) {
+// hideFooterClose: true nếu nội dung (content) đã tự có nút "Đóng" riêng (đặt cạnh nút Xóa) -
+// để tránh hiện 2 nút "Đóng" chồng lên nhau.
+function showPopup(title, content, hideFooterClose = false) {
     document.getElementById('popup-title').innerText = title;
     document.getElementById('popup-content').innerHTML = content;
     document.getElementById('popup-ncc').classList.remove('hidden');
+    const footerCloseBtn = document.getElementById('popup-close-btn');
+    if (footerCloseBtn) footerCloseBtn.style.display = hideFooterClose ? 'none' : '';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 // Render bảng danh sách NCC và tính toán công nợ
@@ -11781,9 +11803,12 @@ function xemChiTietNCC(id) {
             <button onclick="Swal.close(); window.openHistory('${safeName}')" class="bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-xl text-sm font-bold">🕒 Lịch sử</button>
             <button onclick="Swal.close(); editNCC('${id}', '${safeName}', '${safePhone}', '${safeAddress}')" class="col-span-2 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-xl text-sm font-bold">✏️ Sửa</button>
         </div>
-        <button onclick="Swal.close(); deleteDoc('suppliers', '${id}')" class="mt-2 w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
-            <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa nhà cung cấp này
-        </button>
+        <div class="grid grid-cols-2 gap-2 mt-2">
+            <button onclick="Swal.close(); deleteDoc('suppliers', '${id}')" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
+                <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa NCC
+            </button>
+            <button onclick="Swal.close()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 border border-slate-300 py-2 rounded-xl text-sm font-bold">Đóng</button>
+        </div>
     `;
 
     Swal.fire({
@@ -12393,12 +12418,15 @@ function xemChiTietPhieu(soPhieu) {
                 ${rows}
             </tbody>
         </table>
-        <button onclick="document.getElementById('popup-ncc').classList.add('hidden'); deleteDoc('material_imports', '${soPhieu}')" class="mt-4 w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
-            <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa cả phiếu này
-        </button>
+        <div class="grid grid-cols-2 gap-2 mt-4">
+            <button onclick="document.getElementById('popup-ncc').classList.add('hidden'); deleteDoc('material_imports', '${soPhieu}')" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
+                <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa cả phiếu này
+            </button>
+            <button onclick="document.getElementById('popup-ncc').classList.add('hidden')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 border border-slate-300 py-2 rounded-xl text-sm font-bold">Đóng</button>
+        </div>
     `;
     
-    showPopup("Chi tiết phiếu: " + soPhieu, content);
+    showPopup("Chi tiết phiếu: " + soPhieu, content, true);
     if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
