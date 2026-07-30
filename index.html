@@ -180,6 +180,36 @@
         z-index: 99999999 !important;
     }
 
+    /* 1b. Khung popup (Swal) đổi màu theo giao diện Sáng/Tối - trước đây luôn nền trắng
+    cố định dù app đang ở giao diện Tối, nhìn lệch tông. Giờ khi <html> có class "dark",
+    toàn bộ khung popup + chữ + icon đóng sẽ chuyển sang tông tối cho đồng bộ. */
+    .dark .swal2-popup {
+        background: #0f172a !important;
+        color: #e2e8f0 !important;
+    }
+    .dark .swal2-popup .swal2-title {
+        color: #f1f5f9 !important;
+    }
+    .dark .swal2-popup .swal2-html-container {
+        color: #cbd5e1 !important;
+    }
+    .dark .swal2-popup .swal2-close {
+        color: #94a3b8 !important;
+    }
+    .dark .swal2-popup .swal2-close:hover {
+        color: #f1f5f9 !important;
+    }
+    /* Các bảng/tiêu đề bảng bên trong popup (thường có nền xám nhạt cố định) cũng cần tối lại */
+    .dark .swal2-popup .bg-gray-100 {
+        background-color: #1e293b !important;
+        color: #e2e8f0 !important;
+    }
+    .dark .swal2-popup table, 
+    .dark .swal2-popup th, 
+    .dark .swal2-popup td {
+        border-color: #334155 !important;
+    }
+
     /* 2. Đảm bảo khi menu mở, nó sẽ tự động thoát khỏi vòng vây của bảng */
     .menu-container {
         position: relative;
@@ -1643,7 +1673,7 @@ html:not(.dark) .bg-white {
             <div id="modal-content" class="text-sm"></div>
             <div class="mt-6 text-center">
                 <button onclick="document.getElementById('order-detail-modal').classList.add('hidden')" 
-                        class="bg-violet-50 dark:bg-violet-950/60 border border-violet-200 dark:border-transparent border-b-[3px] border-violet-300 dark:border-violet-800 hover:bg-violet-100 dark:hover:bg-violet-900/50 hover:border-violet-400 dark:hover:border-violet-700 text-violet-600 dark:text-violet-400 px-8 py-2 rounded-lg font-bold active:translate-y-[1px] transition-all">Đóng</button>
+                        class="bg-slate-600 hover:bg-slate-700 text-white px-8 py-2 rounded-xl font-bold transition-all">Đóng</button>
             </div>
         </div>
     </div>
@@ -1679,7 +1709,7 @@ html:not(.dark) .bg-white {
                 </table>
             </div>
             <button onclick="document.getElementById('salesDetailModal').classList.add('hidden')" 
-                    class="mt-4 w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-transparent border-b-[3px] border-slate-300 dark:border-slate-800 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 py-3 rounded-xl font-bold active:translate-y-[1px] transition-all">Đóng</button>
+                    class="mt-4 w-full bg-slate-600 hover:bg-slate-700 text-white py-3 rounded-xl font-bold transition-all">Đóng</button>
         </div>
     </div>
 </div>
@@ -1782,7 +1812,7 @@ html:not(.dark) .bg-white {
             <div class="overflow-x-auto overflow-y-auto max-h-[280px] border border-blue-100 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 custom-scrollbar">
                 <table class="w-full text-sm">
                     <thead class="sticky top-0 z-10 bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-slate-700 text-gray-800 dark:text-gray-200 shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
-                        <tr><th class="py-3 px-2 text-center w-[30%]">Số phiếu</th><th class="py-3 px-2 text-center w-[40%]">Ngày nhập</th><th class="py-3 px-2 text-center w-[30%]">Số SP</th></tr>
+                        <tr><th class="py-3 px-3 text-center w-[30%]">Số phiếu</th><th class="py-3 px-3 text-center w-[40%]">Ngày nhập</th><th class="py-3 px-3 text-center w-[30%]">Số SP</th></tr>
                     </thead>
                     <tbody id="list-receipts-left" class="text-gray-800 dark:text-gray-300"></tbody>
                 </table>
@@ -1790,7 +1820,7 @@ html:not(.dark) .bg-white {
             <div class="overflow-x-auto overflow-y-auto max-h-[280px] border border-blue-100 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 custom-scrollbar">
                 <table class="w-full text-sm">
                     <thead class="sticky top-0 z-10 bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-slate-700 text-gray-800 dark:text-gray-200 shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
-                        <tr><th class="py-3 px-2 text-center w-[30%]">Số phiếu</th><th class="py-3 px-2 text-center w-[40%]">Ngày nhập</th><th class="py-3 px-2 text-center w-[30%]">Số SP</th></tr>
+                        <tr><th class="py-3 px-3 text-center w-[30%]">Số phiếu</th><th class="py-3 px-3 text-center w-[40%]">Ngày nhập</th><th class="py-3 px-3 text-center w-[30%]">Số SP</th></tr>
                     </thead>
                     <tbody id="list-receipts-right" class="text-gray-800 dark:text-gray-300"></tbody>
                 </table>
@@ -1807,15 +1837,18 @@ html:not(.dark) .bg-white {
         </div>
         <table class="w-full border-collapse border border-gray-200 dark:border-slate-700 text-sm">
             <thead class="sticky top-0 z-10 bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-slate-700 text-gray-800 dark:text-gray-200 shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
-                <tr><th class="border dark:border-slate-700 p-2">Sản phẩm</th><th class="border dark:border-slate-700 p-2">ĐVT</th><th class="border dark:border-slate-700 p-2">SL</th><th class="border dark:border-slate-700 p-2">Giá</th><th class="border dark:border-slate-700 p-2">Thao tác</th></tr>
+                <tr><th class="border dark:border-slate-700 p-2">Sản phẩm</th><th class="border dark:border-slate-700 p-2">ĐVT</th><th class="border dark:border-slate-700 p-2">SL</th><th class="border dark:border-slate-700 p-2">Giá</th></tr>
             </thead>
             <tbody id="modal-receipt-body" class="text-gray-800 dark:text-gray-300"></tbody>
         </table>
-        <div class="grid grid-cols-2 gap-2 mt-4 pt-3 border-t dark:border-slate-700">
-            <button id="modal-receipt-delete-btn" onclick="deleteReceipt(window.__currentViewReceiptDocId)" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
+        <button onclick="saveAllItemEdits(window.__currentViewReceiptDocId)" class="w-full mt-4 bg-green-600 hover:bg-green-700 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
+            💾 Lưu tất cả thay đổi
+        </button>
+        <div class="grid grid-cols-2 gap-2 mt-2 pt-3 border-t dark:border-slate-700">
+            <button id="modal-receipt-delete-btn" onclick="deleteReceipt(window.__currentViewReceiptDocId)" class="bg-red-600 hover:bg-red-700 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
                 <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa cả phiếu này
             </button>
-            <button onclick="document.getElementById('modal-receipt').classList.add('hidden')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 border border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-700 py-2 rounded-xl text-sm font-bold">Đóng</button>
+            <button onclick="document.getElementById('modal-receipt').classList.add('hidden')" class="bg-slate-600 hover:bg-slate-700 text-white py-2 rounded-xl text-sm font-bold">Đóng</button>
         </div>
     </div>
 </div>
@@ -2183,11 +2216,11 @@ html:not(.dark) .bg-white {
             <table class="w-full text-sm text-left border-collapse">
                 <thead class="sticky top-0 z-20 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold uppercase text-[11px] tracking-wider">
                     <tr>
-                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 w-[25%]">Tên đại lý</th>
-                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 w-[20%]">Địa chỉ</th>
-                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 w-[15%]">Số điện thoại</th>
-                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 text-center text-green-600 w-[20%]">Đã trả</th>
-                        <th class="py-4 px-2 border-b border-slate-200 dark:border-slate-700 text-center text-red-600 w-[20%]">Công nợ</th>
+                        <th class="py-4 px-3 border-b border-slate-200 dark:border-slate-700 w-[25%]">Tên đại lý</th>
+                        <th class="py-4 px-3 border-b border-slate-200 dark:border-slate-700 w-[20%]">Địa chỉ</th>
+                        <th class="py-4 px-3 border-b border-slate-200 dark:border-slate-700 w-[15%]">Số điện thoại</th>
+                        <th class="py-4 px-3 border-b border-slate-200 dark:border-slate-700 text-center text-green-600 w-[20%]">Đã trả</th>
+                        <th class="py-4 px-3 border-b border-slate-200 dark:border-slate-700 text-center text-red-600 w-[20%]">Công nợ</th>
                     </tr>
                 </thead>
                 <tbody id="customer-list-body" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody>
@@ -2222,9 +2255,9 @@ html:not(.dark) .bg-white {
         <table class="w-full bg-white text-sm">
             <thead class="sticky top-0 bg-gray-50 z-10">
                 <tr>
-                    <th class="py-4 px-2 border-b text-left font-bold text-gray-600 dark:text-slate-300 w-[25%]">Mã vạch</th>
-                    <th class="py-4 px-2 border-b text-left font-bold text-gray-600 dark:text-slate-300 w-[45%]">Tên sản phẩm</th>
-                    <th class="py-4 px-2 border-b text-left font-bold text-gray-600 dark:text-slate-300 w-[30%]">ĐVT</th>
+                    <th class="py-4 px-3 border-b text-left font-bold text-gray-600 dark:text-slate-300 w-[25%]">Mã vạch</th>
+                    <th class="py-4 px-3 border-b text-left font-bold text-gray-600 dark:text-slate-300 w-[45%]">Tên sản phẩm</th>
+                    <th class="py-4 px-3 border-b text-left font-bold text-gray-600 dark:text-slate-300 w-[30%]">ĐVT</th>
                 </tr>
             </thead>
             <tbody id="prod-manage-body"></tbody>
@@ -2273,7 +2306,7 @@ html:not(.dark) .bg-white {
     </div>
         
     <div class="bg-white rounded-2xl shadow-lg border border-blue-200 overflow-hidden">
-        <div class="overflow-y-auto max-h-[70vh] overflow-x-auto">
+        <div class="overflow-y-auto max-h-[70vh] overflow-x-auto pr-1">
             <table class="w-full text-sm border-collapse" id="invoiceTable">
 				<thead class="sticky top-0 bg-slate-100 z-10 text-slate-700 font-bold uppercase text-[11px]">
 					<tr>
@@ -2281,7 +2314,7 @@ html:not(.dark) .bg-white {
 						<th class="p-3 border-b text-left w-[33%]">Khách hàng</th>
 						<th class="p-3 border-b text-center w-[15%]">Ngày xuất</th>
 						<th class="p-3 border-b text-center w-[15%]">Số SP</th>
-						<th class="p-3 pr-4 border-b text-right w-[25%]">Tổng tiền</th>
+						<th class="p-3 pr-6 border-b text-right w-[25%]">Tổng tiền</th>
 					</tr>
 				</thead>
 				<tbody id="sales-list-body" class="divide-y divide-slate-100 text-slate-600">
@@ -2455,12 +2488,12 @@ html:not(.dark) .bg-white {
             <table class="w-full text-left border-collapse table-fixed">
               <thead class="sticky top-0 bg-gray-100 dark:bg-slate-950 z-10">
                 <tr class="border-b border-gray-200 dark:border-slate-700">
-                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[26%]">Ngày / Số phiếu</th>
-                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[26%]">Sản phẩm</th>
-                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[8%] text-center">SL</th>
-                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[14%] text-center">Mới mua</th>
-                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[14%] text-center">Chờ đóng</th>
-                  <th class="py-3 px-1.5 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[12%] text-center">Đóng xong</th>
+                  <th class="py-3 px-3 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[26%]">Ngày / Số phiếu</th>
+                  <th class="py-3 px-3 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[26%]">Sản phẩm</th>
+                  <th class="py-3 px-3 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[8%] text-center">SL</th>
+                  <th class="py-3 px-3 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[14%] text-center">Mới mua</th>
+                  <th class="py-3 px-3 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[14%] text-center">Chờ đóng</th>
+                  <th class="py-3 px-3 text-xs md:text-sm font-semibold text-gray-700 dark:text-slate-300 w-[12%] text-center">Đóng xong</th>
                 </tr>
               </thead>
               <tbody id="list-sanxuat" class="text-xs md:text-sm text-gray-600 dark:text-gray-300 divide-y divide-gray-100 dark:divide-slate-800"></tbody>
@@ -2690,13 +2723,13 @@ html:not(.dark) .bg-white {
 
         <!-- Popup -->
         <div id="popup-ncc" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center p-4 z-50">
-            <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm relative">
-                <button onclick="document.getElementById('popup-ncc').classList.add('hidden')" class="absolute top-3 right-3 text-slate-400 hover:text-slate-700 transition-colors" title="Đóng" aria-label="Đóng">
+            <div class="bg-white dark:bg-slate-900 p-6 rounded-lg shadow-xl w-full max-w-sm relative">
+                <button onclick="document.getElementById('popup-ncc').classList.add('hidden')" class="absolute top-3 right-3 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 transition-colors" title="Đóng" aria-label="Đóng">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
-                <h3 id="popup-title" class="font-bold text-lg mb-4 text-center"></h3>
-                <div id="popup-content" class="mb-4"></div>
-                <button id="popup-close-btn" onclick="document.getElementById('popup-ncc').classList.add('hidden')" class="w-full bg-gray-500 text-white py-2 rounded-xl">Đóng</button>
+                <h3 id="popup-title" class="font-bold text-lg mb-4 text-center text-slate-800 dark:text-slate-100"></h3>
+                <div id="popup-content" class="mb-4 text-slate-700 dark:text-slate-300"></div>
+                <button id="popup-close-btn" onclick="document.getElementById('popup-ncc').classList.add('hidden')" class="w-full bg-slate-600 hover:bg-slate-700 text-white py-2 rounded-xl">Đóng</button>
             </div>
         </div>
     </div>
@@ -2768,12 +2801,12 @@ html:not(.dark) .bg-white {
     </button>
 
     <div id="modal-add-event" class="hidden fixed inset-0 bg-black/50 z-[1000] flex justify-center items-center p-4">
-        <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm">
-            <h3 class="font-bold text-lg mb-4 text-gray-800">Thêm công việc mới</h3>
-            <input id="new-event-title" type="text" placeholder="Tên công việc" class="w-full border p-2 rounded mb-3">
-            <input id="new-event-date" type="datetime-local" class="w-full border p-2 rounded mb-3">
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-xl w-full max-w-sm">
+            <h3 class="font-bold text-lg mb-4 text-gray-800 dark:text-slate-100">Thêm công việc mới</h3>
+            <input id="new-event-title" type="text" placeholder="Tên công việc" class="w-full border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 p-2 rounded mb-3">
+            <input id="new-event-date" type="datetime-local" class="w-full border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 p-2 rounded mb-3">
             
-            <select id="new-event-color" class="w-full border p-2 rounded mb-3">
+            <select id="new-event-color" class="w-full border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 p-2 rounded mb-3">
     <option value="#4285F4">Xanh dương (Google)</option>
     <option value="#DB4437">Đỏ (Deadline)</option>
     <option value="#0F9D58">Xanh lá (Hẹn khách)</option>
@@ -2782,20 +2815,20 @@ html:not(.dark) .bg-white {
 </select>
 
             <div class="flex gap-2">
-                <button onclick="document.getElementById('modal-add-event').classList.add('hidden')" class="flex-1 bg-gray-200 py-2 rounded-xl font-bold">Hủy</button>
-                <button onclick="saveNewEvent()" class="flex-1 bg-blue-600 text-white py-2 rounded-xl font-bold">Lưu</button>
+                <button onclick="document.getElementById('modal-add-event').classList.add('hidden')" class="flex-1 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-100 py-2 rounded-xl font-bold">Hủy</button>
+                <button onclick="saveNewEvent()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl font-bold">Lưu</button>
             </div>
         </div>
     </div>
 
     <div id="modal-view-event" class="hidden fixed inset-0 bg-black/50 z-[1000] flex justify-center items-center p-4">
-        <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm">
-            <h3 id="view-event-title" class="font-bold text-lg mb-2 text-gray-800"></h3>
-            <p id="view-event-time" class="text-gray-500 text-sm mb-6"></p>
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-xl w-full max-w-sm">
+            <h3 id="view-event-title" class="font-bold text-lg mb-2 text-gray-800 dark:text-slate-100"></h3>
+            <p id="view-event-time" class="text-gray-500 dark:text-slate-400 text-sm mb-6"></p>
             <div class="flex gap-2">
-                <button onclick="document.getElementById('modal-view-event').classList.add('hidden')" class="flex-1 bg-gray-200 py-2 rounded-xl font-bold">Đóng</button>
-                <button onclick="markDone()" class="flex-1 bg-green-600 text-white py-2 rounded-xl font-bold">Hoàn thành</button>
-                <button onclick="deleteEvent()" title="Xóa" class="flex-1 bg-red-600 text-white py-2 rounded-xl font-bold flex items-center justify-center"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                <button onclick="document.getElementById('modal-view-event').classList.add('hidden')" class="flex-1 bg-slate-600 hover:bg-slate-700 text-white py-2 rounded-xl font-bold">Đóng</button>
+                <button onclick="markDone()" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-xl font-bold">Hoàn thành</button>
+                <button onclick="deleteEvent()" title="Xóa" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-xl font-bold flex items-center justify-center"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
             </div>
         </div>
     </div>
@@ -3284,7 +3317,8 @@ function xemQuyenNguoiDung(username) {
                 <p><strong>Trang được cấp quyền:</strong><br>${escapeHtml(info.permLabel)}</p>
                </div>`,
         icon: 'info',
-        confirmButtonText: 'Đóng'
+        confirmButtonText: 'Đóng',
+        confirmButtonColor: '#475569'
     });
 }
 
@@ -3424,7 +3458,8 @@ function xemChiTietNhatKy(logId) {
                 <p><strong>Chi tiết:</strong><br>${escapeHtml(l.detail || '(không có mô tả)')}</p>
                </div>`,
         icon: l.action === 'Xóa' ? 'warning' : 'info',
-        confirmButtonText: 'Đóng'
+        confirmButtonText: 'Đóng',
+        confirmButtonColor: '#475569'
     });
 }
 
@@ -5836,19 +5871,16 @@ window.viewReceipt = function(docId) {
     if (receipt.items && receipt.items.length > 0) {
         receipt.items.forEach((item, index) => {
             body.innerHTML += `
-                <tr class="border-b">
+                <tr class="border-b dark:border-slate-700">
                     <td class="p-2">${item.name}</td>
-                    <td class="p-2">${item.unit || ''}</td>
-                    <td class="p-2"><input type="number" id="edit-qty-${index}" value="${item.qty}" class="w-16 border p-1 rounded"></td>
-                    <td class="p-2"><input type="number" id="edit-price-${index}" value="${item.price}" class="w-20 border p-1 rounded"></td>
-                    <td class="p-2">
-                        <button onclick="saveItemEdit('${docId}', ${index})" class="bg-green-600 text-white px-2 py-1 rounded-xl text-xs hover:bg-green-700">Lưu</button>
-                    </td>
+                    <td class="p-2 text-center">${item.unit || ''}</td>
+                    <td class="p-2 text-center"><input type="number" id="edit-qty-${index}" value="${item.qty}" class="w-16 mx-auto block text-center border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 p-1 rounded"></td>
+                    <td class="p-2 text-center"><input type="number" id="edit-price-${index}" value="${item.price}" class="w-20 mx-auto block text-center border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 p-1 rounded"></td>
                 </tr>
             `;
         });
     } else {
-        body.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">Không có sản phẩm nào.</td></tr>';
+        body.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-500">Không có sản phẩm nào.</td></tr>';
     }
 
     // 4. HIỆN MODAL
@@ -5857,61 +5889,70 @@ window.viewReceipt = function(docId) {
     if (typeof lucide !== 'undefined') lucide.createIcons();
 };
 
-window.saveItemEdit = async function(docId, index) {
-    const newQty = parseFloat(document.getElementById(`edit-qty-${index}`).value);
-    const newPrice = parseFloat(document.getElementById(`edit-price-${index}`).value);
-    
+window.saveAllItemEdits = async function(docId) {
     try {
         // Truy cập trực tiếp document bằng docId (ID Firebase), không cần .where()
         const receiptRef = db.collection('receipts').doc(docId);
         const doc = await receiptRef.get();
-        
+
         if (!doc.exists) {
             alert("Không tìm thấy phiếu này trong hệ thống!");
             return;
         }
-        
-        let items = doc.data().items;
-        
-        // QUAN TRỌNG: phải nhớ số lượng CŨ trước khi ghi đè, để tính đúng phần chênh
-        // lệch cần cộng/trừ vào tồn kho thực tế (stock_counters). TRƯỚC ĐÂY hàm này chỉ
-        // sửa số lượng trên PHIẾU mà QUÊN cập nhật kho, khiến tồn kho thực tế (đã cộng
-        // đúng lúc nhập ban đầu) và số liệu tính lại từ phiếu (bị lệch theo giá trị vừa
-        // sửa) không còn khớp nhau nữa - đây chính là nguyên nhân tồn đầu/tồn cuối bị trừ
-        // sai sau khi sửa số lượng ở đây.
-        const oldQty = parseFloat(items[index].qty) || 0;
-        const productName = items[index].name;
 
-        // Cập nhật giá trị mới
-        items[index].qty = newQty;
-        items[index].price = newPrice;
-        
-        // Lưu vào Firebase
+        let items = doc.data().items;
+        if (!items || items.length === 0) {
+            alert("Phiếu này không có sản phẩm nào để lưu.");
+            return;
+        }
+
+        // QUAN TRỌNG: phải nhớ số lượng CŨ trước khi ghi đè, để tính đúng phần chênh
+        // lệch cần cộng/trừ vào tồn kho thực tế (stock_counters) cho TỪNG sản phẩm -
+        // giống hệt logic của hàm lưu từng dòng trước đây, chỉ khác là giờ gộp lại
+        // xử lý một lượt cho TẤT CẢ sản phẩm trong phiếu, thay vì phải bấm Lưu từng dòng.
+        const stockDeltas = [];
+        items.forEach((item, index) => {
+            const qtyInput = document.getElementById(`edit-qty-${index}`);
+            const priceInput = document.getElementById(`edit-price-${index}`);
+            if (!qtyInput || !priceInput) return;
+
+            const newQty = parseFloat(qtyInput.value);
+            const newPrice = parseFloat(priceInput.value);
+            const oldQty = parseFloat(item.qty) || 0;
+
+            item.qty = newQty;
+            item.price = newPrice;
+
+            const delta = newQty - oldQty;
+            if (delta !== 0 && item.name) {
+                stockDeltas.push({ name: item.name, qty: delta });
+            }
+        });
+
+        // Lưu vào Firebase MỘT LẦN cho toàn bộ phiếu
         await receiptRef.update({ items: items });
 
-        // Cộng/trừ đúng PHẦN CHÊNH LỆCH (newQty - oldQty) vào tồn kho thực tế - không phải
-        // cộng/trừ lại toàn bộ newQty, vì oldQty đã được cộng vào kho từ lúc lưu phiếu ban đầu rồi.
-        const delta = newQty - oldQty;
-        if (delta !== 0 && productName) {
-            await adjustStockCounters([{ name: productName, qty: delta }], 1);
+        // Cộng/trừ đúng PHẦN CHÊNH LỆCH vào tồn kho thực tế cho tất cả sản phẩm đã sửa
+        if (stockDeltas.length > 0) {
+            await adjustStockCounters(stockDeltas, 1);
         }
-        
+
         // Cập nhật dữ liệu ngay trong mảng local để giao diện đồng bộ
         const receiptIndex = window.allReceipts.findIndex(r => r.docId === docId);
         if (receiptIndex > -1) {
             window.allReceipts[receiptIndex].items = items;
         }
-        
-        alert("Đã cập nhật!");
+
+        alert("Đã lưu tất cả thay đổi!");
 
         // Báo cho toàn bộ ứng dụng biết dữ liệu vừa thay đổi để Kho Hàng / NXT Trang Chủ
         // tự làm mới theo đúng số tồn kho mới - trước đây thiếu bước này nên phải tự tải
         // lại trang mới thấy đúng.
         window.dispatchEvent(new CustomEvent('dataChanged'));
-        
+
         // Gọi lại hàm xem để refresh modal với dữ liệu mới
-        viewReceipt(docId); 
-        
+        viewReceipt(docId);
+
     } catch (error) {
         console.error("Lỗi: ", error);
         alert("Có lỗi xảy ra khi lưu!");
@@ -7948,8 +7989,8 @@ async function viewInvoiceDetails(docId) {
                     <button onclick="Swal.close(); shareSaleZalo('${docId}')" class="bg-sky-500 hover:bg-sky-600 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">💬 Chia sẻ Zalo</button>
                 </div>
                 <div class="grid grid-cols-2 gap-2 mt-2">
-                    <button onclick="Swal.close(); deleteSale('${docId}')" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">🗑️ Xóa phiếu này</button>
-                    <button onclick="Swal.close()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 border border-slate-300 py-2 rounded-xl text-sm font-bold">Đóng</button>
+                    <button onclick="Swal.close(); deleteSale('${docId}')" class="bg-red-600 hover:bg-red-700 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">🗑️ Xóa phiếu này</button>
+                    <button onclick="Swal.close()" class="bg-slate-600 hover:bg-slate-700 text-white py-2 rounded-xl text-sm font-bold">Đóng</button>
                 </div>
             `,
             width: '800px',
@@ -8033,15 +8074,15 @@ async function viewInvoiceDetails(docId) {
 						<td colspan="5" class="p-2">
 							<div onclick="viewInvoiceDetails('${doc.id}')" class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-3 md:p-3 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] cursor-pointer transition-all hover:-translate-y-0.5" style="border-left-color:#a855f7 !important; border-right-color:#a855f7 !important;">
 								<div class="flex items-center gap-2 md:contents">
-									<span class="text-[12px] md:text-[11px] font-bold text-slate-700 dark:text-slate-300 md:w-[12%] truncate md:px-2">${data.id || 'N/A'}</span>
-									<span class="text-[12px] md:text-[11px] font-bold text-slate-900 dark:text-slate-100 truncate flex-1 md:w-[33%] md:px-2">${data.customer || 'Khách lẻ'}</span>
+									<span class="text-[12px] md:text-[11px] font-bold text-slate-700 dark:text-slate-300 md:w-[12%] truncate md:px-3">${data.id || 'N/A'}</span>
+									<span class="text-[12px] md:text-[11px] font-bold text-slate-900 dark:text-slate-100 truncate flex-1 md:w-[33%] md:px-3">${data.customer || 'Khách lẻ'}</span>
 								</div>
 								<div class="flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700">
 									<div class="flex items-center gap-3 md:contents">
-										<span class="text-[11px] font-bold text-slate-700 dark:text-slate-400 md:w-[15%] md:text-center md:px-2">${dateStr}</span>
-										<span class="text-[11px] text-slate-500 dark:text-slate-400 md:w-[15%] md:text-center md:px-2">${itemCount} SP</span>
+										<span class="text-[11px] font-bold text-slate-700 dark:text-slate-400 md:w-[15%] md:text-center md:px-3">${dateStr}</span>
+										<span class="text-[11px] text-slate-500 dark:text-slate-400 md:w-[15%] md:text-center md:px-3">${itemCount} SP</span>
 									</div>
-									<span class="text-[12px] md:text-[11px] font-black text-rose-600 dark:text-rose-400 md:w-[25%] md:text-right md:pl-2 md:pr-4">${Number(totalAmount).toLocaleString('vi-VN')} VNĐ</span>
+									<span class="text-[12px] md:text-[11px] font-black text-rose-600 dark:text-rose-400 md:w-[25%] md:text-right md:pl-2 md:pr-6">${Number(totalAmount).toLocaleString('vi-VN')} VNĐ</span>
 								</div>
 							</div>
 						</td>
@@ -8885,18 +8926,18 @@ function renderCustomerList() {
                  style="border-left-color:#14b8a6 !important; border-right-color:#14b8a6 !important;">
                         
                 <div class="md:contents">
-                    <div class="text-[13px] md:text-[11px] font-bold ${debt > 0 ? 'text-blue-600 dark:text-blue-400' : 'text-slate-700 dark:text-slate-200'} md:px-2 md:w-[25%] truncate">${data.name || ''}</div>
+                    <div class="text-[13px] md:text-[11px] font-bold ${debt > 0 ? 'text-blue-600 dark:text-blue-400' : 'text-slate-700 dark:text-slate-200'} md:px-3 md:w-[25%] truncate">${data.name || ''}</div>
                     ${mobileAddressPhone}
-                    <div class="hidden md:block md:px-2 md:text-[11px] md:text-slate-600 md:dark:text-slate-400 md:w-[20%] md:truncate">${data.address || ''}</div>
-                    <div class="hidden md:block md:px-2 md:text-[11px] md:text-slate-600 md:dark:text-slate-400 md:w-[15%]">${data.phone || ''}</div>
+                    <div class="hidden md:block md:px-3 md:text-[11px] md:text-slate-600 md:dark:text-slate-400 md:w-[20%] md:truncate">${data.address || ''}</div>
+                    <div class="hidden md:block md:px-3 md:text-[11px] md:text-slate-600 md:dark:text-slate-400 md:w-[15%]">${data.phone || ''}</div>
                 </div>
 
                 <div class="flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700">
                     <div class="flex items-center gap-3 text-[12px] md:contents">
                         <span class="text-slate-500 dark:text-slate-400 md:hidden">Đã trả:</span>
-                        <span class="md:px-2 md:text-[11px] font-bold text-green-600 dark:text-green-400 md:w-[20%] md:text-center">${totalPaid.toLocaleString('vi-VN')} đ</span>
+                        <span class="md:px-3 md:text-[11px] font-bold text-green-600 dark:text-green-400 md:w-[20%] md:text-center">${totalPaid.toLocaleString('vi-VN')} đ</span>
                         <span class="text-slate-500 dark:text-slate-400 md:hidden">Nợ:</span>
-                        <span class="md:px-2 md:text-[11px] font-bold ${debt > 0 ? 'text-red-600' : 'text-slate-500 dark:text-slate-400'} md:w-[20%] md:text-center">${debt.toLocaleString('vi-VN')} đ</span>
+                        <span class="md:px-3 md:text-[11px] font-bold ${debt > 0 ? 'text-red-600' : 'text-slate-500 dark:text-slate-400'} md:w-[20%] md:text-center">${debt.toLocaleString('vi-VN')} đ</span>
                     </div>
                 </div>
             </div>
@@ -8933,10 +8974,10 @@ function xemChiTietDaiLy(id) {
             <button onclick="Swal.close(); editCustomer('${id}')" class="bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-xl text-sm font-bold">✏️ Sửa</button>
         </div>
         <div class="grid grid-cols-2 gap-2 mt-2">
-            <button onclick="Swal.close(); deleteCustomer('${id}')" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
+            <button onclick="Swal.close(); deleteCustomer('${id}')" class="bg-red-600 hover:bg-red-700 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
                 <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa đại lý
             </button>
-            <button onclick="Swal.close()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 border border-slate-300 py-2 rounded-xl text-sm font-bold">Đóng</button>
+            <button onclick="Swal.close()" class="bg-slate-600 hover:bg-slate-700 text-white py-2 rounded-xl text-sm font-bold">Đóng</button>
         </div>
     `;
 
@@ -10885,11 +10926,11 @@ async function loadProductManage() {
                     <div onclick="xemChiTietSP('${doc.id}')" class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2 cursor-pointer transition-all hover:-translate-y-0.5
                                 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]" style="border-left-color:#f97316 !important; border-right-color:#f97316 !important;">
                         <div class="flex items-center gap-2 md:contents">
-                            <div class="md:px-2 md:w-[25%]">${barcodeDisplay}</div>
-                            <div class="flex-1 md:px-2 md:w-[45%] text-[13px] md:text-[12px] font-bold text-slate-800 dark:text-slate-100 truncate">${p.name}</div>
+                            <div class="md:px-3 md:w-[25%]">${barcodeDisplay}</div>
+                            <div class="flex-1 md:px-3 md:w-[45%] text-[13px] md:text-[12px] font-bold text-slate-800 dark:text-slate-100 truncate">${p.name}</div>
                         </div>
                         <div class="flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700">
-                            <div class="text-[12px] text-slate-600 dark:text-slate-400 md:px-2 md:w-[30%]">ĐVT: ${p.unit}</div>
+                            <div class="text-[12px] text-slate-600 dark:text-slate-400 md:px-3 md:w-[30%]">ĐVT: ${p.unit}</div>
                         </div>
                     </div>
                 </td>
@@ -10917,12 +10958,13 @@ function xemChiTietSP(id) {
                 <div><b>ĐVT:</b> ${p.unit || ''}</div>
                 <div><b>Mã vạch:</b> ${barcodeText}</div>
             </div>
+            <button onclick="Swal.close(); editProductName('${id}', '${safeName}')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-xl text-sm font-bold mb-2">✏️ Sửa tên sản phẩm</button>
             <button onclick="Swal.close(); editBarcode('${id}', '${safeName}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl text-sm font-bold mb-2">🏷️ Gán / Sửa mã vạch</button>
             <div class="grid grid-cols-2 gap-2">
-                <button onclick="Swal.close(); deleteProduct('${id}')" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
+                <button onclick="Swal.close(); deleteProduct('${id}')" class="bg-red-600 hover:bg-red-700 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
                     <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa
                 </button>
-                <button onclick="Swal.close()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 border border-slate-300 py-2 rounded-xl text-sm font-bold">Đóng</button>
+                <button onclick="Swal.close()" class="bg-slate-600 hover:bg-slate-700 text-white py-2 rounded-xl text-sm font-bold">Đóng</button>
             </div>
         `;
 
@@ -10935,6 +10977,31 @@ function xemChiTietSP(id) {
         });
         if (typeof lucide !== 'undefined') lucide.createIcons();
     });
+}
+
+// Hàm sửa tên sản phẩm
+async function editProductName(id, currentName) {
+    const { value: newName } = await Swal.fire({
+        title: 'Sửa tên sản phẩm',
+        input: 'text',
+        inputValue: currentName,
+        inputPlaceholder: 'Nhập tên sản phẩm mới...',
+        showCancelButton: true,
+        confirmButtonText: 'Lưu tên',
+        cancelButtonText: 'Hủy',
+        inputValidator: (value) => {
+            if (!value || !value.trim()) return 'Tên sản phẩm không được để trống!';
+        }
+    });
+
+    if (newName && newName.trim() && newName.trim() !== currentName) {
+        const cleanName = newName.trim();
+        await db.collection('products').doc(id).update({ name: cleanName });
+        Swal.fire('Thành công', 'Đã cập nhật tên sản phẩm!', 'success');
+        loadProductManage(); // Tải lại danh sách
+        updateProductDropdowns(); // Cập nhật lại dropdown ở trang Nhập kho
+        if (typeof ghiLog === 'function') ghiLog('Sản Phẩm', 'Sửa', cleanName, `Đổi tên sản phẩm từ "${currentName}" thành "${cleanName}"`);
+    }
 }
 
 // Hàm hỗ trợ để gán mã cho sản phẩm cũ
@@ -11306,16 +11373,16 @@ function groupAndRenderSX(docs) {
                      class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-3 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] cursor-pointer transition-all hover:-translate-y-0.5"
                      style="border-left-color:${accentColor} !important; border-right-color:${accentColor} !important;">
                     <div class="flex items-center gap-2 md:contents">
-                        <span class="text-[11px] text-slate-500 dark:text-slate-400 md:w-[13%] md:px-2">${g.ngay}</span>
-                        <span class="text-[12px] font-bold text-slate-800 dark:text-slate-100 md:w-[13%] md:px-2">${soPhieu}</span>
+                        <span class="text-[11px] text-slate-500 dark:text-slate-400 md:w-[13%] md:px-3">${g.ngay}</span>
+                        <span class="text-[12px] font-bold text-slate-800 dark:text-slate-100 md:w-[13%] md:px-3">${soPhieu}</span>
                     </div>
-                    <div class="text-[12px] text-slate-700 dark:text-slate-300 truncate md:w-[26%] md:px-2 pt-1 md:pt-0 border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700" title="${tenHienThi}">${tenHienThi}</div>
+                    <div class="text-[12px] text-slate-700 dark:text-slate-300 truncate md:w-[26%] md:px-3 pt-1 md:pt-0 border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700" title="${tenHienThi}">${tenHienThi}</div>
                     <div class="flex items-center justify-between md:contents">
                         <div class="flex items-center gap-3 md:contents">
-                            <span class="text-[11px] text-slate-500 dark:text-slate-400 md:w-[8%] md:text-center md:px-2">SL: <b class="text-slate-700 dark:text-slate-200">${sumSL}</b></span>
-                            <span class="text-[11px] text-blue-600 dark:text-blue-400 font-bold md:w-[14%] md:text-center md:px-2">Mới: ${sumMoi}</span>
-                            <span class="text-[11px] text-amber-600 dark:text-amber-400 font-bold md:w-[14%] md:text-center md:px-2">Chờ: ${sumCho}</span>
-                            <span class="text-[11px] text-green-600 dark:text-green-400 font-bold md:w-[12%] md:text-center md:px-2">Xong: ${sumDong}</span>
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400 md:w-[8%] md:text-center md:px-3">SL: <b class="text-slate-700 dark:text-slate-200">${sumSL}</b></span>
+                            <span class="text-[11px] text-blue-600 dark:text-blue-400 font-bold md:w-[14%] md:text-center md:px-3">Mới: ${sumMoi}</span>
+                            <span class="text-[11px] text-amber-600 dark:text-amber-400 font-bold md:w-[14%] md:text-center md:px-3">Chờ: ${sumCho}</span>
+                            <span class="text-[11px] text-green-600 dark:text-green-400 font-bold md:w-[12%] md:text-center md:px-3">Xong: ${sumDong}</span>
                         </div>
                     </div>
                 </div>
@@ -11374,7 +11441,8 @@ function xemChiTietPhieuSX(soPhieu) {
         reverseButtons: true,
         denyButtonText: '🗑️ Xóa cả phiếu này',
         denyButtonColor: '#dc2626',
-        confirmButtonText: 'Đóng'
+        confirmButtonText: 'Đóng',
+        confirmButtonColor: '#475569'
     }).then((result) => {
         if (result.isDenied) {
             huyPhieuSXGroup(soPhieu);
@@ -11758,17 +11826,17 @@ async function loadTableNCC() {
                 <td colspan="5" class="p-1">
                 <div onclick="xemChiTietNCC('${doc.id}')" class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2 cursor-pointer transition-all hover:-translate-y-0.5 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]" style="border-left-color:#84cc16 !important; border-right-color:#84cc16 !important;">
                         <div class="md:contents">
-                            <div class="text-sm md:text-[11px] font-bold text-slate-800 dark:text-slate-100 md:w-[30%] md:px-2 md:truncate">${d.name}</div>
+                            <div class="text-sm md:text-[11px] font-bold text-slate-800 dark:text-slate-100 md:w-[30%] md:px-3 md:truncate">${d.name}</div>
                             ${mobileAddressPhone}
-                            <div class="hidden md:block md:text-[11px] md:text-slate-600 md:dark:text-slate-400 md:w-[28%] md:px-2 md:truncate">${d.address || ''}</div>
-                            <div class="hidden md:block md:text-[11px] md:text-slate-600 md:dark:text-slate-400 md:w-[14%] md:px-2 md:text-center">${d.phone || ''}</div>
+                            <div class="hidden md:block md:text-[11px] md:text-slate-600 md:dark:text-slate-400 md:w-[28%] md:px-3 md:truncate">${d.address || ''}</div>
+                            <div class="hidden md:block md:text-[11px] md:text-slate-600 md:dark:text-slate-400 md:w-[14%] md:px-3 md:text-center">${d.phone || ''}</div>
                         </div>
                         <div class="flex items-center justify-between gap-2 mt-2 pt-2 md:mt-0 md:pt-0 border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700 md:contents">
                             <div class="flex items-center gap-3 text-xs md:contents">
                                 <span class="text-slate-500 dark:text-slate-400 md:hidden">Nợ: <b class="text-red-600">${(d.debt || 0).toLocaleString()}</b></span>
-                                <span class="hidden md:block md:text-[11px] md:font-bold md:text-red-600 md:w-[14%] md:px-2 md:text-center">${(d.debt || 0).toLocaleString()}</span>
+                                <span class="hidden md:block md:text-[11px] md:font-bold md:text-red-600 md:w-[14%] md:px-3 md:text-center">${(d.debt || 0).toLocaleString()}</span>
                                 <span class="text-slate-500 dark:text-slate-400 md:hidden">Đã trả: <b class="text-green-600">${totalPaid.toLocaleString()}</b></span>
-                                <span class="hidden md:block md:text-[11px] md:font-bold md:text-green-600 md:w-[14%] md:px-2 md:text-center">${totalPaid.toLocaleString()}</span>
+                                <span class="hidden md:block md:text-[11px] md:font-bold md:text-green-600 md:w-[14%] md:px-3 md:text-center">${totalPaid.toLocaleString()}</span>
                             </div>
                         </div>
                     </div>
@@ -11804,10 +11872,10 @@ function xemChiTietNCC(id) {
             <button onclick="Swal.close(); editNCC('${id}', '${safeName}', '${safePhone}', '${safeAddress}')" class="col-span-2 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-xl text-sm font-bold">✏️ Sửa</button>
         </div>
         <div class="grid grid-cols-2 gap-2 mt-2">
-            <button onclick="Swal.close(); deleteDoc('suppliers', '${id}')" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
+            <button onclick="Swal.close(); deleteDoc('suppliers', '${id}')" class="bg-red-600 hover:bg-red-700 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
                 <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa NCC
             </button>
-            <button onclick="Swal.close()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 border border-slate-300 py-2 rounded-xl text-sm font-bold">Đóng</button>
+            <button onclick="Swal.close()" class="bg-slate-600 hover:bg-slate-700 text-white py-2 rounded-xl text-sm font-bold">Đóng</button>
         </div>
     `;
 
@@ -12363,13 +12431,13 @@ async function filterNhapKho() {
                         shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] text-[12px]" style="border-left-color:#a3e635 !important; border-right-color:#a3e635 !important;">
                 <div class="flex items-center justify-between gap-2 md:contents">
                     <div class="flex items-center gap-2 min-w-0 md:contents">
-                        <span class="font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap md:w-[18%] md:px-2">${p.soPhieu}</span>
-                        <span class="text-slate-500 dark:text-slate-400 whitespace-nowrap md:w-[17%] md:px-2">${p.ngay instanceof Date ? p.ngay.toLocaleDateString('vi-VN') : "---"}</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap md:w-[18%] md:px-3">${p.soPhieu}</span>
+                        <span class="text-slate-500 dark:text-slate-400 whitespace-nowrap md:w-[17%] md:px-3">${p.ngay instanceof Date ? p.ngay.toLocaleDateString('vi-VN') : "---"}</span>
                     </div>
                     <span class="font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap md:hidden">${p.tongTien.toLocaleString('vi-VN')} đ</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 mt-1.5 pt-1.5 md:mt-0 md:pt-0 border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700 md:contents">
-                    <span class="text-slate-700 dark:text-slate-200 truncate md:w-[45%] md:px-2 md:order-3">${p.ncc}</span>
+                    <span class="text-slate-700 dark:text-slate-200 truncate md:w-[45%] md:px-3 md:order-3">${p.ncc}</span>
                     <span class="hidden md:block md:w-[20%] md:pl-2 md:pr-4 md:text-right md:order-4 font-bold text-slate-800 dark:text-slate-100">${p.tongTien.toLocaleString('vi-VN')} đ</span>
                 </div>
             </div>
@@ -12419,10 +12487,10 @@ function xemChiTietPhieu(soPhieu) {
             </tbody>
         </table>
         <div class="grid grid-cols-2 gap-2 mt-4">
-            <button onclick="document.getElementById('popup-ncc').classList.add('hidden'); deleteDoc('material_imports', '${soPhieu}')" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
+            <button onclick="document.getElementById('popup-ncc').classList.add('hidden'); deleteDoc('material_imports', '${soPhieu}')" class="bg-red-600 hover:bg-red-700 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
                 <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa cả phiếu này
             </button>
-            <button onclick="document.getElementById('popup-ncc').classList.add('hidden')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 border border-slate-300 py-2 rounded-xl text-sm font-bold">Đóng</button>
+            <button onclick="document.getElementById('popup-ncc').classList.add('hidden')" class="bg-slate-600 hover:bg-slate-700 text-white py-2 rounded-xl text-sm font-bold">Đóng</button>
         </div>
     `;
     
