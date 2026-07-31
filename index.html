@@ -2695,7 +2695,7 @@ html:not(.dark) .bg-white {
                 </div>
             </div>
 
-            <div class="overflow-y-auto max-h-[500px] border rounded-lg">
+            <div class="overflow-y-auto max-h-[550px] border rounded-lg">
                 <table class="w-full text-xs text-left">
 					<thead class="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 uppercase sticky top-0 text-xs">
 						<tr>
@@ -2729,14 +2729,14 @@ html:not(.dark) .bg-white {
                 </div>
             </div>
             <button type="button" onclick="addNguyenLieuToCart();" 
-    class="w-full bg-gradient-to-b from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700 text-white py-2.5 rounded-xl mb-3 text-sm font-bold shadow-md transition-all duration-75 border-b-[4px] border-emerald-700 dark:border-emerald-900 hover:-translate-y-1 hover:brightness-110 active:translate-y-[2px] active:border-b-[2px]">
-    ➕ THÊM VÀO GIỎ
-</button>
-            <div id="gio-hang-nl" class="my-2 border dark:border-slate-700 p-2 text-xs bg-gray-50 dark:bg-slate-950 dark:text-white rounded h-[150px] overflow-y-auto border-blue-100"></div>
+				class="w-full bg-gradient-to-b from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700 text-white py-2.5 rounded-xl mb-3 text-sm font-bold shadow-md transition-all duration-75 border-b-[4px] border-emerald-700 dark:border-emerald-900 hover:-translate-y-1 hover:brightness-110 active:translate-y-[2px] active:border-b-[2px]">
+				➕ THÊM VÀO GIỎ
+			</button>
+            <div id="gio-hang-nl" class="my-2 border dark:border-slate-700 p-2 text-xs bg-gray-50 dark:bg-slate-950 dark:text-white rounded h-[200px] overflow-y-auto border-blue-100"></div>
             <button onclick="saveFullInvoice()" 
-    class="w-full bg-blue-600 dark:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-lg mt-2">
-    LƯU PHIẾU NHẬP
-</button>
+				class="w-full bg-blue-600 dark:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-lg mt-2">
+				LƯU PHIẾU NHẬP
+			</button>
         </div>
     </div>
 </div>
@@ -2776,9 +2776,9 @@ html:not(.dark) .bg-white {
                         </label>
                     </div>
                     <button onclick="openEventModal()" 
-    class="w-full mt-4 bg-blue-600 dark:bg-blue-700 text-white py-2 rounded-lg font-bold text-sm transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
-    + Thêm lịch mới
-</button>
+						class="w-full mt-4 bg-blue-600 dark:bg-blue-700 text-white py-2 rounded-lg font-bold text-sm transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+						+ Thêm lịch mới
+					</button>
                 </div>
             </div>
 
@@ -2788,7 +2788,7 @@ html:not(.dark) .bg-white {
                     <div class="flex items-center gap-2 bg-white dark:bg-slate-900 p-1.5 rounded-full shadow-sm border border-gray-100 dark:border-slate-800">
                         <button id="agenda-btn-week" onclick="setAgendaMode('week')" class="flex-1 py-2.5 rounded-full font-bold text-sm transition-colors bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-300">Tuần</button>
                         <button id="agenda-btn-month" onclick="setAgendaMode('month')" class="flex-1 py-2.5 rounded-full font-bold text-sm transition-colors text-slate-400 dark:text-slate-500">Tháng</button>
-                        <button onclick="openEventModal()" class="shrink-0 bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-full font-bold text-sm flex items-center gap-1 shadow-sm">+ Thêm buổi</button>
+                        <button onclick="openEventModal()" class="shrink-0 bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-full font-bold text-sm flex items-center gap-1 shadow-sm">+ Thêm </button>
                     </div>
 
                     <div class="flex items-center justify-between bg-white dark:bg-slate-900 p-3 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800">
@@ -2827,12 +2827,12 @@ html:not(.dark) .bg-white {
             <input id="new-event-date" type="datetime-local" class="w-full border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 p-2 rounded mb-3">
             
             <select id="new-event-color" class="w-full border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 p-2 rounded mb-3">
-    <option value="#4285F4">Xanh dương (Google)</option>
-    <option value="#DB4437">Đỏ (Deadline)</option>
-    <option value="#0F9D58">Xanh lá (Hẹn khách)</option>
-    <option value="#F4B400">Vàng (Cá nhân)</option>
-    <option value="#9C27B0">Tím (Học tập)</option>
-</select>
+				<option value="#4285F4">Xanh dương (Google)</option>
+				<option value="#DB4437">Đỏ (Deadline)</option>
+				<option value="#0F9D58">Xanh lá (Hẹn khách)</option>
+				<option value="#F4B400">Vàng (Cá nhân)</option>
+				<option value="#9C27B0">Tím (Học tập)</option>
+			</select>
 
             <div class="flex gap-2">
                 <button onclick="document.getElementById('modal-add-event').classList.add('hidden')" class="flex-1 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-100 py-2 rounded-xl font-bold">Hủy</button>
