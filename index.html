@@ -1726,7 +1726,7 @@ html:not(.dark) .bg-white {
     <div class="flex flex-col-reverse lg:flex-row -mx-4 items-stretch">
 
         <!-- CỘT DANH SÁCH PHIẾU NHẬP (1/3 chiều rộng trên PC, chỉ 1 cột danh sách) -->
-        <div class="w-full lg:w-1/3 px-4 mb-6">
+        <div class="w-full lg:w-5/12 px-4 mb-6">
             <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl border border-blue-200 dark:border-slate-700 shadow-lg h-full flex flex-col">
                 <div class="flex flex-col gap-4 mb-4 border-b dark:border-slate-700 pb-4">
                     <h3 class="font-bold text-xl text-slate-800 dark:text-white whitespace-nowrap">📋 DANH SÁCH PHIẾU NHẬP</h3>
@@ -1771,7 +1771,7 @@ html:not(.dark) .bg-white {
         </div>
 
         <!-- CỘT NHẬP THÔNG TIN (2/3 chiều rộng trên PC) - các ô xếp theo hàng ngang cho gọn -->
-        <div class="w-full lg:w-2/3 px-4 mb-6">
+        <div class="w-full lg:w-7/12 px-4 mb-6">
             <div class="bg-yellow-50 dark:bg-slate-900 p-5 rounded-xl border border-yellow-200 dark:border-slate-700 shadow-lg flex flex-col h-full">
                 <div class="flex-1 flex flex-col min-h-0">
                     <div class="bg-yellow-100/60 dark:bg-slate-950 p-2 rounded-xl mb-4 border border-yellow-200 dark:border-slate-700">
@@ -1896,10 +1896,10 @@ html:not(.dark) .bg-white {
             </div>
             <div class="col-span-1 md:col-span-3">
                <!-- Nút Xuất Excel -->
-<button onclick="exportToExcel()" 
-    class="w-full bg-green-600 dark:bg-green-700 text-white py-3 rounded-xl text-sm font-bold transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
-    📊 Xuất Excel
-</button>
+			<button onclick="exportToExcel()" 
+				class="w-full bg-green-600 dark:bg-green-700 text-white py-3 rounded-xl text-sm font-bold transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+				📊 Xuất Excel
+			</button>
             </div>
         </div>
 
@@ -2200,7 +2200,7 @@ html:not(.dark) .bg-white {
     <p style="margin: 40px 0 6px 0; text-align: right; font-size: 13px; white-space: nowrap;">Ninh Bình, ngày <span id="xk-day2"></span> tháng <span id="xk-month2"></span> năm <span id="xk-year2"></span></p>
     <div style="display: flex; justify-content: space-between; text-align: center; font-size: 13px;">
         <div style="width: 30%;">
-            <p style="margin: 0;"><strong>Người lập phiếu</strong></p>
+            <p style="margin: 0;"><strong>Người nhận hàng</strong></p>
             <p style="font-size: 12px; font-style: italic;">(Ký, ghi rõ họ tên)</p>
         </div>
         <div style="width: 30%;">
@@ -2208,7 +2208,7 @@ html:not(.dark) .bg-white {
             <p style="font-size: 12px; font-style: italic;">(Ký, ghi rõ họ tên)</p>
         </div>
         <div style="width: 30%;">
-            <p style="margin: 0;"><strong>Người nhận hàng</strong></p>
+            <p style="margin: 0;"><strong>Người lập phiếu</strong></p>
             <p style="font-size: 12px; font-style: italic;">(Ký, ghi rõ họ tên)</p>
         </div>
     </div>
@@ -2588,17 +2588,17 @@ html:not(.dark) .bg-white {
             </div>
           </div>
 
-          <!-- Nút Thêm Vào Giỏ + Giỏ hàng sản xuất -->
+          <!-- Giỏ hàng sản xuất + Nút Thêm Vào Giỏ (đặt ngay trên nút Lưu) -->
           <div class="mt-3">
-            <button onclick="themSanPhamVaoGioSX()" 
-                class="w-full bg-gradient-to-b from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700 text-white font-bold py-2.5 rounded-xl transition-all duration-75 border-b-[4px] border-emerald-700 dark:border-emerald-900 hover:-translate-y-1 hover:brightness-110 active:translate-y-[2px] active:border-b-[2px] shadow-md">
-                ➕ THÊM VÀO GIỎ
-            </button>
-
-            <div class="mt-2 text-xs font-bold text-gray-400 uppercase">Giỏ hàng phiếu <span id="sx-cart-sophieu" class="text-blue-500 dark:text-blue-400"></span> (<span id="sx-cart-count">0</span> dòng)</div>
+            <div class="text-xs font-bold text-gray-400 uppercase">Giỏ hàng phiếu <span id="sx-cart-sophieu" class="text-blue-500 dark:text-blue-400"></span> (<span id="sx-cart-count">0</span> dòng)</div>
             <div id="sx-cart-list" class="mt-1 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-xl p-1.5 h-[180px] overflow-y-auto space-y-1.5">
                 <div class="text-center text-gray-400 text-xs italic py-3">Giỏ hàng đang trống</div>
             </div>
+
+            <button onclick="themSanPhamVaoGioSX()" 
+                class="mt-2 w-full bg-gradient-to-b from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700 text-white font-bold py-2.5 rounded-xl transition-all duration-75 border-b-[4px] border-emerald-700 dark:border-emerald-900 hover:-translate-y-1 hover:brightness-110 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+                ➕ THÊM VÀO GIỎ
+            </button>
           </div>
 
           <!-- Nút lưu được đẩy xuống đáy, tự động căng đều chiều cao -->
@@ -2621,22 +2621,22 @@ html:not(.dark) .bg-white {
         <h3 class="mb-6 font-bold text-2xl text-gray-800 px-2 md:px-0">QUẢN LÝ NGUYÊN LIỆU</h3>
         
         <!-- Tab Menu -->
-<div class="grid grid-cols-3 gap-2 md:gap-3 mb-6 bg-slate-200 dark:bg-slate-950 p-1.5 rounded-2xl border border-slate-300 dark:border-slate-900 shadow-[inset_0_2px_6px_rgba(0,0,0,0.15)] dark:shadow-[inset_0_4px_12px_rgba(0,0,0,0.8)] select-none">
-    <button id="btn-ncc" onclick="openNLTab('ncc-tab')" class="tab-btn py-2.5 px-1 text-[10px] md:text-sm font-black rounded-xl transition-all duration-150 bg-gradient-to-b from-blue-300 to-blue-400 dark:from-blue-900/60 dark:to-blue-800/50 text-blue-800 dark:text-blue-400 border-t border-l border-white dark:border-blue-500/20 border-b-[4px] border-blue-400 dark:border-blue-600 shadow-[0_4px_10px_rgba(59,130,246,0.15)] dark:shadow-[0_6px_15px_rgba(59,130,246,0.25)] uppercase tracking-wider">NCC & CÔNG NỢ</button>
-    <button id="btn-dm" onclick="openNLTab('dm-tab')" class="tab-btn py-2.5 px-1 text-[10px] md:text-sm font-bold rounded-xl transition-all duration-150 bg-slate-100/80 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border-b-[2px] border-slate-300 dark:border-slate-950 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/80 hover:border-b-[4px] hover:border-slate-400 dark:hover:border-slate-800 uppercase tracking-wider">DANH MỤC NL</button>
-    <button id="btn-nhap" onclick="openNLTab('nhap-tab')" class="tab-btn py-2.5 px-1 text-[10px] md:text-sm font-bold rounded-xl transition-all duration-150 bg-slate-100/80 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border-b-[2px] border-slate-300 dark:border-slate-950 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/80 hover:border-b-[4px] hover:border-slate-400 dark:hover:border-slate-800 uppercase tracking-wider">NHẬP KHO NL</button>
-</div>
+		<div class="grid grid-cols-3 gap-2 md:gap-3 mb-6 bg-slate-200 dark:bg-slate-950 p-1.5 rounded-2xl border border-slate-300 dark:border-slate-900 shadow-[inset_0_2px_6px_rgba(0,0,0,0.15)] dark:shadow-[inset_0_4px_12px_rgba(0,0,0,0.8)] select-none">
+			<button id="btn-nhap" onclick="openNLTab('nhap-tab')" class="tab-btn py-2.5 px-1 text-[10px] md:text-sm font-black rounded-xl transition-all duration-150 bg-gradient-to-b from-blue-300 to-blue-400 dark:from-blue-900/60 dark:to-blue-800/50 text-blue-800 dark:text-blue-400 border-t border-l border-white dark:border-blue-500/20 border-b-[4px] border-blue-400 dark:border-blue-600 shadow-[0_4px_10px_rgba(59,130,246,0.15)] dark:shadow-[0_6px_15px_rgba(59,130,246,0.25)] uppercase tracking-wider">NHẬP KHO NL</button>
+			<button id="btn-ncc" onclick="openNLTab('ncc-tab')" class="tab-btn py-2.5 px-1 text-[10px] md:text-sm font-bold rounded-xl transition-all duration-150 bg-slate-100/80 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border-b-[2px] border-slate-300 dark:border-slate-950 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/80 hover:border-b-[4px] hover:border-slate-400 dark:hover:border-slate-800 uppercase tracking-wider">NCC & CÔNG NỢ</button>
+			<button id="btn-dm" onclick="openNLTab('dm-tab')" class="tab-btn py-2.5 px-1 text-[10px] md:text-sm font-bold rounded-xl transition-all duration-150 bg-slate-100/80 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border-b-[2px] border-slate-300 dark:border-slate-950 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/80 hover:border-b-[4px] hover:border-slate-400 dark:hover:border-slate-800 uppercase tracking-wider">DANH MỤC NL</button>
+		</div>
 
         <!-- Tab 1: Nhà Cung Cấp -->
-        <div id="ncc-tab" class="nl-tab-pane bg-white dark:bg-slate-900 p-4 md:p-6 rounded-xl shadow border border-slate-100 dark:border-slate-700 min-h-[400px]">
+        <div id="ncc-tab" class="nl-tab-pane hidden bg-white dark:bg-slate-900 p-4 md:p-6 rounded-xl shadow border border-slate-100 dark:border-slate-700 min-h-[400px]">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <input id="in-ncc" placeholder="Tên NCC" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
                 <input id="in-sdt" placeholder="SĐT" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
                 <input id="in-diachi" placeholder="Địa chỉ" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
                <button onclick="addNCC()" 
-    class="w-full bg-green-600 dark:bg-green-700 text-white p-2 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
-    THÊM NCC
-</button>
+				class="w-full bg-green-600 dark:bg-green-700 text-white p-2 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+				THÊM NCC
+			</button>
             </div>
             <div class="overflow-x-visible overflow-y-visible border rounded-lg min-h-[250px]">
                 <table class="w-full text-sm text-left">
@@ -2660,9 +2660,9 @@ html:not(.dark) .bg-white {
                 <input id="in-nl" placeholder="Tên Nguyên Liệu" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
                 <input id="in-dvt" placeholder="ĐVT" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
                <button onclick="addNL()" 
-    class="w-full bg-green-600 dark:bg-green-700 text-white p-2 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
-    THÊM NL
-</button>
+				class="w-full bg-green-600 dark:bg-green-700 text-white p-2 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+				THÊM NL
+			</button>
             </div>
             <div class="border rounded-lg overflow-hidden min-h-[250px]">
                 <table class="w-full text-sm text-left">
@@ -2673,7 +2673,7 @@ html:not(.dark) .bg-white {
         </div>
         
         <!-- Tab 3: Nhập & Công nợ -->
-<div id="nhap-tab" class="nl-tab-pane hidden p-0 min-h-[400px]">
+<div id="nhap-tab" class="nl-tab-pane p-0 min-h-[400px]">
     <div class="flex flex-col-reverse lg:grid lg:grid-cols-12 gap-6">
         <!-- Danh sách: order-2 (nằm dưới trên đt) -->
         <div class="col-span-12 lg:col-span-9 bg-white dark:bg-slate-900 p-4 md:p-5 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700">
@@ -2728,15 +2728,15 @@ html:not(.dark) .bg-white {
                     <input id="in-gia" type="number" placeholder="Đơn giá" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
             </div>
+            <div id="gio-hang-nl" class="my-2 border dark:border-slate-700 p-2 text-xs bg-gray-50 dark:bg-slate-950 dark:text-white rounded h-[250px] overflow-y-auto border-blue-100"></div>
             <button type="button" onclick="addNguyenLieuToCart();" 
-				class="w-full bg-gradient-to-b from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700 text-white py-2.5 rounded-xl mb-3 text-sm font-bold shadow-md transition-all duration-75 border-b-[4px] border-emerald-700 dark:border-emerald-900 hover:-translate-y-1 hover:brightness-110 active:translate-y-[2px] active:border-b-[2px]">
-				➕ THÊM VÀO GIỎ
-			</button>
-            <div id="gio-hang-nl" class="my-2 border dark:border-slate-700 p-2 text-xs bg-gray-50 dark:bg-slate-950 dark:text-white rounded h-[200px] overflow-y-auto border-blue-100"></div>
+			class="w-full bg-gradient-to-b from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700 text-white py-2.5 rounded-xl mb-3 text-sm font-bold shadow-md transition-all duration-75 border-b-[4px] border-emerald-700 dark:border-emerald-900 hover:-translate-y-1 hover:brightness-110 active:translate-y-[2px] active:border-b-[2px]">
+			➕ THÊM VÀO GIỎ
+		</button>
             <button onclick="saveFullInvoice()" 
-				class="w-full bg-blue-600 dark:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-lg mt-2">
-				LƯU PHIẾU NHẬP
-			</button>
+			class="w-full bg-blue-600 dark:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-lg mt-2">
+			LƯU PHIẾU NHẬP
+		</button>
         </div>
     </div>
 </div>
@@ -2776,9 +2776,9 @@ html:not(.dark) .bg-white {
                         </label>
                     </div>
                     <button onclick="openEventModal()" 
-						class="w-full mt-4 bg-blue-600 dark:bg-blue-700 text-white py-2 rounded-lg font-bold text-sm transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
-						+ Thêm lịch mới
-					</button>
+    class="w-full mt-4 bg-blue-600 dark:bg-blue-700 text-white py-2 rounded-lg font-bold text-sm transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+    + Thêm lịch mới
+</button>
                 </div>
             </div>
 
@@ -2788,7 +2788,7 @@ html:not(.dark) .bg-white {
                     <div class="flex items-center gap-2 bg-white dark:bg-slate-900 p-1.5 rounded-full shadow-sm border border-gray-100 dark:border-slate-800">
                         <button id="agenda-btn-week" onclick="setAgendaMode('week')" class="flex-1 py-2.5 rounded-full font-bold text-sm transition-colors bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-300">Tuần</button>
                         <button id="agenda-btn-month" onclick="setAgendaMode('month')" class="flex-1 py-2.5 rounded-full font-bold text-sm transition-colors text-slate-400 dark:text-slate-500">Tháng</button>
-                        <button onclick="openEventModal()" class="shrink-0 bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-full font-bold text-sm flex items-center gap-1 shadow-sm">+ Thêm </button>
+                        <button onclick="openEventModal()" class="shrink-0 bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-full font-bold text-sm flex items-center gap-1 shadow-sm">+ Thêm buổi</button>
                     </div>
 
                     <div class="flex items-center justify-between bg-white dark:bg-slate-900 p-3 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800">
@@ -2827,12 +2827,12 @@ html:not(.dark) .bg-white {
             <input id="new-event-date" type="datetime-local" class="w-full border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 p-2 rounded mb-3">
             
             <select id="new-event-color" class="w-full border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 p-2 rounded mb-3">
-				<option value="#4285F4">Xanh dương (Google)</option>
-				<option value="#DB4437">Đỏ (Deadline)</option>
-				<option value="#0F9D58">Xanh lá (Hẹn khách)</option>
-				<option value="#F4B400">Vàng (Cá nhân)</option>
-				<option value="#9C27B0">Tím (Học tập)</option>
-			</select>
+    <option value="#4285F4">Xanh dương (Google)</option>
+    <option value="#DB4437">Đỏ (Deadline)</option>
+    <option value="#0F9D58">Xanh lá (Hẹn khách)</option>
+    <option value="#F4B400">Vàng (Cá nhân)</option>
+    <option value="#9C27B0">Tím (Học tập)</option>
+</select>
 
             <div class="flex gap-2">
                 <button onclick="document.getElementById('modal-add-event').classList.add('hidden')" class="flex-1 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-100 py-2 rounded-xl font-bold">Hủy</button>
