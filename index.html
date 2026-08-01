@@ -1565,14 +1565,14 @@ html:not(.dark) .bg-white {
         <!-- Công Nợ Cần Thu -->
         <div onclick="showDashboardDetail('debt-customer')" 
              class="bg-rose-100/70 dark:bg-rose-900/50 border-b-[4px] border-rose-300 dark:border-rose-800 text-rose-600 dark:text-rose-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(244,63,94,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-rose-200/70 dark:hover:bg-rose-800/60 hover:border-rose-400 dark:hover:border-rose-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
-            <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-rose-500 dark:text-rose-300/80">Công Nợ Cần Thu</p>
+            <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-rose-500 dark:text-rose-300/80">Công Nợ Cần Thu (Kỳ Này)</p>
             <h3 id="total-debt-summary" class="text-md md:text-2xl font-black drop-shadow-[0_1.5px_3px_rgba(244,63,94,0.15)] dark:drop-shadow-[0_2px_4px_rgba(244,63,94,0.3)]">0 đ</h3>
         </div>
         
         <!-- Tổng Nợ NCC -->
         <div onclick="showDashboardDetail('debt-ncc')" 
              class="bg-amber-100/70 dark:bg-amber-900/50 border-b-[4px] border-amber-300 dark:border-amber-800 text-amber-600 dark:text-amber-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(245,158,11,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-amber-200/70 dark:hover:bg-amber-800/60 hover:border-amber-400 dark:hover:border-amber-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
-            <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-300/80">Tổng Nợ NCC</p>
+            <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-300/80">Nợ NCC (Kỳ Này)</p>
             <h3 id="total-debt-ncc-summary" class="text-md md:text-2xl font-black drop-shadow-[0_1.5px_3px_rgba(245,158,11,0.15)] dark:drop-shadow-[0_2px_4px_rgba(245,158,11,0.3)]">0 đ</h3>
         </div>
         
@@ -2780,6 +2780,16 @@ html:not(.dark) .bg-white {
     + Thêm lịch mới
 </button>
                 </div>
+
+                <!-- DANH SÁCH GHI CHÚ: liệt kê toàn bộ lịch/công việc đã tạo, mỗi dòng có màu
+                     viền/nền tương ứng đúng màu đã chọn khi tạo (giống màu chấm tròn trên ô lịch),
+                     bấm vào để xem/sửa nhanh mà không cần tìm trên lịch. -->
+                <div class="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800">
+                    <h4 class="font-bold text-gray-700 dark:text-slate-200 mb-3">DANH SÁCH GHI CHÚ</h4>
+                    <div id="calendar-notes-list" class="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+                        <p class="text-xs text-gray-400 dark:text-slate-500 italic text-center py-3">Đang tải...</p>
+                    </div>
+                </div>
             </div>
 
             <div class="w-full lg:w-3/4">
@@ -3780,6 +3790,15 @@ function showPage(pageId) {
             if (typeof updateReceiptNum === 'function') updateReceiptNum();
             if (typeof loadReceipts === 'function') loadReceipts();
             break;
+
+        case 'page-NguyenLieu':
+            // TRƯỚC ĐÂY: chỉ tải danh sách NCC vào ô "Chọn NCC" khi bấm chuyển tab (openNLTab),
+            // nên lần đầu vào thẳng trang này (tab "NHẬP KHO NL" hiện sẵn mặc định) ô "Chọn NCC"
+            // trống trơn - phải bấm qua tab "NCC & Công nợ" rồi quay lại mới thấy danh sách.
+            // Giờ gọi tải ngay khi mở trang, không cần đợi bấm tab.
+            if (typeof loadDropdowns === 'function') loadDropdowns();
+            if (typeof loadAllData === 'function') loadAllData();
+            break;
             
         case 'page-inventory':
             // TỰ ĐỘNG ĐIỀN NGÀY THÁNG KHI MỞ TRANG KHO
@@ -4137,12 +4156,28 @@ async function loadDashboard(filter = 'default') {
     // 2 giá trị làm điểm bắt đầu truy vấn.
     const queryStartDate = startDate < monthsAgoLimit ? startDate : monthsAgoLimit;
 
-    const [salesSnap, suppliersSnap, customersSnap] = await Promise.all([
+    // Định dạng chuỗi ngày 'YYYY-MM-DD' của startDate/endDate để lọc collection debt_history
+    // (trường "date" ở đó được lưu dạng chuỗi, không phải Firestore Timestamp).
+    const fmtYMD = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const startDateStr = fmtYMD(startDate);
+    const endDateStr = fmtYMD(endDate);
+
+    const [salesSnap, suppliersSnap, customersSnap, materialImportsPeriodSnap, allSupplierPaymentsSnap, allCustomerPaymentsSnap] = await Promise.all([
         db.collection('sales')
             .where('date', '>=', queryStartDate)
             .get({ source: 'default' }),
         db.collection('suppliers').get({ source: 'default' }),
-        db.collection('customers').get({ source: 'default' }) 
+        db.collection('customers').get({ source: 'default' }),
+        // Nợ NCC PHÁT SINH trong đúng kỳ đang chọn (mỗi lần nhập nguyên liệu ghi 1 dòng ở đây)
+        db.collection('material_imports')
+            .where('timestamp', '>=', startDate)
+            .where('timestamp', '<=', endDate)
+            .get({ source: 'default' }).catch(() => ({ docs: [] })),
+        // Lấy TOÀN BỘ lịch sử trả nợ NCC (không lọc theo kỳ) - dùng để vừa tính số ĐÃ TRẢ
+        // TRONG KỲ, vừa tính tổng ĐÃ TRẢ LUỸ KẾ của từng NCC để hiển thị trong popup.
+        db.collection('payments').get({ source: 'default' }).catch(() => ({ docs: [] })),
+        // Tương tự, lấy TOÀN BỘ lịch sử trả nợ của khách hàng.
+        db.collection('debt_history').get({ source: 'default' }).catch(() => ({ docs: [] }))
     ]);
 
     const allSales = salesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -4182,7 +4217,74 @@ async function loadDashboard(filter = 'default') {
         .slice(0, 10);
 
     let totalDebtNCC = allSuppliers.reduce((sum, sup) => sum + (Number(sup.debt) || 0), 0);
-    const profit = totalRevenue - totalDebtNCC;
+
+    // ================== NỢ PHÁT SINH TRONG KỲ (THÁNG ĐANG CHỌN) VÀ NỢ CŨ ==================
+    // "totalDebt"/"totalDebtNCC" ở trên là TỔNG NỢ LUỸ KẾ tới hiện tại (không phân biệt tháng
+    // nào phát sinh). Để hiển thị đúng "nợ của tháng mới" theo yêu cầu, tính thêm:
+    //  - Nợ PHÁT SINH trong đúng kỳ đang chọn (hoá đơn ghi nợ / phiếu nhập NL trong kỳ đó)
+    //  - Đã THU/TRẢ trong đúng kỳ đang chọn
+    //  - Nợ CŨ (trước kỳ) = Tổng nợ hiện tại - Nợ phát sinh trong kỳ + Đã thu/trả trong kỳ
+    //    (suy ra từ đẳng thức: Nợ cuối kỳ = Nợ đầu kỳ + Phát sinh trong kỳ - Đã thu trong kỳ)
+    let newDebtCustomerPeriod = 0;
+    filteredSales.forEach(order => {
+        if (order.paymentMethod === 'Công nợ') {
+            newDebtCustomerPeriod += (Number(order.total) || 0);
+        }
+    });
+
+    // Tính từ dữ liệu ALL-TIME vừa lấy: vừa lọc ra phần TRONG KỲ, vừa cộng dồn LUỸ KẾ theo
+    // từng khách hàng (paidByCustomerAllTime, key = customerId) để hiển thị cột "Đã trả"
+    // của từng khách trong popup "Công nợ Khách hàng".
+    let paidCustomerPeriod = 0;
+    const paidByCustomerAllTime = {};
+    allCustomerPaymentsSnap.docs.forEach(doc => {
+        const d = doc.data();
+        const amt = Number(d.amount) || 0;
+        paidByCustomerAllTime[d.customerId] = (paidByCustomerAllTime[d.customerId] || 0) + amt;
+        // Trường "date" ở debt_history là chuỗi 'YYYY-MM-DD', so sánh chuỗi trực tiếp.
+        if (d.date && d.date >= startDateStr && d.date <= endDateStr) paidCustomerPeriod += amt;
+    });
+    let oldDebtCustomerBaseline = totalDebt - newDebtCustomerPeriod + paidCustomerPeriod;
+    if (oldDebtCustomerBaseline < 0) oldDebtCustomerBaseline = 0;
+    // "oldDebtCustomerBaseline" là nợ cũ TÍNH TỪ ĐẦU KỲ (một mốc lịch sử cố định) - nếu chỉ
+    // hiển thị số này thì dù khách có trả bớt nợ TRONG kỳ, số "Nợ cũ" vẫn không giảm (vì phần
+    // "paidCustomerPeriod" cộng vào công thức trên đã tự triệt tiêu với phần giảm của
+    // totalDebt). Để đúng ý muốn "trả nợ thì Nợ cũ phải giảm", giả định tiền trả trong kỳ
+    // được trừ vào NỢ CŨ TRƯỚC (theo đúng thứ tự nợ cũ hơn được thu trước), phần dư mới trừ
+    // tiếp vào nợ mới phát sinh trong kỳ - đảm bảo Nợ cũ (còn lại) + Nợ mới (còn lại) luôn
+    // khớp đúng bằng Tổng nợ hiện tại.
+    let oldDebtCustomer = Math.max(0, oldDebtCustomerBaseline - paidCustomerPeriod);
+    let newDebtCustomerRemaining = totalDebt - oldDebtCustomer;
+    if (newDebtCustomerRemaining < 0) newDebtCustomerRemaining = 0;
+
+    let newDebtNCCPeriod = 0;
+    materialImportsPeriodSnap.docs.forEach(doc => {
+        newDebtNCCPeriod += (Number(doc.data().thanhTien) || 0);
+    });
+
+    // Tương tự cho NCC: lọc phần TRONG KỲ, cộng dồn LUỸ KẾ theo tên NCC
+    // (paidBySupplierAllTime, key = supplierName) để hiển thị cột "Đã trả" của từng NCC.
+    let paidNCCPeriod = 0;
+    const paidBySupplierAllTime = {};
+    allSupplierPaymentsSnap.docs.forEach(doc => {
+        const d = doc.data();
+        const amt = Number(d.amount) || 0;
+        paidBySupplierAllTime[d.supplierName] = (paidBySupplierAllTime[d.supplierName] || 0) + amt;
+        const payDate = d.date && d.date.toDate ? d.date.toDate() : new Date(d.date);
+        if (payDate >= startDate && payDate <= endDate) paidNCCPeriod += amt;
+    });
+    let oldDebtNCCBaseline = totalDebtNCC - newDebtNCCPeriod + paidNCCPeriod;
+    if (oldDebtNCCBaseline < 0) oldDebtNCCBaseline = 0;
+    // Áp dụng cùng nguyên tắc FIFO như trên cho nợ NCC.
+    let oldDebtNCC = Math.max(0, oldDebtNCCBaseline - paidNCCPeriod);
+    let newDebtNCCRemaining = totalDebtNCC - oldDebtNCC;
+    if (newDebtNCCRemaining < 0) newDebtNCCRemaining = 0;
+    // =======================================================================================
+
+    // LỢI NHUẬN = Tổng doanh thu (trong kỳ) - Nợ NCC PHÁT SINH TRONG KỲ (không phải trừ tổng
+    // nợ NCC luỹ kế từ trước tới giờ như trước đây - đó là lý do số Lợi Nhuận trước đây bị
+    // âm rất lớn/sai lệch, vì mỗi tháng đều bị trừ luôn cả khoản nợ cũ của các tháng trước).
+    const profit = totalRevenue - newDebtNCCPeriod;
 
     const updateEl = (id, val) => {
         const el = document.getElementById(id);
@@ -4190,8 +4292,11 @@ async function loadDashboard(filter = 'default') {
     };
 
     updateEl('total-revenue', totalRevenue);
-    updateEl('total-debt-summary', totalDebt);
-    updateEl('total-debt-ncc-summary', totalDebtNCC);
+    // Hiển thị NỢ PHÁT SINH TRONG KỲ (đã đối soát FIFO - xem giải thích ở trên) làm số nổi
+    // bật trên 2 thẻ, đảm bảo LUÔN cộng khớp đúng với "Nợ cũ" ra đúng Tổng nợ hiện tại,
+    // kể cả sau khi khách/NCC vừa trả bớt nợ.
+    updateEl('total-debt-summary', newDebtCustomerRemaining);
+    updateEl('total-debt-ncc-summary', newDebtNCCRemaining);
     updateEl('profit-summary', profit);
 
     renderDebtCustomers(customersSnap);
@@ -4203,7 +4308,16 @@ async function loadDashboard(filter = 'default') {
     window.currentDashboardData = {
         filteredSales: filteredSales,
         customersSnap: customersSnap,
-        allSuppliers: allSuppliers 
+        allSuppliers: allSuppliers,
+        // Dữ liệu bổ sung để popup "Chi tiết" hiện được cả nợ tháng mới lẫn nợ cũ, và cột "Đã trả".
+        // Dùng "Remaining" (đã đối soát FIFO) thay vì số phát sinh thô, để Nợ cũ + Nợ mới
+        // trong popup LUÔN cộng khớp đúng bằng Tổng nợ luỹ kế hiện tại.
+        debtPeriodInfo: {
+            newDebtCustomerPeriod: newDebtCustomerRemaining, paidCustomerPeriod, oldDebtCustomer, totalDebt,
+            newDebtNCCPeriod: newDebtNCCRemaining, paidNCCPeriod, oldDebtNCC, totalDebtNCC
+        },
+        paidByCustomerAllTime: paidByCustomerAllTime,
+        paidBySupplierAllTime: paidBySupplierAllTime
     };
 
     setTimeout(() => {
@@ -4218,6 +4332,11 @@ async function loadDashboard(filter = 'default') {
  * Đặt hàm này ở cuối file JS của bạn
  */
 function showDashboardDetail(type) {
+    // Ghi nhớ lại loại popup đang mở (nợ khách/nợ NCC/doanh thu...) để hàm
+    // refreshDashboardData() có thể tự vẽ lại đúng popup này ngay khi dữ liệu thay đổi
+    // (ví dụ vừa xoá 1 khoản trả nợ bị ghi nhầm) - không cần bấm F5 mới thấy cập nhật.
+    window.__lastDashboardDetailType = type;
+
     if (typeof window.currentDashboardData === 'undefined') {
         console.error("Dữ liệu dashboard chưa sẵn sàng.");
         alert("Dữ liệu chưa sẵn sàng, vui lòng tải lại trang.");
@@ -4293,38 +4412,68 @@ function showDashboardDetail(type) {
         title.innerText = "Công nợ Khách hàng";
         
         let totalDebt = 0;
+        let totalPaidAll = 0;
         let listHtml = '';
         let hasDebt = false;
+        const paidMap = (window.currentDashboardData && window.currentDashboardData.paidByCustomerAllTime) || {};
 
         customersSnap.forEach(doc => {
             const data = doc.data();
             const debt = Number(data.debt) || 0;
+            const paid = Number(paidMap[doc.id]) || 0;
             if (debt > 0) {
                 hasDebt = true;
                 totalDebt += debt;
+                totalPaidAll += paid;
                 listHtml += `
-                    <div class="flex justify-between items-center py-1.5 border-b border-slate-100 dark:border-slate-800/60">
-                        <span class="text-xs font-medium text-slate-700 dark:text-slate-300 pr-2 line-clamp-2">${data.name || 'Khách hàng'}</span>
-                        <span class="text-xs font-bold text-slate-900 dark:text-white whitespace-nowrap">${debt.toLocaleString('vi-VN')} đ</span>
+                    <div class="flex justify-between items-center py-1.5 border-b border-slate-100 dark:border-slate-800/60 gap-2">
+                        <span class="text-xs font-medium text-slate-700 dark:text-slate-300 pr-2 line-clamp-2 flex-1 min-w-0">${data.name || 'Khách hàng'}</span>
+                        <span class="text-xs font-bold text-green-600 dark:text-green-400 whitespace-nowrap w-[90px] text-right">${paid.toLocaleString('vi-VN')} đ</span>
+                        <span class="text-xs font-bold text-slate-900 dark:text-white whitespace-nowrap w-[90px] text-right">${debt.toLocaleString('vi-VN')} đ</span>
                     </div>
                 `;
             }
         });
 
+        // Khối "Nợ tháng mới (kỳ đang chọn) / Nợ cũ (trước kỳ)" - theo yêu cầu hiển thị cả
+        // nợ phát sinh trong kỳ mới VÀ nợ tồn đọng từ trước khi bấm vào xem chi tiết.
+        const pInfo = window.currentDashboardData.debtPeriodInfo;
+        let periodHtml = '';
+        if (pInfo) {
+            periodHtml = `
+                <div class="mb-3 space-y-1.5">
+                    <div class="flex justify-between items-center py-1.5 px-3 rounded-lg bg-rose-50/70 dark:bg-rose-950/25">
+                        <span class="text-xs font-bold text-rose-700 dark:text-rose-400">Nợ phát sinh trong kỳ (tháng mới)</span>
+                        <span class="text-xs font-black text-rose-700 dark:text-rose-400">${pInfo.newDebtCustomerPeriod.toLocaleString('vi-VN')} đ</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5 px-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                        <span class="text-xs font-bold text-slate-600 dark:text-slate-300">Nợ cũ (trước kỳ này)</span>
+                        <span class="text-xs font-black text-slate-700 dark:text-slate-200">${pInfo.oldDebtCustomer.toLocaleString('vi-VN')} đ</span>
+                    </div>
+                </div>
+            `;
+        }
+
         // Ô TỔNG CỘNG CÔNG NỢ KHÁCH: NỀN MỜ ĐỎ/HỒNG DỊU CHỐNG CHÓI
         let html = `
+            ${periodHtml}
             <div class="mb-4 p-3 bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200/50 dark:border-rose-900/30 rounded-xl">
                 <div class="flex justify-between items-center text-rose-900 dark:text-rose-400">
-                    <span class="font-bold text-xs uppercase">Tổng nợ khách hàng</span>
+                    <span class="font-bold text-xs uppercase">Tổng nợ khách hàng (luỹ kế)</span>
                     <span class="font-black text-sm text-rose-600 dark:text-rose-400">${totalDebt.toLocaleString('vi-VN')} đ</span>
                 </div>
+            </div>
+            <div class="flex justify-between items-center px-0 pb-1.5 mb-1 border-b border-slate-200 dark:border-slate-700 gap-2">
+                <span class="text-[10px] font-bold uppercase text-slate-400 flex-1">Khách hàng</span>
+                <span class="text-[10px] font-bold uppercase text-slate-400 w-[90px] text-right">Đã trả</span>
+                <span class="text-[10px] font-bold uppercase text-slate-400 w-[90px] text-right">Còn nợ</span>
             </div>
             <div class="space-y-1 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">
                 ${listHtml}
             </div>
         `;
 
-        content.innerHTML = !hasDebt ? '<p class="text-center text-sm p-4 text-slate-500 dark:text-slate-400">Hiện tại không có khách hàng nào nợ.</p>' : html;
+        content.innerHTML = !hasDebt ? (periodHtml || '') + '<p class="text-center text-sm p-4 text-slate-500 dark:text-slate-400">Hiện tại không có khách hàng nào nợ.</p>' : html;
     }
 
     // TRƯỜNG HỢP 3: CÔNG NỢ NCC (ĐỒNG BỘ DUAL THEME - NỀN MỜ AMBER)
@@ -4332,30 +4481,57 @@ function showDashboardDetail(type) {
         title.innerText = "Nợ Nhà cung cấp";
         const activeDebtSuppliers = allSuppliers.filter(sup => (Number(sup.debt) || 0) > 0);
 
+        // Khối "Nợ tháng mới (kỳ đang chọn) / Nợ cũ (trước kỳ)"
+        const pInfo = window.currentDashboardData.debtPeriodInfo;
+        let periodHtml = '';
+        if (pInfo) {
+            periodHtml = `
+                <div class="mb-3 space-y-1.5">
+                    <div class="flex justify-between items-center py-1.5 px-3 rounded-lg bg-amber-50/70 dark:bg-amber-950/25">
+                        <span class="text-xs font-bold text-amber-700 dark:text-amber-400">Nợ phát sinh trong kỳ (tháng mới)</span>
+                        <span class="text-xs font-black text-amber-700 dark:text-amber-400">${pInfo.newDebtNCCPeriod.toLocaleString('vi-VN')} đ</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5 px-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                        <span class="text-xs font-bold text-slate-600 dark:text-slate-300">Nợ cũ (trước kỳ này)</span>
+                        <span class="text-xs font-black text-slate-700 dark:text-slate-200">${pInfo.oldDebtNCC.toLocaleString('vi-VN')} đ</span>
+                    </div>
+                </div>
+            `;
+        }
+
         if (activeDebtSuppliers.length === 0) {
-            content.innerHTML = '<p class="text-center text-sm p-4 text-slate-500 dark:text-slate-400">Hiện tại không nợ nhà cung cấp nào.</p>';
+            content.innerHTML = periodHtml + '<p class="text-center text-sm p-4 text-slate-500 dark:text-slate-400">Hiện tại không nợ nhà cung cấp nào.</p>';
         } else {
             let totalNCCDebt = 0;
             let listHtml = '';
+            const paidMapNCC = (window.currentDashboardData && window.currentDashboardData.paidBySupplierAllTime) || {};
 
             activeDebtSuppliers.forEach(sup => {
                 const debt = Number(sup.debt) || 0;
+                const paid = Number(paidMapNCC[sup.name]) || 0;
                 totalNCCDebt += debt;
                 listHtml += `
-                    <div class="flex justify-between items-center py-1.5 border-b border-slate-100 dark:border-slate-800/60">
-                        <span class="text-xs font-medium text-slate-700 dark:text-slate-300 pr-2 line-clamp-2">${sup.name || 'NCC'}</span>
-                        <span class="text-xs font-bold text-slate-900 dark:text-white whitespace-nowrap">${debt.toLocaleString('vi-VN')} đ</span>
+                    <div class="flex justify-between items-center py-1.5 border-b border-slate-100 dark:border-slate-800/60 gap-2">
+                        <span class="text-xs font-medium text-slate-700 dark:text-slate-300 pr-2 line-clamp-2 flex-1 min-w-0">${sup.name || 'NCC'}</span>
+                        <span class="text-xs font-bold text-green-600 dark:text-green-400 whitespace-nowrap w-[90px] text-right">${paid.toLocaleString('vi-VN')} đ</span>
+                        <span class="text-xs font-bold text-slate-900 dark:text-white whitespace-nowrap w-[90px] text-right">${debt.toLocaleString('vi-VN')} đ</span>
                     </div>
                 `;
             });
 
             // Ô TỔNG CỘNG CÔNG NỢ NCC: NỀN MỜ VÀNG/CAM ẤM DỊU CHỐNG CHÓI
             let html = `
+                ${periodHtml}
                 <div class="mb-4 p-3 bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/30 rounded-xl">
                     <div class="flex justify-between items-center text-amber-900 dark:text-amber-400">
-                        <span class="font-bold text-xs uppercase">Tổng nợ nhà cung cấp</span>
+                        <span class="font-bold text-xs uppercase">Tổng nợ nhà cung cấp (luỹ kế)</span>
                         <span class="font-black text-sm text-amber-600 dark:text-amber-400">${totalNCCDebt.toLocaleString('vi-VN')} đ</span>
                     </div>
+                </div>
+                <div class="flex justify-between items-center px-0 pb-1.5 mb-1 border-b border-slate-200 dark:border-slate-700 gap-2">
+                    <span class="text-[10px] font-bold uppercase text-slate-400 flex-1">Nhà cung cấp</span>
+                    <span class="text-[10px] font-bold uppercase text-slate-400 w-[90px] text-right">Đã trả</span>
+                    <span class="text-[10px] font-bold uppercase text-slate-400 w-[90px] text-right">Còn nợ</span>
                 </div>
                 <div class="space-y-1 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">
                     ${listHtml}
@@ -4576,6 +4752,31 @@ function refreshFinance() {
         loadDashboard({ from: fromEl.value, to: toEl.value });
     } else {
         loadDashboard('default');
+    }
+}
+
+// Hàm dùng chung để tải lại số liệu Dashboard SAU KHI có thay đổi ở nơi khác (trả nợ, xoá
+// phiếu trả nợ bị ghi nhầm, nhập kho, lưu hoá đơn...). TRƯỚC ĐÂY các chỗ này gọi thẳng
+// loadDashboard() không tham số -> luôn RESET về kỳ "tháng hiện tại" mặc định, làm mất kỳ
+// người dùng đang xem (nếu họ đang xem tháng khác); và nếu popup "Công nợ..." đang mở sẵn,
+// nội dung popup vẫn giữ nguyên số liệu CŨ (chỉ có mấy thẻ số ở trên đổi) - phải bấm F5 mới
+// thấy popup cập nhật đúng. Hàm này sửa cả 2 vấn đề: giữ đúng kỳ đang chọn, và tự vẽ lại
+// popup ngay nếu đang mở.
+async function refreshDashboardData() {
+    const fromEl = document.getElementById('fin-from');
+    const toEl = document.getElementById('fin-to');
+
+    if (typeof loadDashboard === 'function') {
+        if (fromEl && toEl && fromEl.value && toEl.value) {
+            await loadDashboard({ from: fromEl.value, to: toEl.value });
+        } else {
+            await loadDashboard('default');
+        }
+    }
+
+    const modal = document.getElementById('dashboard-detail-modal');
+    if (modal && !modal.classList.contains('hidden') && window.__lastDashboardDetailType && typeof showDashboardDetail === 'function') {
+        showDashboardDetail(window.__lastDashboardDetailType);
     }
 }
 
@@ -8277,7 +8478,7 @@ async function deleteSale(docId) {
             try {
                 await calculateAllStock(); 
                 if (typeof renderProductGrid === 'function') renderProductGrid(); 
-                if (typeof loadDashboard === 'function') loadDashboard(); 
+                if (typeof refreshDashboardData === 'function') refreshDashboardData(); 
                 if (typeof loadCustomers === 'function') loadCustomers(); // Cập nhật lại danh sách nợ khách hàng
                 
                 loadSalesList();
@@ -8729,7 +8930,7 @@ window.onload = async function() {
     try {
         // 1. Tải dữ liệu sản phẩm
         if (typeof updateProductDropdowns === 'function') await updateProductDropdowns();
-        if (typeof loadDashboard === 'function') await loadDashboard(); 
+        if (typeof refreshDashboardData === 'function') await refreshDashboardData(); 
         await refreshCache(); 
         
         console.log("Đã load xong dữ liệu hệ thống!");
@@ -9183,7 +9384,7 @@ async function payDebt(id, currentDebt, customerName) {
             // Các lệnh cập nhật UI
             loadCustomers(); // Load lại danh sách khách hàng
             if (typeof loadDashboard === 'function') {
-                loadDashboard(); // Cập nhật lại số liệu Dashboard ở trang chủ
+                refreshDashboardData(); // Cập nhật lại số liệu Dashboard ở trang chủ (đúng kỳ đang chọn + tự vẽ lại popup nếu đang mở)
             }
             
         } catch (error) {
@@ -9295,6 +9496,13 @@ async function deletePayment(paymentId, customerId, amount) {
         
         Swal.fire('Thành công', 'Đã hoàn tác và cập nhật lại công nợ', 'success');
         loadCustomers(); // Tải lại bảng chính
+
+        // BỔ SUNG: cập nhật lại Trang Chủ (Dashboard) ngay lập tức, không cần F5 -
+        // trước đây popup "Công nợ Khách hàng" ở trang chủ vẫn giữ số liệu cũ (đã lấy từ
+        // trước khi xóa) cho tới khi tải lại trang.
+        if (typeof loadDashboard === 'function') {
+            await refreshDashboardData();
+        }
     } catch (error) {
         Swal.fire('Lỗi', error.message, 'error');
     }
@@ -12022,7 +12230,7 @@ async function paySupplierDebt(docId, nccName) {
 
         // 2. BỔ SUNG DÒNG NÀY ĐỂ TRANG CHỦ TỰ ĐỘNG CẬP NHẬT NGAY LẬP TỨC MÀ KHÔNG CẦN F5
         if (typeof loadDashboard === 'function') {
-            await loadDashboard();
+            await refreshDashboardData();
         }
 
     } catch (error) {
@@ -12102,7 +12310,7 @@ async function deletePaymentNCC(payId, nccName, amount) {
         
         // BỔ SUNG DÒNG NÀY ĐỂ TRANG CHỦ TỰ CẬP NHẬT NGAY LẬP TỨC MÀ KHÔNG CẦN F5
         if (typeof loadDashboard === 'function') {
-            await loadDashboard();
+            await refreshDashboardData();
         }
         
     } catch (error) {
@@ -12182,7 +12390,7 @@ async function deleteDoc(col, soPhieu) {
         if (typeof loadAllData === 'function') await loadAllData();
 		// THÊM DÒNG NÀY VÀO: Cập nhật lại toàn bộ Dashboard để các ô số liệu tự nhảy
         if (typeof loadDashboard === 'function') {
-            await loadDashboard();
+            await refreshDashboardData();
         }
         
     } catch (error) {
@@ -12370,7 +12578,7 @@ async function saveFullInvoice() {
     if (typeof filterNhapKho === 'function') await filterNhapKho();
 	// --- CẬP NHẬT LẠI DASHBOARD ---
     if (typeof loadDashboard === 'function') {
-        await loadDashboard();
+        await refreshDashboardData();
     }
 }
 
@@ -12594,6 +12802,7 @@ document.addEventListener('DOMContentLoaded', function() {
             right: 'dayGridMonth,dayGridWeek,listWeek' // Thêm nút "Danh sách" để chuyển qua lại
         },
         buttonText: { today: 'Hôm nay', month: 'Tháng', week: 'Tuần', day: 'Ngày', list: 'Danh sách' },
+        noEventsText: 'Không có sự kiện nào trong khoảng thời gian này',
         editable: true,
         selectable: true,
         // Tự động chuyển chế độ khi xoay màn hình / đổi kích thước cửa sổ
@@ -12642,6 +12851,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         // Đồng bộ lại giao diện Agenda trên di động mỗi khi dữ liệu thay đổi
         if (typeof renderMobileAgenda === 'function') renderMobileAgenda();
+        // Đồng bộ lại danh sách ghi chú ở khung "DANH MỤC LỊCH"
+        if (typeof renderNotesList === 'function') renderNotesList();
     });
 });
 
@@ -12796,6 +13007,40 @@ function openMobileEventView(eventId) {
     const timeStr = ev.start ? ev.start.toLocaleString('vi-VN') : 'Cả ngày';
     document.getElementById('view-event-time').innerText = "Thời gian: " + timeStr;
     document.getElementById('modal-view-event').classList.remove('hidden');
+}
+
+// Hiển thị TOÀN BỘ lịch/ghi chú đã tạo thành 1 danh sách ở khung "DANH MỤC LỊCH" (bên dưới
+// nút "+ Thêm lịch mới") - mỗi dòng có màu viền trái đúng màu đã chọn khi tạo (giống màu
+// chấm tròn/nền sự kiện trên lịch), sắp xếp theo thời gian gần nhất trước, bấm vào để xem
+// nhanh (dùng lại đúng modal xem chi tiết đang có).
+function renderNotesList() {
+    const container = document.getElementById('calendar-notes-list');
+    if (!container || !window.calendar) return;
+
+    const events = window.calendar.getEvents();
+    if (events.length === 0) {
+        container.innerHTML = '<p class="text-xs text-gray-400 dark:text-slate-500 italic text-center py-3">Chưa có lịch/ghi chú nào</p>';
+        return;
+    }
+
+    const sorted = [...events].sort((a, b) => (a.start ? a.start.getTime() : 0) - (b.start ? b.start.getTime() : 0));
+
+    container.innerHTML = sorted.map(ev => {
+        const color = ev.backgroundColor || '#4285F4';
+        const isDone = ev.classNames && ev.classNames.includes('event-done');
+        const timeStr = ev.start ? ev.start.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Cả ngày';
+        const title = (ev.title || '').replace('✅ ', '').replace(' (Đã xong)', '');
+        return `
+            <div onclick="openMobileEventView('${ev.id}')"
+                 class="flex items-start gap-2 p-2 rounded-lg cursor-pointer border-l-4 bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors ${isDone ? 'opacity-50' : ''}"
+                 style="border-left-color:${color};">
+                <div class="min-w-0 flex-1">
+                    <p class="text-sm font-bold text-slate-700 dark:text-slate-200 truncate">${isDone ? '✅ ' : ''}${title}</p>
+                    <p class="text-[11px] text-slate-400 dark:text-slate-500">${timeStr}</p>
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
 // Thêm: Hàm tự động cập nhật ngày khi kéo thả
