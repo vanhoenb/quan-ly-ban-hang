@@ -2798,7 +2798,6 @@ html:not(.dark) .bg-white {
                     <div class="flex items-center gap-2 bg-white dark:bg-slate-900 p-1.5 rounded-full shadow-sm border border-gray-100 dark:border-slate-800">
                         <button id="agenda-btn-week" onclick="setAgendaMode('week')" class="flex-1 py-2.5 rounded-full font-bold text-sm transition-colors bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-300">Tuần</button>
                         <button id="agenda-btn-month" onclick="setAgendaMode('month')" class="flex-1 py-2.5 rounded-full font-bold text-sm transition-colors text-slate-400 dark:text-slate-500">Tháng</button>
-                        <button onclick="openEventModal()" class="shrink-0 bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-full font-bold text-sm flex items-center gap-1 shadow-sm">+ Thêm buổi</button>
                     </div>
 
                     <div class="flex items-center justify-between bg-white dark:bg-slate-900 p-3 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800">
@@ -4109,7 +4108,15 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 
 // Tải dữ liệu tổng quan (doanh thu, tồn kho...) cho Trang chủ
+// Chống RACE CONDITION: loadDashboard có thể bị gọi chồng lên nhau từ nhiều nơi khác nhau
+// gần như cùng lúc (khi vào Trang Chủ, và đồng thời listener "customers.onSnapshot" cũng tự
+// gọi loadDashboard('default') mỗi khi có bất kỳ thay đổi nào) - nếu 1 lệnh gọi CŨ HƠN (dùng
+// khoảng ngày hẹp hơn) lại hoàn thành SAU 1 lệnh gọi MỚI HƠN, nó sẽ ghi đè lên kết quả đúng,
+// khiến biểu đồ "Doanh thu theo tháng" đôi khi chỉ hiện 1 tháng, phải F5 lại mới đúng.
+window.__dashboardLoadToken = 0;
+
 async function loadDashboard(filter = 'default') {
+    const __myDashboardToken = ++window.__dashboardLoadToken;
     console.log("Đang tải dữ liệu dashboard...");
 
     // Tính khoảng ngày cần hiển thị TRƯỚC (thay vì đọc hết dữ liệu rồi mới lọc như cũ)
@@ -4179,6 +4186,11 @@ async function loadDashboard(filter = 'default') {
         // Tương tự, lấy TOÀN BỘ lịch sử trả nợ của khách hàng.
         db.collection('debt_history').get({ source: 'default' }).catch(() => ({ docs: [] }))
     ]);
+
+    // Nếu đã có 1 lệnh gọi loadDashboard() MỚI HƠN bắt đầu trong lúc đang chờ dữ liệu ở trên,
+    // bỏ qua toàn bộ phần xử lý/hiển thị bên dưới của lệnh gọi CŨ này - tránh ghi đè kết quả
+    // đúng bằng dữ liệu cũ hơn (nguyên nhân gây hiện tượng biểu đồ tháng lúc đúng lúc sai).
+    if (__myDashboardToken !== window.__dashboardLoadToken) return;
 
     const allSales = salesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
@@ -9342,11 +9354,11 @@ async function payDebt(id, currentDebt, customerName) {
         title: 'Ghi nhận trả nợ: ' + customerName,
         html:
             '<label class="text-sm font-bold block text-left mb-1">Số tiền trả:</label>' +
-            '<input id="swal-amount" type="number" class="w-full p-2 border rounded mb-3" placeholder="Số tiền..."> ' +
+            '<input id="swal-amount" type="number" class="w-full p-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded mb-3" placeholder="Số tiền..."> ' +
             '<label class="text-sm font-bold block text-left mb-1">Ngày trả:</label>' +
-            '<input id="swal-date" type="date" class="w-full p-2 border rounded mb-3" value="' + new Date().toISOString().split('T')[0] + '"> ' +
+            '<input id="swal-date" type="date" class="w-full p-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded mb-3" value="' + new Date().toISOString().split('T')[0] + '"> ' +
             '<label class="text-sm font-bold block text-left mb-1">Ghi chú:</label>' +
-            '<input id="swal-note" type="text" class="w-full p-2 border rounded" placeholder="Ghi chú (nếu có)...">',
+            '<input id="swal-note" type="text" class="w-full p-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded" placeholder="Ghi chú (nếu có)...">',
         focusConfirm: false,
         confirmButtonText: 'Xác nhận',
         showCancelButton: true,
@@ -12196,7 +12208,7 @@ async function updateNCC(docId) {
 function openPayModal(docId, nccName) {
     // Lưu ý: Đã đổi payDebt thành paySupplierDebt ở dòng bên dưới
     const content = `
-        <input type="number" id="in-pay-modal" class="border p-2 w-full mb-4" placeholder="Nhập số tiền">
+        <input type="number" id="in-pay-modal" class="border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white p-2 w-full mb-4 rounded" placeholder="Nhập số tiền">
         <button onclick="paySupplierDebt('${docId}', '${nccName}')" class="bg-blue-600 text-white w-full py-2 rounded-xl">Xác nhận trả nợ</button>
     `;
     showPopup("Trả nợ: " + nccName, content);
@@ -13030,13 +13042,16 @@ function renderNotesList() {
         const isDone = ev.classNames && ev.classNames.includes('event-done');
         const timeStr = ev.start ? ev.start.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Cả ngày';
         const title = (ev.title || '').replace('✅ ', '').replace(' (Đã xong)', '');
+        // TRƯỚC ĐÂY chỉ có viền trái mỏng 4px + nền xám phẳng -> ở giao diện Tối viền màu
+        // gần như chìm vào nền, trông như "mất màu". Giờ tô cả nền của dòng bằng đúng màu
+        // sự kiện (rất nhạt, 15% độ đậm) để màu luôn nổi bật rõ ràng ở cả 2 giao diện.
         return `
             <div onclick="openMobileEventView('${ev.id}')"
-                 class="flex items-start gap-2 p-2 rounded-lg cursor-pointer border-l-4 bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors ${isDone ? 'opacity-50' : ''}"
-                 style="border-left-color:${color};">
+                 class="flex items-start gap-2 p-2 rounded-lg cursor-pointer border-l-4 hover:brightness-95 dark:hover:brightness-125 transition-all ${isDone ? 'opacity-50' : ''}"
+                 style="border-left-color:${color}; background-color:${color}26;">
                 <div class="min-w-0 flex-1">
-                    <p class="text-sm font-bold text-slate-700 dark:text-slate-200 truncate">${isDone ? '✅ ' : ''}${title}</p>
-                    <p class="text-[11px] text-slate-400 dark:text-slate-500">${timeStr}</p>
+                    <p class="text-sm font-bold text-slate-800 dark:text-white truncate">${isDone ? '✅ ' : ''}${title}</p>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-300">${timeStr}</p>
                 </div>
             </div>
         `;
