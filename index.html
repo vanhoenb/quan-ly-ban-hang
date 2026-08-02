@@ -1962,6 +1962,16 @@ html:not(.dark) .bg-white {
     </div>
 
         <div class="lg:w-1/2 w-full space-y-4 h-[850px] flex flex-col">
+            <!-- Banner báo đang ở CHẾ ĐỘ SỬA PHIẾU (chỉ hiện khi sửa 1 phiếu đã lưu từ trang
+                 Lịch Sử HĐ) - ẩn theo mặc định. -->
+            <div id="edit-sale-banner" class="hidden bg-amber-100 dark:bg-amber-900/30 border-2 border-amber-400 dark:border-amber-700 rounded-2xl p-3 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2 min-w-0">
+                    <i data-lucide="pencil" class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0"></i>
+                    <span class="text-sm font-bold text-amber-800 dark:text-amber-300 truncate">Đang sửa phiếu <span id="edit-sale-banner-id"></span> - lưu lại sẽ ghi đè phiếu này</span>
+                </div>
+                <button onclick="exitEditSaleMode()" class="flex-shrink-0 bg-white dark:bg-slate-800 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-700 px-3 py-1.5 rounded-xl text-xs font-bold hover:bg-amber-50 dark:hover:bg-slate-700">Hủy sửa</button>
+            </div>
+
             <!-- HÓA ĐƠN CHỜ: cho phép tạm giữ đơn đang bán để phục vụ khách khác, rồi quay lại sau -->
             <div class="bg-white dark:bg-slate-900 rounded-2xl border-2 border-blue-200 dark:border-slate-700 p-2 shadow-sm">
                 <div id="held-orders-bar" class="flex items-center gap-2 overflow-x-auto pb-0.5"></div>
@@ -3823,7 +3833,9 @@ function showPage(pageId) {
             
         case 'page-sell':
             if (typeof calculateAllStock === 'function') calculateAllStock();
-            if (typeof updateSellReceiptNum === 'function') updateSellReceiptNum();
+            // Khi đang ở CHẾ ĐỘ SỬA 1 phiếu có sẵn (mở từ Lịch Sử HĐ), KHÔNG được tự sinh số
+            // phiếu mới - sẽ đè mất số phiếu gốc đang cần giữ nguyên khi lưu lại.
+            if (!window.__editingSaleId && typeof updateSellReceiptNum === 'function') updateSellReceiptNum();
             if (typeof loadCustomers === 'function') loadCustomers();
             if (typeof renderHeldOrdersBar === 'function') renderHeldOrdersBar();
             break;
@@ -7896,7 +7908,271 @@ function renderHeldOrdersBar() {
     if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
+//==================================================================
+//===================== SỬA PHIẾU XUẤT (CHỈ TRONG NGÀY) ===========
+//==================================================================
+// Cho phép sửa lại 1 phiếu bán hàng ĐÃ LƯU (chỉ trong ngày lập phiếu): chuyển sang trang
+// Bán Hàng, điền sẵn khách hàng + giỏ hàng đúng như phiếu cũ, cho sửa thoải mái (đổi khách,
+// thêm/bớt/đổi SL sản phẩm), khi lưu lại sẽ GHI ĐÈ vào đúng phiếu cũ (không tạo phiếu mới),
+// đồng thời tự tính lại phần CHÊNH LỆCH tồn kho (NXT) và công nợ cho chính xác.
+async function editInvoiceFromHistory(docId) {
+    try {
+        const doc = await db.collection('sales').doc(docId).get();
+        if (!doc.exists) { Swal.fire('Lỗi', 'Không tìm thấy phiếu này.', 'error'); return; }
+        const data = doc.data();
+
+        // Chặn sửa phiếu không phải trong ngày hôm nay (double-check phía JS, phòng khi
+        // người dùng vẫn còn giữ popup cũ mở qua nửa đêm).
+        const saleDateObj = data.date && data.date.toDate ? data.date.toDate() : (data.date ? new Date(data.date) : null);
+        const now = new Date();
+        const isSameDay = saleDateObj &&
+            saleDateObj.getFullYear() === now.getFullYear() &&
+            saleDateObj.getMonth() === now.getMonth() &&
+            saleDateObj.getDate() === now.getDate();
+        if (!isSameDay) {
+            Swal.fire('Không thể sửa', 'Chỉ có thể sửa phiếu được lập trong ngày hôm nay.', 'warning');
+            return;
+        }
+
+        // Bật "chế độ sửa" TRƯỚC khi chuyển trang - để case 'page-sell' trong showPage()
+        // biết mà KHÔNG tự sinh số phiếu mới đè lên số phiếu gốc đang sửa.
+        window.__editingSaleId = docId;
+        window.__editingSaleOriginalItems = JSON.parse(JSON.stringify(data.items || []));
+        window.__editingSaleOriginalTotal = Number(data.total) || 0;
+        window.__editingSaleOriginalCustomer = data.customer || '';
+        window.__editingSaleOriginalPaymentMethod = data.paymentMethod || 'Tiền mặt';
+        window.__editingSaleOriginalDate = data.date || null;
+
+        showPage('page-sell');
+
+        // Điền lại giỏ hàng đúng dữ liệu phiếu cũ
+        sellCart = (data.items || []).map(i => {
+            const qty = parseFloat(i.qty) || 0;
+            const price = parseFloat(i.price) || 0;
+            return { name: i.name, unit: i.unit || 'Cái', qty: qty, price: price, vat: i.vat || 0, taxAmount: i.taxAmount || 0, note: i.note || '', total: qty * price };
+        });
+
+        // Điền lại thông tin khách hàng / thanh toán / ghi chú / thuế / số phiếu (giữ nguyên)
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+        setVal('sell-receipt', data.id || docId);
+        setVal('sell-customer', data.customer || '');
+        setVal('sell-address', data.address || '');
+        setVal('sell-phone', data.phone || '');
+        setVal('sell-note-global', data.note || '');
+        setVal('global-vat', data.vatRate || 0);
+        setVal('payment-method', data.paymentMethod || 'Tiền mặt');
+
+        renderSellCart();
+        if (typeof updateGrandTotal === 'function') updateGrandTotal();
+
+        // Hiện banner báo đang sửa phiếu + đổi chữ nút lưu cho rõ
+        const banner = document.getElementById('edit-sale-banner');
+        const bannerId = document.getElementById('edit-sale-banner-id');
+        if (banner) banner.classList.remove('hidden');
+        if (bannerId) bannerId.innerText = data.id || docId;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        const saveBtn = document.getElementById('btn-save-print');
+        if (saveBtn) saveBtn.innerText = "CẬP NHẬT PHIẾU (F1)";
+
+        Swal.fire({ icon: 'info', title: 'Đang sửa phiếu ' + (data.id || docId), toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+
+    } catch (e) {
+        console.error(e);
+        Swal.fire('Lỗi', 'Không tải được phiếu để sửa: ' + e.message, 'error');
+    }
+}
+
+// Thoát chế độ sửa phiếu (do bấm "Hủy sửa", hoặc sau khi lưu cập nhật thành công)
+function exitEditSaleMode() {
+    window.__editingSaleId = null;
+    window.__editingSaleOriginalItems = null;
+    window.__editingSaleOriginalTotal = 0;
+    window.__editingSaleOriginalCustomer = '';
+    window.__editingSaleOriginalPaymentMethod = '';
+    window.__editingSaleOriginalDate = null;
+
+    sellCart = [];
+    renderSellCart();
+    const clearFields = ['sell-customer', 'sell-address', 'sell-phone', 'sell-note', 'sell-note-global'];
+    clearFields.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    if (typeof updateSellReceiptNum === 'function') updateSellReceiptNum();
+
+    const banner = document.getElementById('edit-sale-banner');
+    if (banner) banner.classList.add('hidden');
+
+    const saveBtn = document.getElementById('btn-save-print');
+    if (saveBtn) saveBtn.innerText = "LƯU & IN (F1)";
+}
+
+// Lưu lại phiếu ĐANG SỬA - ghi đè vào đúng phiếu cũ (window.__editingSaleId), chỉ cộng/trừ
+// kho theo đúng PHẦN CHÊNH LỆCH so với phiếu gốc (không trừ lại từ đầu), và đối soát lại
+// công nợ nếu hình thức thanh toán "Công nợ" bị ảnh hưởng (đổi khách, đổi hình thức, đổi
+// tổng tiền...).
+async function updateExistingSale() {
+    if (sellCart.length === 0) {
+        Swal.fire({ icon: 'warning', title: 'Giỏ hàng đang trống!', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+        return;
+    }
+
+    const btn = document.getElementById('btn-save-print');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerText = "Đang cập nhật...";
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+
+    const docId = window.__editingSaleId;
+    const receiptId = document.getElementById('sell-receipt').value;
+    const customer = document.getElementById('sell-customer').value;
+    const paymentMethod = document.getElementById('payment-method').value;
+    const address = document.getElementById('sell-address') ? document.getElementById('sell-address').value : '';
+    const phone = document.getElementById('sell-phone') ? document.getElementById('sell-phone').value : '';
+    const noteGlobal = document.getElementById('sell-note-global') ? document.getElementById('sell-note-global').value : '';
+    const vatEl = document.getElementById('global-vat');
+    const vatRate = vatEl ? parseFloat(vatEl.value) || 0 : 0;
+
+    try {
+        const itemsToSave = sellCart.map(i => {
+            const lowerNote = (i.note || '').toLowerCase();
+            if (lowerNote.includes('date') || lowerNote.includes('đate')) return { ...i, price: 0 };
+            return i;
+        });
+
+        let subTotalAll = 0;
+        itemsToSave.forEach(i => { subTotalAll += (i.qty * i.price); });
+        const taxTotalAll = subTotalAll * (vatRate / 100);
+        const grandTotal = subTotalAll + taxTotalAll;
+
+        // Giữ nguyên NGÀY LẬP GỐC (không đổi thành lúc sửa) và giữ nguyên SỐ PHIẾU - chỉ nội
+        // dung phiếu (khách hàng/sản phẩm/tiền...) được cập nhật.
+        const saleData = {
+            id: receiptId,
+            customer: customer,
+            paymentMethod: paymentMethod,
+            address: address,
+            phone: phone,
+            note: noteGlobal,
+            items: itemsToSave,
+            vatRate: vatRate,
+            total: grandTotal,
+            date: window.__editingSaleOriginalDate || firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        // Tính CHÊNH LỆCH số lượng từng sản phẩm so với phiếu GỐC (không phải trừ kho lại
+        // từ đầu) - ví dụ phiếu gốc bán 5, sửa thành 8 -> chỉ cần trừ thêm 3 vào kho; sửa
+        // thành 2 -> phải CỘNG TRẢ lại 3 vào kho.
+        const oldQtyByName = {};
+        (window.__editingSaleOriginalItems || []).forEach(i => {
+            oldQtyByName[i.name] = (oldQtyByName[i.name] || 0) + (parseFloat(i.qty) || 0);
+        });
+        const newQtyByName = {};
+        itemsToSave.forEach(i => {
+            newQtyByName[i.name] = (newQtyByName[i.name] || 0) + (parseFloat(i.qty) || 0);
+        });
+        const allProductNames = Array.from(new Set([...Object.keys(oldQtyByName), ...Object.keys(newQtyByName)]));
+        const deltaByName = {};
+        allProductNames.forEach(name => {
+            const delta = (newQtyByName[name] || 0) - (oldQtyByName[name] || 0);
+            if (Math.abs(delta) > 0.000001) deltaByName[name] = delta;
+        });
+        const changedNames = Object.keys(deltaByName);
+
+        const saleRef = db.collection('sales').doc(docId);
+
+        await db.runTransaction(async (transaction) => {
+            const refs = changedNames.map(name => getStockRef(name));
+            const snaps = await Promise.all(refs.map(ref => transaction.get(ref)));
+
+            for (let i = 0; i < changedNames.length; i++) {
+                const currentQty = parseFloat((snaps[i].data() || {}).qty || 0);
+                const delta = deltaByName[changedNames[i]];
+                // delta > 0 = bán thêm so với phiếu gốc -> cần đủ hàng trong kho mới trừ thêm được
+                if (delta > 0 && delta > currentQty + 0.000001) {
+                    throw new Error(`Sản phẩm "${changedNames[i]}" chỉ còn ${currentQty} trong kho, không đủ để tăng thêm số lượng như vừa sửa.`);
+                }
+            }
+
+            changedNames.forEach((name, i) => {
+                const currentQty = parseFloat((snaps[i].data() || {}).qty || 0);
+                const newQty = Math.round((currentQty - deltaByName[name]) * 100) / 100;
+                transaction.set(refs[i], { name: name, qty: newQty, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+            });
+
+            transaction.update(saleRef, saleData);
+        });
+
+        // Cập nhật lại bản đồ tồn kho trong bộ nhớ cho khớp (đỡ tốn 1 lượt đọc mạng)
+        if (!window.baseInventoryMap) window.baseInventoryMap = {};
+        changedNames.forEach(name => {
+            window.baseInventoryMap[name] = (window.baseInventoryMap[name] || 0) - deltaByName[name];
+        });
+
+        // --- ĐỐI SOÁT LẠI CÔNG NỢ nếu phiếu gốc và/hoặc phiếu sửa có liên quan "Công nợ" ---
+        // Hoàn tác đúng phần công nợ mà phiếu GỐC đã cộng (nếu có), rồi cộng lại đúng phần
+        // công nợ mà phiếu MỚI (sau khi sửa) tạo ra (nếu có) - xử lý đúng cả khi đổi khách
+        // hàng hoặc đổi hình thức thanh toán giữa 2 lần lưu.
+        try {
+            const oldPaymentMethod = window.__editingSaleOriginalPaymentMethod;
+            const oldCustomer = window.__editingSaleOriginalCustomer;
+            const oldTotal = window.__editingSaleOriginalTotal;
+
+            if (oldPaymentMethod === 'Công nợ' && oldCustomer) {
+                const q1 = await db.collection('customers').where('name', '==', oldCustomer).get();
+                if (!q1.empty) {
+                    const d1 = q1.docs[0];
+                    const curDebt1 = d1.data().debt || 0;
+                    await db.collection('customers').doc(d1.id).update({ debt: curDebt1 - oldTotal });
+                }
+            }
+            if (paymentMethod === 'Công nợ' && customer) {
+                const q2 = await db.collection('customers').where('name', '==', customer).get();
+                if (!q2.empty) {
+                    const d2 = q2.docs[0];
+                    const curDebt2 = d2.data().debt || 0;
+                    await db.collection('customers').doc(d2.id).update({ debt: curDebt2 + grandTotal });
+                }
+            }
+        } catch (debtErr) {
+            console.warn('Không đối soát được công nợ khi sửa phiếu (phiếu vẫn đã lưu đúng):', debtErr);
+        }
+
+        Swal.fire({ icon: 'success', title: 'Đã cập nhật phiếu ' + receiptId + '!', toast: true, position: 'top-end', timer: 1500, showConfirmButton: false });
+
+        // In lại phiếu vừa sửa cho tiện (giữ đúng ngày lập gốc trên bản in)
+        const printType = (document.getElementById('print-doc-type-value') || {}).value || 'hoadon';
+        const printOpts = {
+            receiptId, customer, address, phone, note: noteGlobal,
+            items: itemsToSave, vatRate,
+            dateObj: (window.__editingSaleOriginalDate && window.__editingSaleOriginalDate.toDate) ? window.__editingSaleOriginalDate.toDate() : new Date()
+        };
+        window.__lastInvoicePrintOpts = printOpts;
+        if (printType === 'xuatkho') { renderXuatKhoTemplate(printOpts); } else { renderHoaDonTemplate(printOpts); }
+
+        exitEditSaleMode();
+
+        if (typeof recomputeCurrentStock === 'function') recomputeCurrentStock();
+        if (typeof loadSalesList === 'function') loadSalesList();
+        if (typeof loadCustomers === 'function') loadCustomers();
+        if (typeof refreshDashboardData === 'function') await refreshDashboardData();
+
+    } catch (error) {
+        console.error("Lỗi cập nhật phiếu:", error);
+        Swal.fire('Lỗi', 'Có lỗi khi cập nhật phiếu: ' + error.message, 'error');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerText = window.__editingSaleId ? "CẬP NHẬT PHIẾU (F1)" : "LƯU & IN (F1)";
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+    }
+}
+
 async function saveAndPrint() {
+    // Nếu đang ở CHẾ ĐỘ SỬA 1 phiếu có sẵn (mở từ Lịch Sử HĐ) -> đi theo luồng cập nhật
+    // riêng (ghi đè phiếu cũ), không tạo phiếu mới.
+    if (window.__editingSaleId) {
+        return await updateExistingSale();
+    }
     if (sellCart.length === 0) {
         alert("Giỏ hàng đang trống!");
         return;
@@ -8229,6 +8505,19 @@ async function viewInvoiceDetails(docId) {
         
         itemsHtml += `</tbody></table>`;
 
+        // Chỉ cho phép SỬA nếu phiếu được lập TRONG NGÀY HÔM NAY (theo yêu cầu) - so sánh
+        // đúng theo ngày dương lịch (năm-tháng-ngày), không phải trong vòng 24h.
+        const saleDateObj = data.date && data.date.toDate ? data.date.toDate() : (data.date ? new Date(data.date) : null);
+        const now = new Date();
+        const isSameDay = saleDateObj &&
+            saleDateObj.getFullYear() === now.getFullYear() &&
+            saleDateObj.getMonth() === now.getMonth() &&
+            saleDateObj.getDate() === now.getDate();
+
+        const editButtonHtml = isSameDay
+            ? `<button onclick="Swal.close(); editInvoiceFromHistory('${docId}')" class="bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5 mt-2 w-full">✏️ Sửa phiếu này</button>`
+            : `<p class="text-center text-[11px] text-slate-400 dark:text-slate-500 italic mt-2">Chỉ có thể sửa phiếu được lập trong ngày hôm nay</p>`;
+
         Swal.fire({
             title: `Chi tiết phiếu: ${data.id || docId}`, // Dùng data.id theo tên field trong ảnh
             html: `
@@ -8242,6 +8531,7 @@ async function viewInvoiceDetails(docId) {
                     <button onclick="Swal.close(); reprintSale('${docId}')" class="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">🖨️ In lại</button>
                     <button onclick="Swal.close(); shareSaleZalo('${docId}')" class="bg-sky-500 hover:bg-sky-600 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">💬 Chia sẻ Zalo</button>
                 </div>
+                ${editButtonHtml}
                 <div class="grid grid-cols-2 gap-2 mt-2">
                     <button onclick="Swal.close(); deleteSale('${docId}')" class="bg-red-600 hover:bg-red-700 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">🗑️ Xóa phiếu này</button>
                     <button onclick="Swal.close()" class="bg-slate-600 hover:bg-slate-700 text-white py-2 rounded-xl text-sm font-bold">Đóng</button>
