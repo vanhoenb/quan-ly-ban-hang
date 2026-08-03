@@ -1408,34 +1408,70 @@ html:not(.dark) .bg-white {
     </div>
 
     <div class="flex justify-around items-center px-2 py-3 gap-1.5 select-none">
-        <button onclick="showPage('page-home')" data-perm="page-home" class="flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] bg-emerald-950/40 border-emerald-800 text-emerald-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]">
-            <i data-lucide="home" class="w-5 h-5 drop-shadow-[0_1.5px_3px_rgba(16,185,129,0.4)]"></i>
+        <button onclick="showPage('page-home')" data-perm="page-home" data-navbtn="page-home"
+            data-active-classes="border-b-[3px] bg-emerald-950/40 border-emerald-800 text-emerald-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]"
+            data-inactive-classes="border-b-[3px] border-transparent text-slate-500"
+            class="nav-btn flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] bg-emerald-950/40 border-emerald-800 text-emerald-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]">
+            <i data-lucide="home" class="w-5 h-5"></i>
             <span class="text-[8px] md:text-[9px] font-bold tracking-wider mt-0.5">Trang Chủ</span>
         </button>
         
-        <button onclick="showPage('page-sell')" data-perm="page-sell" class="flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] bg-rose-950/40 border-rose-800 text-rose-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]">
-            <i data-lucide="shopping-cart" class="w-5 h-5 drop-shadow-[0_1.5px_3px_rgba(244,63,94,0.4)]"></i>
+        <button onclick="showPage('page-sell')" data-perm="page-sell" data-navbtn="page-sell"
+            data-active-classes="border-b-[3px] bg-rose-950/40 border-rose-800 text-rose-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]"
+            data-inactive-classes="border-b-[3px] border-transparent text-slate-500"
+            class="nav-btn flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] border-transparent text-slate-500">
+            <i data-lucide="shopping-cart" class="w-5 h-5"></i>
             <span class="text-[8px] md:text-[9px] font-bold tracking-wider mt-0.5">Bán Hàng</span>
         </button>
         
-        <button onclick="showPage('page-import')" data-perm="page-import" class="flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] bg-amber-950/40 border-amber-800 text-amber-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]">
-            <i data-lucide="arrow-down-circle" class="w-5 h-5 drop-shadow-[0_1.5px_3px_rgba(245,158,11,0.4)]"></i>
+        <button onclick="showPage('page-import')" data-perm="page-import" data-navbtn="page-import"
+            data-active-classes="border-b-[3px] bg-amber-950/40 border-amber-800 text-amber-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]"
+            data-inactive-classes="border-b-[3px] border-transparent text-slate-500"
+            class="nav-btn flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] border-transparent text-slate-500">
+            <i data-lucide="arrow-down-circle" class="w-5 h-5"></i>
             <span class="text-[8px] md:text-[9px] font-bold tracking-wider mt-0.5">Nhập Kho</span>
         </button>
         
-        <button onclick="showPage('page-report')" data-perm="page-report" class="flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] bg-sky-950/40 border-sky-800 text-sky-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]">
-            <i data-lucide="bar-chart-3" class="w-5 h-5 drop-shadow-[0_1.5px_3px_rgba(14,165,233,0.4)]"></i>
+        <button onclick="showPage('page-report')" data-perm="page-report" data-navbtn="page-report"
+            data-active-classes="border-b-[3px] bg-sky-950/40 border-sky-800 text-sky-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]"
+            data-inactive-classes="border-b-[3px] border-transparent text-slate-500"
+            class="nav-btn flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] border-transparent text-slate-500">
+            <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
             <span class="text-[8px] md:text-[9px] font-bold tracking-wider mt-0.5">Báo Cáo</span>
         </button>
         
-        <button onclick="toggleMoreMenu()" class="flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] bg-indigo-950/40 border-indigo-800 text-indigo-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]">
-            <i data-lucide="more-horizontal" class="w-5 h-5 drop-shadow-[0_1.5px_3px_rgba(99,102,241,0.4)]"></i>
+        <button onclick="toggleMoreMenu()" data-navbtn="more"
+            data-active-classes="border-b-[3px] bg-indigo-950/40 border-indigo-800 text-indigo-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]"
+            data-inactive-classes="border-b-[3px] border-transparent text-slate-500"
+            class="nav-btn flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] border-transparent text-slate-500">
+            <i data-lucide="more-horizontal" class="w-5 h-5"></i>
             <span class="text-[8px] md:text-[9px] font-bold tracking-wider mt-0.5">Khác</span>
         </button>
     </div>
   </div>
 
   <script>
+    // Cập nhật tab nào đang được TÔ MÀU NỔI BẬT trên thanh điều hướng dưới cùng (điện thoại) -
+    // TRƯỚC ĐÂY cả 5 nút luôn tô màu sẵn cùng lúc (trông rối, không rõ đang ở trang nào).
+    // Giờ chỉ đúng 1 tab đang mở được tô màu, còn lại chuyển xám trung tính - đúng kiểu
+    // thanh điều hướng hiện đại (giống Zalo/Messenger). Nút "Khác" cũng tự sáng lên nếu
+    // trang đang mở là 1 trong các trang nằm trong menu "Khác" (Kho Hàng, Lịch Sử HĐ...).
+    const MOBILE_NAV_MORE_PAGES = ['page-inventory', 'page-history', 'page-customers', 'page-products-manage', 'page-SanXuat', 'page-NguyenLieu', 'page-LichCongViec', 'page-user-management'];
+
+    function updateMobileNavActive(pageId) {
+        const mainTabs = ['page-home', 'page-sell', 'page-import', 'page-report'];
+        const activeKey = mainTabs.includes(pageId) ? pageId : (MOBILE_NAV_MORE_PAGES.includes(pageId) ? 'more' : null);
+
+        document.querySelectorAll('.nav-btn[data-navbtn]').forEach(btn => {
+            const isActive = btn.getAttribute('data-navbtn') === activeKey;
+            const cls = isActive ? btn.getAttribute('data-active-classes') : btn.getAttribute('data-inactive-classes');
+            // Xoá hết class màu/viền cũ (active hoặc inactive) rồi gắn đúng bộ class tương ứng
+            btn.classList.remove(...btn.getAttribute('data-active-classes').split(' '));
+            btn.classList.remove(...btn.getAttribute('data-inactive-classes').split(' '));
+            btn.classList.add(...cls.split(' '));
+        });
+    }
+
     // Ẩn/hiện menu 'Thêm' trên thanh điều hướng
     function toggleMoreMenu() {
         const menu = document.getElementById('more-menu-list');
@@ -1715,8 +1751,21 @@ html:not(.dark) .bg-white {
 </div>
 
 <!-- NHẬP KHO ------>
-<div id="page-import" class="hidden space-y-4 px-2 md:px-6">
+<div id="page-import" class="hidden space-y-4 px-2 md:px-6 pb-24 lg:pb-4">
     <h2 class="text-xl font-bold text-gray-800 dark:text-white">NHẬP KHO</h2>
+
+    <!-- Thanh giỏ hàng nổi - chỉ điện thoại, giống hệt kiểu ở trang Bán Hàng -->
+    <div id="mobile-cart-bar-import" class="lg:hidden fixed bottom-16 left-2 right-2 z-40 bg-white dark:bg-slate-900 border-2 border-yellow-400 dark:border-yellow-600 rounded-2xl shadow-[0_-6px_20px_rgba(0,0,0,0.25)] p-2.5 flex items-center gap-2">
+        <div onclick="document.getElementById('cart-box').scrollIntoView({behavior:'smooth', block:'center'})" class="flex-1 flex items-center gap-2 cursor-pointer active:opacity-70 min-w-0">
+            <div class="relative shrink-0">
+                <i data-lucide="shopping-cart" class="w-6 h-6 text-yellow-600 dark:text-yellow-500"></i>
+                <span id="mobile-cart-count-import" class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-black rounded-full w-4 h-4 flex items-center justify-center">0</span>
+            </div>
+            <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400">SP trong giỏ</div>
+        </div>
+        <button onclick="addToCart()" class="shrink-0 bg-purple-600 text-white px-3 py-3 rounded-xl font-bold text-xs border-b-[3px] border-purple-800 active:translate-y-[2px] active:border-b-[1px]">Thêm giỏ</button>
+        <button onclick="saveImport()" class="shrink-0 bg-blue-600 dark:bg-blue-700 text-white px-3 py-3 rounded-xl font-bold text-xs border-b-[3px] border-blue-800 dark:border-blue-900 active:translate-y-[2px] active:border-b-[1px]">Lưu</button>
+    </div>
 
     <!-- items-stretch giúp 2 khung tự động căng chiều cao bằng nhau.
          flex-col-reverse: trên điện thoại hiển thị cột NHẬP LIỆU (đứng sau trong DOM) lên TRÊN,
@@ -1785,8 +1834,10 @@ html:not(.dark) .bg-white {
                         <button type="button" id="close-scanner-btn" onclick="stopScanner()" class="mt-2 w-full bg-red-500 text-white py-1 rounded-lg font-bold text-xs shadow-sm">❌ Đóng Camera</button>
                     </div>
 
-                    <!-- Hàng 1: Số phiếu, Loại, Nhà cung cấp - cùng 1 dòng -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                    <!-- Hàng 1: Số phiếu, Loại, Nhà cung cấp - PC cùng 1 dòng (3 cột).
+                         Điện thoại: Số phiếu + Loại chung 1 dòng (2 cột), ẩn hẳn ô Nhà cung
+                         cấp đi cho gọn (vẫn hiện đầy đủ trên PC). -->
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
                         <div>
                             <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Số phiếu</label>
                             <input type="text" id="imp-receipt" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-950 font-bold text-blue-600 dark:text-blue-400" readonly>
@@ -1795,7 +1846,7 @@ html:not(.dark) .bg-white {
                             <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Loại</label>
                             <select id="imp-type" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-950 text-gray-800 dark:text-white"><option>Nhập mới</option><option>Nhập đổi</option></select>
                         </div>
-                        <div>
+                        <div class="hidden md:block">
                             <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nhà cung cấp (Chọn hoặc nhập)</label>
                             <input type="text" id="imp-vendor" list="cust-list" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-950 text-gray-800 dark:text-white" placeholder="Chọn hoặc nhập tên NCC..." onkeydown="handleEnter(event, 'imp-name')">
                             <datalist id="cust-list"></datalist>
@@ -1924,8 +1975,31 @@ html:not(.dark) .bg-white {
 </div>
         
 <!-- PHẦN 3: BÁN HÀNG -->
-<div id="page-sell" class="p-2 md:p-6 space-y-4 w-full">
+<div id="page-sell" class="p-2 md:p-6 pb-24 lg:pb-6 space-y-4 w-full">
     <h2 class="text-2xl font-bold text-gray-800 dark:text-white">BÁN HÀNG / XUẤT HOÁ ĐƠN</h2>
+
+    <!-- THANH GIỎ HÀNG NỔI - CHỈ HIỆN TRÊN ĐIỆN THOẠI (ẩn từ lg trở lên). Trước đây trên
+         điện thoại, chọn xong sản phẩm phải cuộn qua hết khu vực chọn sản phẩm mới thấy
+         được giỏ hàng, tổng tiền, và nút Lưu & In. Thanh này đứng yên gần đáy màn hình
+         (chừa khoảng trống bên dưới cho thanh điều hướng của ứng dụng chứa/host), luôn
+         hiện sẵn tổng tiền + số lượng SP + nút Lưu & In ngay tại chỗ - không cần cuộn
+         xuống nữa. Bấm vào phần tổng tiền (không phải nút Lưu) sẽ cuộn tới giỏ hàng để
+         xem/sửa số lượng chi tiết khi cần. -->
+    <div id="mobile-cart-bar" class="hidden lg:hidden fixed bottom-16 left-2 right-2 z-40 bg-white dark:bg-slate-900 border-2 border-blue-400 dark:border-blue-600 rounded-2xl shadow-[0_-6px_20px_rgba(0,0,0,0.25)] p-2.5 flex items-center gap-2">
+        <div onclick="document.getElementById('sell-cart-container').scrollIntoView({behavior:'smooth', block:'start'})" class="flex-1 flex items-center gap-2 cursor-pointer active:opacity-70 min-w-0">
+            <div class="relative shrink-0">
+                <i data-lucide="shopping-cart" class="w-6 h-6 text-blue-600 dark:text-blue-400"></i>
+                <span id="mobile-cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-black rounded-full w-4 h-4 flex items-center justify-center">0</span>
+            </div>
+            <div class="min-w-0">
+                <div class="text-[10px] text-slate-400 dark:text-slate-500 leading-none">Xem giỏ hàng</div>
+                <div id="mobile-cart-total" class="text-base font-black text-red-500 truncate">0 đ</div>
+            </div>
+        </div>
+        <button onclick="saveAndPrint()" class="shrink-0 bg-green-600 dark:bg-green-700 text-white px-5 py-3 rounded-xl font-bold text-sm border-b-[3px] border-green-800 dark:border-green-900 active:translate-y-[2px] active:border-b-[1px]">
+            LƯU & IN
+        </button>
+    </div>
 
    <div class="flex flex-col lg:flex-row gap-4 w-full">
    <div class="lg:w-1/2 w-full space-y-4 h-auto md:h-[850px]">
@@ -2480,7 +2554,20 @@ html:not(.dark) .bg-white {
 </div>
 
 		<!-- PHẦN 6: SẢN XUẤT -->
-<div id="page-SanXuat" class="page-content hidden p-2 md:p-6 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300">
+<div id="page-SanXuat" class="page-content hidden p-2 md:p-6 pb-24 lg:pb-6 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300">
+
+    <!-- Thanh giỏ hàng nổi - chỉ điện thoại -->
+    <div id="mobile-cart-bar-sx" class="lg:hidden fixed bottom-16 left-2 right-2 z-40 bg-white dark:bg-slate-900 border-2 border-purple-400 dark:border-purple-600 rounded-2xl shadow-[0_-6px_20px_rgba(0,0,0,0.25)] p-2.5 flex items-center gap-2">
+        <div onclick="document.getElementById('sx-cart-list').scrollIntoView({behavior:'smooth', block:'center'})" class="flex-1 flex items-center gap-2 cursor-pointer active:opacity-70 min-w-0">
+            <div class="relative shrink-0">
+                <i data-lucide="shopping-cart" class="w-6 h-6 text-purple-600 dark:text-purple-400"></i>
+                <span id="mobile-cart-count-sx" class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-black rounded-full w-4 h-4 flex items-center justify-center">0</span>
+            </div>
+            <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400">SP trong giỏ</div>
+        </div>
+        <button onclick="themSanPhamVaoGioSX()" class="shrink-0 bg-emerald-600 text-white px-3 py-3 rounded-xl font-bold text-xs border-b-[3px] border-emerald-800 active:translate-y-[2px] active:border-b-[1px]">Thêm giỏ</button>
+        <button onclick="luuSanXuat()" class="shrink-0 bg-blue-600 dark:bg-blue-700 text-white px-3 py-3 rounded-xl font-bold text-xs border-b-[3px] border-blue-800 dark:border-blue-900 active:translate-y-[2px] active:border-b-[1px]">Lưu</button>
+    </div>
   <div class="max-w-[98%] mx-auto">
     <h3 class="mb-6 font-bold text-2xl text-gray-800 dark:text-white">THEO DÕI SẢN XUẤT</h3>
 
@@ -2566,7 +2653,9 @@ html:not(.dark) .bg-white {
               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-2 mb-3">
+            <!-- Điện thoại: 3 ô SL Sản phẩm / Tồn Cuối / Số KG Đã Đóng chung 1 dòng (3 cột).
+                 PC: giữ nguyên bố cục cũ - SL + Tồn Cuối 1 dòng, Số KG Đã Đóng xuống dòng riêng. -->
+            <div class="grid grid-cols-3 md:grid-cols-2 gap-2 mb-3">
               <div>
                 <label class="block text-xs font-bold text-gray-400 uppercase mb-1">SL Sản phẩm</label>
                 <input type="number" id="sxSL" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-950 text-gray-800 dark:text-white" placeholder="0" oninput="tinhSoKgThanhPham(); tinhTonCuoi();">
@@ -2575,11 +2664,10 @@ html:not(.dark) .bg-white {
                 <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Tồn Cuối</label>
                 <input type="text" id="sxTonCuoi" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-950 text-gray-800 dark:text-white" readonly>
               </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Số KG Đã Đóng</label>
-              <input type="number" id="sxSoKg" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-950 text-gray-800 dark:text-white" placeholder="0.00">
+              <div class="md:col-span-2">
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Số KG Đã Đóng</label>
+                <input type="number" id="sxSoKg" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-950 text-gray-800 dark:text-white" placeholder="0.00">
+              </div>
             </div>
 
             <div class="grid grid-cols-3 gap-2 mb-2">
@@ -2625,7 +2713,20 @@ html:not(.dark) .bg-white {
 </div>
 
 <!-- PHẦN 7: NGUYÊN LIỆU & CÔNG NỢ -->
-<div id="page-NguyenLieu" class="page-content hidden p-2 md:p-6 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300">
+<div id="page-NguyenLieu" class="page-content hidden p-2 md:p-6 pb-24 lg:pb-6 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300">
+
+    <!-- Thanh giỏ hàng nổi - chỉ điện thoại -->
+    <div id="mobile-cart-bar-nl" class="lg:hidden fixed bottom-16 left-2 right-2 z-40 bg-white dark:bg-slate-900 border-2 border-lime-400 dark:border-lime-600 rounded-2xl shadow-[0_-6px_20px_rgba(0,0,0,0.25)] p-2.5 flex items-center gap-2">
+        <div onclick="document.getElementById('gio-hang-nl').scrollIntoView({behavior:'smooth', block:'center'})" class="flex-1 flex items-center gap-2 cursor-pointer active:opacity-70 min-w-0">
+            <div class="relative shrink-0">
+                <i data-lucide="shopping-cart" class="w-6 h-6 text-lime-600 dark:text-lime-500"></i>
+                <span id="mobile-cart-count-nl" class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-black rounded-full w-4 h-4 flex items-center justify-center">0</span>
+            </div>
+            <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400">NL trong giỏ</div>
+        </div>
+        <button onclick="addNguyenLieuToCart()" class="shrink-0 bg-emerald-600 text-white px-3 py-3 rounded-xl font-bold text-xs border-b-[3px] border-emerald-800 active:translate-y-[2px] active:border-b-[1px]">Thêm giỏ</button>
+        <button onclick="saveFullInvoice()" class="shrink-0 bg-blue-600 dark:bg-blue-700 text-white px-3 py-3 rounded-xl font-bold text-xs border-b-[3px] border-blue-800 dark:border-blue-900 active:translate-y-[2px] active:border-b-[1px]">Lưu</button>
+    </div>
     <!-- Bỏ max-w-7xl để dùng toàn bộ màn hình -->
     <div class="w-full">
         <h3 class="mb-6 font-bold text-2xl text-gray-800 px-2 md:px-0">QUẢN LÝ NGUYÊN LIỆU</h3>
@@ -3753,6 +3854,9 @@ function showPage(pageId) {
     if (targetPage) {
         targetPage.classList.remove('hidden');
     }
+
+    // 2b. Cập nhật tab nào đang được tô màu nổi bật trên thanh điều hướng dưới cùng (di động)
+    if (typeof updateMobileNavActive === 'function') updateMobileNavActive(pageId);
 
     // 3. TỰ ĐỘNG ĐÓNG SIDEBAR VÀ OVERLAY TRÊN DI ĐỘNG
     if (window.innerWidth <= 768) {
@@ -5560,6 +5664,11 @@ db.collection('customers').onSnapshot(() => {
 function renderCart() {
     const cartBox = document.getElementById('cart-box');
     
+    // Cập nhật số lượng trên thanh giỏ hàng nổi (điện thoại) - LUÔN hiện thanh này (kể cả
+    // giỏ đang trống) vì nút "Thêm giỏ" trên đó cần dùng được để thêm SẢN PHẨM ĐẦU TIÊN.
+    const mobileCountImport = document.getElementById('mobile-cart-count-import');
+    if (mobileCountImport) mobileCountImport.innerText = cart.length;
+
     // Nếu giỏ hàng trống, hiển thị thông báo nhẹ nhàng
     if (cart.length === 0) {
         cartBox.innerHTML = '<p class="text-gray-400 text-center py-4 italic">Chưa có sản phẩm trong phiếu</p>';
@@ -6560,6 +6669,8 @@ function renderSellCart() {
         body.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400 italic">Giỏ hàng đang trống</td></tr>`;
         const totalDisplay = document.getElementById('cart-total-display');
         if (totalDisplay) totalDisplay.innerText = "0 đ";
+        const mobileBar = document.getElementById('mobile-cart-bar');
+        if (mobileBar) mobileBar.classList.add('hidden');
         return;
     }
 
@@ -7082,6 +7193,22 @@ function updateCartTotalDisplay() {
     const grandTotal = subTotal + taxTotal;
 
     totalDisplay.innerText = grandTotal.toLocaleString('vi-VN') + ' đ';
+
+    // Đồng bộ thanh giỏ hàng nổi trên điện thoại (chỉ hiện khi giỏ hàng có ít nhất 1 món)
+    const mobileBar = document.getElementById('mobile-cart-bar');
+    if (mobileBar) {
+        const totalQty = sellCart.reduce((sum, item) => sum + (parseFloat(item.qty) || 0), 0);
+        const countEl = document.getElementById('mobile-cart-count');
+        const totalEl = document.getElementById('mobile-cart-total');
+        if (countEl) countEl.innerText = totalQty;
+        if (totalEl) totalEl.innerText = grandTotal.toLocaleString('vi-VN') + ' đ';
+        if (sellCart.length > 0) {
+            mobileBar.classList.remove('hidden');
+        } else {
+            mobileBar.classList.add('hidden');
+        }
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
 }
 
 // Lưu ý: Hãy gọi hàm này bên trong hàm renderSellCart() của bạn
@@ -11762,6 +11889,12 @@ function renderGioHangSX() {
 
     if (sophieuEl) sophieuEl.innerText = soPhieuInput ? soPhieuInput.value : "";
     if (countEl) countEl.innerText = sxCart.length;
+
+    // Cập nhật thanh giỏ hàng nổi (điện thoại) - LUÔN hiện thanh này (kể cả giỏ đang
+    // trống) vì nút "Thêm giỏ" trên đó cần dùng được để thêm sản phẩm ĐẦU TIÊN.
+    const mobileCountSx = document.getElementById('mobile-cart-count-sx');
+    if (mobileCountSx) mobileCountSx.innerText = sxCart.length;
+
     if (!box) return;
 
     if (sxCart.length === 0) {
@@ -12801,6 +12934,11 @@ function renderCartNL() {
     const gioHangDiv = document.getElementById('gio-hang-nl');
     if (!gioHangDiv) return;
 
+    // Cập nhật thanh giỏ hàng nổi (điện thoại) - LUÔN hiện thanh này (kể cả giỏ đang
+    // trống) vì nút "Thêm giỏ" trên đó cần dùng được để thêm nguyên liệu ĐẦU TIÊN.
+    const mobileCountNl = document.getElementById('mobile-cart-count-nl');
+    if (mobileCountNl) mobileCountNl.innerText = cartNL.length;
+
     gioHangDiv.innerHTML = cartNL.map((item, index) => `
         <div class="flex justify-between items-center p-2 border-b">
             <span>${item.nl} | ${item.sl} | ${item.thanhTien.toLocaleString()} đ</span>
@@ -13332,16 +13470,16 @@ function renderNotesList() {
         const isDone = ev.classNames && ev.classNames.includes('event-done');
         const timeStr = ev.start ? ev.start.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Cả ngày';
         const title = (ev.title || '').replace('✅ ', '').replace(' (Đã xong)', '');
-        // TRƯỚC ĐÂY chỉ có viền trái mỏng 4px + nền xám phẳng -> ở giao diện Tối viền màu
-        // gần như chìm vào nền, trông như "mất màu". Giờ tô cả nền của dòng bằng đúng màu
-        // sự kiện (rất nhạt, 15% độ đậm) để màu luôn nổi bật rõ ràng ở cả 2 giao diện.
+        // Tô NGUYÊN KHỐI nền đặc đúng màu của sự kiện (giống hệt ô màu trên lịch), chữ trắng
+        // cố định - dùng toàn bộ style inline (không có class "dark:") nên màu LUÔN giữ
+        // nguyên y hệt dù đang ở giao diện Sáng hay Tối, không bị nhạt/mất màu nữa.
         return `
             <div onclick="openMobileEventView('${ev.id}')"
-                 class="flex items-start gap-2 p-2 rounded-lg cursor-pointer border-l-4 hover:brightness-95 dark:hover:brightness-125 transition-all ${isDone ? 'opacity-50' : ''}"
-                 style="border-left-color:${color}; background-color:${color}26;">
+                 class="flex items-start gap-2 p-2.5 rounded-lg cursor-pointer hover:brightness-95 transition-all ${isDone ? 'opacity-60' : ''}"
+                 style="background-color:${color}; color:#ffffff;">
                 <div class="min-w-0 flex-1">
-                    <p class="text-sm font-bold text-slate-800 dark:text-white truncate">${isDone ? '✅ ' : ''}${title}</p>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-300">${timeStr}</p>
+                    <p class="text-sm font-bold truncate" style="color:#ffffff;">${isDone ? '✅ ' : ''}${title}</p>
+                    <p class="text-[11px]" style="color:rgba(255,255,255,0.85);">${timeStr}</p>
                 </div>
             </div>
         `;
