@@ -1366,7 +1366,7 @@ html:not(.dark) .bg-white {
   </div>
 
   <!-- DI ĐỘNG -->
-  <div class="md:hidden fixed bottom-0 left-0 w-full z-[800] bg-slate-900 border-t border-slate-800/80 shadow-[0_-4px_15px_rgba(0,0,0,0.5)]">
+  <div id="mobile-bottom-nav" class="md:hidden fixed bottom-0 left-0 w-full z-[800] bg-slate-900 border-t border-slate-800/80 shadow-[0_-4px_15px_rgba(0,0,0,0.5)]" style="transition: transform 0.25s ease;">
     
     <div id="more-menu-list" class="hidden absolute bottom-full right-2 w-max bg-slate-900 border border-slate-800 rounded-xl shadow-[0_-5px_20px_rgba(0,0,0,0.5)] flex flex-col p-2 gap-2 mb-2 select-none">
         
@@ -1480,6 +1480,72 @@ html:not(.dark) .bg-white {
             lucide.createIcons();
         }
     }
+
+    // ================================================================
+    // ẨN/HIỆN THANH MENU DƯỚI THEO HƯỚNG CUỘN (chỉ điện thoại) - giống Gmail/Shopee:
+    // cuộn xuống thì thanh tự trượt ẩn (nhường thêm chỗ đọc danh sách), cuộn lên dù chỉ
+    // 1 chút hoặc gần về đầu trang thì hiện lại ngay lập tức. KHÔNG ẩn hẳn kiểu phải bấm
+    // mới hiện lại - vì đây là app cần đổi tab (Bán Hàng/Nhập Kho/Kho Hàng...) liên tục.
+    //
+    // Nhiều danh sách trong app (Kho Hàng, Lịch Sử HĐ, Sản Xuất...) cuộn BÊN TRONG 1 khung
+    // riêng (overflow-y-auto) chứ không cuộn cả trang, nên chỉ lắng nghe sự kiện scroll
+    // trên window là không đủ. Dùng addEventListener với {capture: true} ở cấp document
+    // để bắt được sự kiện cuộn phát sinh từ BẤT KỲ khung cuộn lồng nhau nào trên trang,
+    // không riêng gì cuộn cả trang.
+    (function () {
+        const nav = document.getElementById('mobile-bottom-nav');
+        if (!nav) return;
+
+        // Các thanh giỏ hàng nổi (Bán Hàng/Nhập Kho/Sản Xuất/Nguyên Liệu) cần trượt theo
+        // CÙNG NHỊP với thanh menu - trước đây thanh menu ẩn đi nhưng các thanh giỏ hàng
+        // vẫn đứng nguyên vị trí cũ (chừa chỗ cho thanh menu), nhìn bị "lơ lửng" giữa
+        // khoảng trống. Giờ 2 thanh trượt xuống/lên CÙNG LÚC với nhau.
+        const cartBars = ['mobile-cart-bar', 'mobile-cart-bar-import', 'mobile-cart-bar-sx', 'mobile-cart-bar-nl']
+            .map(id => document.getElementById(id))
+            .filter(Boolean);
+
+        const lastScrollByEl = new WeakMap();
+        const isMobileView = () => window.innerWidth < 768;
+
+        function setNavVisible(visible) {
+            nav.style.transform = visible ? 'translateY(0)' : 'translateY(100%)';
+            // Thanh giỏ hàng nổi: khi menu hiện thì đứng cách đáy 1 khoảng (chừa chỗ cho
+            // menu, dùng lại giá trị bottom-16 có sẵn qua class), khi menu ẩn thì hạ
+            // xuống sát đáy màn hình luôn.
+            cartBars.forEach(bar => {
+                bar.style.bottom = visible ? '' : '0.5rem';
+            });
+        }
+
+        function handleAnyScroll(e) {
+            if (!isMobileView()) return;
+
+            const target = (e.target === document) ? document.scrollingElement || document.documentElement : e.target;
+            const scrollTop = (typeof target.scrollTop === 'number') ? target.scrollTop : (window.pageYOffset || 0);
+            const prevTop = lastScrollByEl.get(target) || 0;
+            const delta = scrollTop - prevTop;
+            lastScrollByEl.set(target, scrollTop);
+
+            // Đang mở menu "Khác" mà bắt đầu cuộn thì tự đóng lại, tránh che nội dung
+            const moreMenu = document.getElementById('more-menu-list');
+            if (moreMenu && !moreMenu.classList.contains('hidden')) {
+                moreMenu.classList.add('hidden');
+            }
+
+            if (scrollTop <= 20) {
+                // Gần đầu danh sách/trang -> luôn hiện thanh menu
+                setNavVisible(true);
+            } else if (delta > 4) {
+                // Cuộn xuống rõ ràng -> trượt ẩn xuống dưới
+                setNavVisible(false);
+            } else if (delta < -4) {
+                // Cuộn lên (dù chỉ 1 chút) -> hiện lại ngay lập tức
+                setNavVisible(true);
+            }
+        }
+
+        document.addEventListener('scroll', handleAnyScroll, { passive: true, capture: true });
+    })();
   </script>
 
   <!-- PC SIDEBAR (Thêm flex flex-col) -->
@@ -1755,7 +1821,7 @@ html:not(.dark) .bg-white {
     <h2 class="text-xl font-bold text-gray-800 dark:text-white">NHẬP KHO</h2>
 
     <!-- Thanh giỏ hàng nổi - chỉ điện thoại, giống hệt kiểu ở trang Bán Hàng -->
-    <div id="mobile-cart-bar-import" class="lg:hidden fixed bottom-16 left-2 right-2 z-40 bg-white dark:bg-slate-900 border-2 border-yellow-400 dark:border-yellow-600 rounded-2xl shadow-[0_-6px_20px_rgba(0,0,0,0.25)] p-2.5 flex items-center gap-2">
+    <div id="mobile-cart-bar-import" style="transition: bottom 0.25s ease;" class="lg:hidden fixed bottom-16 left-2 right-2 z-40 bg-white dark:bg-slate-900 border-2 border-yellow-400 dark:border-yellow-600 rounded-2xl shadow-[0_-6px_20px_rgba(0,0,0,0.25)] p-2.5 flex items-center gap-2">
         <div onclick="document.getElementById('cart-box').scrollIntoView({behavior:'smooth', block:'center'})" class="flex-1 flex items-center gap-2 cursor-pointer active:opacity-70 min-w-0">
             <div class="relative shrink-0">
                 <i data-lucide="shopping-cart" class="w-6 h-6 text-yellow-600 dark:text-yellow-500"></i>
@@ -1884,8 +1950,10 @@ html:not(.dark) .bg-white {
                     <div id="cart-box" class="flex-1 min-h-[150px] bg-white dark:bg-slate-900 p-2 rounded-xl border border-gray-300 dark:border-slate-700 overflow-x-auto overflow-y-auto text-gray-800 dark:text-white"></div>
                 </div>
 
-                <!-- 2 nút Thêm vào giỏ (trái) và Lưu nhập kho (phải) cùng 1 hàng -->
-                <div class="grid grid-cols-2 gap-3 mt-4">
+                <!-- 2 nút Thêm vào giỏ (trái) và Lưu nhập kho (phải) cùng 1 hàng - CHỈ HIỆN
+                     TRÊN PC (lg+), trên điện thoại đã có sẵn 2 nút này ở thanh nổi cố định
+                     phía dưới rồi nên ẩn đi cho đỡ trùng lặp. -->
+                <div class="hidden lg:grid grid-cols-2 gap-3 mt-4">
                     <button id="add-btn" onclick="addToCart()"
                         class="w-full bg-violet-600 dark:bg-violet-700 text-white py-3 rounded-2xl font-bold transition-all duration-75 border-b-[4px] border-violet-800 dark:border-violet-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
                         Thêm vào giỏ
@@ -1985,7 +2053,7 @@ html:not(.dark) .bg-white {
          hiện sẵn tổng tiền + số lượng SP + nút Lưu & In ngay tại chỗ - không cần cuộn
          xuống nữa. Bấm vào phần tổng tiền (không phải nút Lưu) sẽ cuộn tới giỏ hàng để
          xem/sửa số lượng chi tiết khi cần. -->
-    <div id="mobile-cart-bar" class="hidden lg:hidden fixed bottom-16 left-2 right-2 z-40 bg-white dark:bg-slate-900 border-2 border-blue-400 dark:border-blue-600 rounded-2xl shadow-[0_-6px_20px_rgba(0,0,0,0.25)] p-2.5 flex items-center gap-2">
+    <div id="mobile-cart-bar" style="transition: bottom 0.25s ease;" class="hidden lg:hidden fixed bottom-16 left-2 right-2 z-40 bg-white dark:bg-slate-900 border-2 border-blue-400 dark:border-blue-600 rounded-2xl shadow-[0_-6px_20px_rgba(0,0,0,0.25)] p-2.5 flex items-center gap-2">
         <div onclick="document.getElementById('sell-cart-container').scrollIntoView({behavior:'smooth', block:'start'})" class="flex-1 flex items-center gap-2 cursor-pointer active:opacity-70 min-w-0">
             <div class="relative shrink-0">
                 <i data-lucide="shopping-cart" class="w-6 h-6 text-blue-600 dark:text-blue-400"></i>
@@ -2557,7 +2625,7 @@ html:not(.dark) .bg-white {
 <div id="page-SanXuat" class="page-content hidden p-2 md:p-6 pb-24 lg:pb-6 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300">
 
     <!-- Thanh giỏ hàng nổi - chỉ điện thoại -->
-    <div id="mobile-cart-bar-sx" class="lg:hidden fixed bottom-16 left-2 right-2 z-40 bg-white dark:bg-slate-900 border-2 border-purple-400 dark:border-purple-600 rounded-2xl shadow-[0_-6px_20px_rgba(0,0,0,0.25)] p-2.5 flex items-center gap-2">
+    <div id="mobile-cart-bar-sx" style="transition: bottom 0.25s ease;" class="lg:hidden fixed bottom-16 left-2 right-2 z-40 bg-white dark:bg-slate-900 border-2 border-purple-400 dark:border-purple-600 rounded-2xl shadow-[0_-6px_20px_rgba(0,0,0,0.25)] p-2.5 flex items-center gap-2">
         <div onclick="document.getElementById('sx-cart-list').scrollIntoView({behavior:'smooth', block:'center'})" class="flex-1 flex items-center gap-2 cursor-pointer active:opacity-70 min-w-0">
             <div class="relative shrink-0">
                 <i data-lucide="shopping-cart" class="w-6 h-6 text-purple-600 dark:text-purple-400"></i>
@@ -2693,14 +2761,15 @@ html:not(.dark) .bg-white {
                 <div class="text-center text-gray-400 text-xs italic py-3">Giỏ hàng đang trống</div>
             </div>
 
+            <!-- CHỈ HIỆN TRÊN PC (lg+) - trên điện thoại đã có ở thanh nổi cố định rồi -->
             <button onclick="themSanPhamVaoGioSX()" 
-                class="mt-2 w-full bg-gradient-to-b from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700 text-white font-bold py-2.5 rounded-xl transition-all duration-75 border-b-[4px] border-emerald-700 dark:border-emerald-900 hover:-translate-y-1 hover:brightness-110 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+                class="hidden lg:block mt-2 w-full bg-gradient-to-b from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700 text-white font-bold py-2.5 rounded-xl transition-all duration-75 border-b-[4px] border-emerald-700 dark:border-emerald-900 hover:-translate-y-1 hover:brightness-110 active:translate-y-[2px] active:border-b-[2px] shadow-md">
                 ➕ THÊM VÀO GIỎ
             </button>
           </div>
 
-          <!-- Nút lưu được đẩy xuống đáy, tự động căng đều chiều cao -->
-          <div class="mt-4 pt-2">
+          <!-- Nút lưu được đẩy xuống đáy, tự động căng đều chiều cao - CHỈ HIỆN TRÊN PC -->
+          <div class="hidden lg:block mt-4 pt-2">
             <button onclick="luuSanXuat()" 
                 class="w-full bg-blue-600 dark:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
                 LƯU SẢN XUẤT
@@ -2716,7 +2785,7 @@ html:not(.dark) .bg-white {
 <div id="page-NguyenLieu" class="page-content hidden p-2 md:p-6 pb-24 lg:pb-6 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300">
 
     <!-- Thanh giỏ hàng nổi - chỉ điện thoại -->
-    <div id="mobile-cart-bar-nl" class="lg:hidden fixed bottom-16 left-2 right-2 z-40 bg-white dark:bg-slate-900 border-2 border-lime-400 dark:border-lime-600 rounded-2xl shadow-[0_-6px_20px_rgba(0,0,0,0.25)] p-2.5 flex items-center gap-2">
+    <div id="mobile-cart-bar-nl" style="transition: bottom 0.25s ease;" class="lg:hidden fixed bottom-16 left-2 right-2 z-40 bg-white dark:bg-slate-900 border-2 border-lime-400 dark:border-lime-600 rounded-2xl shadow-[0_-6px_20px_rgba(0,0,0,0.25)] p-2.5 flex items-center gap-2">
         <div onclick="document.getElementById('gio-hang-nl').scrollIntoView({behavior:'smooth', block:'center'})" class="flex-1 flex items-center gap-2 cursor-pointer active:opacity-70 min-w-0">
             <div class="relative shrink-0">
                 <i data-lucide="shopping-cart" class="w-6 h-6 text-lime-600 dark:text-lime-500"></i>
@@ -2841,11 +2910,11 @@ html:not(.dark) .bg-white {
             </div>
             <div id="gio-hang-nl" class="my-2 border dark:border-slate-700 p-2 text-xs bg-gray-50 dark:bg-slate-950 dark:text-white rounded h-[250px] overflow-y-auto border-blue-100"></div>
             <button type="button" onclick="addNguyenLieuToCart();" 
-			class="w-full bg-gradient-to-b from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700 text-white py-2.5 rounded-xl mb-3 text-sm font-bold shadow-md transition-all duration-75 border-b-[4px] border-emerald-700 dark:border-emerald-900 hover:-translate-y-1 hover:brightness-110 active:translate-y-[2px] active:border-b-[2px]">
+			class="hidden lg:block w-full bg-gradient-to-b from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700 text-white py-2.5 rounded-xl mb-3 text-sm font-bold shadow-md transition-all duration-75 border-b-[4px] border-emerald-700 dark:border-emerald-900 hover:-translate-y-1 hover:brightness-110 active:translate-y-[2px] active:border-b-[2px]">
 			➕ THÊM VÀO GIỎ
 		</button>
             <button onclick="saveFullInvoice()" 
-			class="w-full bg-blue-600 dark:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-lg mt-2">
+			class="hidden lg:block w-full bg-blue-600 dark:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-lg mt-2">
 			LƯU PHIẾU NHẬP
 		</button>
         </div>
