@@ -10233,6 +10233,24 @@ async function exportSales() {
 }
 
 // 2. Xuất báo cáo Nhập Xuất Tồn
+// ĐỊNH NGHĨA CÁC NHÓM SẢN PHẨM DÙNG CHUNG CHO CÁC BÁO CÁO XUẤT EXCEL (Báo Cáo Tồn Kho,
+// Báo Cáo Tổng Hợp...) - xếp nhóm dựa theo từ khoá xuất hiện trong tên sản phẩm. Sản phẩm
+// nào không khớp từ khoá nào sẽ tự động rơi vào nhóm "KHÁC" ở cuối cùng, không bị rớt mất
+// khỏi báo cáo. Thêm/sửa từ khoá ở đây khi phát sinh nhóm sản phẩm mới - áp dụng ngay cho
+// TẤT CẢ báo cáo có phân nhóm, không cần sửa nhiều nơi.
+const NHOM_SP_DINH_NGHIA = [
+    { ten: 'THỊT CHƯNG MẮM TÉP', khop: (n) => /tcmt|khay nh[ôo]m|m[ắa]m/i.test(n) },
+    { ten: 'CƠM CHÁY', khop: (n) => /ccqc|c[ơo]m ch[áa]y/i.test(n) },
+    { ten: 'TRÀ HOA VÀNG', khop: (n) => /tr[àa] hoa v[àa]ng|^tr[àa]\b/i.test(n) },
+    { ten: 'RUỐC CÁ', khop: (n) => /ru[ốô]c/i.test(n) },
+    { ten: 'BÁNH DỨA', khop: (n) => /b[áa]nh d[ứư]a/i.test(n) },
+    { ten: 'CÁC LOẠI HỘP TÚI', khop: (n) => /t[úu]i|h[ộo]p qu[àa]/i.test(n) },
+];
+function xepNhomSanPham(ten) {
+    const nhom = NHOM_SP_DINH_NGHIA.find(g => g.khop(ten));
+    return nhom ? nhom.ten : 'KHÁC';
+}
+
 async function exportInventory() {
     let from = document.getElementById('date-from').value;
     let to = document.getElementById('date-to').value;
@@ -10311,43 +10329,90 @@ async function exportInventory() {
         const workbook = new ExcelJS.Workbook();
         const sheet = workbook.addWorksheet('NXT');
 
-        // Tiêu đề
-        sheet.addRow(["BÁO CÁO NHẬP XUẤT TỒN"]).font = { size: 16, bold: true };
-        sheet.addRow([`Từ ngày: ${from} - Đến ngày: ${to}`]);
+        // Tiêu đề - căn giữa, gộp ô, giống hệt kiểu Báo Cáo Tổng Hợp
+        const titleRow = sheet.addRow(["BÁO CÁO NHẬP XUẤT TỒN"]);
+        titleRow.font = { size: 16, bold: true };
+        sheet.mergeCells(titleRow.number, 1, titleRow.number, 7);
+        titleRow.alignment = { horizontal: 'center' };
+
+        const dateRow = sheet.addRow([`Từ ngày: ${from} - Đến ngày: ${to}`]);
+        sheet.mergeCells(dateRow.number, 1, dateRow.number, 7);
+        dateRow.alignment = { horizontal: 'center' };
         sheet.addRow([]);
 
-        // Header
+        // Header - căn giữa cả ngang lẫn dọc, tô nền xanh nhạt, in đậm, giống Báo Cáo Tổng Hợp
         const headers = ["STT", "Tên sản phẩm", "Tồn đầu", "Nhập mới", "Nhập đổi", "Xuất", "Tồn cuối"];
         const headerRow = sheet.addRow(headers);
-        headerRow.eachCell(c => { 
-            c.font = { bold: true }; 
-            c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } }; 
+        headerRow.height = 25;
+        headerRow.eachCell(c => {
+            c.font = { bold: true, size: 12 };
+            c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFB3E5FC' } };
             c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+            c.alignment = { horizontal: 'center', vertical: 'middle' };
         });
 
         // Sắp xếp theo thứ tự chuẩn: khối lượng giảm dần, cùng khối lượng thì Thuỷ tinh > Nhựa
         const sortedNames = Object.keys(inventory).sort(compareProductDisplayOrder);
 
-        let stt = 0;
+        // Gom theo nhóm sản phẩm (dùng chung NHOM_SP_DINH_NGHIA/xepNhomSanPham() ở đầu file)
+        // giống hệt cách làm ở Báo Cáo Tổng Hợp, mỗi nhóm có 1 dòng tiêu đề tô vàng.
+        const nhomMap = new Map();
+        const thuTuNhom = NHOM_SP_DINH_NGHIA.map(g => g.ten).concat(['KHÁC']);
+        thuTuNhom.forEach(ten => nhomMap.set(ten, []));
+
         sortedNames.forEach((name) => {
             const item = inventory[name];
             const currentStock = currentStockMap[name] || 0;
             const tonCuoi = currentStock - item.gapNet;
             const tonDau = tonCuoi - item.nhapMoi - item.nhapDoi + item.xuat;
-
             if (tonDau === 0 && item.nhapMoi === 0 && item.nhapDoi === 0 && item.xuat === 0 && tonCuoi === 0) return;
+            nhomMap.get(xepNhomSanPham(name)).push({ name, tonDau, item, tonCuoi });
+        });
 
-            stt += 1;
-            const row = sheet.addRow([stt, name, tonDau, item.nhapMoi, item.nhapDoi, item.xuat, tonCuoi]);
-            
-            // Kẻ bảng cho từng dòng dữ liệu
-            row.eachCell((cell) => {
-                cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+        let stt = 0;
+        let romanIdx = 0;
+        const soLaMa = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+        thuTuNhom.forEach(tenNhom => {
+            const danhSach = nhomMap.get(tenNhom);
+            if (danhSach.length === 0) return;
+
+            const rowNhom = sheet.addRow([`${soLaMa[romanIdx] || (romanIdx + 1)}. ${tenNhom}`]);
+            romanIdx++;
+            sheet.mergeCells(rowNhom.number, 1, rowNhom.number, 7);
+            rowNhom.eachCell(c => {
+                c.font = { bold: true, size: 12 };
+                c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFEB3B' } };
+                c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+            });
+
+            danhSach.forEach(({ name, tonDau, item, tonCuoi }) => {
+                stt += 1;
+                const row = sheet.addRow([stt, name, tonDau, item.nhapMoi, item.nhapDoi, item.xuat, tonCuoi]);
+                row.eachCell((c, col) => {
+                    c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+                    c.font = { size: 12 };
+                    // Căn giữa cột STT (1) và các cột số lượng (3-7), in đậm các cột số lượng
+                    if (col === 1) c.alignment = { horizontal: 'center' };
+                    if (col >= 3 && col <= 7) {
+                        c.alignment = { horizontal: 'center' };
+                        c.font = { bold: true, size: 12 };
+                    }
+                });
             });
         });
 
         // Căn chỉnh độ rộng cột
         sheet.columns = [{ width: 8 }, { width: 30 }, { width: 12 }, { width: 12 }, { width: 12 }, { width: 12 }, { width: 12 }];
+
+        // Thiết lập trang in: A4, khổ dọc, lề nhỏ nhất, co vừa 1 trang ngang khi in
+        sheet.pageSetup = {
+            paperSize: 9, // A4
+            orientation: 'portrait',
+            fitToPage: true,
+            fitToWidth: 1,
+            fitToHeight: 0,
+            margins: { top: 0.25, left: 0.25, right: 0.25, bottom: 0.25, header: 0.1, footer: 0.1 }
+        };
         
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -10578,39 +10643,60 @@ async function exportFullReport() {
             c.alignment = { horizontal: 'center', vertical: 'middle' }; 
         });
 
-        // SỬA Ở ĐÂY: Dùng orderList đã được sắp xếp từ trước
+        // Dùng bộ phân nhóm dùng chung NHOM_SP_DINH_NGHIA / xepNhomSanPham() đã định nghĩa
+        // ở đầu file (áp dụng đồng bộ cho cả Báo Cáo Tồn Kho và Báo Cáo Tổng Hợp).
+
+        // SỬA Ở ĐÂY: Dùng orderList đã được sắp xếp từ trước, nhưng gom lại theo nhóm sản
+        // phẩm trước khi vẽ bảng - mỗi nhóm có 1 dòng tiêu đề tô vàng, chỉ hiện nhóm nào có
+        // ít nhất 1 sản phẩm thực sự có số liệu (giữ đúng logic bỏ qua dòng toàn số 0 như cũ).
+        const nhomMap = new Map(); // tên nhóm -> mảng các dòng dữ liệu sẽ vẽ
+        const thuTuNhom = NHOM_SP_DINH_NGHIA.map(g => g.ten).concat(['KHÁC']);
+        thuTuNhom.forEach(ten => nhomMap.set(ten, []));
+
         orderList.forEach(name => {
-    const item = inventory[name];
-    if (!item) return;
+            const item = inventory[name];
+            if (!item) return;
+            const tonCuoi = item.tonDau + item.nhapMoi + item.nhapDoi - item.xuat;
+            if (item.tonDau === 0 && item.nhapMoi === 0 && item.nhapDoi === 0 && item.xuat === 0 && tonCuoi === 0) return;
 
-    // Tính tồn cuối
-    const tonCuoi = item.tonDau + item.nhapMoi + item.nhapDoi - item.xuat;
+            nhomMap.get(xepNhomSanPham(name)).push({ name, item, tonCuoi });
+        });
 
-    // Kiểm tra nếu tất cả đều bằng 0 thì bỏ qua
-    if (item.tonDau === 0 && item.nhapMoi === 0 && item.nhapDoi === 0 && item.xuat === 0 && tonCuoi === 0) return;
+        let romanIdx = 0;
+        const soLaMa = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+        thuTuNhom.forEach(tenNhom => {
+            const danhSach = nhomMap.get(tenNhom);
+            if (danhSach.length === 0) return; // Nhóm không có sản phẩm nào -> bỏ qua, không hiện tiêu đề thừa
 
-    // Dùng hàm hỗ trợ để biến số 0 thành chuỗi rỗng
-    const valOrEmpty = (v) => (v === 0 ? "" : v);
-
-    const row = sheet.addRow([
-                formatDateToDDMMYYYY(toVal), 
-                name, 
-                formatVal(item.tonDau), 
-                formatVal(item.nhapMoi), 
-                formatVal(item.nhapDoi), 
-                formatVal(item.xuat), 
-                formatVal(item.tonDau + item.nhapMoi + item.nhapDoi - item.xuat)
-            ]);
-            
-            row.eachCell((c, col) => { 
+            // Dòng tiêu đề nhóm - tô vàng, in đậm, gộp hết chiều ngang bảng, giống mẫu
+            const rowNhom = sheet.addRow([`${soLaMa[romanIdx] || (romanIdx + 1)}. ${tenNhom}`]);
+            romanIdx++;
+            sheet.mergeCells(rowNhom.number, 1, rowNhom.number, 7);
+            rowNhom.eachCell(c => {
+                c.font = { bold: true, size: 12 };
+                c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFEB3B' } };
                 c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-				c.font = { size: 12 };
-                
-                // CĂN GIỮA VÀ BÔI ĐẬM TỪ CỘT C (3) ĐẾN G (7)
-                if (col >= 3 && col <= 7) {
-                    c.alignment = { horizontal: 'center' };
-                    c.font = { bold: true, size: 12 };
-                }
+            });
+
+            danhSach.forEach(({ name, item, tonCuoi }) => {
+                const row = sheet.addRow([
+                    formatDateToDDMMYYYY(toVal),
+                    name,
+                    formatVal(item.tonDau),
+                    formatVal(item.nhapMoi),
+                    formatVal(item.nhapDoi),
+                    formatVal(item.xuat),
+                    formatVal(tonCuoi)
+                ]);
+
+                row.eachCell((c, col) => {
+                    c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+                    c.font = { size: 12 };
+                    if (col >= 3 && col <= 7) {
+                        c.alignment = { horizontal: 'center' };
+                        c.font = { bold: true, size: 12 };
+                    }
+                });
             });
         });
 
