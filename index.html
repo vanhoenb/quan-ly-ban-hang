@@ -1412,7 +1412,10 @@ html:not(.dark) .bg-white {
             data-active-classes="border-b-[3px] bg-emerald-950/40 border-emerald-800 text-emerald-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]"
             data-inactive-classes="border-b-[3px] border-transparent text-slate-500"
             class="nav-btn flex flex-col items-center flex-1 py-1 rounded-lg transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[3px] bg-emerald-950/40 border-emerald-800 text-emerald-400 shadow-[0_3px_5px_rgba(0,0,0,0.4)]">
-            <i data-lucide="home" class="w-5 h-5"></i>
+            <span class="relative inline-block">
+                <i data-lucide="home" class="w-5 h-5"></i>
+                <span id="home-overdue-dot-mobile" class="hidden absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full ring-1 ring-slate-900 animate-pulse"></span>
+            </span>
             <span class="text-[8px] md:text-[9px] font-bold tracking-wider mt-0.5">Trang Chủ</span>
         </button>
         
@@ -1553,7 +1556,10 @@ html:not(.dark) .bg-white {
     <nav class="space-y-2 overflow-y-auto max-h-[80vh] flex-1">
         
         <button onclick="showPage('page-home'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" data-perm="page-home" data-navbtn-pc="page-home" data-active-classes="bg-gradient-to-b from-emerald-500 to-emerald-600 dark:from-emerald-900/60 dark:to-emerald-800/50 text-white dark:text-emerald-400 border-b-[4px] border-emerald-700 dark:border-emerald-600 shadow-[0_4px_10px_rgba(0,0,0,0.35)] dark:shadow-[0_6px_15px_rgba(0,0,0,0.35)] font-black tracking-wide" data-inactive-classes="border-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] bg-gradient-to-b from-emerald-500 to-emerald-600 dark:from-emerald-900/60 dark:to-emerald-800/50 text-white dark:text-emerald-400 border-b-[4px] border-emerald-700 dark:border-emerald-600 shadow-[0_4px_10px_rgba(0,0,0,0.35)] dark:shadow-[0_6px_15px_rgba(0,0,0,0.35)] font-black tracking-wide">
-            <i data-lucide="home" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(16,185,129,0.4)]"></i> <span class="sidebar-text">Trang Chủ</span>
+            <span class="relative inline-block">
+                <i data-lucide="home" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(16,185,129,0.4)]"></i>
+                <span id="home-overdue-dot" class="hidden absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white dark:ring-slate-900 animate-pulse"></span>
+            </span> <span class="sidebar-text">Trang Chủ</span>
         </button>
 
         <button onclick="showPage('page-import'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" data-perm="page-import" data-navbtn-pc="page-import" data-active-classes="bg-gradient-to-b from-amber-500 to-amber-600 dark:from-amber-900/60 dark:to-amber-800/50 text-white dark:text-amber-400 border-b-[4px] border-amber-700 dark:border-amber-600 shadow-[0_4px_10px_rgba(0,0,0,0.35)] dark:shadow-[0_6px_15px_rgba(0,0,0,0.35)] font-black tracking-wide" data-inactive-classes="border-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] border-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60">
@@ -1655,6 +1661,7 @@ html:not(.dark) .bg-white {
              class="bg-blue-100/70 dark:bg-blue-900/50 border-b-[4px] border-blue-300 dark:border-blue-800 text-blue-600 dark:text-blue-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(59,130,246,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-blue-200/70 dark:hover:bg-blue-800/60 hover:border-blue-400 dark:hover:border-blue-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
             <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-blue-500 dark:text-blue-300/80">Tổng Doanh Thu</p>
             <h3 id="total-revenue" class="text-md md:text-2xl font-black drop-shadow-[0_1.5px_3px_rgba(59,130,246,0.15)] dark:drop-shadow-[0_2px_4px_rgba(59,130,246,0.3)]">0 đ</h3>
+            <span id="revenue-mom-badge" class="hidden mt-0.5 text-[9px] md:text-[11px] font-bold px-1.5 py-0.5 rounded-full"></span>
         </div>
         
         <!-- Công Nợ Cần Thu -->
@@ -1710,7 +1717,12 @@ html:not(.dark) .bg-white {
                         <input type="date" id="inv-to" onchange="refreshInventory()" class="text-[10px] dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500 transition-all">
                     </div>
                 </div>
-                <div id="home-inventory-list" class="space-y-2 overflow-y-auto custom-scrollbar pr-2 h-[400px] md:h-[500px]"></div>
+                <div id="home-inventory-list" class="space-y-2 overflow-y-auto custom-scrollbar pr-2 h-[400px] md:h-[500px]">
+                    <div class="animate-pulse h-14 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2"></div>
+                    <div class="animate-pulse h-14 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2"></div>
+                    <div class="animate-pulse h-14 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2"></div>
+                    <div class="animate-pulse h-14 bg-slate-200 dark:bg-slate-800 rounded-lg"></div>
+                </div>
             </div>
             
             <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-blue-100 dark:border-blue-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
@@ -1722,7 +1734,12 @@ html:not(.dark) .bg-white {
                     <div class="w-[20%] text-center">Tổng tiền</div>
                     <div class="w-[15%] text-center">Trạng thái</div>
                 </div>
-                <div id="customer-orders-table" class="overflow-y-auto custom-scrollbar h-[400px] md:h-[500px] pr-2"></div>
+                <div id="customer-orders-table" class="overflow-y-auto custom-scrollbar h-[400px] md:h-[500px] pr-2">
+                    <div class="animate-pulse h-12 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2"></div>
+                    <div class="animate-pulse h-12 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2"></div>
+                    <div class="animate-pulse h-12 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2"></div>
+                    <div class="animate-pulse h-12 bg-slate-200 dark:bg-slate-800 rounded-lg"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -2965,7 +2982,9 @@ html:not(.dark) .bg-white {
                 <div class="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800">
                     <h4 class="font-bold text-gray-700 dark:text-slate-200 mb-3">DANH SÁCH GHI CHÚ</h4>
                     <div id="calendar-notes-list" class="space-y-2 max-h-[500px] overflow-y-auto pr-1">
-                        <p class="text-xs text-gray-400 dark:text-slate-500 italic text-center py-3">Đang tải...</p>
+                        <div class="animate-pulse h-10 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2"></div>
+                        <div class="animate-pulse h-10 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2"></div>
+                        <div class="animate-pulse h-10 bg-slate-200 dark:bg-slate-800 rounded-lg"></div>
                     </div>
                 </div>
             </div>
@@ -3452,7 +3471,7 @@ html:not(.dark) .bg-white {
 async function loadUserList() {
     const body = document.getElementById('user-list-body');
     if (!body) return;
-    body.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-400">Đang tải...</td></tr>';
+    body.innerHTML = skeletonRows(6, 6);
     window.userPermCache = {};
     try {
         const snap = await db.collection('app_users').get();
@@ -3562,7 +3581,7 @@ window.activityLogCache = [];
 async function loadActivityLog() {
     const body = document.getElementById('activity-log-body');
     if (!body) return;
-    body.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-400">Đang tải...</td></tr>';
+    body.innerHTML = skeletonRows(6, 6);
     try {
         // 1. Nạp danh sách nhân viên thật (từ app_users) để lọc luôn hiện đủ tất cả, kể cả người chưa có nhật ký nào
         const selUser = document.getElementById('logFilterUser');
@@ -4145,6 +4164,47 @@ async function fillProductDetails(name) {
 }
 
    // --- BIẾN TOÀN CỤC ---
+// ============================================================
+// THÔNG BÁO ĐỒNG BỘ - dùng THAY CHO showAlert() ở mọi nơi trong app, để toàn bộ thông báo
+// lỗi/thành công/cảnh báo đều hiện dạng SweetAlert2 đẹp, nhất quán, chuyên nghiệp -
+// KHÔNG còn hộp thoại showAlert() xấu, cứng nhắc của trình duyệt nữa. Tự đoán loại thông
+// báo (lỗi/thành công/cảnh báo) dựa theo từ khoá trong nội dung, không cần sửa lại
+// từng chỗ gọi showAlert() cũ - chỉ cần đổi tên hàm gọi.
+// Rung nhẹ phản hồi tức thì khi quét mã vạch thành công (chỉ hoạt động trên điện thoại
+// hỗ trợ - tự động không làm gì trên PC/trình duyệt không hỗ trợ, không gây lỗi).
+function hapticFeedback(pattern = 60) {
+    try {
+        if (navigator.vibrate) navigator.vibrate(pattern);
+    } catch (e) { /* im lặng bỏ qua nếu trình duyệt không hỗ trợ */ }
+}
+
+// Khung "đang tải" dạng skeleton (thanh xám nhấp nháy mờ dần) thay cho chữ "Đang tải..."
+// khô khan hoặc màn hình trắng trống trong 1-2 giây khi vào trang có nhiều dữ liệu -
+// cảm giác mượt và chuyên nghiệp hơn nhiều. Dùng cho cả dạng bảng (tr/td) và dạng thẻ card.
+function skeletonRows(count = 5, colspan = 6) {
+    let html = '';
+    for (let i = 0; i < count; i++) {
+        html += `<tr><td colspan="${colspan}" class="p-2"><div class="animate-pulse h-10 bg-slate-200 dark:bg-slate-800 rounded-lg"></div></td></tr>`;
+    }
+    return html;
+}
+function skeletonCards(count = 5, heightClass = 'h-14') {
+    let html = '';
+    for (let i = 0; i < count; i++) {
+        html += `<div class="animate-pulse ${heightClass} bg-slate-200 dark:bg-slate-800 rounded-lg mb-2"></div>`;
+    }
+    return html;
+}
+
+function showAlert(message) {
+    const msg = String(message);
+    let icon = 'info', title = 'Thông báo';
+    if (/lỗi|error|không thể|thất bại|không tìm thấy/i.test(msg)) { icon = 'error'; title = 'Lỗi'; }
+    else if (/đã (thêm|xóa|lưu|cập nhật|xuất|sửa)|thành công/i.test(msg)) { icon = 'success'; title = 'Thành công'; }
+    else if (/vui lòng|chưa|thiếu|cảnh báo/i.test(msg)) { icon = 'warning'; title = 'Chú ý'; }
+    Swal.fire({ icon, title, text: msg });
+}
+
 let cart = [];
 let sellCart = [];
 let cartNL = []; // <--- THÊM DÒNG NÀY VÀO ĐÂY
@@ -4540,6 +4600,39 @@ async function loadDashboard(filter = 'default') {
         paidBySupplierAllTime: paidBySupplierAllTime
     };
 
+    // So sánh doanh thu tháng này với tháng trước - hiện mũi tên tăng/giảm % cạnh "Tổng
+    // Doanh Thu" để biết ngay đang tốt lên hay xấu đi, không cần tự nhẩm. Tận dụng luôn
+    // dữ liệu allSales đã đọc sẵn (4-5 tháng gần nhất), không cần truy vấn thêm.
+    try {
+        const nowD = new Date();
+        const thisMonthKey = `${nowD.getFullYear()}-${String(nowD.getMonth() + 1).padStart(2, '0')}`;
+        const lastMonthDate = new Date(nowD.getFullYear(), nowD.getMonth() - 1, 1);
+        const lastMonthKey = `${lastMonthDate.getFullYear()}-${String(lastMonthDate.getMonth() + 1).padStart(2, '0')}`;
+        let thisMonthTotal = 0, lastMonthTotal = 0;
+        allSales.forEach(o => {
+            const d = o.date?.toDate ? o.date.toDate() : new Date(o.date);
+            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+            if (key === thisMonthKey) thisMonthTotal += (Number(o.total) || 0);
+            else if (key === lastMonthKey) lastMonthTotal += (Number(o.total) || 0);
+        });
+        const badge = document.getElementById('revenue-mom-badge');
+        if (badge) {
+            if (lastMonthTotal > 0) {
+                const pct = ((thisMonthTotal - lastMonthTotal) / lastMonthTotal) * 100;
+                const up = pct >= 0;
+                badge.classList.remove('hidden');
+                badge.className = `mt-0.5 text-[9px] md:text-[11px] font-bold px-1.5 py-0.5 rounded-full ${up ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400' : 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400'}`;
+                badge.innerText = `${up ? '▲' : '▼'} ${Math.abs(pct).toFixed(1)}% so với tháng trước`;
+            } else if (thisMonthTotal > 0) {
+                badge.classList.remove('hidden');
+                badge.className = 'mt-0.5 text-[9px] md:text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400';
+                badge.innerText = `▲ Mới so với tháng trước`;
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+    } catch (e) { console.warn('Không tính được so sánh doanh thu tháng:', e); }
+
     setTimeout(() => {
         if (typeof updateRevenueChart === 'function') updateRevenueChart(filteredSales);
         if (typeof updateTopProductsChart === 'function') updateTopProductsChart(topProducts);
@@ -4559,7 +4652,7 @@ function showDashboardDetail(type) {
 
     if (typeof window.currentDashboardData === 'undefined') {
         console.error("Dữ liệu dashboard chưa sẵn sàng.");
-        alert("Dữ liệu chưa sẵn sàng, vui lòng tải lại trang.");
+        showAlert("Dữ liệu chưa sẵn sàng, vui lòng tải lại trang.");
         return;
     }
 
@@ -4790,6 +4883,26 @@ function renderCustomerOrders(allSales, customersSnap) {
     });
 
     const currentOrders = Array.from(latestOrdersMap.values()).sort((a, b) => b.diffDays - a.diffDays);
+
+    // Cảnh báo công nợ quá hạn ngay từ icon "Trang Chủ" ở sidebar/menu dưới - không cần
+    // mở app mới biết. Dùng cùng ngưỡng 20 ngày đang tô màu đỏ trong danh sách này, và
+    // chỉ tính khách THỰC SỰ CÒN NỢ (debt > 0), tránh báo động giả cho khách lâu không
+    // lấy hàng nhưng đã thanh toán hết.
+    try {
+        const debtMap = new Map();
+        customersSnap.forEach(doc => {
+            const d = doc.data();
+            debtMap.set(d.name?.toString().trim(), parseFloat(d.debt) || 0);
+        });
+        const hasOverdue = currentOrders.some(o => o.diffDays >= 20 && (debtMap.get(o.customer?.toString().trim()) || 0) > 0);
+        const dot1 = document.getElementById('home-overdue-dot');
+        const dot2 = document.getElementById('home-overdue-dot-mobile');
+        [dot1, dot2].forEach(dot => {
+            if (!dot) return;
+            if (hasOverdue) dot.classList.remove('hidden');
+            else dot.classList.add('hidden');
+        });
+    } catch (e) { console.warn('Không kiểm tra được cảnh báo công nợ quá hạn:', e); }
 
     if (currentOrders.length === 0) {
         container.innerHTML = `<div class="p-4 text-center text-slate-500 text-xs">Không có đơn hàng nào.</div>`;
@@ -6140,6 +6253,10 @@ async function loadInventory() {
     // sản phẩm đã có sẵn trong bộ nhớ (window.allProductCache - đã được tải sẵn lúc mở
     // app), không cần đọc thêm gì từ 'receipts'/'sales' nữa.
     try {
+        // Hiện khung skeleton ngay lập tức trong lúc chờ tải dữ liệu, tránh khoảng trắng trống
+        const tbodySkeleton = document.getElementById('inventory-data');
+        if (tbodySkeleton) tbodySkeleton.innerHTML = skeletonRows(8, 5);
+
         const stockSnap = await db.collection('stock_counters').get();
         const stockMap = {};
         stockSnap.forEach(doc => {
@@ -6219,7 +6336,7 @@ window.choicesInstances = {};
 window.updateProductPrice = async function(productName, newValue, type) {
     const cleanValue = parseFloat(newValue.replace(/\./g, ''));
     if (isNaN(cleanValue)) {
-        alert("Vui lòng nhập số hợp lệ!");
+        showAlert("Vui lòng nhập số hợp lệ!");
         loadInventory();
         return;
     }
@@ -6252,11 +6369,11 @@ window.updateProductPrice = async function(productName, newValue, type) {
             console.log(`Đã cập nhật ${type} cho ${cleanName} thành ${cleanValue}`);
         } else {
             console.error("Không tìm thấy sản phẩm với tên chính xác là:", cleanName);
-            alert("Không tìm thấy sản phẩm: " + cleanName + " trong danh mục!");
+            showAlert("Không tìm thấy sản phẩm: " + cleanName + " trong danh mục!");
         }
     } catch (err) {
         console.error("Lỗi cập nhật giá:", err);
-        alert("Có lỗi xảy ra, vui lòng thử lại!");
+        showAlert("Có lỗi xảy ra, vui lòng thử lại!");
     }
 };
 
@@ -6328,7 +6445,7 @@ window.viewReceipt = function(docId) {
     if (!receipt) {
         console.error("Không tìm thấy phiếu với docId:", docId);
         console.log("Danh sách hiện tại:", window.allReceipts);
-        alert("Lỗi: Không tìm thấy phiếu này trong bộ nhớ.");
+        showAlert("Lỗi: Không tìm thấy phiếu này trong bộ nhớ.");
         return;
     }
 
@@ -6369,13 +6486,13 @@ window.saveAllItemEdits = async function(docId) {
         const doc = await receiptRef.get();
 
         if (!doc.exists) {
-            alert("Không tìm thấy phiếu này trong hệ thống!");
+            showAlert("Không tìm thấy phiếu này trong hệ thống!");
             return;
         }
 
         let items = doc.data().items;
         if (!items || items.length === 0) {
-            alert("Phiếu này không có sản phẩm nào để lưu.");
+            showAlert("Phiếu này không có sản phẩm nào để lưu.");
             return;
         }
 
@@ -6416,7 +6533,7 @@ window.saveAllItemEdits = async function(docId) {
             window.allReceipts[receiptIndex].items = items;
         }
 
-        alert("Đã lưu tất cả thay đổi!");
+        showAlert("Đã lưu tất cả thay đổi!");
 
         // Báo cho toàn bộ ứng dụng biết dữ liệu vừa thay đổi để Kho Hàng / NXT Trang Chủ
         // tự làm mới theo đúng số tồn kho mới - trước đây thiếu bước này nên phải tự tải
@@ -6428,7 +6545,7 @@ window.saveAllItemEdits = async function(docId) {
 
     } catch (error) {
         console.error("Lỗi: ", error);
-        alert("Có lỗi xảy ra khi lưu!");
+        showAlert("Có lỗi xảy ra khi lưu!");
     }
 };
 
@@ -7053,10 +7170,10 @@ window.forceResyncStockCounters = async function () {
         });
 
         console.log('✅ Đã sửa xong tồn kho:', inventory);
-        alert('Đã sửa xong tồn kho! Vui lòng tải lại trang (F5) để thấy số liệu mới.');
+        showAlert('Đã sửa xong tồn kho! Vui lòng tải lại trang (F5) để thấy số liệu mới.');
     } catch (e) {
         console.error('Lỗi khi sửa tồn kho:', e);
-        alert('Có lỗi khi sửa tồn kho: ' + e.message + '\nNếu là lỗi "quota", vui lòng đợi vài giờ rồi thử lại (quota Firestore miễn phí reset theo ngày).');
+        showAlert('Có lỗi khi sửa tồn kho: ' + e.message + '\nNếu là lỗi "quota", vui lòng đợi vài giờ rồi thử lại (quota Firestore miễn phí reset theo ngày).');
     }
 };
 
@@ -7171,10 +7288,13 @@ function renderProductGrid() {
         const safeName = p.name.replace(/'/g, "\\'");
         const idName = p.name.replace(/ /g, '_');
         const isOutOfStock = realStock <= 0;
+        // Mức cảnh báo "SẮP HẾT" (còn ≤10) - giúp chủ động nhập hàng trước khi hết hẳn,
+        // thay vì chỉ có 2 trạng thái còn/hết như trước.
+        const isLowStock = !isOutOfStock && realStock <= 10;
         const b = themeClasses[index % themeClasses.length];
 
         return `
-            <div onclick="${isOutOfStock ? `alert('Hết hàng!')` : `quickAdd('${safeName}')`}"
+            <div onclick="${isOutOfStock ? `showAlert('Hết hàng!')` : `quickAdd('${safeName}')`}"
                  class="group relative bg-gradient-to-b ${b.top} p-1.5 md:p-4 rounded-lg md:rounded-2xl border border-white/60 dark:border-slate-700 ring-1 ${b.ring}
                         ${b.shadow} flex flex-col justify-between cursor-pointer h-16 md:h-28 overflow-hidden
                         transition-all duration-200 ease-out
@@ -7199,8 +7319,8 @@ function renderProductGrid() {
                 </div>
 
                 <div class="relative flex items-center gap-1 md:gap-1.5 mt-0.5 md:mt-1">
-                    <span class="text-[7px] md:text-[9px] uppercase font-black ${isOutOfStock ? 'text-red-600 dark:text-red-400' : 'text-slate-400 dark:text-slate-400'}">Tồn</span>
-                    <span id="stock-display-${idName}" class="font-black rounded-full border md:border-2 shadow-sm ${isOutOfStock ? 'text-[7px] md:text-[9px] px-1 md:px-1.5 py-0 md:py-0.5 bg-red-50 border-red-300 text-red-600 dark:bg-red-500/10 dark:border-red-500/40 dark:text-red-400' : `text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 ${b.badge} border-white/70 dark:border-slate-900/40`}">
+                    <span class="text-[7px] md:text-[9px] uppercase font-black ${isOutOfStock ? 'text-red-600 dark:text-red-400' : (isLowStock ? 'text-orange-500 dark:text-orange-400' : 'text-slate-400 dark:text-slate-400')}">Tồn</span>
+                    <span id="stock-display-${idName}" class="font-black rounded-full border md:border-2 shadow-sm ${isOutOfStock ? 'text-[7px] md:text-[9px] px-1 md:px-1.5 py-0 md:py-0.5 bg-red-50 border-red-300 text-red-600 dark:bg-red-500/10 dark:border-red-500/40 dark:text-red-400' : (isLowStock ? 'text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-orange-100 border-orange-300 text-orange-700 dark:bg-orange-500/15 dark:border-orange-500/40 dark:text-orange-400' : `text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 ${b.badge} border-white/70 dark:border-slate-900/40`)}">
                         ${isOutOfStock ? 'HẾT' : realStock}
                     </span>
                 </div>
@@ -7269,10 +7389,11 @@ async function quickAdd(productName, event) {
         const newStock = window.currentStockMap[productName];
         const displayValue = Number(newStock);
         const isNowOut = displayValue <= 0;
+        const isNowLow = !isNowOut && displayValue <= 10;
         stockDisplay.innerText = isNowOut ? 'HẾT' : displayValue;
         // Giữ nguyên kiểu khoanh tròn (giống lúc mới hiển thị), tránh bị mất khung tròn
         // khi số tồn cập nhật lại sau khi thêm vào giỏ hàng.
-        stockDisplay.className = `font-black rounded-full border md:border-2 shadow-sm ${isNowOut ? 'text-[7px] md:text-[9px] px-1 md:px-1.5 py-0 md:py-0.5 bg-red-50 border-red-300 text-red-600 dark:bg-red-500/10 dark:border-red-500/40 dark:text-red-400' : 'text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-blue-100 text-blue-700 border-white/70 dark:bg-blue-500/15 dark:text-blue-300 dark:border-slate-900/40'}`;
+        stockDisplay.className = `font-black rounded-full border md:border-2 shadow-sm ${isNowOut ? 'text-[7px] md:text-[9px] px-1 md:px-1.5 py-0 md:py-0.5 bg-red-50 border-red-300 text-red-600 dark:bg-red-500/10 dark:border-red-500/40 dark:text-red-400' : (isNowLow ? 'text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-orange-100 border-orange-300 text-orange-700 dark:bg-orange-500/15 dark:border-orange-500/40 dark:text-orange-400' : 'text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-blue-100 text-blue-700 border-white/70 dark:bg-blue-500/15 dark:text-blue-300 dark:border-slate-900/40')}`;
     }
 
     renderSellCart();
@@ -7372,6 +7493,22 @@ function updateCartItem(index, field, value) {
         renderProductGrid();
     } else if (field === 'price') {
         item.price = parseFloat(value) || 0;
+
+        // CẢNH BÁO GIÁ BÁN THẤP HƠN GIÁ GỐC - tránh bán lỗ do gõ nhầm giá. Vì hệ thống
+        // hiện chưa lưu riêng "giá nhập/giá vốn" cho từng sản phẩm, dùng giá bán lẻ/sỉ đã
+        // đăng ký sẵn trong Danh Mục SP làm mốc tham chiếu - nếu giá vừa nhập THẤP HƠN CẢ
+        // 2 mốc đó thì rất có thể là gõ nhầm, cần cảnh báo (không chặn, vì đôi khi giảm
+        // giá là chủ đích của người bán).
+        const productInfo = (window.allProducts || []).find(p => p.name === item.name);
+        if (productInfo && item.price > 0) {
+            const retailPrice = parseFloat(productInfo.retail) || 0;
+            const wholesalePrice = parseFloat(productInfo.wholesale) || 0;
+            const floorPrice = Math.min(...[retailPrice, wholesalePrice].filter(v => v > 0));
+            if (floorPrice > 0 && item.price < floorPrice) {
+                const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3500, timerProgressBar: true });
+                Toast.fire({ icon: 'warning', title: `⚠️ Giá ${item.price.toLocaleString('vi-VN')}đ THẤP HƠN giá gốc (${floorPrice.toLocaleString('vi-VN')}đ) của "${item.name}" - kiểm tra lại kẻo bán lỗ!` });
+            }
+        }
     } else if (field === 'note') {
         item.note = value;
     }
@@ -7417,12 +7554,12 @@ function selectPrintDocType(type) {
 //    tải ảnh hóa đơn về máy + mở Zalo Web ở tab mới để người dùng tự đính kèm ảnh gửi đi.
 async function shareInvoiceViaZalo(areaId, modeClass, fileNamePrefix, receiptId, customerName, dateObj) {
     if (typeof html2canvas === 'undefined') {
-        alert('Chưa tải được công cụ chụp ảnh hóa đơn (html2canvas). Vui lòng kiểm tra kết nối mạng rồi thử lại.');
+        showAlert('Chưa tải được công cụ chụp ảnh hóa đơn (html2canvas). Vui lòng kiểm tra kết nối mạng rồi thử lại.');
         return;
     }
     const el = document.getElementById(areaId);
     if (!el) {
-        alert('Không tìm thấy nội dung hóa đơn để chia sẻ!');
+        showAlert('Không tìm thấy nội dung hóa đơn để chia sẻ!');
         return;
     }
 
@@ -7498,7 +7635,7 @@ async function shareInvoiceViaZalo(areaId, modeClass, fileNamePrefix, receiptId,
 
         await new Promise(resolve => {
             canvas.toBlob(async (blob) => {
-                if (!blob) { alert('Không tạo được ảnh hóa đơn!'); resolve(); return; }
+                if (!blob) { showAlert('Không tạo được ảnh hóa đơn!'); resolve(); return; }
 
                 // Tên file chia sẻ = Tên khách hàng + Ngày lập hoá đơn (thay vì
                 // "HoaDon_PX..." như trước) - loại bỏ các ký tự không hợp lệ trong tên
@@ -7555,7 +7692,7 @@ async function shareInvoiceViaZalo(areaId, modeClass, fileNamePrefix, receiptId,
                 link.click();
                 document.body.removeChild(link);
 
-                alert('Đã tải ảnh hóa đơn về máy (kiểm tra thư mục Downloads). Zalo Web sẽ mở ở tab mới - bạn hãy đính kèm ảnh vừa tải để gửi cho khách.');
+                showAlert('Đã tải ảnh hóa đơn về máy (kiểm tra thư mục Downloads). Zalo Web sẽ mở ở tab mới - bạn hãy đính kèm ảnh vừa tải để gửi cho khách.');
                 window.open('https://chat.zalo.me/', '_blank');
                 resolve();
             }, 'image/png');
@@ -7563,7 +7700,7 @@ async function shareInvoiceViaZalo(areaId, modeClass, fileNamePrefix, receiptId,
     } catch (err) {
         if (showLoading) Swal.close();
         console.error('Lỗi khi chụp ảnh hóa đơn để chia sẻ:', err);
-        alert('Có lỗi khi tạo ảnh hóa đơn để chia sẻ: ' + err.message);
+        showAlert('Có lỗi khi tạo ảnh hóa đơn để chia sẻ: ' + err.message);
     } finally {
         // Trả lại chiều cao "100%" ban đầu cho div bên trong các ô (đã tạm đổi thành số
         // pixel cụ thể ngay trước khi chụp ảnh ở trên).
@@ -7579,7 +7716,7 @@ async function shareInvoiceViaZalo(areaId, modeClass, fileNamePrefix, receiptId,
 window.shareLastInvoiceToZalo = async function () {
     const opts = window.__lastInvoicePrintOpts;
     if (!opts) {
-        alert('Chưa có hóa đơn nào vừa lưu trong phiên làm việc này để chia sẻ. Hãy bấm "Lưu & In" trước.');
+        showAlert('Chưa có hóa đơn nào vừa lưu trong phiên làm việc này để chia sẻ. Hãy bấm "Lưu & In" trước.');
         return;
     }
 
@@ -7616,7 +7753,7 @@ window.shareLastInvoiceToZalo = async function () {
 window.shareSaleZalo = async function (docId) {
     try {
         const doc = await db.collection('sales').doc(docId).get();
-        if (!doc.exists) return alert('Không tìm thấy hóa đơn!');
+        if (!doc.exists) return showAlert('Không tìm thấy hóa đơn!');
         const data = doc.data();
         const dateObj = data.date && typeof data.date.toDate === 'function' ? data.date.toDate() : new Date();
         const printOpts = {
@@ -7655,7 +7792,7 @@ window.shareSaleZalo = async function (docId) {
         // Nếu bấm Hủy thì không làm gì cả
     } catch (error) {
         console.error('Lỗi khi chia sẻ hóa đơn:', error);
-        alert('Có lỗi khi tải hóa đơn để chia sẻ!');
+        showAlert('Có lỗi khi tải hóa đơn để chia sẻ!');
     }
 };
 
@@ -7669,7 +7806,7 @@ function triggerPrint(modeClass) {
         const printElement = document.getElementById(areaId);
         
         if (!printElement) {
-            alert("Không tìm thấy vùng dữ liệu cần in!");
+            showAlert("Không tìm thấy vùng dữ liệu cần in!");
             return;
         }
 
@@ -8410,7 +8547,7 @@ async function saveAndPrint() {
         return await updateExistingSale();
     }
     if (sellCart.length === 0) {
-        alert("Giỏ hàng đang trống!");
+        showAlert("Giỏ hàng đang trống!");
         return;
     }
 
@@ -8423,7 +8560,7 @@ async function saveAndPrint() {
         const qtyInCart = parseFloat(item.qty || 0);
         const realStockBeforeSale = stock + qtyInCart;
         if (qtyInCart > realStockBeforeSale + 0.000001) {
-            alert(`LỖI: Sản phẩm ${item.name} chỉ còn ${realStockBeforeSale} trong kho, nhưng bạn xuất ${qtyInCart}. Vui lòng kiểm tra lại!`);
+            showAlert(`LỖI: Sản phẩm ${item.name} chỉ còn ${realStockBeforeSale} trong kho, nhưng bạn xuất ${qtyInCart}. Vui lòng kiểm tra lại!`);
             return;
         }
     }
@@ -8590,7 +8727,7 @@ async function saveAndPrint() {
             }
         }
 
-        // TRƯỚC ĐÂY dùng alert("Lưu thành công!") - alert() của trình duyệt là LỆNH CHẶN
+        // TRƯỚC ĐÂY dùng showAlert("Lưu thành công!") - showAlert() của trình duyệt là LỆNH CHẶN
         // (block), toàn bộ code phía dưới (kể cả lệnh IN) phải ĐỢI nhân viên bấm "OK"
         // mới chạy tiếp. Đây chính là nguyên nhân chính khiến "lưu & in" cảm giác chậm/lag
         // - hoá đơn đã lưu xong từ lâu nhưng máy vẫn đứng im chờ 1 cú click chuột.
@@ -8684,7 +8821,7 @@ async function saveAndPrint() {
         
     } catch (error) {
         console.error("Lỗi: ", error);
-        alert("Có lỗi xảy ra: " + error.message);
+        showAlert("Có lỗi xảy ra: " + error.message);
     } finally {
         if (btn) {
             btn.disabled = false;
@@ -8872,7 +9009,7 @@ async function viewInvoiceDetails(docId) {
         });
     } catch (err) {
         console.error("Lỗi truy vấn Firestore:", err);
-        alert("Có lỗi khi tải danh sách hóa đơn!");
+        showAlert("Có lỗi khi tải danh sách hóa đơn!");
     }
 }
 
@@ -8911,7 +9048,7 @@ function handleMonthChange() {
 async function reprintSale(docId) {
     try {
         const doc = await db.collection('sales').doc(docId).get();
-        if (!doc.exists) return alert("Không tìm thấy hóa đơn!");
+        if (!doc.exists) return showAlert("Không tìm thấy hóa đơn!");
 
         const data = doc.data();
         const dateObj = data.date && typeof data.date.toDate === 'function' ? data.date.toDate() : new Date();
@@ -8957,7 +9094,7 @@ async function reprintSale(docId) {
 
     } catch (error) {
         console.error("Lỗi in lại:", error);
-        alert("Có lỗi khi tải hóa đơn để in!");
+        showAlert("Có lỗi khi tải hóa đơn để in!");
     }
 }
 
@@ -9005,7 +9142,7 @@ async function deleteSale(docId) {
             // 4. Thực hiện xóa hóa đơn
             await docRef.delete();
             
-            alert("Đã xóa hóa đơn, hoàn kho và điều chỉnh công nợ thành công!");
+            showAlert("Đã xóa hóa đơn, hoàn kho và điều chỉnh công nợ thành công!");
             
             if (typeof ghiLog === 'function') ghiLog('Bán Hàng', 'Xóa', data.id || docId, `Xóa hóa đơn bán hàng ${data.id || docId} (KH: ${customerName || 'Khách lẻ'}, tổng tiền: ${total.toLocaleString('vi-VN')}đ)`);
             
@@ -9027,7 +9164,7 @@ async function deleteSale(docId) {
             
         } catch (error) {
             console.error("Lỗi khi xóa hóa đơn: ", error);
-            alert("Có lỗi xảy ra: " + error.message);
+            showAlert("Có lỗi xảy ra: " + error.message);
         }
     }
 }
@@ -9174,7 +9311,8 @@ async function startScannerSell() {
             { fps: 20, qrbox: { width: 250, height: 100 } },
             async (decodedText) => {
                 const barcode = decodedText.trim();
-                
+                hapticFeedback(); // Rung nhẹ phản hồi tức thì ngay khi quét thành công
+
                 // 1. Dừng Camera trước để không quét liên tục
                 await stopScannerSell();
                 
@@ -9855,7 +9993,7 @@ function addCustomer() {
     const address = document.getElementById('cust-address').value;
     const phone = document.getElementById('cust-phone').value;
 
-    if (!name) return alert("Vui lòng nhập tên đại lý!");
+    if (!name) return showAlert("Vui lòng nhập tên đại lý!");
 
     db.collection('customers').add({
         name: name,
@@ -9864,7 +10002,7 @@ function addCustomer() {
         debt: 0, // Khởi tạo công nợ = 0
         createdAt: new Date()
     }).then(() => {
-        alert("Đã thêm đại lý!");
+        showAlert("Đã thêm đại lý!");
         // Reset form
         document.getElementById('cust-name').value = '';
         document.getElementById('cust-address').value = '';
@@ -10054,7 +10192,7 @@ async function deleteCustomer(id) {
     
     // Kiểm tra xem khách có đang nợ không
     if ((data.debt || 0) > 0) {
-        alert("Không thể xóa! Đại lý này vẫn còn đang nợ: " + data.debt.toLocaleString() + " đ. Hãy yêu cầu khách trả hết nợ trước.");
+        showAlert("Không thể xóa! Đại lý này vẫn còn đang nợ: " + data.debt.toLocaleString() + " đ. Hãy yêu cầu khách trả hết nợ trước.");
         return;
     }
 
@@ -10062,10 +10200,10 @@ async function deleteCustomer(id) {
         try {
             await db.collection('customers').doc(id).delete();
             loadCustomers();
-            alert("Đã xóa đại lý.");
+            showAlert("Đã xóa đại lý.");
             if (typeof ghiLog === 'function') ghiLog('Khách Hàng', 'Xóa', data.name || id, `Xóa khách hàng/đại lý "${data.name || id}"`);
         } catch (error) {
-            alert("Lỗi khi xóa: " + error.message);
+            showAlert("Lỗi khi xóa: " + error.message);
         }
     }
 }
@@ -10100,6 +10238,9 @@ async function editCustomer(id) {
     if (formValues) {
         if (!formValues.name) return Swal.fire('Lỗi', 'Tên khách hàng không được để trống!', 'error');
 
+        const oldName = customer.name || '';
+        const isRenaming = oldName && oldName !== formValues.name;
+
         try {
             // Cập nhật lên Firestore
             await db.collection('customers').doc(id).update({
@@ -10120,6 +10261,37 @@ async function editCustomer(id) {
             
             // Tải lại dữ liệu để cập nhật giao diện
             loadCustomers();
+
+            // Hỏi thêm (tùy chọn): các hóa đơn CŨ lưu tên khách hàng dạng chữ, không theo
+            // mã khách hàng, nên đổi tên xong mà không cập nhật lại thì khách này sẽ "biến
+            // mất" khỏi khung "Thời Gian Cấp Hàng Đại Lý" ở Trang Chủ (vì không còn khớp
+            // tên với hóa đơn cũ) cho tới khi có hóa đơn mới. Công nợ/số đã trả của khách
+            // vẫn đúng (lưu theo mã khách hàng, không bị ảnh hưởng).
+            if (isRenaming) {
+                const { isConfirmed } = await Swal.fire({
+                    icon: 'question',
+                    title: 'Đổi tên trong hóa đơn cũ?',
+                    html: `Bạn có muốn đổi luôn tên <b>"${oldName}"</b> → <b>"${formValues.name}"</b> trong <b>các hóa đơn đã lưu trước đây</b> không?<br><span class="text-xs text-slate-400">(Nếu không đổi, khách này sẽ tạm "biến mất" khỏi khung "Thời Gian Cấp Hàng Đại Lý" cho tới khi có hóa đơn mới - công nợ vẫn đúng, không bị ảnh hưởng)</span>`,
+                    showCancelButton: true,
+                    confirmButtonText: 'Có, đổi luôn',
+                    cancelButtonText: 'Không cần',
+                    confirmButtonColor: '#2563eb'
+                });
+                if (isConfirmed) {
+                    Swal.fire({ title: 'Đang cập nhật...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                    const salesSnap = await db.collection('sales').where('customer', '==', oldName).get();
+                    let batch = db.batch();
+                    let ops = 0;
+                    for (const doc of salesSnap.docs) {
+                        batch.update(doc.ref, { customer: formValues.name });
+                        ops++;
+                        if (ops >= 450) { await batch.commit(); batch = db.batch(); ops = 0; }
+                    }
+                    if (ops > 0) await batch.commit();
+                    Swal.fire('Hoàn tất', `Đã đổi tên trong ${salesSnap.size} hóa đơn cũ.`, 'success');
+                    if (typeof loadDashboard === 'function') loadDashboard();
+                }
+            }
         } catch (error) {
             Swal.fire('Lỗi', 'Không thể cập nhật: ' + error.message, 'error');
         }
@@ -10858,7 +11030,7 @@ window.addEventListener('DOMContentLoaded', () => {
 async function exportDebtReport() {
     const from = document.getElementById('date-from').value;
     const to = document.getElementById('date-to').value;
-    if (!from || !to) return alert("Vui lòng chọn Từ ngày và Đến ngày");
+    if (!from || !to) return showAlert("Vui lòng chọn Từ ngày và Đến ngày");
 
     const fromDate = new Date(from);
     const toDate = new Date(to);
@@ -11033,7 +11205,7 @@ async function exportDebtReport() {
         a.href = window.URL.createObjectURL(new Blob([buffer]));
         a.download = `Bao_Cao_Cong_No_${formatDateToDDMMYYYY(from).replace(/-/g,'')}_den_${formatDateToDDMMYYYY(to).replace(/-/g,'')}.xlsx`;
         a.click();
-    } catch (e) { alert("Lỗi: " + e.message); }
+    } catch (e) { showAlert("Lỗi: " + e.message); }
 }
 
 // Hàm phụ trợ: kẻ viền cho ô khi xuất file Excel
@@ -11060,7 +11232,7 @@ function getDates() {
     const f = document.getElementById('date-from');
     const t = document.getElementById('date-to');
     if (!f || !t || !f.value || !t.value) {
-        alert("Vui lòng chọn Từ ngày và Đến ngày!");
+        showAlert("Vui lòng chọn Từ ngày và Đến ngày!");
         return null;
     }
     return { from: f.value, to: t.value };
@@ -11075,7 +11247,7 @@ async function saveExcelFile(workbook, filename) {
         link.href = URL.createObjectURL(blob);
         link.download = filename + '.xlsx';
         link.click();
-    } catch (e) { alert("Lỗi lưu file: " + e.message); }
+    } catch (e) { showAlert("Lỗi lưu file: " + e.message); }
 }
 
 //================== 1. XUẤT QUYỂN 1 =====================
@@ -11230,7 +11402,7 @@ async function exportExcelQuyen1() {
         sheet.views = [{ showGridLines: true }];
 
         await saveExcelFile(workbook, 'So_Kiem_Thuc_Quyen_1');
-    } catch (err) { alert("Lỗi: " + err.message); }
+    } catch (err) { showAlert("Lỗi: " + err.message); }
 }
 
 // ============== 1. XUẤT QUYỂN 2 ====================
@@ -11334,7 +11506,7 @@ async function exportExcelQuyen2() {
         });
         
         await saveExcelFile(workbook, 'So_Kiem_Thuc_Quyen_2');
-    } catch (err) { alert("Lỗi xuất Q2: " + err.message); }
+    } catch (err) { showAlert("Lỗi xuất Q2: " + err.message); }
 }
 
 // ================== 2. XUẤT QUYỂN 3 ================
@@ -11435,7 +11607,7 @@ async function exportExcelQuyen3() {
         sheet.views = [{ showGridLines: false }];
 
         await saveExcelFile(workbook, 'So_Kiem_Thuc_Quyen_3');
-    } catch (e) { alert("Lỗi: " + e.message); }
+    } catch (e) { showAlert("Lỗi: " + e.message); }
 }
 
 // ================ 3. XUẤT LƯU MẪU ================
@@ -11543,7 +11715,7 @@ async function exportExcelLuuMau() {
         sheet.views = [{ showGridLines: false }];
 
         await saveExcelFile(workbook, 'So_Luu_Mau');
-    } catch (e) { alert("Lỗi: " + e.message); }
+    } catch (e) { showAlert("Lỗi: " + e.message); }
 }
 
 
@@ -11555,7 +11727,7 @@ async function exportSupplierDebtReport() {
     // 1. Lấy và kiểm tra dữ liệu đầu vào từ giao diện
     const from = document.getElementById('date-from').value;
     const to = document.getElementById('date-to').value;
-    if (!from || !to) return alert("Vui lòng chọn Từ ngày và Đến ngày");
+    if (!from || !to) return showAlert("Vui lòng chọn Từ ngày và Đến ngày");
 
     const fromDate = new Date(from);
     const toDate = new Date(to);
@@ -11665,7 +11837,7 @@ async function exportSupplierDebtReport() {
         });
 
         const keys = Object.keys(reportData);
-        if (keys.length === 0) return alert("Không có dữ liệu!");
+        if (keys.length === 0) return showAlert("Không có dữ liệu!");
 
         // 6. Vẽ dữ liệu lên file Excel theo từng nhà cung cấp
         for (const nccName of keys) {
@@ -11746,7 +11918,7 @@ async function exportSupplierDebtReport() {
         a.href = window.URL.createObjectURL(new Blob([buffer]));
         a.download = `Bao_Cao_Cong_No_NCC_${formatDateToDDMMYYYY(from).replace(/-/g,'')}_den_${formatDateToDDMMYYYY(to).replace(/-/g,'')}.xlsx`;
         a.click();
-    } catch (e) { alert("Lỗi xuất báo cáo NCC: " + e.message); }
+    } catch (e) { showAlert("Lỗi xuất báo cáo NCC: " + e.message); }
 }
 
 //==================================================================
@@ -11869,11 +12041,103 @@ async function editProductName(id, currentName) {
 
     if (newName && newName.trim() && newName.trim() !== currentName) {
         const cleanName = newName.trim();
-        await db.collection('products').doc(id).update({ name: cleanName });
-        Swal.fire('Thành công', 'Đã cập nhật tên sản phẩm!', 'success');
-        loadProductManage(); // Tải lại danh sách
-        updateProductDropdowns(); // Cập nhật lại dropdown ở trang Nhập kho
-        if (typeof ghiLog === 'function') ghiLog('Sản Phẩm', 'Sửa', cleanName, `Đổi tên sản phẩm từ "${currentName}" thành "${cleanName}"`);
+
+        Swal.fire({ title: 'Đang cập nhật...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+        try {
+            await db.collection('products').doc(id).update({ name: cleanName });
+
+            // QUAN TRỌNG: bộ đếm tồn kho (stock_counters) lưu theo ĐÚNG TÊN sản phẩm làm
+            // khoá (mã tài liệu tạo từ tên) - trước đây đổi tên xong, bộ đếm cũ vẫn nằm
+            // dưới tên CŨ, còn tên MỚI thì chưa có bộ đếm nào -> Kho Hàng/Bán Hàng đọc theo
+            // tên mới ra 0, dù thực ra vẫn còn hàng. Giờ chuyển (migrate) đúng số tồn từ
+            // bộ đếm cũ sang bộ đếm mới, rồi xoá bộ đếm cũ đi để không bị trùng/rác dữ liệu.
+            const oldRef = getStockRef(currentName);
+            const oldSnap = await oldRef.get();
+            if (oldSnap.exists) {
+                const oldQty = parseFloat(oldSnap.data().qty || 0);
+                await getStockRef(cleanName).set({ name: cleanName, qty: oldQty }, { merge: true });
+                await oldRef.delete();
+            }
+
+            Swal.close();
+            if (typeof ghiLog === 'function') ghiLog('Sản Phẩm', 'Sửa', cleanName, `Đổi tên sản phẩm từ "${currentName}" thành "${cleanName}"`);
+
+            // Hỏi thêm: có muốn đổi luôn tên trong các phiếu CŨ đã lưu trước đây không (Nhập
+            // Kho, Lịch Sử HĐ, Sản Xuất, Nguyên Liệu...) - đây là bước TÙY CHỌN vì phải quét
+            // qua khá nhiều phiếu cũ, không tự động làm luôn để tránh tốn thời gian/quota
+            // không cần thiết cho những lần chỉ sửa lỗi chính tả nhỏ.
+            const { isConfirmed } = await Swal.fire({
+                icon: 'question',
+                title: 'Đổi tên trong lịch sử cũ?',
+                html: `Đã cập nhật tên và tồn kho hiện tại thành công!<br><br>Bạn có muốn đổi luôn tên <b>"${currentName}"</b> → <b>"${cleanName}"</b> trong <b>các phiếu Nhập Kho / Hoá đơn / Sản Xuất / Nguyên Liệu đã lưu trước đây</b> không?<br><span class="text-xs text-slate-400">(Có thể mất chút thời gian nếu lịch sử nhiều, các báo cáo/thống kê cũ sẽ hiện đúng tên mới)</span>`,
+                showCancelButton: true,
+                confirmButtonText: 'Có, đổi luôn',
+                cancelButtonText: 'Không cần',
+                confirmButtonColor: '#2563eb'
+            });
+
+            if (isConfirmed) {
+                await renameProductInHistory(currentName, cleanName);
+            }
+
+            loadProductManage();
+            updateProductDropdowns();
+
+        } catch (e) {
+            console.error(e);
+            Swal.fire('Lỗi', 'Có lỗi khi đổi tên sản phẩm: ' + e.message, 'error');
+        }
+    }
+}
+
+// Đổi tên sản phẩm trong TOÀN BỘ các phiếu cũ đã lưu (receipts, sales, production,
+// material_imports) - quét từng collection, tìm đúng dòng sản phẩm trùng tên CŨ trong
+// mảng "items" của mỗi phiếu, sửa lại thành tên MỚI, rồi ghi lại. Dùng batch (tối đa 500
+// lệnh ghi/batch) để không vượt giới hạn Firestore khi lịch sử nhiều.
+async function renameProductInHistory(oldName, newName) {
+    Swal.fire({ title: 'Đang cập nhật lịch sử cũ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    try {
+        const collectionsToScan = ['receipts', 'sales', 'production', 'material_imports'];
+        let totalUpdated = 0;
+
+        for (const colName of collectionsToScan) {
+            const snap = await db.collection(colName).get();
+            let batch = db.batch();
+            let opsInBatch = 0;
+
+            for (const doc of snap.docs) {
+                const data = doc.data();
+                if (!Array.isArray(data.items)) continue;
+
+                let changed = false;
+                const newItems = data.items.map(it => {
+                    const itemNameField = it.name || it.nl; // 'nl' dùng cho phiếu Nguyên Liệu
+                    if (itemNameField === oldName) {
+                        changed = true;
+                        return it.name !== undefined ? { ...it, name: newName } : { ...it, nl: newName };
+                    }
+                    return it;
+                });
+
+                if (changed) {
+                    batch.update(doc.ref, { items: newItems });
+                    opsInBatch++;
+                    totalUpdated++;
+                    if (opsInBatch >= 450) {
+                        await batch.commit();
+                        batch = db.batch();
+                        opsInBatch = 0;
+                    }
+                }
+            }
+            if (opsInBatch > 0) await batch.commit();
+        }
+
+        Swal.fire('Hoàn tất', `Đã đổi tên trong ${totalUpdated} phiếu cũ. Các báo cáo/lịch sử sẽ hiện đúng tên mới.`, 'success');
+    } catch (e) {
+        console.error(e);
+        Swal.fire('Lỗi', 'Có lỗi khi đổi tên trong lịch sử cũ: ' + e.message, 'error');
     }
 }
 
@@ -11929,6 +12193,8 @@ async function startScanner(pageType) {
             { facingMode: "environment" },
             { fps: 10, qrbox: 250 },
             async (decodedText) => {
+                hapticFeedback(); // Rung nhẹ phản hồi tức thì ngay khi quét thành công
+
                 // 2. Xử lý logic theo trang
                 if (pageType === 'prod') {
                     // Nếu ở trang Danh mục: Điền vào ô input mã vạch
@@ -12054,7 +12320,7 @@ function themSanPhamVaoGioSX() {
 
     // Kiểm tra: nếu là phiếu sp thì phải có tên, nếu là phiếu mẻ thì phải có ít nhất 1 giá trị mẻ
     if (!tenSP && soMe === 0 && meChuaDong === 0 && meChuaNau === 0) {
-        // TRƯỚC ĐÂY dùng alert() - hộp thoại chặn trang gây "giật/rung" trang trên điện
+        // TRƯỚC ĐÂY dùng showAlert() - hộp thoại chặn trang gây "giật/rung" trang trên điện
         // thoại. Đổi sang toast góc màn hình, không chặn và không che cả trang.
         Swal.fire({ icon: 'warning', title: 'Vui lòng chọn sản phẩm hoặc nhập thông số mẻ trước khi thêm vào giỏ!', toast: true, position: 'top-end', timer: 2200, showConfirmButton: false });
         return;
@@ -12157,7 +12423,7 @@ async function luuSanXuat() {
             await db.collection('production').add(data);
         }
 
-        // TRƯỚC ĐÂY dùng alert() báo thành công - đây là hộp thoại CHẶN trang, phải bấm OK
+        // TRƯỚC ĐÂY dùng showAlert() báo thành công - đây là hộp thoại CHẶN trang, phải bấm OK
         // mới chạy tiếp, và gây cảm giác "rung/loà" cả trang trên điện thoại. Đổi sang
         // toast góc màn hình, không chặn, tự biến mất.
         Swal.fire({ icon: 'success', title: 'Đã lưu ' + sxCart.length + ' dòng vào phiếu ' + soPhieu + '!', toast: true, position: 'top-end', timer: 1500, showConfirmButton: false });
@@ -12179,7 +12445,7 @@ async function luuSanXuat() {
 
     } catch (e) {
         console.error("Lỗi: ", e);
-        alert("Có lỗi: " + e.message);
+        showAlert("Có lỗi: " + e.message);
     } finally {
         if (btn) {
             btn.disabled = false;
@@ -12280,7 +12546,7 @@ function groupAndRenderSX(docs) {
 // Xem chi tiết toàn bộ sản phẩm/mẻ đã nhập trong 1 số phiếu (giống popup Lịch Sử HĐ)
 function xemChiTietPhieuSX(soPhieu) {
     const group = window.sxPhieuData ? window.sxPhieuData[soPhieu] : null;
-    if (!group) { alert("Không tìm thấy dữ liệu phiếu " + soPhieu); return; }
+    if (!group) { showAlert("Không tìm thấy dữ liệu phiếu " + soPhieu); return; }
 
     const rows = group.items.map(it => `
         <tr>
@@ -12358,7 +12624,7 @@ async function xoaDongTrongPhieuSX(id, soPhieu) {
         }
     } catch (e) {
         console.error("Lỗi xoá dòng: ", e);
-        alert("Lỗi: " + e.message);
+        showAlert("Lỗi: " + e.message);
     }
 }
 
@@ -12453,7 +12719,7 @@ async function huyPhieuSX(id) {
         if (selectBox) id = selectBox.value;
     }
     
-    if (!id) { alert("Vui lòng chọn phiếu!"); return; }
+    if (!id) { showAlert("Vui lòng chọn phiếu!"); return; }
     if (!confirm("Xóa phiếu này?")) return;
 
     try {
@@ -12463,7 +12729,7 @@ async function huyPhieuSX(id) {
         const tenSP = d ? (d.tenSP || '') : '';
 
         await db.collection('production').doc(id).delete();
-        alert("Đã xóa!");
+        showAlert("Đã xóa!");
         
         // Cập nhật lại bảng danh sách
         if (typeof filterSanXuat === 'function') {
@@ -12481,7 +12747,7 @@ async function huyPhieuSX(id) {
         
     } catch (e) {
         console.error("Lỗi xóa: ", e);
-        alert("Lỗi: " + e.message);
+        showAlert("Lỗi: " + e.message);
     }
 }
 
@@ -12795,11 +13061,31 @@ async function updateNCC(docId) {
     const phone = document.getElementById('in-sdt').value;
     const address = document.getElementById('in-diachi').value;
 
-    if (!name) return alert("Nhập tên NCC!");
+    if (!name) return showAlert("Nhập tên NCC!");
 
     try {
+        // Lấy tên CŨ trước khi ghi đè, để biết có đang đổi tên hay không
+        const beforeSnap = await db.collection('suppliers').doc(docId).get();
+        const oldName = beforeSnap.exists ? (beforeSnap.data().name || '') : '';
+        const isRenaming = oldName && oldName !== name;
+
         await db.collection('suppliers').doc(docId).update({ name, phone, address });
-        alert("Cập nhật thành công!");
+
+        // QUAN TRỌNG: "payments" (lịch sử trả nợ NCC) lưu theo TÊN chứ không theo mã NCC,
+        // nên đổi tên xong mà không cập nhật lại thì cột "Đã trả" của NCC này sẽ về 0 (vì
+        // không còn khớp tên để cộng dồn) dù trước đó đã trả không ít. Di chuyển (migrate)
+        // toàn bộ các dòng "payments" cũ sang đúng tên mới - việc này luôn tự làm, không
+        // cần hỏi, vì số tiền/số dòng payments thường không nhiều, chi phí rất nhỏ.
+        if (isRenaming) {
+            const paymentsSnap = await db.collection('payments').where('supplierName', '==', oldName).get();
+            if (!paymentsSnap.empty) {
+                const batch = db.batch();
+                paymentsSnap.forEach(doc => batch.update(doc.ref, { supplierName: name }));
+                await batch.commit();
+            }
+        }
+
+        showAlert("Cập nhật thành công!");
 
         if (typeof ghiLog === 'function') ghiLog('Nguyên Liệu', 'Sửa', name, `Cập nhật thông tin nhà cung cấp "${name}" (SĐT: ${phone || '-'}, Địa chỉ: ${address || '-'})`);
 
@@ -12817,8 +13103,38 @@ async function updateNCC(docId) {
         document.getElementById('in-diachi').value = '';
 
         loadAllData();
+
+        // Hỏi thêm (tùy chọn): đổi tên luôn trong các phiếu Nhập Kho Nguyên Liệu đã lưu
+        // trước đây (trường "ncc" trong material_imports) - để lịch sử/báo cáo công nợ cũ
+        // cũng hiện đúng tên mới. Không tự động bắt buộc vì có thể mất chút thời gian nếu
+        // lịch sử nhiều.
+        if (isRenaming) {
+            const { isConfirmed } = await Swal.fire({
+                icon: 'question',
+                title: 'Đổi tên trong lịch sử cũ?',
+                html: `Bạn có muốn đổi luôn tên NCC <b>"${oldName}"</b> → <b>"${name}"</b> trong <b>các phiếu Nhập Kho Nguyên Liệu đã lưu trước đây</b> không?<br><span class="text-xs text-slate-400">(Báo cáo công nợ NCC cũ sẽ hiện đúng tên mới)</span>`,
+                showCancelButton: true,
+                confirmButtonText: 'Có, đổi luôn',
+                cancelButtonText: 'Không cần',
+                confirmButtonColor: '#2563eb'
+            });
+            if (isConfirmed) {
+                Swal.fire({ title: 'Đang cập nhật...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                const miSnap = await db.collection('material_imports').where('ncc', '==', oldName).get();
+                let batch2 = db.batch();
+                let ops = 0;
+                for (const doc of miSnap.docs) {
+                    batch2.update(doc.ref, { ncc: name });
+                    ops++;
+                    if (ops >= 450) { await batch2.commit(); batch2 = db.batch(); ops = 0; }
+                }
+                if (ops > 0) await batch2.commit();
+                Swal.fire('Hoàn tất', `Đã đổi tên trong ${miSnap.size} phiếu nhập nguyên liệu cũ.`, 'success');
+                loadAllData();
+            }
+        }
     } catch (error) {
-        alert("Lỗi cập nhật: " + error.message);
+        showAlert("Lỗi cập nhật: " + error.message);
     }
 }
 
@@ -12837,7 +13153,7 @@ async function paySupplierDebt(docId, nccName) {
     const inputElement = document.getElementById('in-pay-modal');
     const amount = parseFloat(inputElement ? inputElement.value : 0);
     
-    if (!amount || amount <= 0) return alert("Vui lòng nhập số tiền hợp lệ!");
+    if (!amount || amount <= 0) return showAlert("Vui lòng nhập số tiền hợp lệ!");
 
     try {
         await db.collection('payments').add({ 
@@ -12865,7 +13181,7 @@ async function paySupplierDebt(docId, nccName) {
 
     } catch (error) {
         console.error("Lỗi khi thanh toán:", error);
-        alert("Có lỗi xảy ra: " + error.message);
+        showAlert("Có lỗi xảy ra: " + error.message);
     }
 }
 
@@ -12898,7 +13214,7 @@ async function openHistoryModal(nccName) {
         showPopup("Lịch sử: " + nccName, html);
     } catch (err) {
         console.error("Lỗi chi tiết:", err);
-        alert("Lỗi: " + err.message);
+        showAlert("Lỗi: " + err.message);
     }
 }
 
@@ -12915,7 +13231,7 @@ async function deletePaymentNCC(payId, nccName, amount) {
         const snap = await db.collection('suppliers').where('name', '==', nccName).get();
         
         if (snap.empty) {
-            alert("Không tìm thấy thông tin NCC!");
+            showAlert("Không tìm thấy thông tin NCC!");
             return;
         }
 
@@ -12933,7 +13249,7 @@ async function deletePaymentNCC(payId, nccName, amount) {
         const popup = document.getElementById('popup-ncc');
         if (popup) popup.classList.add('hidden');
         
-        alert("Xóa thành công!");
+        showAlert("Xóa thành công!");
         
         // Đợi dữ liệu cập nhật xong mới render lại bảng
         await loadAllData();
@@ -12945,7 +13261,7 @@ async function deletePaymentNCC(payId, nccName, amount) {
         
     } catch (error) {
         console.error("Lỗi:", error);
-        alert("Lỗi khi xóa: " + error.message);
+        showAlert("Lỗi khi xóa: " + error.message);
     }
 }
 
@@ -12957,7 +13273,7 @@ async function addNCC() {
     const name = document.getElementById('in-ncc').value;
     const phone = document.getElementById('in-sdt').value;
     const address = document.getElementById('in-diachi').value;
-    if (!name) return alert("Nhập tên NCC!");
+    if (!name) return showAlert("Nhập tên NCC!");
     await db.collection('suppliers').add({ name, phone, address, debt: 0 });
     document.getElementById('in-ncc').value = ''; 
     document.getElementById('in-sdt').value = ''; 
@@ -12975,7 +13291,7 @@ async function deleteDoc(col, soPhieu) {
             // 1. Tìm tất cả các dòng có chung soPhieu
             const snapshot = await db.collection('material_imports').where('soPhieu', '==', soPhieu).get();
             
-            if (snapshot.empty) return alert("Không tìm thấy dữ liệu phiếu!");
+            if (snapshot.empty) return showAlert("Không tìm thấy dữ liệu phiếu!");
 
             let totalPhiếu = 0;
             let nccId = null;
@@ -12999,14 +13315,14 @@ async function deleteDoc(col, soPhieu) {
             snapshot.docs.forEach(doc => batch.delete(doc.ref));
             await batch.commit();
             
-            alert("Đã xóa phiếu và cập nhật nợ!");
+            showAlert("Đã xóa phiếu và cập nhật nợ!");
 
             if (typeof ghiLog === 'function') ghiLog('Nguyên Liệu', 'Xóa', soPhieu, `Xóa phiếu nhập nguyên liệu ${soPhieu} (${snapshot.docs.length} dòng, tổng tiền ${totalPhiếu.toLocaleString('vi-VN')}đ)`);
         } 
         else {
             // Xử lý xóa các collection khác (suppliers, etc...)
             await db.collection(col).doc(soPhieu).delete();
-            alert("Đã xóa thành công!");
+            showAlert("Đã xóa thành công!");
 
             if (typeof ghiLog === 'function') {
                 const tenModule = col === 'suppliers' ? 'Nguyên Liệu' : 'Nguyên Liệu';
@@ -13025,7 +13341,7 @@ async function deleteDoc(col, soPhieu) {
         
     } catch (error) {
         console.error("Lỗi xóa: ", error);
-        alert("Có lỗi xảy ra: " + error.message);
+        showAlert("Có lỗi xảy ra: " + error.message);
     }
 }
 
@@ -13064,7 +13380,7 @@ async function loadTableNL() {
 // Thêm nguyên liệu mới
 async function addNL() {
     const name = document.getElementById('in-nl').value;
-    if (!name) return alert("Nhập tên NL!");
+    if (!name) return showAlert("Nhập tên NL!");
     await db.collection('materials_list').add({ name, unit: document.getElementById('in-dvt').value });
     document.getElementById('in-nl').value = ''; loadAllData();
 }
@@ -13098,7 +13414,7 @@ function addNguyenLieuToCart() {
         const giaEl = document.getElementById('in-gia');
 
         if (!selEl || !slEl || !giaEl) {
-            alert("Lỗi: Không tìm thấy ID input!");
+            showAlert("Lỗi: Không tìm thấy ID input!");
             return;
         }
 
@@ -13119,7 +13435,7 @@ function addNguyenLieuToCart() {
         selEl.value = 'Chọn NL';
         
     } catch (err) {
-        alert("Lỗi chương trình: " + err.message);
+        showAlert("Lỗi chương trình: " + err.message);
         console.error("Chi tiết lỗi:", err);
     }
 }
@@ -13203,7 +13519,7 @@ async function saveFullInvoice() {
     document.getElementById('in-ngay-hd').value = '';
     document.getElementById('sel-ncc-nhap').value = 'Chọn NCC';
     
-    // TRƯỚC ĐÂY dùng alert() - hộp thoại chặn trang gây "giật/rung" trên điện thoại.
+    // TRƯỚC ĐÂY dùng showAlert() - hộp thoại chặn trang gây "giật/rung" trên điện thoại.
     // Đổi sang toast góc màn hình, không chặn code chạy tiếp bên dưới.
     Swal.fire({ icon: 'success', title: 'Đã lưu phiếu!', toast: true, position: 'top-end', timer: 1500, showConfirmButton: false });
     await generateInvoiceNumber();
@@ -13274,7 +13590,7 @@ async function filterNhapKho() {
     const startDate = new Date(startEl.value + "T00:00:00");
     const endDate = new Date(endEl.value + "T23:59:59");
 
-    listBody.innerHTML = "<tr><td colspan='5' class='text-center p-4'>Đang tải...</td></tr>";
+    listBody.innerHTML = skeletonRows(5, 5);
 
     try {
         // PHƯƠNG ÁN 1: Thử truy vấn có Index
@@ -13695,7 +14011,7 @@ function saveNewEvent() {
     const start = document.getElementById('new-event-date').value;
     const color = document.getElementById('new-event-color').value; 
 
-    if (!title) { alert("Vui lòng nhập tên công việc!"); return; }
+    if (!title) { showAlert("Vui lòng nhập tên công việc!"); return; }
 
     db.collection('calendar_events').add({
         title: title,
