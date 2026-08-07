@@ -12082,6 +12082,16 @@ async function editProductName(id, currentName) {
             }
 
             loadProductManage();
+
+            // QUAN TRỌNG: dữ liệu trên Firestore đã đúng ngay từ bước trên, nhưng các
+            // trang Bán Hàng/Kho Hàng đang hiển thị theo dữ liệu ĐÃ TẢI SẴN TRONG BỘ NHỚ
+            // (cache) từ trước - nếu không làm mới lại các cache này, chúng vẫn hiện tên
+            // cũ/số 0 cho tới khi bấm F5 tải lại cả trang. Giờ chủ động làm mới TẤT CẢ
+            // ngay tại đây, không cần F5 nữa.
+            if (typeof refreshCache === 'function') await refreshCache();          // allProducts/allProductCache/productList (tên + giá)
+            if (typeof calculateAllStock === 'function') await calculateAllStock(); // baseInventoryMap/currentStockMap (số tồn, dùng ở Bán Hàng)
+            if (typeof loadInventory === 'function') loadInventory();              // Vẽ lại bảng Kho Hàng ngay
+            if (typeof renderProductGrid === 'function') renderProductGrid();      // Vẽ lại lưới sản phẩm Bán Hàng ngay
             updateProductDropdowns();
 
         } catch (e) {
