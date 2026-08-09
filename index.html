@@ -1762,23 +1762,10 @@ html:not(.dark) .bg-white {
             <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-blue-100 dark:border-blue-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] flex flex-col">
                 <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">TOP 10 SP BÁN CHẠY</h3>
                 <div class="h-[400px] md:h-[500px] w-full"><canvas id="topProductsChart"></canvas></div>
-
-                <!-- TOP SP BÁN CHẬM (còn hàng) - trước đây chỉ có "bán chạy", chưa có góc nhìn
-                     ngược lại để phát hiện hàng tồn đọng lâu, đọng vốn. Chỉ xét sản phẩm CÒN
-                     TỒN KHO (>0) - sản phẩm đã hết hàng thì không tính là "ế", đơn giản là hết. -->
-                <div class="mt-5 pt-4 border-t border-dashed border-slate-200 dark:border-slate-700">
-                    <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3">Top SP bán chậm nhất (còn hàng)</h3>
-                    <div id="slow-movers-list" class="space-y-1.5"></div>
-                </div>
             </div>
-            <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-rose-100 dark:border-rose-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
-                <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">Khách hàng công nợ</h3>
-                <div class="flex items-center w-full px-2 mb-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">
-                    <div class="w-[40%]">Khách hàng</div>
-                    <div class="w-[25%] text-center">SĐT</div>
-                    <div class="w-[35%] text-center">Công nợ</div>
-                </div>
-                <div id="home-debt-customers-list" class="overflow-y-auto pr-2 h-[400px] md:h-[500px]"></div>
+            <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-rose-100 dark:border-rose-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] flex flex-col">
+                <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">TỶ TRỌNG DOANH THU</h3>
+                <div class="h-[400px] md:h-[500px] w-full"><canvas id="revenueShareChart"></canvas></div>
             </div>
         </div>
     </div>
@@ -1800,7 +1787,7 @@ html:not(.dark) .bg-white {
 
     <!-- MODAL KHÁC TRÊN BẢNG ĐIỀU KHIỂN -->
     <div id="dashboard-detail-modal" class="fixed inset-0 z-[9999] bg-black/70 hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[80vh] overflow-hidden flex flex-col">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
             <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center dark:bg-slate-950/50">
                 <h3 id="modal-detail-title" class="font-black text-slate-900 dark:text-white">Chi tiết</h3>
                 <button onclick="document.getElementById('dashboard-detail-modal').classList.add('hidden')" class="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white text-xl font-bold">✕</button>
@@ -4496,11 +4483,14 @@ async function loadDashboard(filter = 'default') {
     });
 
     const productSalesMap = {};
+    const productRevenueMap = {};
     filteredSales.forEach(order => {
         totalRevenue += (Number(order.total) || 0);
         if (order.items) {
             order.items.forEach(item => {
-                productSalesMap[item.name] = (productSalesMap[item.name] || 0) + Number(item.qty || 0);
+                const qty = Number(item.qty || 0);
+                productSalesMap[item.name] = (productSalesMap[item.name] || 0) + qty;
+                productRevenueMap[item.name] = (productRevenueMap[item.name] || 0) + (qty * Number(item.price || 0));
             });
         }
     });
@@ -4508,36 +4498,7 @@ async function loadDashboard(filter = 'default') {
     const topProducts = Object.entries(productSalesMap)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 10);
-
-    // TOP SP BÁN CHẬM NHẤT (còn hàng) - xét toàn bộ danh mục sản phẩm đang CÒN TỒN KHO,
-    // ghép với số lượng đã bán trong kỳ (0 nếu không bán được cái nào) rồi sắp xếp TĂNG
-    // DẦN - sản phẩm bán ít/không bán được nằm đầu, giúp phát hiện hàng tồn đọng lâu.
-    try {
-        const slowMovers = (window.allProducts || [])
-            .map(p => ({
-                name: p.name,
-                sold: productSalesMap[p.name] || 0,
-                stock: (window.currentStockMap && window.currentStockMap[p.name]) || 0
-            }))
-            .filter(p => p.stock > 0)
-            .sort((a, b) => a.sold - b.sold)
-            .slice(0, 5);
-
-        const slowMoversEl = document.getElementById('slow-movers-list');
-        if (slowMoversEl) {
-            if (slowMovers.length === 0) {
-                slowMoversEl.innerHTML = '<p class="text-center py-3 text-xs text-slate-400 dark:text-slate-500">Chưa có dữ liệu</p>';
-            } else {
-                slowMoversEl.innerHTML = slowMovers.map(p => `
-                    <div class="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/60">
-                        <span class="text-xs font-medium text-slate-700 dark:text-slate-300 line-clamp-1 flex-1">${p.name}</span>
-                        <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 whitespace-nowrap">Tồn: ${p.stock}</span>
-                        <span class="text-[10px] font-black ${p.sold === 0 ? 'text-rose-500' : 'text-amber-500'} whitespace-nowrap">Bán: ${p.sold}</span>
-                    </div>
-                `).join('');
-            }
-        }
-    } catch (e) { console.warn('Không tính được Top SP bán chậm:', e); }
+    window.__dashboardProductRevenueMap = productRevenueMap;
 
     let totalDebtNCC = allSuppliers.reduce((sum, sup) => sum + (Number(sup.debt) || 0), 0);
 
@@ -4585,6 +4546,35 @@ async function loadDashboard(filter = 'default') {
         newDebtNCCPeriod += (Number(doc.data().thanhTien) || 0);
     });
 
+    // ==== CHI TIẾT THEO TỪNG KHÁCH HÀNG / NCC (dùng cho bảng "Nợ đầu kỳ | Phát sinh trong
+    // kỳ | Đã thanh toán | Còn nợ" khi bấm vào ô "Công nợ cần thu"/"Nợ NCC") ====
+    const newDebtByCustomerPeriod = {}; // key: tên khách hàng (sales lưu theo tên, không theo mã)
+    filteredSales.forEach(order => {
+        if (order.paymentMethod === 'Công nợ' && order.customer) {
+            newDebtByCustomerPeriod[order.customer] = (newDebtByCustomerPeriod[order.customer] || 0) + (Number(order.total) || 0);
+        }
+    });
+    const paidByCustomerPeriod = {}; // key: customerId
+    allCustomerPaymentsSnap.docs.forEach(doc => {
+        const d = doc.data();
+        if (d.date && d.date >= startDateStr && d.date <= endDateStr) {
+            paidByCustomerPeriod[d.customerId] = (paidByCustomerPeriod[d.customerId] || 0) + (Number(d.amount) || 0);
+        }
+    });
+    const newDebtBySupplierPeriod = {}; // key: tên NCC
+    materialImportsPeriodSnap.docs.forEach(doc => {
+        const d = doc.data();
+        if (d.ncc) newDebtBySupplierPeriod[d.ncc] = (newDebtBySupplierPeriod[d.ncc] || 0) + (Number(d.thanhTien) || 0);
+    });
+    const paidBySupplierPeriod = {}; // key: tên NCC
+    allSupplierPaymentsSnap.docs.forEach(doc => {
+        const d = doc.data();
+        const payDate = d.date && d.date.toDate ? d.date.toDate() : new Date(d.date);
+        if (payDate >= startDate && payDate <= endDate) {
+            paidBySupplierPeriod[d.supplierName] = (paidBySupplierPeriod[d.supplierName] || 0) + (Number(d.amount) || 0);
+        }
+    });
+
     // Tương tự cho NCC: lọc phần TRONG KỲ, cộng dồn LUỸ KẾ theo tên NCC
     // (paidBySupplierAllTime, key = supplierName) để hiển thị cột "Đã trả" của từng NCC.
     let paidNCCPeriod = 0;
@@ -4622,7 +4612,10 @@ async function loadDashboard(filter = 'default') {
     updateEl('total-debt-ncc-summary', newDebtNCCRemaining);
     updateEl('profit-summary', profit);
 
-    renderDebtCustomers(customersSnap);
+    // Đã thay danh sách "Khách hàng công nợ" ở tab Top SP + KH Nợ bằng biểu đồ tỷ trọng
+    // doanh thu (xem updateRevenueShareChart bên dưới) nên không cần gọi renderDebtCustomers
+    // ở đây nữa - hàm renderDebtCustomers vẫn được giữ lại (không xoá) phòng khi cần dùng
+    // lại chỗ khác, chỉ là không còn được gọi từ đây.
 
     if (typeof renderCustomerOrders === 'function') {
         renderCustomerOrders(allSales, customersSnap);
@@ -4640,7 +4633,11 @@ async function loadDashboard(filter = 'default') {
             newDebtNCCPeriod: newDebtNCCRemaining, paidNCCPeriod, oldDebtNCC, totalDebtNCC
         },
         paidByCustomerAllTime: paidByCustomerAllTime,
-        paidBySupplierAllTime: paidBySupplierAllTime
+        paidBySupplierAllTime: paidBySupplierAllTime,
+        newDebtByCustomerPeriod: newDebtByCustomerPeriod,
+        paidByCustomerPeriod: paidByCustomerPeriod,
+        newDebtBySupplierPeriod: newDebtBySupplierPeriod,
+        paidBySupplierPeriod: paidBySupplierPeriod
     };
 
     // So sánh doanh thu tháng này với tháng trước - hiện mũi tên tăng/giảm % cạnh "Tổng
@@ -4680,6 +4677,7 @@ async function loadDashboard(filter = 'default') {
         if (typeof updateRevenueChart === 'function') updateRevenueChart(filteredSales);
         if (typeof updateTopProductsChart === 'function') updateTopProductsChart(topProducts);
         if (typeof updateMonthlyRevenueChart === 'function') updateMonthlyRevenueChart(allSales);
+        if (typeof updateRevenueShareChart === 'function') updateRevenueShareChart(productRevenueMap);
     }, 50);
 }
 
@@ -4768,87 +4766,76 @@ function showDashboardDetail(type) {
         title.innerText = "Công nợ Khách hàng";
         
         let totalDebt = 0;
-        let totalPaidAll = 0;
         let hasDebt = false;
-        const paidMap = (window.currentDashboardData && window.currentDashboardData.paidByCustomerAllTime) || {};
+        const newDebtByCustomerPeriod = (window.currentDashboardData && window.currentDashboardData.newDebtByCustomerPeriod) || {};
+        const paidByCustomerPeriod = (window.currentDashboardData && window.currentDashboardData.paidByCustomerPeriod) || {};
 
-        // Gom trước rồi SẮP XẾP THEO NỢ GIẢM DẦN - trước đây danh sách hiện theo thứ tự
-        // ngẫu nhiên trong CSDL, khách nợ nhiều nhất có thể nằm cuối, khó thấy ngay ai cần
-        // đòi trước. Giờ luôn hiện khách nợ nhiều nhất lên đầu.
+        // Gom trước rồi SẮP XẾP THEO NỢ GIẢM DẦN - khách nợ nhiều nhất hiện lên đầu, dễ
+        // thấy ngay ai cần đòi trước.
         const debtorRows = [];
         customersSnap.forEach(doc => {
             const data = doc.data();
-            const debt = Number(data.debt) || 0;
-            const paid = Number(paidMap[doc.id]) || 0;
-            if (debt > 0) {
+            const closingDebt = Number(data.debt) || 0; // Còn nợ (tới hiện tại)
+            if (closingDebt > 0) {
                 hasDebt = true;
-                totalDebt += debt;
-                totalPaidAll += paid;
-                debtorRows.push({ id: doc.id, name: data.name || 'Khách hàng', debt, paid });
+                totalDebt += closingDebt;
+                const periodNew = Number(newDebtByCustomerPeriod[data.name]) || 0;   // Phát sinh trong kỳ
+                const periodPaid = Number(paidByCustomerPeriod[doc.id]) || 0;         // Đã thanh toán trong kỳ
+                // Nợ đầu kỳ suy ra từ đẳng thức: Còn nợ = Nợ đầu kỳ + Phát sinh - Đã trả
+                const openingDebt = Math.max(0, closingDebt - periodNew + periodPaid);
+                debtorRows.push({ id: doc.id, name: data.name || 'Khách hàng', closingDebt, periodNew, periodPaid, openingDebt });
             }
         });
-        debtorRows.sort((a, b) => b.debt - a.debt);
+        debtorRows.sort((a, b) => b.closingDebt - a.closingDebt);
 
         let listHtml = '';
-        debtorRows.forEach(({ id, name, debt, paid }) => {
-            // Thanh tỉ lệ nhỏ: đã trả bao nhiêu % so với tổng đã phát sinh (đã trả + còn nợ)
-            const totalTx = paid + debt;
-            const paidPct = totalTx > 0 ? Math.min(100, Math.round((paid / totalTx) * 100)) : 0;
+        debtorRows.forEach(({ id, name, closingDebt, periodNew, periodPaid, openingDebt }) => {
             listHtml += `
                 <div onclick="document.getElementById('dashboard-detail-modal').classList.add('hidden'); xemChiTietDaiLy('${id}')"
-                     class="py-1.5 border-b border-slate-100 dark:border-slate-800/60 cursor-pointer hover:bg-rose-50/60 dark:hover:bg-rose-950/20 rounded-lg px-1 -mx-1 transition-colors">
-                    <div class="flex justify-between items-center gap-2">
-                        <span class="text-xs font-medium text-slate-700 dark:text-slate-300 pr-2 line-clamp-2 flex-1 min-w-0">${name}</span>
-                        <span class="text-xs font-bold text-green-600 dark:text-green-400 whitespace-nowrap w-[90px] text-right">${paid.toLocaleString('vi-VN')} đ</span>
-                        <span class="text-xs font-bold text-slate-900 dark:text-white whitespace-nowrap w-[90px] text-right">${debt.toLocaleString('vi-VN')} đ</span>
-                    </div>
-                    <div class="h-1 w-full bg-slate-100 dark:bg-slate-800 rounded-full mt-1 overflow-hidden">
-                        <div class="h-full bg-green-400 dark:bg-green-500" style="width:${paidPct}%"></div>
+                     class="p-2.5 mb-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 cursor-pointer hover:bg-rose-50/60 dark:hover:bg-rose-950/20 hover:border-rose-200 dark:hover:border-rose-900/50 transition-colors">
+                    <div class="text-xs font-bold text-slate-800 dark:text-slate-100 mb-1.5 truncate">${name}</div>
+                    <div class="grid grid-cols-4 gap-1 text-center">
+                        <div>
+                            <div class="text-[9px] uppercase font-bold text-slate-400">Đầu kỳ</div>
+                            <div class="text-[11px] font-bold text-slate-600 dark:text-slate-300">${openingDebt.toLocaleString('vi-VN')}</div>
+                        </div>
+                        <div>
+                            <div class="text-[9px] uppercase font-bold text-amber-500">Phát sinh</div>
+                            <div class="text-[11px] font-bold text-amber-600 dark:text-amber-400">${periodNew.toLocaleString('vi-VN')}</div>
+                        </div>
+                        <div>
+                            <div class="text-[9px] uppercase font-bold text-green-500">Đã trả</div>
+                            <div class="text-[11px] font-bold text-green-600 dark:text-green-400">${periodPaid.toLocaleString('vi-VN')}</div>
+                        </div>
+                        <div>
+                            <div class="text-[9px] uppercase font-bold text-rose-500">Còn nợ</div>
+                            <div class="text-[11px] font-black text-rose-600 dark:text-rose-400">${closingDebt.toLocaleString('vi-VN')}</div>
+                        </div>
                     </div>
                 </div>
             `;
         });
 
-        // Khối "Nợ tháng mới (kỳ đang chọn) / Nợ cũ (trước kỳ)" - theo yêu cầu hiển thị cả
-        // nợ phát sinh trong kỳ mới VÀ nợ tồn đọng từ trước khi bấm vào xem chi tiết.
-        const pInfo = window.currentDashboardData.debtPeriodInfo;
-        let periodHtml = '';
-        if (pInfo) {
-            periodHtml = `
-                <div class="mb-3 space-y-1.5">
-                    <div class="flex justify-between items-center py-1.5 px-3 rounded-lg bg-rose-50/70 dark:bg-rose-950/25">
-                        <span class="text-xs font-bold text-rose-700 dark:text-rose-400">Nợ phát sinh trong kỳ (tháng mới)</span>
-                        <span class="text-xs font-black text-rose-700 dark:text-rose-400">${pInfo.newDebtCustomerPeriod.toLocaleString('vi-VN')} đ</span>
-                    </div>
-                    <div class="flex justify-between items-center py-1.5 px-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
-                        <span class="text-xs font-bold text-slate-600 dark:text-slate-300">Nợ cũ (trước kỳ này)</span>
-                        <span class="text-xs font-black text-slate-700 dark:text-slate-200">${pInfo.oldDebtCustomer.toLocaleString('vi-VN')} đ</span>
-                    </div>
-                </div>
-            `;
-        }
+        // Đã bỏ khối tóm tắt "Nợ phát sinh trong kỳ" / "Nợ cũ (trước kỳ này)" ở đây theo yêu
+        // cầu - 2 số này đã có sẵn trong cột "Phát sinh" / "Đầu kỳ" của TỪNG khách hàng ở
+        // danh sách bên dưới rồi, để cả 2 nơi bị trùng lặp thông tin không cần thiết. Chỉ
+        // còn giữ lại đúng 1 ô tổng "Tổng nợ khách hàng (Số còn nợ)".
 
         // Ô TỔNG CỘNG CÔNG NỢ KHÁCH: NỀN MỜ ĐỎ/HỒNG DỊU CHỐNG CHÓI
         let html = `
-            ${periodHtml}
             <div class="mb-4 p-3 bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200/50 dark:border-rose-900/30 rounded-xl">
                 <div class="flex justify-between items-center text-rose-900 dark:text-rose-400">
-                    <span class="font-bold text-xs uppercase">Tổng nợ khách hàng (luỹ kế)</span>
+                    <span class="font-bold text-xs uppercase">Tổng nợ khách hàng (Số còn nợ)</span>
                     <span class="font-black text-sm text-rose-600 dark:text-rose-400">${totalDebt.toLocaleString('vi-VN')} đ</span>
                 </div>
                 <div class="text-[10px] text-rose-500/80 dark:text-rose-400/70 mt-0.5">${debtorRows.length} khách đang nợ - sắp xếp nợ nhiều nhất lên đầu, bấm vào tên để xem chi tiết</div>
-            </div>
-            <div class="flex justify-between items-center px-0 pb-1.5 mb-1 border-b border-slate-200 dark:border-slate-700 gap-2">
-                <span class="text-[10px] font-bold uppercase text-slate-400 flex-1">Khách hàng</span>
-                <span class="text-[10px] font-bold uppercase text-slate-400 w-[90px] text-right">Đã trả</span>
-                <span class="text-[10px] font-bold uppercase text-slate-400 w-[90px] text-right">Còn nợ</span>
             </div>
             <div class="space-y-1 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">
                 ${listHtml}
             </div>
         `;
 
-        content.innerHTML = !hasDebt ? (periodHtml || '') + '<p class="text-center text-sm p-4 text-slate-500 dark:text-slate-400">Hiện tại không có khách hàng nào nợ.</p>' : html;
+        content.innerHTML = !hasDebt ? '<p class="text-center text-sm p-4 text-slate-500 dark:text-slate-400">Hiện tại không có khách hàng nào nợ.</p>' : html;
     }
 
     // TRƯỜNG HỢP 3: CÔNG NỢ NCC (ĐỒNG BỘ DUAL THEME - NỀN MỜ AMBER)
@@ -4856,26 +4843,8 @@ function showDashboardDetail(type) {
         title.innerText = "Nợ Nhà cung cấp";
         const activeDebtSuppliers = allSuppliers.filter(sup => (Number(sup.debt) || 0) > 0);
 
-        // Khối "Nợ tháng mới (kỳ đang chọn) / Nợ cũ (trước kỳ)"
-        const pInfo = window.currentDashboardData.debtPeriodInfo;
-        let periodHtml = '';
-        if (pInfo) {
-            periodHtml = `
-                <div class="mb-3 space-y-1.5">
-                    <div class="flex justify-between items-center py-1.5 px-3 rounded-lg bg-amber-50/70 dark:bg-amber-950/25">
-                        <span class="text-xs font-bold text-amber-700 dark:text-amber-400">Nợ phát sinh trong kỳ (tháng mới)</span>
-                        <span class="text-xs font-black text-amber-700 dark:text-amber-400">${pInfo.newDebtNCCPeriod.toLocaleString('vi-VN')} đ</span>
-                    </div>
-                    <div class="flex justify-between items-center py-1.5 px-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
-                        <span class="text-xs font-bold text-slate-600 dark:text-slate-300">Nợ cũ (trước kỳ này)</span>
-                        <span class="text-xs font-black text-slate-700 dark:text-slate-200">${pInfo.oldDebtNCC.toLocaleString('vi-VN')} đ</span>
-                    </div>
-                </div>
-            `;
-        }
-
         if (activeDebtSuppliers.length === 0) {
-            content.innerHTML = periodHtml + '<p class="text-center text-sm p-4 text-slate-500 dark:text-slate-400">Hiện tại không nợ nhà cung cấp nào.</p>';
+            content.innerHTML = '<p class="text-center text-sm p-4 text-slate-500 dark:text-slate-400">Hiện tại không nợ nhà cung cấp nào.</p>';
         } else {
             let totalNCCDebt = 0;
             let listHtml = '';
@@ -4899,40 +4868,49 @@ function showDashboardDetail(type) {
             const sortedSuppliers = [...activeDebtSuppliers].sort((a, b) => (Number(b.debt) || 0) - (Number(a.debt) || 0));
 
             sortedSuppliers.forEach(sup => {
-                const debt = Number(sup.debt) || 0;
-                const paid = Number(paidMapNCC[sup.name]) || 0;
-                totalNCCDebt += debt;
-                const totalTx = paid + debt;
-                const paidPct = totalTx > 0 ? Math.min(100, Math.round((paid / totalTx) * 100)) : 0;
+                const closingDebt = Number(sup.debt) || 0; // Còn nợ (tới hiện tại)
+                totalNCCDebt += closingDebt;
+                const periodNew = Number((window.currentDashboardData && window.currentDashboardData.newDebtBySupplierPeriod || {})[sup.name]) || 0;
+                const periodPaid = Number((window.currentDashboardData && window.currentDashboardData.paidBySupplierPeriod || {})[sup.name]) || 0;
+                // Nợ đầu kỳ suy ra từ đẳng thức: Còn nợ = Nợ đầu kỳ + Phát sinh - Đã trả
+                const openingDebt = Math.max(0, closingDebt - periodNew + periodPaid);
                 listHtml += `
                     <div onclick="document.getElementById('dashboard-detail-modal').classList.add('hidden'); xemChiTietNCC('${sup.id}')"
-                         class="py-1.5 border-b border-slate-100 dark:border-slate-800/60 cursor-pointer hover:bg-amber-50/60 dark:hover:bg-amber-950/20 rounded-lg px-1 -mx-1 transition-colors">
-                        <div class="flex justify-between items-center gap-2">
-                            <span class="text-xs font-medium text-slate-700 dark:text-slate-300 pr-2 line-clamp-2 flex-1 min-w-0">${sup.name || 'NCC'}</span>
-                            <span class="text-xs font-bold text-green-600 dark:text-green-400 whitespace-nowrap w-[90px] text-right">${paid.toLocaleString('vi-VN')} đ</span>
-                            <span class="text-xs font-bold text-slate-900 dark:text-white whitespace-nowrap w-[90px] text-right">${debt.toLocaleString('vi-VN')} đ</span>
-                        </div>
-                        <div class="h-1 w-full bg-slate-100 dark:bg-slate-800 rounded-full mt-1 overflow-hidden">
-                            <div class="h-full bg-green-400 dark:bg-green-500" style="width:${paidPct}%"></div>
+                         class="p-2.5 mb-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 cursor-pointer hover:bg-amber-50/60 dark:hover:bg-amber-950/20 hover:border-amber-200 dark:hover:border-amber-900/50 transition-colors">
+                        <div class="text-xs font-bold text-slate-800 dark:text-slate-100 mb-1.5 truncate">${sup.name || 'NCC'}</div>
+                        <div class="grid grid-cols-4 gap-1 text-center">
+                            <div>
+                                <div class="text-[9px] uppercase font-bold text-slate-400">Đầu kỳ</div>
+                                <div class="text-[11px] font-bold text-slate-600 dark:text-slate-300">${openingDebt.toLocaleString('vi-VN')}</div>
+                            </div>
+                            <div>
+                                <div class="text-[9px] uppercase font-bold text-amber-500">Phát sinh</div>
+                                <div class="text-[11px] font-bold text-amber-600 dark:text-amber-400">${periodNew.toLocaleString('vi-VN')}</div>
+                            </div>
+                            <div>
+                                <div class="text-[9px] uppercase font-bold text-green-500">Đã trả</div>
+                                <div class="text-[11px] font-bold text-green-600 dark:text-green-400">${periodPaid.toLocaleString('vi-VN')}</div>
+                            </div>
+                            <div>
+                                <div class="text-[9px] uppercase font-bold text-rose-500">Còn nợ</div>
+                                <div class="text-[11px] font-black text-rose-600 dark:text-rose-400">${closingDebt.toLocaleString('vi-VN')}</div>
+                            </div>
                         </div>
                     </div>
                 `;
             });
 
+            // Đã bỏ khối tóm tắt "Nợ phát sinh trong kỳ" / "Nợ cũ (trước kỳ này)" ở đây theo
+            // yêu cầu - trùng lặp với cột "Phát sinh"/"Đầu kỳ" của từng NCC ở danh sách dưới.
+
             // Ô TỔNG CỘNG CÔNG NỢ NCC: NỀN MỜ VÀNG/CAM ẤM DỊU CHỐNG CHÓI
             let html = `
-                ${periodHtml}
                 <div class="mb-4 p-3 bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/30 rounded-xl">
                     <div class="flex justify-between items-center text-amber-900 dark:text-amber-400">
-                        <span class="font-bold text-xs uppercase">Tổng nợ nhà cung cấp (luỹ kế)</span>
+                        <span class="font-bold text-xs uppercase">Tổng nợ nhà cung cấp (Số còn nợ)</span>
                         <span class="font-black text-sm text-amber-600 dark:text-amber-400">${totalNCCDebt.toLocaleString('vi-VN')} đ</span>
                     </div>
                     <div class="text-[10px] text-amber-600/80 dark:text-amber-400/70 mt-0.5">${sortedSuppliers.length} NCC đang nợ - sắp xếp nợ nhiều nhất lên đầu, bấm vào tên để xem chi tiết</div>
-                </div>
-                <div class="flex justify-between items-center px-0 pb-1.5 mb-1 border-b border-slate-200 dark:border-slate-700 gap-2">
-                    <span class="text-[10px] font-bold uppercase text-slate-400 flex-1">Nhà cung cấp</span>
-                    <span class="text-[10px] font-bold uppercase text-slate-400 w-[90px] text-right">Đã trả</span>
-                    <span class="text-[10px] font-bold uppercase text-slate-400 w-[90px] text-right">Còn nợ</span>
                 </div>
                 <div class="space-y-1 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">
                     ${listHtml}
@@ -5719,7 +5697,7 @@ function updateTopProductsChart(topProducts) {
     // --- NHẬN DIỆN GIAO DIỆN ĐỘNG (LIGHT / DARK THEME) ---
     const isDark = document.documentElement.classList.contains('dark');
     const datalabelsColor = isDark ? '#cbd5e1' : '#475569'; // Slate-300 (sáng) vs Slate-600 (tối)
-    const yTicksColor = isDark ? '#94a3b8' : '#475569';     // Slate-400 (sáng) vs Slate-600 (tối)
+    const xTicksColor = isDark ? '#94a3b8' : '#475569';     // Slate-400 (sáng) vs Slate-600 (tối)
 
     window.topProductChartInstance = new Chart(ctx, {
         type: 'bar',
@@ -5728,51 +5706,108 @@ function updateTopProductsChart(topProducts) {
             datasets: [{
                 label: 'Số lượng',
                 data: topProducts.map(p => p[1]),
-                backgroundColor: '#f43f5e', // Đỏ Rose cực kỳ nổi bật trên cả nền sáng và tối
-                borderRadius: 8, // Bo tròn góc cột hiện đại
-                barPercentage: 0.8, // Tránh các cột dính sát nhau
-                categoryPercentage: 0.9
+                backgroundColor: '#3b82f6', // Xanh dương nổi bật trên cả nền sáng và tối
+                borderRadius: 6, // Bo tròn góc cột hiện đại
+                barPercentage: 0.7, // Tránh các cột dính sát nhau
+                categoryPercentage: 0.85
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            indexAxis: 'y',
+            // Cột đứng (mặc định của Chart.js là indexAxis: 'x') giống biểu đồ "Sản lượng
+            // bán ra" mẫu - trước đây dùng indexAxis: 'y' (nằm ngang).
             animation: false,
             layout: {
-                padding: {
-                    left: 0,
-                    right: 25, // Tăng nhẹ khoảng đệm bên phải để tránh số lượng bị tràn hoặc mất nét
-                    top: 0,
-                    bottom: 0
-                }
+                padding: { left: 0, right: 0, top: 20, bottom: 0 }
             },
             plugins: {
                 legend: { display: false },
                 datalabels: {
                     anchor: 'end',
-                    align: 'right',
+                    align: 'top',
                     color: datalabelsColor, // Thay đổi động theo giao diện hiện tại
                     font: { weight: 'bold', size: 11 }
                 }
             },
             scales: {
-                x: { 
-                    grid: { display: false }, 
-                    beginAtZero: true,
-                    grace: '5%', // Tự động dãn rộng biểu đồ tránh số lượng đè vào viền phải
-                    ticks: { display: false }
-                },
                 y: { 
+                    grid: { color: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }, 
+                    beginAtZero: true,
+                    grace: '10%', // Tự động dãn rộng biểu đồ tránh số lượng đè vào viền trên
+                    ticks: { color: xTicksColor, font: { size: 10 } }
+                },
+                x: { 
                     grid: { display: false },
                     ticks: {
-                        color: yTicksColor, // Thay đổi động tên sản phẩm theo giao diện hiện tại
-                        font: { size: 10 }
+                        color: xTicksColor, // Thay đổi động tên sản phẩm theo giao diện hiện tại
+                        font: { size: 9 },
+                        maxRotation: 45,
+                        minRotation: 45
                     }
                 }
             }
         },
         plugins: [ChartDataLabels] 
+    });
+}
+
+// Biểu đồ tròn "Tỷ trọng doanh thu" theo từng sản phẩm - thay cho danh sách "Khách hàng
+// công nợ" trước đây ở tab Top SP + KH Nợ. Lấy TOP 8 sản phẩm doanh thu cao nhất, các sản
+// phẩm còn lại gộp chung vào lát "Khác" để biểu đồ không bị vụn quá nhiều lát nhỏ.
+function updateRevenueShareChart(productRevenueMap) {
+    const ctx = document.getElementById('revenueShareChart')?.getContext('2d');
+    if (!ctx) return;
+    if (window.revenueShareChartInstance) window.revenueShareChartInstance.destroy();
+
+    const isDark = document.documentElement.classList.contains('dark');
+    const legendColor = isDark ? '#cbd5e1' : '#475569';
+
+    const entries = Object.entries(productRevenueMap || {}).sort((a, b) => b[1] - a[1]);
+    const top = entries.slice(0, 8);
+    const rest = entries.slice(8);
+    const restTotal = rest.reduce((sum, [, v]) => sum + v, 0);
+
+    const labels = top.map(e => e[0]);
+    const data = top.map(e => e[1]);
+    if (restTotal > 0) { labels.push('Khác'); data.push(restTotal); }
+
+    const palette = ['#ef4444', '#f59e0b', '#10b981', '#0ea5e9', '#8b5cf6', '#ec4899', '#22c55e', '#eab308', '#94a3b8'];
+    const total = data.reduce((s, v) => s + v, 0);
+
+    window.revenueShareChartInstance = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: palette.slice(0, labels.length),
+                borderColor: isDark ? '#0f172a' : '#ffffff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: { color: legendColor, font: { size: 11 }, boxWidth: 12, padding: 10 }
+                },
+                datalabels: {
+                    color: '#fff',
+                    font: { weight: 'bold', size: 10 },
+                    formatter: (value) => total > 0 ? (Math.round((value / total) * 1000) / 10) + '%' : ''
+                },
+                tooltip: {
+                    callbacks: {
+                        label: (item) => `${item.label}: ${Number(item.raw).toLocaleString('vi-VN')} đ`
+                    }
+                }
+            }
+        },
+        plugins: [ChartDataLabels]
     });
 }
 
