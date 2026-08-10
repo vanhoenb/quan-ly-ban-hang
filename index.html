@@ -4317,27 +4317,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 3. Danh sách class khi Tab được chọn (Bao gồm cả Dark mode)
+    // 3. Danh sách class khi Tab được chọn (PHẢI khớp CHÍNH XÁC với class tĩnh ban đầu
+    // trong HTML của nút "NXT KHO" - nếu không khớp, classList.remove() bên dưới sẽ không
+    // xoá được class cũ (do không tìm thấy đúng tên class để xoá), khiến class cũ dính lại
+    // chồng lên class mới thêm vào. Đây chính là nguyên nhân lỗi "mất chữ" ở chế độ sáng:
+    // 'text-white' của trạng thái active bị dính lại trên tab không active, chữ trắng trên
+    // nền sáng gần như vô hình - trong khi ở chế độ tối vẫn thấy được (chữ trắng + nền tối
+    // vẫn tương phản tốt) nên không lộ ra lỗi.
     const activeClasses = [
-        'bg-gradient-to-b', 'from-blue-300', 'to-blue-400', 
-        'text-blue-800', 'border-t', 'border-l', 'border-white', 
-        'border-b-[4px]', 'border-blue-400', 
+        'bg-gradient-to-b', 'from-blue-500', 'to-blue-600', 
+        'text-white', 
+        'border-b-[4px]', 'border-blue-700', 
         'shadow-[0_4px_10px_rgba(59,130,246,0.15)]', 
-        '-translate-y-[2px]', 'font-black',
+        'font-black',
         // Các class cho Dark Mode
         'dark:from-blue-900/60', 'dark:to-blue-800/50', 'dark:text-blue-400', 
-        'dark:border-blue-500/20', 'dark:border-blue-600', 
+        'dark:border-blue-600', 
         'dark:shadow-[0_6px_15px_rgba(59,130,246,0.25)]'
     ];
     
-    // 4. Danh sách class khi Tab KHÔNG được chọn (Bao gồm cả Dark mode)
+    // 4. Danh sách class khi Tab KHÔNG được chọn (cũng khớp chính xác với class tĩnh ban
+    // đầu của nút "DOANH THU"/"TOP SP + KH NỢ" trong HTML).
     const inactiveClasses = [
         'bg-slate-100/80', 'text-slate-400', 
         'border-b-[2px]', 'border-slate-300', 
         'shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]', 
-        'translate-y-0', 'hover:text-slate-700', 
+        'hover:text-slate-700', 
         'hover:bg-slate-50', 'hover:border-b-[4px]', 
-        'hover:border-slate-400', 'hover:-translate-y-[2px]', 
+        'hover:border-slate-400', 
         'hover:shadow-[0_4px_10px_rgba(0,0,0,0.1)]', 'font-bold',
         // Các class cho Dark Mode
         'dark:bg-slate-900/40', 'dark:text-slate-500', 'dark:border-slate-950', 
@@ -5755,13 +5762,73 @@ function updateTopProductsChart(topProducts) {
 // Biểu đồ tròn "Tỷ trọng doanh thu" theo từng sản phẩm - thay cho danh sách "Khách hàng
 // công nợ" trước đây ở tab Top SP + KH Nợ. Lấy TOP 8 sản phẩm doanh thu cao nhất, các sản
 // phẩm còn lại gộp chung vào lát "Khác" để biểu đồ không bị vụn quá nhiều lát nhỏ.
+// Chart.js không có sẵn kiểu "nhãn kéo ra ngoài kèm đường kẻ chỉ" cho biểu đồ tròn, nên viết
+// thêm 1 plugin nhỏ để vẽ: 1 đường kẻ gãy khúc từ mép mỗi lát bánh ra ngoài, rồi ghi tên sản
+// phẩm + % ngay đầu đường kẻ đó - giống đúng kiểu biểu đồ tròn mẫu (Google Sheets/Excel).
+const outsidePieLabelsPlugin = {
+    id: 'outsidePieLabels',
+    afterDraw(chart) {
+        if (!chart.config._outsideLabels) return;
+        const { ctx } = chart;
+        const meta = chart.getDatasetMeta(0);
+        const dataset = chart.data.datasets[0];
+        if (!dataset) return;
+        const total = dataset.data.reduce((a, b) => a + b, 0);
+        if (total <= 0) return;
+
+        const isDark = document.documentElement.classList.contains('dark');
+        const textColor = isDark ? '#e2e8f0' : '#334155';
+        const lineColor = isDark ? '#64748b' : '#94a3b8';
+
+        ctx.save();
+        ctx.font = '11px sans-serif';
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = lineColor;
+
+        meta.data.forEach((arc, i) => {
+            const value = dataset.data[i];
+            if (!value) return;
+            const pct = Math.round((value / total) * 1000) / 10;
+            if (pct < 1) return; // Lát quá nhỏ (<1%) thì bỏ qua nhãn, tránh chữ chồng chéo nhau
+
+            const angle = (arc.startAngle + arc.endAngle) / 2;
+            const cx = arc.x, cy = arc.y;
+            const outerR = arc.outerRadius;
+
+            const startX = cx + Math.cos(angle) * outerR;
+            const startY = cy + Math.sin(angle) * outerR;
+            const midX = cx + Math.cos(angle) * (outerR + 18);
+            const midY = cy + Math.sin(angle) * (outerR + 18);
+            const isRight = Math.cos(angle) >= 0;
+            const endX = midX + (isRight ? 26 : -26);
+
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(midX, midY);
+            ctx.lineTo(endX, midY);
+            ctx.stroke();
+
+            ctx.fillStyle = textColor;
+            ctx.textAlign = isRight ? 'left' : 'right';
+            ctx.textBaseline = 'bottom';
+            const label = chart.data.labels[i];
+            ctx.fillText(label, endX + (isRight ? 4 : -4), midY - 2);
+            ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
+            ctx.font = '10px sans-serif';
+            ctx.fillText(pct + '%', endX + (isRight ? 4 : -4), midY + 11);
+            ctx.font = '11px sans-serif';
+        });
+        ctx.restore();
+    }
+};
+Chart.register(outsidePieLabelsPlugin);
+
 function updateRevenueShareChart(productRevenueMap) {
     const ctx = document.getElementById('revenueShareChart')?.getContext('2d');
     if (!ctx) return;
     if (window.revenueShareChartInstance) window.revenueShareChartInstance.destroy();
 
     const isDark = document.documentElement.classList.contains('dark');
-    const legendColor = isDark ? '#cbd5e1' : '#475569';
 
     const entries = Object.entries(productRevenueMap || {}).sort((a, b) => b[1] - a[1]);
     const top = entries.slice(0, 8);
@@ -5773,7 +5840,6 @@ function updateRevenueShareChart(productRevenueMap) {
     if (restTotal > 0) { labels.push('Khác'); data.push(restTotal); }
 
     const palette = ['#ef4444', '#f59e0b', '#10b981', '#0ea5e9', '#8b5cf6', '#ec4899', '#22c55e', '#eab308', '#94a3b8'];
-    const total = data.reduce((s, v) => s + v, 0);
 
     window.revenueShareChartInstance = new Chart(ctx, {
         type: 'pie',
@@ -5790,25 +5856,24 @@ function updateRevenueShareChart(productRevenueMap) {
             responsive: true,
             maintainAspectRatio: false,
             animation: false,
+            // Chừa khoảng trống lớn quanh biểu đồ để nhãn + đường kẻ ra ngoài (do plugin
+            // outsidePieLabels vẽ) không bị tràn ra ngoài khung/cắt mất chữ.
+            layout: { padding: 70 },
             plugins: {
-                legend: {
-                    position: 'right',
-                    labels: { color: legendColor, font: { size: 11 }, boxWidth: 12, padding: 10 }
-                },
-                datalabels: {
-                    color: '#fff',
-                    font: { weight: 'bold', size: 10 },
-                    formatter: (value) => total > 0 ? (Math.round((value / total) * 1000) / 10) + '%' : ''
-                },
+                // Tắt legend mặc định và nhãn % ở giữa lát bánh - đã thay bằng nhãn kéo ra
+                // ngoài kèm đường kẻ chỉ (outsidePieLabels) giống ảnh mẫu.
+                legend: { display: false },
+                datalabels: { display: false },
                 tooltip: {
                     callbacks: {
                         label: (item) => `${item.label}: ${Number(item.raw).toLocaleString('vi-VN')} đ`
                     }
                 }
             }
-        },
-        plugins: [ChartDataLabels]
+        }
     });
+    window.revenueShareChartInstance.config._outsideLabels = true;
+    window.revenueShareChartInstance.update();
 }
 
 
