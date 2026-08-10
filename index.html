@@ -1760,7 +1760,10 @@ html:not(.dark) .bg-white {
     <div id="content-main-products" class="main-tab-content hidden">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-blue-100 dark:border-blue-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] flex flex-col">
-                <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">TOP 10 SP BÁN CHẠY</h3>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">TOP 10 SP BÁN CHẠY</h3>
+                    <button onclick="showAllProductsSold()" class="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap">Xem tất cả ▸</button>
+                </div>
                 <div class="h-[400px] md:h-[500px] w-full"><canvas id="topProductsChart"></canvas></div>
             </div>
             <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-rose-100 dark:border-rose-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] flex flex-col">
@@ -3076,6 +3079,25 @@ html:not(.dark) .bg-white {
         </div>
         <button id="btn-fix-stock" onclick="runForceResyncStockCountersUI()" class="shrink-0 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-amber-700 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2 justify-center">
             <i data-lucide="refresh-ccw" class="w-4 h-4"></i> Sửa lại tồn kho ngay
+        </button>
+    </div>
+
+    <!-- KHỐI SAO LƯU DỮ LIỆU: tải toàn bộ dữ liệu về máy phòng trường hợp phần mềm gặp
+         sự cố (mất mạng dài ngày, tài khoản Firebase gặp vấn đề, thao tác nhầm hàng loạt...) -->
+    <div class="bg-sky-50 dark:bg-sky-950/30 border border-sky-300 dark:border-sky-800 rounded-2xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+            <p class="font-bold text-sky-800 dark:text-sky-300 flex items-center gap-2">
+                <i data-lucide="hard-drive-download" class="w-4 h-4"></i> Sao lưu dữ liệu ra máy tính
+            </p>
+            <p class="text-xs text-sky-700 dark:text-sky-400 mt-1">
+                Tải về 1 file duy nhất chứa TOÀN BỘ dữ liệu hiện có (sản phẩm, phiếu nhập/xuất, khách hàng,
+                nhà cung cấp, công nợ, nguyên liệu, sản xuất...) - phòng trường hợp phần mềm gặp sự cố hoặc
+                cần đối chiếu lại. Nên sao lưu định kỳ (ví dụ cuối mỗi tuần) và lưu file ở nơi an toàn, vì
+                file có chứa cả thông tin tài khoản đăng nhập.
+            </p>
+        </div>
+        <button id="btn-backup-data" onclick="backupAllDataToFile()" class="shrink-0 bg-sky-500 hover:bg-sky-600 text-white px-4 py-2.5 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-sky-700 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2 justify-center">
+            <i data-lucide="download" class="w-4 h-4"></i> Sao lưu dữ liệu ra máy
         </button>
     </div>
 
@@ -4506,6 +4528,7 @@ async function loadDashboard(filter = 'default') {
         .sort((a, b) => b[1] - a[1])
         .slice(0, 10);
     window.__dashboardProductRevenueMap = productRevenueMap;
+    window.__dashboardProductSalesMap = productSalesMap;
 
     let totalDebtNCC = allSuppliers.reduce((sum, sup) => sum + (Number(sup.debt) || 0), 0);
 
@@ -5874,6 +5897,46 @@ function updateRevenueShareChart(productRevenueMap) {
     });
     window.revenueShareChartInstance.config._outsideLabels = true;
     window.revenueShareChartInstance.update();
+}
+
+// Nút "Xem tất cả" ở biểu đồ "TOP 10 SP BÁN CHẠY" - trước đây có nút nhưng chưa cài đặt
+// hàm nên bấm không có tác dụng gì. Hiện đầy đủ TẤT CẢ sản phẩm đã bán trong kỳ đang xem
+// trên Trang Chủ (không chỉ 10 SP đầu), sắp xếp theo số lượng bán giảm dần, kèm doanh thu -
+// dùng lại đúng dữ liệu đã tính sẵn (window.__dashboardProductSalesMap/RevenueMap), không
+// cần đọc lại Firestore nên mở tức thì.
+function showAllProductsSold() {
+    const salesMap = window.__dashboardProductSalesMap || {};
+    const revenueMap = window.__dashboardProductRevenueMap || {};
+    const entries = Object.entries(salesMap).sort((a, b) => b[1] - a[1]);
+
+    const modal = document.getElementById('dashboard-detail-modal');
+    const title = document.getElementById('modal-detail-title');
+    const content = document.getElementById('modal-detail-content');
+    if (!modal || !title || !content) return;
+
+    title.innerText = 'Tất cả sản phẩm đã bán (kỳ đang xem)';
+
+    if (entries.length === 0) {
+        content.innerHTML = '<p class="text-center text-sm p-4 text-slate-500 dark:text-slate-400">Chưa có dữ liệu bán hàng trong kỳ này.</p>';
+    } else {
+        let rows = entries.map(([name, qty], idx) => `
+            <div class="flex items-center gap-2 py-2 px-2.5 rounded-lg ${idx % 2 === 0 ? 'bg-slate-50 dark:bg-slate-800/40' : ''}">
+                <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 w-6 text-center shrink-0">${idx + 1}</span>
+                <span class="text-xs font-bold text-slate-800 dark:text-slate-100 flex-1 truncate">${name}</span>
+                <span class="text-xs font-bold text-blue-600 dark:text-blue-400 shrink-0 w-16 text-right">${qty} SL</span>
+                <span class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 shrink-0 w-28 text-right">${(revenueMap[name] || 0).toLocaleString('vi-VN')} đ</span>
+            </div>
+        `).join('');
+
+        content.innerHTML = `
+            <div class="mb-3 text-[11px] text-slate-500 dark:text-slate-400">Tổng cộng <b>${entries.length}</b> sản phẩm đã bán trong kỳ đang xem ở Trang Chủ.</div>
+            <div class="max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar space-y-0.5">
+                ${rows}
+            </div>
+        `;
+    }
+
+    modal.classList.remove('hidden');
 }
 
 
@@ -7396,6 +7459,84 @@ window.runForceResyncStockCountersUI = async function () {
             btn.disabled = false;
             btn.classList.remove('opacity-50', 'cursor-not-allowed');
             btn.innerHTML = '<i data-lucide="refresh-ccw" class="w-4 h-4"></i> Sửa lại tồn kho ngay';
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+    }
+};
+
+// ============================================================
+// SAO LƯU TOÀN BỘ DỮ LIỆU RA FILE - phòng trường hợp phần mềm gặp sự cố (mất mạng dài
+// ngày, tài khoản Firebase gặp vấn đề, thao tác nhầm hàng loạt, hết hạn mức miễn phí kéo
+// dài...). Đọc toàn bộ các collection đang dùng trong hệ thống, gộp thành 1 file JSON duy
+// nhất rồi tải về máy - đây là bản chụp (snapshot) tại đúng thời điểm bấm nút, không tự
+// động cập nhật, nên cần bấm lại định kỳ để có bản sao lưu mới.
+// ============================================================
+window.backupAllDataToFile = async function () {
+    const btn = document.getElementById('btn-backup-data');
+    const collectionsToBackup = [
+        'products', 'receipts', 'sales', 'customers', 'suppliers', 'stock_counters',
+        'materials_list', 'material_imports', 'production', 'payments', 'debt_history',
+        'opening_balances', 'supplier_opening_balances', 'calendar_events', 'app_users',
+        'activity_logs', 'app_meta'
+    ];
+
+    if (btn) {
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang sao lưu...';
+    }
+
+    try {
+        const backup = {
+            exportedAt: new Date().toISOString(),
+            note: 'File sao lưu dữ liệu hệ thống Quản Lý Kho & Bán Hàng - chứa cả thông tin tài khoản đăng nhập, cần lưu ở nơi an toàn.',
+            collections: {}
+        };
+        let totalDocs = 0;
+
+        for (const colName of collectionsToBackup) {
+            try {
+                const snap = await db.collection(colName).get();
+                backup.collections[colName] = snap.docs.map(doc => {
+                    const data = doc.data();
+                    // Chuyển các trường kiểu Firestore Timestamp thành chuỗi ISO, vì JSON
+                    // thường không lưu được kiểu Timestamp của Firestore.
+                    const converted = {};
+                    Object.keys(data).forEach(key => {
+                        const val = data[key];
+                        converted[key] = (val && typeof val.toDate === 'function') ? val.toDate().toISOString() : val;
+                    });
+                    return { _docId: doc.id, ...converted };
+                });
+                totalDocs += backup.collections[colName].length;
+            } catch (e) {
+                console.warn(`Không đọc được collection "${colName}" khi sao lưu:`, e);
+                backup.collections[colName] = [];
+            }
+        }
+
+        const jsonStr = JSON.stringify(backup, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const now = new Date();
+        const pad = (n) => String(n).padStart(2, '0');
+        const fileName = `backup_POS_${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}.json`;
+
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        Swal.fire('Đã sao lưu xong', `Đã tải về máy ${totalDocs.toLocaleString('vi-VN')} bản ghi từ ${collectionsToBackup.length} danh mục dữ liệu (file: ${fileName}). Bạn nên lưu file này ở nơi an toàn (USB, ổ cứng ngoài, Google Drive riêng...).`, 'success');
+    } catch (error) {
+        console.error('Lỗi khi sao lưu dữ liệu:', error);
+        Swal.fire('Lỗi', 'Có lỗi khi sao lưu dữ liệu: ' + error.message, 'error');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            btn.innerHTML = '<i data-lucide="download" class="w-4 h-4"></i> Sao lưu dữ liệu ra máy';
             if (typeof lucide !== 'undefined') lucide.createIcons();
         }
     }
