@@ -1321,13 +1321,13 @@ html:not(.dark) .bg-white {
 </style>
 
 
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@1.31.0"></script>
     <!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1"></script>
 <!-- Chartjs Plugin Datalabels -->
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-compat.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -16169,6 +16169,16 @@ function updateToggleButton(theme) {
 
 // 5. Lắng nghe sự kiện tải trang để kích hoạt hệ thống theme ngay lập tức
 document.addEventListener('DOMContentLoaded', initTheme);
+
+// --- ĐĂNG KÝ SERVICE WORKER (hoàn thiện PWA: cache giao diện app để mở được khi mất mạng) ---
+// File sw.js cần được đặt CÙNG THƯ MỤC với file HTML này trên server khi triển khai.
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+            .then(() => console.log('Service Worker: đã đăng ký thành công.'))
+            .catch((err) => console.warn('Service Worker: đăng ký thất bại (app vẫn hoạt động bình thường, chỉ là không cache được khi mất mạng):', err));
+    });
+}
 
 // --- KHỞI TẠO HỆ THỐNG ---
 // 1. Cấu hình ban đầu
