@@ -2196,16 +2196,22 @@ html:not(.dark) .bg-white {
                 </div>
             </div>
 
-            <div id="sell-cart-container" class="bg-white dark:bg-slate-900 p-2 md:p-4 rounded-2xl shadow-sm border-4 border-blue-400 h-48 md:h-auto md:flex-1 overflow-y-auto" style="border-width:4px;border-style:solid;border-color:#60a5fa;">
-                <table class="w-full text-xs border-collapse">
+            <!-- Bảng giỏ hàng: chỉ áp dụng "ép cột cố định + cuộn ngang" cho ĐIỆN THOẠI (dưới
+                 md). Từ md trở lên (PC/tablet ngang) quay về ĐÚNG như bản gốc: table-auto,
+                 không ép min-width, dùng lại đúng độ rộng cột cũ (w-1/4, w-[50px], w-[70px],
+                 w-24, w-20, w-8) - PC không đổi gì cả. Trên điện thoại: table-fixed + độ rộng
+                 mới rộng rãi hơn cho Tên SP/SL/Giá, Ghi chú thu gọn lại, cuộn ngang để luôn
+                 xem được Thành tiền + nút xoá thay vì bị che mất. -->
+            <div id="sell-cart-container" class="bg-white dark:bg-slate-900 p-2 md:p-4 rounded-2xl shadow-sm border-4 border-blue-400 h-48 md:h-auto md:flex-1 overflow-y-auto overflow-x-auto" style="border-width:4px;border-style:solid;border-color:#60a5fa;">
+                <table class="w-full text-xs border-collapse table-fixed md:table-auto min-w-[540px] md:min-w-0">
                     <thead class="bg-gray-50 dark:bg-slate-800 border-b border-gray-300 dark:border-slate-700 sticky top-0">
                         <tr>
-                            <th class="p-2 text-left w-1/4 border-r border-gray-300 dark:border-slate-700">Tên SP</th> 
-                            <th class="p-2 w-[50px] border-r border-gray-300 dark:border-slate-700">SL</th>
-                            <th class="p-2 w-[70px] border-r border-gray-300 dark:border-slate-700">Giá</th>
-                            <th class="p-2 w-24 border-r border-gray-300 dark:border-slate-700">Ghi chú</th>
-                            <th class="p-2 w-20 border-r border-gray-300 dark:border-slate-700">Thành tiền</th>
-                            <th class="p-2 w-8">X</th>
+                            <th class="p-2 text-left border-r border-gray-300 dark:border-slate-700 w-[120px] md:w-1/4">Tên SP</th> 
+                            <th class="p-2 border-r border-gray-300 dark:border-slate-700 w-[60px] md:w-[50px]">SL</th>
+                            <th class="p-2 border-r border-gray-300 dark:border-slate-700 w-[90px] md:w-[70px]">Giá</th>
+                            <th class="p-2 border-r border-gray-300 dark:border-slate-700 w-[130px] md:w-24">Ghi chú</th>
+                            <th class="p-2 border-r border-gray-300 dark:border-slate-700 w-[90px] md:w-20">Thành tiền</th>
+                            <th class="p-2 w-[40px] md:w-8">X</th>
                         </tr>
                     </thead>
                     <tbody id="sell-cart-body" class="divide-y divide-gray-300 dark:divide-slate-700 text-center dark:text-white">
@@ -7474,41 +7480,47 @@ function renderSellCart() {
         
         return `
     <tr class="${rowBg} border-b-2 border-gray-200 dark:border-slate-700 ${c.l} border-l-4 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors">
-        <td class="p-2 w-1/4">
+        <td class="p-2 w-[120px] md:w-1/4">
             <div class="w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-left font-bold break-words text-[11px] p-1.5">${i.name}</div>
         </td>
         
-        <!-- Đã nới rộng thêm ô SL -->
-        <td class="p-2 w-[85px]">
+        <td class="p-2 w-[60px] md:w-[50px]">
             <input type="number" value="${i.qty}" step="any" class="w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-center font-bold text-xs p-1.5 focus:ring-2 focus:ring-blue-400 outline-none" 
                    onchange="updateCartItem(${index}, 'qty', this.value)">
         </td>
         
-        <!-- Đã nới rộng thêm ô Giá -->
-        <td class="p-2 w-[110px]">` + 
+        <td class="p-2 w-[90px] md:w-[70px]">` + 
             (i.dateSwap
                 ? `<div class="w-full text-center text-[10px] font-bold text-gray-400 p-1.5">Đổi date</div>`
                 : `<input type="number" value="${i.price}" class="w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-right text-xs p-1.5 focus:ring-2 focus:ring-blue-400 outline-none" onchange="updateCartItem(${index}, 'price', this.value)">`) + `
         </td>
         
-        <!-- Đã thu ngắn gọn ô Ghi chú lại -->
-        <td class="p-2 w-20">
-            <div class="flex items-center gap-1">
-                <input type="text" value="${i.note || ''}" placeholder="Ghi chú..." class="flex-1 min-w-0 border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-xs p-1.5 focus:ring-2 focus:ring-blue-400 outline-none" 
+        <!-- Gộp chung 1 ô: ô nhập ghi chú + nút chọn trạng thái "Đổi date" lồng ngay bên
+             trong góc phải (không còn 2 khung tách rời như trước) - vừa gõ ghi chú vừa
+             chọn trạng thái ngay trên cùng 1 ô, không tốn thêm chỗ. Nút chọn được vẽ RÕ
+             thành 1 ô vuông bo góc có viền + nền riêng (giống 1 nút bấm thật sự), không
+             còn là icon "trôi nổi" mờ nhạt khó nhận ra như trước - bấm vào mở ra vẫn thấy
+             đủ chữ "Bình thường/Còn hạn/Hết hạn". -->
+        <td class="p-2 w-[130px] md:w-24">
+            <div class="relative w-full">
+                <input type="text" value="${i.note || ''}" placeholder="Ghi chú..." 
+                       class="w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-xs p-1.5 pr-8 focus:ring-2 focus:ring-blue-400 outline-none" 
                        onchange="updateCartItem(${index}, 'note', this.value)">
-                <select class="shrink-0 w-[65px] border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 rounded-lg text-[10px] p-1 outline-none ${i.dateSwapStatus === 'expired' ? 'text-red-600 font-bold' : (i.dateSwap ? 'text-amber-600 font-bold' : 'text-gray-400')}" onchange="setCartDateSwap(${index}, this.value)">
-                    <option value="" ${!i.dateSwap ? 'selected' : ''}>Bình thường</option>
+                <select class="absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 rounded-md border shadow-sm text-[12px] leading-none outline-none cursor-pointer appearance-none text-center p-0 flex items-center justify-center transition-colors ${i.dateSwapStatus === 'expired' ? 'bg-red-100 border-red-300 text-red-600 dark:bg-red-500/20 dark:border-red-500/50' : (i.dateSwap ? 'bg-amber-100 border-amber-300 text-amber-600 dark:bg-amber-500/20 dark:border-amber-500/50' : 'bg-slate-200 border-slate-300 text-slate-500 dark:bg-slate-700 dark:border-slate-600 hover:bg-slate-300 dark:hover:bg-slate-600')}" 
+                        onchange="setCartDateSwap(${index}, this.value)" 
+                        title="Bấm để chọn: Bình thường / Còn hạn / Hết hạn (đang: ${i.dateSwapStatus === 'expired' ? 'Hết hạn' : (i.dateSwap ? 'Còn hạn' : 'Bình thường')})">
+                    <option value="" ${!i.dateSwap ? 'selected' : ''}>➖ Bình thường</option>
                     <option value="ok" ${i.dateSwapStatus === 'ok' ? 'selected' : ''}>🔄 Còn hạn</option>
-                    <option value="expired" ${i.dateSwapStatus === 'expired' ? 'selected' : ''}>🔄 Hết hạn</option>
+                    <option value="expired" ${i.dateSwapStatus === 'expired' ? 'selected' : ''}>⛔ Hết hạn</option>
                 </select>
             </div>
         </td>
         
-        <td class="p-2 w-20">
+        <td class="p-2 w-[90px] md:w-20">
             <div class="w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 rounded-lg text-right font-black text-[11px] p-1.5 ${c.chip.split(' ').filter(x => x.includes('text-')).join(' ')}">${i.total.toLocaleString('vi-VN')}</div>
         </td>
         
-        <td class="p-2 w-8">
+        <td class="p-2 w-[40px] md:w-8">
             <button onclick="removeSellItem(${index})" class="w-full h-full min-h-[30px] flex items-center justify-center border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 rounded-lg text-red-500 hover:bg-red-500 hover:text-white font-bold transition-colors">✕</button>
         </td>
     </tr>
