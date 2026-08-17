@@ -2687,6 +2687,23 @@ html:not(.dark) .bg-white {
             </div>
         </div>
 
+        <!-- BC Hàng Hoàn Trả - liệt kê các phiếu khách trả lại hàng đã mua (collection
+             'returns'), kèm lý do trả hàng, để chủ shop theo dõi/thống kê nguyên nhân
+             trả hàng theo thời gian. -->
+        <div class="bg-white p-4 md:p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg transition-all">
+            <h3 class="font-bold text-sm md:text-lg text-slate-800 mb-2 md:mb-4 text-center">↩️ Hàng Hoàn Trả</h3>
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="viewReturnsReport()"
+        class="w-full bg-slate-600 dark:bg-slate-700 text-white py-3 md:py-4 rounded-xl font-bold text-xs md:text-sm transition-all duration-75 border-b-[4px] border-slate-800 dark:border-slate-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+        👁 Xem
+    </button>
+                <button onclick="exportReturnsReport()"
+        class="w-full bg-orange-500 dark:bg-orange-600 text-white py-3 md:py-4 rounded-xl font-bold text-xs md:text-sm transition-all duration-75 border-b-[4px] border-orange-700 dark:border-orange-800 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+        ⬇ Excel
+    </button>
+            </div>
+        </div>
+
         <!-- BC Mua Nguyên Liệu -->
         <div class="bg-white p-4 md:p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg transition-all">
             <h3 class="font-bold text-sm md:text-lg text-slate-800 mb-2 md:mb-4 text-center">🌾 Mua Nguyên Liệu</h3>
@@ -4599,7 +4616,7 @@ async function loadDashboard(filter = 'default') {
     const startDateStr = fmtYMD(startDate);
     const endDateStr = fmtYMD(endDate);
 
-    const [salesSnap, suppliersSnap, customersSnap, materialImportsPeriodSnap, allSupplierPaymentsSnap, allCustomerPaymentsSnap] = await Promise.all([
+    const [salesSnap, suppliersSnap, customersSnap, materialImportsPeriodSnap, allSupplierPaymentsSnap, allCustomerPaymentsSnap, returnsPeriodSnap] = await Promise.all([
         db.collection('sales')
             .where('date', '>=', queryStartDate)
             .get({ source: 'default' }),
@@ -4614,7 +4631,14 @@ async function loadDashboard(filter = 'default') {
         // TRONG KỲ, vừa tính tổng ĐÃ TRẢ LUỸ KẾ của từng NCC để hiển thị trong popup.
         db.collection('payments').get({ source: 'default' }).catch(() => ({ docs: [] })),
         // Tương tự, lấy TOÀN BỘ lịch sử trả nợ của khách hàng.
-        db.collection('debt_history').get({ source: 'default' }).catch(() => ({ docs: [] }))
+        db.collection('debt_history').get({ source: 'default' }).catch(() => ({ docs: [] })),
+        // Hàng hoàn trả PHÁT SINH trong đúng kỳ đang chọn (theo NGÀY TRẢ HÀNG, KHÔNG PHẢI
+        // ngày bán gốc - xem processReturn) - dùng để trừ vào "Doanh thu" của đúng ngày này,
+        // không đụng tới doanh thu của ngày bán gốc (giữ nguyên báo cáo ngày cũ đã xuất).
+        db.collection('returns')
+            .where('date', '>=', startDate)
+            .where('date', '<=', endDate)
+            .get({ source: 'default' }).catch(() => ({ docs: [] }))
     ]);
 
     // Nếu đã có 1 lệnh gọi loadDashboard() MỚI HƠN bắt đầu trong lúc đang chờ dữ liệu ở trên,
@@ -4671,6 +4695,17 @@ async function loadDashboard(filter = 'default') {
         .slice(0, 10);
     window.__dashboardProductRevenueMap = productRevenueMap;
     window.__dashboardProductSalesMap = productSalesMap;
+
+    // TRỪ HÀNG HOÀN TRẢ TRONG KỲ khỏi doanh thu - tính theo NGÀY TRẢ HÀNG (returns.date),
+    // KHÔNG PHẢI theo ngày bán gốc của hoá đơn (xem processReturn) - nhờ vậy nếu hoá đơn
+    // gốc thuộc 1 kỳ báo cáo ĐÃ XUẤT trước đây, con số kỳ đó không hề bị đụng tới; khoản
+    // giảm trừ chỉ xuất hiện đúng ở kỳ đang chứa ngày trả hàng thật sự.
+    let totalReturns = 0;
+    (returnsPeriodSnap.docs || []).forEach(doc => {
+        totalReturns += (Number(doc.data().total) || 0);
+    });
+    totalRevenue -= totalReturns;
+    window.__dashboardTotalReturns = totalReturns;
 
     let totalDebtNCC = allSuppliers.reduce((sum, sup) => sum + (Number(sup.debt) || 0), 0);
 
@@ -5497,6 +5532,14 @@ async function renderInventoryList(filter = 'today') {
         (data.items || []).forEach(item => {
             const inv = ensureItem(item.name);
             if (data.typeDoc === 'receipt') {
+                // QUAN TRỌNG (sửa lỗi phiếu GỘP bị bỏ sót): phiếu "Hoàn trả" và phiếu "Nhập
+                // đổi - Hết hạn" (thuần) đều có stockAdjusted=false ở CẤP CẢ PHIẾU nên đúng
+                // là phải bỏ qua. NHƯNG phiếu "Nhập đổi" GỘP (vừa có dòng còn hạn vừa có dòng
+                // hết hạn trong CÙNG 1 phiếu) cũng bị đánh dấu stockAdjusted=false cho CẢ
+                // PHIẾU dù dòng "còn hạn" bên trong nó VẪN ĐƯỢC cộng vào kho thật - phải xét
+                // đúng dateStatus của TỪNG DÒNG sản phẩm, không chỉ xét cờ chung của cả phiếu.
+                const wasAddedToStock = item.dateStatus ? item.dateStatus === 'ok' : (data.stockAdjusted !== false);
+                if (!wasAddedToStock) return;
                 if (data.type === 'Nhập mới') inv.nhap += Number(item.qty || 0);
                 else inv.change += Number(item.qty || 0);
             } else {
@@ -5508,8 +5551,13 @@ async function renderInventoryList(filter = 'today') {
     gapTransactions.forEach(data => {
         (data.items || []).forEach(item => {
             const inv = ensureItem(item.name);
-            if (data.typeDoc === 'receipt') inv.gapNet += Number(item.qty || 0);
-            else inv.gapNet -= Number(item.qty || 0);
+            if (data.typeDoc === 'receipt') {
+                const wasAddedToStock = item.dateStatus ? item.dateStatus === 'ok' : (data.stockAdjusted !== false);
+                if (!wasAddedToStock) return;
+                inv.gapNet += Number(item.qty || 0);
+            } else {
+                inv.gapNet -= Number(item.qty || 0);
+            }
         });
     });
 
@@ -6447,12 +6495,14 @@ function removeFromCart(index) {
   // để đồng bộ giao diện trong toàn bộ ứng dụng. Kèm theo TÊN KHÁCH/ĐẠI LÝ (nếu có) khi là
   // "Nhập đổi" - để biết ngay phiếu đổi date này là của ai mang tới, giống bản mẫu. Phiếu
   // "Nhập mới" thì KHÔNG hiện tên KH (theo đúng yêu cầu, chỉ đổi date mới cần).
-  function receiptTypeBadgeHtml(type, dateStatus, vendor) {
-      const vendorHtml = (type === 'Nhập đổi' && vendor)
+  function receiptTypeBadgeHtml(type, dateStatus, vendor, isReturn) {
+      const vendorHtml = ((type === 'Nhập đổi' || isReturn) && vendor)
           ? `<span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate max-w-[140px]">${vendor}</span>`
           : '';
       let tagHtml;
-      if (type === 'Nhập đổi' && dateStatus === 'expired') {
+      if (isReturn) {
+          tagHtml = '<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-400 whitespace-nowrap">↩️ Hoàn trả</span>';
+      } else if (type === 'Nhập đổi' && dateStatus === 'expired') {
           tagHtml = '<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400 whitespace-nowrap">🗑 Hết hạn — huỷ</span>';
       } else if (type === 'Nhập đổi' && dateStatus === 'mixed') {
           tagHtml = '<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400 whitespace-nowrap">🔄 Đổi date (2 loại)</span>';
@@ -6468,7 +6518,7 @@ function removeFromCart(index) {
   // mỗi dòng là 1 "thẻ" bo góc, có viền màu nhấn 2 bên, đổ bóng nhẹ, nổi lên khi hover -
   // thay vì kiểu bảng kẻ ô trơn khác biệt như trước. Vẫn giữ checkbox chọn nhiều phiếu +
   // nút "Xem" riêng (không bấm cả dòng) như thiết kế gốc, để tránh bấm nhầm khi chỉ muốn tick chọn.
-  function buildReceiptRowHtml(docId, displayId, dateStr, itemCount, type, dateStatus, vendor) {
+  function buildReceiptRowHtml(docId, displayId, dateStr, itemCount, type, dateStatus, vendor, isReturn) {
       return `
 				<tr class="hover:bg-transparent transition-colors">
 					<td colspan="6" class="p-2">
@@ -6481,7 +6531,7 @@ function removeFromCart(index) {
 								<span class="text-[11px] font-bold text-slate-700 dark:text-slate-400 md:w-[14%] md:text-center md:px-2">${dateStr}</span>
 							</div>
 							<div class="flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700">
-								<div class="md:w-[40%] md:px-2">${receiptTypeBadgeHtml(type, dateStatus, vendor)}</div>
+								<div class="md:w-[40%] md:px-2">${receiptTypeBadgeHtml(type, dateStatus, vendor, isReturn)}</div>
 								<div class="flex items-center gap-3 md:contents">
 									<span class="text-[11px] text-slate-500 dark:text-slate-400 md:w-[10%] md:text-center md:px-2">${itemCount} SP</span>
 									<span class="md:w-[16%] md:text-center md:px-2">
@@ -6552,14 +6602,16 @@ function removeFromCart(index) {
 			type: data.type || 'Nhập mới',
 			dateStatus: data.dateStatus || null,
 			stockAdjusted: data.stockAdjusted !== false,
-			vendor: data.vendor || null
+			vendor: data.vendor || null,
+			isReturn: data.isReturn === true,
+			note: data.note || ''
 		});
 
             const dateStr = data.date?.toDate ? data.date.toDate().toLocaleDateString('vi-VN') : '---';
             const itemCount = Array.isArray(data.items) ? data.items.length : 0;
             const displayId = data.id || '---';
 
-            rowsHtml.push(buildReceiptRowHtml(doc.id, displayId, dateStr, itemCount, data.type || 'Nhập mới', data.dateStatus || null, data.vendor || null));
+            rowsHtml.push(buildReceiptRowHtml(doc.id, displayId, dateStr, itemCount, data.type || 'Nhập mới', data.dateStatus || null, data.vendor || null, data.isReturn === true));
         });
 
         leftBody.innerHTML = rowsHtml.join('');
@@ -6590,7 +6642,9 @@ async function ensureAllReceiptsFullLoaded() {
             dateStr: date.toLocaleDateString('vi-VN'),
             itemCount: Array.isArray(data.items) ? data.items.length : 0,
             type: data.type || 'Nhập mới',
-            dateStatus: data.dateStatus || null
+            dateStatus: data.dateStatus || null,
+            vendor: data.vendor || null,
+            isReturn: data.isReturn === true
         });
     });
     window.__allReceiptsFullLoaded = true;
@@ -6705,7 +6759,8 @@ async function filterReceipts() {
                 itemCount: Array.isArray(r.items) ? r.items.length : 0,
                 type: r.type || 'Nhập mới',
                 dateStatus: r.dateStatus || null,
-                vendor: r.vendor || null
+                vendor: r.vendor || null,
+                isReturn: r.isReturn === true
             }));
     }
 
@@ -6714,7 +6769,7 @@ async function filterReceipts() {
     // Danh sách giờ chỉ còn 1 cột duy nhất (bảng phải đã ẩn vĩnh viễn) - dồn hết vào bảng trái.
     // Gom HTML vào mảng rồi gán 1 lần (thay vì "+=" lặp lại) - quan trọng ở đây vì khi có
     // từ khóa tìm kiếm, "matched" có thể là TOÀN BỘ lịch sử phiếu từ trước tới giờ.
-    const rowsHtml = matched.map(r => buildReceiptRowHtml(r.docId, r.displayId, r.dateStr, r.itemCount, r.type, r.dateStatus, r.vendor));
+    const rowsHtml = matched.map(r => buildReceiptRowHtml(r.docId, r.displayId, r.dateStr, r.itemCount, r.type, r.dateStatus, r.vendor, r.isReturn));
     leftBody.innerHTML = rowsHtml.join('');
 
     if (matched.length === 0) {
@@ -6989,11 +7044,17 @@ window.viewReceipt = function(docId) {
     // "Nhập đổi" (đồng thời cảnh báo rõ nếu là hàng huỷ, KHÔNG được cộng vào tồn kho).
     const tagEl = document.getElementById('modal-receipt-datestatus-tag');
     if (tagEl) {
-        if (receipt.type === 'Nhập đổi' && receipt.dateStatus === 'expired') {
+        if (receipt.isReturn) {
+            tagEl.innerHTML = `<span class="inline-block px-2.5 py-1 rounded-full text-[11px] font-bold bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-400">↩️ Phiếu hoàn trả — ${escapeHtml(receipt.note || '')}</span>`;
+            tagEl.classList.remove('hidden');
+        } else if (receipt.type === 'Nhập đổi' && receipt.dateStatus === 'expired') {
             tagEl.innerHTML = '<span class="inline-block px-2.5 py-1 rounded-full text-[11px] font-bold bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400">🗑 Hết hạn — huỷ, KHÔNG cộng vào tồn kho</span>';
             tagEl.classList.remove('hidden');
         } else if (receipt.type === 'Nhập đổi' && receipt.dateStatus === 'ok') {
             tagEl.innerHTML = '<span class="inline-block px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400">📦 Còn hạn — đã nhập lại kho</span>';
+            tagEl.classList.remove('hidden');
+        } else if (receipt.type === 'Nhập đổi' && receipt.dateStatus === 'mixed') {
+            tagEl.innerHTML = '<span class="inline-block px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">🔀 Phiếu gộp — có cả hàng Còn hạn (đã nhập lại kho) và Hết hạn (huỷ, không cộng tồn). Xem rõ từng dòng bên dưới.</span>';
             tagEl.classList.remove('hidden');
         } else {
             tagEl.innerHTML = '';
@@ -7007,9 +7068,18 @@ window.viewReceipt = function(docId) {
     // 3. Render các sản phẩm
     if (receipt.items && receipt.items.length > 0) {
         receipt.items.forEach((item, index) => {
+            // Nếu dòng này có dateStatus riêng (phiếu "Nhập đổi", đặc biệt là phiếu GỘP có
+            // cả hàng còn hạn lẫn hết hạn) - hiện rõ ngay dưới tên sản phẩm là dòng nào còn
+            // hạn (đã cộng vào tồn) hay hết hạn (huỷ, không cộng tồn), tránh nhìn vào chỉ
+            // thấy tên sản phẩm giống hệt nhau mà không biết dòng nào là dòng nào.
+            const itemTag = item.dateStatus === 'expired'
+                ? '<div class="text-[10px] font-bold text-red-600 dark:text-red-400 mt-0.5">⛔ Hết hạn — huỷ, không cộng tồn</div>'
+                : (item.dateStatus === 'ok'
+                    ? '<div class="text-[10px] font-bold text-blue-600 dark:text-blue-400 mt-0.5">🔄 Còn hạn — đã cộng vào tồn</div>'
+                    : '');
             body.innerHTML += `
                 <tr class="border-b dark:border-slate-700">
-                    <td class="p-2">${item.name}</td>
+                    <td class="p-2">${item.name}${itemTag}</td>
                     <td class="p-2 text-center">${item.unit || ''}</td>
                     <td class="p-2 text-center"><input type="number" id="edit-qty-${index}" value="${item.qty}" class="w-16 mx-auto block text-center border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 p-1 rounded"></td>
                     <td class="p-2 text-center"><input type="number" id="edit-price-${index}" value="${item.price}" class="w-20 mx-auto block text-center border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 p-1 rounded"></td>
@@ -7700,11 +7770,10 @@ async function migrateStockCountersIfNeeded() {
         // - Phiếu nhập "Nhập đổi - Hết hạn" (huỷ) KHÔNG được cộng vào tồn (dòng nào tự có
         //   dateStatus riêng thì theo đúng dòng đó - phiếu gộp cả 2 loại từ trang Bán
         //   hàng; còn không có thì theo cờ chung stockAdjusted của cả phiếu).
-        // - Dòng "Đổi date" trong hoá đơn bán là hàng KHÁCH/ĐẠI LÝ MANG TRẢ LẠI (đi VÀO
-        //   kho, không phải bán ra) - KHÔNG được trừ kho ở đây, vì tác động tồn kho của
-        //   nó (nếu còn hạn) đã nằm ở phiếu Nhập Kho tự động tạo ra rồi (tính ở dòng
-        //   trên); nếu trừ thêm ở đây sẽ bị trừ NHẦM 2 lần (hàng còn hạn) hoặc trừ SAI
-        //   hẳn dù chưa từng có addition nào bù lại (hàng hết hạn).
+        // - Dòng "Đổi date" trong hoá đơn bán (còn hạn lẫn hết hạn) GIỜ ĐƯỢC TÍNH VÀO
+        //   phần trừ kho bên dưới giống hàng bán bình thường - hàng đổi date được coi là
+        //   ĐÃ XUẤT KHO (gỡ khỏi kệ) ngay lúc bán. Việc CỘNG LẠI (nếu còn hạn) hay KHÔNG
+        //   cộng lại (nếu hết hạn) đã được xử lý ở phần tính phiếu Nhập Kho phía trên rồi.
         const snapNhap = await db.collection('receipts').get();
         snapNhap.forEach(doc => {
             const d = doc.data();
@@ -7718,7 +7787,9 @@ async function migrateStockCountersIfNeeded() {
         const snapXuat = await db.collection('sales').get();
         snapXuat.forEach(doc => {
             (doc.data().items || []).forEach(item => {
-                if (item.dateSwap) return;
+                // ĐÃ ĐỔI LẠI (theo yêu cầu mới): dòng "Đổi date" GIỜ CŨNG BỊ TRỪ KHO ngay lúc
+                // bán (xem saveAndPrint) - nên khi tính lại tồn kho từ đầu lịch sử, phải trừ
+                // dòng này giống hàng bán bình thường, không loại trừ nữa như logic cũ.
                 inventory[item.name] = (inventory[item.name] || 0) - (parseFloat(item.qty) || 0);
             });
         });
@@ -7763,11 +7834,10 @@ window.forceResyncStockCounters = async function () {
         // - Phiếu nhập "Nhập đổi - Hết hạn" (huỷ) KHÔNG được cộng vào tồn (dòng nào tự có
         //   dateStatus riêng thì theo đúng dòng đó - phiếu gộp cả 2 loại từ trang Bán
         //   hàng; còn không có thì theo cờ chung stockAdjusted của cả phiếu).
-        // - Dòng "Đổi date" trong hoá đơn bán là hàng KHÁCH/ĐẠI LÝ MANG TRẢ LẠI (đi VÀO
-        //   kho, không phải bán ra) - KHÔNG được trừ kho ở đây, vì tác động tồn kho của
-        //   nó (nếu còn hạn) đã nằm ở phiếu Nhập Kho tự động tạo ra rồi (tính ở dòng
-        //   trên); nếu trừ thêm ở đây sẽ bị trừ NHẦM 2 lần (hàng còn hạn) hoặc trừ SAI
-        //   hẳn dù chưa từng có addition nào bù lại (hàng hết hạn).
+        // - Dòng "Đổi date" trong hoá đơn bán (còn hạn lẫn hết hạn) GIỜ ĐƯỢC TÍNH VÀO
+        //   phần trừ kho bên dưới giống hàng bán bình thường - hàng đổi date được coi là
+        //   ĐÃ XUẤT KHO (gỡ khỏi kệ) ngay lúc bán. Việc CỘNG LẠI (nếu còn hạn) hay KHÔNG
+        //   cộng lại (nếu hết hạn) đã được xử lý ở phần tính phiếu Nhập Kho phía trên rồi.
         const snapNhap = await db.collection('receipts').get();
         snapNhap.forEach(doc => {
             const d = doc.data();
@@ -7781,7 +7851,9 @@ window.forceResyncStockCounters = async function () {
         const snapXuat = await db.collection('sales').get();
         snapXuat.forEach(doc => {
             (doc.data().items || []).forEach(item => {
-                if (item.dateSwap) return;
+                // ĐÃ ĐỔI LẠI (theo yêu cầu mới): dòng "Đổi date" GIỜ CŨNG BỊ TRỪ KHO ngay lúc
+                // bán (xem saveAndPrint) - nên khi tính lại tồn kho từ đầu lịch sử, phải trừ
+                // dòng này giống hàng bán bình thường, không loại trừ nữa như logic cũ.
                 inventory[item.name] = (inventory[item.name] || 0) - (parseFloat(item.qty) || 0);
             });
         });
@@ -9296,11 +9368,10 @@ async function editInvoiceFromHistory(docId) {
             return {
                 name: i.name, unit: i.unit || 'Cái', qty: qty, price: price, vat: i.vat || 0,
                 taxAmount: i.taxAmount || 0, note: i.note || '', total: qty * price,
-                // QUAN TRỌNG (sửa lỗi tồn kho khi sửa hoá đơn): phải giữ lại đúng 2 cờ này từ
-                // dữ liệu gốc - trước đây bị làm rơi mất khi nạp lại giỏ hàng để sửa, khiến
-                // dòng "Đổi date" bị hiểu nhầm thành sản phẩm bán bình thường lúc lưu lại (xem
-                // updateExistingSale), làm tồn kho bị TRỪ SAI thêm 1 lần nữa dù hàng đổi date
-                // này chưa từng bị trừ kho lúc bán ban đầu.
+                // QUAN TRỌNG: phải giữ lại đúng 2 cờ này từ dữ liệu gốc - nếu để rơi mất khi
+                // nạp lại giỏ hàng để sửa, dòng "Đổi date" sẽ bị hiểu nhầm thành sản phẩm bán
+                // bình thường lúc lưu lại (mất đúng trạng thái còn hạn/hết hạn của nó, dù về
+                // mặt trừ kho thì 2 loại này giờ được tính giống nhau).
                 dateSwap: !!i.dateSwap, dateSwapStatus: i.dateSwapStatus || null
             };
         });
@@ -9421,18 +9492,17 @@ async function updateExistingSale() {
         // Tính CHÊNH LỆCH số lượng từng sản phẩm so với phiếu GỐC (không phải trừ kho lại
         // từ đầu) - ví dụ phiếu gốc bán 5, sửa thành 8 -> chỉ cần trừ thêm 3 vào kho; sửa
         // thành 2 -> phải CỘNG TRẢ lại 3 vào kho.
-        // QUAN TRỌNG: loại trừ dòng "Đổi date" (dateSwap) khỏi cả 2 bên - đây là hàng
-        // KHÁCH/ĐẠI LÝ MANG TRẢ LẠI (đi VÀO kho qua phiếu Nhập Kho tự động riêng, không
-        // phải bán ra), không được tính vào chênh lệch trừ kho ở đây - giống hệt lý do
-        // đã sửa ở saveAndPrint (xem ghi chú tại đó).
+        // QUAN TRỌNG: dòng "Đổi date" (dateSwap - dù còn hạn hay hết hạn) giờ ĐƯỢC TÍNH
+        // VÀO đây giống như hàng bán bình thường - hàng đổi date được coi là ĐÃ XUẤT KHO
+        // (gỡ khỏi kệ) ngay lúc bán, y hệt hàng bán thường. Việc CỘNG LẠI vào kho (nếu còn
+        // hạn) hay KHÔNG cộng lại (nếu hết hạn - coi như huỷ) là việc của phiếu Nhập Kho tự
+        // động tạo riêng, không liên quan tới chỗ tính chênh lệch này.
         const oldQtyByName = {};
         (window.__editingSaleOriginalItems || []).forEach(i => {
-            if (i.dateSwap) return;
             oldQtyByName[i.name] = (oldQtyByName[i.name] || 0) + (parseFloat(i.qty) || 0);
         });
         const newQtyByName = {};
         itemsToSave.forEach(i => {
-            if (i.dateSwap) return;
             newQtyByName[i.name] = (newQtyByName[i.name] || 0) + (parseFloat(i.qty) || 0);
         });
         const allProductNames = Array.from(new Set([...Object.keys(oldQtyByName), ...Object.keys(newQtyByName)]));
@@ -9621,16 +9691,13 @@ async function saveAndPrint() {
 
         // Gộp số lượng theo tên sản phẩm (phòng khi giỏ hàng có nhiều dòng cùng 1 sản
         // phẩm, ví dụ dùng nút "Thêm dòng mới") để kiểm tra tồn kho cho chính xác.
-        // QUAN TRỌNG (sửa lỗi trừ kho sai): dòng "Đổi date" (i.dateSwap) đại diện cho
-        // hàng KHÁCH/ĐẠI LÝ MANG TRẢ LẠI - tức hàng đi VÀO kho, không phải bán ra - nên
-        // KHÔNG được gộp vào đây để trừ kho. Tác động tồn kho của nó (nếu còn hạn: CỘNG
-        // vào kho) đã được xử lý riêng ở khối "TỰ ĐỘNG TẠO PHIẾU NHẬP KHO" bên dưới rồi.
-        // Trước đây gộp chung vào đây khiến hàng "còn hạn" bị trừ ở đây rồi cộng lại ở
-        // dưới => tồn kho KHÔNG đổi (phải TĂNG mới đúng); còn hàng "hết hạn" bị trừ ở
-        // đây mà không hề được cộng bù ở đâu cả => tồn kho bị giảm SAI.
+        // QUAN TRỌNG: dòng "Đổi date" (i.dateSwap - dù còn hạn hay hết hạn) GIỜ ĐƯỢC GỘP
+        // VÀO ĐÂY để trừ kho giống hàng bán bình thường - hàng đổi date được coi là đã
+        // XUẤT KHO (gỡ khỏi kệ) ngay lúc bán. Sau đó, khối "TỰ ĐỘNG TẠO PHIẾU NHẬP KHO"
+        // bên dưới sẽ CỘNG LẠI vào kho nếu còn hạn (net = không đổi, chỉ là làm mới hạn
+        // dùng) hoặc KHÔNG cộng lại nếu hết hạn (net = trừ hẳn 1 lần, coi như huỷ/bỏ).
         const qtyByName = {};
         itemsToSave.forEach(i => {
-            if (i.dateSwap) return;
             qtyByName[i.name] = (qtyByName[i.name] || 0) + (parseFloat(i.qty) || 0);
         });
         const productNames = Object.keys(qtyByName);
@@ -9948,6 +10015,37 @@ async function viewInvoiceDetails(docId) {
         
         itemsHtml += `</tbody></table>`;
 
+        // BANNER + DANH SÁCH CÁC LẦN ĐÃ TRẢ HÀNG - hiện RÕ RÀNG ngay đầu popup nếu hoá đơn
+        // này từng có trả hàng, kèm nút "Hoàn tác" cho từng lần (phòng khi bấm nhầm).
+        let returnsHtml = '';
+        if (data.hasReturns) {
+            const returnsSnap = await db.collection('returns').where('originalInvoiceId', '==', docId).get();
+            const returnDocs = returnsSnap.docs
+                .map(d => ({ id: d.id, ...d.data() }))
+                .sort((a, b) => (b.date?.toDate ? b.date.toDate() : 0) - (a.date?.toDate ? a.date.toDate() : 0));
+            if (returnDocs.length > 0) {
+                const totalReturned = returnDocs.reduce((s, r) => s + (parseFloat(r.total) || 0), 0);
+                const rowsHtml = returnDocs.map(r => {
+                    const rDate = r.date?.toDate ? r.date.toDate().toLocaleDateString('vi-VN') : '---';
+                    const itemsStr = (r.items || []).map(it => `${it.name} x${it.qty}`).join(', ');
+                    return `
+                        <div class="flex items-start justify-between gap-2 py-1.5 border-b border-orange-200 dark:border-orange-500/20 last:border-0">
+                            <div class="text-left">
+                                <div class="text-[11px] font-bold text-orange-700 dark:text-orange-400">${rDate} — ${Number(r.total || 0).toLocaleString('vi-VN')}đ</div>
+                                <div class="text-[10px] text-slate-500">${escapeHtml(itemsStr)}</div>
+                                <div class="text-[10px] text-slate-400 italic">Lý do: ${escapeHtml(r.reason || '')}</div>
+                            </div>
+                            <button onclick="undoReturn('${r.id}', '${docId}')" class="shrink-0 text-[10px] font-bold text-red-600 hover:text-red-800 underline whitespace-nowrap mt-0.5">Hoàn tác</button>
+                        </div>`;
+                }).join('');
+                returnsHtml = `
+                    <div class="mb-3 p-3 rounded-xl bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/20 text-left">
+                        <div class="font-bold text-orange-700 dark:text-orange-400 text-sm mb-1">↩️ Hoá đơn này ĐÃ CÓ trả hàng - Tổng đã hoàn: ${totalReturned.toLocaleString('vi-VN')}đ</div>
+                        ${rowsHtml}
+                    </div>`;
+            }
+        }
+
         // Chỉ cho phép SỬA nếu phiếu được lập TRONG NGÀY HÔM NAY (theo yêu cầu) - so sánh
         // đúng theo ngày dương lịch (năm-tháng-ngày), không phải trong vòng 24h.
         const saleDateObj = data.date && data.date.toDate ? data.date.toDate() : (data.date ? new Date(data.date) : null);
@@ -9962,8 +10060,9 @@ async function viewInvoiceDetails(docId) {
             : `<p class="text-center text-[11px] text-slate-400 dark:text-slate-500 italic mt-2">Chỉ có thể sửa phiếu được lập trong ngày hôm nay</p>`;
 
         Swal.fire({
-            title: `Chi tiết phiếu: ${data.id || docId}`, // Dùng data.id theo tên field trong ảnh
+            title: `Chi tiết phiếu: ${data.id || docId}${data.hasReturns ? ' ↩️' : ''}`, // Dùng data.id theo tên field trong ảnh
             html: `
+                ${returnsHtml}
                 <div class="text-left mb-4">
                     <p><b>Khách hàng:</b> ${customerName}</p>
                     <p><b>Ngày xuất:</b> ${dateStr}</p>
@@ -9976,9 +10075,10 @@ async function viewInvoiceDetails(docId) {
                 </div>
                 ${editButtonHtml}
                 <div class="grid grid-cols-2 gap-2 mt-2">
+                    <button onclick="Swal.close(); openReturnModal('${docId}')" class="bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">↩️ Trả hàng</button>
                     <button onclick="Swal.close(); deleteSale('${docId}')" class="bg-red-600 hover:bg-red-700 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">🗑️ Xóa phiếu này</button>
-                    <button onclick="Swal.close()" class="bg-slate-600 hover:bg-slate-700 text-white py-2 rounded-xl text-sm font-bold">Đóng</button>
                 </div>
+                <button onclick="Swal.close()" class="bg-slate-600 hover:bg-slate-700 text-white py-2 rounded-xl text-sm font-bold w-full mt-2">Đóng</button>
             `,
             width: '800px',
             showConfirmButton: false,
@@ -9987,6 +10087,110 @@ async function viewInvoiceDetails(docId) {
     } catch (e) {
         console.error(e);
         Swal.fire('Lỗi', 'Không thể tải chi tiết hóa đơn: ' + e.message, 'error');
+    }
+}
+
+// HOÀN TÁC 1 LẦN TRẢ HÀNG (dùng khi bấm nhầm "Trả hàng") - đảo ngược đúng những gì
+// processReturn đã làm: trừ lại kho, hoàn lại công nợ (nếu trước đó đã trừ), xoá phiếu
+// "Hoàn trả" đã tạo trong Nhập Kho, và xoá bản ghi trong 'returns'.
+async function undoReturn(returnDocId, saleDocId) {
+    const confirm = await Swal.fire({
+        title: 'Hoàn tác lần trả hàng này?',
+        text: 'Sẽ trừ lại số hàng đã cộng vào kho, hoàn lại công nợ (nếu có) và xoá phiếu nhập "Hoàn trả" tương ứng. Dùng khi bấm nhầm.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Hoàn tác',
+        confirmButtonColor: '#dc2626',
+        cancelButtonText: 'Thôi'
+    });
+    if (!confirm.isConfirmed) return;
+
+    try {
+        const rDoc = await db.collection('returns').doc(returnDocId).get();
+        if (!rDoc.exists) { Swal.fire('Lỗi', 'Không tìm thấy lần trả hàng này (có thể đã bị hoàn tác trước đó).', 'error'); return; }
+        const rData = rDoc.data();
+
+        // 1. Trừ lại đúng số hàng đã cộng vào kho lúc trả hàng.
+        if (typeof adjustStockCounters === 'function') {
+            await adjustStockCounters(rData.items || [], -1);
+        }
+
+        // 2. Hoàn lại công nợ nếu trước đó đã trừ (refundMethod === 'Trừ vào công nợ').
+        if (rData.refundMethod === 'Trừ vào công nợ' && rData.customer) {
+            const q = await db.collection('customers').where('name', '==', rData.customer).get();
+            if (!q.empty) {
+                await db.collection('customers').doc(q.docs[0].id).update({
+                    debt: firebase.firestore.FieldValue.increment(parseFloat(rData.total) || 0)
+                });
+            }
+        }
+
+        // 3. Xoá phiếu "Hoàn trả" đã tạo trong Nhập Kho (nếu còn tồn tại).
+        // Ưu tiên xoá theo importReceiptDocId (lưu từ bản mới). Với các bản ghi CŨ (tạo
+        // trước khi tính năng "Hoàn tác" này ra đời) chưa có sẵn field này, tự tìm lại
+        // phiếu qua số hiệu hiển thị (PN...) hoặc qua fromSaleId+isReturn để vẫn xoá đúng.
+        let receiptDocIdToDelete = rData.importReceiptDocId || null;
+        if (!receiptDocIdToDelete && rData.importReceiptNo) {
+            const byNoSnap = await db.collection('receipts').where('id', '==', rData.importReceiptNo).limit(1).get();
+            if (!byNoSnap.empty) receiptDocIdToDelete = byNoSnap.docs[0].id;
+        }
+        if (!receiptDocIdToDelete) {
+            // Phương án cuối: tìm theo đúng hóa đơn gốc + đúng cờ "Hoàn trả" + khớp tổng SL
+            // các dòng sản phẩm (phòng trường hợp có nhiều lần trả hàng cho cùng 1 hóa đơn).
+            // Bọc riêng try/catch - nếu bước TÌM này lỗi (vd thiếu index), KHÔNG được làm
+            // gãy toàn bộ việc hoàn tác (kho/công nợ ở bước 1-2 đã xử lý xong rồi).
+            try {
+                const byFromSaleSnap = await db.collection('receipts')
+                    .where('fromSaleId', '==', rData.originalInvoiceId)
+                    .where('isReturn', '==', true)
+                    .get();
+                const rItemsKey = (rData.items || []).map(it => `${it.name}:${it.qty}`).sort().join('|');
+                byFromSaleSnap.forEach(rcDoc => {
+                    if (receiptDocIdToDelete) return; // đã tìm thấy rồi thì thôi
+                    const rc = rcDoc.data();
+                    const rcItemsKey = (rc.items || []).map(it => `${it.name}:${it.qty}`).sort().join('|');
+                    if (rcItemsKey === rItemsKey) receiptDocIdToDelete = rcDoc.id;
+                });
+            } catch (findErr) {
+                console.warn('Không tìm kiếm được phiếu nhập theo phương án dự phòng:', findErr);
+            }
+        }
+        if (receiptDocIdToDelete) {
+            try { await db.collection('receipts').doc(receiptDocIdToDelete).delete(); }
+            catch (delErr) { console.warn('Không xoá được phiếu nhập liên kết (có thể đã bị xoá tay trước đó):', delErr); }
+        } else {
+            console.warn('Không tìm được phiếu nhập "Hoàn trả" liên kết để xoá - có thể đã bị xoá tay trước đó, hoặc dữ liệu quá cũ. Vào Nhập Kho kiểm tra/xoá tay nếu còn sót.');
+        }
+
+        // 4. Xoá bản ghi trả hàng.
+        await db.collection('returns').doc(returnDocId).delete();
+
+        // 5. Nếu hoá đơn không còn lần trả hàng nào khác, bỏ đánh dấu "hasReturns".
+        const remainSnap = await db.collection('returns').where('originalInvoiceId', '==', saleDocId).get();
+        if (remainSnap.empty) {
+            await db.collection('sales').doc(saleDocId).update({ hasReturns: false });
+        }
+
+        if (typeof ghiLog === 'function') {
+            ghiLog('Bán Hàng', 'Hoàn tác trả hàng', rData.originalReceiptNo || saleDocId,
+                `Hoàn tác lần trả hàng ${Number(rData.total || 0).toLocaleString('vi-VN')}đ của hóa đơn ${rData.originalReceiptNo || saleDocId} (bấm nhầm).`);
+        }
+
+        Swal.fire({ icon: 'success', title: 'Đã hoàn tác!', text: 'Đã trừ lại kho và hoàn lại công nợ (nếu có) về đúng trạng thái trước khi trả hàng.' });
+
+        try {
+            if (typeof calculateAllStock === 'function') await calculateAllStock();
+            if (typeof renderProductGrid === 'function') renderProductGrid();
+            if (typeof refreshDashboardData === 'function') await refreshDashboardData();
+            if (typeof loadCustomers === 'function') loadCustomers();
+            if (typeof loadSalesList === 'function') loadSalesList();
+            if (typeof loadReceipts === 'function') loadReceipts();
+        } catch (refreshErr) {
+            console.warn('Không làm mới được giao diện sau khi hoàn tác (việc hoàn tác vẫn đã thành công):', refreshErr);
+        }
+    } catch (e) {
+        console.error('Lỗi khi hoàn tác trả hàng:', e);
+        Swal.fire('Lỗi', 'Có lỗi khi hoàn tác: ' + e.message, 'error');
     }
 }
 
@@ -10062,7 +10266,7 @@ async function viewInvoiceDetails(docId) {
 							<div onclick="viewInvoiceDetails('${doc.id}')" class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-3 md:p-3 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] cursor-pointer transition-all hover:-translate-y-0.5" style="border-left-color:#a855f7 !important; border-right-color:#a855f7 !important;">
 								<div class="flex items-center gap-2 md:contents">
 									<span class="text-[12px] md:text-[11px] font-bold text-slate-700 dark:text-slate-300 md:w-[12%] truncate md:px-3">${data.id || 'N/A'}</span>
-									<span class="text-[12px] md:text-[11px] font-bold text-slate-900 dark:text-slate-100 truncate flex-1 md:w-[33%] md:px-3">${data.customer || 'Khách lẻ'}</span>
+									<span class="text-[12px] md:text-[11px] font-bold text-slate-900 dark:text-slate-100 truncate flex-1 md:w-[33%] md:px-3">${data.customer || 'Khách lẻ'}${data.hasReturns ? ' <span class="inline-block align-middle ml-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-400 whitespace-nowrap">↩️ Đã hoàn trả</span>' : ''}</span>
 								</div>
 								<div class="flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700">
 									<div class="flex items-center gap-3 md:contents">
@@ -10123,13 +10327,76 @@ async function reprintSale(docId) {
         const data = doc.data();
         const dateObj = data.date && typeof data.date.toDate === 'function' ? data.date.toDate() : new Date();
 
+        // Hoá đơn gốc được GIỮ NGUYÊN số liệu trong dữ liệu (không sửa - xem processReturn),
+        // nên nếu hoá đơn này từng có trả hàng, phải TỰ TÍNH ra bản "đã trừ hàng hoàn trả"
+        // ngay lúc in (không lưu lại) - đây mới là bản đúng để đưa cho khách hàng.
+        let printItems = data.items || [];
+        let netTotal = null;
+        let returnNote = '';
+
+        if (data.hasReturns) {
+            const returnsSnap = await db.collection('returns').where('originalInvoiceId', '==', docId).get();
+            if (!returnsSnap.empty) {
+                const returnedQtyByName = {};
+                let totalReturned = 0;
+                let latestDate = null;
+                returnsSnap.forEach(rDoc => {
+                    const rData = rDoc.data();
+                    totalReturned += (parseFloat(rData.total) || 0);
+                    const rDate = rData.date?.toDate ? rData.date.toDate() : null;
+                    if (rDate && (!latestDate || rDate > latestDate)) latestDate = rDate;
+                    (rData.items || []).forEach(it => {
+                        returnedQtyByName[it.name] = (returnedQtyByName[it.name] || 0) + (parseFloat(it.qty) || 0);
+                    });
+                });
+
+                const netItems = (data.items || [])
+                    .map(it => {
+                        if (it.dateSwap || !returnedQtyByName[it.name]) return it;
+                        const newQty = Math.round(((parseFloat(it.qty) || 0) - returnedQtyByName[it.name]) * 100) / 100;
+                        return { ...it, qty: newQty };
+                    })
+                    .filter(it => it.dateSwap || (parseFloat(it.qty) || 0) > 0.000001);
+
+                const vatRate = parseFloat(data.vatRate) || 0;
+                let netSubTotal = 0;
+                netItems.forEach(it => { if (!it.dateSwap) netSubTotal += (parseFloat(it.qty) || 0) * (parseFloat(it.price) || 0); });
+                netTotal = Math.round(netSubTotal * (1 + vatRate / 100));
+                returnNote = `Đã trừ hàng hoàn trả ngày ${latestDate ? latestDate.toLocaleDateString('vi-VN') : ''} (${totalReturned.toLocaleString('vi-VN')}đ)`;
+
+                const choice = await Swal.fire({
+                    title: 'Hóa đơn này có hàng đã hoàn trả',
+                    html: `Chọn bản muốn in:<br><br>
+                        <b>Hóa đơn GỐC</b>: đúng như lúc bán (${(parseFloat(data.total) || 0).toLocaleString('vi-VN')}đ)<br>
+                        <b>Hóa đơn ĐÃ TRỪ hoàn trả</b>: để đưa cho khách (${netTotal.toLocaleString('vi-VN')}đ)`,
+                    icon: 'question',
+                    showDenyButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Đã trừ hoàn trả (đưa khách)',
+                    denyButtonText: 'Hóa đơn gốc',
+                    cancelButtonText: 'Hủy',
+                    confirmButtonColor: '#f97316',
+                    denyButtonColor: '#64748b'
+                });
+
+                if (choice.isConfirmed) {
+                    printItems = netItems;
+                } else if (choice.isDenied) {
+                    printItems = data.items || [];
+                    returnNote = '';
+                } else {
+                    return; // Hủy
+                }
+            }
+        }
+
         const printOpts = {
             receiptId: data.id || docId,
             customer: data.customer || '',
             address: data.address || '',
             phone: data.phone || '',
-            note: data.note || '',
-            items: data.items || [],
+            note: returnNote ? `${data.note || ''}${data.note ? ' - ' : ''}${returnNote}` : (data.note || ''),
+            items: printItems,
             vatRate: data.vatRate || 0,
             dateObj: dateObj
         };
@@ -10202,16 +10469,34 @@ async function deleteSale(docId) {
             }
 
             // 3. HOÀN KHO: cộng lại đúng số lượng đã bán vào bộ đếm tồn kho (stock_counters).
-            // (Trước đây đoạn này cập nhật vào collection 'inventory', nhưng collection đó
-            // không được bất kỳ chỗ nào khác trong ứng dụng đọc tới nên hoàn toàn không có
-            // tác dụng - đã thay bằng adjustStockCounters để hoàn kho thật sự.)
-            // QUAN TRỌNG: loại trừ dòng "Đổi date" (dateSwap) - hàng này CHƯA TỪNG bị trừ
-            // kho lúc bán (xem saveAndPrint), tác động tồn kho của nó nằm ở phiếu Nhập Kho
-            // tự động riêng (collection 'receipts', không bị xóa cùng hóa đơn này) - nếu
-            // vẫn cộng vào đây sẽ làm tồn kho bị TĂNG SAI (cộng khống, vì có gì đâu mà hoàn).
-            const itemsToRestore = (items || []).filter(it => !it.dateSwap);
+            // QUAN TRỌNG (đã đổi lại logic theo yêu cầu mới): hàng "Đổi date" (dateSwap - cả
+            // còn hạn lẫn hết hạn) GIỜ CŨNG BỊ TRỪ KHO NGAY LÚC BÁN (xem saveAndPrint), nên
+            // khi xoá hoá đơn phải HOÀN TRẢ lại đúng như hàng bán bình thường - không loại
+            // trừ nữa như logic cũ.
+            const itemsToRestore = (items || []);
             if (typeof adjustStockCounters === 'function' && itemsToRestore.length) {
                 await adjustStockCounters(itemsToRestore, +1);
+            }
+
+            // 3b. HỦY TÁC ĐỘNG CỦA PHIẾU NHẬP KHO TỰ ĐỘNG (nếu hoá đơn này có hàng đổi date):
+            // lúc lưu hoá đơn, nếu có dòng "còn hạn", hệ thống đã tự tạo 1 phiếu Nhập Kho
+            // CỘNG THÊM (+1) lại đúng số đó vào kho (xem saveAndPrint). Nếu giờ xoá hoá đơn
+            // mà không xử lý phiếu này, phần CỘNG THÊM đó sẽ bị bỏ sót lại vĩnh viễn, khiến
+            // kho bị THỪA (dư 1 lần) so với thực tế. Nên phải: (a) trừ lại đúng phần đã cộng
+            // thêm đó, và (b) xoá luôn phiếu Nhập Kho tự động này (không để nó tham chiếu tới
+            // 1 hoá đơn đã không còn tồn tại nữa).
+            try {
+                const linkedReceiptsSnap = await db.collection('receipts').where('fromSaleId', '==', data.id || docId).get();
+                for (const rDoc of linkedReceiptsSnap.docs) {
+                    const rData = rDoc.data();
+                    const okItems = (rData.items || []).filter(it => it.dateStatus !== 'expired');
+                    if (okItems.length && typeof adjustStockCounters === 'function') {
+                        await adjustStockCounters(okItems, -1);
+                    }
+                    await rDoc.ref.delete();
+                }
+            } catch (linkedReceiptErr) {
+                console.warn('Không xử lý được phiếu Nhập Kho tự động liên kết với hoá đơn này (hoá đơn vẫn đã xoá đúng) - cần kiểm tra tay trang Nhập Kho:', linkedReceiptErr);
             }
 
             // 4. Thực hiện xóa hóa đơn
@@ -10241,6 +10526,256 @@ async function deleteSale(docId) {
             console.error("Lỗi khi xóa hóa đơn: ", error);
             showAlert("Có lỗi xảy ra: " + error.message);
         }
+    }
+}
+
+/* ==================================================================================
+   TÍNH NĂNG: TRẢ HÀNG / HOÀN HÀNG
+   Khác với "Xóa phiếu" (hủy toàn bộ hóa đơn), đây là luồng khách chỉ trả lại MỘT PHẦN
+   hoặc TOÀN BỘ sản phẩm trong 1 hóa đơn đã bán, có ghi rõ lý do để thống kê sau này.
+   Khi xác nhận trả hàng, hệ thống tự động:
+     1. Cộng lại đúng số lượng trả vào tồn kho (stock_counters).
+     2. Nếu hóa đơn gốc là "Công nợ": tự trừ bớt đúng số tiền hàng trả vào công nợ khách.
+        Nếu là "Tiền mặt"/"CK": không tự động chuyển tiền được (ngoài khả năng của app),
+        chỉ hiển thị rõ số tiền cần hoàn lại cho khách để người bán tự xử lý.
+     3. Lưu 1 phiếu trả hàng riêng (collection 'returns') kèm lý do - dùng để tra cứu/
+        thống kê sau này (KHÔNG sửa/xóa hóa đơn gốc, giữ nguyên lịch sử bán hàng thật).
+     4. Đánh dấu lại số lượng đã trả trên hóa đơn gốc (field returnedQtyByName) để lần
+        sau mở phiếu này ra trả tiếp, hệ thống biết mỗi sản phẩm còn trả được tối đa
+        bao nhiêu (không cho trả vượt quá số đã mua).
+   ================================================================================== */
+
+async function openReturnModal(docId) {
+    try {
+        const doc = await db.collection('sales').doc(docId).get();
+        if (!doc.exists) { Swal.fire('Lỗi', 'Không tìm thấy hóa đơn này!', 'error'); return; }
+        const data = doc.data();
+
+        // Hoá đơn gốc KHÔNG còn bị trừ trực tiếp nữa (để không ảnh hưởng báo cáo ngày bán
+        // gốc đã xuất trước đây) - nên phải tự tính "đã trả những gì trước đó" bằng cách
+        // truy vấn collection 'returns' theo đúng hoá đơn này, rồi lấy SL gốc trừ đi.
+        const prevReturnsSnap = await db.collection('returns').where('originalInvoiceId', '==', docId).get();
+        const returnedSoFar = {};
+        prevReturnsSnap.forEach(rDoc => {
+            (rDoc.data().items || []).forEach(it => {
+                returnedSoFar[it.name] = (returnedSoFar[it.name] || 0) + (parseFloat(it.qty) || 0);
+            });
+        });
+
+        // Loại trừ dòng "Đổi date" (dateSwap) - đây không phải hàng bán thật, không áp
+        // dụng trả hàng cho dòng này (giống logic loại trừ ở deleteSale/editInvoiceFromHistory).
+        const eligibleItems = (data.items || [])
+            .map((it, idx) => ({ ...it, __idx: idx }))
+            .filter(it => !it.dateSwap);
+
+        if (eligibleItems.length === 0) {
+            Swal.fire('Không có gì để trả', 'Hóa đơn này không có sản phẩm nào có thể trả lại.', 'info');
+            return;
+        }
+
+        const rowsHtml = eligibleItems.map(it => {
+            const already = returnedSoFar[it.name] || 0;
+            const remaining = Math.max(0, Math.round(((parseFloat(it.qty) || 0) - already) * 100) / 100);
+            const disabled = remaining <= 0 ? 'disabled' : '';
+            return '    <tr class="border-b dark:border-slate-700" data-item-idx="' + it.__idx + '" data-item-name="' + escapeHtml(it.name) + '" data-item-unit="' + escapeHtml(it.unit || '') + '" data-item-price="' + (parseFloat(it.price) || 0) + '" data-item-max="' + remaining + '">\n' +
+                   '        <td class="p-2 text-left text-sm">' + escapeHtml(it.name) + '</td>\n' +
+                   '        <td class="p-2 text-center text-xs text-slate-500">' + escapeHtml(it.unit || '') + '</td>\n' +
+                   '        <td class="p-2 text-center text-xs text-slate-500">' + it.qty + (already > 0 ? ' <span class="text-orange-500">(đã trả ' + already + ')</span>' : '') + '</td>\n' +
+                   '        <td class="p-2 text-center">\n' +
+                   '            <input type="number" class="return-qty-input w-20 border rounded-lg p-1.5 text-center text-sm dark:bg-slate-800 dark:border-slate-600" value="0" min="0" max="' + remaining + '" step="any" ' + disabled + '>\n' +
+                   '        </td>\n' +
+                   '    </tr>';
+        }).join('');
+
+        const { value: formValues } = await Swal.fire({
+            title: 'Trả hàng - Phiếu ' + (data.id || docId),
+            html: '    <div class="text-left text-xs text-slate-500 mb-2">Khách hàng: <b>' + escapeHtml(data.customer || 'Khách lẻ') + '</b> — Hình thức TT gốc: <b>' + escapeHtml(data.paymentMethod || '') + '</b></div>\n' +
+                  '    <div class="text-left text-[11px] text-slate-400 mb-2">Hoá đơn gốc được giữ nguyên số liệu (không sửa) để không ảnh hưởng báo cáo ngày bán đã xuất trước đây. Việc trả hàng sẽ được ghi nhận vào ngày hôm nay.</div>\n' +
+                  '    <div class="max-h-64 overflow-y-auto border rounded-lg dark:border-slate-700">\n' +
+                  '        <table class="w-full text-left border-collapse" id="return-items-table">\n' +
+                  '            <thead class="bg-gray-100 dark:bg-slate-800 sticky top-0">\n' +
+                  '                <tr>\n' +
+                  '                    <th class="p-2 text-xs">Tên SP</th>\n' +
+                  '                    <th class="p-2 text-xs text-center">ĐVT</th>\n' +
+                  '                    <th class="p-2 text-xs text-center">Đã mua</th>\n' +
+                  '                    <th class="p-2 text-xs text-center">SL trả</th>\n' +
+                  '                </tr>\n' +
+                  '            </thead>\n' +
+                  '            <tbody>' + rowsHtml + '</tbody>\n' +
+                  '        </table>\n' +
+                  '    </div>\n' +
+                  '    <div class="mt-3 text-left">\n' +
+                  '        <label class="text-xs font-bold text-slate-500">Lý do trả hàng (bắt buộc)</label>\n' +
+                  '        <textarea id="return-reason" class="swal2-textarea !m-0 !w-full" placeholder="Ví dụ: hàng lỗi, giao nhầm sản phẩm, khách đổi ý..."></textarea>\n' +
+                  '    </div>',
+            width: '700px',
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: 'Xác nhận trả hàng',
+            confirmButtonColor: '#f97316',
+            cancelButtonText: 'Hủy',
+            preConfirm: () => {
+                const reason = (document.getElementById('return-reason').value || '').trim();
+                if (!reason) { Swal.showValidationMessage('Vui lòng nhập lý do trả hàng!'); return false; }
+
+                const rows = document.querySelectorAll('#return-items-table tbody tr');
+                const items = [];
+                for (const row of rows) {
+                    const qty = parseFloat(row.querySelector('.return-qty-input').value) || 0;
+                    if (qty <= 0) continue;
+                    const max = parseFloat(row.getAttribute('data-item-max')) || 0;
+                    const name = row.getAttribute('data-item-name');
+                    if (qty > max + 0.000001) {
+                        Swal.showValidationMessage('Số lượng trả của "' + name + '" vượt quá số lượng còn có thể trả (tối đa ' + max + ').');
+                        return false;
+                    }
+                    items.push({
+                        name: name,
+                        unit: row.getAttribute('data-item-unit'),
+                        price: parseFloat(row.getAttribute('data-item-price')) || 0,
+                        qty: qty
+                    });
+                }
+                if (items.length === 0) { Swal.showValidationMessage('Vui lòng nhập số lượng trả cho ít nhất 1 sản phẩm!'); return false; }
+                return { reason, items };
+            }
+        });
+
+        if (!formValues) return;
+        await processReturn(docId, data, formValues.items, formValues.reason);
+
+    } catch (e) {
+        console.error('Lỗi khi mở form trả hàng:', e);
+        Swal.fire('Lỗi', 'Không thể mở form trả hàng: ' + e.message, 'error');
+    }
+}
+
+async function processReturn(docId, saleData, returnItems, reason) {
+    try {
+        const totalRefund = returnItems.reduce((sum, it) => sum + (it.qty * it.price), 0);
+        const customerName = saleData.customer;
+        const paymentMethod = saleData.paymentMethod;
+        const isDebtInvoice = paymentMethod === 'Công nợ' && customerName;
+
+        // QUAN TRỌNG - NGUYÊN TẮC CỐT LÕI: hoá đơn gốc ĐÃ ĐƯỢC TÍNH VÀO báo cáo của đúng
+        // ngày nó phát sinh (Báo Cáo Tổng Hợp/BC Bán Hàng... có thể đã được xuất ra và lưu
+        // trữ/nộp báo cáo ngày hôm đó rồi). Nếu bây giờ SỬA LẠI số liệu hoá đơn gốc (dù là
+        // ngày hôm qua hay 10 ngày trước), báo cáo NGÀY ĐÓ nếu mở/xuất lại sẽ cho ra số
+        // liệu KHÁC với bản đã báo cáo trước đây - gây lệch sổ sách.
+        // => Vì vậy hoá đơn gốc ĐƯỢC GIỮ NGUYÊN 100% (không đổi items/total) - mọi ảnh
+        // hưởng của việc trả hàng (kho, công nợ, doanh thu) đều được ghi nhận vào ĐÚNG
+        // NGÀY TRẢ HÀNG (hôm nay) - giống cách kế toán thực tế xử lý "hàng bán bị trả lại"
+        // (ghi giảm trừ vào ngày phát sinh trả hàng, không ghi lùi về ngày bán).
+        // Chỉ thêm 2 field PHỤ mang tính thông tin (không ảnh hưởng số liệu báo cáo nào):
+        await db.collection('sales').doc(docId).update({
+            hasReturns: true,
+            lastReturnAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // 1. HOÀN KHO - cộng lại đúng số lượng trả vào tồn kho THỰC TẾ (bộ đếm không theo
+        // ngày, nên luôn đúng ngay lập tức bất kể hoá đơn gốc bán ngày nào).
+        if (typeof adjustStockCounters === 'function') {
+            await adjustStockCounters(returnItems, +1);
+        }
+
+        // 2. CÔNG NỢ - trừ ngay vào công nợ hiện tại của khách (công nợ là số dư LUỸ KẾ tới
+        // hiện tại, không tính theo từng ngày, nên trừ ngay lúc này là đúng, không cần chờ).
+        if (isDebtInvoice) {
+            const q = await db.collection('customers').where('name', '==', customerName).get();
+            if (!q.empty) {
+                await db.collection('customers').doc(q.docs[0].id).update({
+                    debt: firebase.firestore.FieldValue.increment(-totalRefund)
+                });
+            }
+        }
+
+        // 3. TẠO PHIẾU "HOÀN TRẢ" trong collection 'receipts', NGÀY = HÔM NAY (ngày trả
+        // hàng thật sự) - đây là bản ghi CHÍNH THỨC, DUY NHẤT thể hiện sự kiện tăng kho,
+        // nên KHÔNG đánh dấu stockAdjusted:false nữa (để báo cáo NXT/Tồn Kho tự động cộng
+        // đúng vào "Nhập" của HÔM NAY - không phải cộng khống, vì đây là kho tăng thật sự
+        // hôm nay). Nhờ ghi đúng ngày hôm nay, báo cáo của NGÀY BÁN GỐC không hề bị đụng
+        // tới - vẫn khớp 100% với bản đã xuất trước đây.
+        let newReceiptNum = null;
+        let newReceiptDocId = null;
+        try {
+            const counterSnap = await db.collection('app_meta').doc('receipt_counter').get();
+            const maxNum = counterSnap.exists ? parseInt(counterSnap.data().maxNum || 0) : 0;
+            newReceiptNum = 'PN' + (maxNum + 1).toString().padStart(2, '0');
+            const receiptItems = returnItems.map(it => ({
+                name: it.name, unit: it.unit || 'Cái', qty: it.qty, retail: 0, wholesale: 0
+            }));
+            const receiptRef = await db.collection('receipts').add({
+                id: newReceiptNum,
+                items: receiptItems,
+                date: firebase.firestore.FieldValue.serverTimestamp(), // luôn = HÔM NAY
+                type: 'Nhập mới',
+                dateStatus: null,
+                isReturn: true,
+                vendor: customerName || 'Khách lẻ',
+                note: `Hoàn trả từ hóa đơn ${saleData.id || docId} (bán ngày ${saleData.date?.toDate ? saleData.date.toDate().toLocaleDateString('vi-VN') : '---'}). Lý do: ${reason}`,
+                fromSaleId: docId,
+                returnReason: reason
+            });
+            newReceiptDocId = receiptRef.id; // lưu lại để có thể xoá đúng phiếu này nếu sau này hoàn tác
+            await db.collection('app_meta').doc('receipt_counter').set({
+                maxNum: firebase.firestore.FieldValue.increment(1)
+            }, { merge: true });
+        } catch (receiptErr) {
+            // Việc trả hàng (cộng kho + trừ công nợ) đã lưu thành công ở bước 1-2 rồi -
+            // lỗi ở bước tạo phiếu LƯU VẾT này không được coi là lỗi trả hàng.
+            console.warn('Không tạo được phiếu "Hoàn trả" (việc trả hàng vẫn đã thành công):', receiptErr);
+            newReceiptNum = null;
+        }
+
+        // 4. LƯU PHIẾU TRẢ HÀNG RIÊNG, NGÀY = HÔM NAY (để: (a) tra cứu/thống kê ở "BC Hàng
+        // Hoàn Trả", (b) tính "còn lại bao nhiêu để trả tiếp" ở lần mở form trả hàng sau,
+        // (c) trừ vào "Doanh thu" của ĐÚNG NGÀY HÔM NAY ở Trang Chủ - không đụng doanh thu
+        // ngày bán gốc, (d) cho phép HOÀN TÁC nếu bấm nhầm (xem undoReturn)).
+        await db.collection('returns').add({
+            originalInvoiceId: docId,
+            originalReceiptNo: saleData.id || docId,
+            originalSaleDate: saleData.date || null,
+            importReceiptNo: newReceiptNum,
+            importReceiptDocId: newReceiptDocId,
+            customer: customerName || 'Khách lẻ',
+            paymentMethodOriginal: paymentMethod || '',
+            items: returnItems,
+            total: totalRefund,
+            reason: reason,
+            refundMethod: isDebtInvoice ? 'Trừ vào công nợ' : 'Hoàn tiền mặt/CK cho khách',
+            date: firebase.firestore.FieldValue.serverTimestamp(), // luôn = HÔM NAY
+            createdBy: (getCurrentUser() && getCurrentUser().username) || 'unknown'
+        });
+
+        if (typeof ghiLog === 'function') {
+            ghiLog('Bán Hàng', 'Trả hàng', saleData.id || docId,
+                `Trả hàng phiếu ${saleData.id || docId} (KH: ${customerName || 'Khách lẻ'}), tổng ${totalRefund.toLocaleString('vi-VN')}đ, lý do: ${reason}. Hoá đơn gốc GIỮ NGUYÊN số liệu (không sửa báo cáo ngày cũ)${newReceiptNum ? `, ghi nhận qua phiếu ${newReceiptNum} ngày hôm nay` : ''}.`);
+        }
+
+        const receiptMsg = newReceiptNum ? ` (phiếu ${newReceiptNum})` : '';
+        if (isDebtInvoice) {
+            Swal.fire({ icon: 'success', title: 'Đã ghi nhận trả hàng!', text: `Đã cộng lại hàng vào kho${receiptMsg} và trừ ${totalRefund.toLocaleString('vi-VN')}đ vào công nợ của khách. Hoá đơn gốc được giữ nguyên số liệu để không ảnh hưởng báo cáo ngày bán trước đây.` });
+        } else {
+            Swal.fire({ icon: 'success', title: 'Đã ghi nhận trả hàng!', html: `Đã cộng lại hàng vào kho${receiptMsg}. Hoá đơn gốc được giữ nguyên số liệu để không ảnh hưởng báo cáo ngày bán trước đây.<br><b class="text-orange-600">Vui lòng hoàn lại ${totalRefund.toLocaleString('vi-VN')}đ tiền mặt/chuyển khoản cho khách.</b>` });
+        }
+
+        // Làm mới lại giao diện liên quan (bọc try/catch riêng - việc trả hàng đã lưu
+        // thành công rồi, lỗi ở bước làm mới giao diện không được coi là lỗi trả hàng).
+        try {
+            if (typeof calculateAllStock === 'function') await calculateAllStock();
+            if (typeof renderProductGrid === 'function') renderProductGrid();
+            if (typeof refreshDashboardData === 'function') await refreshDashboardData();
+            if (typeof loadCustomers === 'function') loadCustomers();
+            if (typeof loadSalesList === 'function') loadSalesList();
+            if (typeof loadReceipts === 'function') loadReceipts();
+            if (typeof updateReceiptNum === 'function') updateReceiptNum();
+        } catch (refreshErr) {
+            console.warn('Không làm mới được giao diện sau khi trả hàng (việc trả hàng vẫn đã thành công):', refreshErr);
+        }
+
+    } catch (e) {
+        console.error('Lỗi khi xử lý trả hàng:', e);
+        Swal.fire('Lỗi', 'Có lỗi khi xử lý trả hàng: ' + e.message, 'error');
     }
 }
 
@@ -11703,27 +12238,25 @@ async function viewInventoryReport() {
                 const inv = initItem(i.name);
                 const qty = parseFloat(i.qty || 0);
                 // QUAN TRỌNG (sửa lỗi báo cáo NXT sai): hàng "Nhập đổi - Hết hạn" (huỷ) KHÔNG
-                // hề được cộng vào tồn kho thực tế lúc lưu (xem saveImport/saveAndPrint) -
-                // nếu vẫn cộng vào cột "Nhập Đổi" ở đây, báo cáo sẽ lệch với tồn kho thực tế.
+                // hề được cộng vào tồn kho thực tế lúc lưu (xem saveImport/saveAndPrint), và
+                // hàng "Hoàn trả" (isReturn, stockAdjusted:false) ĐÃ được cộng kho qua việc
+                // trừ trực tiếp vào hoá đơn gốc (xem processReturn) - nếu vẫn cộng vào đây sẽ
+                // làm báo cáo lệch với tồn kho thực tế (cộng khống 2 lần).
                 // Với phiếu GỘP (mixed), phải xét TỪNG DÒNG theo dateStatus riêng của nó,
                 // giống hệt cách deleteReceipt/getExpiredGoodsRows đã làm.
-                const wasAddedToStock = type !== 'Nhập đổi'
-                    ? true
-                    : (i.dateStatus ? i.dateStatus === 'ok' : (data.stockAdjusted !== false));
+                const wasAddedToStock = i.dateStatus ? i.dateStatus === 'ok' : (data.stockAdjusted !== false);
                 if (type === 'Nhập đổi') {
                     if (wasAddedToStock) inv.nhapDoi += qty;
                 } else {
-                    inv.nhapMoi += qty;
+                    if (wasAddedToStock) inv.nhapMoi += qty;
                 }
             });
         });
         periodSalesSnap.forEach(doc => {
             (doc.data().items || []).forEach(i => {
-                // QUAN TRỌNG (sửa lỗi báo cáo NXT sai): dòng "Đổi date" (i.dateSwap) trong 1
-                // hoá đơn bán hàng là hàng KHÁCH MANG TRẢ LẠI, KHÔNG hề bị trừ kho lúc bán
-                // (xem saveAndPrint) - nếu vẫn cộng vào cột "Xuất" ở đây sẽ làm sai lệch với
-                // tồn kho thực tế (tính hụt mất phần lẽ ra không được trừ).
-                if (i.dateSwap) return;
+                // ĐÃ ĐỔI LẠI (theo yêu cầu mới): dòng "Đổi date" (i.dateSwap) GIỜ CŨNG BỊ TRỪ
+                // KHO ngay lúc bán (xem saveAndPrint), y hệt hàng bán thường - nên phải tính
+                // vào cột "Xuất" ở đây như bình thường, không loại trừ nữa.
                 initItem(i.name).xuat += parseFloat(i.qty || 0);
             });
         });
@@ -11731,20 +12264,19 @@ async function viewInventoryReport() {
         if (gapReceiptsSnap) {
             gapReceiptsSnap.forEach(doc => {
                 const data = doc.data();
-                const type = data.type || 'Nhập mới';
                 (data.items || []).forEach(i => {
                     // Cùng lý do đã sửa ở mục 1: hàng "Nhập đổi - Hết hạn" không hề vào kho.
-                    if (type === 'Nhập đổi') {
-                        const wasAddedToStock = i.dateStatus ? i.dateStatus === 'ok' : (data.stockAdjusted !== false);
-                        if (!wasAddedToStock) return;
-                    }
+                    // Từ khi có phiếu "Hoàn trả" (isReturn, stockAdjusted:false, xem
+                    // processReturn) - hàng này ĐÃ được cộng kho qua việc trừ trực tiếp vào
+                    // hoá đơn gốc, KHÔNG được cộng thêm ở đây (tránh cộng khống 2 lần).
+                    const wasAddedToStock = i.dateStatus ? i.dateStatus === 'ok' : (data.stockAdjusted !== false);
+                    if (!wasAddedToStock) return;
                     initItem(i.name).gapNet += parseFloat(i.qty || 0);
                 });
             });
             gapSalesSnap.forEach(doc => {
                 (doc.data().items || []).forEach(i => {
-                    // Cùng lý do đã sửa ở mục 1: dòng "Đổi date" không hề bị trừ kho lúc bán.
-                    if (i.dateSwap) return;
+                    // Cùng lý do đã sửa ở mục 1: dòng "Đổi date" giờ cũng bị trừ kho lúc bán.
                     initItem(i.name).gapNet -= parseFloat(i.qty || 0);
                 });
             });
@@ -11834,27 +12366,25 @@ async function exportInventory() {
                 const inv = initItem(i.name);
                 const qty = parseFloat(i.qty || 0);
                 // QUAN TRỌNG (sửa lỗi báo cáo NXT sai): hàng "Nhập đổi - Hết hạn" (huỷ) KHÔNG
-                // hề được cộng vào tồn kho thực tế lúc lưu (xem saveImport/saveAndPrint) -
-                // nếu vẫn cộng vào cột "Nhập Đổi" ở đây, báo cáo sẽ lệch với tồn kho thực tế.
+                // hề được cộng vào tồn kho thực tế lúc lưu (xem saveImport/saveAndPrint), và
+                // hàng "Hoàn trả" (isReturn, stockAdjusted:false) ĐÃ được cộng kho qua việc
+                // trừ trực tiếp vào hoá đơn gốc (xem processReturn) - nếu vẫn cộng vào đây sẽ
+                // làm báo cáo lệch với tồn kho thực tế (cộng khống 2 lần).
                 // Với phiếu GỘP (mixed), phải xét TỪNG DÒNG theo dateStatus riêng của nó,
                 // giống hệt cách deleteReceipt/getExpiredGoodsRows đã làm.
-                const wasAddedToStock = type !== 'Nhập đổi'
-                    ? true
-                    : (i.dateStatus ? i.dateStatus === 'ok' : (data.stockAdjusted !== false));
+                const wasAddedToStock = i.dateStatus ? i.dateStatus === 'ok' : (data.stockAdjusted !== false);
                 if (type === 'Nhập đổi') {
                     if (wasAddedToStock) inv.nhapDoi += qty;
                 } else {
-                    inv.nhapMoi += qty;
+                    if (wasAddedToStock) inv.nhapMoi += qty;
                 }
             });
         });
         periodSalesSnap.forEach(doc => {
             (doc.data().items || []).forEach(i => {
-                // QUAN TRỌNG (sửa lỗi báo cáo NXT sai): dòng "Đổi date" (i.dateSwap) trong 1
-                // hoá đơn bán hàng là hàng KHÁCH MANG TRẢ LẠI, KHÔNG hề bị trừ kho lúc bán
-                // (xem saveAndPrint) - nếu vẫn cộng vào cột "Xuất" ở đây sẽ làm sai lệch với
-                // tồn kho thực tế (tính hụt mất phần lẽ ra không được trừ).
-                if (i.dateSwap) return;
+                // ĐÃ ĐỔI LẠI (theo yêu cầu mới): dòng "Đổi date" (i.dateSwap) GIỜ CŨNG BỊ TRỪ
+                // KHO ngay lúc bán (xem saveAndPrint), y hệt hàng bán thường - nên phải tính
+                // vào cột "Xuất" ở đây như bình thường, không loại trừ nữa.
                 initItem(i.name).xuat += parseFloat(i.qty || 0);
             });
         });
@@ -11863,20 +12393,19 @@ async function exportInventory() {
         if (gapReceiptsSnap) {
             gapReceiptsSnap.forEach(doc => {
                 const data = doc.data();
-                const type = data.type || 'Nhập mới';
                 (data.items || []).forEach(i => {
                     // Cùng lý do đã sửa ở mục 1: hàng "Nhập đổi - Hết hạn" không hề vào kho.
-                    if (type === 'Nhập đổi') {
-                        const wasAddedToStock = i.dateStatus ? i.dateStatus === 'ok' : (data.stockAdjusted !== false);
-                        if (!wasAddedToStock) return;
-                    }
+                    // Từ khi có phiếu "Hoàn trả" (isReturn, stockAdjusted:false, xem
+                    // processReturn) - hàng này ĐÃ được cộng kho qua việc trừ trực tiếp vào
+                    // hoá đơn gốc, KHÔNG được cộng thêm ở đây (tránh cộng khống 2 lần).
+                    const wasAddedToStock = i.dateStatus ? i.dateStatus === 'ok' : (data.stockAdjusted !== false);
+                    if (!wasAddedToStock) return;
                     initItem(i.name).gapNet += parseFloat(i.qty || 0);
                 });
             });
             gapSalesSnap.forEach(doc => {
                 (doc.data().items || []).forEach(i => {
-                    // Cùng lý do đã sửa ở mục 1: dòng "Đổi date" không hề bị trừ kho lúc bán.
-                    if (i.dateSwap) return;
+                    // Cùng lý do đã sửa ở mục 1: dòng "Đổi date" giờ cũng bị trừ kho lúc bán.
                     initItem(i.name).gapNet -= parseFloat(i.qty || 0);
                 });
             });
@@ -12133,6 +12662,142 @@ async function exportExpiredGoodsReport() {
     }
 }
 
+// 2c. Báo cáo Hàng Hoàn Trả - liệt kê các phiếu khách trả lại hàng đã mua (collection
+// 'returns', được tạo tự động ở processReturn khi bấm "Xác nhận trả hàng" tại Lịch Sử HĐ),
+// kèm lý do trả hàng, để chủ shop thống kê nguyên nhân trả hàng theo thời gian.
+async function getReturnsRows(from, to) {
+    const snapshot = await getDocsByDate('returns', from, to);
+    const rows = [];
+    snapshot.forEach(doc => {
+        const d = doc.data();
+        const dDateObj = d.date ? d.date.toDate() : null;
+        const itemsStr = (d.items || []).map(it => `${it.name} x${it.qty}`).join(', ');
+        rows.push({
+            dateObj: dDateObj || new Date(0),
+            dateStr: dDateObj ? dDateObj.toLocaleDateString('vi-VN') : '---',
+            originalReceiptNo: d.originalReceiptNo || d.originalInvoiceId || '---',
+            importReceiptNo: d.importReceiptNo || '---',
+            customer: d.customer || 'Khách lẻ',
+            itemsStr: itemsStr,
+            total: parseFloat(d.total) || 0,
+            reason: d.reason || '',
+            refundMethod: d.refundMethod || ''
+        });
+    });
+    rows.sort((a, b) => a.dateObj - b.dateObj);
+    return rows;
+}
+
+async function viewReturnsReport() {
+    let from = document.getElementById('date-from').value;
+    let to = document.getElementById('date-to').value;
+    if (!from || !to) return Swal.fire({ icon: 'warning', title: 'Thông báo', text: 'Vui lòng chọn ngày!' });
+
+    showLoading();
+    try {
+        const rows = await getReturnsRows(from, to);
+        Swal.close();
+        let stt = 0;
+        let totalAmount = 0;
+        const tableRows = rows.map(r => {
+            stt++; totalAmount += r.total;
+            return [stt, r.dateStr, r.originalReceiptNo, r.customer, r.itemsStr, r.total.toLocaleString('vi-VN') + 'đ', r.reason, r.refundMethod];
+        });
+        const totalRowHtml = `<tr style="font-weight:bold;background:#f8f9fa;"><td colspan="5" style="border:1px solid #999;padding:7px 8px;text-align:right;">TỔNG TIỀN HOÀN TRẢ</td><td style="border:1px solid #999;padding:7px 8px;text-align:right;">${totalAmount.toLocaleString('vi-VN')}đ</td><td colspan="2" style="border:1px solid #999;"></td></tr>`;
+        openReportPreviewWindow(
+            'BÁO CÁO HÀNG HOÀN TRẢ',
+            `Từ ngày: ${formatDateToDDMMYYYY(from)} - Đến ngày: ${formatDateToDDMMYYYY(to)}`,
+            ['STT', 'Ngày', 'Số HĐ gốc', 'Khách hàng', 'Sản phẩm trả', 'Tiền hoàn', 'Lý do', 'Hình thức hoàn'],
+            tableRows,
+            totalRowHtml,
+            ['center', 'left', 'left', 'left', 'left', 'right', 'left', 'left']
+        );
+    } catch (err) {
+        Swal.close();
+        console.error(err);
+        Swal.fire('Lỗi', 'Không tải được báo cáo hàng hoàn trả.', 'error');
+    }
+}
+
+async function exportReturnsReport() {
+    let from = document.getElementById('date-from').value;
+    let to = document.getElementById('date-to').value;
+    if (!from || !to) return Swal.fire({ icon: 'warning', title: 'Thông báo', text: 'Vui lòng chọn ngày!' });
+
+    showLoading();
+    try {
+        const rows = await getReturnsRows(from, to);
+
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet('Hàng hoàn trả');
+
+        const titleRow = sheet.addRow(["BÁO CÁO HÀNG HOÀN TRẢ"]);
+        titleRow.font = { size: 16, bold: true };
+        sheet.mergeCells(titleRow.number, 1, titleRow.number, 8);
+        titleRow.alignment = { horizontal: 'center' };
+
+        const dateRow = sheet.addRow([`Từ ngày: ${formatDateToDDMMYYYY(from)} - Đến ngày: ${formatDateToDDMMYYYY(to)}`]);
+        sheet.mergeCells(dateRow.number, 1, dateRow.number, 8);
+        dateRow.alignment = { horizontal: 'center' };
+        sheet.addRow([]);
+
+        const headerRow = sheet.addRow(["STT", "Ngày", "Số HĐ gốc", "Khách hàng", "Sản phẩm trả", "Tiền hoàn", "Lý do", "Hình thức hoàn"]);
+        headerRow.height = 25;
+        headerRow.eachCell(c => {
+            c.font = { bold: true, size: 12 };
+            c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFE0B2' } };
+            c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+            c.alignment = { horizontal: 'center', vertical: 'middle' };
+        });
+
+        let stt = 0, totalAmount = 0;
+        rows.forEach(r => {
+            stt += 1; totalAmount += r.total;
+            const row = sheet.addRow([stt, r.dateStr, r.originalReceiptNo, r.customer, r.itemsStr, r.total, r.reason, r.refundMethod]);
+            row.eachCell((c, col) => {
+                c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+                c.font = { size: 12 };
+                if (col === 1 || col === 2 || col === 3) c.alignment = { horizontal: 'center' };
+                if (col === 6) c.numFmt = '#,##0"đ"';
+                if (col === 5 || col === 7) c.alignment = { wrapText: true, vertical: 'middle' };
+            });
+        });
+        if (!rows.length) {
+            const emptyRow = sheet.addRow(["Không có dữ liệu trong khoảng thời gian này"]);
+            sheet.mergeCells(emptyRow.number, 1, emptyRow.number, 8);
+            emptyRow.alignment = { horizontal: 'center' };
+        }
+
+        sheet.addRow([]);
+        const totalRow = sheet.addRow(['', '', '', '', 'TỔNG CỘNG', totalAmount, '', '']);
+        totalRow.font = { bold: true, size: 12 };
+        totalRow.getCell(6).numFmt = '#,##0"đ"';
+        totalRow.eachCell(c => { c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }; });
+
+        sheet.columns = [{ width: 6 }, { width: 12 }, { width: 12 }, { width: 18 }, { width: 30 }, { width: 14 }, { width: 24 }, { width: 20 }];
+
+        sheet.pageSetup.paperSize = 9; // A4
+        sheet.pageSetup.orientation = 'landscape';
+        sheet.pageSetup.fitToPage = true;
+        sheet.pageSetup.fitToWidth = 1;
+        sheet.pageSetup.fitToHeight = 0;
+        sheet.pageSetup.margins = { left: 0.25, right: 0.25, top: 0.25, bottom: 0.25, header: 0.1, footer: 0.1 };
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const a = document.createElement('a');
+        a.href = window.URL.createObjectURL(blob);
+        a.download = `Bao_Cao_Hang_Hoan_Tra_${from}_den_${to}.xlsx`;
+        a.click();
+
+        Swal.close();
+        Swal.fire({ icon: 'success', title: 'Thành công', text: 'Đã xuất báo cáo!', timer: 2000 });
+    } catch (err) {
+        console.error(err);
+        Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Không thể xuất báo cáo!' });
+    }
+}
+
 // 3. Xuất báo cáo Tổng hợp
 async function exportFullReport() {
     const fromVal = document.getElementById('date-from').value;
@@ -12176,7 +12841,17 @@ async function exportFullReport() {
             
             d.items?.forEach(i => {
                 initItem(i.name);
-                const qty = parseFloat(i.qty || 0); // Sửa thành parseFloat
+                // QUAN TRỌNG (sửa lỗi phiếu GỘP bị bỏ sót): phiếu "Hoàn trả" và phiếu "Nhập
+                // đổi - Hết hạn" (thuần, không gộp) đều có stockAdjusted=false ở CẤP CẢ PHIẾU
+                // nên đúng là phải bỏ qua. NHƯNG phiếu "Nhập đổi" GỘP (vừa có dòng còn hạn vừa
+                // có dòng hết hạn trong CÙNG 1 phiếu, tạo tự động khi bán hàng có cả 2 loại đổi
+                // date) cũng bị đánh dấu stockAdjusted=false cho CẢ PHIẾU dù dòng "còn hạn" bên
+                // trong nó VẪN ĐƯỢC cộng vào kho thật - nếu chỉ xét cờ ở cấp phiếu như cũ, các
+                // dòng "còn hạn" này bị bỏ sót hoàn toàn khỏi báo cáo. Phải xét ĐÚNG dateStatus
+                // của TỪNG DÒNG sản phẩm, giống cách deleteReceipt/BC Tồn Kho đã làm.
+                const wasAddedToStock = i.dateStatus ? i.dateStatus === 'ok' : (d.stockAdjusted !== false);
+                if (!wasAddedToStock) return;
+                const qty = parseFloat(i.qty || 0);
                 if (dDateObj < fromDateObj) {
                     inventory[i.name].tonDau += qty;
                 } else if (dDateStr >= fromVal && dDateStr <= toVal) {
@@ -12577,6 +13252,16 @@ async function viewFullReport() {
             const dDateStr = dDateObj.toISOString().split('T')[0];
             d.items?.forEach(i => {
                 initItem(i.name);
+                // QUAN TRỌNG (sửa lỗi phiếu GỘP bị bỏ sót): phiếu "Hoàn trả" và phiếu "Nhập
+                // đổi - Hết hạn" (thuần, không gộp) đều có stockAdjusted=false ở CẤP CẢ PHIẾU
+                // nên đúng là phải bỏ qua. NHƯNG phiếu "Nhập đổi" GỘP (vừa có dòng còn hạn vừa
+                // có dòng hết hạn trong CÙNG 1 phiếu, tạo tự động khi bán hàng có cả 2 loại đổi
+                // date) cũng bị đánh dấu stockAdjusted=false cho CẢ PHIẾU dù dòng "còn hạn" bên
+                // trong nó VẪN ĐƯỢC cộng vào kho thật - nếu chỉ xét cờ ở cấp phiếu như cũ, các
+                // dòng "còn hạn" này bị bỏ sót hoàn toàn khỏi báo cáo. Phải xét ĐÚNG dateStatus
+                // của TỪNG DÒNG sản phẩm, giống cách deleteReceipt/BC Tồn Kho đã làm.
+                const wasAddedToStock = i.dateStatus ? i.dateStatus === 'ok' : (d.stockAdjusted !== false);
+                if (!wasAddedToStock) return;
                 const qty = parseFloat(i.qty || 0);
                 if (dDateObj < fromDateObj) {
                     inventory[i.name].tonDau += qty;
