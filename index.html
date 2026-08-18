@@ -4616,7 +4616,7 @@ async function loadDashboard(filter = 'default') {
     const startDateStr = fmtYMD(startDate);
     const endDateStr = fmtYMD(endDate);
 
-    const [salesSnap, suppliersSnap, customersSnap, materialImportsPeriodSnap, allSupplierPaymentsSnap, allCustomerPaymentsSnap, returnsPeriodSnap] = await Promise.all([
+    const [salesSnap, suppliersSnap, customersSnap, materialImportsPeriodSnap, allSupplierPaymentsSnap, allCustomerPaymentsSnap, allReturnsSnap] = await Promise.all([
         db.collection('sales')
             .where('date', '>=', queryStartDate)
             .get({ source: 'default' }),
@@ -4632,14 +4632,17 @@ async function loadDashboard(filter = 'default') {
         db.collection('payments').get({ source: 'default' }).catch(() => ({ docs: [] })),
         // Tương tự, lấy TOÀN BỘ lịch sử trả nợ của khách hàng.
         db.collection('debt_history').get({ source: 'default' }).catch(() => ({ docs: [] })),
-        // Hàng hoàn trả PHÁT SINH trong đúng kỳ đang chọn (theo NGÀY TRẢ HÀNG, KHÔNG PHẢI
-        // ngày bán gốc - xem processReturn) - dùng để trừ vào "Doanh thu" của đúng ngày này,
-        // không đụng tới doanh thu của ngày bán gốc (giữ nguyên báo cáo ngày cũ đã xuất).
+        // Hàng hoàn trả - lấy CÙNG KHOẢNG với 'sales' ở trên (queryStartDate, ~4-5 tháng gần
+        // nhất) - dùng để: (a) trừ vào "Doanh thu" của kỳ đang chọn, (b) trừ vào badge so
+        // sánh "doanh thu tháng này/tháng trước" bên dưới, (c) cộng vào "đã trả trong kỳ" của
+        // breakdown công nợ khách (hàng hoàn trả trừ công nợ có tác dụng y hệt 1 lần trả
+        // tiền) - LUÔN tính theo NGÀY TRẢ HÀNG (KHÔNG PHẢI ngày bán gốc - xem processReturn),
+        // không đụng doanh thu/báo cáo của ngày bán gốc.
         db.collection('returns')
-            .where('date', '>=', startDate)
-            .where('date', '<=', endDate)
+            .where('date', '>=', queryStartDate)
             .get({ source: 'default' }).catch(() => ({ docs: [] }))
     ]);
+    const allReturns = allReturnsSnap.docs.map(doc => doc.data());
 
     // Nếu đã có 1 lệnh gọi loadDashboard() MỚI HƠN bắt đầu trong lúc đang chờ dữ liệu ở trên,
     // bỏ qua toàn bộ phần xử lý/hiển thị bên dưới của lệnh gọi CŨ này - tránh ghi đè kết quả
@@ -4701,8 +4704,9 @@ async function loadDashboard(filter = 'default') {
     // gốc thuộc 1 kỳ báo cáo ĐÃ XUẤT trước đây, con số kỳ đó không hề bị đụng tới; khoản
     // giảm trừ chỉ xuất hiện đúng ở kỳ đang chứa ngày trả hàng thật sự.
     let totalReturns = 0;
-    (returnsPeriodSnap.docs || []).forEach(doc => {
-        totalReturns += (Number(doc.data().total) || 0);
+    allReturns.forEach(r => {
+        const rDate = r.date?.toDate ? r.date.toDate() : null;
+        if (rDate && rDate >= startDate && rDate <= endDate) totalReturns += (Number(r.total) || 0);
     });
     totalRevenue -= totalReturns;
     window.__dashboardTotalReturns = totalReturns;
@@ -4734,6 +4738,16 @@ async function loadDashboard(filter = 'default') {
         paidByCustomerAllTime[d.customerId] = (paidByCustomerAllTime[d.customerId] || 0) + amt;
         // Trường "date" ở debt_history là chuỗi 'YYYY-MM-DD', so sánh chuỗi trực tiếp.
         if (d.date && d.date >= startDateStr && d.date <= endDateStr) paidCustomerPeriod += amt;
+    });
+    // CỘNG THÊM phần "Hoàn trả - Trừ vào công nợ" phát sinh trong kỳ (theo ngày trả hàng -
+    // xem processReturn) vào "đã trả trong kỳ": về bản chất, 1 lần trả hàng làm GIẢM công nợ
+    // khách y hệt 1 lần trả tiền mặt - nếu không cộng vào đây, "newDebtCustomerPeriod" (tính
+    // từ tổng hoá đơn Công nợ, CHƯA trừ phần đã hoàn) sẽ bị THỔI PHỒNG, kéo theo "Nợ cũ" bị
+    // tính SAI (thấp hơn thực tế) trong công thức bên dưới.
+    allReturns.forEach(r => {
+        if (r.refundMethod !== 'Trừ vào công nợ') return;
+        const rDate = r.date?.toDate ? r.date.toDate() : null;
+        if (rDate && rDate >= startDate && rDate <= endDate) paidCustomerPeriod += (Number(r.total) || 0);
     });
     let oldDebtCustomerBaseline = totalDebt - newDebtCustomerPeriod + paidCustomerPeriod;
     if (oldDebtCustomerBaseline < 0) oldDebtCustomerBaseline = 0;
@@ -4862,6 +4876,15 @@ async function loadDashboard(filter = 'default') {
             if (key === thisMonthKey) thisMonthTotal += (Number(o.total) || 0);
             else if (key === lastMonthKey) lastMonthTotal += (Number(o.total) || 0);
         });
+        // TRỪ HÀNG HOÀN TRẢ của đúng tháng đó (theo ngày trả hàng) - để badge so sánh
+        // KHÔNG bị lệch với số "Tổng Doanh Thu" thực tế đã trừ hoàn trả hiện phía trên.
+        allReturns.forEach(r => {
+            const rDate = r.date?.toDate ? r.date.toDate() : null;
+            if (!rDate) return;
+            const key = `${rDate.getFullYear()}-${String(rDate.getMonth() + 1).padStart(2, '0')}`;
+            if (key === thisMonthKey) thisMonthTotal -= (Number(r.total) || 0);
+            else if (key === lastMonthKey) lastMonthTotal -= (Number(r.total) || 0);
+        });
         const badge = document.getElementById('revenue-mom-badge');
         if (badge) {
             if (lastMonthTotal > 0) {
@@ -4932,39 +4955,45 @@ function showDashboardDetail(type) {
             }
         });
 
+        // TRỪ HÀNG HOÀN TRẢ TRONG KỲ - để khớp đúng với số đã hiện ở thẻ "Tổng Doanh Thu"
+        // ngoài Trang Chủ (đã trừ ở loadDashboard) - nếu không trừ ở đây, popup chi tiết
+        // này sẽ hiện số KHÁC (cao hơn) so với thẻ, gây nhầm lẫn khi đối chiếu.
+        // LƯU Ý: tính "diff" (chênh lệch Thuế/Phí/Khác bên dưới) TỪ SỐ GỘP GỐC (trước khi
+        // trừ hoàn trả) - nếu trừ trước rồi mới tính diff, khoản hoàn trả sẽ bị lẫn vào
+        // dòng "Thuế / Phí / Khác", hiện sai số tiền không rõ nghĩa.
         const diff = totalRealRevenue - totalItemsValue;
+        const totalReturnsInPeriod = Number(window.__dashboardTotalReturns) || 0;
+        totalRealRevenue -= totalReturnsInPeriod;
+
         const sortedProducts = Object.entries(productMap).sort((a, b) => b[1] - a[1]);
 
-        let html = `
-            <!-- Ô TỔNG CỘNG DOANH THU: NỀN MỜ XANH DƯƠNG DỊU MẮT -->
-            <div class="mb-4 p-3 bg-blue-50/55 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-900/40 rounded-xl">
-                <div class="flex justify-between items-center text-blue-900 dark:text-blue-400">
-                    <span class="font-bold text-xs uppercase">Tổng cộng doanh thu</span>
-                    <span class="font-black text-sm text-blue-700 dark:text-blue-300">${totalRealRevenue.toLocaleString('vi-VN')} đ</span>
-                </div>
-            </div>
-            <div class="space-y-1 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">
-        `;
-        
+        let rowsHtml = '';
         sortedProducts.forEach(([name, total]) => {
-            html += `
-                <div class="flex justify-between items-center py-1.5 border-b border-slate-100 dark:border-slate-800/60">
-                    <span class="text-xs font-medium text-slate-700 dark:text-slate-300 pr-2 line-clamp-2">${name}</span>
-                    <span class="text-xs font-bold text-slate-900 dark:text-white whitespace-nowrap">${total.toLocaleString('vi-VN')} đ</span>
-                </div>
-            `;
+            rowsHtml += '<div class="flex justify-between items-center py-1.5 border-b border-slate-100 dark:border-slate-800/60">' +
+                '<span class="text-xs font-medium text-slate-700 dark:text-slate-300 pr-2 line-clamp-2">' + name + '</span>' +
+                '<span class="text-xs font-bold text-slate-900 dark:text-white whitespace-nowrap">' + total.toLocaleString('vi-VN') + ' đ</span>' +
+            '</div>';
         });
 
         if (Math.abs(diff) > 1) {
-            html += `
-                <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40">
-                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 italic pr-2">Thuế / Phí / Khác</span>
-                    <span class="text-xs font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">${diff.toLocaleString('vi-VN')} đ</span>
-                </div>
-            `;
+            rowsHtml += '<div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40">' +
+                '<span class="text-xs font-bold text-slate-500 dark:text-slate-400 italic pr-2">Thuế / Phí / Khác</span>' +
+                '<span class="text-xs font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">' + diff.toLocaleString('vi-VN') + ' đ</span>' +
+            '</div>';
         }
-        
-        html += '</div>';
+
+        let html = '<div class="mb-4 p-3 bg-blue-50/55 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-900/40 rounded-xl">' +
+            '<div class="flex justify-between items-center text-blue-900 dark:text-blue-400">' +
+                '<span class="font-bold text-xs uppercase">Tổng cộng doanh thu</span>' +
+                '<span class="font-black text-sm text-blue-700 dark:text-blue-300">' + totalRealRevenue.toLocaleString('vi-VN') + ' đ</span>' +
+            '</div>' +
+            (totalReturnsInPeriod > 0 ? '<div class="flex justify-between items-center text-orange-600 dark:text-orange-400 mt-1 pt-1 border-t border-blue-200/60 dark:border-blue-900/40">' +
+                '<span class="text-[10px] font-semibold">↩️ Đã trừ hàng hoàn trả trong kỳ</span>' +
+                '<span class="text-[10px] font-bold">-' + totalReturnsInPeriod.toLocaleString('vi-VN') + ' đ</span>' +
+            '</div>' : '') +
+        '</div>' +
+        '<div class="space-y-1 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">' + rowsHtml + '</div>';
+
         content.innerHTML = html;
     }
 
@@ -4997,50 +5026,41 @@ function showDashboardDetail(type) {
 
         let listHtml = '';
         debtorRows.forEach(({ id, name, closingDebt, periodNew, periodPaid, openingDebt }) => {
-            listHtml += `
-                <div onclick="document.getElementById('dashboard-detail-modal').classList.add('hidden'); xemChiTietDaiLy('${id}')"
-                     class="p-2.5 mb-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 cursor-pointer hover:bg-rose-50/60 dark:hover:bg-rose-950/20 hover:border-rose-200 dark:hover:border-rose-900/50 transition-colors">
-                    <div class="text-xs font-bold text-slate-800 dark:text-slate-100 mb-1.5 truncate">${name}</div>
-                    <div class="grid grid-cols-4 gap-1 text-center">
-                        <div>
-                            <div class="text-[9px] uppercase font-bold text-slate-400">Đầu kỳ</div>
-                            <div class="text-[11px] font-bold text-slate-600 dark:text-slate-300">${openingDebt.toLocaleString('vi-VN')}</div>
-                        </div>
-                        <div>
-                            <div class="text-[9px] uppercase font-bold text-amber-500">Phát sinh</div>
-                            <div class="text-[11px] font-bold text-amber-600 dark:text-amber-400">${periodNew.toLocaleString('vi-VN')}</div>
-                        </div>
-                        <div>
-                            <div class="text-[9px] uppercase font-bold text-green-500">Đã trả</div>
-                            <div class="text-[11px] font-bold text-green-600 dark:text-green-400">${periodPaid.toLocaleString('vi-VN')}</div>
-                        </div>
-                        <div>
-                            <div class="text-[9px] uppercase font-bold text-rose-500">Còn nợ</div>
-                            <div class="text-[11px] font-black text-rose-600 dark:text-rose-400">${closingDebt.toLocaleString('vi-VN')}</div>
-                        </div>
-                    </div>
-                </div>
-            `;
+            listHtml += '<div onclick="document.getElementById(\'dashboard-detail-modal\').classList.add(\'hidden\'); xemChiTietDaiLy(\'' + id + '\')" ' +
+                'class="p-2.5 mb-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 cursor-pointer hover:bg-rose-50/60 dark:hover:bg-rose-950/20 hover:border-rose-200 dark:hover:border-rose-900/50 transition-colors">' +
+                '<div class="text-xs font-bold text-slate-800 dark:text-slate-100 mb-1.5 truncate">' + name + '</div>' +
+                '<div class="grid grid-cols-4 gap-1 text-center">' +
+                    '<div>' +
+                        '<div class="text-[9px] uppercase font-bold text-slate-400">Đầu kỳ</div>' +
+                        '<div class="text-[11px] font-bold text-slate-600 dark:text-slate-300">' + openingDebt.toLocaleString('vi-VN') + '</div>' +
+                    '</div>' +
+                    '<div>' +
+                        '<div class="text-[9px] uppercase font-bold text-amber-500">Phát sinh</div>' +
+                        '<div class="text-[11px] font-bold text-amber-600 dark:text-amber-400">' + periodNew.toLocaleString('vi-VN') + '</div>' +
+                    '</div>' +
+                    '<div>' +
+                        '<div class="text-[9px] uppercase font-bold text-green-500">Đã trả</div>' +
+                        '<div class="text-[11px] font-bold text-green-600 dark:text-green-400">' + periodPaid.toLocaleString('vi-VN') + '</div>' +
+                    '</div>' +
+                    '<div>' +
+                        '<div class="text-[9px] uppercase font-bold text-rose-500">Còn nợ</div>' +
+                        '<div class="text-[11px] font-black text-rose-600 dark:text-rose-400">' + closingDebt.toLocaleString('vi-VN') + '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
         });
 
-        // Đã bỏ khối tóm tắt "Nợ phát sinh trong kỳ" / "Nợ cũ (trước kỳ này)" ở đây theo yêu
-        // cầu - 2 số này đã có sẵn trong cột "Phát sinh" / "Đầu kỳ" của TỪNG khách hàng ở
-        // danh sách bên dưới rồi, để cả 2 nơi bị trùng lặp thông tin không cần thiết. Chỉ
-        // còn giữ lại đúng 1 ô tổng "Tổng nợ khách hàng (Số còn nợ)".
-
         // Ô TỔNG CỘNG CÔNG NỢ KHÁCH: NỀN MỜ ĐỎ/HỒNG DỊU CHỐNG CHÓI
-        let html = `
-            <div class="mb-4 p-3 bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200/50 dark:border-rose-900/30 rounded-xl">
-                <div class="flex justify-between items-center text-rose-900 dark:text-rose-400">
-                    <span class="font-bold text-xs uppercase">Tổng nợ khách hàng (Số còn nợ)</span>
-                    <span class="font-black text-sm text-rose-600 dark:text-rose-400">${totalDebt.toLocaleString('vi-VN')} đ</span>
-                </div>
-                <div class="text-[10px] text-rose-500/80 dark:text-rose-400/70 mt-0.5">${debtorRows.length} khách đang nợ - sắp xếp nợ nhiều nhất lên đầu, bấm vào tên để xem chi tiết</div>
-            </div>
-            <div class="space-y-1 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">
-                ${listHtml}
-            </div>
-        `;
+        let html = '<div class="mb-4 p-3 bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200/50 dark:border-rose-900/30 rounded-xl">' +
+            '<div class="flex justify-between items-center text-rose-900 dark:text-rose-400">' +
+                '<span class="font-bold text-xs uppercase">Tổng nợ khách hàng (Số còn nợ)</span>' +
+                '<span class="font-black text-sm text-rose-600 dark:text-rose-400">' + totalDebt.toLocaleString('vi-VN') + ' đ</span>' +
+            '</div>' +
+            '<div class="text-[10px] text-rose-500/80 dark:text-rose-400/70 mt-0.5">' + debtorRows.length + ' khách đang nợ - sắp xếp nợ nhiều nhất lên đầu, bấm vào tên để xem chi tiết</div>' +
+        '</div>' +
+        '<div class="space-y-1 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">' +
+            listHtml +
+        '</div>';
 
         content.innerHTML = !hasDebt ? '<p class="text-center text-sm p-4 text-slate-500 dark:text-slate-400">Hiện tại không có khách hàng nào nợ.</p>' : html;
     }
@@ -5057,12 +5077,6 @@ function showDashboardDetail(type) {
             let listHtml = '';
             const paidMapNCC = (window.currentDashboardData && window.currentDashboardData.paidBySupplierAllTime) || {};
 
-            // QUAN TRỌNG: xemChiTietNCC() (mở khi bấm vào tên NCC) đọc dữ liệu từ
-            // window.allSuppliersData - bộ nhớ tạm này TRƯỚC ĐÂY chỉ được nạp khi mở đúng
-            // trang Nguyên Liệu > NCC & Công Nợ. Nếu bấm xem NCC từ Trang Chủ mà chưa từng
-            // mở trang đó trong phiên làm việc, bộ nhớ rỗng -> bấm không hiện gì cả (đúng
-            // lỗi bạn gặp). Giờ tự nạp lại bộ nhớ này ngay tại đây bằng dữ liệu đã có sẵn,
-            // đảm bảo luôn xem/thao tác được dù mở từ Trang Chủ hay từ trang Nguyên Liệu.
             window.allSuppliersData = window.allSuppliersData || {};
             allSuppliers.forEach(sup => {
                 window.allSuppliersData[sup.id] = {
@@ -5071,7 +5085,7 @@ function showDashboardDetail(type) {
                 };
             });
 
-            // SẮP XẾP THEO NỢ GIẢM DẦN - NCC nợ nhiều nhất hiện lên đầu, dễ ưu tiên trả trước
+            // SẮP XẾP THEO NỢ GIẢM DẦN - NCC nợ nhiều nhất lên đầu, dễ ưu tiên trả trước
             const sortedSuppliers = [...activeDebtSuppliers].sort((a, b) => (Number(b.debt) || 0) - (Number(a.debt) || 0));
 
             sortedSuppliers.forEach(sup => {
@@ -5081,48 +5095,41 @@ function showDashboardDetail(type) {
                 const periodPaid = Number((window.currentDashboardData && window.currentDashboardData.paidBySupplierPeriod || {})[sup.name]) || 0;
                 // Nợ đầu kỳ suy ra từ đẳng thức: Còn nợ = Nợ đầu kỳ + Phát sinh - Đã trả
                 const openingDebt = Math.max(0, closingDebt - periodNew + periodPaid);
-                listHtml += `
-                    <div onclick="document.getElementById('dashboard-detail-modal').classList.add('hidden'); xemChiTietNCC('${sup.id}')"
-                         class="p-2.5 mb-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 cursor-pointer hover:bg-amber-50/60 dark:hover:bg-amber-950/20 hover:border-amber-200 dark:hover:border-amber-900/50 transition-colors">
-                        <div class="text-xs font-bold text-slate-800 dark:text-slate-100 mb-1.5 truncate">${sup.name || 'NCC'}</div>
-                        <div class="grid grid-cols-4 gap-1 text-center">
-                            <div>
-                                <div class="text-[9px] uppercase font-bold text-slate-400">Đầu kỳ</div>
-                                <div class="text-[11px] font-bold text-slate-600 dark:text-slate-300">${openingDebt.toLocaleString('vi-VN')}</div>
-                            </div>
-                            <div>
-                                <div class="text-[9px] uppercase font-bold text-amber-500">Phát sinh</div>
-                                <div class="text-[11px] font-bold text-amber-600 dark:text-amber-400">${periodNew.toLocaleString('vi-VN')}</div>
-                            </div>
-                            <div>
-                                <div class="text-[9px] uppercase font-bold text-green-500">Đã trả</div>
-                                <div class="text-[11px] font-bold text-green-600 dark:text-green-400">${periodPaid.toLocaleString('vi-VN')}</div>
-                            </div>
-                            <div>
-                                <div class="text-[9px] uppercase font-bold text-rose-500">Còn nợ</div>
-                                <div class="text-[11px] font-black text-rose-600 dark:text-rose-400">${closingDebt.toLocaleString('vi-VN')}</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                listHtml += '<div onclick="document.getElementById(\'dashboard-detail-modal\').classList.add(\'hidden\'); xemChiTietNCC(\'' + sup.id + '\')" ' +
+                    'class="p-2.5 mb-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 cursor-pointer hover:bg-amber-50/60 dark:hover:bg-amber-950/20 hover:border-amber-200 dark:hover:border-amber-900/50 transition-colors">' +
+                    '<div class="text-xs font-bold text-slate-800 dark:text-slate-100 mb-1.5 truncate">' + (sup.name || 'NCC') + '</div>' +
+                    '<div class="grid grid-cols-4 gap-1 text-center">' +
+                        '<div>' +
+                            '<div class="text-[9px] uppercase font-bold text-slate-400">Đầu kỳ</div>' +
+                            '<div class="text-[11px] font-bold text-slate-600 dark:text-slate-300">' + openingDebt.toLocaleString('vi-VN') + '</div>' +
+                        '</div>' +
+                        '<div>' +
+                            '<div class="text-[9px] uppercase font-bold text-amber-500">Phát sinh</div>' +
+                            '<div class="text-[11px] font-bold text-amber-600 dark:text-amber-400">' + periodNew.toLocaleString('vi-VN') + '</div>' +
+                        '</div>' +
+                        '<div>' +
+                            '<div class="text-[9px] uppercase font-bold text-green-500">Đã trả</div>' +
+                            '<div class="text-[11px] font-bold text-green-600 dark:text-green-400">' + periodPaid.toLocaleString('vi-VN') + '</div>' +
+                        '</div>' +
+                        '<div>' +
+                            '<div class="text-[9px] uppercase font-bold text-rose-500">Còn nợ</div>' +
+                            '<div class="text-[11px] font-black text-rose-600 dark:text-rose-400">' + closingDebt.toLocaleString('vi-VN') + '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
             });
 
-            // Đã bỏ khối tóm tắt "Nợ phát sinh trong kỳ" / "Nợ cũ (trước kỳ này)" ở đây theo
-            // yêu cầu - trùng lặp với cột "Phát sinh"/"Đầu kỳ" của từng NCC ở danh sách dưới.
-
             // Ô TỔNG CỘNG CÔNG NỢ NCC: NỀN MỜ VÀNG/CAM ẤM DỊU CHỐNG CHÓI
-            let html = `
-                <div class="mb-4 p-3 bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/30 rounded-xl">
-                    <div class="flex justify-between items-center text-amber-900 dark:text-amber-400">
-                        <span class="font-bold text-xs uppercase">Tổng nợ nhà cung cấp (Số còn nợ)</span>
-                        <span class="font-black text-sm text-amber-600 dark:text-amber-400">${totalNCCDebt.toLocaleString('vi-VN')} đ</span>
-                    </div>
-                    <div class="text-[10px] text-amber-600/80 dark:text-amber-400/70 mt-0.5">${sortedSuppliers.length} NCC đang nợ - sắp xếp nợ nhiều nhất lên đầu, bấm vào tên để xem chi tiết</div>
-                </div>
-                <div class="space-y-1 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">
-                    ${listHtml}
-                </div>
-            `;
+            let html = '<div class="mb-4 p-3 bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/30 rounded-xl">' +
+                '<div class="flex justify-between items-center text-amber-900 dark:text-amber-400">' +
+                    '<span class="font-bold text-xs uppercase">Tổng nợ nhà cung cấp (Số còn nợ)</span>' +
+                    '<span class="font-black text-sm text-amber-600 dark:text-amber-400">' + totalNCCDebt.toLocaleString('vi-VN') + ' đ</span>' +
+                '</div>' +
+                '<div class="text-[10px] text-amber-600/80 dark:text-amber-400/70 mt-0.5">' + sortedSuppliers.length + ' NCC đang nợ - sắp xếp nợ nhiều nhất lên đầu, bấm vào tên để xem chi tiết</div>' +
+            '</div>' +
+            '<div class="space-y-1 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">' +
+                listHtml +
+            '</div>';
             content.innerHTML = html;
         }
     }
@@ -6606,7 +6613,8 @@ function removeFromCart(index) {
 			stockAdjusted: data.stockAdjusted !== false,
 			vendor: data.vendor || null,
 			isReturn: data.isReturn === true,
-			note: data.note || ''
+			note: data.note || '',
+			fromSaleId: data.fromSaleId || null
 		});
 
             const dateStr = data.date?.toDate ? data.date.toDate().toLocaleDateString('vi-VN') : '---';
@@ -7046,17 +7054,28 @@ window.viewReceipt = function(docId) {
     // "Nhập đổi" (đồng thời cảnh báo rõ nếu là hàng huỷ, KHÔNG được cộng vào tồn kho).
     const tagEl = document.getElementById('modal-receipt-datestatus-tag');
     if (tagEl) {
+        // CẢNH BÁO RIÊNG nếu phiếu này SINH RA TỰ ĐỘNG từ 1 hoá đơn bán hàng (Đổi date
+        // hoặc Hoàn trả, đều có fromSaleId) - sửa số lượng/giá TRỰC TIẾP ở đây vẫn cộng/
+        // trừ tồn kho đúng, nhưng KHÔNG cập nhật lại hoá đơn gốc (2 nơi sẽ hiện lệch số
+        // với nhau). Nếu cần đổi số lượng, nên vào Lịch Sử HĐ > mở đúng hoá đơn > "Sửa
+        // phiếu này" để cả hoá đơn lẫn phiếu nhập này được cập nhật khớp nhau.
+        const linkedWarningHtml = receipt.fromSaleId
+            ? `<div class="mt-2 text-[11px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-lg px-2.5 py-1.5">⚠️ Phiếu này tự động sinh ra từ hóa đơn bán hàng <b>${escapeHtml(receipt.fromSaleId)}</b>. Sửa số lượng/giá ở đây sẽ KHÔNG cập nhật lại hóa đơn gốc — nếu cần đổi số lượng, vào Lịch Sử HĐ mở đúng hóa đơn rồi bấm "Sửa phiếu này".</div>`
+            : '';
         if (receipt.isReturn) {
-            tagEl.innerHTML = `<span class="inline-block px-2.5 py-1 rounded-full text-[11px] font-bold bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-400">↩️ Phiếu hoàn trả — ${escapeHtml(receipt.note || '')}</span>`;
+            tagEl.innerHTML = `<span class="inline-block px-2.5 py-1 rounded-full text-[11px] font-bold bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-400">↩️ Phiếu hoàn trả — ${escapeHtml(receipt.note || '')}</span>${linkedWarningHtml}`;
             tagEl.classList.remove('hidden');
         } else if (receipt.type === 'Nhập đổi' && receipt.dateStatus === 'expired') {
-            tagEl.innerHTML = '<span class="inline-block px-2.5 py-1 rounded-full text-[11px] font-bold bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400">🗑 Hết hạn — huỷ, KHÔNG cộng vào tồn kho</span>';
+            tagEl.innerHTML = '<span class="inline-block px-2.5 py-1 rounded-full text-[11px] font-bold bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400">🗑 Hết hạn — huỷ, KHÔNG cộng vào tồn kho</span>' + linkedWarningHtml;
             tagEl.classList.remove('hidden');
         } else if (receipt.type === 'Nhập đổi' && receipt.dateStatus === 'ok') {
-            tagEl.innerHTML = '<span class="inline-block px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400">📦 Còn hạn — đã nhập lại kho</span>';
+            tagEl.innerHTML = '<span class="inline-block px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400">📦 Còn hạn — đã nhập lại kho</span>' + linkedWarningHtml;
             tagEl.classList.remove('hidden');
         } else if (receipt.type === 'Nhập đổi' && receipt.dateStatus === 'mixed') {
-            tagEl.innerHTML = '<span class="inline-block px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">🔀 Phiếu gộp — có cả hàng Còn hạn (đã nhập lại kho) và Hết hạn (huỷ, không cộng tồn). Xem rõ từng dòng bên dưới.</span>';
+            tagEl.innerHTML = '<span class="inline-block px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">🔀 Phiếu gộp — có cả hàng Còn hạn (đã nhập lại kho) và Hết hạn (huỷ, không cộng tồn). Xem rõ từng dòng bên dưới.</span>' + linkedWarningHtml;
+            tagEl.classList.remove('hidden');
+        } else if (linkedWarningHtml) {
+            tagEl.innerHTML = linkedWarningHtml;
             tagEl.classList.remove('hidden');
         } else {
             tagEl.innerHTML = '';
@@ -9544,6 +9563,72 @@ async function updateExistingSale() {
         changedNames.forEach(name => {
             window.baseInventoryMap[name] = (window.baseInventoryMap[name] || 0) - deltaByName[name];
         });
+
+        // --- TÁI TẠO PHIẾU NHẬP KHO TỰ ĐỘNG "ĐỔI DATE" CHO ĐÚNG VỚI NỘI DUNG VỪA SỬA ---
+        // QUAN TRỌNG (sửa lỗi thiếu đồng bộ): việc trừ kho ở transaction phía trên chỉ xử
+        // lý đúng phần "hàng đổi date được coi là ĐÃ BÁN" (xuất kho) - nhưng KHÔNG hề đụng
+        // tới phiếu Nhập Kho tự động đã tạo lúc bán ban đầu (phần "+1 cộng lại nếu còn
+        // hạn"). Nếu sửa phiếu mà đổi số lượng/đổi trạng thái còn hạn-hết hạn của hàng đổi
+        // date, hoặc thêm/bớt dòng đổi date, mà không xử lý gì thêm thì phiếu Nhập Kho cũ
+        // sẽ bị LỆCH so với hoá đơn (sai số lượng, sai trạng thái) và kho có thể bị THỪA
+        // hoặc THIẾU. Cách xử lý AN TOÀN NHẤT: HUỶ TÁC ĐỘNG của phiếu Nhập Kho CŨ (giống
+        // hệt bước 3b trong deleteSale) rồi TẠO LẠI MỘT PHIẾU MỚI từ đầu theo đúng dữ liệu
+        // vừa sửa (giống hệt logic trong saveAndPrint) - đảm bảo luôn khớp 100% dù người
+        // dùng sửa kiểu gì (đổi SL, đổi còn hạn/hết hạn, thêm dòng mới, xoá dòng cũ...).
+        // Chỉ làm việc này khi phiếu GỐC hoặc phiếu SAU KHI SỬA có liên quan tới "Đổi date"
+        // - bỏ qua hoàn toàn nếu không dính dáng gì, đỡ tốn phiếu PN mới cho các lần sửa
+        // bình thường không đụng tới hàng đổi date.
+        const hadDateSwapBefore = (window.__editingSaleOriginalItems || []).some(i => i.dateSwap);
+        const hasDateSwapNow = itemsToSave.some(i => i.dateSwap);
+        if (hadDateSwapBefore || hasDateSwapNow) {
+            try {
+                // 1. Huỷ tác động (hoàn lại đúng phần đã cộng "+1" cho hàng còn hạn) của MỌI
+                // phiếu Nhập Kho tự động đã từng tạo cho hoá đơn này, rồi xoá các phiếu đó.
+                const oldLinkedSnap = await db.collection('receipts').where('fromSaleId', '==', receiptId).get();
+                for (const rDoc of oldLinkedSnap.docs) {
+                    const rData = rDoc.data();
+                    const oldOkItems = (rData.items || []).filter(it => it.dateStatus !== 'expired');
+                    if (oldOkItems.length) await adjustStockCounters(oldOkItems, -1);
+                    await rDoc.ref.delete();
+                }
+
+                // 2. Tạo lại phiếu mới (nếu hoá đơn SAU KHI SỬA vẫn còn dòng đổi date) - y hệt
+                // logic tự động tạo phiếu ở saveAndPrint.
+                const dateSwapItemsNow = itemsToSave.filter(i => i.dateSwap);
+                if (dateSwapItemsNow.length) {
+                    const counterSnap = await db.collection('app_meta').doc('receipt_counter').get();
+                    const maxNum = counterSnap.exists ? parseInt(counterSnap.data().maxNum || 0) : 0;
+                    const newReceiptNum = 'PN' + (maxNum + 1).toString().padStart(2, '0');
+                    const autoReceiptItems = dateSwapItemsNow.map(it => ({
+                        name: it.name, unit: it.unit || 'Cái', qty: parseFloat(it.qty) || 0, retail: 0, wholesale: 0,
+                        dateStatus: it.dateSwapStatus === 'expired' ? 'expired' : 'ok'
+                    }));
+                    const newOkItems = autoReceiptItems.filter(it => it.dateStatus === 'ok');
+                    const hasExpiredNow = autoReceiptItems.some(it => it.dateStatus === 'expired');
+                    const hasOkNow = newOkItems.length > 0;
+                    await db.collection('receipts').add({
+                        id: newReceiptNum,
+                        items: autoReceiptItems,
+                        date: firebase.firestore.FieldValue.serverTimestamp(),
+                        type: 'Nhập đổi',
+                        dateStatus: (hasOkNow && hasExpiredNow) ? 'mixed' : (hasExpiredNow ? 'expired' : 'ok'),
+                        stockAdjusted: !hasExpiredNow,
+                        note: `Tự động từ hoá đơn bán hàng ${receiptId} (đổi date - đã cập nhật lại sau khi sửa phiếu)`,
+                        fromSaleId: receiptId,
+                        vendor: customer ? customer.trim() : null
+                    });
+                    await db.collection('app_meta').doc('receipt_counter').set({
+                        maxNum: firebase.firestore.FieldValue.increment(1)
+                    }, { merge: true });
+                    if (hasOkNow) await adjustStockCounters(newOkItems, +1);
+                }
+            } catch (dateSwapReceiptErr) {
+                // Hoá đơn + phần trừ kho chính đã lưu thành công ở transaction phía trên rồi
+                // - lỗi ở bước tái tạo phiếu Nhập Kho phụ này KHÔNG được coi là lưu thất bại,
+                // chỉ cảnh báo để kiểm tra tay trang Nhập Kho nếu cần.
+                console.warn('Không tái tạo được phiếu Nhập Kho tự động cho hàng đổi date sau khi sửa phiếu (hoá đơn vẫn đã lưu đúng) - vào trang Nhập Kho kiểm tra/tạo tay nếu cần:', dateSwapReceiptErr);
+            }
+        }
 
         // --- ĐỐI SOÁT LẠI CÔNG NỢ nếu phiếu gốc và/hoặc phiếu sửa có liên quan "Công nợ" ---
         // Hoàn tác đúng phần công nợ mà phiếu GỐC đã cộng (nếu có), rồi cộng lại đúng phần
@@ -12103,7 +12188,10 @@ async function viewSalesReport() {
     if (!from || !to) return Swal.fire({ icon: 'warning', title: 'Thông báo', text: 'Vui lòng chọn ngày!' });
 
     showLoading();
-    const snapshot = await getDocsByDate('sales', from, to);
+    const [snapshot, returnsSnap] = await Promise.all([
+        getDocsByDate('sales', from, to),
+        getDocsByDate('returns', from, to) // theo NGÀY TRẢ HÀNG - xem processReturn/Trang Chủ
+    ]);
     Swal.close();
 
     const rows = [];
@@ -12122,7 +12210,18 @@ async function viewSalesReport() {
             rows.push([date, sale.customer || 'Khách lẻ', i.name, i.unit || '', qty, price.toLocaleString('vi-VN'), Math.round(thueMoiMon).toLocaleString('vi-VN'), Math.round(thanhTienCoThue).toLocaleString('vi-VN')]);
         });
     });
-    const totalRowHtml = `<tr style="font-weight:bold;background:#f8f9fa;"><td colspan="7" style="border:1px solid #999;padding:7px 8px;text-align:right;">TỔNG CỘNG</td><td style="border:1px solid #999;padding:7px 8px;text-align:right;">${Math.round(tongDoanhThu).toLocaleString('vi-VN')}</td></tr>`;
+
+    // TRỪ HÀNG HOÀN TRẢ PHÁT SINH TRONG KỲ (theo ngày trả, không phải ngày bán gốc - xem
+    // processReturn) - đồng bộ với cách "Doanh thu" ở Trang Chủ đang tính, để 2 nơi không
+    // hiện số liệu khác nhau gây nhầm lẫn khi đối chiếu.
+    let tongHoanTra = 0;
+    returnsSnap.forEach(doc => { tongHoanTra += (parseFloat(doc.data().total) || 0); });
+    const doanhThuThuan = tongDoanhThu - tongHoanTra;
+
+    const totalRowHtml = `
+        <tr style="background:#f8f9fa;"><td colspan="7" style="border:1px solid #999;padding:7px 8px;text-align:right;">Tổng tiền hàng bán (gộp)</td><td style="border:1px solid #999;padding:7px 8px;text-align:right;">${Math.round(tongDoanhThu).toLocaleString('vi-VN')}</td></tr>
+        <tr style="background:#fff3e0;color:#e65100;"><td colspan="7" style="border:1px solid #999;padding:7px 8px;text-align:right;">Trừ: Hàng hoàn trả trong kỳ</td><td style="border:1px solid #999;padding:7px 8px;text-align:right;">-${Math.round(tongHoanTra).toLocaleString('vi-VN')}</td></tr>
+        <tr style="font-weight:bold;background:#f8f9fa;"><td colspan="7" style="border:1px solid #999;padding:7px 8px;text-align:right;">DOANH THU THUẦN</td><td style="border:1px solid #999;padding:7px 8px;text-align:right;">${Math.round(doanhThuThuan).toLocaleString('vi-VN')}</td></tr>`;
     openReportPreviewWindow(
         'BÁO CÁO CHI TIẾT BÁN HÀNG',
         `Từ ngày: ${formatDateToDDMMYYYY(from)} - Đến ngày: ${formatDateToDDMMYYYY(to)}`,
@@ -12141,7 +12240,10 @@ async function exportSales() {
     if (!from || !to) return Swal.fire({ icon: 'warning', title: 'Thông báo', text: 'Vui lòng chọn ngày!' });
 
     showLoading();
-    const snapshot = await getDocsByDate('sales', from, to);
+    const [snapshot, returnsSnap] = await Promise.all([
+        getDocsByDate('sales', from, to),
+        getDocsByDate('returns', from, to) // theo NGÀY TRẢ HÀNG - xem processReturn/Trang Chủ
+    ]);
     
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet('Báo cáo bán hàng');
@@ -12199,8 +12301,22 @@ async function exportSales() {
         });
     });
 
+    // TRỪ HÀNG HOÀN TRẢ PHÁT SINH TRONG KỲ (theo ngày trả, không phải ngày bán gốc - xem
+    // processReturn) - đồng bộ với cách "Doanh thu" ở Trang Chủ đang tính.
+    let tongHoanTra = 0;
+    returnsSnap.forEach(doc => { tongHoanTra += (parseFloat(doc.data().total) || 0); });
+    const doanhThuThuan = tongDoanhThu - tongHoanTra;
+
+    sheet.addRow([]);
+    const grossRow = sheet.addRow(['', '', '', '', '', '', 'Tổng tiền hàng bán (gộp)', Math.round(tongDoanhThu)]);
+    grossRow.eachCell((cell) => { cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }; });
+
+    const returnRow = sheet.addRow(['', '', '', '', '', '', 'Trừ: Hàng hoàn trả trong kỳ', -Math.round(tongHoanTra)]);
+    returnRow.font = { color: { argb: 'FFE65100' } };
+    returnRow.eachCell((cell) => { cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }; });
+
     // Thêm hàng tổng cộng vào cuối
-    const totalRow = sheet.addRow(['', '', '', '', '', '', 'TỔNG CỘNG', Math.round(tongDoanhThu)]);
+    const totalRow = sheet.addRow(['', '', '', '', '', '', 'DOANH THU THUẦN', Math.round(doanhThuThuan)]);
     totalRow.font = { bold: true };
     totalRow.eachCell((cell) => {
         cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
