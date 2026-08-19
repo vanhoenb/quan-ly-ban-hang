@@ -7054,14 +7054,18 @@ window.viewReceipt = function(docId) {
     // "Nhập đổi" (đồng thời cảnh báo rõ nếu là hàng huỷ, KHÔNG được cộng vào tồn kho).
     const tagEl = document.getElementById('modal-receipt-datestatus-tag');
     if (tagEl) {
-        // CẢNH BÁO RIÊNG nếu phiếu này SINH RA TỰ ĐỘNG từ 1 hoá đơn bán hàng (Đổi date
-        // hoặc Hoàn trả, đều có fromSaleId) - sửa số lượng/giá TRỰC TIẾP ở đây vẫn cộng/
-        // trừ tồn kho đúng, nhưng KHÔNG cập nhật lại hoá đơn gốc (2 nơi sẽ hiện lệch số
-        // với nhau). Nếu cần đổi số lượng, nên vào Lịch Sử HĐ > mở đúng hoá đơn > "Sửa
-        // phiếu này" để cả hoá đơn lẫn phiếu nhập này được cập nhật khớp nhau.
-        const linkedWarningHtml = receipt.fromSaleId
-            ? `<div class="mt-2 text-[11px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-lg px-2.5 py-1.5">⚠️ Phiếu này tự động sinh ra từ hóa đơn bán hàng <b>${escapeHtml(receipt.fromSaleId)}</b>. Sửa số lượng/giá ở đây sẽ KHÔNG cập nhật lại hóa đơn gốc — nếu cần đổi số lượng, vào Lịch Sử HĐ mở đúng hóa đơn rồi bấm "Sửa phiếu này".</div>`
-            : '';
+        // Phiếu "Đổi date" (fromSaleId có giá trị, isReturn KHÔNG true) giờ ĐÃ TỰ ĐỘNG ĐỒNG
+        // BỘ ngược lại hóa đơn gốc khi sửa số lượng ở đây (xem saveAllItemEdits) - chỉ cần
+        // báo cho biết rõ để yên tâm, không phải cảnh báo nguy hiểm nữa.
+        // Phiếu "Hoàn trả" (isReturn:true) thì NGƯỢC LẠI - CỐ TÌNH không bao giờ đồng bộ lại
+        // hóa đơn gốc (để giữ nguyên báo cáo ngày bán đã xuất trước đây, xem processReturn) -
+        // vẫn cần cảnh báo rõ để tránh nhầm lẫn.
+        let linkedWarningHtml = '';
+        if (receipt.fromSaleId && receipt.isReturn) {
+            linkedWarningHtml = `<div class="mt-2 text-[11px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-lg px-2.5 py-1.5">⚠️ Phiếu này sinh ra từ việc trả hàng của hóa đơn <b>${escapeHtml(receipt.fromSaleId)}</b>. Đây CHỈ là phiếu lưu vết - sửa số lượng ở đây KHÔNG cập nhật lại hóa đơn gốc (thiết kế cố ý, để không làm sai lệch báo cáo ngày bán đã xuất trước đây).</div>`;
+        } else if (receipt.fromSaleId) {
+            linkedWarningHtml = `<div class="mt-2 text-[11px] font-semibold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-lg px-2.5 py-1.5">ℹ️ Phiếu này tự động sinh ra từ hóa đơn bán hàng <b>${escapeHtml(receipt.fromSaleId)}</b>. Sửa số lượng ở đây sẽ TỰ ĐỘNG cập nhật lại đúng dòng tương ứng trên hóa đơn gốc.</div>`;
+        }
         if (receipt.isReturn) {
             tagEl.innerHTML = `<span class="inline-block px-2.5 py-1 rounded-full text-[11px] font-bold bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-400">↩️ Phiếu hoàn trả — ${escapeHtml(receipt.note || '')}</span>${linkedWarningHtml}`;
             tagEl.classList.remove('hidden');
@@ -7179,13 +7183,68 @@ window.saveAllItemEdits = async function(docId) {
             await adjustStockCounters(finalDeltas, 1);
         }
 
+        // --- ĐỒNG BỘ NGƯỢC VỀ HOÁ ĐƠN GỐC (nếu phiếu này tự sinh ra từ 1 hoá đơn bán hàng
+        // qua tính năng "Đổi date") ---
+        // CHỈ áp dụng cho phiếu "Đổi date" (docData.fromSaleId có giá trị, KHÔNG PHẢI phiếu
+        // "Hoàn trả" isReturn:true) - phiếu Hoàn trả CỐ TÌNH không bao giờ đụng lại hoá đơn
+        // gốc (để giữ nguyên báo cáo ngày bán đã xuất trước đây, xem processReturn).
+        // Mỗi dòng "Đổi date" trong phiếu nhập tương ứng với đúng 1 dòng dateSwap trên hoá
+        // đơn gốc - khi sửa số lượng ở đây, phải cập nhật lại CẢ 2 nơi để không bị lệch:
+        //   1. Số lượng trên chính dòng đó trong hoá đơn (để in lại/xem lại hoá đơn đúng).
+        //   2. Phần kho "coi như đã bán" mà hoá đơn đã trừ lúc lưu (KHÁC với phần kho "nhập
+        //      lại" đã xử lý ở finalDeltas phía trên - đây là 2 lớp tồn kho độc lập, xem
+        //      saveAndPrint) - nếu chỉ sửa lớp "nhập lại" mà bỏ qua lớp "đã bán", tổng tồn
+        //      kho sẽ bị lệch đúng bằng phần chênh lệch đó.
+        if (docDataForStock.fromSaleId && docDataForStock.isReturn !== true && stockDeltas.length > 0) {
+            try {
+                const saleQuery = await db.collection('sales').where('id', '==', docDataForStock.fromSaleId).limit(1).get();
+                if (!saleQuery.empty) {
+                    const saleDoc = saleQuery.docs[0];
+                    const saleItems = saleDoc.data().items || [];
+                    const saleStockDeltas = []; // phần kho "coi như đã bán" cần điều chỉnh lại
+
+                    stockDeltas.forEach(sd => {
+                        const wantedStatus = sd._itemAdjusted === true ? 'ok' : 'expired';
+                        const matchIdx = saleItems.findIndex(si =>
+                            si.name === sd.name && si.dateSwap && si.dateSwapStatus === wantedStatus
+                        );
+                        if (matchIdx > -1) {
+                            const oldSaleQty = parseFloat(saleItems[matchIdx].qty) || 0;
+                            const newSaleQty = oldSaleQty + sd.qty; // sd.qty chính là delta (newQty - oldQty) của phiếu
+                            saleItems[matchIdx] = { ...saleItems[matchIdx], qty: newSaleQty };
+                            saleStockDeltas.push({ name: sd.name, qty: sd.qty });
+                        }
+                    });
+
+                    if (saleStockDeltas.length > 0) {
+                        // Giá của dòng "Đổi date" luôn = 0 (xem saveAndPrint/updateExistingSale)
+                        // nên đổi số lượng KHÔNG làm thay đổi total của hoá đơn - chỉ cần ghi
+                        // lại đúng mảng items mới.
+                        await saleDoc.ref.update({ items: saleItems });
+                        // Lớp kho "coi như đã bán": delta dương (phiếu tăng SL) nghĩa là hoá đơn
+                        // giờ "bán" nhiều hơn -> phải TRỪ THÊM vào kho (sign = -1); delta âm thì
+                        // ngược lại, TRẢ LẠI kho.
+                        await adjustStockCounters(saleStockDeltas, -1);
+                    }
+                } else {
+                    console.warn('Không tìm thấy hóa đơn gốc (có thể đã bị xóa) để đồng bộ lại - kho vẫn đã được cập nhật đúng cho riêng phiếu nhập này.');
+                }
+            } catch (syncErr) {
+                // Phần lưu phiếu nhập + tồn kho của RIÊNG phiếu này đã thành công rồi - lỗi ở
+                // bước đồng bộ ngược về hoá đơn KHÔNG được coi là lưu thất bại.
+                console.warn('Không đồng bộ được lại hóa đơn gốc (phiếu nhập vẫn đã lưu đúng) - vào Lịch Sử HĐ kiểm tra tay hóa đơn liên quan nếu cần:', syncErr);
+            }
+        }
+
         // Cập nhật dữ liệu ngay trong mảng local để giao diện đồng bộ
         const receiptIndex = window.allReceipts.findIndex(r => r.docId === docId);
         if (receiptIndex > -1) {
             window.allReceipts[receiptIndex].items = items;
         }
 
-        showAlert("Đã lưu tất cả thay đổi!");
+        showAlert(docDataForStock.fromSaleId && docDataForStock.isReturn !== true
+            ? "Đã lưu và đồng bộ lại số lượng trên hóa đơn gốc!"
+            : "Đã lưu tất cả thay đổi!");
 
         // Báo cho toàn bộ ứng dụng biết dữ liệu vừa thay đổi để Kho Hàng / NXT Trang Chủ
         // tự làm mới theo đúng số tồn kho mới - trước đây thiếu bước này nên phải tự tải
@@ -10704,11 +10763,12 @@ async function openReturnModal(docId) {
             return;
         }
 
-        const rowsHtml = eligibleItems.map(it => {
+        let rowsHtml = '';
+        eligibleItems.forEach(it => {
             const already = returnedSoFar[it.name] || 0;
             const remaining = Math.max(0, Math.round(((parseFloat(it.qty) || 0) - already) * 100) / 100);
             const disabled = remaining <= 0 ? 'disabled' : '';
-            return '<tr class="border-b dark:border-slate-700" data-item-idx="' + it.__idx + '" data-item-name="' + escapeHtml(it.name) + '" data-item-unit="' + escapeHtml(it.unit || '') + '" data-item-price="' + (parseFloat(it.price) || 0) + '" data-item-max="' + remaining + '">' +
+            rowsHtml += '<tr class="border-b dark:border-slate-700" data-item-idx="' + it.__idx + '" data-item-name="' + escapeHtml(it.name) + '" data-item-unit="' + escapeHtml(it.unit || '') + '" data-item-price="' + (parseFloat(it.price) || 0) + '" data-item-max="' + remaining + '">' +
                 '<td class="p-2 text-left text-sm">' + escapeHtml(it.name) + '</td>' +
                 '<td class="p-2 text-center text-xs text-slate-500">' + escapeHtml(it.unit || '') + '</td>' +
                 '<td class="p-2 text-center text-xs text-slate-500">' + it.qty + (already > 0 ? ' <span class="text-orange-500">(đã trả ' + already + ')</span>' : '') + '</td>' +
@@ -10716,7 +10776,7 @@ async function openReturnModal(docId) {
                     '<input type="number" class="return-qty-input w-20 border rounded-lg p-1.5 text-center text-sm dark:bg-slate-800 dark:border-slate-600" value="0" min="0" max="' + remaining + '" step="any" ' + disabled + '>' +
                 '</td>' +
             '</tr>';
-        }).join('');
+        });
 
         const { value: formValues } = await Swal.fire({
             title: 'Trả hàng - Phiếu ' + (data.id || docId),
