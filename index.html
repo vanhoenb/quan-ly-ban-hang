@@ -11669,6 +11669,25 @@ async function loadCustomers() {
 
 
 // Hàm này chuyên để lọc và hiển thị, gọi mỗi khi gõ phím
+// Dựng 2 nút nhỏ "📞 Gọi" + "💬 Zalo" cho 1 số điện thoại - dùng chung cho cả dòng danh
+// sách khách hàng lẫn bảng chi tiết. Trả về chuỗi rỗng nếu khách chưa có SĐT (không hiện gì
+// cả, tránh nút bấm vào chẳng làm được gì). "tel:" mở app gọi điện sẵn có trên điện thoại;
+// "https://zalo.me/<số điện thoại>" mở đúng cuộc trò chuyện Zalo với số đó (cách làm chuẩn,
+// không cần biết trước tên Zalo hay kết bạn từ trước).
+function phoneActionIconsHtml(phone, size) {
+    if (!phone) return '';
+    const digits = phone.replace(/[^0-9]/g, '');
+    if (!digits) return '';
+    const cls = size === 'sm'
+        ? 'w-6 h-6 text-[11px]'
+        : 'w-7 h-7 text-xs';
+    return `
+        <span class="inline-flex items-center gap-1" onclick="event.stopPropagation()">
+            <a href="tel:${digits}" title="Gọi điện" class="${cls} inline-flex items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-500/25 transition-colors">📞</a>
+            <a href="https://zalo.me/${digits}" target="_blank" rel="noopener" title="Nhắn Zalo" class="${cls} inline-flex items-center justify-center rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-500/25 transition-colors">💬</a>
+        </span>`;
+}
+
 function renderCustomerList() {
     const body = document.getElementById('customer-list-body');
     const searchTerm = (document.getElementById('cust-search')?.value || '').toLowerCase();
@@ -11689,7 +11708,10 @@ function renderCustomerList() {
         // Tách riêng đoạn hiển thị địa chỉ/SĐT trên mobile để tránh lỗi backtick lồng nhau
         let mobileAddressPhone = '';
         if (data.address || data.phone) {
-            mobileAddressPhone = `<div class="text-[11px] text-slate-500 dark:text-slate-400 md:hidden">${data.address || ''}${data.address && data.phone ? ' • ' : ''}${data.phone || ''}</div>`;
+            mobileAddressPhone = `<div class="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 md:hidden">
+                <span>${data.address || ''}${data.address && data.phone ? ' • ' : ''}${data.phone || ''}</span>
+                ${phoneActionIconsHtml(data.phone, 'sm')}
+            </div>`;
         }
         
         body.innerHTML += `
@@ -11703,7 +11725,10 @@ function renderCustomerList() {
                     <div class="text-[13px] md:text-[11px] font-bold ${debt > 0 ? 'text-blue-600 dark:text-blue-400' : 'text-slate-700 dark:text-slate-200'} md:px-3 md:w-[25%] truncate">${data.name || ''}</div>
                     ${mobileAddressPhone}
                     <div class="hidden md:block md:px-3 md:text-[11px] md:text-slate-600 md:dark:text-slate-400 md:w-[20%] md:truncate">${data.address || ''}</div>
-                    <div class="hidden md:block md:px-3 md:text-[11px] md:text-slate-600 md:dark:text-slate-400 md:w-[15%]">${data.phone || ''}</div>
+                    <div class="hidden md:flex md:items-center md:gap-1.5 md:px-3 md:text-[11px] md:text-slate-600 md:dark:text-slate-400 md:w-[15%]">
+                        <span>${data.phone || ''}</span>
+                        ${phoneActionIconsHtml(data.phone, 'sm')}
+                    </div>
                 </div>
 
                 <div class="flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700">
@@ -11735,7 +11760,7 @@ function xemChiTietDaiLy(id) {
     const content = `
         <div class="text-left text-sm space-y-1 mb-4">
             <div><b>Địa chỉ:</b> ${data.address || '(chưa có)'}</div>
-            <div><b>SĐT:</b> ${data.phone || '(chưa có)'}</div>
+            <div class="flex items-center gap-2"><b>SĐT:</b> <span>${data.phone || '(chưa có)'}</span>${phoneActionIconsHtml(data.phone)}</div>
             <div class="pt-2 flex gap-4">
                 <div><b class="text-green-600">Đã trả:</b> ${totalPaid.toLocaleString('vi-VN')} đ</div>
                 <div><b class="text-red-600">Còn nợ:</b> ${debt.toLocaleString('vi-VN')} đ</div>
