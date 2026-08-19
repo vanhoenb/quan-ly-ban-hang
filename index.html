@@ -1397,6 +1397,13 @@ html:not(.dark) .bg-white {
         <button onclick="showPage('page-LichCongViec'); toggleMoreMenu()" data-perm="page-LichCongViec" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-indigo-950/40 border-indigo-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-indigo-400 text-xs font-bold">
             <i data-lucide="calendar" class="w-4 h-4 drop-shadow-[0_1px_2px_rgba(99,102,241,0.4)]"></i> Lịch Công Việc
         </button>
+
+        <button onclick="showPage('page-chat'); toggleMoreMenu()" data-perm="page-chat" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-cyan-950/40 border-cyan-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-cyan-400 text-xs font-bold">
+            <span class="relative inline-block">
+                <i data-lucide="message-circle" class="w-4 h-4 drop-shadow-[0_1px_2px_rgba(34,211,238,0.4)]"></i>
+                <span id="chat-unread-dot-mobile" class="hidden absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full ring-1 ring-slate-900"></span>
+            </span> Nhắn Tin
+        </button>
 		<button onclick="showPage('page-user-management'); toggleMoreMenu()" data-perm="page-user-management" class="admin-only-nav hidden w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-red-950/40 border-red-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-red-400 text-xs font-bold">
 			<i data-lucide="shield" class="w-4 h-4 drop-shadow-[0_1px_2px_rgba(239,68,68,0.4)]"></i> Quản Lý
 		</button>
@@ -1459,7 +1466,7 @@ html:not(.dark) .bg-white {
     // Giờ chỉ đúng 1 tab đang mở được tô màu, còn lại chuyển xám trung tính - đúng kiểu
     // thanh điều hướng hiện đại (giống Zalo/Messenger). Nút "Khác" cũng tự sáng lên nếu
     // trang đang mở là 1 trong các trang nằm trong menu "Khác" (Kho Hàng, Lịch Sử HĐ...).
-    const MOBILE_NAV_MORE_PAGES = ['page-inventory', 'page-history', 'page-customers', 'page-products-manage', 'page-SanXuat', 'page-NguyenLieu', 'page-LichCongViec', 'page-user-management'];
+    const MOBILE_NAV_MORE_PAGES = ['page-inventory', 'page-history', 'page-customers', 'page-products-manage', 'page-SanXuat', 'page-NguyenLieu', 'page-LichCongViec', 'page-chat', 'page-user-management'];
 
     function updateMobileNavActive(pageId) {
         const mainTabs = ['page-home', 'page-sell', 'page-import', 'page-report'];
@@ -1600,6 +1607,13 @@ html:not(.dark) .bg-white {
 
         <button onclick="showPage('page-LichCongViec'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" data-perm="page-LichCongViec" data-navbtn-pc="page-LichCongViec" data-active-classes="bg-gradient-to-b from-indigo-500 to-indigo-600 dark:from-indigo-900/60 dark:to-indigo-800/50 text-white dark:text-indigo-400 border-b-[4px] border-indigo-700 dark:border-indigo-600 shadow-[0_4px_10px_rgba(0,0,0,0.35)] dark:shadow-[0_6px_15px_rgba(0,0,0,0.35)] font-black tracking-wide" data-inactive-classes="border-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] border-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60">
             <i data-lucide="calendar" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(99,102,241,0.4)]"></i> <span class="sidebar-text">Lịch Công Việc</span>
+        </button>
+
+        <button onclick="showPage('page-chat'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" data-perm="page-chat" data-navbtn-pc="page-chat" data-active-classes="bg-gradient-to-b from-cyan-500 to-cyan-600 dark:from-cyan-900/60 dark:to-cyan-800/50 text-white dark:text-cyan-400 border-b-[4px] border-cyan-700 dark:border-cyan-600 shadow-[0_4px_10px_rgba(0,0,0,0.35)] dark:shadow-[0_6px_15px_rgba(0,0,0,0.35)] font-black tracking-wide" data-inactive-classes="border-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] border-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60">
+            <span class="relative inline-block">
+                <i data-lucide="message-circle" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(34,211,238,0.4)]"></i>
+                <span id="chat-unread-dot" class="hidden absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white dark:ring-slate-900"></span>
+            </span> <span class="sidebar-text">Nhắn Tin</span>
         </button>
 
         <button onclick="showPage('page-user-management'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" data-perm="page-user-management" data-navbtn-pc="page-user-management" data-active-classes="bg-gradient-to-b from-red-500 to-red-600 dark:from-red-900/60 dark:to-red-800/50 text-white dark:text-red-400 border-b-[4px] border-red-700 dark:border-red-600 shadow-[0_4px_10px_rgba(0,0,0,0.35)] dark:shadow-[0_6px_15px_rgba(0,0,0,0.35)] font-black tracking-wide" data-inactive-classes="border-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60" class="admin-only-nav hidden w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] border-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60">
@@ -3194,7 +3208,37 @@ html:not(.dark) .bg-white {
     </div>
 </div>
 
-<!-- ===================== QUẢN LÝ NGƯỜI DÙNG (CHỈ ADMIN) ===================== -->
+<!-- ===================== NHẮN TIN NỘI BỘ (phòng chung + nhắn riêng từng người) ===================== -->
+<div id="page-chat" class="page-content hidden p-2 md:p-6 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300">
+    <div class="w-full">
+        <h3 class="mb-6 font-bold text-2xl text-gray-800 dark:text-white px-2 md:px-0">NHẮN TIN NỘI BỘ</h3>
+
+        <div class="flex flex-col md:flex-row gap-4 md:h-[74vh]">
+            <!-- CỘT TRÁI: Phòng chung + danh sách nhân viên để nhắn riêng -->
+            <div id="chat-contact-col" class="w-full md:w-[300px] shrink-0 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col overflow-hidden md:h-full">
+                <div class="p-3 border-b dark:border-slate-700 shrink-0">
+                    <input type="text" id="chat-contact-search" oninput="renderChatContactList()" placeholder="🔍 Tìm nhân viên..." class="w-full p-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-gray-800 dark:text-white rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div id="chat-conversation-list" class="flex-1 overflow-y-auto custom-scrollbar divide-y divide-slate-100 dark:divide-slate-800 max-h-[50vh] md:max-h-none"></div>
+            </div>
+
+            <!-- CỘT PHẢI: khung chat của hội thoại đang chọn -->
+            <div id="chat-thread-col" class="w-full flex-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col overflow-hidden md:h-full">
+                <div id="chat-thread-header" class="p-3 border-b dark:border-slate-700 flex items-center gap-2 font-bold text-slate-700 dark:text-slate-200 shrink-0">
+                    <button onclick="chatBackToList()" class="md:hidden p-1.5 -ml-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    </button>
+                    <span id="chat-thread-header-text" class="text-slate-400 dark:text-slate-500 font-normal text-sm">Chọn 1 hội thoại để bắt đầu</span>
+                </div>
+                <div id="chat-thread-messages" class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2 flex flex-col min-h-[40vh] md:min-h-0"></div>
+                <form id="chat-send-form" onsubmit="return sendChatMessage(event)" class="p-3 border-t dark:border-slate-700 flex gap-2 shrink-0">
+                    <input type="text" id="chat-input-text" placeholder="Nhập tin nhắn..." autocomplete="off" disabled class="flex-1 p-2.5 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-gray-800 dark:text-white rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60">
+                    <button type="submit" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shrink-0">Gửi</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 <div id="page-user-management" class="hidden space-y-6 p-2 md:p-6">
     <!-- KHỐI BẢO TRÌ HỆ THỐNG: sửa lại tồn kho nếu bị sai số do lỗi hệ thống trước đó -->
     <div class="bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-800 rounded-2xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
@@ -3435,7 +3479,8 @@ html:not(.dark) .bg-white {
         { id: 'page-SanXuat',          label: 'Sản Xuất' },
         { id: 'page-NguyenLieu',       label: 'Nguyên Liệu' },
         { id: 'page-report',           label: 'Báo Cáo' },
-        { id: 'page-LichCongViec',     label: 'Lịch Công Việc' }
+        { id: 'page-LichCongViec',     label: 'Lịch Công Việc' },
+        { id: 'page-chat',             label: 'Nhắn Tin' }
     ];
 
     // --- MÃ HÓA MẬT KHẨU (SHA-256, chạy phía trình duyệt) ---
@@ -3571,6 +3616,9 @@ html:not(.dark) .bg-white {
             setAppVisible(true);
             applyPermissionsToUI(userObj);
             goToFirstAllowedPage(userObj);
+            // Kiểm tra tin nhắn nội bộ chưa đọc ngay sau khi đăng nhập (chấm đỏ trên menu
+            // "Nhắn Tin") - không chờ đến khi họ tự mở trang Nhắn Tin mới biết có tin mới.
+            if (typeof refreshChatUnreadBadge === 'function') refreshChatUnreadBadge();
         } catch (e) {
             errEl.textContent = e.message || 'Đăng nhập thất bại!';
             errEl.classList.remove('hidden');
@@ -3590,6 +3638,301 @@ html:not(.dark) .bg-white {
             goLogout();
         }
     }
+
+    // ========================= NHẮN TIN NỘI BỘ (PHÒNG CHUNG + NHẮN RIÊNG) =========================
+    // Dữ liệu Firestore:
+    //   - Phòng chung: collection 'chat_group_messages' { senderUsername, senderName, text, time }
+    //   - Nhắn riêng : collection 'chat_dm_conversations/{conversationId}/messages'
+    //     { senderUsername, senderName, text, time } - conversationId = 2 username ghép lại
+    //     theo thứ tự bảng chữ cái (vd: "an__binh") để 2 người luôn ra đúng 1 hội thoại chung,
+    //     bất kể ai nhắn trước.
+    // Dùng SUBCOLLECTION riêng cho từng cặp (thay vì 1 collection chung + lọc theo
+    // conversationId) để mỗi câu truy vấn chỉ cần orderBy('time') - KHÔNG cần tạo composite
+    // index thủ công trên Firebase (tránh lỗi "query requires an index" khi chạy lần đầu).
+    // Chỉ lắng nghe realtime (onSnapshot) khi đang MỞ đúng trang Nhắn Tin - rời trang là huỷ
+    // ngay (xem showPage()), tránh tốn quota đọc khi không xem chat.
+    function chatConversationId(userA, userB) {
+        return [userA, userB].sort().join('__');
+    }
+
+    function chatReadKey(myUsername, convKey) {
+        return `chat_read_${myUsername}_${convKey}`;
+    }
+
+    function formatChatTime(d) {
+        if (!d) return '';
+        const now = new Date();
+        const sameDay = d.toDateString() === now.toDateString();
+        const hm = d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        return sameDay ? hm : `${d.toLocaleDateString('vi-VN')} ${hm}`;
+    }
+
+    // Tải danh sách nhân viên (trừ chính mình, chỉ tài khoản còn hoạt động) - cache lại trong
+    // phiên làm việc, chỉ tải lại nếu trang được load lại từ đầu (F5).
+    async function ensureChatStaffListLoaded() {
+        if (window.__chatStaffList) return window.__chatStaffList;
+        const cur = getCurrentUser();
+        const snap = await db.collection('app_users').get();
+        const list = [];
+        snap.forEach(doc => {
+            const d = doc.data();
+            if (doc.id === (cur && cur.username)) return;
+            if (d.active === false) return;
+            list.push({ username: doc.id, displayName: d.displayName || doc.id, role: d.role || 'staff' });
+        });
+        window.__chatStaffList = list;
+        return list;
+    }
+
+    // Đọc tin nhắn CUỐI CÙNG của phòng chung + của TỪNG cuộc nhắn riêng (mỗi hội thoại 1 lần
+    // đọc .limit(1), rẻ - phù hợp quy mô vài chục nhân viên) để: (1) hiện xem đã đọc hay chưa
+    // (so với mốc lưu trong localStorage của MÁY này), (2) hiện dòng xem trước ở danh sách bên
+    // trái. Kết quả cache vào window.__chatPreviews để cả huy hiệu chấm đỏ lẫn danh sách hội
+    // thoại dùng chung, không phải đọc lại 2 lần.
+    async function refreshChatPreviews() {
+        const cur = getCurrentUser();
+        if (!cur) return null;
+        const staff = await ensureChatStaffListLoaded();
+        const previews = { group: null, dm: {} };
+
+        const groupSnap = await db.collection('chat_group_messages').orderBy('time', 'desc').limit(1).get();
+        if (!groupSnap.empty) {
+            const d = groupSnap.docs[0].data();
+            previews.group = { text: d.text || '', senderUsername: d.senderUsername, senderName: d.senderName, time: d.time?.toDate ? d.time.toDate() : null };
+        }
+
+        await Promise.all(staff.map(async (s) => {
+            const cid = chatConversationId(cur.username, s.username);
+            const snap = await db.collection('chat_dm_conversations').doc(cid).collection('messages').orderBy('time', 'desc').limit(1).get();
+            if (!snap.empty) {
+                const d = snap.docs[0].data();
+                previews.dm[s.username] = { text: d.text || '', senderUsername: d.senderUsername, senderName: d.senderName, time: d.time?.toDate ? d.time.toDate() : null };
+            }
+        }));
+
+        window.__chatPreviews = previews;
+        return previews;
+    }
+
+    // Có tin nào MỚI HƠN mốc đã đọc lưu ở máy này, và người gửi KHÔNG PHẢI là mình không?
+    function chatIsUnread(preview, convKey) {
+        if (!preview || !preview.time) return false;
+        const cur = getCurrentUser();
+        if (!cur || preview.senderUsername === cur.username) return false;
+        const lastRead = parseInt(localStorage.getItem(chatReadKey(cur.username, convKey)) || '0', 10);
+        return preview.time.getTime() > lastRead;
+    }
+
+    function chatMarkRead(convKey, atTime) {
+        const cur = getCurrentUser();
+        if (!cur) return;
+        localStorage.setItem(chatReadKey(cur.username, convKey), String((atTime || new Date()).getTime()));
+    }
+
+    // Cập nhật chấm đỏ trên menu "Nhắn Tin" (cả sidebar PC lẫn menu "Khác" di động) - gọi ngay
+    // sau khi đăng nhập và mỗi khi rời/đổi hội thoại trong trang chat.
+    async function refreshChatUnreadBadge() {
+        try {
+            const previews = window.__chatPreviews || await refreshChatPreviews();
+            let anyUnread = chatIsUnread(previews.group, 'group');
+            if (!anyUnread) {
+                for (const uname in previews.dm) {
+                    if (chatIsUnread(previews.dm[uname], `dm_${chatConversationId(getCurrentUser().username, uname)}`)) { anyUnread = true; break; }
+                }
+            }
+            document.getElementById('chat-unread-dot')?.classList.toggle('hidden', !anyUnread);
+            document.getElementById('chat-unread-dot-mobile')?.classList.toggle('hidden', !anyUnread);
+        } catch (e) { console.error('Lỗi kiểm tra tin nhắn chưa đọc:', e); }
+    }
+
+    // --- MỞ TRANG NHẮN TIN ---
+    window.__chatCurrentConv = null;   // { type: 'group' } hoặc { type: 'dm', username, displayName }
+    window.__chatUnsub = null;         // hàm huỷ listener realtime đang chạy (nếu có)
+
+    async function initChatPage() {
+        await ensureChatStaffListLoaded();
+        await refreshChatPreviews();
+        refreshChatUnreadBadge();
+        renderChatContactList();
+        chatUpdateMobileView(false); // mặc định trên di động: hiện danh sách trước
+
+        // Nếu đã từng chọn 1 hội thoại trong phiên này (quay lại trang) thì mở lại đúng hội
+        // thoại đó; nếu là lần đầu mở trang, mặc định vào Phòng Chung cho thân thiện.
+        if (window.__chatCurrentConv) {
+            selectChatConversation(window.__chatCurrentConv.type, window.__chatCurrentConv.username, window.__chatCurrentConv.displayName, true);
+        } else {
+            selectChatConversation('group', null, null);
+        }
+    }
+
+    // Gọi khi RỜI trang Nhắn Tin (từ showPage()) - huỷ listener realtime để không tốn quota.
+    function leaveChatPage() {
+        if (window.__chatUnsub) { window.__chatUnsub(); window.__chatUnsub = null; }
+    }
+
+    function chatUpdateMobileView(showThread) {
+        if (window.innerWidth > 768) return; // Trên PC luôn hiện cả 2 cột, không cần ẩn/hiện
+        const listCol = document.getElementById('chat-contact-col');
+        const threadCol = document.getElementById('chat-thread-col');
+        if (listCol) listCol.classList.toggle('hidden', !!showThread);
+        if (threadCol) threadCol.classList.toggle('hidden', !showThread);
+    }
+
+    function chatBackToList() {
+        chatUpdateMobileView(false);
+    }
+
+    function renderChatContactList() {
+        const box = document.getElementById('chat-conversation-list');
+        if (!box) return;
+        const cur = getCurrentUser();
+        if (!cur) return;
+        const keyword = (document.getElementById('chat-contact-search')?.value || '').trim().toLowerCase();
+        const staff = (window.__chatStaffList || []).filter(s => !keyword || s.displayName.toLowerCase().includes(keyword) || s.username.toLowerCase().includes(keyword));
+        const previews = window.__chatPreviews || { group: null, dm: {} };
+
+        // Sắp xếp: hội thoại có tin nhắn gần nhất lên trước, chưa từng nhắn thì xuống cuối
+        // (xếp theo tên) - đúng thói quen dùng app chat (Zalo/Messenger đều làm vậy).
+        const staffSorted = [...staff].sort((a, b) => {
+            const ta = previews.dm[a.username]?.time?.getTime() || 0;
+            const tb = previews.dm[b.username]?.time?.getTime() || 0;
+            if (ta !== tb) return tb - ta;
+            return a.displayName.localeCompare(b.displayName, 'vi');
+        });
+
+        const isActive = (type, username) => window.__chatCurrentConv && window.__chatCurrentConv.type === type && window.__chatCurrentConv.username === username;
+
+        const groupUnread = chatIsUnread(previews.group, 'group');
+        const groupPreviewText = previews.group ? `${previews.group.senderUsername === cur.username ? 'Bạn: ' : ''}${escapeHtml(previews.group.text).slice(0, 40)}` : 'Chưa có tin nhắn';
+
+        let html = `
+            <div onclick="selectChatConversation('group', null, null)" class="flex items-center gap-2.5 p-3 cursor-pointer transition-colors ${isActive('group') ? 'bg-blue-50 dark:bg-blue-500/10' : 'hover:bg-slate-50 dark:hover:bg-slate-800/60'}">
+                <div class="w-9 h-9 rounded-full bg-cyan-100 dark:bg-cyan-500/15 text-cyan-700 dark:text-cyan-400 flex items-center justify-center shrink-0 text-base">🏠</div>
+                <div class="min-w-0 flex-1">
+                    <div class="text-[13px] font-bold text-slate-700 dark:text-slate-200 truncate">Phòng chung</div>
+                    <div class="text-[11px] text-slate-400 dark:text-slate-500 truncate">${groupPreviewText}</div>
+                </div>
+                ${groupUnread ? '<span class="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0"></span>' : ''}
+            </div>`;
+
+        html += staffSorted.map(s => {
+            const p = previews.dm[s.username];
+            const unread = chatIsUnread(p, `dm_${chatConversationId(cur.username, s.username)}`);
+            const previewText = p ? `${p.senderUsername === cur.username ? 'Bạn: ' : ''}${escapeHtml(p.text).slice(0, 40)}` : 'Chưa có tin nhắn';
+            const initial = (s.displayName || '?').trim().charAt(0).toUpperCase();
+            return `
+            <div onclick="selectChatConversation('dm', '${s.username}', '${escapeHtml(s.displayName).replace(/'/g, "\\'")}')" class="flex items-center gap-2.5 p-3 cursor-pointer transition-colors ${isActive('dm', s.username) ? 'bg-blue-50 dark:bg-blue-500/10' : 'hover:bg-slate-50 dark:hover:bg-slate-800/60'}">
+                <div class="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center shrink-0 text-sm font-bold">${initial}</div>
+                <div class="min-w-0 flex-1">
+                    <div class="text-[13px] font-bold text-slate-700 dark:text-slate-200 truncate">${escapeHtml(s.displayName)}</div>
+                    <div class="text-[11px] text-slate-400 dark:text-slate-500 truncate">${previewText}</div>
+                </div>
+                ${unread ? '<span class="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0"></span>' : ''}
+            </div>`;
+        }).join('');
+
+        box.innerHTML = html || '<div class="p-4 text-center text-slate-400 text-sm">Chưa có nhân viên nào khác</div>';
+    }
+
+    function selectChatConversation(type, username, displayName, skipRerenderList) {
+        const cur = getCurrentUser();
+        if (!cur) return;
+
+        if (window.__chatUnsub) { window.__chatUnsub(); window.__chatUnsub = null; }
+        window.__chatCurrentConv = type === 'group' ? { type: 'group' } : { type: 'dm', username, displayName };
+
+        const headerText = document.getElementById('chat-thread-header-text');
+        const input = document.getElementById('chat-input-text');
+        const msgBox = document.getElementById('chat-thread-messages');
+        if (headerText) { headerText.textContent = type === 'group' ? '🏠 Phòng chung' : displayName; headerText.classList.remove('text-slate-400', 'dark:text-slate-500', 'font-normal'); }
+        if (input) input.disabled = false;
+        if (msgBox) msgBox.innerHTML = '<div class="text-center text-slate-400 text-xs py-4">Đang tải...</div>';
+
+        const convKey = type === 'group' ? 'group' : `dm_${chatConversationId(cur.username, username)}`;
+        const colRef = type === 'group'
+            ? db.collection('chat_group_messages')
+            : db.collection('chat_dm_conversations').doc(chatConversationId(cur.username, username)).collection('messages');
+
+        // Chỉ lấy 200 tin gần nhất (tránh đọc cả lịch sử chat dài dằng dặc mỗi lần mở), rồi
+        // đảo lại đúng thứ tự cũ → mới để hiển thị.
+        window.__chatUnsub = colRef.orderBy('time', 'desc').limit(200).onSnapshot(snap => {
+            const msgs = snap.docs.map(d => d.data()).reverse();
+            renderChatMessages(msgs);
+            const lastMsg = msgs[msgs.length - 1];
+            if (lastMsg && lastMsg.time?.toDate) {
+                chatMarkRead(convKey, lastMsg.time.toDate());
+                refreshChatUnreadBadge();
+            }
+        }, err => {
+            console.error('Lỗi tải tin nhắn:', err);
+            if (msgBox) msgBox.innerHTML = '<div class="text-center text-rose-400 text-xs py-4">Không tải được tin nhắn.</div>';
+        });
+
+        if (!skipRerenderList) renderChatContactList();
+        chatUpdateMobileView(true);
+    }
+
+    function renderChatMessages(msgs) {
+        const box = document.getElementById('chat-thread-messages');
+        if (!box) return;
+        const cur = getCurrentUser();
+        const isGroup = window.__chatCurrentConv && window.__chatCurrentConv.type === 'group';
+
+        if (!msgs.length) {
+            box.innerHTML = '<div class="text-center text-slate-400 text-xs py-4">Chưa có tin nhắn nào - hãy gửi lời chào đầu tiên!</div>';
+            return;
+        }
+
+        box.innerHTML = msgs.map(m => {
+            const isMine = m.senderUsername === (cur && cur.username);
+            const t = m.time?.toDate ? m.time.toDate() : null;
+            const nameLine = (isGroup && !isMine) ? `<div class="text-[10px] font-bold text-cyan-600 dark:text-cyan-400 mb-0.5">${escapeHtml(m.senderName || m.senderUsername)}</div>` : '';
+            return `
+                <div class="flex ${isMine ? 'justify-end' : 'justify-start'}">
+                    <div class="max-w-[78%] md:max-w-[65%] px-3 py-2 rounded-2xl text-[13px] ${isMine ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-bl-sm'}">
+                        ${nameLine}
+                        <div class="whitespace-pre-wrap break-words">${escapeHtml(m.text)}</div>
+                        <div class="text-[10px] mt-0.5 text-right ${isMine ? 'text-blue-100' : 'text-slate-400 dark:text-slate-500'}">${formatChatTime(t)}</div>
+                    </div>
+                </div>`;
+        }).join('');
+        box.scrollTop = box.scrollHeight;
+    }
+
+    async function sendChatMessage(event) {
+        event.preventDefault();
+        const input = document.getElementById('chat-input-text');
+        const text = (input?.value || '').trim();
+        if (!text || !window.__chatCurrentConv) return false;
+        const cur = getCurrentUser();
+        if (!cur) return false;
+
+        input.value = '';
+        input.disabled = true;
+        try {
+            const payload = {
+                senderUsername: cur.username,
+                senderName: cur.displayName || cur.username,
+                text: text,
+                time: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            if (window.__chatCurrentConv.type === 'group') {
+                await db.collection('chat_group_messages').add(payload);
+            } else {
+                const cid = chatConversationId(cur.username, window.__chatCurrentConv.username);
+                await db.collection('chat_dm_conversations').doc(cid).collection('messages').add(payload);
+            }
+        } catch (e) {
+            console.error('Lỗi gửi tin nhắn:', e);
+            if (typeof Swal !== 'undefined') Swal.fire({ icon: 'error', title: 'Gửi thất bại', text: e.message || '' });
+            input.value = text; // Trả lại nội dung để người dùng không phải gõ lại từ đầu
+        } finally {
+            input.disabled = false;
+            input.focus();
+        }
+        return false;
+    }
+    // ========================= HẾT PHẦN NHẮN TIN NỘI BỘ =========================
 
     // --- ĐỔI MẬT KHẨU (cho chính tài khoản đang đăng nhập) ---
     async function openChangePasswordForm() {
@@ -4126,7 +4469,11 @@ function showPage(pageId) {
 
     // 1. Ẩn tất cả các trang
     document.querySelectorAll('main > div').forEach(div => div.classList.add('hidden'));
-    
+
+    // 1b. Rời trang Nhắn Tin thì HUỶ LUÔN các listener realtime (onSnapshot) đang lắng nghe -
+    // để không tốn quota đọc Firestore liên tục khi người dùng đã chuyển sang trang khác.
+    if (pageId !== 'page-chat' && typeof leaveChatPage === 'function') leaveChatPage();
+
     // 2. Hiện trang được chọn
     const targetPage = document.getElementById(pageId);
     if (targetPage) {
@@ -4240,6 +4587,10 @@ function showPage(pageId) {
         case 'page-LichCongViec':
             if (typeof fixCalendarLayout === 'function') fixCalendarLayout();
             break;	
+
+        case 'page-chat':
+            if (typeof initChatPage === 'function') initChatPage();
+            break;
 
         case 'page-user-management':
             if (typeof loadUserList === 'function') loadUserList();
@@ -7086,15 +7437,43 @@ async function updateProductDropdowns() {
 }
 
 
-window.viewReceipt = function(docId) {
-    // 1. Tìm phiếu trong mảng window.allReceipts bằng docId
-    const receipt = window.allReceipts.find(r => r.docId === docId);
-    
+window.viewReceipt = async function(docId) {
+    // 1. Tìm phiếu trong mảng window.allReceipts (chỉ chứa phiếu của THÁNG ĐANG XEM) trước -
+    // nhanh, không tốn lượt đọc Firestore nếu đã có sẵn.
+    let receipt = window.allReceipts.find(r => r.docId === docId);
+
     if (!receipt) {
-        console.error("Không tìm thấy phiếu với docId:", docId);
-        console.log("Danh sách hiện tại:", window.allReceipts);
-        showAlert("Lỗi: Không tìm thấy phiếu này trong bộ nhớ.");
-        return;
+        // SỬA LỖI: TRƯỚC ĐÂY nếu không thấy trong window.allReceipts là báo lỗi luôn ("Không
+        // tìm thấy phiếu này trong bộ nhớ") - xảy ra khi TÌM KIẾM ra 1 phiếu thuộc THÁNG
+        // KHÁC (không phải tháng đang tải), vì window.allReceipts chỉ giữ đúng 1 tháng.
+        // Giờ tự động tải thẳng phiếu đó từ Firestore bằng docId khi không thấy trong bộ nhớ.
+        showLoading();
+        try {
+            const doc = await db.collection('receipts').doc(docId).get();
+            Swal.close();
+            if (!doc.exists) {
+                console.error("Không tìm thấy phiếu với docId:", docId);
+                showAlert("Lỗi: Không tìm thấy phiếu này (có thể đã bị xóa).");
+                return;
+            }
+            const d = doc.data();
+            receipt = {
+                docId: doc.id,
+                displayId: d.id || '---',
+                items: d.items || [],
+                type: d.type || 'Nhập mới',
+                dateStatus: d.dateStatus || null,
+                vendor: d.vendor || null,
+                isReturn: d.isReturn === true,
+                fromSaleId: d.fromSaleId || null,
+                note: d.note || ''
+            };
+        } catch (e) {
+            Swal.close();
+            console.error("Lỗi tải phiếu:", e);
+            showAlert("Lỗi: Không tải được phiếu này. " + (e.message || ''));
+            return;
+        }
     }
 
     // 2. Hiển thị ID lên Modal
@@ -8053,7 +8432,18 @@ window.backupAllDataToFile = async function () {
         'products', 'receipts', 'sales', 'customers', 'suppliers', 'stock_counters',
         'materials_list', 'material_imports', 'production', 'payments', 'debt_history',
         'opening_balances', 'supplier_opening_balances', 'calendar_events', 'app_users',
-        'activity_logs', 'app_meta'
+        'activity_logs', 'app_meta',
+        // SỬA LỖI: 'returns' (hàng hoàn trả) TRƯỚC ĐÂY bị BỎ SÓT hoàn toàn khỏi sao lưu - dù
+        // đây là dữ liệu kinh doanh quan trọng (ảnh hưởng công nợ, doanh thu, NXT kho) y hệt
+        // 'sales'/'payments'. Nếu khôi phục từ file backup cũ thiếu dòng này, toàn bộ lịch sử
+        // hoàn trả sẽ biến mất dù các hoá đơn gốc vẫn còn - dễ gây lệch số liệu khó phát hiện.
+        'returns',
+        // Tin nhắn PHÒNG CHUNG (collection cấp cao nhất, sao lưu bình thường được). Riêng tin
+        // nhắn NHẮN RIÊNG từng người nằm trong subcollection 'chat_dm_conversations/{id}/
+        // messages' nên KHÔNG nằm trong danh sách này (cơ chế sao lưu hiện tại chỉ đọc được
+        // collection cấp cao nhất) - lịch sử nhắn riêng sẽ KHÔNG được khôi phục nếu phục hồi
+        // từ file backup. Nếu cần sao lưu cả phần này, báo lại để nâng cấp thêm.
+        'chat_group_messages'
     ];
 
     if (btn) {
