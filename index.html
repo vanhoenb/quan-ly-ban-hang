@@ -1870,8 +1870,9 @@ html:not(.dark) .bg-white {
                         </div>
 
                         <div class="col-span-2">
-                            <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase">Tìm theo số phiếu</label>
-                            <input type="text" id="searchReceiptInput" onkeyup="filterReceipts()" placeholder="Nhập số phiếu..." class="w-full p-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-white rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                            <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase">Tìm kiếm (số phiếu hoặc tên sản phẩm)</label>
+                            <input type="text" id="searchReceiptInput" list="prod-list" onkeyup="filterReceipts()" placeholder="Nhập số phiếu hoặc tên sản phẩm..." class="w-full p-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-white rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                            <datalist id="prod-list"></datalist>
                         </div>
                     </div>
                 </div>
@@ -1884,6 +1885,10 @@ html:not(.dark) .bg-white {
                     </label>
                     <button onclick="printSelectedReceipts()" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white whitespace-nowrap">🖨 In phiếu đã chọn</button>
                 </div>
+                <!-- Chỉ hiện khi đang tìm theo sản phẩm: tóm tắt nhanh "tìm thấy bao nhiêu
+                     phiếu, tổng nhập bao nhiêu" - đúng câu hỏi người dùng hay cần trả lời
+                     ("SP A nhập vào những ngày nào, bao nhiêu lần") mà không cần mở từng phiếu. -->
+                <div id="receipt-search-product-summary" class="hidden mb-2 px-3 py-2 rounded-lg text-xs font-bold bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-100 dark:border-blue-500/20"></div>
                 <div class="overflow-x-auto overflow-y-auto max-h-[55vh] border border-blue-100 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 custom-scrollbar flex-grow">
                     <table class="w-full text-sm">
                         <thead class="sticky top-0 z-10 bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-slate-700 text-gray-800 dark:text-gray-200 shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
@@ -6527,7 +6532,12 @@ function removeFromCart(index) {
   // mỗi dòng là 1 "thẻ" bo góc, có viền màu nhấn 2 bên, đổ bóng nhẹ, nổi lên khi hover -
   // thay vì kiểu bảng kẻ ô trơn khác biệt như trước. Vẫn giữ checkbox chọn nhiều phiếu +
   // nút "Xem" riêng (không bấm cả dòng) như thiết kế gốc, để tránh bấm nhầm khi chỉ muốn tick chọn.
-  function buildReceiptRowHtml(docId, displayId, dateStr, itemCount, type, dateStatus, vendor, isReturn) {
+  function buildReceiptRowHtml(docId, displayId, dateStr, itemCount, type, dateStatus, vendor, isReturn, matchQtyLabel) {
+      // matchQtyLabel: chỉ có giá trị khi đang TÌM THEO SẢN PHẨM - hiện nổi bật đúng số
+      // lượng của SP đang tìm trong PHIẾU NÀY, để không phải mở từng phiếu ra xem mới biết.
+      const matchHtml = matchQtyLabel
+          ? `<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400 whitespace-nowrap">🔎 ${matchQtyLabel}</span>`
+          : '';
       return `
 				<tr class="hover:bg-transparent transition-colors">
 					<td colspan="6" class="p-2">
@@ -6540,7 +6550,7 @@ function removeFromCart(index) {
 								<span class="text-[11px] font-bold text-slate-700 dark:text-slate-400 md:w-[14%] md:text-center md:px-2">${dateStr}</span>
 							</div>
 							<div class="flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700">
-								<div class="md:w-[40%] md:px-2">${receiptTypeBadgeHtml(type, dateStatus, vendor, isReturn)}</div>
+								<div class="md:w-[40%] md:px-2 flex flex-col gap-1">${receiptTypeBadgeHtml(type, dateStatus, vendor, isReturn)}${matchHtml}</div>
 								<div class="flex items-center gap-3 md:contents">
 									<span class="text-[11px] text-slate-500 dark:text-slate-400 md:w-[10%] md:text-center md:px-2">${itemCount} SP</span>
 									<span class="md:w-[16%] md:text-center md:px-2">
@@ -6651,6 +6661,14 @@ async function ensureAllReceiptsFullLoaded() {
             displayId: data.id || '---',
             dateStr: date.toLocaleDateString('vi-VN'),
             itemCount: Array.isArray(data.items) ? data.items.length : 0,
+            // Lưu thêm tên + ĐVT + SL từng dòng sản phẩm - CẦN THIẾT để tìm phiếu theo tên
+            // sản phẩm (xem SP nào đã nhập vào những ngày nào, số lượng bao nhiêu mỗi lần)
+            // mà không phải mở từng phiếu ra xem.
+            items: (data.items || []).map(it => ({
+                name: it.name || '',
+                unit: it.unit || '',
+                qty: parseFloat(it.qty) || 0
+            })),
             type: data.type || 'Nhập mới',
             dateStatus: data.dateStatus || null,
             vendor: data.vendor || null,
@@ -6740,6 +6758,7 @@ function handleReceiptMonthChange() {
 async function filterReceipts() {
     const leftBody = document.getElementById('list-receipts-left');
     const rightBody = document.getElementById('list-receipts-right');
+    const summaryBox = document.getElementById('receipt-search-product-summary');
     if (!leftBody || !rightBody) return;
 
     const fromVal = document.getElementById('filter-date-from').value;
@@ -6747,14 +6766,44 @@ async function filterReceipts() {
     const keyword = document.getElementById('searchReceiptInput')?.value.trim().toLowerCase() || "";
 
     let matched;
+    // matchQtyByDocId: chỉ có giá trị (khác undefined) cho những phiếu khớp theo TÊN SẢN
+    // PHẨM - lưu lại SL của đúng SP đang tìm trong TỪNG phiếu, để hiện thẳng ra danh sách
+    // (không cần mở từng phiếu). Phiếu chỉ khớp theo SỐ PHIẾU thì không có nhãn này.
+    let matchQtyByDocId = null;
 
     if (keyword !== "") {
-        // CÓ TỪ KHÓA: tìm trên TOÀN BỘ phiếu (mọi tháng) - chỉ tải 1 lần duy nhất trong
-        // phiên làm việc (nếu chưa tải), không phải lúc nào cũng đọc lại toàn bộ lịch sử.
+        // GỘP CHUNG 1 Ô TÌM KIẾM: từ khoá khớp SỐ PHIẾU hoặc TÊN SẢN PHẨM đều ra kết quả -
+        // luôn tìm trên TOÀN BỘ phiếu (mọi tháng), vì mục đích chính là xem 1 SP đã nhập vào
+        // NHỮNG NGÀY NÀO, BAO NHIÊU LẦN trong suốt lịch sử, không chỉ trong tháng đang xem.
+        // Chỉ tải 1 lần duy nhất trong phiên làm việc (nếu chưa tải).
         const fullList = await ensureAllReceiptsFullLoaded();
-        matched = (fullList || []).filter(r => r.displayId.toLowerCase().includes(keyword));
+        matchQtyByDocId = {};
+        let totalQty = 0;
+        let productMatchCount = 0;
+        matched = fullList.filter(r => {
+            const numberHit = r.displayId.toLowerCase().includes(keyword);
+            const hitItems = (r.items || []).filter(it => it.name.toLowerCase().includes(keyword));
+            if (hitItems.length > 0) {
+                // 1 SP có thể xuất hiện nhiều dòng trong cùng 1 phiếu (hiếm) - cộng dồn lại.
+                const qty = hitItems.reduce((s, it) => s + it.qty, 0);
+                const unit = hitItems[0].unit || '';
+                matchQtyByDocId[r.docId] = `SL: ${qty}${unit ? ' ' + unit : ''}`;
+                totalQty += qty;
+                productMatchCount++;
+            }
+            return numberHit || hitItems.length > 0;
+        });
+        if (summaryBox) {
+            if (productMatchCount > 0) {
+                summaryBox.classList.remove('hidden');
+                summaryBox.textContent = `🔎 Tìm thấy ${productMatchCount} phiếu có nhập sản phẩm khớp "${keyword}" — tổng cộng ${totalQty.toLocaleString('vi-VN')} đơn vị.`;
+            } else {
+                summaryBox.classList.add('hidden');
+            }
+        }
     } else {
         // KHÔNG CÓ TỪ KHÓA: lọc theo khoảng ngày trong phạm vi tháng đang tải (window.allReceipts)
+        if (summaryBox) summaryBox.classList.add('hidden');
         const fromDate = fromVal ? new Date(fromVal) : new Date(0);
         const toDate = toVal ? new Date(toVal) : new Date(3000, 0, 1);
         matched = (window.allReceipts || [])
@@ -6779,7 +6828,10 @@ async function filterReceipts() {
     // Danh sách giờ chỉ còn 1 cột duy nhất (bảng phải đã ẩn vĩnh viễn) - dồn hết vào bảng trái.
     // Gom HTML vào mảng rồi gán 1 lần (thay vì "+=" lặp lại) - quan trọng ở đây vì khi có
     // từ khóa tìm kiếm, "matched" có thể là TOÀN BỘ lịch sử phiếu từ trước tới giờ.
-    const rowsHtml = matched.map(r => buildReceiptRowHtml(r.docId, r.displayId, r.dateStr, r.itemCount, r.type, r.dateStatus, r.vendor, r.isReturn));
+    const rowsHtml = matched.map(r => buildReceiptRowHtml(
+        r.docId, r.displayId, r.dateStr, r.itemCount, r.type, r.dateStatus, r.vendor, r.isReturn,
+        matchQtyByDocId ? matchQtyByDocId[r.docId] : null
+    ));
     leftBody.innerHTML = rowsHtml.join('');
 
     if (matched.length === 0) {
@@ -12411,6 +12463,7 @@ const NHOM_SP_DINH_NGHIA = [
     { ten: 'TRÀ HOA VÀNG', khop: (n) => /tr[àa] hoa v[àa]ng|^tr[àa]\b/i.test(n) },
     { ten: 'RUỐC CÁ', khop: (n) => /ru[ốô]c/i.test(n) },
     { ten: 'BÁNH DỨA', khop: (n) => /b[áa]nh d[ứư]a/i.test(n) },
+    { ten: 'QUẢ BÙI KỲ NÃO', khop: (n) => /b[ùu]i k[ỳy] n[ãa]o|qu[ảa] b[ùu]i/i.test(n) },
     { ten: 'CÁC LOẠI HỘP TÚI', khop: (n) => /t[úu]i|h[ộo]p qu[àa]/i.test(n) },
 ];
 function xepNhomSanPham(ten) {
