@@ -2141,6 +2141,7 @@ html:not(.dark) .bg-white {
                 <input type="text" id="product-search" placeholder="🔍 Tìm SP..." 
                        onkeyup="filterProducts()" 
                        class="w-1/4 p-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 text-sm dark:text-white">
+                <button type="button" onclick="addShippingFeeToCart()" title="Thêm tiền ship - không tính vào tồn kho, không tính thuế" class="shrink-0 bg-sky-500 hover:bg-sky-600 text-white px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap">🚚 Ship</button>
             </div>
 
             <div id="scanner-container" class="hidden fixed inset-0 z-[9999] bg-black bg-opacity-95 p-4 flex flex-col justify-center items-center">
@@ -5409,6 +5410,7 @@ async function loadDashboard(filter = 'default') {
         totalRevenue += (Number(order.total) || 0);
         if (order.items) {
             order.items.forEach(item => {
+                if (item.isShipping) return; // "Tiền ship" không phải sản phẩm, không đưa vào Top SP
                 const qty = Number(item.qty || 0);
                 productSalesMap[item.name] = (productSalesMap[item.name] || 0) + qty;
                 productRevenueMap[item.name] = (productRevenueMap[item.name] || 0) + (qty * Number(item.price || 0));
@@ -6289,6 +6291,7 @@ async function renderInventoryList(filter = 'today') {
 
     periodTransactions.forEach(data => {
         (data.items || []).forEach(item => {
+            if (item.isShipping) return; // "Tiền ship" không phải hàng hoá thật - không có NXT
             const inv = ensureItem(item.name);
             if (data.typeDoc === 'receipt') {
                 // QUAN TRỌNG (sửa lỗi phiếu GỘP bị bỏ sót): phiếu "Nhập đổi - Hết hạn" (thuần)
@@ -6311,6 +6314,7 @@ async function renderInventoryList(filter = 'today') {
 
     gapTransactions.forEach(data => {
         (data.items || []).forEach(item => {
+            if (item.isShipping) return;
             const inv = ensureItem(item.name);
             if (data.typeDoc === 'receipt') {
                 const wasAddedToStock = item.dateStatus ? item.dateStatus === 'ok' : (data.stockAdjusted !== false);
@@ -8424,6 +8428,51 @@ async function autoFillDetails(name) {
     Toast.fire({ icon: 'success', title: 'Đã thêm ' + p.name });
 }
 
+// --- TIỀN SHIP: thêm vào giỏ hàng giống 1 dòng sản phẩm, nhưng KHÔNG kiểm tra/trừ tồn kho
+// (không có NXT), và KHÔNG tính thuế/VAT dù hoá đơn có bật thuế (xem updateGrandTotal,
+// saveAndPrint, updateExistingSale - đều loại trừ item có isShipping:true khỏi phần tính
+// thuế). Có thể thêm nhiều lần cho 1 hoá đơn nếu ship nhiều chặng/nhiều lần khác nhau.
+async function addShippingFeeToCart() {
+    const PRESETS = [10000, 15000, 20000, 30000, 50000];
+    const presetsHtml = PRESETS.map(v => `<button type="button" onclick="document.getElementById('swal-ship-amount').value='${v}'" class="px-3 py-1.5 rounded-lg bg-sky-100 hover:bg-sky-200 text-sky-700 text-xs font-bold">${v.toLocaleString('vi-VN')}đ</button>`).join('');
+
+    const { value: amount } = await Swal.fire({
+        title: '🚚 Thêm tiền Ship',
+        html: `
+            <div class="text-left space-y-3">
+                <div class="flex flex-wrap gap-2 justify-center">${presetsHtml}</div>
+                <div>
+                    <label class="text-xs font-bold text-slate-500">Số tiền ship (đ)</label>
+                    <input id="swal-ship-amount" type="number" min="0" step="1000" class="swal2-input !m-0 !w-full" placeholder="VD: 25000">
+                </div>
+            </div>`,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'Thêm vào giỏ',
+        cancelButtonText: 'Hủy',
+        confirmButtonColor: '#0284c7',
+        preConfirm: () => {
+            const v = parseFloat(document.getElementById('swal-ship-amount').value);
+            if (!v || v <= 0) { Swal.showValidationMessage('Vui lòng nhập số tiền ship lớn hơn 0!'); return false; }
+            return v;
+        }
+    });
+    if (!amount) return;
+
+    sellCart.push({
+        name: 'Tiền ship',
+        unit: '',
+        qty: 1,
+        price: amount,
+        vat: 0,
+        taxAmount: 0,
+        note: '',
+        total: amount,
+        isShipping: true // đánh dấu để loại trừ khỏi: tồn kho, thuế VAT, phiếu Xuất Kho, Trả hàng
+    });
+    renderSellCart();
+}
+
 // Vẽ lại giỏ hàng của trang Bán hàng
 function renderSellCart() {
     const body = document.getElementById('sell-cart-body');
@@ -8448,22 +8497,26 @@ function renderSellCart() {
     ];
 
     body.innerHTML = sellCart.map((i, index) => {
-        const rowBg = i.dateSwapStatus === 'expired'
-            ? 'bg-red-50 dark:bg-red-500/10'
-            : i.dateSwap
-                ? 'bg-amber-50 dark:bg-amber-500/10'
-                : (index % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50 dark:bg-slate-800/70');
+        const rowBg = i.isShipping
+            ? 'bg-sky-50 dark:bg-sky-500/10'
+            : i.dateSwapStatus === 'expired'
+                ? 'bg-red-50 dark:bg-red-500/10'
+                : i.dateSwap
+                    ? 'bg-amber-50 dark:bg-amber-500/10'
+                    : (index % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50 dark:bg-slate-800/70');
         const c = accentColors[index % accentColors.length];
         
         return `
     <tr class="${rowBg} border-b-2 border-gray-200 dark:border-slate-700 ${c.l} border-l-4 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors">
         <td class="p-2 w-[120px] md:w-1/4">
-            <div class="w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-left font-bold break-words text-[11px] p-1.5">${i.name}</div>
+            <div class="w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-left font-bold break-words text-[11px] p-1.5">${i.isShipping ? '🚚 ' : ''}${i.name}</div>
         </td>
         
-        <td class="p-2 w-[60px] md:w-[50px]">
-            <input type="number" value="${i.qty}" step="any" class="w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-center font-bold text-xs p-1.5 focus:ring-2 focus:ring-blue-400 outline-none" 
-                   onchange="updateCartItem(${index}, 'qty', this.value)">
+        <td class="p-2 w-[60px] md:w-[50px]">` +
+            (i.isShipping
+                ? `<div class="w-full text-center text-[10px] font-bold text-gray-400 p-1.5">-</div>`
+                : `<input type="number" value="${i.qty}" step="any" class="w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-center font-bold text-xs p-1.5 focus:ring-2 focus:ring-blue-400 outline-none" 
+                   onchange="updateCartItem(${index}, 'qty', this.value)">`) + `
         </td>
         
         <td class="p-2 w-[90px] md:w-[70px]">` + 
@@ -8477,9 +8530,12 @@ function renderSellCart() {
              chọn trạng thái ngay trên cùng 1 ô, không tốn thêm chỗ. Nút chọn được vẽ RÕ
              thành 1 ô vuông bo góc có viền + nền riêng (giống 1 nút bấm thật sự), không
              còn là icon "trôi nổi" mờ nhạt khó nhận ra như trước - bấm vào mở ra vẫn thấy
-             đủ chữ "Bình thường/Còn hạn/Hết hạn". -->
-        <td class="p-2 w-[130px] md:w-24">
-            <div class="relative w-full">
+             đủ chữ "Bình thường/Còn hạn/Hết hạn". Dòng "Tiền ship" KHÔNG có lựa chọn Đổi
+             date (không áp dụng), chỉ hiện nhãn "Không tính thuế/kho" cho rõ. -->
+        <td class="p-2 w-[130px] md:w-24">` +
+            (i.isShipping
+                ? `<div class="w-full text-center text-[9px] font-bold text-sky-500 p-1.5 leading-tight">Không tính<br>thuế/kho</div>`
+                : `<div class="relative w-full">
                 <input type="text" value="${i.note || ''}" placeholder="Ghi chú..." 
                        class="w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-xs p-1.5 pr-8 focus:ring-2 focus:ring-blue-400 outline-none" 
                        onchange="updateCartItem(${index}, 'note', this.value)">
@@ -8490,7 +8546,7 @@ function renderSellCart() {
                     <option value="ok" ${i.dateSwapStatus === 'ok' ? 'selected' : ''}>🔄 Còn hạn</option>
                     <option value="expired" ${i.dateSwapStatus === 'expired' ? 'selected' : ''}>⛔ Hết hạn</option>
                 </select>
-            </div>
+            </div>`) + `
         </td>
         
         <td class="p-2 w-[90px] md:w-20">
@@ -8776,6 +8832,37 @@ window.forceResyncStockCounters = async function () {
                 });
             });
             await batch.commit();
+        }
+
+        // QUAN TRỌNG (sửa lỗi "đổi tên sản phẩm để lại bộ đếm rác"): DỌN DẸP mọi bộ đếm tồn
+        // kho (stock_counters) có TÊN KHÔNG CÒN KHỚP với bất kỳ sản phẩm nào trong Danh Mục
+        // SP hiện tại. Đây chính là nguyên nhân gây ra tình trạng "đổi tên sản phẩm xong,
+        // báo cáo vẫn hiện cả tên cũ lẫn tên mới, tên mới thì tồn âm" - vì hàm này TRƯỚC ĐÂY
+        // chỉ GHI/SỬA bộ đếm cho tên nào còn xuất hiện trong lịch sử Nhập/Xuất, KHÔNG BAO
+        // GIỜ xoá bộ đếm của tên đã không còn dùng nữa (VD: tên trước khi đổi tên) - nên bộ
+        // đếm "mồ côi" đó cứ nằm lì mãi, dù không còn sản phẩm nào mang tên đó trong Danh
+        // Mục SP. Chỉ xoá đúng những bộ đếm không khớp tên bất kỳ sản phẩm hiện có nào -
+        // không đụng đến bộ đếm của sản phẩm đang hoạt động bình thường.
+        try {
+            const productsSnap = await db.collection('products').get();
+            const validNames = new Set(productsSnap.docs.map(d => d.data().name));
+            const countersSnap = await db.collection('stock_counters').get();
+            let cleanupBatch = db.batch();
+            let cleanupOps = 0;
+            let cleanupCount = 0;
+            for (const doc of countersSnap.docs) {
+                const cName = doc.data().name;
+                if (cName && !validNames.has(cName)) {
+                    cleanupBatch.delete(doc.ref);
+                    cleanupOps++;
+                    cleanupCount++;
+                    if (cleanupOps >= 400) { await cleanupBatch.commit(); cleanupBatch = db.batch(); cleanupOps = 0; }
+                }
+            }
+            if (cleanupOps > 0) await cleanupBatch.commit();
+            if (cleanupCount > 0) console.log(`🧹 Đã dọn ${cleanupCount} bộ đếm tồn kho "mồ côi" (tên không còn trong Danh Mục SP - thường do đổi tên sản phẩm để lại).`);
+        } catch (cleanupErr) {
+            console.warn('Không dọn được bộ đếm mồ côi (không ảnh hưởng tới việc sửa tồn kho chính vừa xong):', cleanupErr);
         }
 
         // Đánh dấu lại "đã khởi tạo" để khỏi bị chạy lại tự động lần nữa
@@ -9953,17 +10040,20 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
             return lower.includes('date') || lower.includes('đate');
         };
 
-        const normalItems = listItems.filter(i => !i.dateSwap && !isDateNote(i.note));
+        const normalItems = listItems.filter(i => !i.dateSwap && !isDateNote(i.note) && !i.isShipping);
+        const shippingItems = listItems.filter(i => i.isShipping);
         const changeDateItems = listItems.filter(i => i.dateSwap || isDateNote(i.note));
 
         let html = '';
         let stt = 1;
+        let taxableSubTotal = 0;
+        let shippingSubTotal = 0;
 
         // 1. Render sản phẩm bình thường
         normalItems.forEach(i => {
             const subTotal = i.qty * i.price;
             const taxAmount = subTotal * (vr / 100);
-            subTotalAll += subTotal;
+            taxableSubTotal += subTotal;
             html += `<tr>
                 <td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">${stt++}</div></td>
                 <td style="padding: 7px 8px;"><div style="height:100%;text-align:left;">${i.name || ''}</div></td>
@@ -9973,6 +10063,25 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
                 <td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">${subTotal.toLocaleString('vi-VN')}</div></td>
                 <td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">${vr}%</div></td>
                 <td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">${taxAmount.toLocaleString('vi-VN')}</div></td>
+                <td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">${i.note || ''}</div></td>
+            </tr>`;
+        });
+
+        // 1b. Render "Tiền ship" - vẫn hiện đúng giá/thành tiền thật (khác với dòng Đổi date
+        // luôn = 0), CỘNG vào tổng thanh toán, nhưng KHÔNG chịu thuế VAT (luôn 0%/0đ ở đây
+        // dù hoá đơn có bật VAT cho các sản phẩm khác).
+        shippingItems.forEach(i => {
+            const subTotal = i.qty * i.price;
+            shippingSubTotal += subTotal;
+            html += `<tr>
+                <td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">${stt++}</div></td>
+                <td style="padding: 7px 8px;"><div style="height:100%;text-align:left;">🚚 ${i.name || 'Tiền ship'}</div></td>
+                <td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">-</div></td>
+                <td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">${i.qty}</div></td>
+                <td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">${i.price.toLocaleString('vi-VN')}</div></td>
+                <td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">${subTotal.toLocaleString('vi-VN')}</div></td>
+                <td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">0%</div></td>
+                <td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">0</div></td>
                 <td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">${i.note || ''}</div></td>
             </tr>`;
         });
@@ -10003,9 +10112,11 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
             });
         }
         elItems.innerHTML = html;
+        subTotalAll = taxableSubTotal + shippingSubTotal;
+        window.__lastPrintTaxableSubTotal = taxableSubTotal; // dùng để tính taxTotalAll bên dưới, không tính thuế trên phần ship
     }
 
-    const taxTotalAll = subTotalAll * (vr / 100);
+    const taxTotalAll = (window.__lastPrintTaxableSubTotal || 0) * (vr / 100);
     const grandTotal = subTotalAll + taxTotalAll;
 
     if (document.getElementById('print-subtotal')) document.getElementById('print-subtotal').innerText = subTotalAll.toLocaleString('vi-VN');
@@ -10045,7 +10156,10 @@ function renderXuatKhoTemplate({ receiptId, customer, address, phone, note, item
     let subTotalAll = 0;
     const xkItemsEl = document.getElementById('xk-items');
     if (xkItemsEl) {
-        const listItems = items || [];
+        // "Tiền ship" (isShipping:true) KHÔNG phải hàng lấy từ kho - loại bỏ hoàn toàn khỏi
+        // Phiếu Xuất Kho (chỉ hiện trên Hóa Đơn, xem renderHoaDonTemplate) để thủ kho không
+        // bị nhầm tưởng phải xuất 1 món hàng tên "Tiền ship".
+        const listItems = (items || []).filter(i => !i.isShipping);
 
         // Hàm kiểm tra ghi chú có chứa "date" hoặc "đate" không
         const isDateNote = (noteText) => {
@@ -10350,11 +10464,13 @@ async function editInvoiceFromHistory(docId) {
             return {
                 name: i.name, unit: i.unit || 'Cái', qty: qty, price: price, vat: i.vat || 0,
                 taxAmount: i.taxAmount || 0, note: i.note || '', total: qty * price,
-                // QUAN TRỌNG: phải giữ lại đúng 2 cờ này từ dữ liệu gốc - nếu để rơi mất khi
+                // QUAN TRỌNG: phải giữ lại đúng các cờ này từ dữ liệu gốc - nếu để rơi mất khi
                 // nạp lại giỏ hàng để sửa, dòng "Đổi date" sẽ bị hiểu nhầm thành sản phẩm bán
                 // bình thường lúc lưu lại (mất đúng trạng thái còn hạn/hết hạn của nó, dù về
-                // mặt trừ kho thì 2 loại này giờ được tính giống nhau).
-                dateSwap: !!i.dateSwap, dateSwapStatus: i.dateSwapStatus || null
+                // mặt trừ kho thì 2 loại này giờ được tính giống nhau); dòng "Tiền ship" sẽ bị
+                // hiểu nhầm thành sản phẩm thật, bị tính thuế và bị trừ kho sai.
+                dateSwap: !!i.dateSwap, dateSwapStatus: i.dateSwapStatus || null,
+                isShipping: !!i.isShipping
             };
         });
 
@@ -10452,8 +10568,13 @@ async function updateExistingSale() {
         });
 
         let subTotalAll = 0;
-        itemsToSave.forEach(i => { subTotalAll += (i.qty * i.price); });
-        const taxTotalAll = subTotalAll * (vatRate / 100);
+        let taxableSubTotal = 0;
+        itemsToSave.forEach(i => {
+            const lineTotal = i.qty * i.price;
+            subTotalAll += lineTotal;
+            if (!i.isShipping) taxableSubTotal += lineTotal;
+        });
+        const taxTotalAll = taxableSubTotal * (vatRate / 100);
         const grandTotal = subTotalAll + taxTotalAll;
 
         // Giữ nguyên NGÀY LẬP GỐC (không đổi thành lúc sửa) và giữ nguyên SỐ PHIẾU - chỉ nội
@@ -10481,10 +10602,12 @@ async function updateExistingSale() {
         // động tạo riêng, không liên quan tới chỗ tính chênh lệch này.
         const oldQtyByName = {};
         (window.__editingSaleOriginalItems || []).forEach(i => {
+            if (i.isShipping) return; // "Tiền ship" không phải hàng hoá thật - không có NXT
             oldQtyByName[i.name] = (oldQtyByName[i.name] || 0) + (parseFloat(i.qty) || 0);
         });
         const newQtyByName = {};
         itemsToSave.forEach(i => {
+            if (i.isShipping) return;
             newQtyByName[i.name] = (newQtyByName[i.name] || 0) + (parseFloat(i.qty) || 0);
         });
         const allProductNames = Array.from(new Set([...Object.keys(oldQtyByName), ...Object.keys(newQtyByName)]));
@@ -10699,7 +10822,8 @@ async function saveAndPrint() {
         // --- XỬ LÝ: ÉP ĐƠN GIÁ SẢN PHẨM ĐỔI DATE VỀ 0 ĐỂ LỊCH SỬ KHÔNG TÍNH TIỀN ---
         // (item.price đã bị khoá về 0 sẵn từ lúc chọn dropdown "Đổi date" ở giỏ hàng -
         // đoạn dưới đây chỉ là lưới an toàn thứ 2, phòng trường hợp ghi chú có chữ "date"
-        // nhưng vì lý do gì đó cờ dateSwap chưa được set đúng).
+        // nhưng vì lý do gì đó cờ dateSwap chưa được set đúng). Giữ nguyên cờ isShipping
+        // (nếu có) qua bước map này để các bước sau (tính thuế, trừ kho) nhận biết đúng.
         const itemsToSave = sellCart.map(i => {
             const lowerNote = (i.note || '').toLowerCase();
             const isDate = !!i.dateSwap || lowerNote.includes('date') || lowerNote.includes('đate');
@@ -10710,12 +10834,17 @@ async function saveAndPrint() {
         });
         // ------------------------------------------------------------------------
 
+        // "Tiền ship" (isShipping:true) vẫn cộng vào subTotalAll (khách vẫn phải trả), nhưng
+        // KHÔNG được tính vào phần chịu thuế - xem addShippingFeeToCart/updateGrandTotal.
         let subTotalAll = 0;
+        let taxableSubTotal = 0;
         itemsToSave.forEach(i => {
-            subTotalAll += (i.qty * i.price);
+            const lineTotal = i.qty * i.price;
+            subTotalAll += lineTotal;
+            if (!i.isShipping) taxableSubTotal += lineTotal;
         });
 
-        const taxTotalAll = subTotalAll * (vatRate / 100);
+        const taxTotalAll = taxableSubTotal * (vatRate / 100);
         const grandTotal = subTotalAll + taxTotalAll;
 
         const saleData = {
@@ -10744,8 +10873,11 @@ async function saveAndPrint() {
         // XUẤT KHO (gỡ khỏi kệ) ngay lúc bán. Sau đó, khối "TỰ ĐỘNG TẠO PHIẾU NHẬP KHO"
         // bên dưới sẽ CỘNG LẠI vào kho nếu còn hạn (net = không đổi, chỉ là làm mới hạn
         // dùng) hoặc KHÔNG cộng lại nếu hết hạn (net = trừ hẳn 1 lần, coi như huỷ/bỏ).
+        // "Tiền ship" (isShipping:true) KHÔNG phải hàng hoá thật - không có NXT, không được
+        // tính vào phần trừ kho ở đây (xem addShippingFeeToCart).
         const qtyByName = {};
         itemsToSave.forEach(i => {
+            if (i.isShipping) return;
             qtyByName[i.name] = (qtyByName[i.name] || 0) + (parseFloat(i.qty) || 0);
         });
         const productNames = Object.keys(qtyByName);
@@ -11658,7 +11790,7 @@ async function openReturnModal(docId) {
         // dụng trả hàng cho dòng này (giống logic loại trừ ở deleteSale/editInvoiceFromHistory).
         const eligibleItems = (data.items || [])
             .map((it, idx) => ({ ...it, __idx: idx }))
-            .filter(it => !it.dateSwap);
+            .filter(it => !it.dateSwap && !it.isShipping);
 
         if (eligibleItems.length === 0) {
             Swal.fire('Không có gì để trả', 'Hóa đơn này không có sản phẩm nào có thể trả lại.', 'info');
@@ -12152,18 +12284,22 @@ function updateGrandTotal() {
     const vatSelect = document.getElementById('global-vat');
     const vatPercent = vatSelect ? parseInt(vatSelect.value) || 0 : 0;
 
-    // 2. Tính tổng tiền hàng (chưa VAT) - TỰ ĐỘNG BỎ QUA TIỀN SẢN PHẨM ĐỔI DATE
+    // 2. Tính tổng tiền hàng (chưa VAT) - TỰ ĐỘNG BỎ QUA TIỀN SẢN PHẨM ĐỔI DATE, và tách
+    // riêng phần "Tiền ship" (vẫn cộng vào tổng tiền thanh toán, nhưng KHÔNG tính vào phần
+    // chịu thuế - xem addShippingFeeToCart).
     let subTotalAll = 0;
+    let taxableSubTotal = 0;
     sellCart.forEach(i => {
         const lowerNote = (i.note || '').toLowerCase();
         const effectivePrice = (lowerNote.includes('date') || lowerNote.includes('đate')) ? 0 : i.price;
         
         i.total = i.qty * effectivePrice; 
         subTotalAll += i.total;
+        if (!i.isShipping) taxableSubTotal += i.total;
     });
 
-    // 3. Tính tiền thuế dựa trên tổng tiền hàng thực tế
-    const taxTotalAll = subTotalAll * (vatPercent / 100);
+    // 3. Tính tiền thuế CHỈ dựa trên phần chịu thuế (không gồm Tiền ship)
+    const taxTotalAll = taxableSubTotal * (vatPercent / 100);
     const grandTotal = subTotalAll + taxTotalAll;
     
     // 4. Cập nhật hiển thị tiền thuế (sẽ hiển thị chuẩn 16.000 đ thay vì 32.000 đ)
@@ -13191,10 +13327,11 @@ async function viewSalesReport() {
             const qty = parseFloat(i.qty) || 0;
             const price = parseFloat(i.price) || 0;
             const tienHangMoiMon = qty * price;
-            const thueMoiMon = tienHangMoiMon * (vatRate / 100);
+            // "Tiền ship" (isShipping:true) không chịu thuế VAT, dù hóa đơn có bật VAT.
+            const thueMoiMon = i.isShipping ? 0 : tienHangMoiMon * (vatRate / 100);
             const thanhTienCoThue = tienHangMoiMon + thueMoiMon;
             tongDoanhThu += thanhTienCoThue;
-            rows.push([date, sale.customer || 'Khách lẻ', i.name, i.unit || '', qty, price.toLocaleString('vi-VN'), Math.round(thueMoiMon).toLocaleString('vi-VN'), Math.round(thanhTienCoThue).toLocaleString('vi-VN')]);
+            rows.push([date, sale.customer || 'Khách lẻ', i.isShipping ? ('🚚 ' + i.name) : i.name, i.unit || '', qty, price.toLocaleString('vi-VN'), Math.round(thueMoiMon).toLocaleString('vi-VN'), Math.round(thanhTienCoThue).toLocaleString('vi-VN')]);
         });
     });
 
@@ -13263,7 +13400,8 @@ async function exportSales() {
             const price = parseFloat(i.price) || 0;
             
             const tienHangMoiMon = qty * price;
-            const thueMoiMon = tienHangMoiMon * (vatRate / 100);
+            // "Tiền ship" (isShipping:true) không chịu thuế VAT, dù hóa đơn có bật VAT.
+            const thueMoiMon = i.isShipping ? 0 : tienHangMoiMon * (vatRate / 100);
             const thanhTienCoThue = tienHangMoiMon + thueMoiMon;
             
             tongDoanhThu += thanhTienCoThue;
@@ -13415,6 +13553,9 @@ async function viewInventoryReport() {
         });
         periodSalesSnap.forEach(doc => {
             (doc.data().items || []).forEach(i => {
+                // "Tiền ship" (isShipping:true) không phải hàng hoá thật - không có NXT,
+                // loại bỏ khỏi báo cáo (không tạo dòng "sản phẩm" giả).
+                if (i.isShipping) return;
                 // ĐÃ ĐỔI LẠI (theo yêu cầu mới): dòng "Đổi date" (i.dateSwap) GIỜ CŨNG BỊ TRỪ
                 // KHO ngay lúc bán (xem saveAndPrint), y hệt hàng bán thường - nên phải tính
                 // vào cột "Xuất" ở đây như bình thường, không loại trừ nữa.
@@ -13437,6 +13578,7 @@ async function viewInventoryReport() {
             });
             gapSalesSnap.forEach(doc => {
                 (doc.data().items || []).forEach(i => {
+                    if (i.isShipping) return; // "Tiền ship" không phải hàng hoá thật
                     // Cùng lý do đã sửa ở mục 1: dòng "Đổi date" giờ cũng bị trừ kho lúc bán.
                     initItem(i.name).gapNet -= parseFloat(i.qty || 0);
                 });
@@ -13545,6 +13687,9 @@ async function exportInventory() {
         });
         periodSalesSnap.forEach(doc => {
             (doc.data().items || []).forEach(i => {
+                // "Tiền ship" (isShipping:true) không phải hàng hoá thật - không có NXT,
+                // loại bỏ khỏi báo cáo (không tạo dòng "sản phẩm" giả).
+                if (i.isShipping) return;
                 // ĐÃ ĐỔI LẠI (theo yêu cầu mới): dòng "Đổi date" (i.dateSwap) GIỜ CŨNG BỊ TRỪ
                 // KHO ngay lúc bán (xem saveAndPrint), y hệt hàng bán thường - nên phải tính
                 // vào cột "Xuất" ở đây như bình thường, không loại trừ nữa.
@@ -13568,6 +13713,7 @@ async function exportInventory() {
             });
             gapSalesSnap.forEach(doc => {
                 (doc.data().items || []).forEach(i => {
+                    if (i.isShipping) return; // "Tiền ship" không phải hàng hoá thật
                     // Cùng lý do đã sửa ở mục 1: dòng "Đổi date" giờ cũng bị trừ kho lúc bán.
                     initItem(i.name).gapNet -= parseFloat(i.qty || 0);
                 });
@@ -14038,6 +14184,9 @@ async function exportFullReport() {
             const vatRate = parseFloat(d.vatRate || 0); 
             
             d.items?.forEach(i => {
+                // "Tiền ship" (isShipping:true) không phải hàng hoá thật - không có NXT,
+                // loại bỏ hoàn toàn khỏi báo cáo tồn kho (không tạo dòng "sản phẩm" giả).
+                if (i.isShipping) return;
                 initItem(i.name);
                 const qty = parseFloat(i.qty || 0); // Sửa thành parseFloat
                 const price = parseFloat(i.price || 0);
@@ -14447,6 +14596,9 @@ async function viewFullReport() {
             const dDateStr = dDateObj.toISOString().split('T')[0];
             const vatRate = parseFloat(d.vatRate || 0);
             d.items?.forEach(i => {
+                // "Tiền ship" (isShipping:true) không phải hàng hoá thật - không có NXT,
+                // loại bỏ hoàn toàn khỏi báo cáo tồn kho (không tạo dòng "sản phẩm" giả).
+                if (i.isShipping) return;
                 initItem(i.name);
                 const qty = parseFloat(i.qty || 0);
                 const price = parseFloat(i.price || 0);
@@ -15971,12 +16123,18 @@ async function renameProductInHistory(oldName, newName) {
     Swal.fire({ title: 'Đang cập nhật lịch sử cũ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
     try {
         const collectionsToScan = ['receipts', 'sales', 'production', 'material_imports', 'returns'];
+        // Chuẩn hoá khoảng trắng thừa/thiếu (gõ tay dễ lệch 1 dấu cách) để không bị bỏ sót
+        // phiếu chỉ vì sai khác nhỏ không nhìn thấy bằng mắt thường.
+        const normalize = (s) => (s || '').toString().trim().replace(/\s+/g, ' ');
+        const oldNorm = normalize(oldName);
         let totalUpdated = 0;
+        const perCollectionCount = {};
 
         for (const colName of collectionsToScan) {
             const snap = await db.collection(colName).get();
             let batch = db.batch();
             let opsInBatch = 0;
+            let countThisCollection = 0;
 
             for (const doc of snap.docs) {
                 const data = doc.data();
@@ -15984,8 +16142,8 @@ async function renameProductInHistory(oldName, newName) {
 
                 let changed = false;
                 const newItems = data.items.map(it => {
-                    const itemNameField = it.name || it.nl; // 'nl' dùng cho phiếu Nguyên Liệu
-                    if (itemNameField === oldName) {
+                    const itemNameField = it.name !== undefined ? it.name : it.nl; // 'nl' dùng cho phiếu Nguyên Liệu
+                    if (normalize(itemNameField) === oldNorm) {
                         changed = true;
                         return it.name !== undefined ? { ...it, name: newName } : { ...it, nl: newName };
                     }
@@ -15996,6 +16154,7 @@ async function renameProductInHistory(oldName, newName) {
                     batch.update(doc.ref, { items: newItems });
                     opsInBatch++;
                     totalUpdated++;
+                    countThisCollection++;
                     if (opsInBatch >= 450) {
                         await batch.commit();
                         batch = db.batch();
@@ -16004,9 +16163,14 @@ async function renameProductInHistory(oldName, newName) {
                 }
             }
             if (opsInBatch > 0) await batch.commit();
+            perCollectionCount[colName] = countThisCollection;
         }
 
-        Swal.fire('Hoàn tất', `Đã đổi tên trong ${totalUpdated} phiếu cũ. Các báo cáo/lịch sử sẽ hiện đúng tên mới.`, 'success');
+        // Báo cáo RÕ số phiếu đã đổi ở TỪNG collection - để nếu có chỗ nào ra 0 mà đáng lẽ
+        // phải có (VD: sản phẩm này chắc chắn có bán mà "sales" lại báo 0 phiếu), người dùng
+        // biết ngay là tên cũ gõ chưa khớp, cần thử lại thay vì tưởng đã xong.
+        const detailLines = collectionsToScan.map(c => `${c}: ${perCollectionCount[c]} phiếu`).join('<br>');
+        Swal.fire('Hoàn tất', `Đã đổi tên trong ${totalUpdated} phiếu cũ.<br><br>${detailLines}<br><br>Nếu có dòng nào là 0 mà bạn chắc chắn sản phẩm này từng xuất hiện ở đó, tên cũ vừa nhập có thể chưa khớp tuyệt đối - hãy thử lại, copy tên cũ trực tiếp từ báo cáo đang hiện tên cũ để chắc chắn đúng từng dấu.`, 'success');
     } catch (e) {
         console.error(e);
         Swal.fire('Lỗi', 'Có lỗi khi đổi tên trong lịch sử cũ: ' + e.message, 'error');
