@@ -3230,8 +3230,21 @@ html:not(.dark) .bg-white {
                     </button>
                     <span id="chat-thread-header-text" class="text-slate-400 dark:text-slate-500 font-normal text-sm">Chọn 1 hội thoại để bắt đầu</span>
                 </div>
-                <div id="chat-thread-messages" class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2 flex flex-col min-h-[40vh] md:min-h-0"></div>
-                <form id="chat-send-form" onsubmit="return sendChatMessage(event)" class="p-3 border-t dark:border-slate-700 flex gap-2 shrink-0">
+                <div id="chat-thread-messages" class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2 flex flex-col min-h-[40vh] md:min-h-0">
+                    <div id="chat-load-older-wrap" class="hidden text-center pb-2">
+                        <button type="button" onclick="loadOlderChatMessages()" id="chat-load-older-btn" class="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-500/10">⬆️ Tải thêm tin nhắn cũ hơn</button>
+                    </div>
+                    <div id="chat-messages-inner"></div>
+                </div>
+                <div id="chat-image-preview-wrap" class="hidden px-3 pt-2 border-t dark:border-slate-700">
+                    <div class="relative inline-block">
+                        <img id="chat-image-preview" class="h-16 rounded-lg border border-slate-300 dark:border-slate-600 object-cover" src="">
+                        <button type="button" onclick="clearChatImagePreview()" class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-slate-800 text-white text-xs flex items-center justify-center shadow">✕</button>
+                    </div>
+                </div>
+                <form id="chat-send-form" onsubmit="return sendChatMessage(event)" class="p-3 border-t dark:border-slate-700 flex gap-2 shrink-0 items-center">
+                    <input type="file" id="chat-image-input" accept="image/*" class="hidden" onchange="handleChatImageSelect(event)">
+                    <button type="button" onclick="document.getElementById('chat-image-input').click()" title="Gửi ảnh" class="shrink-0 w-10 h-10 flex items-center justify-center rounded-xl border border-gray-300 dark:border-slate-700 text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-lg">📷</button>
                     <input type="text" id="chat-input-text" placeholder="Nhập tin nhắn..." autocomplete="off" disabled class="flex-1 p-2.5 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-gray-800 dark:text-white rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60">
                     <button type="submit" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shrink-0">Gửi</button>
                 </form>
@@ -3254,6 +3267,27 @@ html:not(.dark) .bg-white {
         </div>
         <button id="btn-fix-stock" onclick="runForceResyncStockCountersUI()" class="shrink-0 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-amber-700 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2 justify-center">
             <i data-lucide="refresh-ccw" class="w-4 h-4"></i> Sửa lại tồn kho ngay
+        </button>
+    </div>
+
+    <!-- KHỐI BẢO TRÌ HỆ THỐNG: đồng bộ lại tên sản phẩm vào lịch sử cũ - dùng khi đã ĐỔI TÊN
+         1 sản phẩm ở Danh Mục SP TRƯỚC ĐÂY (từ bản phần mềm cũ, lúc bước này còn là tùy chọn
+         và lỡ bỏ qua) khiến báo cáo "Tổng Hợp" (NXT) hiện tách thành 2 dòng riêng (tên cũ +
+         tên mới), dòng tên mới bị tồn âm. -->
+    <div class="bg-violet-50 dark:bg-violet-950/30 border border-violet-300 dark:border-violet-800 rounded-2xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+            <p class="font-bold text-violet-800 dark:text-violet-300 flex items-center gap-2">
+                <i data-lucide="refresh-ccw" class="w-4 h-4"></i> Đồng bộ tên sản phẩm vào lịch sử cũ (nếu báo cáo NXT hiện tách 2 tên)
+            </p>
+            <p class="text-xs text-violet-700 dark:text-violet-400 mt-1">
+                Dùng khi trước đây bạn đã ĐỔI TÊN 1 sản phẩm nhưng chưa đồng bộ lại tên đó vào các phiếu Nhập
+                Kho/Hoá đơn cũ - khiến "Báo Cáo Tổng Hợp" (NXT) hiểu nhầm thành 2 sản phẩm khác nhau (tên cũ
+                giữ nguyên tồn, tên mới bị tồn ÂM đúng bằng số đã bán). Nhập đúng tên CŨ và tên MỚI để đồng bộ
+                lại - không làm thay đổi bất kỳ số lượng/số tiền nào đã có, chỉ đổi nhãn tên.
+            </p>
+        </div>
+        <button onclick="openSyncProductNameHistoryTool()" class="shrink-0 bg-violet-500 hover:bg-violet-600 text-white px-4 py-2.5 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-violet-700 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2 justify-center">
+            <i data-lucide="refresh-ccw" class="w-4 h-4"></i> Đồng bộ tên ngay
         </button>
     </div>
 
@@ -3619,6 +3653,10 @@ html:not(.dark) .bg-white {
             // Kiểm tra tin nhắn nội bộ chưa đọc ngay sau khi đăng nhập (chấm đỏ trên menu
             // "Nhắn Tin") - không chờ đến khi họ tự mở trang Nhắn Tin mới biết có tin mới.
             if (typeof refreshChatUnreadBadge === 'function') refreshChatUnreadBadge();
+            // Bắt đầu theo dõi tin nhắn mới CHẠY NỀN SUỐT PHIÊN (nháy tiêu đề tab + âm thanh
+            // khi có tin mới) - không phụ thuộc có đang mở đúng trang Nhắn Tin hay không, để
+            // vẫn được báo dù đang bận ở trang khác (VD: đang đứng bán hàng).
+            if (typeof startChatGlobalWatchers === 'function') startChatGlobalWatchers();
         } catch (e) {
             errEl.textContent = e.message || 'Đăng nhập thất bại!';
             errEl.classList.remove('hidden');
@@ -3630,7 +3668,11 @@ html:not(.dark) .bg-white {
 
     // --- ĐĂNG XUẤT ---
     function doLogout() {
-        const goLogout = () => { clearCurrentUser(); location.reload(); };
+        const goLogout = () => {
+            if (typeof stopChatGlobalWatchers === 'function') stopChatGlobalWatchers();
+            clearCurrentUser();
+            location.reload();
+        };
         if (typeof Swal !== 'undefined') {
             Swal.fire({ title: 'Đăng xuất?', text: 'Bạn có chắc muốn đăng xuất khỏi hệ thống?', icon: 'question', showCancelButton: true, confirmButtonText: 'Đăng xuất', cancelButtonText: 'Hủy' })
                 .then(r => { if (r.isConfirmed) goLogout(); });
@@ -3698,7 +3740,7 @@ html:not(.dark) .bg-white {
         const groupSnap = await db.collection('chat_group_messages').orderBy('time', 'desc').limit(1).get();
         if (!groupSnap.empty) {
             const d = groupSnap.docs[0].data();
-            previews.group = { text: d.text || '', senderUsername: d.senderUsername, senderName: d.senderName, time: d.time?.toDate ? d.time.toDate() : null };
+            previews.group = { text: d.text || '', hasImage: !!d.imageData, senderUsername: d.senderUsername, senderName: d.senderName, time: d.time?.toDate ? d.time.toDate() : null };
         }
 
         await Promise.all(staff.map(async (s) => {
@@ -3706,7 +3748,7 @@ html:not(.dark) .bg-white {
             const snap = await db.collection('chat_dm_conversations').doc(cid).collection('messages').orderBy('time', 'desc').limit(1).get();
             if (!snap.empty) {
                 const d = snap.docs[0].data();
-                previews.dm[s.username] = { text: d.text || '', senderUsername: d.senderUsername, senderName: d.senderName, time: d.time?.toDate ? d.time.toDate() : null };
+                previews.dm[s.username] = { text: d.text || '', hasImage: !!d.imageData, senderUsername: d.senderUsername, senderName: d.senderName, time: d.time?.toDate ? d.time.toDate() : null };
             }
         }));
 
@@ -3803,7 +3845,9 @@ html:not(.dark) .bg-white {
         const isActive = (type, username) => window.__chatCurrentConv && window.__chatCurrentConv.type === type && window.__chatCurrentConv.username === username;
 
         const groupUnread = chatIsUnread(previews.group, 'group');
-        const groupPreviewText = previews.group ? `${previews.group.senderUsername === cur.username ? 'Bạn: ' : ''}${escapeHtml(previews.group.text).slice(0, 40)}` : 'Chưa có tin nhắn';
+        const groupPreviewText = previews.group
+            ? `${previews.group.senderUsername === cur.username ? 'Bạn: ' : ''}${previews.group.text ? escapeHtml(previews.group.text).slice(0, 40) : (previews.group.hasImage ? '📷 Đã gửi 1 ảnh' : '')}`
+            : 'Chưa có tin nhắn';
 
         let html = `
             <div onclick="selectChatConversation('group', null, null)" class="flex items-center gap-2.5 p-3 cursor-pointer transition-colors ${isActive('group') ? 'bg-blue-50 dark:bg-blue-500/10' : 'hover:bg-slate-50 dark:hover:bg-slate-800/60'}">
@@ -3818,7 +3862,9 @@ html:not(.dark) .bg-white {
         html += staffSorted.map(s => {
             const p = previews.dm[s.username];
             const unread = chatIsUnread(p, `dm_${chatConversationId(cur.username, s.username)}`);
-            const previewText = p ? `${p.senderUsername === cur.username ? 'Bạn: ' : ''}${escapeHtml(p.text).slice(0, 40)}` : 'Chưa có tin nhắn';
+            const previewText = p
+                ? `${p.senderUsername === cur.username ? 'Bạn: ' : ''}${p.text ? escapeHtml(p.text).slice(0, 40) : (p.hasImage ? '📷 Đã gửi 1 ảnh' : '')}`
+                : 'Chưa có tin nhắn';
             const initial = (s.displayName || '?').trim().charAt(0).toUpperCase();
             return `
             <div onclick="selectChatConversation('dm', '${s.username}', '${escapeHtml(s.displayName).replace(/'/g, "\\'")}')" class="flex items-center gap-2.5 p-3 cursor-pointer transition-colors ${isActive('dm', s.username) ? 'bg-blue-50 dark:bg-blue-500/10' : 'hover:bg-slate-50 dark:hover:bg-slate-800/60'}">
@@ -3841,57 +3887,157 @@ html:not(.dark) .bg-white {
         if (window.__chatUnsub) { window.__chatUnsub(); window.__chatUnsub = null; }
         window.__chatCurrentConv = type === 'group' ? { type: 'group' } : { type: 'dm', username, displayName };
 
+        // Reset trạng thái phân trang (tin cũ đã tải thêm) + xoá ảnh đang chọn dở của hội
+        // thoại trước - mỗi hội thoại bắt đầu lại từ đầu, tránh lẫn tin/ảnh giữa 2 hội thoại.
+        window.__chatOlderMsgs = [];
+        window.__chatLiveMsgs = [];
+        window.__chatNoMoreOlder = false;
+        clearChatImagePreview();
+
         const headerText = document.getElementById('chat-thread-header-text');
         const input = document.getElementById('chat-input-text');
-        const msgBox = document.getElementById('chat-thread-messages');
+        const innerBox = document.getElementById('chat-messages-inner');
+        const olderWrap = document.getElementById('chat-load-older-wrap');
         if (headerText) { headerText.textContent = type === 'group' ? '🏠 Phòng chung' : displayName; headerText.classList.remove('text-slate-400', 'dark:text-slate-500', 'font-normal'); }
         if (input) input.disabled = false;
-        if (msgBox) msgBox.innerHTML = '<div class="text-center text-slate-400 text-xs py-4">Đang tải...</div>';
+        if (innerBox) innerBox.innerHTML = '<div class="text-center text-slate-400 text-xs py-4">Đang tải...</div>';
+        if (olderWrap) olderWrap.classList.add('hidden');
 
         const convKey = type === 'group' ? 'group' : `dm_${chatConversationId(cur.username, username)}`;
         const colRef = type === 'group'
             ? db.collection('chat_group_messages')
             : db.collection('chat_dm_conversations').doc(chatConversationId(cur.username, username)).collection('messages');
+        window.__chatCurrentColRef = colRef; // dùng lại ở loadOlderChatMessages/deleteChatMessage
 
         // Chỉ lấy 200 tin gần nhất (tránh đọc cả lịch sử chat dài dằng dặc mỗi lần mở), rồi
-        // đảo lại đúng thứ tự cũ → mới để hiển thị.
+        // đảo lại đúng thứ tự cũ → mới để hiển thị. Có thêm nút "Tải thêm tin cũ hơn" riêng
+        // (xem loadOlderChatMessages) để xem xa hơn 200 tin này khi cần.
         window.__chatUnsub = colRef.orderBy('time', 'desc').limit(200).onSnapshot(snap => {
-            const msgs = snap.docs.map(d => d.data()).reverse();
-            renderChatMessages(msgs);
-            const lastMsg = msgs[msgs.length - 1];
+            window.__chatLiveMsgs = snap.docs.map(d => ({ id: d.id, ...d.data() })).reverse();
+            renderChatMessages();
+            const lastMsg = window.__chatLiveMsgs[window.__chatLiveMsgs.length - 1];
             if (lastMsg && lastMsg.time?.toDate) {
                 chatMarkRead(convKey, lastMsg.time.toDate());
                 refreshChatUnreadBadge();
             }
+            // Nút "Tải thêm tin cũ hơn": chỉ hiện khi đã có ĐỦ 200 tin (nhiều khả năng còn tin
+            // cũ hơn nữa) và chưa từng bấm tới lúc hết tin.
+            if (olderWrap) olderWrap.classList.toggle('hidden', window.__chatLiveMsgs.length < 200 || window.__chatNoMoreOlder);
         }, err => {
             console.error('Lỗi tải tin nhắn:', err);
-            if (msgBox) msgBox.innerHTML = '<div class="text-center text-rose-400 text-xs py-4">Không tải được tin nhắn.</div>';
+            if (innerBox) innerBox.innerHTML = '<div class="text-center text-rose-400 text-xs py-4">Không tải được tin nhắn.</div>';
         });
 
         if (!skipRerenderList) renderChatContactList();
         chatUpdateMobileView(true);
     }
 
-    function renderChatMessages(msgs) {
+    // Tải thêm 1 đợt tin nhắn CŨ HƠN (trước tin cũ nhất đang hiển thị) - dùng khi đã cuộn hết
+    // 200 tin gần nhất mà vẫn muốn xem xa hơn. Không dùng realtime cho phần này (chỉ đọc 1
+    // lần) - đỡ tốn quota, vì tin nhắn cũ gần như không đổi.
+    async function loadOlderChatMessages() {
+        const colRef = window.__chatCurrentColRef;
+        const btn = document.getElementById('chat-load-older-btn');
+        const combined = (window.__chatOlderMsgs || []).concat(window.__chatLiveMsgs || []);
+        if (!colRef || combined.length === 0) return;
+        const oldestTime = combined[0].time;
+        if (!oldestTime) return;
+
+        if (btn) { btn.disabled = true; btn.textContent = 'Đang tải...'; }
+        try {
+            const snap = await colRef.orderBy('time', 'desc').where('time', '<', oldestTime).limit(50).get();
+            const older = snap.docs.map(d => ({ id: d.id, ...d.data() })).reverse();
+            if (older.length === 0) {
+                window.__chatNoMoreOlder = true;
+                document.getElementById('chat-load-older-wrap')?.classList.add('hidden');
+                if (typeof Swal !== 'undefined') Swal.fire({ icon: 'info', title: 'Đã hết', text: 'Không còn tin nhắn cũ hơn nữa.', timer: 1500, showConfirmButton: false });
+                return;
+            }
+            window.__chatOlderMsgs = older.concat(window.__chatOlderMsgs || []);
+            const box = document.getElementById('chat-thread-messages');
+            const prevScrollHeight = box ? box.scrollHeight : 0;
+            renderChatMessages();
+            // Giữ nguyên vị trí đang xem (không giật cuộn xuống đầu) sau khi chèn thêm tin cũ
+            // lên trên - bù đúng phần chiều cao vừa tăng thêm.
+            if (box) box.scrollTop = box.scrollHeight - prevScrollHeight;
+            if (older.length < 50) {
+                window.__chatNoMoreOlder = true;
+                document.getElementById('chat-load-older-wrap')?.classList.add('hidden');
+            }
+        } catch (e) {
+            console.error('Lỗi tải tin nhắn cũ hơn:', e);
+            if (typeof Swal !== 'undefined') Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Không tải được tin nhắn cũ hơn.' });
+        } finally {
+            if (btn) { btn.disabled = false; btn.textContent = '⬆️ Tải thêm tin nhắn cũ hơn'; }
+        }
+    }
+
+    // "Hôm nay" / "Hôm qua" / "20/08/2026" - dùng làm dòng ngăn cách theo ngày trong khung chat.
+    function formatChatDateSeparator(d) {
+        if (!d) return '';
+        const now = new Date();
+        const startOfDay = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+        const diffDays = Math.round((startOfDay(now) - startOfDay(d)) / 86400000);
+        if (diffDays === 0) return 'Hôm nay';
+        if (diffDays === 1) return 'Hôm qua';
+        return d.toLocaleDateString('vi-VN');
+    }
+
+    function renderChatMessages() {
         const box = document.getElementById('chat-thread-messages');
-        if (!box) return;
+        const innerBox = document.getElementById('chat-messages-inner');
+        if (!box || !innerBox) return;
         const cur = getCurrentUser();
         const isGroup = window.__chatCurrentConv && window.__chatCurrentConv.type === 'group';
 
+        // Gộp tin cũ đã tải thêm (nếu có) + tin trong cửa sổ 200 tin gần nhất - loại bỏ trùng
+        // (phòng khi 2 nguồn vô tình chồng lấn ở đúng ranh giới).
+        const seenIds = new Set();
+        const msgs = [];
+        (window.__chatOlderMsgs || []).concat(window.__chatLiveMsgs || []).forEach(m => {
+            if (m.id && seenIds.has(m.id)) return;
+            if (m.id) seenIds.add(m.id);
+            msgs.push(m);
+        });
+
         if (!msgs.length) {
-            box.innerHTML = '<div class="text-center text-slate-400 text-xs py-4">Chưa có tin nhắn nào - hãy gửi lời chào đầu tiên!</div>';
+            innerBox.innerHTML = '<div class="text-center text-slate-400 text-xs py-4">Chưa có tin nhắn nào - hãy gửi lời chào đầu tiên!</div>';
             return;
         }
 
-        box.innerHTML = msgs.map(m => {
+        let lastDateKey = null;
+        innerBox.innerHTML = msgs.map(m => {
             const isMine = m.senderUsername === (cur && cur.username);
             const t = m.time?.toDate ? m.time.toDate() : null;
             const nameLine = (isGroup && !isMine) ? `<div class="text-[10px] font-bold text-cyan-600 dark:text-cyan-400 mb-0.5">${escapeHtml(m.senderName || m.senderUsername)}</div>` : '';
+
+            let dateSeparatorHtml = '';
+            if (t) {
+                const dateKey = t.toDateString();
+                if (dateKey !== lastDateKey) {
+                    lastDateKey = dateKey;
+                    dateSeparatorHtml = `<div class="flex justify-center my-2"><span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">${formatChatDateSeparator(t)}</span></div>`;
+                }
+            }
+
+            const imageHtml = m.imageData
+                ? `<img src="${m.imageData}" onclick="openChatImageViewer('${(m.id || '').replace(/'/g, "\\'")}')" class="rounded-xl max-w-full max-h-64 cursor-zoom-in mb-1 block" loading="lazy">`
+                : '';
+            const textHtml = m.text ? `<div class="whitespace-pre-wrap break-words">${escapeHtml(m.text)}</div>` : '';
+
+            // Nút xoá CHỈ hiện với tin nhắn CỦA CHÍNH MÌNH - dùng khi gõ sai/gửi nhầm.
+            const deleteBtnHtml = (isMine && m.id)
+                ? `<button type="button" onclick="deleteChatMessage('${m.id}')" title="Xóa tin nhắn này" class="shrink-0 self-end mb-1 w-6 h-6 flex items-center justify-center rounded-full text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 dark:text-slate-600 transition-colors">🗑</button>`
+                : '';
+
             return `
-                <div class="flex ${isMine ? 'justify-end' : 'justify-start'}">
+                ${dateSeparatorHtml}
+                <div class="flex items-end gap-1 ${isMine ? 'justify-end' : 'justify-start'}">
+                    ${isMine ? deleteBtnHtml : ''}
                     <div class="max-w-[78%] md:max-w-[65%] px-3 py-2 rounded-2xl text-[13px] ${isMine ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-bl-sm'}">
                         ${nameLine}
-                        <div class="whitespace-pre-wrap break-words">${escapeHtml(m.text)}</div>
+                        ${imageHtml}
+                        ${textHtml}
                         <div class="text-[10px] mt-0.5 text-right ${isMine ? 'text-blue-100' : 'text-slate-400 dark:text-slate-500'}">${formatChatTime(t)}</div>
                     </div>
                 </div>`;
@@ -3899,11 +4045,120 @@ html:not(.dark) .bg-white {
         box.scrollTop = box.scrollHeight;
     }
 
+    // Mở ảnh phóng to (dùng lại SweetAlert2 làm khung xem ảnh đơn giản, đỡ phải viết riêng).
+    function openChatImageViewer(msgId) {
+        const all = (window.__chatOlderMsgs || []).concat(window.__chatLiveMsgs || []);
+        const m = all.find(x => x.id === msgId);
+        if (!m || !m.imageData || typeof Swal === 'undefined') return;
+        Swal.fire({ imageUrl: m.imageData, imageAlt: 'Ảnh', showConfirmButton: false, showCloseButton: true, background: 'transparent', width: 'auto' });
+    }
+
+    // Xoá 1 tin nhắn CỦA CHÍNH MÌNH đã gửi nhầm (gõ sai, gửi nhầm hội thoại, gửi nhầm ảnh...).
+    async function deleteChatMessage(msgId) {
+        const colRef = window.__chatCurrentColRef;
+        if (!colRef) return;
+        const confirm = await Swal.fire({
+            title: 'Xóa tin nhắn này?',
+            text: 'Không thể khôi phục lại sau khi xóa.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Xóa',
+            confirmButtonColor: '#dc2626',
+            cancelButtonText: 'Hủy'
+        });
+        if (!confirm.isConfirmed) return;
+        try {
+            await colRef.doc(msgId).delete();
+            // Nếu tin vừa xoá nằm trong phần "tin cũ đã tải thêm" (ngoài cửa sổ realtime 200
+            // tin) thì phải tự gỡ khỏi mảng đó rồi vẽ lại - vì phần đó KHÔNG tự cập nhật theo
+            // realtime listener.
+            if (window.__chatOlderMsgs && window.__chatOlderMsgs.some(m => m.id === msgId)) {
+                window.__chatOlderMsgs = window.__chatOlderMsgs.filter(m => m.id !== msgId);
+                renderChatMessages();
+            }
+            // Nếu tin nằm trong cửa sổ 200 tin gần nhất, listener realtime sẽ tự vẽ lại ngay.
+        } catch (e) {
+            console.error('Lỗi xóa tin nhắn:', e);
+            if (typeof Swal !== 'undefined') Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Không xóa được tin nhắn: ' + (e.message || '') });
+        }
+    }
+
+    // --- GỬI ẢNH: chọn ảnh -> nén/resize nhỏ lại bằng canvas -> lưu base64 thẳng vào
+    // Firestore (KHÔNG dùng Firebase Storage vì SDK đó chưa được nạp trong app này) - nén
+    // xuống tối đa 1000px chiều rộng, chất lượng JPEG ~0.6 để chắc chắn dưới ngưỡng 1MB mỗi
+    // tài liệu Firestore cho phép.
+    window.__chatPendingImage = null; // dataURL đang chờ gửi (đã chọn nhưng chưa bấm Gửi)
+
+    function resizeImageForChat(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onerror = () => reject(new Error('Không đọc được file ảnh'));
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onerror = () => reject(new Error('File không phải là ảnh hợp lệ'));
+                img.onload = () => {
+                    const MAX_DIM = 1000;
+                    let { width, height } = img;
+                    if (width > MAX_DIM || height > MAX_DIM) {
+                        if (width >= height) { height = Math.round(height * MAX_DIM / width); width = MAX_DIM; }
+                        else { width = Math.round(width * MAX_DIM / height); height = MAX_DIM; }
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width; canvas.height = height;
+                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                    // Thử giảm dần chất lượng nếu vẫn còn quá to (ảnh chụp máy ảnh xưởng có
+                    // thể rất chi tiết) - dừng lại khi dưới ~700KB (chừa dư ra so với mức 1MB
+                    // Firestore cho phép, vì còn các field khác trong tài liệu).
+                    let quality = 0.6;
+                    let dataUrl = canvas.toDataURL('image/jpeg', quality);
+                    while (dataUrl.length > 700000 && quality > 0.25) {
+                        quality -= 0.1;
+                        dataUrl = canvas.toDataURL('image/jpeg', quality);
+                    }
+                    if (dataUrl.length > 900000) { reject(new Error('Ảnh vẫn quá lớn sau khi nén, vui lòng chọn ảnh khác.')); return; }
+                    resolve(dataUrl);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    async function handleChatImageSelect(event) {
+        const file = event.target.files && event.target.files[0];
+        event.target.value = ''; // cho phép chọn lại đúng file đó lần sau nếu cần
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            if (typeof Swal !== 'undefined') Swal.fire({ icon: 'warning', title: 'Không phải ảnh', text: 'Vui lòng chọn 1 tệp hình ảnh.' });
+            return;
+        }
+        try {
+            const dataUrl = await resizeImageForChat(file);
+            window.__chatPendingImage = dataUrl;
+            const previewImg = document.getElementById('chat-image-preview');
+            if (previewImg) previewImg.src = dataUrl;
+            document.getElementById('chat-image-preview-wrap')?.classList.remove('hidden');
+        } catch (e) {
+            console.error('Lỗi xử lý ảnh:', e);
+            if (typeof Swal !== 'undefined') Swal.fire({ icon: 'error', title: 'Không gửi được ảnh', text: e.message || '' });
+        }
+    }
+
+    function clearChatImagePreview() {
+        window.__chatPendingImage = null;
+        document.getElementById('chat-image-preview-wrap')?.classList.add('hidden');
+        const previewImg = document.getElementById('chat-image-preview');
+        if (previewImg) previewImg.src = '';
+    }
+
     async function sendChatMessage(event) {
         event.preventDefault();
         const input = document.getElementById('chat-input-text');
         const text = (input?.value || '').trim();
-        if (!text || !window.__chatCurrentConv) return false;
+        const pendingImage = window.__chatPendingImage;
+        // Cho phép gửi CHỈ ảnh (không cần chữ), hoặc CHỈ chữ, hoặc cả 2 - chỉ chặn khi không
+        // có gì để gửi cả.
+        if ((!text && !pendingImage) || !window.__chatCurrentConv) return false;
         const cur = getCurrentUser();
         if (!cur) return false;
 
@@ -3916,12 +4171,14 @@ html:not(.dark) .bg-white {
                 text: text,
                 time: firebase.firestore.FieldValue.serverTimestamp()
             };
+            if (pendingImage) payload.imageData = pendingImage;
             if (window.__chatCurrentConv.type === 'group') {
                 await db.collection('chat_group_messages').add(payload);
             } else {
                 const cid = chatConversationId(cur.username, window.__chatCurrentConv.username);
                 await db.collection('chat_dm_conversations').doc(cid).collection('messages').add(payload);
             }
+            clearChatImagePreview();
         } catch (e) {
             console.error('Lỗi gửi tin nhắn:', e);
             if (typeof Swal !== 'undefined') Swal.fire({ icon: 'error', title: 'Gửi thất bại', text: e.message || '' });
@@ -3931,6 +4188,116 @@ html:not(.dark) .bg-white {
             input.focus();
         }
         return false;
+    }
+
+    // --- BÁO TIN NHẮN MỚI RÕ RÀNG HƠN: nháy tiêu đề tab + tiếng "ting" nhỏ, CHẠY NỀN LIÊN
+    // TỤC sau khi đăng nhập (không phụ thuộc có đang mở đúng trang Nhắn Tin hay không) - để
+    // vẫn được báo dù đang bận ở trang khác (VD: đang đứng bán hàng). Khác với
+    // window.__chatUnsub (listener của ĐÚNG 1 hội thoại đang mở, huỷ khi rời trang Chat),
+    // các listener này CHẠY SUỐT PHIÊN LÀM VIỆC, chỉ huỷ khi tải lại trang/đăng xuất.
+    window.__chatGlobalUnsubs = [];
+    const CHAT_ORIGINAL_TITLE = document.title;
+    let chatTitleFlashTimer = null;
+    let chatAudioCtx = null;
+
+    // Trình duyệt chặn phát âm thanh nếu chưa có tương tác nào của người dùng trên trang -
+    // "mở khoá" AudioContext ngay lần đầu người dùng bấm/chạm bất kỳ đâu trên trang.
+    document.addEventListener('click', function unlockChatAudio() {
+        try {
+            if (!chatAudioCtx) chatAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (chatAudioCtx.state === 'suspended') chatAudioCtx.resume();
+        } catch (e) { /* trình duyệt không hỗ trợ Web Audio - bỏ qua, không ảnh hưởng gì khác */ }
+    }, { once: true });
+
+    function playChatNotifySound() {
+        try {
+            if (!chatAudioCtx) chatAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const ctx = chatAudioCtx;
+            const o = ctx.createOscillator();
+            const g = ctx.createGain();
+            o.connect(g); g.connect(ctx.destination);
+            o.type = 'sine';
+            o.frequency.setValueAtTime(880, ctx.currentTime);
+            o.frequency.setValueAtTime(660, ctx.currentTime + 0.12);
+            g.gain.setValueAtTime(0.001, ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + 0.02);
+            g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+            o.start();
+            o.stop(ctx.currentTime + 0.4);
+        } catch (e) { /* im lặng bỏ qua nếu trình duyệt chặn/không hỗ trợ âm thanh */ }
+    }
+
+    function startChatTitleFlash() {
+        if (chatTitleFlashTimer) return; // đã đang nháy rồi, không tạo thêm
+        let toggle = false;
+        chatTitleFlashTimer = setInterval(() => {
+            document.title = toggle ? CHAT_ORIGINAL_TITLE : '🔴 Tin nhắn mới!';
+            toggle = !toggle;
+        }, 1000);
+    }
+    function stopChatTitleFlash() {
+        if (chatTitleFlashTimer) { clearInterval(chatTitleFlashTimer); chatTitleFlashTimer = null; }
+        document.title = CHAT_ORIGINAL_TITLE;
+    }
+    // Quay lại xem trang (đổi tab, bấm vào lại cửa sổ) coi như đã chú ý tới rồi -> thôi nháy.
+    window.addEventListener('focus', stopChatTitleFlash);
+
+    function stopChatGlobalWatchers() {
+        (window.__chatGlobalUnsubs || []).forEach(u => { try { u(); } catch (e) { /* bỏ qua */ } });
+        window.__chatGlobalUnsubs = [];
+        stopChatTitleFlash();
+    }
+
+    // Bắt đầu theo dõi NỀN cho cả Phòng Chung lẫn từng hội thoại riêng - gọi 1 lần ngay sau
+    // khi đăng nhập thành công.
+    async function startChatGlobalWatchers() {
+        stopChatGlobalWatchers(); // tránh tạo trùng listener nếu lỡ gọi lại
+        const cur = getCurrentUser();
+        if (!cur) return;
+
+        const seenTimeKey = (convKey) => `chat_globalseen_${cur.username}_${convKey}`;
+
+        const handleIncoming = (convKey, isGroup, otherUsername, msg) => {
+            if (!msg || !msg.time || !msg.time.toDate) return;
+            if (msg.senderUsername === cur.username) return; // tin của chính mình, không cần báo
+
+            const msgTime = msg.time.toDate().getTime();
+            const key = seenTimeKey(convKey);
+            const lastSeen = parseInt(sessionStorage.getItem(key) || '0', 10);
+            if (msgTime <= lastSeen) return; // tin đã từng thấy rồi (hoặc cũ hơn), không báo lại
+            sessionStorage.setItem(key, String(msgTime));
+
+            // Đang xem ĐÚNG hội thoại này VÀ tab đang được chú ý (không phải đang ở tab
+            // khác/thu nhỏ) thì không cần ồn ào báo động - người dùng đã thấy ngay rồi.
+            const chatPageEl = document.getElementById('page-chat');
+            const isViewingThisConv = window.__chatCurrentConv &&
+                chatPageEl && !chatPageEl.classList.contains('hidden') &&
+                ((isGroup && window.__chatCurrentConv.type === 'group') ||
+                 (!isGroup && window.__chatCurrentConv.type === 'dm' && window.__chatCurrentConv.username === otherUsername));
+            if (isViewingThisConv && document.hasFocus()) return;
+
+            playChatNotifySound();
+            startChatTitleFlash();
+        };
+
+        const groupUnsub = db.collection('chat_group_messages').orderBy('time', 'desc').limit(1)
+            .onSnapshot(snap => {
+                if (typeof refreshChatUnreadBadge === 'function') refreshChatUnreadBadge();
+                if (!snap.empty) handleIncoming('group', true, null, { id: snap.docs[0].id, ...snap.docs[0].data() });
+            }, err => console.error('Lỗi theo dõi tin nhắn phòng chung:', err));
+        window.__chatGlobalUnsubs.push(groupUnsub);
+
+        const staff = await ensureChatStaffListLoaded();
+        staff.forEach(s => {
+            const cid = chatConversationId(cur.username, s.username);
+            const unsub = db.collection('chat_dm_conversations').doc(cid).collection('messages')
+                .orderBy('time', 'desc').limit(1)
+                .onSnapshot(snap => {
+                    if (typeof refreshChatUnreadBadge === 'function') refreshChatUnreadBadge();
+                    if (!snap.empty) handleIncoming(`dm_${cid}`, false, s.username, { id: snap.docs[0].id, ...snap.docs[0].data() });
+                }, err => console.error(`Lỗi theo dõi tin nhắn riêng với ${s.username}:`, err));
+            window.__chatGlobalUnsubs.push(unsub);
+        });
     }
     // ========================= HẾT PHẦN NHẮN TIN NỘI BỘ =========================
 
@@ -5795,6 +6162,35 @@ function compareProductDisplayOrder(nameA, nameB) {
     const pa = getProductMaterialPriority(nameA), pb = getProductMaterialPriority(nameB);
     if (pa !== pb) return pa - pb; // Thuỷ tinh > Nhựa > khác
     return 0; // giữ nguyên thứ tự cũ (sort ổn định)
+}
+
+// ================ THỨ TỰ SẮP XẾP RIÊNG CHO LƯỚI SẢN PHẨM Ở TRANG BÁN HÀNG ================
+// Theo đúng yêu cầu: TCMT lên đầu (450g > 275g > 180g > 150g > các cỡ nhỏ hơn, kể cả sản
+// phẩm chỉ ghi tắt "Khay Nhôm 90g" không có chữ TCMT) -> rồi đến Mắm Tép Riu Đỏ/Nguyên Chất
+// -> rồi đến Quả Bùi Kỳ Lão -> rồi mới đến các mặt hàng khác (giữ nguyên thứ tự vốn có giữa
+// chúng - sort ổn định). Việc "còn tồn lên trên, hết tồn xuống dưới cùng" xử lý RIÊNG ở
+// renderProductGrid (tách 2 danh sách trước khi sắp theo thứ tự này), không nằm ở đây.
+function getSellPageCategoryTier(name) {
+    const s = (name || '').toString().toLowerCase();
+    // Tier 0: TCMT - có chữ "tcmt", HOẶC chỉ ghi tắt "khay nhôm" + số gram mà KHÔNG kèm tên
+    // nhóm khác (như "bùi"/"quả") - để không bắt nhầm các sản phẩm khác cũng đóng khay nhôm
+    // (VD: Quả Bùi Kỳ Lão) vào nhóm TCMT.
+    if (s.includes('tcmt')) return 0;
+    if (s.includes('khay nh') && !s.includes('bùi') && !s.includes('quả')) return 0;
+    // Tier 1: Mắm Tép Riu Đỏ / Mắm Nguyên Chất
+    if (/riu\s*đ[ỏo]|nguy[êe]n\s*ch[ấa]t/i.test(s)) return 1;
+    // Tier 2: Quả Bùi Kỳ Lão
+    if (/b[ùu]i\s*k[ỳy]\s*(n[ãa]o|l[ãa]o)|qu[ảa]\s*b[ùu]i/i.test(s)) return 2;
+    return 3; // Các mặt hàng khác
+}
+function compareProductsForSellPage(nameA, nameB) {
+    const ta = getSellPageCategoryTier(nameA), tb = getSellPageCategoryTier(nameB);
+    if (ta !== tb) return ta - tb; // theo đúng thứ tự nhóm: TCMT -> Mắm -> Bùi Kỳ Lão -> Khác
+    if (ta === 0) { // Trong nhóm TCMT: khối lượng giảm dần (450g -> 275g -> 180g -> 150g -> ...)
+        const wa = getProductWeightForSort(nameA), wb = getProductWeightForSort(nameB);
+        if (wa !== wb) return wb - wa;
+    }
+    return 0; // cùng nhóm, không phân biệt thêm -> giữ nguyên thứ tự vốn có (sort ổn định)
 }
 
 // ================ TỒN KHO (ĐỒNG BỘ DUAL THEME - 3D GLOSSY CHỐNG LÓA) ==============================
@@ -8419,6 +8815,67 @@ window.runForceResyncStockCountersUI = async function () {
     }
 };
 
+// Công cụ tự phục vụ: đồng bộ lại tên sản phẩm vào lịch sử cũ cho những lần ĐỔI TÊN đã lỡ
+// bỏ qua bước này từ trước (lúc bước này còn là tùy chọn) - dùng lại đúng hàm
+// renameProductInHistory() đã có sẵn (nay được gọi tự động mỗi khi đổi tên mới, xem
+// editProductName), chỉ khác là cho phép chạy TAY cho 1 cặp tên cũ/mới bất kỳ đã biết trước.
+async function openSyncProductNameHistoryTool() {
+    const { value: formValues } = await Swal.fire({
+        title: 'Đồng bộ tên sản phẩm vào lịch sử cũ',
+        html: `
+            <div class="text-left space-y-3">
+                <div>
+                    <label class="text-xs font-bold text-slate-500">Tên CŨ (như đã lưu trong các phiếu cũ)</label>
+                    <input id="swal-sync-old-name" type="text" class="swal2-input !m-0 !w-full" placeholder="VD: Quả Bùi Kỳ Lão Om 250g">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-500">Tên MỚI (đang dùng hiện tại)</label>
+                    <input id="swal-sync-new-name" type="text" class="swal2-input !m-0 !w-full" placeholder="VD: Quả Bùi Kỳ Lão Om 250g Khay Nhôm">
+                </div>
+                <p class="text-[11px] text-slate-400">Gõ chính xác từng dấu/khoảng trắng như tên đã lưu - có thể copy tên MỚI trực tiếp từ Danh Mục SP cho chắc chắn.</p>
+            </div>`,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'Đồng bộ ngay',
+        cancelButtonText: 'Hủy',
+        confirmButtonColor: '#7c3aed',
+        preConfirm: () => {
+            const oldName = (document.getElementById('swal-sync-old-name').value || '').trim();
+            const newName = (document.getElementById('swal-sync-new-name').value || '').trim();
+            if (!oldName || !newName) { Swal.showValidationMessage('Vui lòng nhập đầy đủ cả tên cũ và tên mới!'); return false; }
+            if (oldName === newName) { Swal.showValidationMessage('Tên cũ và tên mới đang giống hệt nhau, không có gì để đồng bộ!'); return false; }
+            return { oldName, newName };
+        }
+    });
+    if (!formValues) return;
+
+    await renameProductInHistory(formValues.oldName, formValues.newName);
+
+    // Sau khi đồng bộ xong, cũng migrate luôn bộ đếm tồn kho (stock_counters) từ tên cũ
+    // (nếu vẫn còn sót lại do lần đổi tên trước đó chưa migrate đúng) sang tên mới, rồi làm
+    // mới lại các trang đang hiển thị - giống hệt bước đã làm trong editProductName.
+    try {
+        const oldRef = getStockRef(formValues.oldName);
+        const oldSnap = await oldRef.get();
+        if (oldSnap.exists) {
+            const oldQty = parseFloat(oldSnap.data().qty || 0);
+            const newRef = getStockRef(formValues.newName);
+            const newSnap = await newRef.get();
+            const newQty = newSnap.exists ? parseFloat(newSnap.data().qty || 0) : 0;
+            await newRef.set({ name: formValues.newName, qty: oldQty + newQty }, { merge: true });
+            await oldRef.delete();
+        }
+    } catch (e) {
+        console.warn('Không migrate được bộ đếm tồn kho tên cũ (có thể tên cũ chưa từng có bộ đếm riêng, không sao):', e);
+    }
+
+    if (typeof refreshCache === 'function') await refreshCache();
+    if (typeof calculateAllStock === 'function') await calculateAllStock();
+    if (typeof loadInventory === 'function') loadInventory();
+    if (typeof renderProductGrid === 'function') renderProductGrid();
+    if (typeof updateProductDropdowns === 'function') updateProductDropdowns();
+}
+
 // ============================================================
 // SAO LƯU TOÀN BỘ DỮ LIỆU RA FILE - phòng trường hợp phần mềm gặp sự cố (mất mạng dài
 // ngày, tài khoản Firebase gặp vấn đề, thao tác nhầm hàng loạt, hết hạn mức miễn phí kéo
@@ -8774,14 +9231,17 @@ function renderProductGrid() {
         { top: 'from-cyan-100 to-cyan-50/60 dark:from-cyan-950/70 dark:to-slate-900',    ring: 'ring-cyan-200 dark:ring-cyan-500/20',    badge: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-300',    btn: 'from-cyan-400 to-cyan-600 dark:from-cyan-500 dark:to-cyan-700',    shadow: 'shadow-[0_6px_0_0_#155e75,0_10px_16px_-4px_rgba(8,145,178,0.35)] dark:shadow-[0_6px_0_0_#164e63,0_10px_16px_-4px_rgba(0,0,0,0.5)]' }
     ];
 
-    // Đưa sản phẩm HẾT HÀNG xuống cuối danh sách, GIỮ NGUYÊN thứ tự vốn có giữa các sản
-    // phẩm còn lại (không xáo trộn) - chỉ tách thành 2 nhóm: còn hàng trước, hết hàng sau.
+    // Đưa sản phẩm HẾT HÀNG xuống cuối danh sách; trong TỪNG nhóm (còn hàng / hết hàng),
+    // sắp xếp theo đúng thứ tự: TCMT -> Mắm Tép Riu Đỏ/Nguyên Chất -> Quả Bùi Kỳ Lão -> các
+    // mặt hàng khác (xem compareProductsForSellPage).
     const inStockList = [];
     const outOfStockList = [];
     window.allProductCache.forEach(p => {
         const rawStock = window.currentStockMap ? (window.currentStockMap[p.name] || 0) : 0;
         if (rawStock <= 0) outOfStockList.push(p); else inStockList.push(p);
     });
+    inStockList.sort((a, b) => compareProductsForSellPage(a.name, b.name));
+    outOfStockList.sort((a, b) => compareProductsForSellPage(a.name, b.name));
     const sortedProductList = inStockList.concat(outOfStockList);
 
     // Gom HTML vào 1 mảng rồi gán "innerHTML" đúng 1 lần ở cuối - nhanh hơn nhiều so với
@@ -12873,12 +13333,17 @@ async function exportSales() {
 // khỏi báo cáo. Thêm/sửa từ khoá ở đây khi phát sinh nhóm sản phẩm mới - áp dụng ngay cho
 // TẤT CẢ báo cáo có phân nhóm, không cần sửa nhiều nơi.
 const NHOM_SP_DINH_NGHIA = [
-    { ten: 'THỊT CHƯNG MẮM TÉP', khop: (n) => /tcmt|khay nh[ôo]m|m[ắa]m/i.test(n) },
+    // QUAN TRỌNG: "khay nhôm" chỉ là VẬT LIỆU ĐÓNG GÓI, không phải đặc trưng riêng của nhóm
+    // TCMT - nhiều nhóm khác (VD: Quả Bùi Kỳ Lão) cũng đóng khay nhôm. Nếu để "khay nh[ôo]m"
+    // ở đây, .find() sẽ bắt nhầm các sản phẩm đó vào nhóm này TRƯỚC KHI kịp tới lượt kiểm
+    // tra nhóm đúng của chúng ở phía dưới (thứ tự mảng quyết định nhóm nào được xét trước).
+    // Chỉ giữ từ khoá THẬT SỰ đặc trưng riêng của TCMT: "tcmt" hoặc "mắm" (mắm tép).
+    { ten: 'THỊT CHƯNG MẮM TÉP', khop: (n) => /tcmt|m[ắa]m/i.test(n) },
     { ten: 'CƠM CHÁY', khop: (n) => /ccqc|c[ơo]m ch[áa]y/i.test(n) },
     { ten: 'TRÀ HOA VÀNG', khop: (n) => /tr[àa] hoa v[àa]ng|^tr[àa]\b/i.test(n) },
     { ten: 'RUỐC CÁ', khop: (n) => /ru[ốô]c/i.test(n) },
     { ten: 'BÁNH DỨA', khop: (n) => /b[áa]nh d[ứư]a/i.test(n) },
-    { ten: 'QUẢ BÙI KỲ NÃO', khop: (n) => /b[ùu]i k[ỳy] n[ãa]o|qu[ảa] b[ùu]i/i.test(n) },
+    { ten: 'QUẢ BÙI KỲ LÃO', khop: (n) => /b[ùu]i k[ỳy] (n[ãa]o|l[ãa]o)|qu[ảa] b[ùu]i/i.test(n) },
     { ten: 'CÁC LOẠI HỘP TÚI', khop: (n) => /t[úu]i|h[ộo]p qu[àa]/i.test(n) },
 ];
 function xepNhomSanPham(ten) {
@@ -15464,23 +15929,17 @@ async function editProductName(id, currentName) {
             Swal.close();
             if (typeof ghiLog === 'function') ghiLog('Sản Phẩm', 'Sửa', cleanName, `Đổi tên sản phẩm từ "${currentName}" thành "${cleanName}"`);
 
-            // Hỏi thêm: có muốn đổi luôn tên trong các phiếu CŨ đã lưu trước đây không (Nhập
-            // Kho, Lịch Sử HĐ, Sản Xuất, Nguyên Liệu...) - đây là bước TÙY CHỌN vì phải quét
-            // qua khá nhiều phiếu cũ, không tự động làm luôn để tránh tốn thời gian/quota
-            // không cần thiết cho những lần chỉ sửa lỗi chính tả nhỏ.
-            const { isConfirmed } = await Swal.fire({
-                icon: 'question',
-                title: 'Đổi tên trong lịch sử cũ?',
-                html: `Đã cập nhật tên và tồn kho hiện tại thành công!<br><br>Bạn có muốn đổi luôn tên <b>"${currentName}"</b> → <b>"${cleanName}"</b> trong <b>các phiếu Nhập Kho / Hoá đơn / Sản Xuất / Nguyên Liệu đã lưu trước đây</b> không?<br><span class="text-xs text-slate-400">(Có thể mất chút thời gian nếu lịch sử nhiều, các báo cáo/thống kê cũ sẽ hiện đúng tên mới)</span>`,
-                showCancelButton: true,
-                confirmButtonText: 'Có, đổi luôn',
-                cancelButtonText: 'Không cần',
-                confirmButtonColor: '#2563eb'
-            });
-
-            if (isConfirmed) {
-                await renameProductInHistory(currentName, cleanName);
-            }
+            // QUAN TRỌNG (sửa lỗi báo cáo NXT bị tách đôi/tồn âm sau khi đổi tên): TỰ ĐỘNG
+            // đổi tên luôn trong toàn bộ lịch sử cũ (Nhập Kho, Lịch Sử HĐ, Sản Xuất, Nguyên
+            // Liệu, Hàng Hoàn Trả) - KHÔNG hỏi lại nữa. Trước đây bước này là TÙY CHỌN (có
+            // thể bấm "Không cần"), nhưng nếu bỏ qua, các phiếu/hoá đơn cũ vẫn mang tên CŨ
+            // trong khi tồn kho hiện tại đã chuyển hẳn sang tên MỚI - khiến báo cáo "Tổng
+            // Hợp" (NXT) coi đây là 2 sản phẩm khác nhau: dòng tên CŨ giữ nguyên tồn cũ (vì
+            // không còn giao dịch nào cập nhật nó nữa), còn dòng tên MỚI không có "tồn đầu"
+            // nên chỉ cần bán ra là lập tức hiện ÂM đúng bằng số đã bán. Đổi tên chỉ là ĐẶT
+            // LẠI NHÃN, không làm thay đổi bất kỳ số lượng/số tiền nào đã có - nên làm tự
+            // động luôn là an toàn, không có rủi ro gì như sửa số liệu.
+            await renameProductInHistory(currentName, cleanName);
 
             loadProductManage();
 
@@ -15503,13 +15962,15 @@ async function editProductName(id, currentName) {
 }
 
 // Đổi tên sản phẩm trong TOÀN BỘ các phiếu cũ đã lưu (receipts, sales, production,
-// material_imports) - quét từng collection, tìm đúng dòng sản phẩm trùng tên CŨ trong
-// mảng "items" của mỗi phiếu, sửa lại thành tên MỚI, rồi ghi lại. Dùng batch (tối đa 500
-// lệnh ghi/batch) để không vượt giới hạn Firestore khi lịch sử nhiều.
+// material_imports, returns) - quét từng collection, tìm đúng dòng sản phẩm trùng tên CŨ
+// trong mảng "items" của mỗi phiếu, sửa lại thành tên MỚI, rồi ghi lại. Dùng batch (tối đa
+// 500 lệnh ghi/batch) để không vượt giới hạn Firestore khi lịch sử nhiều. Được gọi TỰ ĐỘNG
+// mỗi khi đổi tên sản phẩm (xem editProductName) - không phải bước tùy chọn nữa, vì bỏ sót
+// bước này sẽ làm báo cáo "Tổng Hợp" (NXT) hiểu nhầm thành 2 sản phẩm khác nhau.
 async function renameProductInHistory(oldName, newName) {
     Swal.fire({ title: 'Đang cập nhật lịch sử cũ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
     try {
-        const collectionsToScan = ['receipts', 'sales', 'production', 'material_imports'];
+        const collectionsToScan = ['receipts', 'sales', 'production', 'material_imports', 'returns'];
         let totalUpdated = 0;
 
         for (const colName of collectionsToScan) {
