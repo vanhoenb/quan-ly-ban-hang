@@ -13863,7 +13863,16 @@ async function exportSales() {
 // nào không khớp từ khoá nào sẽ tự động rơi vào nhóm "KHÁC" ở cuối cùng, không bị rớt mất
 // khỏi báo cáo. Thêm/sửa từ khoá ở đây khi phát sinh nhóm sản phẩm mới - áp dụng ngay cho
 // TẤT CẢ báo cáo có phân nhóm, không cần sửa nhiều nơi.
+// QUAN TRỌNG: mảng này quyết định THỨ TỰ KHỚP NHÓM (nhóm nào được xét trước khi 1 sản phẩm
+// khớp nhiều từ khoá cùng lúc) - KHÔNG phải thứ tự hiển thị trong báo cáo (xem
+// THU_TU_HIEN_THI_NHOM ngay bên dưới, định nghĩa RIÊNG, độc lập với mảng này).
 const NHOM_SP_DINH_NGHIA = [
+    // "MẮM TÉP RIU ĐỎ" phải được xét TRƯỚC "THỊT CHƯNG MẮM TÉP" - vì từ khoá "mắm" ở nhóm
+    // THỊT CHƯNG MẮM TÉP bên dưới rất chung chung, sẽ "nhặt" nhầm luôn cả "Mắm tép riu đỏ..."
+    // nếu xét nó trước. Đặt ở ĐÂY (đầu mảng) chỉ để KHỚP ĐÚNG nhóm - vị trí HIỂN THỊ trong
+    // báo cáo (ngay sau Thịt Chưng Mắm Tép) do THU_TU_HIEN_THI_NHOM quyết định, không phụ
+    // thuộc việc nó nằm ở đầu mảng này.
+    { ten: 'MẮM TÉP RIU ĐỎ', khop: (n) => /riu \u0111[ỏo]/i.test(n) },
     // QUAN TRỌNG: "khay nhôm" chỉ là VẬT LIỆU ĐÓNG GÓI, không phải đặc trưng riêng của nhóm
     // TCMT - nhiều nhóm khác (VD: Quả Bùi Kỳ Lão) cũng đóng khay nhôm. Nếu để "khay nh[ôo]m"
     // ở đây, .find() sẽ bắt nhầm các sản phẩm đó vào nhóm này TRƯỚC KHI kịp tới lượt kiểm
@@ -13876,6 +13885,21 @@ const NHOM_SP_DINH_NGHIA = [
     { ten: 'BÁNH DỨA', khop: (n) => /b[áa]nh d[ứư]a/i.test(n) },
     { ten: 'QUẢ BÙI KỲ LÃO', khop: (n) => /b[ùu]i k[ỳy] (n[ãa]o|l[ãa]o)|qu[ảa] b[ùu]i/i.test(n) },
     { ten: 'CÁC LOẠI HỘP TÚI', khop: (n) => /t[úu]i|h[ộo]p qu[àa]/i.test(n) },
+];
+
+// THỨ TỰ HIỂN THỊ các nhóm trong báo cáo (Báo Cáo Tổng Hợp mục II, BC Tồn Kho...) - theo
+// đúng yêu cầu: Thịt Chưng Mắm Tép -> Mắm Tép Riu Đỏ (ngay sau) -> Quả Bùi Kỳ Lão (đưa lên
+// ngay sau Mắm Tép Riu Đỏ) -> các nhóm còn lại giữ nguyên thứ tự cũ. Sửa thứ tự hiển thị chỉ
+// cần sửa Ở ĐÂY, không ảnh hưởng gì tới việc khớp nhóm ở mảng NHOM_SP_DINH_NGHIA phía trên.
+const THU_TU_HIEN_THI_NHOM = [
+    'THỊT CHƯNG MẮM TÉP',
+    'MẮM TÉP RIU ĐỎ',
+    'QUẢ BÙI KỲ LÃO',
+    'CƠM CHÁY',
+    'TRÀ HOA VÀNG',
+    'RUỐC CÁ',
+    'BÁNH DỨA',
+    'CÁC LOẠI HỘP TÚI',
 ];
 function xepNhomSanPham(ten) {
     const nhom = NHOM_SP_DINH_NGHIA.find(g => g.khop(ten));
@@ -14149,7 +14173,7 @@ async function exportInventory() {
         // Gom theo nhóm sản phẩm (dùng chung NHOM_SP_DINH_NGHIA/xepNhomSanPham() ở đầu file)
         // giống hệt cách làm ở Báo Cáo Tổng Hợp, mỗi nhóm có 1 dòng tiêu đề tô vàng.
         const nhomMap = new Map();
-        const thuTuNhom = NHOM_SP_DINH_NGHIA.map(g => g.ten).concat(['KHÁC']);
+        const thuTuNhom = THU_TU_HIEN_THI_NHOM.concat(['KHÁC']); // Thứ tự HIỂN THỊ - tách riêng khỏi thứ tự khớp nhóm
         thuTuNhom.forEach(ten => nhomMap.set(ten, []));
 
         sortedNames.forEach((name) => {
@@ -14766,7 +14790,7 @@ async function exportFullReport() {
         // phẩm trước khi vẽ bảng - mỗi nhóm có 1 dòng tiêu đề tô vàng, chỉ hiện nhóm nào có
         // ít nhất 1 sản phẩm thực sự có số liệu (giữ đúng logic bỏ qua dòng toàn số 0 như cũ).
         const nhomMap = new Map(); // tên nhóm -> mảng các dòng dữ liệu sẽ vẽ
-        const thuTuNhom = NHOM_SP_DINH_NGHIA.map(g => g.ten).concat(['KHÁC']);
+        const thuTuNhom = THU_TU_HIEN_THI_NHOM.concat(['KHÁC']); // Thứ tự HIỂN THỊ - tách riêng khỏi thứ tự khớp nhóm
         thuTuNhom.forEach(ten => nhomMap.set(ten, []));
 
         orderList.forEach(name => {
@@ -15089,7 +15113,7 @@ async function viewFullReport() {
         }).join('') || `<tr><td colspan="7" style="${td}text-align:center;color:#888;">Không có dữ liệu</td></tr>`;
 
         const nhomMap = new Map();
-        const thuTuNhom = NHOM_SP_DINH_NGHIA.map(g => g.ten).concat(['KHÁC']);
+        const thuTuNhom = THU_TU_HIEN_THI_NHOM.concat(['KHÁC']); // Thứ tự HIỂN THỊ - tách riêng khỏi thứ tự khớp nhóm
         thuTuNhom.forEach(ten => nhomMap.set(ten, []));
         orderList.forEach(name => {
             const item = inventory[name];
@@ -18182,9 +18206,12 @@ function xemChiTietPhieu(soPhieu) {
                 ${rows}
             </tbody>
         </table>
-        <div class="grid grid-cols-2 gap-2 mt-4">
+        <div class="grid grid-cols-3 gap-2 mt-4">
+            <button onclick="document.getElementById('popup-ncc').classList.add('hidden'); editImportReceipt('${soPhieu}')" class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
+                ✏️ Sửa phiếu
+            </button>
             <button onclick="document.getElementById('popup-ncc').classList.add('hidden'); deleteDoc('material_imports', '${soPhieu}')" class="bg-red-600 hover:bg-red-700 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5">
-                <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa cả phiếu này
+                <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa cả phiếu
             </button>
             <button onclick="document.getElementById('popup-ncc').classList.add('hidden')" class="bg-slate-600 hover:bg-slate-700 text-white py-2 rounded-xl text-sm font-bold">Đóng</button>
         </div>
@@ -18192,6 +18219,218 @@ function xemChiTietPhieu(soPhieu) {
     
     showPopup("Chi tiết phiếu: " + soPhieu, content, true);
     if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+// ================== SỬA PHIẾU NHẬP NGUYÊN LIỆU ==================
+// Phiếu nhập nguyên liệu ở đây CHỈ dùng để theo dõi CÔNG NỢ NHÀ CUNG CẤP, KHÔNG theo dõi
+// NXT nguyên liệu (không có kho nguyên liệu nào bị trừ/cộng khi sửa) - nên sửa phiếu chỉ cần
+// lo ĐÚNG 1 việc: sau khi sửa, công nợ NCC phải khớp lại đúng theo số liệu MỚI, không cần
+// đụng gì tới tồn kho.
+// Cách làm: cho sửa thoải mái (đổi NCC, đổi số HĐ/ngày HĐ, sửa/thêm/xoá từng dòng nguyên
+// liệu) trong 1 form, rồi khi Lưu: (1) tính lại tổng tiền mới, (2) so với tổng tiền CŨ của
+// phiếu để biết chênh lệch, (3) cộng/trừ đúng phần chênh lệch đó vào nợ NCC (nếu đổi sang
+// NCC khác thì trừ hết nợ cũ ở NCC cũ, cộng full tiền mới vào NCC mới), (4) xoá hết các dòng
+// cũ của phiếu rồi ghi lại đúng các dòng hiện có trong form - giữ nguyên NGÀY GIỜ gốc của
+// phiếu (không đổi ngày ghi nhận, chỉ đổi nội dung).
+window.__editImportRows = [];
+
+async function editImportReceipt(soPhieu) {
+    const p = window.phieuData[soPhieu];
+    if (!p) { showAlert("Không tìm thấy dữ liệu phiếu!"); return; }
+
+    // Nạp danh sách NCC + Nguyên liệu để làm dropdown (dùng chung nguồn với form nhập mới)
+    const [nccSnap, nlSnap] = await Promise.all([
+        db.collection('suppliers').get(),
+        db.collection('materials_list').get()
+    ]);
+    const nccOptions = nccSnap.docs.map(d => d.data().name).filter(Boolean);
+    const nlOptions = nlSnap.docs.map(d => d.data().name).filter(Boolean);
+
+    // Bản nháp các dòng đang sửa - thao tác trên bản nháp này, chỉ ghi thật vào Firestore khi
+    // bấm "Lưu thay đổi".
+    window.__editImportRows = p.items.map(it => ({
+        tenNL: it.tenNL || '',
+        sl: parseFloat(it.sl) || 0,
+        donGia: parseFloat(it.donGia) || 0
+    }));
+
+    const firstItem = p.items[0] || {};
+    let nccOptionsHtml = '';
+    nccOptions.forEach(n => {
+        nccOptionsHtml += '<option value="' + n + '" ' + (n === p.ncc ? 'selected' : '') + '>' + n + '</option>';
+    });
+
+    const html = '<div class="text-left space-y-3">' +
+        '<div class="grid grid-cols-2 gap-2">' +
+            '<div>' +
+                '<label class="text-xs font-bold text-slate-500">Nhà cung cấp</label>' +
+                '<select id="edit-imp-ncc" class="swal2-input !m-0 !w-full">' + nccOptionsHtml + '</select>' +
+            '</div>' +
+            '<div>' +
+                '<label class="text-xs font-bold text-slate-500">Số phiếu</label>' +
+                '<input id="edit-imp-sophieu" type="text" value="' + soPhieu + '" disabled class="swal2-input !m-0 !w-full !bg-slate-100 dark:!bg-slate-800">' +
+            '</div>' +
+        '</div>' +
+        '<div class="grid grid-cols-2 gap-2">' +
+            '<div>' +
+                '<label class="text-xs font-bold text-slate-500">Số hoá đơn</label>' +
+                '<input id="edit-imp-sohd" type="text" value="' + (firstItem.soHd || '') + '" class="swal2-input !m-0 !w-full">' +
+            '</div>' +
+            '<div>' +
+                '<label class="text-xs font-bold text-slate-500">Ngày hoá đơn</label>' +
+                '<input id="edit-imp-ngayhd" type="date" value="' + (firstItem.ngayHd || '') + '" class="swal2-input !m-0 !w-full">' +
+            '</div>' +
+        '</div>' +
+        '<div>' +
+            '<label class="text-xs font-bold text-slate-500">Danh sách nguyên liệu</label>' +
+            '<div id="edit-imp-rows" class="mt-1 space-y-1.5 max-h-[35vh] overflow-y-auto pr-1"></div>' +
+            '<button type="button" onclick="addEditImportRow()" class="mt-2 w-full bg-emerald-600 hover:bg-emerald-700 text-white py-1.5 rounded-lg text-xs font-bold">+ Thêm dòng nguyên liệu</button>' +
+        '</div>' +
+        '<div class="text-right font-black text-base pt-1">Tổng tiền mới: <span id="edit-imp-total" class="text-indigo-600">0</span> đ</div>' +
+    '</div>';
+
+    Swal.fire({
+        title: 'Sửa phiếu nhập NL: ' + soPhieu,
+        html: html,
+        width: '480px',
+        showCancelButton: true,
+        confirmButtonText: '💾 Lưu thay đổi',
+        cancelButtonText: 'Hủy',
+        didOpen: () => {
+            window.__editImportNlOptions = nlOptions;
+            renderEditImportRows();
+        },
+        preConfirm: async () => {
+            const nccName = document.getElementById('edit-imp-ncc').value;
+            const soHd = document.getElementById('edit-imp-sohd').value.trim();
+            const ngayHd = document.getElementById('edit-imp-ngayhd').value;
+            const rows = window.__editImportRows.filter(r => r.tenNL && r.sl > 0);
+            if (rows.length === 0) { Swal.showValidationMessage('Phiếu phải có ít nhất 1 dòng nguyên liệu hợp lệ (SL > 0)!'); return false; }
+            if (!nccName) { Swal.showValidationMessage('Vui lòng chọn nhà cung cấp!'); return false; }
+            return { nccName, soHd, ngayHd, rows };
+        }
+    }).then(async (result) => {
+        if (!result.isConfirmed) return;
+        await saveEditedImportReceipt(soPhieu, p, result.value);
+    });
+}
+
+// Vẽ lại danh sách dòng nguyên liệu đang sửa (bản nháp window.__editImportRows) + tự tính
+// lại tổng tiền mỗi khi có thay đổi.
+function renderEditImportRows() {
+    const box = document.getElementById('edit-imp-rows');
+    if (!box) return;
+    const nlOptions = window.__editImportNlOptions || [];
+    
+    let rowsHtml = '';
+    window.__editImportRows.forEach((r, idx) => {
+        let nlOptionsHtml = '';
+        nlOptions.forEach(n => {
+            nlOptionsHtml += '<option value="' + n + '" ' + (n === r.tenNL ? 'selected' : '') + '>' + n + '</option>';
+        });
+
+        rowsHtml += '<div class="flex gap-1.5 items-center">' +
+            '<select onchange="updateEditImportRow(' + idx + ', \'tenNL\', this.value)" class="flex-[2] p-1.5 text-xs border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 dark:text-white rounded-lg">' +
+                nlOptionsHtml +
+            '</select>' +
+            '<input type="number" value="' + r.sl + '" placeholder="SL" onchange="updateEditImportRow(' + idx + ', \'sl\', this.value)" class="w-16 p-1.5 text-xs border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 dark:text-white rounded-lg text-center">' +
+            '<input type="number" value="' + r.donGia + '" placeholder="Đơn giá" onchange="updateEditImportRow(' + idx + ', \'donGia\', this.value)" class="w-24 p-1.5 text-xs border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 dark:text-white rounded-lg text-right">' +
+            '<button type="button" onclick="removeEditImportRow(' + idx + ')" class="w-7 h-7 shrink-0 flex items-center justify-center rounded-lg bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400 font-bold">✕</button>' +
+        '</div>';
+    });
+
+    box.innerHTML = rowsHtml;
+    updateEditImportTotal();
+}
+
+function addEditImportRow() {
+    const nlOptions = window.__editImportNlOptions || [];
+    window.__editImportRows.push({ tenNL: nlOptions[0] || '', sl: 1, donGia: 0 });
+    renderEditImportRows();
+}
+
+function removeEditImportRow(idx) {
+    window.__editImportRows.splice(idx, 1);
+    renderEditImportRows();
+}
+
+function updateEditImportRow(idx, field, value) {
+    if (!window.__editImportRows[idx]) return;
+    window.__editImportRows[idx][field] = (field === 'sl' || field === 'donGia') ? (parseFloat(value) || 0) : value;
+    updateEditImportTotal();
+}
+
+function updateEditImportTotal() {
+    const totalEl = document.getElementById('edit-imp-total');
+    if (!totalEl) return;
+    const total = window.__editImportRows.reduce((s, r) => s + (r.sl * r.donGia), 0);
+    totalEl.textContent = total.toLocaleString('vi-VN');
+}
+
+// Lưu lại phiếu ĐÃ SỬA: tính chênh lệch nợ đúng, xoá dòng cũ + ghi lại dòng mới, giữ nguyên
+// ngày giờ gốc của phiếu (không đổi ngày ghi nhận công nợ).
+async function saveEditedImportReceipt(soPhieu, oldData, newData) {
+    showLoading();
+    try {
+        const oldTotal = oldData.items.reduce((s, it) => s + (parseFloat(it.thanhTien) || 0), 0);
+        const oldNccId = oldData.items[0]?.nccId || null;
+        const originalTimestamp = oldData.items[0]?.timestamp || new Date();
+
+        // Tìm ID của NCC MỚI (có thể là NCC cũ nếu không đổi, hoặc NCC khác nếu vừa đổi)
+        const nccSnap = await db.collection('suppliers').where('name', '==', newData.nccName).get();
+        if (nccSnap.empty) { Swal.close(); showAlert("Không tìm thấy NCC đã chọn!"); return; }
+        const newNccDoc = nccSnap.docs[0];
+        const newNccId = newNccDoc.id;
+
+        const newTotal = newData.rows.reduce((s, r) => s + (r.sl * r.donGia), 0);
+
+        // TÍNH LẠI CÔNG NỢ CHO ĐÚNG: nếu đổi sang NCC KHÁC, phải trừ hết nợ cũ ở NCC CŨ và
+        // cộng full tiền mới vào NCC MỚI (2 nhà cung cấp khác nhau, không thể chỉ bù trừ
+        // chênh lệch được) - còn nếu vẫn là NCC cũ, chỉ cần cộng/trừ đúng phần CHÊNH LỆCH.
+        if (oldNccId && oldNccId !== newNccId) {
+            await db.collection('suppliers').doc(oldNccId).update({ debt: firebase.firestore.FieldValue.increment(-oldTotal) });
+            await newNccDoc.ref.update({ debt: firebase.firestore.FieldValue.increment(newTotal) });
+        } else {
+            const delta = newTotal - oldTotal;
+            await newNccDoc.ref.update({ debt: firebase.firestore.FieldValue.increment(delta) });
+        }
+
+        // Xoá hết các dòng CŨ của phiếu, ghi lại đúng các dòng HIỆN CÓ trong form - giữ
+        // nguyên NGÀY GIỜ gốc (originalTimestamp) để phiếu không bị "nhảy" sang kỳ báo cáo
+        // khác chỉ vì sửa nội dung.
+        const oldSnap = await db.collection('material_imports').where('soPhieu', '==', soPhieu).get();
+        const batch = db.batch();
+        oldSnap.docs.forEach(doc => batch.delete(doc.ref));
+        await batch.commit();
+
+        for (const row of newData.rows) {
+            await db.collection('material_imports').add({
+                soPhieu: soPhieu,
+                ncc: newData.nccName,
+                nccId: newNccId,
+                soHd: newData.soHd,
+                ngayHd: newData.ngayHd,
+                tenNL: row.tenNL,
+                sl: row.sl,
+                donGia: row.donGia,
+                thanhTien: row.sl * row.donGia,
+                timestamp: originalTimestamp
+            });
+        }
+
+        Swal.close();
+        Swal.fire({ icon: 'success', title: 'Đã lưu thay đổi!', toast: true, position: 'top-end', timer: 1800, showConfirmButton: false });
+
+        if (typeof ghiLog === 'function') ghiLog('Nguyên Liệu', 'Sửa', soPhieu, `Sửa phiếu nhập nguyên liệu ${soPhieu}: ${oldTotal.toLocaleString('vi-VN')}đ → ${newTotal.toLocaleString('vi-VN')}đ${oldNccId !== newNccId ? ` (đổi NCC: ${oldData.ncc} → ${newData.nccName})` : ''}`);
+
+        if (typeof filterNhapKho === 'function') await filterNhapKho();
+        if (typeof loadAllData === 'function') await loadAllData();
+        if (typeof refreshDashboardData === 'function') refreshDashboardData();
+    } catch (e) {
+        Swal.close();
+        console.error(e);
+        showAlert("Lỗi khi lưu: " + e.message);
+    }
 }
 
 
