@@ -6327,8 +6327,10 @@ async function renderInventoryList(filter = 'today') {
     });
 
     // Đảm bảo mọi sản phẩm đang có tồn kho thực tế cũng xuất hiện, kể cả khi không có
-    // giao dịch nào trong đúng khoảng ngày đang xem.
-    Object.keys(currentStockMap).forEach(name => ensureItem(name));
+    // giao dịch nào trong đúng khoảng ngày đang xem. LOẠI TRỪ "Tiền ship" - đây không phải
+    // sản phẩm thật, không có NXT (dù bộ đếm tồn kho lỡ còn sót tài liệu rác tên này từ
+    // trước khi sửa, vẫn không để lọt vào báo cáo).
+    Object.keys(currentStockMap).forEach(name => { if (name !== 'Tiền ship') ensureItem(name); });
 
     inventoryMap.forEach((inv, name) => {
         const currentStock = currentStockMap[name] || 0;
@@ -9492,18 +9494,25 @@ function updateCartTotalDisplay() {
     const totalDisplay = document.getElementById('cart-total-display');
     if (!totalDisplay) return;
 
-    // Tính tổng tiền hàng: nếu ghi chú có "date" hoặc "đate" thì đơn giá tính bằng 0
-    const subTotal = sellCart.reduce((sum, item) => {
+    // Tính tổng tiền hàng: nếu ghi chú có "date" hoặc "đate" thì đơn giá tính bằng 0.
+    // SỬA LỖI: TRƯỚC ĐÂY cộng luôn cả dòng "Tiền Ship" (isShipping:true) vào phần chịu
+    // thuế - không khớp với lúc LƯU hoá đơn thật sự (saveAndPrint đã loại trừ đúng), khiến
+    // số tiền hiển thị SỐNG trên màn hình lúc đang bán (trước khi bấm Lưu) bị CAO HƠN số
+    // tiền thực tế sau khi lưu - gây lệch số ngay trước mắt người bán hàng.
+    let subTotal = 0, shippingTotal = 0;
+    sellCart.forEach(item => {
         const lowerNote = (item.note || '').toLowerCase();
         const effectivePrice = (lowerNote.includes('date') || lowerNote.includes('đate')) ? 0 : item.price;
-        return sum + (item.qty * effectivePrice);
-    }, 0);
+        const lineTotal = item.qty * effectivePrice;
+        if (item.isShipping) shippingTotal += lineTotal; else subTotal += lineTotal;
+    });
 
-    // Cộng thêm thuế VAT (giống như giao diện đang hiển thị)
+    // Cộng thêm thuế VAT (giống như giao diện đang hiển thị) - CHỈ áp cho phần hàng hoá
+    // thật, Tiền Ship cộng thẳng vào tổng, không qua thuế.
     const vatEl = document.getElementById('global-vat');
     const vatRate = vatEl ? parseFloat(vatEl.value) || 0 : 0;
     const taxTotal = subTotal * (vatRate / 100);
-    const grandTotal = subTotal + taxTotal;
+    const grandTotal = subTotal + taxTotal + shippingTotal;
 
     totalDisplay.innerText = grandTotal.toLocaleString('vi-VN') + ' đ';
 
@@ -11547,9 +11556,16 @@ async function reprintSale(docId) {
                     .filter(it => it.dateSwap || (parseFloat(it.qty) || 0) > 0.000001);
 
                 const vatRate = parseFloat(data.vatRate) || 0;
-                let netSubTotal = 0;
-                netItems.forEach(it => { if (!it.dateSwap) netSubTotal += (parseFloat(it.qty) || 0) * (parseFloat(it.price) || 0); });
-                netTotal = Math.round(netSubTotal * (1 + vatRate / 100));
+                // SỬA LỖI: TRƯỚC ĐÂY tính thuế trên CẢ dòng "Tiền Ship" (isShipping:true) -
+                // không nhất quán với mọi nơi khác (Tiền Ship luôn không chịu thuế VAT). Giờ
+                // tách riêng: chỉ hàng hoá thật mới chịu thuế, Tiền Ship cộng thẳng vào tổng.
+                let netSubTotal = 0, netShippingTotal = 0;
+                netItems.forEach(it => {
+                    if (it.dateSwap) return;
+                    const lineTotal = (parseFloat(it.qty) || 0) * (parseFloat(it.price) || 0);
+                    if (it.isShipping) netShippingTotal += lineTotal; else netSubTotal += lineTotal;
+                });
+                netTotal = Math.round(netSubTotal * (1 + vatRate / 100)) + netShippingTotal;
                 returnNote = `Đã trừ hàng hoàn trả ngày ${latestDate ? latestDate.toLocaleDateString('vi-VN') : ''} (${totalReturned.toLocaleString('vi-VN')}đ)`;
 
                 const choice = await Swal.fire({
@@ -13194,9 +13210,61 @@ async function getDocsByDate(collectionName, from, to) {
 // với từng cột) để mỗi báo cáo tự khai đúng: cột chữ căn trái, cột số căn phải, ĐVT/STT căn
 // giữa - đúng kiểu căn lề đang dùng ở Báo Cáo Tổng Hợp. Nếu không truyền aligns thì mới dùng
 // lại quy tắc cũ (cột đầu trái, còn lại phải) để không phá vỡ chỗ nào lỡ chưa cập nhật.
-function reportPrintTableHtml(title, subtitle, headers, rows, totalRowHtml, aligns) {
+// Tính rowspan để "GỘP" các dòng LIÊN TIẾP có cùng giá trị ở 1 cột (dùng cho cột "Tên khách
+// hàng"/"Tên NCC" khi 1 khách mua/nợ nhiều sản phẩm - mỗi khách chỉ hiện tên 1 lần, căn giữa
+// dòng, giống thao tác "Merge & Center" trong Excel) - dùng chung cho cả bảng HTML xem trước
+// lẫn file Excel xuất ra (xem mergeExcelColumnByConsecutiveValue bên dưới).
+function buildMergedColumnRowSpans(rows, colIndex) {
+    const rowSpan = {};
+    const skip = new Set();
+    let i = 0;
+    while (i < rows.length) {
+        const val = rows[i][colIndex];
+        let span = 1;
+        while (i + span < rows.length && rows[i + span][colIndex] === val && val !== '' && val !== undefined && val !== null) span++;
+        rowSpan[i] = span;
+        for (let k = 1; k < span; k++) skip.add(i + k);
+        i += span;
+    }
+    return { rowSpan, skip };
+}
+
+// Bản dùng cho Excel (ExcelJS) - gộp các Ô LIÊN TIẾP có cùng giá trị ở 1 cột thành 1 ô duy
+// nhất, căn giữa cả ngang lẫn dọc. Gọi SAU KHI đã ghi xong toàn bộ dữ liệu vào sheet, truyền
+// đúng dòng đầu/dòng cuối của phần dữ liệu (không lẫn dòng tiêu đề/dòng tổng).
+// Bản dùng cho Excel (ExcelJS) - gộp các Ô LIÊN TIẾP có cùng giá trị ở 1 cột thành 1 ô duy
+// nhất, căn GIỮA THEO CHIỀU DỌC (vertical:middle - đúng giữa dòng đã gộp) nhưng vẫn CĂN LỀ
+// TRÁI theo chiều ngang (horizontal:left - giống mọi ô chữ khác trong bảng, không dồn vào
+// giữa). Gọi SAU KHI đã ghi xong toàn bộ dữ liệu vào sheet, truyền đúng dòng đầu/dòng cuối
+// của phần dữ liệu (không lẫn dòng tiêu đề/dòng tổng).
+function mergeExcelColumnByConsecutiveValue(sheet, colIndex, firstRow, lastRow) {
+    if (lastRow < firstRow) return;
+    let start = firstRow;
+    for (let r = firstRow + 1; r <= lastRow + 1; r++) {
+        const curVal = r <= lastRow ? sheet.getCell(r, colIndex).value : null;
+        const prevVal = sheet.getCell(start, colIndex).value;
+        if (r > lastRow || curVal !== prevVal || !curVal) {
+            if (r - 1 > start) {
+                sheet.mergeCells(start, colIndex, r - 1, colIndex);
+                sheet.getCell(start, colIndex).alignment = { vertical: 'middle', horizontal: 'left' };
+            }
+            start = r;
+        }
+    }
+}
+
+function reportPrintTableHtml(title, subtitle, headers, rows, totalRowHtml, aligns, mergeCol) {
     const theadHtml = '<tr>' + headers.map(h => `<th style="border:1px solid #999;padding:7px 8px;background:#efefef;font-weight:bold;">${h}</th>`).join('') + '</tr>';
-    const bodyHtml = rows.map(r => '<tr>' + r.map((c, idx) => {
+    const merge = (mergeCol !== undefined && mergeCol !== null) ? buildMergedColumnRowSpans(rows, mergeCol) : null;
+    const bodyHtml = rows.map((r, rIdx) => '<tr>' + r.map((c, idx) => {
+        if (merge && idx === mergeCol) {
+            if (merge.skip.has(rIdx)) return ''; // Dòng đã được gộp vào ô phía trên - không vẽ ô này nữa
+            const span = merge.rowSpan[rIdx];
+            const rowspanAttr = span > 1 ? ` rowspan="${span}"` : '';
+            // Căn giữa DỌC (vertical-align:middle) nhưng căn lề TRÁI theo chiều ngang
+            // (text-align:left), giống mọi ô chữ khác trong bảng.
+            return `<td${rowspanAttr} style="border:1px solid #999;padding:6px 8px;text-align:left;vertical-align:middle;font-weight:bold;">${c}</td>`;
+        }
         const align = (aligns && aligns[idx]) ? aligns[idx] : (idx === 0 ? 'left' : 'right');
         return `<td style="border:1px solid #999;padding:6px 8px;text-align:${align};">${c}</td>`;
     }).join('') + '</tr>').join('');
@@ -13244,8 +13312,8 @@ function printReportDirect(title, bodyHtml) {
     setTimeout(cleanup, 60000);
 }
 // Bản dùng cho báo cáo dạng 1 bảng đơn giản (Bán hàng, Tồn kho, Hàng hết hạn...)
-function openReportPreviewWindow(title, subtitle, headers, rows, totalRowHtml, aligns) {
-    printReportDirect(title, reportPrintTableHtml(title, subtitle, headers, rows, totalRowHtml, aligns));
+function openReportPreviewWindow(title, subtitle, headers, rows, totalRowHtml, aligns, mergeCol) {
+    printReportDirect(title, reportPrintTableHtml(title, subtitle, headers, rows, totalRowHtml, aligns, mergeCol));
 }
 
 // ===== IN PHIẾU NHẬP KHO (1 phiếu từ modal chi tiết, hoặc nhiều phiếu đã tick chọn ở
@@ -13352,7 +13420,8 @@ async function viewSalesReport() {
         ['Ngày', 'Tên KH', 'Tên SP', 'ĐVT', 'SL', 'Đơn giá', 'Thuế', 'Thành tiền (có thuế)'],
         rows,
         totalRowHtml,
-        ['left', 'left', 'left', 'center', 'right', 'right', 'right', 'right']
+        ['left', 'left', 'left', 'center', 'right', 'right', 'right', 'right'],
+        1 // Gộp cột "Tên KH" (index 1): 1 khách mua nhiều SP thì gộp thành 1 ô, căn giữa
     );
 }
 
@@ -13388,6 +13457,7 @@ async function exportSales() {
     });
 
     let tongDoanhThu = 0;
+    const dataStartRow = sheet.rowCount + 1; // Dòng đầu tiên của phần dữ liệu (ngay sau header)
 
     snapshot.forEach(doc => {
         const sale = doc.data();
@@ -13421,10 +13491,15 @@ async function exportSales() {
                 cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
                 // SỬA LỖI CHE CHỮ: cột Tên KH (2) và Tên SP (3) cho tự xuống dòng khi dài,
                 // giống cách đã sửa ở Báo Cáo Tổng Hợp.
-                if (col === 2 || col === 3) cell.alignment = { wrapText: true, vertical: 'middle' };
+                if (col === 2 || col === 3) cell.alignment = { vertical: 'middle' };
             });
         });
     });
+
+    // GỘP CỘT "Tên KH" (cột 2): 1 khách mua nhiều SP thì gộp các dòng liên tiếp thành 1 ô
+    // duy nhất, căn giữa cả ngang lẫn dọc - giống thao tác "Merge & Center" trong Excel.
+    const dataEndRow = sheet.rowCount;
+    mergeExcelColumnByConsecutiveValue(sheet, 2, dataStartRow, dataEndRow);
 
     // TRỪ HÀNG HOÀN TRẢ PHÁT SINH TRONG KỲ (theo ngày trả, không phải ngày bán gốc - xem
     // processReturn) - đồng bộ với cách "Doanh thu" ở Trang Chủ đang tính.
@@ -13584,7 +13659,7 @@ async function viewInventoryReport() {
                 });
             });
         }
-        Object.keys(currentStockMap).forEach(name => initItem(name));
+        Object.keys(currentStockMap).forEach(name => { if (name !== 'Tiền ship') initItem(name); }); // loại "Tiền ship" - không phải sản phẩm thật
 
         const sortedNames = Object.keys(inventory).sort(compareProductDisplayOrder);
         const rows = [];
@@ -13722,7 +13797,7 @@ async function exportInventory() {
 
         // Đảm bảo mọi sản phẩm đang có tồn kho thực tế cũng xuất hiện, kể cả khi không
         // có giao dịch nào trong đúng khoảng ngày đang xem.
-        Object.keys(currentStockMap).forEach(name => initItem(name));
+        Object.keys(currentStockMap).forEach(name => { if (name !== 'Tiền ship') initItem(name); }); // loại "Tiền ship" - không phải sản phẩm thật
 
         // 3. Xuất Excel
         const workbook = new ExcelJS.Workbook();
@@ -13797,7 +13872,7 @@ async function exportInventory() {
                         c.font = { bold: true, size: 12 };
                     }
                     // SỬA LỖI CHE CHỮ: cột Tên sản phẩm (2) cho tự xuống dòng khi tên dài
-                    if (col === 2) c.alignment = { wrapText: true, vertical: 'middle' };
+                    if (col === 2) c.alignment = { vertical: 'middle' };
                 });
             });
         });
@@ -13933,7 +14008,7 @@ async function exportExpiredGoodsReport() {
                 c.font = { size: 12 };
                 if (col === 1 || col === 2 || col === 3 || col === 6 || col === 7) c.alignment = { horizontal: 'center' };
                 // Cột "Tên sản phẩm" cho xuống dòng thay vì bị cắt che mất chữ khi tên dài
-                if (col === 5) c.alignment = { wrapText: true, vertical: 'middle' };
+                if (col === 5) c.alignment = { vertical: 'middle' };
             });
         });
         if (!rows.length) {
@@ -14068,7 +14143,7 @@ async function exportReturnsReport() {
                 c.font = { size: 12 };
                 if (col === 1 || col === 2 || col === 3) c.alignment = { horizontal: 'center' };
                 if (col === 6) c.numFmt = '#,##0"đ"';
-                if (col === 5 || col === 7) c.alignment = { wrapText: true, vertical: 'middle' };
+                if (col === 5 || col === 7) c.alignment = { vertical: 'middle' };
             });
         });
         if (!rows.length) {
@@ -14181,35 +14256,52 @@ async function exportFullReport() {
             const dDateStr = dDateObj.toISOString().split('T')[0];
             
             // Lấy vatRate của hóa đơn (nếu không có thì mặc định là 0)
-            const vatRate = parseFloat(d.vatRate || 0); 
+            const vatRate = parseFloat(d.vatRate || 0);
+            const itemsArr = d.items || [];
+            // KH có TỪ 2 SẢN PHẨM TRỞ LÊN trong CÙNG 1 hoá đơn - chỉ khi đó mới cộng thêm
+            // "Tổng hoá đơn" vào Ghi chú (hoá đơn 1 sản phẩm thì Thành tiền đã hiện rõ rồi,
+            // không cần lặp lại).
+            const isMultiProduct = itemsArr.length > 1;
             
-            d.items?.forEach(i => {
-                // "Tiền ship" (isShipping:true) không phải hàng hoá thật - không có NXT,
-                // loại bỏ hoàn toàn khỏi báo cáo tồn kho (không tạo dòng "sản phẩm" giả).
-                if (i.isShipping) return;
-                initItem(i.name);
+            itemsArr.forEach((i, idx) => {
                 const qty = parseFloat(i.qty || 0); // Sửa thành parseFloat
                 const price = parseFloat(i.price || 0);
                 
-                // CÔNG THỨC MỚI: Tính thuế dựa trên % của hóa đơn cho từng món
+                // CÔNG THỨC MỚI: Tính thuế dựa trên % của hóa đơn cho từng món - "Tiền ship"
+                // (isShipping:true) KHÔNG chịu thuế VAT dù hóa đơn có bật thuế.
                 const tienHangMoiMon = qty * price;
-                const thueMoiMon = tienHangMoiMon * (vatRate / 100);
+                const thueMoiMon = i.isShipping ? 0 : tienHangMoiMon * (vatRate / 100);
                 const thanhTienCoThue = tienHangMoiMon + thueMoiMon;
+
+                // "Tiền ship" KHÔNG phải hàng hoá thật - không có NXT, không được tính vào
+                // phần I (Nhập/Xuất/Tồn) - nhưng VẪN được liệt kê ở phần II (Chi tiết bán
+                // hàng) bên dưới, vì đó là khoản tiền thật sự thu của khách.
+                if (!i.isShipping) initItem(i.name);
                 
                 if (dDateObj < fromDateObj) {
-                    inventory[i.name].tonDau -= qty;
+                    if (!i.isShipping) inventory[i.name].tonDau -= qty;
                 } else if (dDateStr >= fromVal && dDateStr <= toVal) {
-                    inventory[i.name].xuat += qty;
+                    if (!i.isShipping) inventory[i.name].xuat += qty;
+
+                    // Ở dòng CUỐI CÙNG của 1 hoá đơn có TỪ 2 SẢN PHẨM TRỞ LÊN, cộng thêm
+                    // "Tổng hoá đơn" vào cột Ghi chú - để biết ngay tổng tiền khách phải trả
+                    // của CẢ hoá đơn, khỏi phải tự cộng từng dòng Thành tiền lại với nhau.
+                    let noteFinal = i.note || "";
+                    if (isMultiProduct && idx === itemsArr.length - 1) {
+                        const invoiceTotal = parseFloat(d.total || 0);
+                        const totalNote = `Tổng hoá đơn: ${invoiceTotal.toLocaleString('vi-VN')}đ`;
+                        noteFinal = noteFinal ? `${noteFinal} | ${totalNote}` : totalNote;
+                    }
                     
                     // Đẩy vào mảng với Thành tiền đã bao gồm thuế
                     salesData.push([
                         dDateStr, 
                         d.customer || 'Khách lẻ', 
-                        i.name, 
+                        i.isShipping ? ('🚚 ' + i.name) : i.name, 
                         qty, 
                         price, 
                         thanhTienCoThue, // Đã cộng thuế ở đây
-                        i.note || ""
+                        noteFinal
                     ]);
                 }
             });
@@ -14281,6 +14373,8 @@ async function exportFullReport() {
         // SẮP XẾP LẠI DỮ LIỆU THEO NGÀY (YYYY-MM-DD) TRƯỚC KHI VẼ BẢNG
         salesData.sort((a, b) => new Date(a[0]) - new Date(b[0]));
 
+        const salesDataStartRow = sheet.rowCount + 1; // Dòng đầu tiên của phần dữ liệu (ngay sau header)
+
         salesData.forEach(item => {
             // TẠO BẢN SAO ĐỂ KHÔNG LÀM THAY ĐỔI DỮ LIỆU GỐC
             let rowData = [...item]; 
@@ -14311,14 +14405,18 @@ async function exportFullReport() {
 				// Cột 5 là Đơn giá, cột 6 là Thành tiền (đã bao gồm thuế)
 				if (col === 5 || col === 6) c.numFmt = '#,##0';
 
-				// SỬA LỖI CHE CHỮ: cột Khách hàng (2), Tên sản phẩm (3) và Ghi chú (7) cho
-				// tự xuống dòng (wrapText) khi nội dung dài, thay vì bị bảng kẻ ô cắt mất
-				// phần chữ thừa - hàng sẽ tự cao lên vừa đủ khi in/xem trong Excel.
+				// Căn giữa theo chiều dọc cho cột Khách hàng (2), Tên sản phẩm (3) và Ghi chú
+				// (7) - đã BỎ wrapText theo yêu cầu, chữ dài sẽ tràn ra thay vì tự xuống dòng.
 				if (col === 2 || col === 3 || col === 7) {
-					c.alignment = { wrapText: true, vertical: 'middle' };
+					c.alignment = { vertical: 'middle' };
 				}
             });
         });
+
+        // GỘP CỘT "Khách hàng" (cột 2): 1 khách mua nhiều SP thì gộp các dòng liên tiếp
+        // thành 1 ô duy nhất, căn giữa cả ngang lẫn dọc - giống thao tác "Merge & Center"
+        // trong Excel, đúng như ảnh mẫu người dùng gửi.
+        mergeExcelColumnByConsecutiveValue(sheet, 2, salesDataStartRow, sheet.rowCount);
         
         // II. NXT
         sheet.addRow([]); 
@@ -14398,7 +14496,7 @@ async function exportFullReport() {
                     }
                     // SỬA LỖI CHE CHỮ: cột Tên sản phẩm (2) cho tự xuống dòng khi tên dài
                     if (col === 2) {
-                        c.alignment = { wrapText: true, vertical: 'middle' };
+                        c.alignment = { vertical: 'middle' };
                     }
                 });
             });
@@ -14440,7 +14538,7 @@ async function exportFullReport() {
                 // SỬA LỖI CHE CHỮ: cột Tên sản phẩm (2) cho tự xuống dòng khi tên dài,
                 // vẫn giữ căn giữa cho đồng bộ với các cột số liệu bên cạnh.
                 if (col === 2) {
-                    c.alignment = { horizontal: 'center', wrapText: true, vertical: 'middle' };
+                    c.alignment = { horizontal: 'center', vertical: 'middle' };
                 }
             });
         });
@@ -14483,9 +14581,8 @@ async function exportFullReport() {
             }); 
         });
         
-        // NỚI RỘNG các cột hay chứa chữ dài (Khách hàng / Tên sản phẩm / Ghi chú) - trước đây
-        // các cột này quá hẹp (15) nên tên sản phẩm/khách hàng dài bị bảng kẻ ô che mất một
-        // phần chữ. Kết hợp với wrapText bên dưới để chữ tự xuống dòng thay vì bị cắt.
+        // NỚI RỘNG các cột hay chứa chữ dài (Khách hàng / Tên sản phẩm / Ghi chú) - đã BỎ
+        // wrapText theo yêu cầu, nên nới rộng cột là cách duy nhất giúp đỡ che chữ hơn.
         sheet.columns = [{ width: 12 }, { width: 26 }, { width: 24 }, { width: 12 }, { width: 14 }, { width: 16 }, { width: 20 }];
 		
 		// --- CHÈN ĐOẠN CẤU HÌNH VÀO ĐÂY ---
@@ -14595,21 +14692,38 @@ async function viewFullReport() {
             const dDateObj = d.date.toDate();
             const dDateStr = dDateObj.toISOString().split('T')[0];
             const vatRate = parseFloat(d.vatRate || 0);
-            d.items?.forEach(i => {
-                // "Tiền ship" (isShipping:true) không phải hàng hoá thật - không có NXT,
-                // loại bỏ hoàn toàn khỏi báo cáo tồn kho (không tạo dòng "sản phẩm" giả).
-                if (i.isShipping) return;
-                initItem(i.name);
+            const itemsArr = d.items || [];
+            // KH có TỪ 2 SẢN PHẨM TRỞ LÊN trong CÙNG 1 hoá đơn - chỉ khi đó mới cộng thêm
+            // "Tổng hoá đơn" vào Ghi chú (hoá đơn 1 sản phẩm thì Thành tiền đã hiện rõ rồi,
+            // không cần lặp lại).
+            const isMultiProduct = itemsArr.length > 1;
+            itemsArr.forEach((i, idx) => {
                 const qty = parseFloat(i.qty || 0);
                 const price = parseFloat(i.price || 0);
                 const tienHangMoiMon = qty * price;
-                const thueMoiMon = tienHangMoiMon * (vatRate / 100);
+                // "Tiền ship" (isShipping:true) không chịu thuế VAT dù hóa đơn có bật thuế.
+                const thueMoiMon = i.isShipping ? 0 : tienHangMoiMon * (vatRate / 100);
                 const thanhTienCoThue = tienHangMoiMon + thueMoiMon;
+                // "Tiền ship" không phải hàng hoá thật - không có NXT, không tính vào phần I
+                // (Nhập/Xuất/Tồn) - nhưng vẫn liệt kê ở "Chi tiết bán hàng" (salesData) bên
+                // dưới vì đó là khoản tiền thật sự thu của khách.
+                if (!i.isShipping) initItem(i.name);
                 if (dDateObj < fromDateObj) {
-                    inventory[i.name].tonDau -= qty;
+                    if (!i.isShipping) inventory[i.name].tonDau -= qty;
                 } else if (dDateStr >= fromVal && dDateStr <= toVal) {
-                    inventory[i.name].xuat += qty;
-                    salesData.push([dDateStr, d.customer || 'Khách lẻ', i.name, qty, price, thanhTienCoThue, i.note || ""]);
+                    if (!i.isShipping) inventory[i.name].xuat += qty;
+
+                    // Ở dòng CUỐI CÙNG của 1 hoá đơn có TỪ 2 SẢN PHẨM TRỞ LÊN, cộng thêm
+                    // "Tổng hoá đơn" vào cột Ghi chú - để biết ngay tổng tiền khách phải trả
+                    // của CẢ hoá đơn, khỏi phải tự cộng từng dòng Thành tiền lại với nhau.
+                    let noteFinal = i.note || "";
+                    if (isMultiProduct && idx === itemsArr.length - 1) {
+                        const invoiceTotal = parseFloat(d.total || 0);
+                        const totalNote = `Tổng hoá đơn: ${invoiceTotal.toLocaleString('vi-VN')}đ`;
+                        noteFinal = noteFinal ? `${noteFinal} | ${totalNote}` : totalNote;
+                    }
+
+                    salesData.push([dDateStr, d.customer || 'Khách lẻ', i.isShipping ? ('🚚 ' + i.name) : i.name, qty, price, thanhTienCoThue, noteFinal]);
                 }
             });
         });
@@ -14646,9 +14760,14 @@ async function viewFullReport() {
         const td = 'border:1px solid #999;padding:6px 8px;';
         const th = 'border:1px solid #999;padding:7px 8px;background:#efefef;font-weight:bold;';
 
-        const salesRowsHtml = salesData.map(r => {
+        const salesMerge = buildMergedColumnRowSpans(salesData, 1); // Gộp cột "Khách hàng" (index 1)
+        const salesRowsHtml = salesData.map((r, rIdx) => {
             const [y, m, dd] = r[0].split('-');
-            return `<tr><td style="${td}text-align:center;">${dd}-${m}-${y}</td><td style="${td}">${r[1]}</td><td style="${td}">${r[2]}</td><td style="${td}text-align:center;">${r[3]}</td><td style="${td}text-align:right;">${Math.round(r[4]).toLocaleString('vi-VN')}</td><td style="${td}text-align:right;">${Math.round(r[5]).toLocaleString('vi-VN')}</td><td style="${td}">${r[6] || ''}</td></tr>`;
+            const custCellHtml = salesMerge.skip.has(rIdx) ? '' :
+                (salesMerge.rowSpan[rIdx] > 1
+                    ? `<td rowspan="${salesMerge.rowSpan[rIdx]}" style="${td}text-align:left;vertical-align:middle;font-weight:bold;">${r[1]}</td>`
+                    : `<td style="${td}">${r[1]}</td>`);
+            return `<tr><td style="${td}text-align:center;">${dd}-${m}-${y}</td>${custCellHtml}<td style="${td}">${r[2]}</td><td style="${td}text-align:center;">${r[3]}</td><td style="${td}text-align:right;">${Math.round(r[4]).toLocaleString('vi-VN')}</td><td style="${td}text-align:right;">${Math.round(r[5]).toLocaleString('vi-VN')}</td><td style="${td}">${r[6] || ''}</td></tr>`;
         }).join('') || `<tr><td colspan="7" style="${td}text-align:center;color:#888;">Không có dữ liệu</td></tr>`;
 
         const nhomMap = new Map();
@@ -14842,7 +14961,7 @@ async function exportMaterialPurchaseReport() {
                 c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
                 c.font = { size: 12 };
                 if (col !== 4 && col !== 5) c.alignment = { horizontal: 'center' };
-                if (col === 5) c.alignment = { wrapText: true, vertical: 'middle' };
+                if (col === 5) c.alignment = { vertical: 'middle' };
             });
         });
         if (!rows.length) {
@@ -14943,17 +15062,24 @@ async function calcCustomerDebtData(from, to) {
         if (d.paymentMethod !== 'Công nợ' || !reportData[d.customer]) return;
         const vat = parseFloat(d.vatRate || 0);
         const dDate = d.date.seconds ? new Date(d.date.seconds * 1000) : new Date(d.date);
+        // SỬA LỖI: TRƯỚC ĐÂY nhân thuế VAT vào MỌI dòng, kể cả dòng "Tiền Ship"
+        // (isShipping:true) - không nhất quán với mọi nơi khác trong app (Hoá đơn, Báo Cáo
+        // Tổng Hợp, BC Bán Hàng đều đã loại thuế cho Tiền Ship) - khiến công nợ của khách bị
+        // tính CAO HƠN thực tế đúng bằng phần thuế bị tính nhầm trên tiền ship.
         let invoiceTotal = 0;
-        (d.items || []).forEach(i => invoiceTotal += (parseFloat(i.qty || 0) * parseFloat(i.price || 0)) * (1 + vat / 100));
+        (d.items || []).forEach(i => {
+            const tienHang = parseFloat(i.qty || 0) * parseFloat(i.price || 0);
+            invoiceTotal += i.isShipping ? tienHang : tienHang * (1 + vat / 100);
+        });
         if (dDate < fromDate) {
             reportData[d.customer].openingBalance += invoiceTotal;
         } else if (dDate <= toDate) {
             (d.items || []).forEach(item => {
                 const tien = parseFloat(item.qty || 0) * parseFloat(item.price || 0);
                 reportData[d.customer].lines.push({
-                    dateObj: dDate, soPhieu: d.id || '---', name: item.name || '',
+                    dateObj: dDate, soPhieu: d.id || '---', name: item.isShipping ? ('🚚 ' + (item.name || '')) : (item.name || ''),
                     unit: item.unit || '', qty: parseFloat(item.qty || 0),
-                    tien: tien, vatRate: vat, tienThue: tien * (vat / 100)
+                    tien: tien, vatRate: item.isShipping ? 0 : vat, tienThue: item.isShipping ? 0 : tien * (vat / 100)
                 });
             });
         }
@@ -15123,7 +15249,7 @@ async function exportDebtReport() {
                 row.eachCell((c, col) => {
                     setBorderStyle(c);
                     if (col === 1 || col === 2 || col === 3 || col === 5 || col === 6 || col === 8) c.alignment = { horizontal: 'center' };
-                    if (col === 4) c.alignment = { wrapText: true, vertical: 'middle' };
+                    if (col === 4) c.alignment = { vertical: 'middle' };
                     if (col === 7 || col === 9) c.numFmt = '#,##0';
                 });
             });
@@ -15311,14 +15437,14 @@ async function exportExcelQuyen1() {
             sheet.getRow(i).font = { bold: true };
             sheet.getRow(i).eachCell({ includeEmpty: true }, c => {
                 c.border = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} };
-                c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+                c.alignment = { horizontal: 'center', vertical: 'middle' };
             });
         }
 
         dataI.forEach((d, i) => {
             const dObj = d.timestamp ? d.timestamp.toDate() : new Date();
             const row = sheet.addRow([i + 1, d.tenNL || "", dObj.toLocaleDateString(), d.sl || "", d.ncc || "", d.address || "", d.nguoigiao || "", "", "", "", "Đạt", "", "", "", ""]);
-            row.eachCell(c => { c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }; });
+            row.eachCell(c => { c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; c.alignment = { horizontal: 'center', vertical: 'middle' }; });
         });
 
         // --- 3. PHẦN II ---
@@ -15343,7 +15469,7 @@ async function exportExcelQuyen1() {
         for(let i = r - 2; i <= r; i++) {
             sheet.getRow(i).eachCell(c => { 
                 c.border = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} }; 
-                c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }; 
+                c.alignment = { horizontal: 'center', vertical: 'middle' }; 
                 c.font = { bold: true }; 
             });
         }
@@ -15352,7 +15478,7 @@ async function exportExcelQuyen1() {
         dataII.forEach((d, i) => {
             const displayDate = d.timestamp ? d.timestamp.toDate().toLocaleDateString() : defaultDate;
             const row = sheet.addRow([i + 1, d.tenNL || "", d.csSX || "", d.address || "", displayDate, d.sl || "", d.ncc || "", d.nguoigiao || "", d.address || "", "", "", "", "Đạt", "", ""]);
-            row.eachCell(c => { c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; c.alignment = { horizontal: 'center', wrapText: true }; });
+            row.eachCell(c => { c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; c.alignment = { horizontal: 'center' }; });
         });
 
         sheet.pageSetup = { orientation: 'landscape', paperSize: 9, margins: { left: 0.2, right: 0.2, top: 0.5, bottom: 0.5 } };
@@ -15439,11 +15565,10 @@ async function exportExcelQuyen2() {
             sheet.getRow(i).font = { bold: true };
             sheet.getRow(i).eachCell(c => {
                 c.border = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} };
-                // --- THÊM wrapText: true VÀO ĐÂY ---
+                // --- THÊM  VÀO ĐÂY ---
                 c.alignment = { 
                     horizontal: 'center', 
-                    vertical: 'middle', 
-                    wrapText: true 
+                    vertical: 'middle' 
                 };
             });
         }
@@ -15456,7 +15581,7 @@ async function exportExcelQuyen2() {
             
             row.eachCell(c => {
                 c.border = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} };
-                c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+                c.alignment = { horizontal: 'center', vertical: 'middle' };
             });
         });
 
@@ -15539,7 +15664,7 @@ async function exportExcelQuyen3() {
         for (let i = r; i <= r + 1; i++) {
             sheet.getRow(i).eachCell(c => {
                 c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-                c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+                c.alignment = { horizontal: 'center', vertical: 'middle' };
                 c.font = { bold: true };
             });
         }
@@ -15641,7 +15766,7 @@ async function exportExcelLuuMau() {
         [headerRow, numRow].forEach(row => {
             row.eachCell(c => {
                 c.border = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} };
-                c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+                c.alignment = { horizontal: 'center', vertical: 'middle' };
                 c.font = { bold: true };
             });
         });
@@ -15662,7 +15787,7 @@ async function exportExcelLuuMau() {
             
             row.eachCell(c => {
                 c.border = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} };
-                c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+                c.alignment = { horizontal: 'center', vertical: 'middle' };
             });
         });
 
@@ -15896,7 +16021,7 @@ async function exportSupplierDebtReport() {
                 row.eachCell((c, col) => {
                     setBorderStyle(c);
                     if (col === 1 || col === 2 || col === 3 || col === 5 || col === 6) c.alignment = { horizontal: 'center' };
-                    if (col === 4) c.alignment = { wrapText: true, vertical: 'middle' };
+                    if (col === 4) c.alignment = { vertical: 'middle' };
                     if (col === 7) c.numFmt = '#,##0';
                 });
             });
