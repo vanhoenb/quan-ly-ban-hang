@@ -2944,13 +2944,8 @@ html:not(.dark) .bg-white {
 
             <div class="mb-3">
               <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Tên sản phẩm</label>
-              <select id="sxTenSP" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-950 text-gray-800 dark:text-white" onchange="tinhSoKgThanhPham()">
+              <select id="sxTenSP" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-950 text-gray-800 dark:text-white" onchange="tinhSoKgThanhPham(); autoFillDVTFromProductSX();">
                 <option value="">-- Chọn sản phẩm --</option>
-                <option>TCMT 450g Thuỷ tinh</option><option>TCMT 450g Nhựa</option>
-                <option>TCMT 275g Thuỷ tinh tròn</option><option>TCMT 275g Thuỷ tinh Lăng</option>
-                <option>TCMT 275g Nhựa</option><option>TCMT 180g Thuỷ tinh</option>
-                <option>TCMT 180g Túi Zip</option><option>TCMT 150g Thuỷ tinh</option>
-                <option>TCMT 90g Khay Nhôm</option><option>Mắm bếp</option>
               </select>
             </div>
 
@@ -16767,9 +16762,45 @@ function getRawNumber(id) {
 }
 
 // Khởi tạo dữ liệu ban đầu cho trang Sản xuất (lấy số phiếu mới nhất...)
+// Nạp danh sách sản phẩm THẬT (window.allProductCache, cùng nguồn với Bán Hàng/Danh Mục SP)
+// vào dropdown "Tên sản phẩm" ở trang Sản Xuất - thay cho danh sách cứng cố định trước đây.
+// Giữ nguyên lựa chọn đang chọn (nếu có) sau khi nạp lại, để không mất dở dữ liệu đang nhập.
+function populateSXProductDropdown() {
+    const sel = document.getElementById('sxTenSP');
+    if (!sel) return;
+    const current = sel.value;
+    const products = (window.allProductCache || []).slice().sort((a, b) => compareProductDisplayOrder(a.name, b.name));
+    sel.innerHTML = '<option value="">-- Chọn sản phẩm --</option>' +
+        products.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+    if (current && products.some(p => p.name === current)) sel.value = current;
+}
+
+// Tự động điền ĐVT theo đúng sản phẩm vừa chọn (lấy từ Danh Mục SP thật) - người dùng vẫn có
+// thể tự đổi lại ĐVT thủ công nếu cần (VD đóng gói theo Khay thay vì Hũ trong 1 mẻ đặc biệt).
+function autoFillDVTFromProductSX() {
+    const tenSP = document.getElementById('sxTenSP')?.value;
+    const dvtSel = document.getElementById('sxDVT');
+    if (!tenSP || !dvtSel) return;
+    const p = (window.allProductCache || []).find(x => x.name === tenSP);
+    if (p && p.unit) {
+        const hasOption = Array.from(dvtSel.options).some(o => o.value === p.unit);
+        if (hasOption) dvtSel.value = p.unit;
+    }
+}
+
 async function khoiTaoTrangSanXuat() {
     console.log("Đang khởi tạo trang sản xuất...");
-    
+
+    // SỬA LỖI: dropdown "Tên sản phẩm" TRƯỚC ĐÂY là danh sách CỨNG chỉ 10 sản phẩm TCMT cố
+    // định trong HTML - sản phẩm mới thêm sau này (VD "Quả Bùi Kỳ Lão", "Mắm Tép Riu Đỏ"...)
+    // hoặc sản phẩm đã đổi tên sẽ KHÔNG BAO GIỜ hiện trong danh sách này. Giờ nạp động từ
+    // đúng danh mục sản phẩm thật (window.allProductCache), luôn khớp với thực tế.
+    // Nếu cache SP chưa kịp tải (VD người dùng mở thẳng trang này đầu tiên), tải bù trước.
+    if ((!window.allProductCache || window.allProductCache.length === 0) && typeof refreshCache === 'function') {
+        await refreshCache();
+    }
+    populateSXProductDropdown();
+
     // 1. Lấy phiếu mới nhất dựa vào thời gian tạo (timestamp) thay vì sắp xếp chuỗi soPhieu
     const snapshot = await db.collection('production').orderBy('timestamp', 'desc').limit(1).get();
     
@@ -16925,6 +16956,7 @@ async function luuSanXuat() {
             };
             await db.collection('production').add(data);
         }
+        invalidateProductionDocsCache();
 
         // TRƯỚC ĐÂY dùng showAlert() báo thành công - đây là hộp thoại CHẶN trang, phải bấm OK
         // mới chạy tiếp, và gây cảm giác "rung/loà" cả trang trên điện thoại. Đổi sang
@@ -17059,7 +17091,8 @@ function xemChiTietPhieuSX(soPhieu) {
             <td class="p-2 border text-center text-blue-600">${it.meChuaNau || 0}</td>
             <td class="p-2 border text-center text-amber-600">${it.meChuaDong || 0}</td>
             <td class="p-2 border text-center text-green-600">${it.soMe || 0}</td>
-            <td class="p-2 border text-center">
+            <td class="p-2 border text-center whitespace-nowrap">
+                <button onclick="editDongPhieuSX('${it.id}', '${soPhieu}')" class="text-indigo-500 hover:text-indigo-700 font-bold mr-2">✏️</button>
                 <button onclick="xoaDongTrongPhieuSX('${it.id}', '${soPhieu}')" class="text-red-500 hover:text-red-700 font-bold">✕</button>
             </td>
         </tr>`).join('');
@@ -17103,6 +17136,89 @@ function xemChiTietPhieuSX(soPhieu) {
     });
 }
 
+// SỬA 1 DÒNG sản phẩm/mẻ trong phiếu sản xuất - trước đây chỉ có thể XOÁ dòng sai rồi thêm
+// lại từ đầu, giờ cho sửa trực tiếp SL/Tồn đầu/Tồn cuối/Số Kg/Số mẻ mà không mất công nhập
+// lại toàn bộ. Không đụng gì tới tồn kho/công nợ (trang Sản Xuất chỉ để theo dõi, không có
+// NXT tự động), nên chỉ cần cập nhật đúng số liệu là xong.
+function editDongPhieuSX(id, soPhieu) {
+    const group = window.sxPhieuData ? window.sxPhieuData[soPhieu] : null;
+    const it = group ? group.items.find(x => x.id === id) : null;
+    if (!it) { showAlert("Không tìm thấy dòng này!"); return; }
+
+    const products = (window.allProductCache || []).slice().sort((a, b) => compareProductDisplayOrder(a.name, b.name));
+
+    let productOptionsHtml = '<option value="">(Chỉ cập nhật mẻ - không chọn SP)</option>';
+    products.forEach(p => {
+        productOptionsHtml += '<option value="' + p.name + '" ' + (p.name === it.tenSP ? 'selected' : '') + '>' + p.name + '</option>';
+    });
+
+    const html = '<div class="text-left space-y-2">' +
+        '<div>' +
+            '<label class="text-xs font-bold text-slate-500">Sản phẩm</label>' +
+            '<select id="edit-sx-ten" class="swal2-input !m-0 !w-full">' + productOptionsHtml + '</select>' +
+        '</div>' +
+        '<div class="grid grid-cols-3 gap-2">' +
+            '<div><label class="text-xs font-bold text-slate-500">ĐVT</label><input id="edit-sx-dvt" type="text" value="' + (it.dvt || '') + '" class="swal2-input !m-0 !w-full"></div>' +
+            '<div><label class="text-xs font-bold text-slate-500">Tồn đầu</label><input id="edit-sx-tondau" type="number" value="' + (it.tonDau || 0) + '" class="swal2-input !m-0 !w-full"></div>' +
+            '<div><label class="text-xs font-bold text-slate-500">SL</label><input id="edit-sx-sl" type="number" value="' + (it.sl || 0) + '" class="swal2-input !m-0 !w-full"></div>' +
+        '</div>' +
+        '<div class="grid grid-cols-2 gap-2">' +
+            '<div><label class="text-xs font-bold text-slate-500">Tồn cuối</label><input id="edit-sx-toncuoi" type="number" value="' + (it.tonCuoi || 0) + '" class="swal2-input !m-0 !w-full"></div>' +
+            '<div><label class="text-xs font-bold text-slate-500">Số Kg đã đóng</label><input id="edit-sx-sokg" type="number" value="' + (parseFloat(it.soKg) || 0) + '" class="swal2-input !m-0 !w-full"></div>' +
+        '</div>' +
+        '<div class="grid grid-cols-3 gap-2">' +
+            '<div><label class="text-xs font-bold text-slate-500">Mẻ Xong</label><input id="edit-sx-some" type="number" value="' + (it.soMe || 0) + '" class="swal2-input !m-0 !w-full"></div>' +
+            '<div><label class="text-xs font-bold text-slate-500">Mẻ Chờ</label><input id="edit-sx-mecho" type="number" value="' + (it.meChuaDong || 0) + '" class="swal2-input !m-0 !w-full"></div>' +
+            '<div><label class="text-xs font-bold text-slate-500">Mẻ Mới</label><input id="edit-sx-memoi" type="number" value="' + (it.meChuaNau || 0) + '" class="swal2-input !m-0 !w-full"></div>' +
+        '</div>' +
+    '</div>';
+
+    Swal.fire({
+        title: 'Sửa dòng sản xuất',
+        html: html,
+        width: '460px',
+        showCancelButton: true,
+        confirmButtonText: '💾 Lưu thay đổi',
+        cancelButtonText: 'Hủy',
+        preConfirm: () => ({
+            tenSP: document.getElementById('edit-sx-ten').value,
+            dvt: document.getElementById('edit-sx-dvt').value.trim(),
+            tonDau: parseFloat(document.getElementById('edit-sx-tondau').value) || 0,
+            sl: parseFloat(document.getElementById('edit-sx-sl').value) || 0,
+            tonCuoi: parseFloat(document.getElementById('edit-sx-toncuoi').value) || 0,
+            soKg: document.getElementById('edit-sx-sokg').value || "0",
+            soMe: parseFloat(document.getElementById('edit-sx-some').value) || 0,
+            meChuaDong: parseFloat(document.getElementById('edit-sx-mecho').value) || 0,
+            meChuaNau: parseFloat(document.getElementById('edit-sx-memoi').value) || 0
+        })
+    }).then(async (result) => {
+        if (!result.isConfirmed) return;
+        await saveEditedDongSX(id, soPhieu, result.value);
+    });
+}
+
+async function saveEditedDongSX(id, soPhieu, newData) {
+    showLoading();
+    try {
+        await db.collection('production').doc(id).update(newData);
+        invalidateProductionDocsCache();
+
+        Swal.close();
+        Swal.fire({ icon: 'success', title: 'Đã lưu thay đổi!', toast: true, position: 'top-end', timer: 1500, showConfirmButton: false });
+
+        if (typeof ghiLog === 'function') ghiLog('Sản Xuất', 'Sửa', soPhieu, `Sửa dòng "${newData.tenSP || '(chỉ mẻ)'}" trong phiếu ${soPhieu}`);
+
+        if (typeof filterSanXuat === 'function') await filterSanXuat();
+        if (window.sxPhieuData && window.sxPhieuData[soPhieu]) {
+            xemChiTietPhieuSX(soPhieu);
+        }
+    } catch (e) {
+        Swal.close();
+        console.error("Lỗi sửa dòng: ", e);
+        showAlert("Lỗi: " + e.message);
+    }
+}
+
 // Xoá 1 dòng sản phẩm/mẻ bên trong phiếu (mở từ popup xem chi tiết), rồi cập nhật lại danh sách + popup
 async function xoaDongTrongPhieuSX(id, soPhieu) {
     if (!confirm("Xóa dòng này khỏi phiếu " + soPhieu + "?")) return;
@@ -17111,6 +17227,7 @@ async function xoaDongTrongPhieuSX(id, soPhieu) {
         const tenSP = snapDoc.exists ? (snapDoc.data().tenSP || '(Chỉ mẻ)') : '';
 
         await db.collection('production').doc(id).delete();
+        invalidateProductionDocsCache();
 
         if (typeof filterSanXuat === 'function') {
             await filterSanXuat();
@@ -17150,6 +17267,7 @@ async function huyPhieuSXGroup(soPhieu) {
         const snap = await db.collection('production').where('soPhieu', '==', soPhieu).get();
         const soDong = snap.docs.length;
         await Promise.all(snap.docs.map(d => d.ref.delete()));
+        invalidateProductionDocsCache();
 
         Swal.fire({ icon: 'success', title: 'Đã xóa phiếu ' + soPhieu + '!', toast: true, position: 'top-end', timer: 1500, showConfirmButton: false });
 
@@ -17195,22 +17313,48 @@ async function loadInitSX() {
     }
 }
 
-// Hàm tìm kiếm riêng cho trang Sản xuất
- function searchSanXuat() {
-    let input = document.getElementById("searchInputSX");
-    let filter = input.value.toUpperCase();
-    let tableBody = document.getElementById("list-sanxuat");
-    let rows = tableBody.getElementsByTagName("tr");
+// Cache TOÀN BỘ lịch sử phiếu sản xuất (mọi tháng) để tìm kiếm xuyên suốt - chỉ tải 1 lần
+// trong phiên làm việc (nếu chưa tải), không phải lúc nào cũng đọc lại toàn bộ lịch sử.
+window.__allProductionDocsCache = null;
+async function ensureAllProductionDocsLoaded() {
+    if (window.__allProductionDocsCache) return window.__allProductionDocsCache;
+    const snapshot = await db.collection('production').orderBy('timestamp', 'desc').get();
+    window.__allProductionDocsCache = snapshot.docs;
+    return window.__allProductionDocsCache;
+}
+// Xoá cache mỗi khi dữ liệu sản xuất thay đổi (lưu mới/sửa/xoá) - lần tìm kiếm tiếp theo sẽ
+// tự tải lại đầy đủ, không hiện dữ liệu cũ đã lỗi thời.
+function invalidateProductionDocsCache() {
+    window.__allProductionDocsCache = null;
+}
 
+// Hàm tìm kiếm riêng cho trang Sản xuất
+// SỬA LỖI: TRƯỚC ĐÂY chỉ lọc trong các dòng ĐANG HIỂN THỊ (đã bị giới hạn theo đúng
+// THÁNG/khoảng ngày đang chọn ở bộ lọc) - gõ số phiếu hoặc tên SP của THÁNG KHÁC sẽ không ra
+// kết quả gì (nhìn như "không có" dù dữ liệu vẫn tồn tại). Giờ khi có từ khoá, tự động tải
+// và tìm trên TOÀN BỘ lịch sử sản xuất (mọi tháng), không chỉ tháng đang xem - giống hệt
+// cách đã sửa ở trang Nhập Kho.
+async function searchSanXuat() {
+    const input = document.getElementById("searchInputSX");
+    const filter = (input.value || '').trim().toUpperCase();
+    const listBody = document.getElementById('list-sanxuat');
+    if (!listBody) return;
+
+    if (filter === '') {
+        // Không có từ khoá: quay về đúng danh sách theo bộ lọc tháng/ngày đang chọn (như cũ).
+        if (typeof filterSanXuat === 'function') filterSanXuat();
+        return;
+    }
+
+    const allDocs = await ensureAllProductionDocsLoaded();
+    const htmlRows = groupAndRenderSX(allDocs); // đồng thời nạp lại ĐẦY ĐỦ window.sxPhieuData
+    listBody.innerHTML = htmlRows;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    const rows = listBody.getElementsByTagName("tr");
     for (let i = 0; i < rows.length; i++) {
-        // Tìm theo toàn bộ nội dung của dòng (Ngày, Số phiếu, Sản phẩm...)
-        // vì dòng hiện dùng 1 ô <td colspan> duy nhất, không còn tách cột riêng
-        let txtValue = rows[i].textContent || rows[i].innerText;
-        if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            rows[i].style.display = ""; // Hiện dòng nếu khớp
-        } else {
-            rows[i].style.display = "none"; // Ẩn dòng nếu không khớp
-        }
+        const txtValue = rows[i].textContent || rows[i].innerText;
+        rows[i].style.display = txtValue.toUpperCase().indexOf(filter) > -1 ? "" : "none";
     }
 }
 
@@ -17232,6 +17376,7 @@ async function huyPhieuSX(id) {
         const tenSP = d ? (d.tenSP || '') : '';
 
         await db.collection('production').doc(id).delete();
+        invalidateProductionDocsCache();
         showAlert("Đã xóa!");
         
         // Cập nhật lại bảng danh sách
