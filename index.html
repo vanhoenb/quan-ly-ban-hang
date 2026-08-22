@@ -171,6 +171,18 @@
     .choices__list--dropdown {
         z-index: 9999 !important;
     }
+
+    /* Ẩn mũi tên tăng/giảm mặc định của ô nhập số (input type="number") - dùng cho các ô
+       cần nhập nhanh, nhiều ô liền nhau (ví dụ bảng Tăng Ca ở trang Chấm Công), đỡ chiếm
+       diện tích và tránh bấm nhầm mũi tên thay vì gõ số trực tiếp. */
+    .no-spinner::-webkit-outer-spin-button,
+    .no-spinner::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    .no-spinner[type=number] {
+        -moz-appearance: textfield;
+    }
 	
 </style>
 
@@ -3189,6 +3201,19 @@ html:not(.dark) .bg-white {
     <div class="w-full">
         <h3 class="mb-6 font-bold text-2xl text-gray-800 px-2 md:px-0">LỊCH CÔNG VIỆC & GHI CHÚ</h3>
 
+        <!-- TAB ĐIỀU HƯỚNG: Lịch & Ghi Chú / Chấm Công (Chấm Công đã CHUYỂN từ trang Quản
+             Lý sang đây theo yêu cầu). -->
+        <div class="flex gap-2 border-b border-slate-200 dark:border-slate-700 mb-4">
+            <button id="tab-btn-lichcv-calendar" onclick="switchLichCVTab('calendar')" class="px-4 py-2.5 font-bold text-sm rounded-t-lg border-b-2 border-blue-600 text-blue-600 dark:text-blue-400 flex items-center gap-2">
+                <i data-lucide="calendar-days" class="w-4 h-4"></i> Lịch &amp; Ghi Chú
+            </button>
+            <button id="tab-btn-lichcv-chamcong" onclick="switchLichCVTab('chamcong')" class="px-4 py-2.5 font-bold text-sm rounded-t-lg border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center gap-2">
+                <i data-lucide="calendar-check-2" class="w-4 h-4"></i> Chấm Công
+            </button>
+        </div>
+
+        <div id="lichcv-tab-calendar">
+
         <div class="flex flex-col lg:flex-row gap-6">
             <div class="w-full lg:w-1/4 space-y-4">
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
@@ -3254,6 +3279,70 @@ html:not(.dark) .bg-white {
                 </div>
             </div>
         </div>
+
+        </div><!-- /lichcv-tab-calendar -->
+
+    <!-- TAB 3: CHẤM CÔNG - 2 bảng: chấm công hàng ngày (X/1-2/N) phía trên, chấm giờ tăng
+         ca (nhập số giờ trực tiếp) phía dưới - theo đúng mẫu Excel "Bảng chấm công" hiện có
+         của cửa hàng. Lưu theo từng THÁNG (đổi tháng ở ô chọn phía trên sẽ tự nạp lại đúng
+         dữ liệu tháng đó, hoặc tạo mới nếu tháng đó chưa chấm công lần nào). -->
+    <div id="lichcv-tab-chamcong" class="hidden space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl p-3">
+            <div class="flex items-center gap-2">
+                <label class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase whitespace-nowrap">Tháng chấm công</label>
+                <input type="month" id="chamcong-month" onchange="loadChamCongMonth()" class="border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-xl text-gray-800 dark:text-white text-sm outline-none">
+            </div>
+            <div class="flex items-center gap-2 flex-wrap">
+                <button onclick="printChamCong()" class="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all duration-75 border-b-[4px] border-slate-800 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2">
+                    <i data-lucide="printer" class="w-4 h-4"></i> In bảng chấm công
+                </button>
+                <button onclick="exportChamCongExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all duration-75 border-b-[4px] border-green-800 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2">
+                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Xuất Excel
+                </button>
+                <button onclick="saveChamCongData()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all duration-75 border-b-[4px] border-emerald-800 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2">
+                    <i data-lucide="save" class="w-4 h-4"></i> Lưu bảng chấm công
+                </button>
+            </div>
+        </div>
+
+        <!-- BẢNG CHẤM CÔNG HÀNG NGÀY -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 p-3">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
+                <div>
+                    <h3 class="font-bold text-slate-800 dark:text-white">BẢNG CHẤM CÔNG HÀNG NGÀY</h3>
+                    <p class="text-[11px] text-slate-400">Bấm vào từng ô ngày để đổi trạng thái theo vòng: (trống) → X (đi làm) → 1/2 (nửa công) → N (nghỉ) → quay lại trống.</p>
+                </div>
+                <button onclick="addChamCongEmployee('attendance')" class="shrink-0 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+                    <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Thêm nhân viên
+                </button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="text-xs border-collapse w-full" id="chamcong-attendance-table">
+                    <thead id="chamcong-attendance-head"></thead>
+                    <tbody id="chamcong-attendance-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- BẢNG TĂNG CA -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 p-3">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
+                <div>
+                    <h3 class="font-bold text-slate-800 dark:text-white">BẢNG TĂNG CA (SỐ GIỜ LÀM THÊM)</h3>
+                    <p class="text-[11px] text-slate-400">Nhập trực tiếp số giờ tăng ca của từng ngày (để trống hoặc 0 nếu hôm đó không tăng ca).</p>
+                </div>
+                <button onclick="addChamCongEmployee('overtime')" class="shrink-0 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+                    <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Thêm nhân viên
+                </button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="text-xs border-collapse w-full" id="chamcong-overtime-table">
+                    <thead id="chamcong-overtime-head"></thead>
+                    <tbody id="chamcong-overtime-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
     </div>
 
     <button onclick="openEventModal()" class="fixed bottom-20 md:bottom-10 right-10 bg-red-500 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-3xl hover:bg-red-600 transition z-[100]">
@@ -3339,88 +3428,45 @@ html:not(.dark) .bg-white {
     </div>
 </div>
 <div id="page-user-management" class="hidden space-y-6 p-2 md:p-6">
-    <!-- 2 KHỐI BẢO TRÌ TỒN KHO xếp chung 1 hàng (cạnh nhau trên PC, xếp dọc trên điện
-         thoại) - trước đây mỗi khối chiếm nguyên 1 hàng riêng, giờ gộp lại cho gọn. -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <!-- KHỐI BẢO TRÌ HỆ THỐNG: sửa lại tồn kho nếu bị sai số do lỗi hệ thống trước đó -->
-        <div class="bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-800 rounded-2xl p-4 flex flex-col gap-3">
-            <div>
-                <p class="font-bold text-amber-800 dark:text-amber-300 flex items-center gap-2">
-                    <i data-lucide="wrench" class="w-4 h-4"></i> Sửa lại tồn kho (nếu số tồn ở trang Bán Hàng bị sai)
-                </p>
-                <p class="text-xs text-amber-700 dark:text-amber-400 mt-1">
-                    Bấm nút này sẽ tính lại chính xác tồn kho của TẤT CẢ sản phẩm từ toàn bộ lịch sử phiếu nhập/xuất
-                    rồi ghi đè lại số liệu đang hiển thị ở trang Bán Hàng. Chỉ cần bấm khi thấy số tồn hiển thị
-                    sai so với thực tế.
-                </p>
-            </div>
-            <button id="btn-fix-stock" onclick="runForceResyncStockCountersUI()" class="shrink-0 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-amber-700 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2 justify-center">
-                <i data-lucide="refresh-ccw" class="w-4 h-4"></i> Sửa lại tồn kho ngay
+    <!-- 4 KHỐI BẢO TRÌ HỆ THỐNG - gộp chung 1 hàng, thu gọn tối đa (chỉ còn tiêu đề ngắn +
+         nút bấm, bỏ hết đoạn văn hướng dẫn dài). Nội dung hướng dẫn đầy đủ giờ chuyển vào
+         hộp thoại xác nhận hiện ra khi bấm nút (xem các hàm confirmXxx trong JS) - vừa gọn
+         giao diện, vừa không mất thông tin hướng dẫn (chỉ ẩn đi cho tới khi cần). -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-800 rounded-2xl p-3 flex flex-col gap-2 items-center text-center">
+            <p class="font-bold text-amber-800 dark:text-amber-300 text-xs flex items-center gap-1.5 justify-center">
+                <i data-lucide="wrench" class="w-3.5 h-3.5"></i> Sửa lại tồn kho
+            </p>
+            <button id="btn-fix-stock" onclick="confirmRunForceResyncStock()" class="w-full bg-amber-500 hover:bg-amber-600 text-white px-2 py-2 rounded-xl font-bold text-xs transition-all duration-75 border-b-[3px] border-amber-700 hover:-translate-y-0.5 active:translate-y-[1px] active:border-b-[1px] shadow-md flex items-center gap-1.5 justify-center">
+                <i data-lucide="refresh-ccw" class="w-3.5 h-3.5"></i> Sửa ngay
             </button>
         </div>
 
-        <!-- KHỐI BẢO TRÌ HỆ THỐNG: đồng bộ lại tên sản phẩm vào lịch sử cũ - dùng khi đã ĐỔI TÊN
-             1 sản phẩm ở Danh Mục SP TRƯỚC ĐÂY (từ bản phần mềm cũ, lúc bước này còn là tùy chọn
-             và lỡ bỏ qua) khiến báo cáo "Tổng Hợp" (NXT) hiện tách thành 2 dòng riêng (tên cũ +
-             tên mới), dòng tên mới bị tồn âm. -->
-        <div class="bg-violet-50 dark:bg-violet-950/30 border border-violet-300 dark:border-violet-800 rounded-2xl p-4 flex flex-col gap-3">
-            <div>
-                <p class="font-bold text-violet-800 dark:text-violet-300 flex items-center gap-2">
-                    <i data-lucide="refresh-ccw" class="w-4 h-4"></i> Đồng bộ tên sản phẩm vào lịch sử cũ (nếu báo cáo NXT hiện tách 2 tên)
-                </p>
-                <p class="text-xs text-violet-700 dark:text-violet-400 mt-1">
-                    Dùng khi trước đây bạn đã ĐỔI TÊN 1 sản phẩm nhưng chưa đồng bộ lại tên đó vào các phiếu Nhập
-                    Kho/Hoá đơn cũ - khiến "Báo Cáo Tổng Hợp" (NXT) hiểu nhầm thành 2 sản phẩm khác nhau (tên cũ
-                    giữ nguyên tồn, tên mới bị tồn ÂM đúng bằng số đã bán). Nhập đúng tên CŨ và tên MỚI để đồng bộ
-                    lại - không làm thay đổi bất kỳ số lượng/số tiền nào đã có, chỉ đổi nhãn tên.
-                </p>
-            </div>
-            <button onclick="openSyncProductNameHistoryTool()" class="shrink-0 bg-violet-500 hover:bg-violet-600 text-white px-4 py-2.5 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-violet-700 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2 justify-center">
-                <i data-lucide="refresh-ccw" class="w-4 h-4"></i> Đồng bộ tên ngay
-            </button>
-        </div>
-    </div>
-
-    <!-- 2 KHỐI SAO LƯU / KHÔI PHỤC DỮ LIỆU xếp chung 1 hàng (cạnh nhau trên PC, xếp dọc
-         trên điện thoại) - trước đây mỗi khối chiếm nguyên 1 hàng riêng, giờ gộp lại cho gọn. -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <!-- KHỐI SAO LƯU DỮ LIỆU: tải toàn bộ dữ liệu về máy phòng trường hợp phần mềm gặp
-             sự cố (mất mạng dài ngày, tài khoản Firebase gặp vấn đề, thao tác nhầm hàng loạt...) -->
-        <div class="bg-sky-50 dark:bg-sky-950/30 border border-sky-300 dark:border-sky-800 rounded-2xl p-4 flex flex-col gap-3">
-            <div>
-                <p class="font-bold text-sky-800 dark:text-sky-300 flex items-center gap-2">
-                    <i data-lucide="hard-drive-download" class="w-4 h-4"></i> Sao lưu dữ liệu ra máy tính
-                </p>
-                <p class="text-xs text-sky-700 dark:text-sky-400 mt-1">
-                    Tải về 1 file duy nhất chứa TOÀN BỘ dữ liệu hiện có (sản phẩm, phiếu nhập/xuất, khách hàng,
-                    nhà cung cấp, công nợ, nguyên liệu, sản xuất...) - phòng trường hợp phần mềm gặp sự cố hoặc
-                    cần đối chiếu lại. Nên sao lưu định kỳ (ví dụ cuối mỗi tuần) và lưu file ở nơi an toàn, vì
-                    file có chứa cả thông tin tài khoản đăng nhập.
-                </p>
-            </div>
-            <button id="btn-backup-data" onclick="backupAllDataToFile()" class="shrink-0 bg-sky-500 hover:bg-sky-600 text-white px-4 py-2.5 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-sky-700 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2 justify-center">
-                <i data-lucide="download" class="w-4 h-4"></i> Sao lưu dữ liệu ra máy
+        <div class="bg-violet-50 dark:bg-violet-950/30 border border-violet-300 dark:border-violet-800 rounded-2xl p-3 flex flex-col gap-2 items-center text-center">
+            <p class="font-bold text-violet-800 dark:text-violet-300 text-xs flex items-center gap-1.5 justify-center">
+                <i data-lucide="refresh-ccw" class="w-3.5 h-3.5"></i> Đồng bộ tên SP
+            </p>
+            <button onclick="confirmOpenSyncProductNameTool()" class="w-full bg-violet-500 hover:bg-violet-600 text-white px-2 py-2 rounded-xl font-bold text-xs transition-all duration-75 border-b-[3px] border-violet-700 hover:-translate-y-0.5 active:translate-y-[1px] active:border-b-[1px] shadow-md flex items-center gap-1.5 justify-center">
+                <i data-lucide="refresh-ccw" class="w-3.5 h-3.5"></i> Đồng bộ ngay
             </button>
         </div>
 
-        <!-- KHỐI KHÔI PHỤC DỮ LIỆU: nạp lại 1 file JSON đã sao lưu trước đó (ở khối bên trên)
-             vào lại hệ thống - dùng khi cần chuyển dữ liệu sang tài khoản Firebase khác, hoặc
-             khôi phục sau sự cố mất dữ liệu. ĐÂY LÀ THAO TÁC GHI ĐÈ - cần hết sức cẩn thận. -->
-        <div class="bg-rose-50 dark:bg-rose-950/30 border border-rose-300 dark:border-rose-800 rounded-2xl p-4 flex flex-col gap-3">
-            <div>
-                <p class="font-bold text-rose-800 dark:text-rose-300 flex items-center gap-2">
-                    <i data-lucide="hard-drive-upload" class="w-4 h-4"></i> Khôi phục dữ liệu từ file sao lưu
-                </p>
-                <p class="text-xs text-rose-700 dark:text-rose-400 mt-1">
-                    Nạp lại dữ liệu từ 1 file <code>backup_POS_...json</code> đã tải về trước đó (ở khối phía trên).
-                    <strong>CẢNH BÁO:</strong> thao tác này sẽ GHI ĐÈ dữ liệu hiện tại bằng dữ liệu trong file -
-                    chỉ dùng khi thực sự cần khôi phục sau sự cố hoặc chuyển dữ liệu, và nên sao lưu dữ liệu
-                    hiện tại (nút bên trên) TRƯỚC khi khôi phục để phòng trường hợp chọn nhầm file.
-                </p>
-            </div>
+        <div class="bg-sky-50 dark:bg-sky-950/30 border border-sky-300 dark:border-sky-800 rounded-2xl p-3 flex flex-col gap-2 items-center text-center">
+            <p class="font-bold text-sky-800 dark:text-sky-300 text-xs flex items-center gap-1.5 justify-center">
+                <i data-lucide="hard-drive-download" class="w-3.5 h-3.5"></i> Sao lưu dữ liệu
+            </p>
+            <button id="btn-backup-data" onclick="confirmBackupData()" class="w-full bg-sky-500 hover:bg-sky-600 text-white px-2 py-2 rounded-xl font-bold text-xs transition-all duration-75 border-b-[3px] border-sky-700 hover:-translate-y-0.5 active:translate-y-[1px] active:border-b-[1px] shadow-md flex items-center gap-1.5 justify-center">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i> Sao lưu ngay
+            </button>
+        </div>
+
+        <div class="bg-rose-50 dark:bg-rose-950/30 border border-rose-300 dark:border-rose-800 rounded-2xl p-3 flex flex-col gap-2 items-center text-center">
+            <p class="font-bold text-rose-800 dark:text-rose-300 text-xs flex items-center gap-1.5 justify-center">
+                <i data-lucide="hard-drive-upload" class="w-3.5 h-3.5"></i> Khôi phục dữ liệu
+            </p>
             <input type="file" id="restore-data-file-input" accept="application/json" class="hidden" onchange="restoreAllDataFromFile(this.files[0]); this.value='';">
-            <button id="btn-restore-data" onclick="document.getElementById('restore-data-file-input').click()" class="shrink-0 bg-rose-500 hover:bg-rose-600 text-white px-4 py-2.5 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-rose-700 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2 justify-center">
-                <i data-lucide="upload" class="w-4 h-4"></i> Chọn file & khôi phục
+            <button id="btn-restore-data" onclick="confirmRestoreData()" class="w-full bg-rose-500 hover:bg-rose-600 text-white px-2 py-2 rounded-xl font-bold text-xs transition-all duration-75 border-b-[3px] border-rose-700 hover:-translate-y-0.5 active:translate-y-[1px] active:border-b-[1px] shadow-md flex items-center gap-1.5 justify-center">
+                <i data-lucide="upload" class="w-3.5 h-3.5"></i> Chọn file
             </button>
         </div>
     </div>
@@ -3440,9 +3486,6 @@ html:not(.dark) .bg-white {
         </button>
         <button id="tab-btn-activitylog" onclick="switchQuanLyTab('activitylog')" class="px-4 py-2.5 font-bold text-sm rounded-t-lg border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center gap-2">
             <i data-lucide="history" class="w-4 h-4"></i> Nhật Ký Hoạt Động
-        </button>
-        <button id="tab-btn-chamcong" onclick="switchQuanLyTab('chamcong')" class="px-4 py-2.5 font-bold text-sm rounded-t-lg border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center gap-2">
-            <i data-lucide="calendar-check-2" class="w-4 h-4"></i> Chấm Công
         </button>
     </div>
 
@@ -3523,64 +3566,6 @@ html:not(.dark) .bg-white {
         </div>
     </div>
 
-    <!-- TAB 3: CHẤM CÔNG - 2 bảng: chấm công hàng ngày (X/1-2/N) phía trên, chấm giờ tăng
-         ca (nhập số giờ trực tiếp) phía dưới - theo đúng mẫu Excel "Bảng chấm công" hiện có
-         của cửa hàng. Lưu theo từng THÁNG (đổi tháng ở ô chọn phía trên sẽ tự nạp lại đúng
-         dữ liệu tháng đó, hoặc tạo mới nếu tháng đó chưa chấm công lần nào). -->
-    <div id="quanly-tab-chamcong" class="hidden space-y-4">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl p-3">
-            <div class="flex items-center gap-2">
-                <label class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase whitespace-nowrap">Tháng chấm công</label>
-                <input type="month" id="chamcong-month" onchange="loadChamCongMonth()" class="border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-xl text-gray-800 dark:text-white text-sm outline-none">
-            </div>
-            <div class="flex items-center gap-2">
-                <button onclick="printChamCong()" class="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all duration-75 border-b-[4px] border-slate-800 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2">
-                    <i data-lucide="printer" class="w-4 h-4"></i> In bảng chấm công
-                </button>
-                <button onclick="saveChamCongData()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all duration-75 border-b-[4px] border-emerald-800 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2">
-                    <i data-lucide="save" class="w-4 h-4"></i> Lưu bảng chấm công
-                </button>
-            </div>
-        </div>
-
-        <!-- BẢNG CHẤM CÔNG HÀNG NGÀY -->
-        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 p-3">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
-                <div>
-                    <h3 class="font-bold text-slate-800 dark:text-white">BẢNG CHẤM CÔNG HÀNG NGÀY</h3>
-                    <p class="text-[11px] text-slate-400">Bấm vào từng ô ngày để đổi trạng thái theo vòng: (trống) → X (đi làm) → 1/2 (nửa công) → N (nghỉ) → quay lại trống.</p>
-                </div>
-                <button onclick="addChamCongEmployee('attendance')" class="shrink-0 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
-                    <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Thêm nhân viên
-                </button>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="text-xs border-collapse w-full" id="chamcong-attendance-table">
-                    <thead id="chamcong-attendance-head"></thead>
-                    <tbody id="chamcong-attendance-body"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- BẢNG TĂNG CA -->
-        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 p-3">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
-                <div>
-                    <h3 class="font-bold text-slate-800 dark:text-white">BẢNG TĂNG CA (SỐ GIỜ LÀM THÊM)</h3>
-                    <p class="text-[11px] text-slate-400">Nhập trực tiếp số giờ tăng ca của từng ngày (để trống hoặc 0 nếu hôm đó không tăng ca).</p>
-                </div>
-                <button onclick="addChamCongEmployee('overtime')" class="shrink-0 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
-                    <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Thêm nhân viên
-                </button>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="text-xs border-collapse w-full" id="chamcong-overtime-table">
-                    <thead id="chamcong-overtime-head"></thead>
-                    <tbody id="chamcong-overtime-body"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
 </div>
 
 
@@ -4602,8 +4587,7 @@ function xemQuyenNguoiDung(username) {
 function switchQuanLyTab(tab) {
     const tabs = {
         users: { content: document.getElementById('quanly-tab-users'), btn: document.getElementById('tab-btn-users') },
-        activitylog: { content: document.getElementById('quanly-tab-activitylog'), btn: document.getElementById('tab-btn-activitylog') },
-        chamcong: { content: document.getElementById('quanly-tab-chamcong'), btn: document.getElementById('tab-btn-chamcong') }
+        activitylog: { content: document.getElementById('quanly-tab-activitylog'), btn: document.getElementById('tab-btn-activitylog') }
     };
     const addBtn = document.getElementById('btn-add-user-header');
     const activeCls = ['border-blue-600', 'text-blue-600', 'dark:text-blue-400'];
@@ -4624,6 +4608,31 @@ function switchQuanLyTab(tab) {
     if (addBtn) addBtn.classList.toggle('hidden', tab !== 'users');
 
     if (tab === 'activitylog') loadActivityLog();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+// Chấm Công (chuyển từ trang Quản Lý sang trang Lịch Công Việc - xem HTML #page-LichCongViec)
+// - 2 tab: "Lịch & Ghi Chú" (mặc định) và "Chấm Công".
+function switchLichCVTab(tab) {
+    const tabs = {
+        calendar: { content: document.getElementById('lichcv-tab-calendar'), btn: document.getElementById('tab-btn-lichcv-calendar') },
+        chamcong: { content: document.getElementById('lichcv-tab-chamcong'), btn: document.getElementById('tab-btn-lichcv-chamcong') }
+    };
+    const activeCls = ['border-blue-600', 'text-blue-600', 'dark:text-blue-400'];
+    const inactiveCls = ['border-transparent', 'text-slate-500', 'dark:text-slate-400'];
+
+    Object.keys(tabs).forEach(key => {
+        const { content, btn } = tabs[key];
+        if (!content || !btn) return;
+        if (key === tab) {
+            content.classList.remove('hidden');
+            btn.classList.remove(...inactiveCls); btn.classList.add(...activeCls);
+        } else {
+            content.classList.add('hidden');
+            btn.classList.remove(...activeCls); btn.classList.add(...inactiveCls);
+        }
+    });
+
     if (tab === 'chamcong') {
         const monthEl = document.getElementById('chamcong-month');
         if (monthEl && !monthEl.value) {
@@ -4631,6 +4640,8 @@ function switchQuanLyTab(tab) {
             monthEl.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
         }
         if (!window.chamCongState || window.chamCongState.month !== monthEl.value) loadChamCongMonth();
+    } else if (tab === 'calendar') {
+        if (typeof fixCalendarLayout === 'function') fixCalendarLayout();
     }
     if (typeof lucide !== 'undefined') lucide.createIcons();
 }
@@ -4687,16 +4698,20 @@ function renderChamCongTable(type, days) {
     const bodyEl = document.getElementById(`chamcong-${type}-body`);
     if (!headEl || !bodyEl) return;
 
-    const thBase = 'border border-slate-300 dark:border-slate-700 p-1 text-slate-600 dark:text-slate-300';
+    // KÍCH THƯỚC CỘT (theo yêu cầu): "Họ và tên" còn 2/3 (110px → 75px), "Đơn giá" còn 1/2
+    // (90px → 45px), "Thành tiền" còn 2/3 (100px → 70px) - nhường chỗ cho các cột NGÀY rộng
+    // hơn (24px → 40px) và CAO hơn (thêm padding dọc) cho thoáng, dễ bấm/nhìn hơn trên cả
+    // máy tính lẫn điện thoại.
+    const thBase = 'border border-slate-300 dark:border-slate-700 p-2 text-slate-600 dark:text-slate-300';
     let headHtml = `<tr class="bg-slate-100 dark:bg-slate-800">
         <th class="${thBase} sticky left-0 bg-slate-100 dark:bg-slate-800 z-10 w-8">STT</th>
-        <th class="${thBase} sticky left-8 bg-slate-100 dark:bg-slate-800 z-10 min-w-[110px] text-left">Họ và tên</th>`;
+        <th class="${thBase} sticky left-8 bg-slate-100 dark:bg-slate-800 z-10 min-w-[75px] text-left">Họ và tên</th>`;
     for (let d = 1; d <= days; d++) {
-        headHtml += `<th class="${thBase} w-6">${d}</th>`;
+        headHtml += `<th class="${thBase} w-10">${d}</th>`;
     }
     headHtml += `<th class="${thBase} min-w-[60px]">Tổng ${type === 'attendance' ? 'công' : 'giờ'}</th>
-        <th class="${thBase} min-w-[90px]">Đơn giá</th>
-        <th class="${thBase} min-w-[100px]">Thành tiền</th>
+        <th class="${thBase} min-w-[45px]">Đơn giá</th>
+        <th class="${thBase} min-w-[70px]">Thành tiền</th>
         <th class="${thBase} w-8"></th>
     </tr>`;
     headEl.innerHTML = headHtml;
@@ -4711,18 +4726,18 @@ function renderChamCongTable(type, days) {
                 const val = (emp.days && emp.days[d]) || '';
                 if (val === 'X') total += 1;
                 else if (val === '1/2') total += 0.5;
-                cellsHtml += `<td class="${tdBase} p-0 text-center cursor-pointer select-none ${chamCongCellClass(val)}" onclick="cycleAttendanceCell(${idx}, ${d})" title="Bấm để đổi trạng thái">${val}</td>`;
+                cellsHtml += `<td class="${tdBase} py-3 text-center cursor-pointer select-none ${chamCongCellClass(val)}" onclick="cycleAttendanceCell(${idx}, ${d})" title="Bấm để đổi trạng thái">${val}</td>`;
             } else {
                 const val = (emp.hours && emp.hours[d]) || '';
                 total += parseFloat(val) || 0;
-                cellsHtml += `<td class="${tdBase} p-0"><input type="number" step="0.5" value="${val}" class="w-6 text-center text-[10px] bg-transparent outline-none focus:bg-blue-50 dark:focus:bg-slate-800" onchange="updateOvertimeHour(${idx}, ${d}, this.value)"></td>`;
+                cellsHtml += `<td class="${tdBase} py-2 text-center"><input type="number" step="0.5" value="${val}" class="no-spinner w-9 text-center text-[11px] bg-transparent outline-none focus:bg-blue-50 dark:focus:bg-slate-800" onchange="updateOvertimeHour(${idx}, ${d}, this.value)"></td>`;
             }
         }
         const rate = emp.rate || 0;
         const thanhTien = total * rate;
         return `<tr>
             <td class="${tdBase} p-1 text-center sticky left-0 bg-white dark:bg-slate-900">${idx + 1}</td>
-            <td class="${tdBase} p-1 font-bold sticky left-8 bg-white dark:bg-slate-900 dark:text-white whitespace-nowrap">${emp.name}</td>
+            <td class="${tdBase} p-1 font-bold sticky left-8 bg-white dark:bg-slate-900 dark:text-white break-words">${emp.name}</td>
             ${cellsHtml}
             <td class="${tdBase} p-1 text-center font-bold dark:text-white">${total}</td>
             <td class="${tdBase} p-1">
@@ -4885,9 +4900,126 @@ function printChamCong() {
         '<h1 style="text-align:center;font-size:18px;margin:0 0 4px;text-transform:uppercase;">HTX Sản Xuất Và Kinh Doanh Nông Sản Thanh Nguyễn</h1>' +
         buildTableHtml('attendance', 'BẢNG CHẤM CÔNG TẠI XƯỞNG') +
         buildTableHtml('overtime', 'BẢNG TĂNG CA TẠI XƯỞNG') +
+        '<div style="margin-top:36px;display:flex;justify-content:flex-end;">' +
+            '<div style="text-align:center;min-width:180px;">' +
+                '<p style="margin:0;font-weight:bold;">Người chấm công</p>' +
+                '<p style="font-size:11px;color:#666;margin:2px 0 60px;">(Ký, ghi rõ họ tên)</p>' +
+            '</div>' +
+        '</div>' +
     '</div>';
 
     printReportDirect('Bảng chấm công ' + monthLabel, bodyHtml);
+}
+
+// Xuất Excel bảng chấm công (cả bảng chấm công hàng ngày lẫn bảng tăng ca trong cùng 1 file,
+// mỗi bảng 1 sheet riêng) - có thêm dòng "Người chấm công" ở cuối mỗi sheet để ký tay sau khi in.
+async function exportChamCongExcel() {
+    const monthStr = window.chamCongState.month || '';
+    if (!monthStr) return showAlert('Vui lòng chọn tháng chấm công trước!');
+    const days = getDaysInMonth(monthStr);
+    const [y, m] = monthStr.split('-');
+    const monthLabel = m ? `${m}/${y}` : '';
+
+    const workbook = new ExcelJS.Workbook();
+
+    function buildSheet(type, title, sheetName) {
+        const sheet = workbook.addWorksheet(sheetName);
+        const list = window.chamCongState[type] || [];
+        const totalCols = 2 + days + 3; // STT, Họ tên, [ngày...], Tổng, Đơn giá, Thành tiền
+
+        const titleRow = sheet.addRow(['HTX Sản Xuất Và Kinh Doanh Nông Sản Thanh Nguyễn']);
+        titleRow.font = { bold: true, size: 13 };
+        sheet.mergeCells(1, 1, 1, totalCols);
+        titleRow.alignment = { horizontal: 'center' };
+
+        const subRow = sheet.addRow([`${title} THÁNG ${monthLabel}`]);
+        subRow.font = { bold: true, size: 12 };
+        sheet.mergeCells(2, 1, 2, totalCols);
+        subRow.alignment = { horizontal: 'center' };
+        sheet.addRow([]);
+
+        const headerCells = ['STT', 'Họ và tên'];
+        for (let d = 1; d <= days; d++) headerCells.push(String(d));
+        headerCells.push(type === 'attendance' ? 'Tổng công' : 'Tổng giờ', 'Đơn giá', 'Thành tiền');
+        const headerRow = sheet.addRow(headerCells);
+        headerRow.eachCell(c => {
+            c.font = { bold: true };
+            c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F0F0' } };
+            c.alignment = { horizontal: 'center', vertical: 'middle' };
+            c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+        });
+
+        list.forEach((emp, idx) => {
+            let total = 0;
+            const dayVals = [];
+            for (let d = 1; d <= days; d++) {
+                if (type === 'attendance') {
+                    const val = (emp.days && emp.days[d]) || '';
+                    if (val === 'X') total += 1; else if (val === '1/2') total += 0.5;
+                    dayVals.push(val);
+                } else {
+                    const val = parseFloat(emp.hours && emp.hours[d]) || 0;
+                    total += val;
+                    dayVals.push(val || '');
+                }
+            }
+            const rate = emp.rate || 0;
+            const thanhTien = total * rate;
+            const row = sheet.addRow([idx + 1, emp.name, ...dayVals, total, rate, thanhTien]);
+            row.eachCell((c, col) => {
+                c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+                if (col === 1 || (col >= 3 && col <= totalCols - 2)) c.alignment = { horizontal: 'center' };
+                if (col === totalCols - 1 || col === totalCols) c.numFmt = '#,##0';
+            });
+        });
+
+        if (!list.length) {
+            const emptyRow = sheet.addRow(['Chưa có dữ liệu']);
+            sheet.mergeCells(sheet.rowCount, 1, sheet.rowCount, totalCols);
+            emptyRow.alignment = { horizontal: 'center' };
+        }
+
+        sheet.addRow([]);
+        const noteRow = sheet.addRow(['Ghi chú: X - 1 ngày công    1/2 - nửa ngày làm    N - nghỉ']);
+        noteRow.font = { italic: true, size: 10 };
+        sheet.addRow([]);
+
+        // "Người chấm công" - dòng ký tên cuối mỗi sheet.
+        const signRow = sheet.addRow(['', '', '', '', '', '', '', '', '', '', 'Người chấm công']);
+        signRow.getCell(totalCols).font = { bold: true };
+        signRow.getCell(totalCols).alignment = { horizontal: 'center' };
+        sheet.mergeCells(signRow.number, totalCols - 1, signRow.number, totalCols);
+        const signNoteRow = sheet.addRow([]);
+        sheet.getCell(signNoteRow.number, totalCols).value = '(Ký, ghi rõ họ tên)';
+        sheet.getCell(signNoteRow.number, totalCols).font = { italic: true, size: 9, color: { argb: 'FF666666' } };
+        sheet.getCell(signNoteRow.number, totalCols).alignment = { horizontal: 'center' };
+        sheet.mergeCells(signNoteRow.number, totalCols - 1, signNoteRow.number, totalCols);
+
+        sheet.getColumn(1).width = 6;
+        sheet.getColumn(2).width = 20;
+        for (let d = 1; d <= days; d++) sheet.getColumn(2 + d).width = 5;
+        sheet.getColumn(totalCols - 2).width = 10;
+        sheet.getColumn(totalCols - 1).width = 12;
+        sheet.getColumn(totalCols).width = 14;
+
+        sheet.pageSetup.paperSize = 9;
+        sheet.pageSetup.orientation = 'landscape';
+        sheet.pageSetup.fitToPage = true;
+        sheet.pageSetup.fitToWidth = 1;
+        sheet.pageSetup.fitToHeight = 0;
+    }
+
+    buildSheet('attendance', 'BẢNG CHẤM CÔNG TẠI XƯỞNG', 'Chấm công');
+    buildSheet('overtime', 'BẢNG TĂNG CA TẠI XƯỞNG', 'Tăng ca');
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const a = document.createElement('a');
+    a.href = window.URL.createObjectURL(blob);
+    a.download = `Bang_Cham_Cong_${monthStr}.xlsx`;
+    a.click();
+
+    if (typeof Swal !== 'undefined') Swal.fire({ icon: 'success', title: 'Thành công', text: 'Đã xuất file chấm công!', timer: 2000 });
 }
 
 // --- TẢI NHẬT KÝ HOẠT ĐỘNG (AI SỬA/XÓA GÌ, KHI NÀO) ---
@@ -5383,7 +5515,10 @@ function showPage(pageId) {
             break;
 		// THÊM ĐOẠN NÀY VÀO TRƯỚC DẤU ĐÓNG CỦA SWITCH
         case 'page-LichCongViec':
-            if (typeof fixCalendarLayout === 'function') fixCalendarLayout();
+            // Mặc định luôn mở lại tab "Lịch & Ghi Chú" mỗi lần vào trang (tab "Chấm Công"
+            // xem thêm ở switchLichCVTab) - nhất quán, dễ đoán hơn là nhớ tab lần trước.
+            if (typeof switchLichCVTab === 'function') switchLichCVTab('calendar');
+            else if (typeof fixCalendarLayout === 'function') fixCalendarLayout();
             break;	
 
         case 'page-chat':
@@ -6588,6 +6723,15 @@ function getProductMaterialPriority(name) {
     if (s.includes('nhựa')) return 1;
     return 2;
 }
+// Làm tròn số lượng để loại bỏ sai số dấu phẩy động rất nhỏ do JS cộng/trừ số thập phân
+// nhiều lần qua nhiều phiếu (ví dụ ra 1.13e-14 thay vì đúng ra phải là 0 tuyệt đối) - dùng
+// ở mọi báo cáo Nhập-Xuất-Tồn trước khi hiển thị/xuất Excel, tránh hiện số dạng khoa học
+// khó hiểu dù thực tế tồn kho đã về đúng 0.
+function cleanQty(v) {
+    const r = Math.round((v || 0) * 100) / 100;
+    return r === 0 ? 0 : r;
+}
+
 function compareProductDisplayOrder(nameA, nameB) {
     const wa = getProductWeightForSort(nameA), wb = getProductWeightForSort(nameB);
     if (wa !== wb) return wb - wa; // khối lượng giảm dần
@@ -6772,14 +6916,16 @@ async function renderInventoryList(filter = 'today') {
     const sortedInventoryEntries = Array.from(inventoryMap.entries())
         .sort((a, b) => compareProductDisplayOrder(a[0], b[0]));
     sortedInventoryEntries.forEach(([name, item]) => {
-        const tonCuoi = item.tonDau + item.nhap + item.change - item.out;
-        const totalNhap = item.nhap + item.change;
-        
-        if (item.tonDau === 0 && totalNhap === 0 && item.out === 0 && tonCuoi === 0) {
+        const tonCuoi = cleanQty(item.tonDau + item.nhap + item.change - item.out);
+        const totalNhap = cleanQty(item.nhap + item.change);
+        const tonDauClean = cleanQty(item.tonDau);
+        const outClean = cleanQty(item.out);
+
+        if (tonDauClean === 0 && totalNhap === 0 && outClean === 0 && tonCuoi === 0) {
             return;
         }
 
-        const maxVal = Math.max(item.tonDau + totalNhap + item.out + tonCuoi, 1); 
+        const maxVal = Math.max(tonDauClean + totalNhap + outClean + tonCuoi, 1); 
         const isLowStock = tonCuoi < 5;
 
         const tcBorderClass = isLowStock ? 'border-rose-400 dark:border-rose-500/80' : 'border-slate-200 dark:border-slate-800/80';
@@ -6797,9 +6943,9 @@ async function renderInventoryList(filter = 'today') {
         // hiệu ứng tăng/giảm màu khi sắp hết hàng, và vẫn có ghi chú (nhãn: giá trị) ngay
         // trong từng đoạn của thanh, chỉ khác là giờ nối liền thành 1 khối duy nhất.
         const segments = [
-            { val: item.tonDau, color: colorTonDau, label: 'T.Đầu' },
+            { val: tonDauClean, color: colorTonDau, label: 'T.Đầu' },
             { val: totalNhap, color: colorNhap, label: 'Nhập' },
-            { val: item.out, color: colorXuat, label: 'Xuất' },
+            { val: outClean, color: colorXuat, label: 'Xuất' },
             { val: tonCuoi, color: colorTonCuoi, label: 'T.Cuối', glow: isLowStock }
         ];
 
@@ -9309,6 +9455,58 @@ window.forceResyncStockCounters = async function () {
         showAlert('Có lỗi khi sửa tồn kho: ' + e.message + '\nNếu là lỗi "quota", vui lòng đợi vài giờ rồi thử lại (quota Firestore miễn phí reset theo ngày).');
     }
 };
+
+// 4 hàm xác nhận (Swal) cho 4 nút bảo trì ở trang Quản Lý - hiện đầy đủ nội dung hướng dẫn
+// (trước đây nằm sẵn dưới dạng đoạn văn ngoài giao diện, giờ gói gọn vào hộp thoại xác
+// nhận, chỉ hiện ra khi bấm nút) rồi mới thực sự chạy hành động tương ứng nếu người dùng
+// bấm "Đồng ý" - không đổi gì về mặt xử lý dữ liệu, chỉ đổi cách hỏi trước khi làm.
+function confirmRunForceResyncStock() {
+    Swal.fire({
+        title: 'Sửa lại tồn kho?',
+        html: 'Bấm nút này sẽ tính lại chính xác tồn kho của <b>TẤT CẢ sản phẩm</b> từ toàn bộ lịch sử phiếu nhập/xuất rồi ghi đè lại số liệu đang hiển thị ở trang Bán Hàng.<br><br>Chỉ cần bấm khi thấy số tồn hiển thị sai so với thực tế.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sửa ngay',
+        cancelButtonText: 'Hủy',
+        confirmButtonColor: '#f59e0b'
+    }).then(res => { if (res.isConfirmed) runForceResyncStockCountersUI(); });
+}
+
+function confirmOpenSyncProductNameTool() {
+    Swal.fire({
+        title: 'Đồng bộ tên sản phẩm vào lịch sử cũ?',
+        html: 'Dùng khi trước đây bạn đã <b>ĐỔI TÊN</b> 1 sản phẩm nhưng chưa đồng bộ lại tên đó vào các phiếu Nhập Kho/Hoá đơn cũ - khiến "Báo Cáo Tổng Hợp" (NXT) hiểu nhầm thành 2 sản phẩm khác nhau (tên cũ giữ nguyên tồn, tên mới bị tồn ÂM đúng bằng số đã bán).<br><br>Ở bước sau, nhập đúng tên CŨ và tên MỚI để đồng bộ lại - không làm thay đổi bất kỳ số lượng/số tiền nào đã có, chỉ đổi nhãn tên.',
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonText: 'Tiếp tục',
+        cancelButtonText: 'Hủy',
+        confirmButtonColor: '#8b5cf6'
+    }).then(res => { if (res.isConfirmed) openSyncProductNameHistoryTool(); });
+}
+
+function confirmBackupData() {
+    Swal.fire({
+        title: 'Sao lưu dữ liệu ra máy tính?',
+        html: 'Tải về 1 file duy nhất chứa TOÀN BỘ dữ liệu hiện có (sản phẩm, phiếu nhập/xuất, khách hàng, nhà cung cấp, công nợ, nguyên liệu, sản xuất...) - phòng trường hợp phần mềm gặp sự cố hoặc cần đối chiếu lại.<br><br>Nên sao lưu định kỳ (ví dụ cuối mỗi tuần) và lưu file ở nơi an toàn, vì file có chứa cả thông tin tài khoản đăng nhập.',
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonText: 'Tải về ngay',
+        cancelButtonText: 'Hủy',
+        confirmButtonColor: '#0ea5e9'
+    }).then(res => { if (res.isConfirmed) backupAllDataToFile(); });
+}
+
+function confirmRestoreData() {
+    Swal.fire({
+        title: 'Khôi phục dữ liệu từ file sao lưu?',
+        html: 'Nạp lại dữ liệu từ 1 file <code>backup_POS_...json</code> đã tải về trước đó.<br><br><b style="color:#dc2626;">CẢNH BÁO:</b> thao tác này sẽ <b>GHI ĐÈ</b> dữ liệu hiện tại bằng dữ liệu trong file - chỉ dùng khi thực sự cần khôi phục sau sự cố hoặc chuyển dữ liệu, và nên sao lưu dữ liệu hiện tại (nút "Sao lưu dữ liệu") TRƯỚC khi khôi phục để phòng trường hợp chọn nhầm file.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Tiếp tục chọn file',
+        cancelButtonText: 'Hủy',
+        confirmButtonColor: '#ef4444'
+    }).then(res => { if (res.isConfirmed) document.getElementById('restore-data-file-input').click(); });
+}
 
 // Hàm gọi từ NÚT BẤM trên trang Quản Lý (thay vì phải mở Console trình duyệt).
 // Tự vô hiệu hoá nút trong lúc chạy và cập nhật lại tồn kho hiển thị ngay khi xong,
@@ -14343,9 +14541,9 @@ async function viewInventoryReport() {
             const currentStock = currentStockMap[name] || 0;
             const tonCuoi = currentStock - item.gapNet;
             const tonDau = tonCuoi - item.nhapMoi - item.nhapDoi + item.xuat;
-            if (tonDau === 0 && item.nhapMoi === 0 && item.nhapDoi === 0 && item.xuat === 0 && tonCuoi === 0) return;
+            if (Math.round(tonDau * 100) === 0 && Math.round(item.nhapMoi * 100) === 0 && Math.round(item.nhapDoi * 100) === 0 && Math.round(item.xuat * 100) === 0 && Math.round(tonCuoi * 100) === 0) return;
             stt += 1;
-            rows.push([stt, name, tonDau, item.nhapMoi, item.nhapDoi, item.xuat, tonCuoi]);
+            rows.push([stt, name, cleanQty(tonDau), cleanQty(item.nhapMoi), cleanQty(item.nhapDoi), cleanQty(item.xuat), cleanQty(tonCuoi)]);
         });
 
         Swal.close();
@@ -14513,7 +14711,7 @@ async function exportInventory() {
             const currentStock = currentStockMap[name] || 0;
             const tonCuoi = currentStock - item.gapNet;
             const tonDau = tonCuoi - item.nhapMoi - item.nhapDoi + item.xuat;
-            if (tonDau === 0 && item.nhapMoi === 0 && item.nhapDoi === 0 && item.xuat === 0 && tonCuoi === 0) return;
+            if (Math.round(tonDau * 100) === 0 && Math.round(item.nhapMoi * 100) === 0 && Math.round(item.nhapDoi * 100) === 0 && Math.round(item.xuat * 100) === 0 && Math.round(tonCuoi * 100) === 0) return;
             nhomMap.get(xepNhomSanPham(name)).push({ name, tonDau, item, tonCuoi });
         });
 
@@ -14535,7 +14733,7 @@ async function exportInventory() {
 
             danhSach.forEach(({ name, tonDau, item, tonCuoi }) => {
                 stt += 1;
-                const row = sheet.addRow([stt, name, tonDau, item.nhapMoi, item.nhapDoi, item.xuat, tonCuoi]);
+                const row = sheet.addRow([stt, name, cleanQty(tonDau), cleanQty(item.nhapMoi), cleanQty(item.nhapDoi), cleanQty(item.xuat), cleanQty(tonCuoi)]);
                 row.eachCell((c, col) => {
                     c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
                     c.font = { size: 12 };
@@ -14862,7 +15060,15 @@ async function exportFullReport() {
     const toVal = document.getElementById('date-to').value;
     if (!fromVal || !toVal) return Swal.fire({ icon: 'warning', title: 'Thông báo', text: 'Vui lòng chọn ngày!' });
 
-    const formatVal = (val) => (val && val !== 0 ? val : "");
+    const formatVal = (val) => {
+        if (!val) return "";
+        // Làm tròn để loại bỏ sai số dấu phẩy động rất nhỏ (ví dụ cộng/trừ số thập phân
+        // nhiều lần qua nhiều phiếu bị lệch li ti thành 1.13e-14 thay vì đúng ra phải là
+        // 0 tuyệt đối) - nếu không sẽ hiện ra dạng số khoa học khó hiểu ở báo cáo dù thực
+        // tế tồn kho đã về đúng 0.
+        const rounded = Math.round(val * 100) / 100;
+        return rounded === 0 ? "" : rounded;
+    };
     showLoading();
 
     try {
@@ -15129,7 +15335,7 @@ async function exportFullReport() {
             const item = inventory[name];
             if (!item) return;
             const tonCuoi = item.tonDau + item.nhapMoi + item.nhapDoi - item.xuat;
-            if (item.tonDau === 0 && item.nhapMoi === 0 && item.nhapDoi === 0 && item.xuat === 0 && tonCuoi === 0) return;
+            if (Math.round(item.tonDau * 100) === 0 && Math.round(item.nhapMoi * 100) === 0 && Math.round(item.nhapDoi * 100) === 0 && Math.round(item.xuat * 100) === 0 && Math.round(tonCuoi * 100) === 0) return;
 
             nhomMap.get(xepNhomSanPham(name)).push({ name, item, tonCuoi });
         });
@@ -15309,7 +15515,15 @@ async function viewFullReport() {
     const toVal = document.getElementById('date-to').value;
     if (!fromVal || !toVal) return Swal.fire({ icon: 'warning', title: 'Thông báo', text: 'Vui lòng chọn ngày!' });
 
-    const formatVal = (val) => (val && val !== 0 ? val : "");
+    const formatVal = (val) => {
+        if (!val) return "";
+        // Làm tròn để loại bỏ sai số dấu phẩy động rất nhỏ (ví dụ cộng/trừ số thập phân
+        // nhiều lần qua nhiều phiếu bị lệch li ti thành 1.13e-14 thay vì đúng ra phải là
+        // 0 tuyệt đối) - nếu không sẽ hiện ra dạng số khoa học khó hiểu ở báo cáo dù thực
+        // tế tồn kho đã về đúng 0.
+        const rounded = Math.round(val * 100) / 100;
+        return rounded === 0 ? "" : rounded;
+    };
     showLoading();
 
     try {
@@ -15451,7 +15665,7 @@ async function viewFullReport() {
             const item = inventory[name];
             if (!item) return;
             const tonCuoi = item.tonDau + item.nhapMoi + item.nhapDoi - item.xuat;
-            if (item.tonDau === 0 && item.nhapMoi === 0 && item.nhapDoi === 0 && item.xuat === 0 && tonCuoi === 0) return;
+            if (Math.round(item.tonDau * 100) === 0 && Math.round(item.nhapMoi * 100) === 0 && Math.round(item.nhapDoi * 100) === 0 && Math.round(item.xuat * 100) === 0 && Math.round(tonCuoi * 100) === 0) return;
             nhomMap.get(xepNhomSanPham(name)).push({ name, item, tonCuoi });
         });
         let nxtRowsHtml = '';
