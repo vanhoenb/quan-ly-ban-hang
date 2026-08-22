@@ -3339,83 +3339,92 @@ html:not(.dark) .bg-white {
     </div>
 </div>
 <div id="page-user-management" class="hidden space-y-6 p-2 md:p-6">
-    <!-- KHỐI BẢO TRÌ HỆ THỐNG: sửa lại tồn kho nếu bị sai số do lỗi hệ thống trước đó -->
-    <div class="bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-800 rounded-2xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <div>
-            <p class="font-bold text-amber-800 dark:text-amber-300 flex items-center gap-2">
-                <i data-lucide="wrench" class="w-4 h-4"></i> Sửa lại tồn kho (nếu số tồn ở trang Bán Hàng bị sai)
-            </p>
-            <p class="text-xs text-amber-700 dark:text-amber-400 mt-1">
-                Bấm nút này sẽ tính lại chính xác tồn kho của TẤT CẢ sản phẩm từ toàn bộ lịch sử phiếu nhập/xuất
-                rồi ghi đè lại số liệu đang hiển thị ở trang Bán Hàng. Chỉ cần bấm khi thấy số tồn hiển thị
-                sai so với thực tế.
-            </p>
+    <!-- 2 KHỐI BẢO TRÌ TỒN KHO xếp chung 1 hàng (cạnh nhau trên PC, xếp dọc trên điện
+         thoại) - trước đây mỗi khối chiếm nguyên 1 hàng riêng, giờ gộp lại cho gọn. -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <!-- KHỐI BẢO TRÌ HỆ THỐNG: sửa lại tồn kho nếu bị sai số do lỗi hệ thống trước đó -->
+        <div class="bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-800 rounded-2xl p-4 flex flex-col gap-3">
+            <div>
+                <p class="font-bold text-amber-800 dark:text-amber-300 flex items-center gap-2">
+                    <i data-lucide="wrench" class="w-4 h-4"></i> Sửa lại tồn kho (nếu số tồn ở trang Bán Hàng bị sai)
+                </p>
+                <p class="text-xs text-amber-700 dark:text-amber-400 mt-1">
+                    Bấm nút này sẽ tính lại chính xác tồn kho của TẤT CẢ sản phẩm từ toàn bộ lịch sử phiếu nhập/xuất
+                    rồi ghi đè lại số liệu đang hiển thị ở trang Bán Hàng. Chỉ cần bấm khi thấy số tồn hiển thị
+                    sai so với thực tế.
+                </p>
+            </div>
+            <button id="btn-fix-stock" onclick="runForceResyncStockCountersUI()" class="shrink-0 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-amber-700 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2 justify-center">
+                <i data-lucide="refresh-ccw" class="w-4 h-4"></i> Sửa lại tồn kho ngay
+            </button>
         </div>
-        <button id="btn-fix-stock" onclick="runForceResyncStockCountersUI()" class="shrink-0 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-amber-700 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2 justify-center">
-            <i data-lucide="refresh-ccw" class="w-4 h-4"></i> Sửa lại tồn kho ngay
-        </button>
+
+        <!-- KHỐI BẢO TRÌ HỆ THỐNG: đồng bộ lại tên sản phẩm vào lịch sử cũ - dùng khi đã ĐỔI TÊN
+             1 sản phẩm ở Danh Mục SP TRƯỚC ĐÂY (từ bản phần mềm cũ, lúc bước này còn là tùy chọn
+             và lỡ bỏ qua) khiến báo cáo "Tổng Hợp" (NXT) hiện tách thành 2 dòng riêng (tên cũ +
+             tên mới), dòng tên mới bị tồn âm. -->
+        <div class="bg-violet-50 dark:bg-violet-950/30 border border-violet-300 dark:border-violet-800 rounded-2xl p-4 flex flex-col gap-3">
+            <div>
+                <p class="font-bold text-violet-800 dark:text-violet-300 flex items-center gap-2">
+                    <i data-lucide="refresh-ccw" class="w-4 h-4"></i> Đồng bộ tên sản phẩm vào lịch sử cũ (nếu báo cáo NXT hiện tách 2 tên)
+                </p>
+                <p class="text-xs text-violet-700 dark:text-violet-400 mt-1">
+                    Dùng khi trước đây bạn đã ĐỔI TÊN 1 sản phẩm nhưng chưa đồng bộ lại tên đó vào các phiếu Nhập
+                    Kho/Hoá đơn cũ - khiến "Báo Cáo Tổng Hợp" (NXT) hiểu nhầm thành 2 sản phẩm khác nhau (tên cũ
+                    giữ nguyên tồn, tên mới bị tồn ÂM đúng bằng số đã bán). Nhập đúng tên CŨ và tên MỚI để đồng bộ
+                    lại - không làm thay đổi bất kỳ số lượng/số tiền nào đã có, chỉ đổi nhãn tên.
+                </p>
+            </div>
+            <button onclick="openSyncProductNameHistoryTool()" class="shrink-0 bg-violet-500 hover:bg-violet-600 text-white px-4 py-2.5 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-violet-700 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2 justify-center">
+                <i data-lucide="refresh-ccw" class="w-4 h-4"></i> Đồng bộ tên ngay
+            </button>
+        </div>
     </div>
 
-    <!-- KHỐI BẢO TRÌ HỆ THỐNG: đồng bộ lại tên sản phẩm vào lịch sử cũ - dùng khi đã ĐỔI TÊN
-         1 sản phẩm ở Danh Mục SP TRƯỚC ĐÂY (từ bản phần mềm cũ, lúc bước này còn là tùy chọn
-         và lỡ bỏ qua) khiến báo cáo "Tổng Hợp" (NXT) hiện tách thành 2 dòng riêng (tên cũ +
-         tên mới), dòng tên mới bị tồn âm. -->
-    <div class="bg-violet-50 dark:bg-violet-950/30 border border-violet-300 dark:border-violet-800 rounded-2xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <div>
-            <p class="font-bold text-violet-800 dark:text-violet-300 flex items-center gap-2">
-                <i data-lucide="refresh-ccw" class="w-4 h-4"></i> Đồng bộ tên sản phẩm vào lịch sử cũ (nếu báo cáo NXT hiện tách 2 tên)
-            </p>
-            <p class="text-xs text-violet-700 dark:text-violet-400 mt-1">
-                Dùng khi trước đây bạn đã ĐỔI TÊN 1 sản phẩm nhưng chưa đồng bộ lại tên đó vào các phiếu Nhập
-                Kho/Hoá đơn cũ - khiến "Báo Cáo Tổng Hợp" (NXT) hiểu nhầm thành 2 sản phẩm khác nhau (tên cũ
-                giữ nguyên tồn, tên mới bị tồn ÂM đúng bằng số đã bán). Nhập đúng tên CŨ và tên MỚI để đồng bộ
-                lại - không làm thay đổi bất kỳ số lượng/số tiền nào đã có, chỉ đổi nhãn tên.
-            </p>
+    <!-- 2 KHỐI SAO LƯU / KHÔI PHỤC DỮ LIỆU xếp chung 1 hàng (cạnh nhau trên PC, xếp dọc
+         trên điện thoại) - trước đây mỗi khối chiếm nguyên 1 hàng riêng, giờ gộp lại cho gọn. -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <!-- KHỐI SAO LƯU DỮ LIỆU: tải toàn bộ dữ liệu về máy phòng trường hợp phần mềm gặp
+             sự cố (mất mạng dài ngày, tài khoản Firebase gặp vấn đề, thao tác nhầm hàng loạt...) -->
+        <div class="bg-sky-50 dark:bg-sky-950/30 border border-sky-300 dark:border-sky-800 rounded-2xl p-4 flex flex-col gap-3">
+            <div>
+                <p class="font-bold text-sky-800 dark:text-sky-300 flex items-center gap-2">
+                    <i data-lucide="hard-drive-download" class="w-4 h-4"></i> Sao lưu dữ liệu ra máy tính
+                </p>
+                <p class="text-xs text-sky-700 dark:text-sky-400 mt-1">
+                    Tải về 1 file duy nhất chứa TOÀN BỘ dữ liệu hiện có (sản phẩm, phiếu nhập/xuất, khách hàng,
+                    nhà cung cấp, công nợ, nguyên liệu, sản xuất...) - phòng trường hợp phần mềm gặp sự cố hoặc
+                    cần đối chiếu lại. Nên sao lưu định kỳ (ví dụ cuối mỗi tuần) và lưu file ở nơi an toàn, vì
+                    file có chứa cả thông tin tài khoản đăng nhập.
+                </p>
+            </div>
+            <button id="btn-backup-data" onclick="backupAllDataToFile()" class="shrink-0 bg-sky-500 hover:bg-sky-600 text-white px-4 py-2.5 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-sky-700 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2 justify-center">
+                <i data-lucide="download" class="w-4 h-4"></i> Sao lưu dữ liệu ra máy
+            </button>
         </div>
-        <button onclick="openSyncProductNameHistoryTool()" class="shrink-0 bg-violet-500 hover:bg-violet-600 text-white px-4 py-2.5 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-violet-700 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2 justify-center">
-            <i data-lucide="refresh-ccw" class="w-4 h-4"></i> Đồng bộ tên ngay
-        </button>
+
+        <!-- KHỐI KHÔI PHỤC DỮ LIỆU: nạp lại 1 file JSON đã sao lưu trước đó (ở khối bên trên)
+             vào lại hệ thống - dùng khi cần chuyển dữ liệu sang tài khoản Firebase khác, hoặc
+             khôi phục sau sự cố mất dữ liệu. ĐÂY LÀ THAO TÁC GHI ĐÈ - cần hết sức cẩn thận. -->
+        <div class="bg-rose-50 dark:bg-rose-950/30 border border-rose-300 dark:border-rose-800 rounded-2xl p-4 flex flex-col gap-3">
+            <div>
+                <p class="font-bold text-rose-800 dark:text-rose-300 flex items-center gap-2">
+                    <i data-lucide="hard-drive-upload" class="w-4 h-4"></i> Khôi phục dữ liệu từ file sao lưu
+                </p>
+                <p class="text-xs text-rose-700 dark:text-rose-400 mt-1">
+                    Nạp lại dữ liệu từ 1 file <code>backup_POS_...json</code> đã tải về trước đó (ở khối phía trên).
+                    <strong>CẢNH BÁO:</strong> thao tác này sẽ GHI ĐÈ dữ liệu hiện tại bằng dữ liệu trong file -
+                    chỉ dùng khi thực sự cần khôi phục sau sự cố hoặc chuyển dữ liệu, và nên sao lưu dữ liệu
+                    hiện tại (nút bên trên) TRƯỚC khi khôi phục để phòng trường hợp chọn nhầm file.
+                </p>
+            </div>
+            <input type="file" id="restore-data-file-input" accept="application/json" class="hidden" onchange="restoreAllDataFromFile(this.files[0]); this.value='';">
+            <button id="btn-restore-data" onclick="document.getElementById('restore-data-file-input').click()" class="shrink-0 bg-rose-500 hover:bg-rose-600 text-white px-4 py-2.5 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-rose-700 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2 justify-center">
+                <i data-lucide="upload" class="w-4 h-4"></i> Chọn file & khôi phục
+            </button>
+        </div>
     </div>
 
-    <!-- KHỐI SAO LƯU DỮ LIỆU: tải toàn bộ dữ liệu về máy phòng trường hợp phần mềm gặp
-         sự cố (mất mạng dài ngày, tài khoản Firebase gặp vấn đề, thao tác nhầm hàng loạt...) -->
-    <div class="bg-sky-50 dark:bg-sky-950/30 border border-sky-300 dark:border-sky-800 rounded-2xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <div>
-            <p class="font-bold text-sky-800 dark:text-sky-300 flex items-center gap-2">
-                <i data-lucide="hard-drive-download" class="w-4 h-4"></i> Sao lưu dữ liệu ra máy tính
-            </p>
-            <p class="text-xs text-sky-700 dark:text-sky-400 mt-1">
-                Tải về 1 file duy nhất chứa TOÀN BỘ dữ liệu hiện có (sản phẩm, phiếu nhập/xuất, khách hàng,
-                nhà cung cấp, công nợ, nguyên liệu, sản xuất...) - phòng trường hợp phần mềm gặp sự cố hoặc
-                cần đối chiếu lại. Nên sao lưu định kỳ (ví dụ cuối mỗi tuần) và lưu file ở nơi an toàn, vì
-                file có chứa cả thông tin tài khoản đăng nhập.
-            </p>
-        </div>
-        <button id="btn-backup-data" onclick="backupAllDataToFile()" class="shrink-0 bg-sky-500 hover:bg-sky-600 text-white px-4 py-2.5 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-sky-700 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2 justify-center">
-            <i data-lucide="download" class="w-4 h-4"></i> Sao lưu dữ liệu ra máy
-        </button>
-    </div>
-
-    <!-- KHỐI KHÔI PHỤC DỮ LIỆU: nạp lại 1 file JSON đã sao lưu trước đó (ở khối bên trên)
-         vào lại hệ thống - dùng khi cần chuyển dữ liệu sang tài khoản Firebase khác, hoặc
-         khôi phục sau sự cố mất dữ liệu. ĐÂY LÀ THAO TÁC GHI ĐÈ - cần hết sức cẩn thận. -->
-    <div class="bg-rose-50 dark:bg-rose-950/30 border border-rose-300 dark:border-rose-800 rounded-2xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <div>
-            <p class="font-bold text-rose-800 dark:text-rose-300 flex items-center gap-2">
-                <i data-lucide="hard-drive-upload" class="w-4 h-4"></i> Khôi phục dữ liệu từ file sao lưu
-            </p>
-            <p class="text-xs text-rose-700 dark:text-rose-400 mt-1">
-                Nạp lại dữ liệu từ 1 file <code>backup_POS_...json</code> đã tải về trước đó (ở khối phía trên).
-                <strong>CẢNH BÁO:</strong> thao tác này sẽ GHI ĐÈ dữ liệu hiện tại bằng dữ liệu trong file -
-                chỉ dùng khi thực sự cần khôi phục sau sự cố hoặc chuyển dữ liệu, và nên sao lưu dữ liệu
-                hiện tại (nút bên trên) TRƯỚC khi khôi phục để phòng trường hợp chọn nhầm file.
-            </p>
-        </div>
-        <input type="file" id="restore-data-file-input" accept="application/json" class="hidden" onchange="restoreAllDataFromFile(this.files[0]); this.value='';">
-        <button id="btn-restore-data" onclick="document.getElementById('restore-data-file-input').click()" class="shrink-0 bg-rose-500 hover:bg-rose-600 text-white px-4 py-2.5 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-rose-700 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2 justify-center">
-            <i data-lucide="upload" class="w-4 h-4"></i> Chọn file & khôi phục
-        </button>
-    </div>
 
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pb-2 border-b border-slate-200 dark:border-slate-700">
         <h2 class="text-2xl font-bold text-slate-800 dark:text-white">QUẢN LÝ NGƯỜI DÙNG & PHÂN QUYỀN</h2>
@@ -3431,6 +3440,9 @@ html:not(.dark) .bg-white {
         </button>
         <button id="tab-btn-activitylog" onclick="switchQuanLyTab('activitylog')" class="px-4 py-2.5 font-bold text-sm rounded-t-lg border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center gap-2">
             <i data-lucide="history" class="w-4 h-4"></i> Nhật Ký Hoạt Động
+        </button>
+        <button id="tab-btn-chamcong" onclick="switchQuanLyTab('chamcong')" class="px-4 py-2.5 font-bold text-sm rounded-t-lg border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center gap-2">
+            <i data-lucide="calendar-check-2" class="w-4 h-4"></i> Chấm Công
         </button>
     </div>
 
@@ -3506,6 +3518,65 @@ html:not(.dark) .bg-white {
                         </tr>
                     </thead>
                     <tbody id="activity-log-body" class="divide-y divide-slate-100 dark:divide-slate-700 text-xs md:text-sm"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 3: CHẤM CÔNG - 2 bảng: chấm công hàng ngày (X/1-2/N) phía trên, chấm giờ tăng
+         ca (nhập số giờ trực tiếp) phía dưới - theo đúng mẫu Excel "Bảng chấm công" hiện có
+         của cửa hàng. Lưu theo từng THÁNG (đổi tháng ở ô chọn phía trên sẽ tự nạp lại đúng
+         dữ liệu tháng đó, hoặc tạo mới nếu tháng đó chưa chấm công lần nào). -->
+    <div id="quanly-tab-chamcong" class="hidden space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl p-3">
+            <div class="flex items-center gap-2">
+                <label class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase whitespace-nowrap">Tháng chấm công</label>
+                <input type="month" id="chamcong-month" onchange="loadChamCongMonth()" class="border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-xl text-gray-800 dark:text-white text-sm outline-none">
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="printChamCong()" class="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all duration-75 border-b-[4px] border-slate-800 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2">
+                    <i data-lucide="printer" class="w-4 h-4"></i> In bảng chấm công
+                </button>
+                <button onclick="saveChamCongData()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all duration-75 border-b-[4px] border-emerald-800 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2">
+                    <i data-lucide="save" class="w-4 h-4"></i> Lưu bảng chấm công
+                </button>
+            </div>
+        </div>
+
+        <!-- BẢNG CHẤM CÔNG HÀNG NGÀY -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 p-3">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
+                <div>
+                    <h3 class="font-bold text-slate-800 dark:text-white">BẢNG CHẤM CÔNG HÀNG NGÀY</h3>
+                    <p class="text-[11px] text-slate-400">Bấm vào từng ô ngày để đổi trạng thái theo vòng: (trống) → X (đi làm) → 1/2 (nửa công) → N (nghỉ) → quay lại trống.</p>
+                </div>
+                <button onclick="addChamCongEmployee('attendance')" class="shrink-0 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+                    <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Thêm nhân viên
+                </button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="text-xs border-collapse w-full" id="chamcong-attendance-table">
+                    <thead id="chamcong-attendance-head"></thead>
+                    <tbody id="chamcong-attendance-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- BẢNG TĂNG CA -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 p-3">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
+                <div>
+                    <h3 class="font-bold text-slate-800 dark:text-white">BẢNG TĂNG CA (SỐ GIỜ LÀM THÊM)</h3>
+                    <p class="text-[11px] text-slate-400">Nhập trực tiếp số giờ tăng ca của từng ngày (để trống hoặc 0 nếu hôm đó không tăng ca).</p>
+                </div>
+                <button onclick="addChamCongEmployee('overtime')" class="shrink-0 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+                    <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Thêm nhân viên
+                </button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="text-xs border-collapse w-full" id="chamcong-overtime-table">
+                    <thead id="chamcong-overtime-head"></thead>
+                    <tbody id="chamcong-overtime-body"></tbody>
                 </table>
             </div>
         </div>
@@ -4526,31 +4597,297 @@ function xemQuyenNguoiDung(username) {
 }
 
 // --- CHUYỂN TAB TRONG TRANG QUẢN LÝ (Người dùng <-> Nhật ký hoạt động) ---
+// Đã nâng cấp lên hỗ trợ 3 tab (users / activitylog / chamcong) - viết theo kiểu generic
+// (map tab -> phần tử) thay vì if/else 2 nhánh cứng như trước, để dễ thêm tab mới sau này.
 function switchQuanLyTab(tab) {
-    const tabUsers = document.getElementById('quanly-tab-users');
-    const tabLog = document.getElementById('quanly-tab-activitylog');
-    const btnUsers = document.getElementById('tab-btn-users');
-    const btnLog = document.getElementById('tab-btn-activitylog');
+    const tabs = {
+        users: { content: document.getElementById('quanly-tab-users'), btn: document.getElementById('tab-btn-users') },
+        activitylog: { content: document.getElementById('quanly-tab-activitylog'), btn: document.getElementById('tab-btn-activitylog') },
+        chamcong: { content: document.getElementById('quanly-tab-chamcong'), btn: document.getElementById('tab-btn-chamcong') }
+    };
     const addBtn = document.getElementById('btn-add-user-header');
-
     const activeCls = ['border-blue-600', 'text-blue-600', 'dark:text-blue-400'];
     const inactiveCls = ['border-transparent', 'text-slate-500', 'dark:text-slate-400'];
 
-    if (tab === 'activitylog') {
-        tabUsers.classList.add('hidden');
-        tabLog.classList.remove('hidden');
-        if (addBtn) addBtn.classList.add('hidden');
-        btnLog.classList.remove(...inactiveCls); btnLog.classList.add(...activeCls);
-        btnUsers.classList.remove(...activeCls); btnUsers.classList.add(...inactiveCls);
-        loadActivityLog();
-    } else {
-        tabLog.classList.add('hidden');
-        tabUsers.classList.remove('hidden');
-        if (addBtn) addBtn.classList.remove('hidden');
-        btnUsers.classList.remove(...inactiveCls); btnUsers.classList.add(...activeCls);
-        btnLog.classList.remove(...activeCls); btnLog.classList.add(...inactiveCls);
+    Object.keys(tabs).forEach(key => {
+        const { content, btn } = tabs[key];
+        if (!content || !btn) return;
+        if (key === tab) {
+            content.classList.remove('hidden');
+            btn.classList.remove(...inactiveCls); btn.classList.add(...activeCls);
+        } else {
+            content.classList.add('hidden');
+            btn.classList.remove(...activeCls); btn.classList.add(...inactiveCls);
+        }
+    });
+
+    if (addBtn) addBtn.classList.toggle('hidden', tab !== 'users');
+
+    if (tab === 'activitylog') loadActivityLog();
+    if (tab === 'chamcong') {
+        const monthEl = document.getElementById('chamcong-month');
+        if (monthEl && !monthEl.value) {
+            const now = new Date();
+            monthEl.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        }
+        if (!window.chamCongState || window.chamCongState.month !== monthEl.value) loadChamCongMonth();
     }
     if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+// ===== CHẤM CÔNG: chấm công hàng ngày (X/1-2/N) + tăng ca (số giờ) theo từng tháng =====
+window.chamCongState = { month: null, attendance: [], overtime: [] };
+
+function getDaysInMonth(monthStr) {
+    if (!monthStr) return 30;
+    const [y, m] = monthStr.split('-').map(Number);
+    return new Date(y, m, 0).getDate();
+}
+
+async function loadChamCongMonth() {
+    const monthEl = document.getElementById('chamcong-month');
+    let monthStr = monthEl.value;
+    if (!monthStr) {
+        const now = new Date();
+        monthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        monthEl.value = monthStr;
+    }
+    showLoading();
+    try {
+        const doc = await db.collection('cham_cong').doc(monthStr).get();
+        if (doc.exists) {
+            const data = doc.data();
+            window.chamCongState = { month: monthStr, attendance: data.attendance || [], overtime: data.overtime || [] };
+        } else {
+            window.chamCongState = { month: monthStr, attendance: [], overtime: [] };
+        }
+        renderChamCongTables();
+        Swal.close();
+    } catch (e) {
+        Swal.close();
+        showAlert('Không tải được bảng chấm công: ' + e.message);
+    }
+}
+
+function renderChamCongTables() {
+    const days = getDaysInMonth(window.chamCongState.month);
+    renderChamCongTable('attendance', days);
+    renderChamCongTable('overtime', days);
+}
+
+function chamCongCellClass(val) {
+    if (val === 'X') return 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 font-black';
+    if (val === '1/2') return 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 font-black';
+    if (val === 'N') return 'bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 font-bold';
+    return 'text-slate-300 dark:text-slate-600';
+}
+
+function renderChamCongTable(type, days) {
+    const headEl = document.getElementById(`chamcong-${type}-head`);
+    const bodyEl = document.getElementById(`chamcong-${type}-body`);
+    if (!headEl || !bodyEl) return;
+
+    const thBase = 'border border-slate-300 dark:border-slate-700 p-1 text-slate-600 dark:text-slate-300';
+    let headHtml = `<tr class="bg-slate-100 dark:bg-slate-800">
+        <th class="${thBase} sticky left-0 bg-slate-100 dark:bg-slate-800 z-10 w-8">STT</th>
+        <th class="${thBase} sticky left-8 bg-slate-100 dark:bg-slate-800 z-10 min-w-[110px] text-left">Họ và tên</th>`;
+    for (let d = 1; d <= days; d++) {
+        headHtml += `<th class="${thBase} w-6">${d}</th>`;
+    }
+    headHtml += `<th class="${thBase} min-w-[60px]">Tổng ${type === 'attendance' ? 'công' : 'giờ'}</th>
+        <th class="${thBase} min-w-[90px]">Đơn giá</th>
+        <th class="${thBase} min-w-[100px]">Thành tiền</th>
+        <th class="${thBase} w-8"></th>
+    </tr>`;
+    headEl.innerHTML = headHtml;
+
+    const list = window.chamCongState[type] || [];
+    const tdBase = 'border border-slate-300 dark:border-slate-700';
+    bodyEl.innerHTML = list.map((emp, idx) => {
+        let total = 0;
+        let cellsHtml = '';
+        for (let d = 1; d <= days; d++) {
+            if (type === 'attendance') {
+                const val = (emp.days && emp.days[d]) || '';
+                if (val === 'X') total += 1;
+                else if (val === '1/2') total += 0.5;
+                cellsHtml += `<td class="${tdBase} p-0 text-center cursor-pointer select-none ${chamCongCellClass(val)}" onclick="cycleAttendanceCell(${idx}, ${d})" title="Bấm để đổi trạng thái">${val}</td>`;
+            } else {
+                const val = (emp.hours && emp.hours[d]) || '';
+                total += parseFloat(val) || 0;
+                cellsHtml += `<td class="${tdBase} p-0"><input type="number" step="0.5" value="${val}" class="w-6 text-center text-[10px] bg-transparent outline-none focus:bg-blue-50 dark:focus:bg-slate-800" onchange="updateOvertimeHour(${idx}, ${d}, this.value)"></td>`;
+            }
+        }
+        const rate = emp.rate || 0;
+        const thanhTien = total * rate;
+        return `<tr>
+            <td class="${tdBase} p-1 text-center sticky left-0 bg-white dark:bg-slate-900">${idx + 1}</td>
+            <td class="${tdBase} p-1 font-bold sticky left-8 bg-white dark:bg-slate-900 dark:text-white whitespace-nowrap">${emp.name}</td>
+            ${cellsHtml}
+            <td class="${tdBase} p-1 text-center font-bold dark:text-white">${total}</td>
+            <td class="${tdBase} p-1">
+                <input type="number" value="${rate}" class="w-full text-center text-[11px] bg-transparent outline-none dark:text-white focus:bg-blue-50 dark:focus:bg-slate-800" onchange="updateChamCongRate('${type}', ${idx}, this.value)">
+            </td>
+            <td class="${tdBase} p-1 text-right font-bold dark:text-white">${thanhTien.toLocaleString('vi-VN')}</td>
+            <td class="${tdBase} p-1 text-center">
+                <button onclick="removeChamCongEmployee('${type}', ${idx})" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+            </td>
+        </tr>`;
+    }).join('');
+
+    if (list.length === 0) {
+        const colspan = days + 5;
+        bodyEl.innerHTML = `<tr><td colspan="${colspan}" class="p-4 text-center text-slate-400 text-xs">Chưa có nhân viên nào - bấm "Thêm nhân viên" ở trên.</td></tr>`;
+    }
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function cycleAttendanceCell(idx, day) {
+    const emp = window.chamCongState.attendance[idx];
+    if (!emp) return;
+    if (!emp.days) emp.days = {};
+    const cur = emp.days[day] || '';
+    const next = cur === '' ? 'X' : cur === 'X' ? '1/2' : cur === '1/2' ? 'N' : '';
+    emp.days[day] = next;
+    renderChamCongTable('attendance', getDaysInMonth(window.chamCongState.month));
+}
+
+function updateOvertimeHour(idx, day, value) {
+    const emp = window.chamCongState.overtime[idx];
+    if (!emp) return;
+    if (!emp.hours) emp.hours = {};
+    emp.hours[day] = parseFloat(value) || 0;
+    renderChamCongTable('overtime', getDaysInMonth(window.chamCongState.month));
+}
+
+function updateChamCongRate(type, idx, value) {
+    const emp = window.chamCongState[type][idx];
+    if (!emp) return;
+    emp.rate = parseFloat(value) || 0;
+    renderChamCongTable(type, getDaysInMonth(window.chamCongState.month));
+}
+
+async function addChamCongEmployee(type) {
+    const { value: name } = await Swal.fire({
+        title: 'Thêm nhân viên vào bảng ' + (type === 'attendance' ? 'chấm công' : 'tăng ca'),
+        input: 'text',
+        inputPlaceholder: 'Họ và tên...',
+        showCancelButton: true,
+        confirmButtonText: 'Thêm',
+        cancelButtonText: 'Hủy',
+        confirmButtonColor: '#2563eb'
+    });
+    if (!name || !name.trim()) return;
+    window.chamCongState[type].push({ name: name.trim(), rate: 0, days: {}, hours: {} });
+    renderChamCongTable(type, getDaysInMonth(window.chamCongState.month));
+}
+
+function removeChamCongEmployee(type, idx) {
+    const emp = window.chamCongState[type][idx];
+    Swal.fire({
+        title: `Xóa "${emp ? emp.name : ''}" khỏi bảng ${type === 'attendance' ? 'chấm công' : 'tăng ca'}?`,
+        text: 'Chỉ xóa khỏi bảng này (không ảnh hưởng bảng kia) - nhớ bấm "Lưu bảng chấm công" sau khi xóa.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Xóa',
+        cancelButtonText: 'Hủy',
+        confirmButtonColor: '#ef4444'
+    }).then(res => {
+        if (res.isConfirmed) {
+            window.chamCongState[type].splice(idx, 1);
+            renderChamCongTable(type, getDaysInMonth(window.chamCongState.month));
+        }
+    });
+}
+
+async function saveChamCongData() {
+    if (!window.chamCongState.month) return;
+    showLoading();
+    try {
+        await db.collection('cham_cong').doc(window.chamCongState.month).set({
+            attendance: window.chamCongState.attendance,
+            overtime: window.chamCongState.overtime,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        Swal.close();
+        const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 });
+        Toast.fire({ icon: 'success', title: 'Đã lưu bảng chấm công tháng ' + window.chamCongState.month });
+        if (typeof ghiLog === 'function') ghiLog('Chấm Công', 'Sửa', window.chamCongState.month, `Cập nhật bảng chấm công tháng ${window.chamCongState.month}`);
+    } catch (e) {
+        Swal.close();
+        showAlert('Lỗi khi lưu bảng chấm công: ' + e.message);
+    }
+}
+
+// In cả 2 bảng (chấm công + tăng ca) trong cùng 1 lần in, có tên công ty ở đầu trang -
+// dùng lại đúng cơ chế in qua iframe ẩn (printReportDirect) đã có sẵn cho các báo cáo khác.
+function printChamCong() {
+    const monthStr = window.chamCongState.month || '';
+    const days = getDaysInMonth(monthStr);
+    const parts = monthStr.split('-');
+    const y = parts[0];
+    const m = parts[1];
+    const monthLabel = m ? m + '/' + y : '';
+
+    function buildTableHtml(type, title) {
+        const list = window.chamCongState[type] || [];
+        let dayHeaders = '';
+        for (let d = 1; d <= days; d++) {
+            dayHeaders += '<th style="border:1px solid #999;padding:4px;background:#efefef;">' + d + '</th>';
+        }
+
+        let rowsHtml = '';
+        list.forEach((emp, idx) => {
+            let total = 0;
+            let cells = '';
+            for (let d = 1; d <= days; d++) {
+                if (type === 'attendance') {
+                    const val = (emp.days && emp.days[d]) || '';
+                    if (val === 'X') total += 1; else if (val === '1/2') total += 0.5;
+                    cells += '<td style="border:1px solid #999;padding:4px;text-align:center;">' + val + '</td>';
+                } else {
+                    const val = parseFloat(emp.hours && emp.hours[d]) || 0;
+                    total += val;
+                    cells += '<td style="border:1px solid #999;padding:4px;text-align:center;">' + (val || '') + '</td>';
+                }
+            }
+            const thanhTien = total * (emp.rate || 0);
+            rowsHtml += '<tr>' +
+                '<td style="border:1px solid #999;padding:4px;text-align:center;">' + (idx + 1) + '</td>' +
+                '<td style="border:1px solid #999;padding:4px;font-weight:bold;">' + emp.name + '</td>' +
+                cells +
+                '<td style="border:1px solid #999;padding:4px;text-align:center;font-weight:bold;">' + total + '</td>' +
+                '<td style="border:1px solid #999;padding:4px;text-align:right;">' + thanhTien.toLocaleString('vi-VN') + '</td>' +
+                '<td style="border:1px solid #999;padding:4px;"></td>' +
+            '</tr>';
+        });
+
+        const totalLabel = type === 'attendance' ? 'công' : 'giờ';
+        const emptyRow = '<tr><td colspan="' + (days + 5) + '" style="border:1px solid #999;padding:10px;text-align:center;">Chưa có dữ liệu</td></tr>';
+
+        return '<h2 style="text-align:center;font-size:17px;margin:24px 0 12px;">' + title + ' THÁNG ' + monthLabel + '</h2>' +
+        '<table style="width:100%;border-collapse:collapse;font-size:11.5px;">' +
+            '<thead><tr>' +
+                '<th style="border:1px solid #999;padding:4px;background:#efefef;">STT</th>' +
+                '<th style="border:1px solid #999;padding:4px;background:#efefef;">Họ và tên</th>' +
+                dayHeaders +
+                '<th style="border:1px solid #999;padding:4px;background:#efefef;">Tổng<br>' + totalLabel + '</th>' +
+                '<th style="border:1px solid #999;padding:4px;background:#efefef;">Thành tiền</th>' +
+                '<th style="border:1px solid #999;padding:4px;background:#efefef;">Ký tên</th>' +
+            '</tr></thead>' +
+            '<tbody>' + (rowsHtml || emptyRow) + '</tbody>' +
+        '</table>' +
+        '<p style="font-size:11px;margin:8px 0 0;"><strong>Ghi chú:</strong> X - 1 ngày công &nbsp;&nbsp; 1/2 - nửa ngày làm &nbsp;&nbsp; N - nghỉ</p>';
+    }
+
+    const bodyHtml = '<div style="font-family:\'Times New Roman\',serif;padding:20px;color:#1a1a1a;">' +
+        '<h1 style="text-align:center;font-size:18px;margin:0 0 4px;text-transform:uppercase;">HTX Sản Xuất Và Kinh Doanh Nông Sản Thanh Nguyễn</h1>' +
+        buildTableHtml('attendance', 'BẢNG CHẤM CÔNG TẠI XƯỞNG') +
+        buildTableHtml('overtime', 'BẢNG TĂNG CA TẠI XƯỞNG') +
+    '</div>';
+
+    printReportDirect('Bảng chấm công ' + monthLabel, bodyHtml);
 }
 
 // --- TẢI NHẬT KÝ HOẠT ĐỘNG (AI SỬA/XÓA GÌ, KHI NÀO) ---
