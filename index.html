@@ -4903,6 +4903,48 @@ function calcShiftHours(inTime, outTime) {
     return diff > 0 ? diff : 0;
 }
 
+// ============ Ô GÕ NGÀY/GIỜ TỰ ĐỊNH DẠNG (thay cho input type="date"/"time" chuẩn) ============
+// SỬA LỖI: ô ngày/giờ CHUẨN của trình duyệt (input type="date"/"time") chia thành nhiều
+// "ngăn" (ngày/tháng/năm, giờ/phút) do CHÍNH TRÌNH DUYỆT tự xử lý bàn phím - gõ nhanh, đặc
+// biệt ở ngăn NĂM (4 chữ số) hay bị "nhảy ngăn"/mất số giữa chừng (lỗi trình duyệt đã biết từ
+// lâu, không phải do phần mềm). Ô tự định dạng dưới đây là Ô CHỮ (text) do TỰ code kiểm soát
+// hoàn toàn: gõ liền số thường (VD "01082026"), tự thêm dấu "/" đúng chỗ thành "01/08/2026",
+// gõ giờ "0530" tự thành "05:30" - không còn bị nhảy/mất số nữa.
+
+// Gõ vào ô ngày: tự thêm "/" sau ngày và sau tháng, tối đa 8 chữ số (ddmmyyyy).
+function maskDateTextInput(el) {
+    let digits = el.value.replace(/[^0-9]/g, '').slice(0, 8);
+    let out = digits;
+    if (digits.length > 4) out = digits.slice(0, 2) + '/' + digits.slice(2, 4) + '/' + digits.slice(4);
+    else if (digits.length > 2) out = digits.slice(0, 2) + '/' + digits.slice(2);
+    el.value = out;
+}
+
+// Gõ vào ô giờ: tự thêm ":" sau giờ, tối đa 4 chữ số (hhmm).
+function maskTimeTextInput(el) {
+    let digits = el.value.replace(/[^0-9]/g, '').slice(0, 4);
+    let out = digits;
+    if (digits.length > 2) out = digits.slice(0, 2) + ':' + digits.slice(2);
+    el.value = out;
+}
+
+// Đổi "dd/mm/yyyy" (người dùng gõ) -> "yyyy-mm-dd" (định dạng lưu trữ nội bộ, giữ NGUYÊN như
+// input type="date" cũ để mọi chỗ khác trong app dùng e.date không phải sửa gì thêm). Trả về
+// '' nếu gõ chưa đủ/không hợp lệ.
+function parseVNDateToISO(str) {
+    const m = String(str || '').match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (!m) return '';
+    const [, d, mo, y] = m;
+    const dNum = parseInt(d, 10), moNum = parseInt(mo, 10), yNum = parseInt(y, 10);
+    if (moNum < 1 || moNum > 12 || dNum < 1 || dNum > 31 || yNum < 1900) return '';
+    return `${y}-${mo}-${d}`;
+}
+
+// Xác thực đúng dạng "hh:mm" (giờ 00-23, phút 00-59) - gõ dở/sai giờ thì coi như chưa nhập.
+function isValidVNTime(str) {
+    return /^([01]\d|2[0-3]):[0-5]\d$/.test(String(str || ''));
+}
+
 function renderParttimeTable() {
     const headEl = document.getElementById('chamcong-parttime-head');
     const bodyEl = document.getElementById('chamcong-parttime-body');
@@ -4929,8 +4971,6 @@ function renderParttimeTable() {
     const list = window.chamCongState.parttime || [];
     const tdBase = 'border border-slate-300 dark:border-slate-700';
     const monthStr = window.chamCongState.month || '';
-    const minDate = monthStr ? `${monthStr}-01` : '';
-    const maxDate = monthStr ? `${monthStr}-${String(days).padStart(2, '0')}` : '';
     bodyEl.innerHTML = list.map((e, idx) => {
         const morningHours = calcShiftHours(e.morningIn, e.morningOut);
         const afternoonHours = calcShiftHours(e.afternoonIn, e.afternoonOut);
@@ -4940,16 +4980,16 @@ function renderParttimeTable() {
         return `<tr>
             <td class="${tdBase} p-1 text-center">${idx + 1}</td>
             <td class="${tdBase} p-1">
-                <input type="date" min="${minDate}" max="${maxDate}" value="${e.date || ''}" lang="vi-VN" class="w-full text-[11px] bg-transparent outline-none focus:bg-blue-50 dark:focus:bg-slate-800 dark:text-white" onchange="updateParttimeField(${idx}, 'date', this.value)">
+                <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/yyyy" value="${formatDateVN(e.date)}" class="w-full text-[11px] bg-transparent outline-none focus:bg-blue-50 dark:focus:bg-slate-800 dark:text-white" oninput="maskDateTextInput(this)" onchange="commitParttimeDate(${idx}, this)">
             </td>
             <td class="${tdBase} p-1 font-bold">
                 <input type="text" value="${escapeHtml(e.name || '')}" placeholder="Nhập tên..." list="chamcong-parttime-namelist" class="w-full min-w-[100px] text-[11px] bg-transparent outline-none focus:bg-blue-50 dark:focus:bg-slate-800 dark:text-white" onchange="updateParttimeField(${idx}, 'name', this.value)">
             </td>
-            <td class="${tdBase} p-1"><input type="time" lang="vi-VN" value="${e.morningIn || ''}" class="w-full text-[11px] bg-transparent outline-none dark:text-white" onchange="updateParttimeField(${idx}, 'morningIn', this.value)"></td>
-            <td class="${tdBase} p-1"><input type="time" lang="vi-VN" value="${e.morningOut || ''}" class="w-full text-[11px] bg-transparent outline-none dark:text-white" onchange="updateParttimeField(${idx}, 'morningOut', this.value)"></td>
+            <td class="${tdBase} p-1"><input type="text" inputmode="numeric" maxlength="5" placeholder="hh:mm" value="${e.morningIn || ''}" class="w-full text-[11px] bg-transparent outline-none dark:text-white" oninput="maskTimeTextInput(this)" onchange="commitParttimeTime(${idx}, 'morningIn', this)"></td>
+            <td class="${tdBase} p-1"><input type="text" inputmode="numeric" maxlength="5" placeholder="hh:mm" value="${e.morningOut || ''}" class="w-full text-[11px] bg-transparent outline-none dark:text-white" oninput="maskTimeTextInput(this)" onchange="commitParttimeTime(${idx}, 'morningOut', this)"></td>
             <td class="${tdBase} p-1 text-center dark:text-white">${morningHours ? morningHours.toFixed(2) : ''}</td>
-            <td class="${tdBase} p-1"><input type="time" lang="vi-VN" value="${e.afternoonIn || ''}" class="w-full text-[11px] bg-transparent outline-none dark:text-white" onchange="updateParttimeField(${idx}, 'afternoonIn', this.value)"></td>
-            <td class="${tdBase} p-1"><input type="time" lang="vi-VN" value="${e.afternoonOut || ''}" class="w-full text-[11px] bg-transparent outline-none dark:text-white" onchange="updateParttimeField(${idx}, 'afternoonOut', this.value)"></td>
+            <td class="${tdBase} p-1"><input type="text" inputmode="numeric" maxlength="5" placeholder="hh:mm" value="${e.afternoonIn || ''}" class="w-full text-[11px] bg-transparent outline-none dark:text-white" oninput="maskTimeTextInput(this)" onchange="commitParttimeTime(${idx}, 'afternoonIn', this)"></td>
+            <td class="${tdBase} p-1"><input type="text" inputmode="numeric" maxlength="5" placeholder="hh:mm" value="${e.afternoonOut || ''}" class="w-full text-[11px] bg-transparent outline-none dark:text-white" oninput="maskTimeTextInput(this)" onchange="commitParttimeTime(${idx}, 'afternoonOut', this)"></td>
             <td class="${tdBase} p-1 text-center dark:text-white">${afternoonHours ? afternoonHours.toFixed(2) : ''}</td>
             <td class="${tdBase} p-1 text-center font-bold dark:text-white">${total ? total.toFixed(2) : 0}</td>
             <td class="${tdBase} p-1">
@@ -5003,6 +5043,34 @@ function updateParttimeField(idx, field, value) {
     }
     renderParttimeTable();
     scheduleChamCongAutoSave();
+}
+
+// Chốt lại giá trị ô NGÀY (gõ tay dd/mm/yyyy) khi rời khỏi ô - đổi về đúng "yyyy-mm-dd" để
+// lưu (giữ nguyên định dạng cũ, mọi chỗ khác trong app không cần sửa gì). Gõ thiếu/sai thì
+// coi như bỏ trống, không chặn/không hiện hộp thoại làm gián đoạn (khớp đúng cảm giác input
+// type="date" cũ: rời ô mà chưa nhập xong thì để trống).
+function commitParttimeDate(idx, el) {
+    const iso = parseVNDateToISO(el.value);
+    // Giữ đúng hành vi cũ của input type="date" (có min/max): ngày gõ vào phải nằm trong
+    // ĐÚNG THÁNG chấm công đang chọn ở trên - gõ ngày tháng khác thì coi như không hợp lệ.
+    const monthStr = window.chamCongState.month || '';
+    const inRange = iso && monthStr && iso.slice(0, 7) === monthStr;
+    if (el.value && !inRange) {
+        el.classList.add('ring-2', 'ring-red-400');
+        setTimeout(() => el.classList.remove('ring-2', 'ring-red-400'), 1500);
+    }
+    updateParttimeField(idx, 'date', inRange ? iso : '');
+}
+
+// Chốt lại giá trị ô GIỜ (gõ tay hh:mm) khi rời khỏi ô - xác thực đúng khung giờ hợp lệ mới
+// lưu, gõ sai/thiếu thì bỏ trống (không chặn thao tác).
+function commitParttimeTime(idx, field, el) {
+    const valid = isValidVNTime(el.value);
+    if (el.value && !valid) {
+        el.classList.add('ring-2', 'ring-red-400');
+        setTimeout(() => el.classList.remove('ring-2', 'ring-red-400'), 1500);
+    }
+    updateParttimeField(idx, field, valid ? el.value : '');
 }
 
 function removeParttimeEntry(idx) {
