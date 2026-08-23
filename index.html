@@ -3202,12 +3202,15 @@ html:not(.dark) .bg-white {
         <h3 class="mb-6 font-bold text-2xl text-gray-800 px-2 md:px-0">LỊCH CÔNG VIỆC & GHI CHÚ</h3>
 
         <!-- TAB ĐIỀU HƯỚNG: Lịch & Ghi Chú / Chấm Công (Chấm Công đã CHUYỂN từ trang Quản
-             Lý sang đây theo yêu cầu). -->
-        <div class="flex gap-2 border-b border-slate-200 dark:border-slate-700 mb-4">
-            <button id="tab-btn-lichcv-calendar" onclick="switchLichCVTab('calendar')" class="px-4 py-2.5 font-bold text-sm rounded-t-lg border-b-2 border-blue-600 text-blue-600 dark:text-blue-400 flex items-center gap-2">
+             Lý sang đây theo yêu cầu). Đổi sang đúng phong cách "tab 3D" giống Trang Chủ
+             (NXT KHO/DOANH THU/TOP SP) thay vì kiểu gạch chân đơn giản trước đây. -->
+        <div class="grid grid-cols-2 gap-2 md:gap-3 bg-slate-200 dark:bg-slate-950 p-1.5 rounded-2xl border border-slate-300 dark:border-slate-900 shadow-[inset_0_2px_6px_rgba(0,0,0,0.15)] dark:shadow-[inset_0_4px_12px_rgba(0,0,0,0.8)] select-none mb-4">
+            <button id="tab-btn-lichcv-calendar" onclick="switchLichCVTab('calendar')"
+                class="py-2.5 px-1 text-[11px] md:text-sm font-black rounded-xl transition-all duration-150 bg-gradient-to-b from-blue-500 to-blue-600 dark:from-blue-900/60 dark:to-blue-800/50 text-white dark:text-blue-400 border-b-[4px] border-blue-700 dark:border-blue-600 shadow-[0_4px_10px_rgba(59,130,246,0.15)] dark:shadow-[0_6px_15px_rgba(59,130,246,0.25)] uppercase tracking-wider flex items-center justify-center gap-2">
                 <i data-lucide="calendar-days" class="w-4 h-4"></i> Lịch &amp; Ghi Chú
             </button>
-            <button id="tab-btn-lichcv-chamcong" onclick="switchLichCVTab('chamcong')" class="px-4 py-2.5 font-bold text-sm rounded-t-lg border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center gap-2">
+            <button id="tab-btn-lichcv-chamcong" onclick="switchLichCVTab('chamcong')"
+                class="py-2.5 px-1 text-[11px] md:text-sm font-bold rounded-xl transition-all duration-150 bg-slate-100/80 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border-b-[2px] border-slate-300 dark:border-slate-950 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/80 hover:border-b-[4px] hover:border-slate-400 dark:hover:border-slate-800 uppercase tracking-wider flex items-center justify-center gap-2">
                 <i data-lucide="calendar-check-2" class="w-4 h-4"></i> Chấm Công
             </button>
         </div>
@@ -3293,6 +3296,9 @@ html:not(.dark) .bg-white {
                 <input type="month" id="chamcong-month" onchange="loadChamCongMonth()" class="border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-xl text-gray-800 dark:text-white text-sm outline-none">
             </div>
             <div class="flex items-center gap-2 flex-wrap">
+                <button onclick="openStaffRosterManager()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all duration-75 border-b-[4px] border-indigo-800 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2">
+                    <i data-lucide="users" class="w-4 h-4"></i> Sổ danh sách NV
+                </button>
                 <button onclick="printChamCong()" class="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all duration-75 border-b-[4px] border-slate-800 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2">
                     <i data-lucide="printer" class="w-4 h-4"></i> In bảng chấm công
                 </button>
@@ -3340,6 +3346,21 @@ html:not(.dark) .bg-white {
                     <thead id="chamcong-overtime-head"></thead>
                     <tbody id="chamcong-overtime-body"></tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- TỔNG CHI PHÍ LƯƠNG THÁNG NÀY (chấm công + tăng ca cộng lại) + Người chấm công -
+             thêm để có cái nhìn tổng quan ngay mà không phải tự cộng 2 bảng, và ghi nhận ai
+             là người lập bảng tháng này (lưu chung 1 dòng cho cả tháng cùng dữ liệu chấm
+             công, xem saveChamCongData/loadChamCongMonth). -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 p-3 flex flex-col md:flex-row md:items-center gap-3">
+            <div class="flex-1 flex items-center gap-2">
+                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase whitespace-nowrap">Người chấm công</label>
+                <input type="text" id="chamcong-nguoi-cham" placeholder="Nhập họ tên người chấm công tháng này..." class="flex-1 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 dark:text-white p-2 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-400">
+            </div>
+            <div class="shrink-0 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-800 rounded-xl px-4 py-2 text-right">
+                <p class="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase">Tổng chi lương tháng này</p>
+                <p id="chamcong-tong-luong" class="text-lg font-black text-emerald-700 dark:text-emerald-400">0 đ</p>
             </div>
         </div>
     </div>
@@ -4613,23 +4634,49 @@ function switchQuanLyTab(tab) {
 
 // Chấm Công (chuyển từ trang Quản Lý sang trang Lịch Công Việc - xem HTML #page-LichCongViec)
 // - 2 tab: "Lịch & Ghi Chú" (mặc định) và "Chấm Công".
+// Đồng bộ với đúng phong cách "tab 3D" của Trang Chủ (switchMainTab) - danh sách class
+// PHẢI khớp CHÍNH XÁC với class tĩnh ban đầu trong HTML của 2 nút, nếu không classList.remove()
+// sẽ không xoá được class cũ, khiến class dính lại chồng lên nhau (lỗi mất chữ ở giao diện
+// sáng - xem chú thích gốc ở switchMainTab).
 function switchLichCVTab(tab) {
     const tabs = {
         calendar: { content: document.getElementById('lichcv-tab-calendar'), btn: document.getElementById('tab-btn-lichcv-calendar') },
         chamcong: { content: document.getElementById('lichcv-tab-chamcong'), btn: document.getElementById('tab-btn-lichcv-chamcong') }
     };
-    const activeCls = ['border-blue-600', 'text-blue-600', 'dark:text-blue-400'];
-    const inactiveCls = ['border-transparent', 'text-slate-500', 'dark:text-slate-400'];
+
+    const activeClasses = [
+        'bg-gradient-to-b', 'from-blue-500', 'to-blue-600',
+        'text-white',
+        'border-b-[4px]', 'border-blue-700',
+        'shadow-[0_4px_10px_rgba(59,130,246,0.15)]',
+        'font-black',
+        'dark:from-blue-900/60', 'dark:to-blue-800/50', 'dark:text-blue-400',
+        'dark:border-blue-600',
+        'dark:shadow-[0_6px_15px_rgba(59,130,246,0.25)]'
+    ];
+    const inactiveClasses = [
+        'bg-slate-100/80', 'text-slate-400',
+        'border-b-[2px]', 'border-slate-300',
+        'shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]',
+        'hover:text-slate-700',
+        'hover:bg-slate-50', 'hover:border-b-[4px]',
+        'hover:border-slate-400', 'font-bold',
+        'dark:bg-slate-900/40', 'dark:text-slate-500', 'dark:border-slate-950',
+        'dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]', 'dark:hover:text-slate-300',
+        'dark:hover:bg-slate-900/80', 'dark:hover:border-slate-800'
+    ];
+    const allClasses = [...activeClasses, ...inactiveClasses];
 
     Object.keys(tabs).forEach(key => {
         const { content, btn } = tabs[key];
         if (!content || !btn) return;
+        btn.classList.remove(...allClasses);
         if (key === tab) {
             content.classList.remove('hidden');
-            btn.classList.remove(...inactiveCls); btn.classList.add(...activeCls);
+            btn.classList.add(...activeClasses);
         } else {
             content.classList.add('hidden');
-            btn.classList.remove(...activeCls); btn.classList.add(...inactiveCls);
+            btn.classList.add(...inactiveClasses);
         }
     });
 
@@ -4668,10 +4715,12 @@ async function loadChamCongMonth() {
         const doc = await db.collection('cham_cong').doc(monthStr).get();
         if (doc.exists) {
             const data = doc.data();
-            window.chamCongState = { month: monthStr, attendance: data.attendance || [], overtime: data.overtime || [] };
+            window.chamCongState = { month: monthStr, attendance: data.attendance || [], overtime: data.overtime || [], nguoiCham: data.nguoiCham || '' };
         } else {
-            window.chamCongState = { month: monthStr, attendance: [], overtime: [] };
+            window.chamCongState = { month: monthStr, attendance: [], overtime: [], nguoiCham: '' };
         }
+        const nguoiChamEl = document.getElementById('chamcong-nguoi-cham');
+        if (nguoiChamEl) nguoiChamEl.value = window.chamCongState.nguoiCham || '';
         renderChamCongTables();
         Swal.close();
     } catch (e) {
@@ -4730,7 +4779,7 @@ function renderChamCongTable(type, days) {
             } else {
                 const val = (emp.hours && emp.hours[d]) || '';
                 total += parseFloat(val) || 0;
-                cellsHtml += `<td class="${tdBase} py-2 text-center"><input type="number" step="0.5" value="${val}" class="no-spinner w-9 text-center text-[11px] bg-transparent outline-none focus:bg-blue-50 dark:focus:bg-slate-800" onchange="updateOvertimeHour(${idx}, ${d}, this.value)"></td>`;
+                cellsHtml += `<td class="${tdBase} py-2 text-center"><input type="number" step="0.5" value="${val}" class="no-spinner min-w-0 w-full text-center text-[11px] bg-transparent outline-none focus:bg-blue-50 dark:focus:bg-slate-800" onchange="updateOvertimeHour(${idx}, ${d}, this.value)"></td>`;
             }
         }
         const rate = emp.rate || 0;
@@ -4756,6 +4805,27 @@ function renderChamCongTable(type, days) {
     }
 
     if (typeof lucide !== 'undefined') lucide.createIcons();
+    updateChamCongTongLuong();
+}
+
+// Cộng "Thành tiền" của CẢ 2 bảng (chấm công + tăng ca) lại thành 1 con số tổng quan duy
+// nhất, hiển thị ở thẻ "Tổng chi lương tháng này" - gọi lại mỗi khi 1 trong 2 bảng render
+// lại (đổi trạng thái ngày, đổi đơn giá, thêm/xoá nhân viên...) để luôn khớp với dữ liệu
+// mới nhất, không cần thao tác gì thêm.
+function updateChamCongTongLuong() {
+    const el = document.getElementById('chamcong-tong-luong');
+    if (!el) return;
+    const sumOf = (type) => (window.chamCongState[type] || []).reduce((sum, emp) => {
+        let total = 0;
+        if (type === 'attendance') {
+            Object.values(emp.days || {}).forEach(v => { if (v === 'X') total += 1; else if (v === '1/2') total += 0.5; });
+        } else {
+            Object.values(emp.hours || {}).forEach(v => { total += parseFloat(v) || 0; });
+        }
+        return sum + total * (emp.rate || 0);
+    }, 0);
+    const tong = sumOf('attendance') + sumOf('overtime');
+    el.innerText = tong.toLocaleString('vi-VN') + ' đ';
 }
 
 function cycleAttendanceCell(idx, day) {
@@ -4783,19 +4853,172 @@ function updateChamCongRate(type, idx, value) {
     renderChamCongTable(type, getDaysInMonth(window.chamCongState.month));
 }
 
-async function addChamCongEmployee(type) {
-    const { value: name } = await Swal.fire({
-        title: 'Thêm nhân viên vào bảng ' + (type === 'attendance' ? 'chấm công' : 'tăng ca'),
-        input: 'text',
-        inputPlaceholder: 'Họ và tên...',
-        showCancelButton: true,
-        confirmButtonText: 'Thêm',
-        cancelButtonText: 'Hủy',
-        confirmButtonColor: '#2563eb'
+// --- SỔ DANH SÁCH NHÂN VIÊN RIÊNG (không phụ thuộc tài khoản đăng nhập - xưởng có khi
+// chỉ 1-2 người có tài khoản, còn lại vài chục công nhân không cần đăng nhập hệ thống) ---
+// Lưu trong collection 'staff_roster' (mỗi tài liệu chỉ có 1 trường "name") - dùng RIÊNG
+// cho việc chọn nhanh khi thêm vào bảng Chấm Công, tách biệt hoàn toàn với app_users.
+async function getAllStaffForChamCong(forceReload) {
+    if (window.__chamCongStaffList && !forceReload) return window.__chamCongStaffList;
+    const snap = await db.collection('staff_roster').get();
+    const list = [];
+    snap.forEach(doc => list.push({ id: doc.id, name: (doc.data().name || '').trim() }));
+    list.sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+    window.__chamCongStaffList = list;
+    return list;
+}
+
+// Lưu thêm 1 tên mới vào sổ (bỏ qua nếu đã có sẵn, so không phân biệt hoa/thường) - gọi mỗi
+// khi người dùng gõ tay thêm 1 người CHƯA CÓ trong sổ, để LẦN SAU tên đó tự hiện ra trong
+// danh sách chọn nhanh, không phải gõ tay lại nữa.
+async function saveNewNameToStaffRoster(name) {
+    const trimmed = (name || '').trim();
+    if (!trimmed) return;
+    const existing = await getAllStaffForChamCong();
+    if (existing.some(s => s.name.toLowerCase() === trimmed.toLowerCase())) return; // đã có sẵn
+    try {
+        await db.collection('staff_roster').add({ name: trimmed, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        window.__chamCongStaffList = null; // buộc nạp lại danh sách ở lần mở tiếp theo
+    } catch (e) {
+        console.warn('Không lưu được tên vào sổ danh sách nhân viên (không ảnh hưởng việc thêm vào bảng chấm công):', e);
+    }
+}
+
+// Quản lý sổ danh sách nhân viên (thêm/xoá tên) - dùng khi có người nghỉ việc cần xoá khỏi
+// sổ, hoặc gõ nhầm tên cần sửa lại (xoá rồi thêm lại tên đúng), hoặc muốn thêm sẵn cả loạt
+// tên trước khi vào bảng chấm công.
+async function openStaffRosterManager() {
+    const renderList = async () => {
+        const list = await getAllStaffForChamCong(true);
+        const box = document.getElementById('swal-staff-roster-list');
+        if (!box) return;
+        box.innerHTML = list.length
+            ? list.map(s => `
+                <div class="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <span class="text-sm dark:text-slate-200">${escapeHtml(s.name)}</span>
+                    <button type="button" onclick="deleteStaffRosterEntry('${s.id}')" class="text-red-500 hover:text-red-700 shrink-0 ml-2"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                </div>`).join('')
+            : `<p class="text-xs text-slate-400 text-center py-3">Sổ đang trống - thêm tên ở ô bên dưới.</p>`;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    };
+
+    await Swal.fire({
+        title: '👥 Sổ danh sách nhân viên',
+        html: `
+            <div class="text-left">
+                <p class="text-xs text-slate-400 mb-2">Sổ này TÁCH BIỆT với tài khoản đăng nhập - dùng để chọn nhanh khi thêm vào bảng Chấm Công, không cần cấp tài khoản cho từng công nhân.</p>
+                <div id="swal-staff-roster-list" class="max-h-56 overflow-y-auto border border-slate-200 dark:border-slate-700 rounded-lg mb-3"></div>
+                <div class="flex gap-2">
+                    <input id="swal-staff-roster-add-input" type="text" class="swal2-input !m-0 flex-1" placeholder="Thêm tên mới...">
+                    <button type="button" onclick="addStaffRosterEntryFromManager()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 rounded-xl font-bold text-sm shrink-0">Thêm</button>
+                </div>
+            </div>`,
+        showConfirmButton: true,
+        confirmButtonText: 'Đóng',
+        confirmButtonColor: '#475569',
+        didOpen: renderList
     });
-    if (!name || !name.trim()) return;
-    window.chamCongState[type].push({ name: name.trim(), rate: 0, days: {}, hours: {} });
+}
+
+async function addStaffRosterEntryFromManager() {
+    const input = document.getElementById('swal-staff-roster-add-input');
+    const name = (input?.value || '').trim();
+    if (!name) return;
+    await saveNewNameToStaffRoster(name);
+    if (input) input.value = '';
+    const list = await getAllStaffForChamCong(true);
+    const box = document.getElementById('swal-staff-roster-list');
+    if (box) {
+        box.innerHTML = list.length
+            ? list.map(s => `
+                <div class="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <span class="text-sm dark:text-slate-200">${escapeHtml(s.name)}</span>
+                    <button type="button" onclick="deleteStaffRosterEntry('${s.id}')" class="text-red-500 hover:text-red-700 shrink-0 ml-2"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                </div>`).join('')
+            : '';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+}
+
+async function deleteStaffRosterEntry(docId) {
+    try {
+        await db.collection('staff_roster').doc(docId).delete();
+        window.__chamCongStaffList = null;
+        const list = await getAllStaffForChamCong(true);
+        const box = document.getElementById('swal-staff-roster-list');
+        if (box) {
+            box.innerHTML = list.length
+                ? list.map(s => `
+                    <div class="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800">
+                        <span class="text-sm dark:text-slate-200">${escapeHtml(s.name)}</span>
+                        <button type="button" onclick="deleteStaffRosterEntry('${s.id}')" class="text-red-500 hover:text-red-700 shrink-0 ml-2"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                    </div>`).join('')
+                : `<p class="text-xs text-slate-400 text-center py-3">Sổ đang trống - thêm tên ở ô bên dưới.</p>`;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+    } catch (e) {
+        console.error('Lỗi xóa tên khỏi sổ:', e);
+    }
+}
+
+async function addChamCongEmployee(type) {
+    const tableLabel = type === 'attendance' ? 'chấm công' : 'tăng ca';
+    const allStaff = await getAllStaffForChamCong();
+    // Loại những người ĐÃ CÓ SẴN trong đúng bảng này (so theo tên) - đỡ tick nhầm thêm
+    // trùng 1 người 2 lần.
+    const existingNames = new Set((window.chamCongState[type] || []).map(e => (e.name || '').trim().toLowerCase()));
+    const available = allStaff.filter(s => !existingNames.has(s.name.toLowerCase()));
+
+    let staffListHtml = '';
+    if (available.length > 0) {
+        available.forEach(s => {
+            staffListHtml += '<label class="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">' +
+                '<input type="checkbox" class="chamcong-pick-staff w-4 h-4 rounded text-blue-600" value="' + escapeHtml(s.name) + '">' +
+                '<span class="text-sm dark:text-slate-200">' + escapeHtml(s.name) + '</span>' +
+            '</label>';
+        });
+    } else {
+        staffListHtml = '<p class="text-xs text-slate-400 text-center py-2">Sổ danh sách nhân viên đang trống, hoặc mọi người đã có sẵn trong bảng này rồi - gõ tên bên dưới để thêm.</p>';
+    }
+
+    const selectAllBtn = available.length ? '<button type="button" onclick="document.querySelectorAll(\'.chamcong-pick-staff\').forEach(el=>el.checked=true)" class="text-[11px] font-bold text-blue-600 hover:underline shrink-0 ml-2">Chọn tất cả</button>' : '';
+
+    const html = '<div class="text-left">' +
+        '<div class="flex items-center justify-between mb-1">' +
+            '<p class="text-xs font-bold text-slate-500">Chọn nhanh từ sổ danh sách nhân viên (tick được nhiều người):</p>' +
+            selectAllBtn +
+        '</div>' +
+        '<div class="max-h-56 overflow-y-auto border border-slate-200 dark:border-slate-700 rounded-lg mb-3">' + staffListHtml + '</div>' +
+        '<p class="text-xs font-bold text-slate-500 mb-1">Hoặc thêm người mới (cách nhau bằng dấu phẩy) - tên mới sẽ được lưu lại vào sổ để lần sau chọn nhanh:</p>' +
+        '<input id="swal-chamcong-manual-name" type="text" class="swal2-input !m-0 !w-full" placeholder="VD: Cô Ba, Chú Tư">' +
+    '</div>';
+
+    const { value: formValues } = await Swal.fire({
+        title: 'Thêm nhân viên vào bảng ' + tableLabel,
+        html: html,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'Thêm vào bảng',
+        cancelButtonText: 'Hủy',
+        confirmButtonColor: '#2563eb',
+        preConfirm: () => {
+            const picked = Array.from(document.querySelectorAll('.chamcong-pick-staff:checked')).map(el => el.value);
+            const manualRaw = (document.getElementById('swal-chamcong-manual-name').value || '').trim();
+            const manualNames = manualRaw ? manualRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+            const allNames = [...picked, ...manualNames];
+            if (allNames.length === 0) { Swal.showValidationMessage('Vui lòng chọn ít nhất 1 nhân viên hoặc gõ tên!'); return false; }
+            return { allNames, manualNames };
+        }
+    });
+    if (!formValues) return;
+
+    formValues.allNames.forEach(name => {
+        window.chamCongState[type].push({ name: name, rate: 0, days: {}, hours: {} });
+    });
     renderChamCongTable(type, getDaysInMonth(window.chamCongState.month));
+
+    // Lưu các tên GÕ TAY (chưa có trong sổ) vào sổ danh sách nhân viên - để lần sau mở
+    // form này ra, tên đó tự hiện sẵn trong danh sách tick chọn, không cần gõ tay lại nữa.
+    formValues.manualNames.forEach(name => saveNewNameToStaffRoster(name));
 }
 
 function removeChamCongEmployee(type, idx) {
@@ -4820,9 +5043,12 @@ async function saveChamCongData() {
     if (!window.chamCongState.month) return;
     showLoading();
     try {
+        const nguoiChamEl = document.getElementById('chamcong-nguoi-cham');
+        window.chamCongState.nguoiCham = nguoiChamEl ? nguoiChamEl.value.trim() : (window.chamCongState.nguoiCham || '');
         await db.collection('cham_cong').doc(window.chamCongState.month).set({
             attendance: window.chamCongState.attendance,
             overtime: window.chamCongState.overtime,
+            nguoiCham: window.chamCongState.nguoiCham,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         Swal.close();
@@ -4844,6 +5070,8 @@ function printChamCong() {
     const y = parts[0];
     const m = parts[1];
     const monthLabel = m ? m + '/' + y : '';
+    const nguoiChamEl = document.getElementById('chamcong-nguoi-cham');
+    const nguoiCham = (nguoiChamEl ? nguoiChamEl.value.trim() : '') || window.chamCongState.nguoiCham || '';
 
     function buildTableHtml(type, title) {
         const list = window.chamCongState[type] || [];
@@ -4903,7 +5131,8 @@ function printChamCong() {
         '<div style="margin-top:36px;display:flex;justify-content:flex-end;">' +
             '<div style="text-align:center;min-width:180px;">' +
                 '<p style="margin:0;font-weight:bold;">Người chấm công</p>' +
-                '<p style="font-size:11px;color:#666;margin:2px 0 60px;">(Ký, ghi rõ họ tên)</p>' +
+                '<p style="font-size:11px;color:#666;margin:2px 0 6px;">(Ký, ghi rõ họ tên)</p>' +
+                '<p style="margin:54px 0 0;font-weight:bold;">' + (nguoiCham || '') + '</p>' +
             '</div>' +
         '</div>' +
     '</div>';
@@ -4919,25 +5148,29 @@ async function exportChamCongExcel() {
     const days = getDaysInMonth(monthStr);
     const [y, m] = monthStr.split('-');
     const monthLabel = m ? `${m}/${y}` : '';
+    const nguoiChamEl = document.getElementById('chamcong-nguoi-cham');
+    const nguoiCham = (nguoiChamEl ? nguoiChamEl.value.trim() : '') || window.chamCongState.nguoiCham || '';
 
     const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Chấm công');
+    const totalCols = 2 + days + 3; // STT, Họ tên, [ngày...], Tổng, Đơn giá, Thành tiền
 
-    function buildSheet(type, title, sheetName) {
-        const sheet = workbook.addWorksheet(sheetName);
-        const list = window.chamCongState[type] || [];
-        const totalCols = 2 + days + 3; // STT, Họ tên, [ngày...], Tổng, Đơn giá, Thành tiền
+    const titleRow = sheet.addRow(['HTX Sản Xuất Và Kinh Doanh Nông Sản Thanh Nguyễn']);
+    titleRow.font = { bold: true, size: 13 };
+    sheet.mergeCells(1, 1, 1, totalCols);
+    titleRow.alignment = { horizontal: 'center' };
+    sheet.addRow([]);
 
-        const titleRow = sheet.addRow(['HTX Sản Xuất Và Kinh Doanh Nông Sản Thanh Nguyễn']);
-        titleRow.font = { bold: true, size: 13 };
-        sheet.mergeCells(1, 1, 1, totalCols);
-        titleRow.alignment = { horizontal: 'center' };
-
+    // GHÉP CHUNG 2 BẢNG (Chấm công + Tăng ca) VÀO 1 SHEET DUY NHẤT, xếp bảng này dưới bảng
+    // kia - đúng như bố cục bản "In bảng chấm công" đang có (không xuất 2 sheet riêng như
+    // trước nữa), và chỉ có 1 dòng ký "Người chấm công" ở cuối cùng.
+    function buildTableBlock(type, title) {
         const subRow = sheet.addRow([`${title} THÁNG ${monthLabel}`]);
         subRow.font = { bold: true, size: 12 };
-        sheet.mergeCells(2, 1, 2, totalCols);
+        sheet.mergeCells(subRow.number, 1, subRow.number, totalCols);
         subRow.alignment = { horizontal: 'center' };
-        sheet.addRow([]);
 
+        const list = window.chamCongState[type] || [];
         const headerCells = ['STT', 'Họ và tên'];
         for (let d = 1; d <= days; d++) headerCells.push(String(d));
         headerCells.push(type === 'attendance' ? 'Tổng công' : 'Tổng giờ', 'Đơn giá', 'Thành tiền');
@@ -4975,42 +5208,51 @@ async function exportChamCongExcel() {
 
         if (!list.length) {
             const emptyRow = sheet.addRow(['Chưa có dữ liệu']);
-            sheet.mergeCells(sheet.rowCount, 1, sheet.rowCount, totalCols);
+            sheet.mergeCells(emptyRow.number, 1, emptyRow.number, totalCols);
             emptyRow.alignment = { horizontal: 'center' };
         }
 
-        sheet.addRow([]);
         const noteRow = sheet.addRow(['Ghi chú: X - 1 ngày công    1/2 - nửa ngày làm    N - nghỉ']);
         noteRow.font = { italic: true, size: 10 };
-        sheet.addRow([]);
-
-        // "Người chấm công" - dòng ký tên cuối mỗi sheet.
-        const signRow = sheet.addRow(['', '', '', '', '', '', '', '', '', '', 'Người chấm công']);
-        signRow.getCell(totalCols).font = { bold: true };
-        signRow.getCell(totalCols).alignment = { horizontal: 'center' };
-        sheet.mergeCells(signRow.number, totalCols - 1, signRow.number, totalCols);
-        const signNoteRow = sheet.addRow([]);
-        sheet.getCell(signNoteRow.number, totalCols).value = '(Ký, ghi rõ họ tên)';
-        sheet.getCell(signNoteRow.number, totalCols).font = { italic: true, size: 9, color: { argb: 'FF666666' } };
-        sheet.getCell(signNoteRow.number, totalCols).alignment = { horizontal: 'center' };
-        sheet.mergeCells(signNoteRow.number, totalCols - 1, signNoteRow.number, totalCols);
-
-        sheet.getColumn(1).width = 6;
-        sheet.getColumn(2).width = 20;
-        for (let d = 1; d <= days; d++) sheet.getColumn(2 + d).width = 5;
-        sheet.getColumn(totalCols - 2).width = 10;
-        sheet.getColumn(totalCols - 1).width = 12;
-        sheet.getColumn(totalCols).width = 14;
-
-        sheet.pageSetup.paperSize = 9;
-        sheet.pageSetup.orientation = 'landscape';
-        sheet.pageSetup.fitToPage = true;
-        sheet.pageSetup.fitToWidth = 1;
-        sheet.pageSetup.fitToHeight = 0;
+        sheet.addRow([]); // dòng trống cách bảng tiếp theo
     }
 
-    buildSheet('attendance', 'BẢNG CHẤM CÔNG TẠI XƯỞNG', 'Chấm công');
-    buildSheet('overtime', 'BẢNG TĂNG CA TẠI XƯỞNG', 'Tăng ca');
+    buildTableBlock('attendance', 'BẢNG CHẤM CÔNG TẠI XƯỞNG');
+    buildTableBlock('overtime', 'BẢNG TĂNG CA TẠI XƯỞNG');
+
+    // "Người chấm công" - CHỈ 1 dòng ký tên duy nhất ở cuối cùng (sau cả 2 bảng), giống hệt
+    // bản in.
+    const signRow = sheet.addRow([]);
+    sheet.getCell(signRow.number, totalCols).value = 'Người chấm công';
+    sheet.getCell(signRow.number, totalCols).font = { bold: true };
+    sheet.getCell(signRow.number, totalCols).alignment = { horizontal: 'center' };
+    sheet.mergeCells(signRow.number, totalCols - 1, signRow.number, totalCols);
+    const signNoteRow = sheet.addRow([]);
+    sheet.getCell(signNoteRow.number, totalCols).value = '(Ký, ghi rõ họ tên)';
+    sheet.getCell(signNoteRow.number, totalCols).font = { italic: true, size: 9, color: { argb: 'FF666666' } };
+    sheet.getCell(signNoteRow.number, totalCols).alignment = { horizontal: 'center' };
+    sheet.mergeCells(signNoteRow.number, totalCols - 1, signNoteRow.number, totalCols);
+    if (nguoiCham) {
+        sheet.addRow([]); sheet.addRow([]); sheet.addRow([]);
+        const nameRow = sheet.addRow([]);
+        sheet.getCell(nameRow.number, totalCols).value = nguoiCham;
+        sheet.getCell(nameRow.number, totalCols).font = { bold: true };
+        sheet.getCell(nameRow.number, totalCols).alignment = { horizontal: 'center' };
+        sheet.mergeCells(nameRow.number, totalCols - 1, nameRow.number, totalCols);
+    }
+
+    sheet.getColumn(1).width = 6;
+    sheet.getColumn(2).width = 20;
+    for (let d = 1; d <= days; d++) sheet.getColumn(2 + d).width = 5;
+    sheet.getColumn(totalCols - 2).width = 10;
+    sheet.getColumn(totalCols - 1).width = 12;
+    sheet.getColumn(totalCols).width = 14;
+
+    sheet.pageSetup.paperSize = 9;
+    sheet.pageSetup.orientation = 'landscape';
+    sheet.pageSetup.fitToPage = true;
+    sheet.pageSetup.fitToWidth = 1;
+    sheet.pageSetup.fitToHeight = 0;
 
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
