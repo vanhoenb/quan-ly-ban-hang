@@ -16799,7 +16799,7 @@ async function viewFullReport() {
                     let noteFinal = i.note || "";
                     if (isMultiProduct && idx === itemsArr.length - 1) {
                         const invoiceTotal = parseFloat(d.total || 0);
-                        const totalNote = `Tổng hoá đơn: ${invoiceTotal.toLocaleString('vi-VN')}đ`;
+                        const totalNote = `Tổng HĐ: ${invoiceTotal.toLocaleString('vi-VN')}đ`;
                         noteFinal = noteFinal ? `${noteFinal} | ${totalNote}` : totalNote;
                     }
 
