@@ -1684,7 +1684,10 @@ html:not(.dark) .bg-white {
         
         <!-- Tổng Doanh Thu -->
         <div onclick="showDashboardDetail('revenue')" 
-             class="bg-blue-100/70 dark:bg-blue-900/50 border-b-[4px] border-blue-300 dark:border-blue-800 text-blue-600 dark:text-blue-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(59,130,246,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-blue-200/70 dark:hover:bg-blue-800/60 hover:border-blue-400 dark:hover:border-blue-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
+             class="relative bg-blue-100/70 dark:bg-blue-900/50 border-b-[4px] border-blue-300 dark:border-blue-800 text-blue-600 dark:text-blue-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(59,130,246,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-blue-200/70 dark:hover:bg-blue-800/60 hover:border-blue-400 dark:hover:border-blue-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
+            <div class="absolute top-2 left-2 md:top-3 md:left-3 w-6 h-6 md:w-8 md:h-8 rounded-lg md:rounded-xl bg-blue-500 text-white flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.4),0_2px_4px_rgba(59,130,246,0.35)]">
+                <i data-lucide="trending-up" class="w-3.5 h-3.5 md:w-4 md:h-4"></i>
+            </div>
             <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-blue-500 dark:text-blue-300/80">Tổng Doanh Thu</p>
             <h3 id="total-revenue" class="text-md md:text-2xl font-black drop-shadow-[0_1.5px_3px_rgba(59,130,246,0.15)] dark:drop-shadow-[0_2px_4px_rgba(59,130,246,0.3)]">0 đ</h3>
             <span id="revenue-mom-badge" class="hidden mt-0.5 text-[9px] md:text-[11px] font-bold px-1.5 py-0.5 rounded-full"></span>
@@ -1692,20 +1695,29 @@ html:not(.dark) .bg-white {
         
         <!-- Công Nợ Cần Thu -->
         <div onclick="showDashboardDetail('debt-customer')" 
-             class="bg-rose-100/70 dark:bg-rose-900/50 border-b-[4px] border-rose-300 dark:border-rose-800 text-rose-600 dark:text-rose-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(244,63,94,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-rose-200/70 dark:hover:bg-rose-800/60 hover:border-rose-400 dark:hover:border-rose-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
+             class="relative bg-rose-100/70 dark:bg-rose-900/50 border-b-[4px] border-rose-300 dark:border-rose-800 text-rose-600 dark:text-rose-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(244,63,94,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-rose-200/70 dark:hover:bg-rose-800/60 hover:border-rose-400 dark:hover:border-rose-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
+            <div class="absolute top-2 left-2 md:top-3 md:left-3 w-6 h-6 md:w-8 md:h-8 rounded-lg md:rounded-xl bg-rose-500 text-white flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.4),0_2px_4px_rgba(244,63,94,0.35)]">
+                <i data-lucide="receipt-text" class="w-3.5 h-3.5 md:w-4 md:h-4"></i>
+            </div>
             <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-rose-500 dark:text-rose-300/80">Công Nợ Cần Thu (Kỳ Này)</p>
             <h3 id="total-debt-summary" class="text-md md:text-2xl font-black drop-shadow-[0_1.5px_3px_rgba(244,63,94,0.15)] dark:drop-shadow-[0_2px_4px_rgba(244,63,94,0.3)]">0 đ</h3>
         </div>
         
         <!-- Tổng Nợ NCC -->
         <div onclick="showDashboardDetail('debt-ncc')" 
-             class="bg-amber-100/70 dark:bg-amber-900/50 border-b-[4px] border-amber-300 dark:border-amber-800 text-amber-600 dark:text-amber-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(245,158,11,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-amber-200/70 dark:hover:bg-amber-800/60 hover:border-amber-400 dark:hover:border-amber-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
+             class="relative bg-amber-100/70 dark:bg-amber-900/50 border-b-[4px] border-amber-300 dark:border-amber-800 text-amber-600 dark:text-amber-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(245,158,11,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-amber-200/70 dark:hover:bg-amber-800/60 hover:border-amber-400 dark:hover:border-amber-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
+            <div class="absolute top-2 left-2 md:top-3 md:left-3 w-6 h-6 md:w-8 md:h-8 rounded-lg md:rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.4),0_2px_4px_rgba(245,158,11,0.35)]">
+                <i data-lucide="truck" class="w-3.5 h-3.5 md:w-4 md:h-4"></i>
+            </div>
             <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-300/80">Nợ NCC (Kỳ Này)</p>
             <h3 id="total-debt-ncc-summary" class="text-md md:text-2xl font-black drop-shadow-[0_1.5px_3px_rgba(245,158,11,0.15)] dark:drop-shadow-[0_2px_4px_rgba(245,158,11,0.3)]">0 đ</h3>
         </div>
         
         <!-- Lợi Nhuận -->
-        <div class="bg-emerald-100/70 dark:bg-emerald-900/50 border-b-[4px] border-emerald-300 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(16,185,129,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] hover:bg-emerald-200/70 dark:hover:bg-emerald-800/60 hover:border-emerald-400 dark:hover:border-emerald-700 hover:-translate-y-[2px] transition-all duration-150">
+        <div class="relative bg-emerald-100/70 dark:bg-emerald-900/50 border-b-[4px] border-emerald-300 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(16,185,129,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] hover:bg-emerald-200/70 dark:hover:bg-emerald-800/60 hover:border-emerald-400 dark:hover:border-emerald-700 hover:-translate-y-[2px] transition-all duration-150">
+            <div class="absolute top-2 left-2 md:top-3 md:left-3 w-6 h-6 md:w-8 md:h-8 rounded-lg md:rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.4),0_2px_4px_rgba(16,185,129,0.35)]">
+                <i data-lucide="piggy-bank" class="w-3.5 h-3.5 md:w-4 md:h-4"></i>
+            </div>
             <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-emerald-500 dark:text-emerald-300/80">Lợi Nhuận</p>
             <h3 id="profit-summary" class="text-md md:text-2xl font-black drop-shadow-[0_1.5px_3px_rgba(16,185,129,0.15)] dark:drop-shadow-[0_2px_4px_rgba(16,185,129,0.3)]">0 đ</h3>
         </div>
@@ -1915,7 +1927,7 @@ html:not(.dark) .bg-white {
                      phiếu, tổng nhập bao nhiêu" - đúng câu hỏi người dùng hay cần trả lời
                      ("SP A nhập vào những ngày nào, bao nhiêu lần") mà không cần mở từng phiếu. -->
                 <div id="receipt-search-product-summary" class="hidden mb-2 px-3 py-2 rounded-lg text-xs font-bold bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-100 dark:border-blue-500/20"></div>
-                <div class="overflow-x-auto overflow-y-auto max-h-[55vh] border border-blue-100 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 custom-scrollbar flex-grow">
+                <div class="overflow-x-auto overflow-y-auto max-h-[50vh] border border-blue-100 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 custom-scrollbar flex-grow">
                     <table class="w-full text-sm">
                         <thead class="sticky top-0 z-10 bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-slate-700 text-gray-800 dark:text-gray-200 shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
                             <tr><th class="py-3 px-2 text-center w-[6%]"></th><th class="py-3 px-2 text-center w-[14%]">Số phiếu</th><th class="py-3 px-2 text-center w-[14%]">Ngày nhập</th><th class="py-3 px-2 text-left w-[40%]">Loại nhập</th><th class="py-3 px-2 text-center w-[10%]">Số SP</th><th class="py-3 px-2 text-center w-[16%]"></th></tr>
@@ -2010,7 +2022,7 @@ html:not(.dark) .bg-white {
 
                     <!-- Giỏ hàng - tự giãn lấp đầy khoảng trống còn lại, khung tổng đã rút ngắn lại
                          (72vh thay vì 85vh) để 2 nút bấm bên dưới luôn hiện đủ trên màn hình. -->
-                    <div id="cart-box" class="flex-1 min-h-[150px] bg-white dark:bg-slate-900 p-2 rounded-xl border border-gray-300 dark:border-slate-700 overflow-x-auto overflow-y-auto text-gray-800 dark:text-white"></div>
+                    <div id="cart-box" class="flex-1 min-h-[120px] max-h-[28vh] bg-white dark:bg-slate-900 p-2 rounded-xl border border-gray-300 dark:border-slate-700 overflow-x-auto overflow-y-auto text-gray-800 dark:text-white"></div>
                 </div>
 
                 <!-- 2 nút Thêm vào giỏ (trái) và Lưu nhập kho (phải) cùng 1 hàng - CHỈ hiện
@@ -8105,9 +8117,25 @@ async function renderInventoryList(filter = 'today') {
     });
 
     let inventoryCardsHtml = '';
-    const sortedInventoryEntries = Array.from(inventoryMap.entries())
-        .sort((a, b) => compareProductDisplayOrder(a[0], b[0]));
-    sortedInventoryEntries.forEach(([name, item]) => {
+    // Gom theo nhóm sản phẩm (dùng chung NHOM_SP_DINH_NGHIA/xepNhomSanPham() + thứ tự hiển
+    // thị THU_TU_HIEN_THI_NHOM - đúng như Phần II Báo Cáo Tổng Hợp) thay vì xếp thẳng 1 dãy
+    // như trước - mỗi nhóm có 1 nhãn tiêu đề nhỏ, trong nhóm vẫn sắp theo khối lượng giảm
+    // dần (compareProductDisplayOrder) như cũ.
+    const nhomMapTonKho = new Map();
+    const thuTuNhomTonKho = THU_TU_HIEN_THI_NHOM.concat(['KHÁC']);
+    thuTuNhomTonKho.forEach(ten => nhomMapTonKho.set(ten, []));
+    Array.from(inventoryMap.entries())
+        .sort((a, b) => compareProductDisplayOrder(a[0], b[0]))
+        .forEach(([name, item]) => nhomMapTonKho.get(xepNhomSanPham(name)).push([name, item]));
+
+    thuTuNhomTonKho.forEach(tenNhom => {
+        const danhSachNhom = nhomMapTonKho.get(tenNhom);
+        if (!danhSachNhom.length) return;
+
+        let groupHasVisibleRow = false;
+        let groupRowsHtml = '';
+
+        danhSachNhom.forEach(([name, item]) => {
         const tonCuoi = cleanQty(item.tonDau + item.nhap + item.change - item.out);
         const totalNhap = cleanQty(item.nhap + item.change);
         const tonDauClean = cleanQty(item.tonDau);
@@ -8116,6 +8144,7 @@ async function renderInventoryList(filter = 'today') {
         if (tonDauClean === 0 && totalNhap === 0 && outClean === 0 && tonCuoi === 0) {
             return;
         }
+        groupHasVisibleRow = true;
 
         const maxVal = Math.max(tonDauClean + totalNhap + outClean + tonCuoi, 1); 
         const isLowStock = tonCuoi < 5;
@@ -8150,7 +8179,7 @@ async function renderInventoryList(filter = 'today') {
             </div>`;
         }).join('');
 
-        inventoryCardsHtml += `
+        groupRowsHtml += `
         <div class="mb-2 bg-white dark:bg-slate-950/40 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-[0_4px_6px_rgba(0,0,0,0.2)] hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-150">
             <div class="text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5 truncate flex items-center gap-1">
                 ${name} ${isLowStock ? '<span class="text-rose-500 animate-pulse text-[12px]">⚠️ Ít hàng</span>' : ''}
@@ -8159,6 +8188,11 @@ async function renderInventoryList(filter = 'today') {
                 ${segmentsHtml}
             </div>
         </div>`;
+        });
+
+        if (groupHasVisibleRow) {
+            inventoryCardsHtml += `<div class="text-[10px] font-black uppercase tracking-wide text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 rounded-lg px-2.5 py-1 mb-1.5 mt-3 first:mt-0">${tenNhom}</div>` + groupRowsHtml;
+        }
     });
 
     container.innerHTML = inventoryCardsHtml || '<p class="text-center py-6 text-xs text-slate-400 dark:text-slate-500">Không có dữ liệu tồn kho</p>';
@@ -9435,11 +9469,26 @@ async function loadInventory() {
         const tbody = document.getElementById('inventory-data');
         if (!tbody) return;
 
+        // Gom theo nhóm sản phẩm (dùng chung NHOM_SP_DINH_NGHIA/xepNhomSanPham() + thứ tự
+        // hiển thị THU_TU_HIEN_THI_NHOM - đúng như Phần II Báo Cáo Tổng Hợp) để nhân viên dễ
+        // tìm sản phẩm theo nhóm hàng thay vì 1 danh sách dài không phân loại như trước.
+        const nhomMapKho = new Map();
+        const thuTuNhomKho = THU_TU_HIEN_THI_NHOM.concat(['KHÁC']);
+        thuTuNhomKho.forEach(ten => nhomMapKho.set(ten, []));
+        productsSource.forEach(item => nhomMapKho.get(xepNhomSanPham(item.name)).push(item));
+
         // Gom HTML vào 1 mảng rồi gán "innerHTML" đúng 1 LẦN ở cuối (thay vì "+=" lặp lại
         // trong vòng for) - danh sách này dài bằng đúng số sản phẩm trong cả cửa hàng nên
         // càng nhiều sản phẩm, cách làm cũ càng giật/chậm do trình duyệt phải phân tích lại
         // toàn bộ bảng sau MỖI dòng thêm vào.
-        const rowsHtml = productsSource.map(item => {
+        const rowsHtmlParts = [];
+        thuTuNhomKho.forEach(tenNhom => {
+            const danhSachNhom = nhomMapKho.get(tenNhom);
+            if (!danhSachNhom.length) return;
+
+            rowsHtmlParts.push(`<tr><td colspan="5" class="pt-3 pb-1 px-1 first:pt-0"><div class="text-[11px] md:text-xs font-black uppercase tracking-wide text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 rounded-lg px-3 py-1.5">${tenNhom}</div></td></tr>`);
+
+            danhSachNhom.forEach(item => {
             const qtyNum = stockMap[item.name] !== undefined ? stockMap[item.name] : 0;
 
             const productData = (window.allProducts || []).find(p => p.name === item.name);
@@ -9453,7 +9502,7 @@ async function loadInventory() {
             const displayQty = (Math.round(qtyNum * 100) / 100).toString();
             const barcode = (productData && productData.barcode) ? productData.barcode : '---';
 
-            return `
+            rowsHtmlParts.push(`
             <tr class="transition-all duration-300">
                 <td colspan="5" class="p-0.5">
                     <div class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2 md:p-1.5 shadow-[0_4px_6px_-2px_rgba(0,0,0,0.2)]" style="border-left-color:#60a5fa !important; border-right-color:#60a5fa !important;">
@@ -9485,10 +9534,11 @@ async function loadInventory() {
                     </div>
                 </td>
             </tr>
-            `;
+            `);
+            });
         });
 
-        tbody.innerHTML = rowsHtml.join('');
+        tbody.innerHTML = rowsHtmlParts.join('');
     } catch (err) {
         console.error("Lỗi khi tải Kho Hàng: ", err);
     }
@@ -11197,7 +11247,7 @@ function renderProductGrid() {
                 <div class="relative flex items-center gap-1 md:gap-1.5 mt-0.5 md:mt-1">
                     <span class="text-[7px] md:text-[9px] uppercase font-black ${isOutOfStock ? 'text-red-600 dark:text-red-400' : (isLowStock ? 'text-orange-500 dark:text-orange-400' : 'text-slate-400 dark:text-slate-400')}">Tồn</span>
                     <span id="stock-display-${idName}" class="font-black rounded-full border md:border-2 shadow-sm ${isOutOfStock ? 'text-[7px] md:text-[9px] px-1 md:px-1.5 py-0 md:py-0.5 bg-red-50 border-red-300 text-red-600 dark:bg-red-500/10 dark:border-red-500/40 dark:text-red-400' : (isLowStock ? 'text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-orange-100 border-orange-300 text-orange-700 dark:bg-orange-500/15 dark:border-orange-500/40 dark:text-orange-400' : `text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 ${b.badge} border-white/70 dark:border-slate-900/40`)}">
-                        ${isOutOfStock ? 'HẾT' : realStock}
+                        ${isOutOfStock ? 'HẾT' : (p.unit ? `${realStock} ${p.unit}` : realStock)}
                     </span>
                 </div>
             </div>
@@ -11232,7 +11282,7 @@ function updateAllStockBadges() {
         const isLowStock = !isOutOfStock && realStock <= 10;
         const badgeThemeClass = cardEl.dataset.badgeClass || 'bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300';
 
-        badgeEl.innerText = isOutOfStock ? 'HẾT' : realStock;
+        badgeEl.innerText = isOutOfStock ? 'HẾT' : (p.unit ? `${realStock} ${p.unit}` : realStock);
         badgeEl.className = `font-black rounded-full border md:border-2 shadow-sm ${isOutOfStock ? 'text-[7px] md:text-[9px] px-1 md:px-1.5 py-0 md:py-0.5 bg-red-50 border-red-300 text-red-600 dark:bg-red-500/10 dark:border-red-500/40 dark:text-red-400' : (isLowStock ? 'text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-orange-100 border-orange-300 text-orange-700 dark:bg-orange-500/15 dark:border-orange-500/40 dark:text-orange-400' : `text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 ${badgeThemeClass} border-white/70 dark:border-slate-900/40`)}`;
 
         cardEl.classList.toggle('grayscale', isOutOfStock);
@@ -15628,6 +15678,15 @@ function xepNhomSanPham(ten) {
     return nhom ? nhom.ten : 'KHÁC';
 }
 
+// Lấy ĐVT (đơn vị tính) của 1 sản phẩm theo TÊN - dùng cho các báo cáo Nhập Xuất Tồn (gộp
+// theo sản phẩm, không có sẵn ĐVT của từng dòng giao dịch) bằng cách tra trong danh mục sản
+// phẩm đã cache sẵn ở window.allProducts. Trả về '' nếu không tìm thấy (sản phẩm đã xoá khỏi
+// danh mục nhưng vẫn còn phát sinh trong lịch sử).
+function getProductUnit(name) {
+    const p = (window.allProducts || []).find(x => x.name === name);
+    return (p && p.unit) || '';
+}
+
 // "👁 Xem" cho BC Tồn Kho (Nhập Xuất Tồn) - dùng lại đúng cách tính như exportInventory()
 // nhưng hiển thị ngay trên màn hình thay vì tải file Excel.
 async function viewInventoryReport() {
@@ -15663,7 +15722,7 @@ async function viewInventoryReport() {
 
         let inventory = {};
         const initItem = (name) => {
-            if (!inventory[name]) inventory[name] = { nhapMoi: 0, nhapDoi: 0, xuat: 0, gapNet: 0 };
+            if (!inventory[name]) inventory[name] = { nhapMoi: 0, nhapDoi: 0, xuat: 0, gapNet: 0, nhapDoiVendors: new Set() };
             return inventory[name];
         };
 
@@ -15684,7 +15743,10 @@ async function viewInventoryReport() {
                 // giống hệt cách deleteReceipt/getExpiredGoodsRows đã làm.
                 const wasAddedToStock = i.dateStatus ? i.dateStatus === 'ok' : (data.stockAdjusted !== false);
                 if (type === 'Nhập đổi') {
-                    if (wasAddedToStock) inv.nhapDoi += qty;
+                    // Ghi lại tên KH/đại lý mang hàng đổi date/hoàn trả tới (data.vendor) - để
+                    // hiện vào cột "Ghi chú" của báo cáo, biết ngay khoản đổi date/hoàn trả
+                    // này là của ai chứ không chỉ thấy mỗi con số.
+                    if (wasAddedToStock) { inv.nhapDoi += qty; if (data.vendor) inv.nhapDoiVendors.add(data.vendor); }
                 } else {
                     if (wasAddedToStock) inv.nhapMoi += qty;
                 }
@@ -15726,8 +15788,9 @@ async function viewInventoryReport() {
         Object.keys(currentStockMap).forEach(name => { if (name !== 'Tiền ship') initItem(name); }); // loại "Tiền ship" - không phải sản phẩm thật
 
         const sortedNames = Object.keys(inventory).sort(compareProductDisplayOrder);
-        const rows = [];
+        const rawRows = [];
         let stt = 0;
+        let anyGhiChu = false;
         sortedNames.forEach((name) => {
             const item = inventory[name];
             const currentStock = currentStockMap[name] || 0;
@@ -15735,17 +15798,32 @@ async function viewInventoryReport() {
             const tonDau = tonCuoi - item.nhapMoi - item.nhapDoi + item.xuat;
             if (Math.round(tonDau * 100) === 0 && Math.round(item.nhapMoi * 100) === 0 && Math.round(item.nhapDoi * 100) === 0 && Math.round(item.xuat * 100) === 0 && Math.round(tonCuoi * 100) === 0) return;
             stt += 1;
-            rows.push([stt, name, cleanQty(tonDau), cleanQty(item.nhapMoi), cleanQty(item.nhapDoi), cleanQty(item.xuat), cleanQty(tonCuoi)]);
+            const ghiChu = item.nhapDoiVendors && item.nhapDoiVendors.size ? Array.from(item.nhapDoiVendors).join(', ') : '';
+            if (ghiChu) anyGhiChu = true;
+            rawRows.push({ stt, name, tonDau, nhapMoi: item.nhapMoi, nhapDoi: item.nhapDoi, xuat: item.xuat, tonCuoi, ghiChu });
+        });
+
+        // Cột "Ghi chú" (tên KH đổi date/hoàn trả) CHỈ hiện khi có ít nhất 1 sản phẩm có ghi
+        // chú - theo đúng yêu cầu, để khỏi thừa 1 cột trống khi kỳ báo cáo không phát sinh
+        // đổi date/hoàn trả nào.
+        const headers = ['STT', 'Tên sản phẩm', 'ĐVT', 'Tồn đầu', 'Nhập mới', 'Đổi date/Hoàn trả', 'Xuất', 'Tồn cuối'];
+        const aligns = ['center', 'left', 'center', 'right', 'right', 'right', 'right', 'right'];
+        if (anyGhiChu) { headers.push('Ghi chú'); aligns.push('left'); }
+
+        const rows = rawRows.map(r => {
+            const row = [r.stt, r.name, getProductUnit(r.name), cleanQty(r.tonDau), cleanQty(r.nhapMoi), cleanQty(r.nhapDoi), cleanQty(r.xuat), cleanQty(r.tonCuoi)];
+            if (anyGhiChu) row.push(r.ghiChu);
+            return row;
         });
 
         Swal.close();
         openReportPreviewWindow(
             'BÁO CÁO NHẬP XUẤT TỒN',
             `Từ ngày: ${formatDateToDDMMYYYY(from)} - Đến ngày: ${formatDateToDDMMYYYY(to)}`,
-            ['STT', 'Tên sản phẩm', 'Tồn đầu', 'Nhập mới', 'Đổi date/Hoàn trả', 'Xuất', 'Tồn cuối'],
+            headers,
             rows,
             null,
-            ['center', 'left', 'right', 'right', 'right', 'right', 'right']
+            aligns
         );
     } catch (err) {
         Swal.close();
@@ -15796,7 +15874,7 @@ async function exportInventory() {
 
         let inventory = {};
         const initItem = (name) => {
-            if (!inventory[name]) inventory[name] = { nhapMoi: 0, nhapDoi: 0, xuat: 0, gapNet: 0 };
+            if (!inventory[name]) inventory[name] = { nhapMoi: 0, nhapDoi: 0, xuat: 0, gapNet: 0, nhapDoiVendors: new Set() };
             return inventory[name];
         };
 
@@ -15818,7 +15896,7 @@ async function exportInventory() {
                 // giống hệt cách deleteReceipt/getExpiredGoodsRows đã làm.
                 const wasAddedToStock = i.dateStatus ? i.dateStatus === 'ok' : (data.stockAdjusted !== false);
                 if (type === 'Nhập đổi') {
-                    if (wasAddedToStock) inv.nhapDoi += qty;
+                    if (wasAddedToStock) { inv.nhapDoi += qty; if (data.vendor) inv.nhapDoiVendors.add(data.vendor); }
                 } else {
                     if (wasAddedToStock) inv.nhapMoi += qty;
                 }
@@ -15863,6 +15941,12 @@ async function exportInventory() {
         // có giao dịch nào trong đúng khoảng ngày đang xem.
         Object.keys(currentStockMap).forEach(name => { if (name !== 'Tiền ship') initItem(name); }); // loại "Tiền ship" - không phải sản phẩm thật
 
+        // Trước khi vẽ bảng: xác định TRƯỚC xem kỳ này có sản phẩm nào có Ghi chú (tên KH đổi
+        // date/hoàn trả) hay không - quyết định có thêm cột "Ghi chú" vào bảng hay không (ẩn
+        // hẳn cột nếu không có, theo đúng yêu cầu, để khỏi thừa 1 cột trống vô nghĩa).
+        const anyGhiChu = Object.values(inventory).some(item => item.nhapDoiVendors && item.nhapDoiVendors.size);
+        const totalCols = anyGhiChu ? 9 : 8;
+
         // 3. Xuất Excel
         const workbook = new ExcelJS.Workbook();
         const sheet = workbook.addWorksheet('NXT');
@@ -15870,16 +15954,17 @@ async function exportInventory() {
         // Tiêu đề - căn giữa, gộp ô, giống hệt kiểu Báo Cáo Tổng Hợp
         const titleRow = sheet.addRow(["BÁO CÁO NHẬP XUẤT TỒN"]);
         titleRow.font = { size: 16, bold: true };
-        sheet.mergeCells(titleRow.number, 1, titleRow.number, 7);
+        sheet.mergeCells(titleRow.number, 1, titleRow.number, totalCols);
         titleRow.alignment = { horizontal: 'center' };
 
         const dateRow = sheet.addRow([`Từ ngày: ${from} - Đến ngày: ${to}`]);
-        sheet.mergeCells(dateRow.number, 1, dateRow.number, 7);
+        sheet.mergeCells(dateRow.number, 1, dateRow.number, totalCols);
         dateRow.alignment = { horizontal: 'center' };
         sheet.addRow([]);
 
         // Header - căn giữa cả ngang lẫn dọc, tô nền xanh nhạt, in đậm, giống Báo Cáo Tổng Hợp
-        const headers = ["STT", "Tên sản phẩm", "Tồn đầu", "Nhập mới", "Đổi date/Hoàn trả", "Xuất", "Tồn cuối"];
+        const headers = ["STT", "Tên sản phẩm", "ĐVT", "Tồn đầu", "Nhập mới", "Đổi date/Hoàn trả", "Xuất", "Tồn cuối"];
+        if (anyGhiChu) headers.push("Ghi chú");
         const headerRow = sheet.addRow(headers);
         headerRow.height = 25;
         headerRow.eachCell(c => {
@@ -15916,7 +16001,7 @@ async function exportInventory() {
 
             const rowNhom = sheet.addRow([`${soLaMa[romanIdx] || (romanIdx + 1)}. ${tenNhom}`]);
             romanIdx++;
-            sheet.mergeCells(rowNhom.number, 1, rowNhom.number, 7);
+            sheet.mergeCells(rowNhom.number, 1, rowNhom.number, totalCols);
             rowNhom.eachCell(c => {
                 c.font = { bold: true, size: 12 };
                 c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFEB3B' } };
@@ -15925,24 +16010,28 @@ async function exportInventory() {
 
             danhSach.forEach(({ name, tonDau, item, tonCuoi }) => {
                 stt += 1;
-                const row = sheet.addRow([stt, name, cleanQty(tonDau), cleanQty(item.nhapMoi), cleanQty(item.nhapDoi), cleanQty(item.xuat), cleanQty(tonCuoi)]);
+                const ghiChu = item.nhapDoiVendors && item.nhapDoiVendors.size ? Array.from(item.nhapDoiVendors).join(', ') : '';
+                const rowValues = [stt, name, getProductUnit(name), cleanQty(tonDau), cleanQty(item.nhapMoi), cleanQty(item.nhapDoi), cleanQty(item.xuat), cleanQty(tonCuoi)];
+                if (anyGhiChu) rowValues.push(ghiChu);
+                const row = sheet.addRow(rowValues);
                 row.eachCell((c, col) => {
                     c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
                     c.font = { size: 12 };
-                    // Căn giữa cột STT (1) và các cột số lượng (3-7), in đậm các cột số lượng
-                    if (col === 1) c.alignment = { horizontal: 'center' };
-                    if (col >= 3 && col <= 7) {
+                    // Căn giữa cột STT (1) và ĐVT (3); căn giữa + in đậm các cột số lượng (4-8)
+                    if (col === 1 || col === 3) c.alignment = { horizontal: 'center' };
+                    if (col >= 4 && col <= 8) {
                         c.alignment = { horizontal: 'center' };
                         c.font = { bold: true, size: 12 };
                     }
-                    // SỬA LỖI CHE CHỮ: cột Tên sản phẩm (2) cho tự xuống dòng khi tên dài
-                    if (col === 2) c.alignment = { vertical: 'middle' };
+                    // SỬA LỖI CHE CHỮ: cột Tên sản phẩm (2) và Ghi chú (9, nếu có) cho tự xuống
+                    // dòng khi chữ dài (không có wrapText nên căn giữa dọc để đỡ lệch).
+                    if (col === 2 || col === 9) c.alignment = { vertical: 'middle' };
                 });
             });
         });
 
-        // Căn chỉnh độ rộng cột
-        sheet.columns = [{ width: 8 }, { width: 30 }, { width: 12 }, { width: 12 }, { width: 12 }, { width: 12 }, { width: 12 }];
+        // Căn chỉnh độ rộng cột - có thêm cột ĐVT (3) và Ghi chú (9, nếu hiện)
+        sheet.columns = [{ width: 8 }, { width: 28 }, { width: 10 }, { width: 12 }, { width: 12 }, { width: 14 }, { width: 12 }, { width: 12 }, { width: 26 }];
 
         // Thiết lập trang in: A4, khổ dọc, lề nhỏ nhất, co vừa 1 trang ngang khi in
         sheet.pageSetup = {
@@ -16281,7 +16370,7 @@ async function exportFullReport() {
 
         const initItem = (name) => { 
             if (!inventory[name]) { 
-                inventory[name] = { tonDau: 0, nhapMoi: 0, nhapDoi: 0, xuat: 0 }; 
+                inventory[name] = { tonDau: 0, nhapMoi: 0, nhapDoi: 0, xuat: 0, nhapDoiVendors: new Set() }; 
                 orderList.push(name); // Lưu lại tên sản phẩm ngay khi nó xuất hiện lần đầu
             } 
         };
@@ -16313,8 +16402,14 @@ async function exportFullReport() {
                 if (dDateObj < fromDateObj) {
                     inventory[i.name].tonDau += qty;
                 } else if (dDateStr >= fromVal && dDateStr <= toVal) {
-                    if (d.type === 'Nhập mới') inventory[i.name].nhapMoi += qty;
-                    else inventory[i.name].nhapDoi += qty;
+                    if (d.type === 'Nhập mới') {
+                        inventory[i.name].nhapMoi += qty;
+                    } else {
+                        inventory[i.name].nhapDoi += qty;
+                        // Ghi lại tên KH/đại lý mang hàng đổi date/hoàn trả tới - hiện vào cột
+                        // "Ghi chú" (chỉ hiện cột này khi có ít nhất 1 dòng như vậy).
+                        if (d.vendor) inventory[i.name].nhapDoiVendors.add(d.vendor);
+                    }
                 }
             });
         });
@@ -16370,6 +16465,7 @@ async function exportFullReport() {
                         dDateStr, 
                         d.customer || 'Khách lẻ', 
                         i.isShipping ? ('🚚 ' + i.name) : i.name, 
+                        i.unit || '',
                         qty, 
                         price, 
                         thanhTienCoThue, // Đã cộng thuế ở đây
@@ -16425,11 +16521,11 @@ async function exportFullReport() {
         // I. CHI TIẾT BÁN HÀNG
         const titleRow = sheet.addRow(["I. CHI TIẾT BÁN HÀNG"]);
         titleRow.font = { bold: true, size: 14 };
-        sheet.mergeCells(titleRow.number, 1, titleRow.number, 7); 
+        sheet.mergeCells(titleRow.number, 1, titleRow.number, 8); 
         titleRow.alignment = { horizontal: 'center' };
 
         // Đổi tên tiêu đề cột 6 thành "Thành tiền (có thuế)"
-        const header1 = sheet.addRow(["Ngày tháng", "Khách hàng", "Tên sản phẩm", "SL", "Đơn giá", "Thành tiền", "Ghi chú"]);
+        const header1 = sheet.addRow(["Ngày tháng", "Khách hàng", "Tên sản phẩm", "ĐVT", "SL", "Đơn giá", "Thành tiền", "Ghi chú"]);
 
         // Chỉnh chiều cao dòng
         header1.height = 25;
@@ -16459,27 +16555,27 @@ async function exportFullReport() {
                 }
             }
 
-            // Lúc này rowData[5] đã chứa giá trị (Thành tiền + Thuế) từ bước tính toán trước đó
+            // Lúc này rowData[6] đã chứa giá trị (Thành tiền + Thuế) từ bước tính toán trước đó
             const row = sheet.addRow(rowData);
             
             row.eachCell((c, col) => {
 				c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
 				c.font = { size: 12 };
 				
-				// CĂN GIỮA CÁC CỘT CẦN THIẾT
-				if (col === 1 || col === 4) { // Cột ngày (1) và SL (4) căn giữa
+				// CĂN GIỮA CÁC CỘT CẦN THIẾT: ngày (1), ĐVT (4), SL (5)
+				if (col === 1 || col === 4 || col === 5) {
 					c.alignment = { horizontal: 'center' };
 				}
 				
-				if (col === 4) c.font = { bold: true, size: 12 };
+				if (col === 5) c.font = { bold: true, size: 12 };
 				
 				// Định dạng số tiền
-				// Cột 5 là Đơn giá, cột 6 là Thành tiền (đã bao gồm thuế)
-				if (col === 5 || col === 6) c.numFmt = '#,##0';
+				// Cột 6 là Đơn giá, cột 7 là Thành tiền (đã bao gồm thuế)
+				if (col === 6 || col === 7) c.numFmt = '#,##0';
 
 				// Căn giữa theo chiều dọc cho cột Khách hàng (2), Tên sản phẩm (3) và Ghi chú
-				// (7) - đã BỎ wrapText theo yêu cầu, chữ dài sẽ tràn ra thay vì tự xuống dòng.
-				if (col === 2 || col === 3 || col === 7) {
+				// (8) - đã BỎ wrapText theo yêu cầu, chữ dài sẽ tràn ra thay vì tự xuống dòng.
+				if (col === 2 || col === 3 || col === 8) {
 					c.alignment = { vertical: 'middle' };
 				}
             });
@@ -16492,13 +16588,21 @@ async function exportFullReport() {
         
         // II. NXT
         sheet.addRow([]); 
-        // Gộp A-G và căn giữa
+        // Cột "Ghi chú" (tên KH đổi date/hoàn trả) CHỈ hiện khi có ít nhất 1 sản phẩm phát
+        // sinh đổi date/hoàn trả có ghi tên KH/đại lý - ẩn hẳn cột nếu không có, theo đúng
+        // yêu cầu (ẩn cả khi xem/in lẫn xuất Excel).
+        const anyGhiChuNxt = Object.values(inventory).some(item => item.nhapDoiVendors && item.nhapDoiVendors.size);
+        const nxtTotalCols = anyGhiChuNxt ? 9 : 8;
+
+        // Gộp A-G/H và căn giữa
         const titleRow2 = sheet.addRow(["II. BÁO CÁO NHẬP XUẤT TỒN"]);
         titleRow2.font = { bold: true, size: 14 };
-        sheet.mergeCells(titleRow2.number, 1, titleRow2.number, 7); 
+        sheet.mergeCells(titleRow2.number, 1, titleRow2.number, nxtTotalCols); 
         titleRow2.alignment = { horizontal: 'center' };
         
-        const header2 = sheet.addRow(["Ngày tháng", "Tên sản phẩm", "Tồn đầu", "Nhập mới", "Đổi date/Hoàn trả", "Xuất", "Tồn cuối"]);
+        const header2Cells = ["Ngày tháng", "Tên sản phẩm", "ĐVT", "Tồn đầu", "Nhập mới", "Đổi date/Hoàn trả", "Xuất", "Tồn cuối"];
+        if (anyGhiChuNxt) header2Cells.push("Ghi chú");
+        const header2 = sheet.addRow(header2Cells);
         
         // Chỉnh chiều cao dòng
         header2.height = 25;
@@ -16541,7 +16645,7 @@ async function exportFullReport() {
             // Dòng tiêu đề nhóm - tô vàng, in đậm, gộp hết chiều ngang bảng, giống mẫu
             const rowNhom = sheet.addRow([`${soLaMa[romanIdx] || (romanIdx + 1)}. ${tenNhom}`]);
             romanIdx++;
-            sheet.mergeCells(rowNhom.number, 1, rowNhom.number, 7);
+            sheet.mergeCells(rowNhom.number, 1, rowNhom.number, nxtTotalCols);
             rowNhom.eachCell(c => {
                 c.font = { bold: true, size: 12 };
                 c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFEB3B' } };
@@ -16549,25 +16653,32 @@ async function exportFullReport() {
             });
 
             danhSach.forEach(({ name, item, tonCuoi }) => {
-                const row = sheet.addRow([
+                const ghiChu = item.nhapDoiVendors && item.nhapDoiVendors.size ? Array.from(item.nhapDoiVendors).join(', ') : '';
+                const rowValues = [
                     formatDateToDDMMYYYY(toVal),
                     name,
+                    getProductUnit(name),
                     formatVal(item.tonDau),
                     formatVal(item.nhapMoi),
                     formatVal(item.nhapDoi),
                     formatVal(item.xuat),
                     formatVal(tonCuoi)
-                ]);
+                ];
+                if (anyGhiChuNxt) rowValues.push(ghiChu);
+                const row = sheet.addRow(rowValues);
 
                 row.eachCell((c, col) => {
                     c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
                     c.font = { size: 12 };
-                    if (col >= 3 && col <= 7) {
+                    // ĐVT (3) căn giữa; các cột số lượng (4-8) căn giữa + in đậm
+                    if (col === 3) c.alignment = { horizontal: 'center' };
+                    if (col >= 4 && col <= 8) {
                         c.alignment = { horizontal: 'center' };
                         c.font = { bold: true, size: 12 };
                     }
-                    // SỬA LỖI CHE CHỮ: cột Tên sản phẩm (2) cho tự xuống dòng khi tên dài
-                    if (col === 2) {
+                    // SỬA LỖI CHE CHỮ: cột Tên sản phẩm (2) và Ghi chú (9, nếu có) cho tự
+                    // xuống dòng khi chữ dài
+                    if (col === 2 || col === 9) {
                         c.alignment = { vertical: 'middle' };
                     }
                 });
@@ -16655,7 +16766,7 @@ async function exportFullReport() {
         
         // NỚI RỘNG các cột hay chứa chữ dài (Khách hàng / Tên sản phẩm / Ghi chú) - đã BỎ
         // wrapText theo yêu cầu, nên nới rộng cột là cách duy nhất giúp đỡ che chữ hơn.
-        sheet.columns = [{ width: 12 }, { width: 26 }, { width: 24 }, { width: 12 }, { width: 14 }, { width: 16 }, { width: 20 }];
+        sheet.columns = [{ width: 12 }, { width: 26 }, { width: 22 }, { width: 10 }, { width: 12 }, { width: 14 }, { width: 16 }, { width: 16 }, { width: 24 }];
 		
 		// --- CHÈN ĐOẠN CẤU HÌNH VÀO ĐÂY ---
         sheet.pageSetup.paperSize = 9; // A4
@@ -16732,7 +16843,7 @@ async function viewFullReport() {
         let inventory = {};
         let orderList = [];
         const initItem = (name) => {
-            if (!inventory[name]) { inventory[name] = { tonDau: 0, nhapMoi: 0, nhapDoi: 0, xuat: 0 }; orderList.push(name); }
+            if (!inventory[name]) { inventory[name] = { tonDau: 0, nhapMoi: 0, nhapDoi: 0, xuat: 0, nhapDoiVendors: new Set() }; orderList.push(name); }
         };
         const fromDateObj = new Date(fromVal);
 
@@ -16759,8 +16870,14 @@ async function viewFullReport() {
                 if (dDateObj < fromDateObj) {
                     inventory[i.name].tonDau += qty;
                 } else if (dDateStr >= fromVal && dDateStr <= toVal) {
-                    if (d.type === 'Nhập mới') inventory[i.name].nhapMoi += qty;
-                    else inventory[i.name].nhapDoi += qty;
+                    if (d.type === 'Nhập mới') {
+                        inventory[i.name].nhapMoi += qty;
+                    } else {
+                        inventory[i.name].nhapDoi += qty;
+                        // Ghi lại tên KH/đại lý mang hàng đổi date/hoàn trả tới - để hiện vào
+                        // cột "Ghi chú" (chỉ hiện cột này khi có ít nhất 1 dòng như vậy).
+                        if (d.vendor) inventory[i.name].nhapDoiVendors.add(d.vendor);
+                    }
                 }
             });
         });
@@ -16803,7 +16920,7 @@ async function viewFullReport() {
                         noteFinal = noteFinal ? `${noteFinal} | ${totalNote}` : totalNote;
                     }
 
-                    salesData.push([dDateStr, d.customer || 'Khách lẻ', i.isShipping ? ('🚚 ' + i.name) : i.name, qty, price, thanhTienCoThue, noteFinal]);
+                    salesData.push([dDateStr, d.customer || 'Khách lẻ', i.isShipping ? ('🚚 ' + i.name) : i.name, i.unit || '', qty, price, thanhTienCoThue, noteFinal]);
                 }
             });
         });
@@ -16847,8 +16964,8 @@ async function viewFullReport() {
                 (salesMerge.rowSpan[rIdx] > 1
                     ? `<td rowspan="${salesMerge.rowSpan[rIdx]}" style="${td}text-align:left;vertical-align:middle;font-weight:bold;">${r[1]}</td>`
                     : `<td style="${td}">${r[1]}</td>`);
-            return `<tr><td style="${td}text-align:center;">${dd}-${m}-${y}</td>${custCellHtml}<td style="${td}">${r[2]}</td><td style="${td}text-align:center;">${r[3]}</td><td style="${td}text-align:right;">${Math.round(r[4]).toLocaleString('vi-VN')}</td><td style="${td}text-align:right;">${Math.round(r[5]).toLocaleString('vi-VN')}</td><td style="${td}">${r[6] || ''}</td></tr>`;
-        }).join('') || `<tr><td colspan="7" style="${td}text-align:center;color:#888;">Không có dữ liệu</td></tr>`;
+            return `<tr><td style="${td}text-align:center;">${dd}-${m}-${y}</td>${custCellHtml}<td style="${td}">${r[2]}</td><td style="${td}text-align:center;">${r[3]}</td><td style="${td}text-align:center;">${r[4]}</td><td style="${td}text-align:right;">${Math.round(r[5]).toLocaleString('vi-VN')}</td><td style="${td}text-align:right;">${Math.round(r[6]).toLocaleString('vi-VN')}</td><td style="${td}">${r[7] || ''}</td></tr>`;
+        }).join('') || `<tr><td colspan="8" style="${td}text-align:center;color:#888;">Không có dữ liệu</td></tr>`;
 
         const nhomMap = new Map();
         const thuTuNhom = THU_TU_HIEN_THI_NHOM.concat(['KHÁC']); // Thứ tự HIỂN THỊ - tách riêng khỏi thứ tự khớp nhóm
@@ -16860,16 +16977,22 @@ async function viewFullReport() {
             if (Math.round(item.tonDau * 100) === 0 && Math.round(item.nhapMoi * 100) === 0 && Math.round(item.nhapDoi * 100) === 0 && Math.round(item.xuat * 100) === 0 && Math.round(tonCuoi * 100) === 0) return;
             nhomMap.get(xepNhomSanPham(name)).push({ name, item, tonCuoi });
         });
+        // Cột "Ghi chú" (tên KH đổi date/hoàn trả) CHỈ hiện khi có ít nhất 1 sản phẩm phát
+        // sinh đổi date/hoàn trả có ghi tên KH/đại lý - ẩn hẳn cột nếu không có, theo đúng
+        // yêu cầu (ẩn cả khi xem/in lẫn xuất Excel).
+        const anyGhiChuNxt = Array.from(nhomMap.values()).some(list => list.some(({ item }) => item.nhapDoiVendors && item.nhapDoiVendors.size));
+        const nxtColCount = anyGhiChuNxt ? 9 : 8;
         let nxtRowsHtml = '';
         thuTuNhom.forEach(tenNhom => {
             const danhSach = nhomMap.get(tenNhom);
             if (!danhSach.length) return;
-            nxtRowsHtml += `<tr><td colspan="7" style="${td}background:#fff9c4;font-weight:bold;">${tenNhom}</td></tr>`;
+            nxtRowsHtml += `<tr><td colspan="${nxtColCount}" style="${td}background:#fff9c4;font-weight:bold;">${tenNhom}</td></tr>`;
             danhSach.forEach(({ name, item, tonCuoi }) => {
-                nxtRowsHtml += `<tr><td style="${td}text-align:center;">${formatDateToDDMMYYYY(toVal)}</td><td style="${td}">${name}</td><td style="${td}text-align:center;">${formatVal(item.tonDau)}</td><td style="${td}text-align:center;">${formatVal(item.nhapMoi)}</td><td style="${td}text-align:center;">${formatVal(item.nhapDoi)}</td><td style="${td}text-align:center;">${formatVal(item.xuat)}</td><td style="${td}text-align:center;">${formatVal(tonCuoi)}</td></tr>`;
+                const ghiChuCell = anyGhiChuNxt ? `<td style="${td}">${item.nhapDoiVendors && item.nhapDoiVendors.size ? Array.from(item.nhapDoiVendors).join(', ') : ''}</td>` : '';
+                nxtRowsHtml += `<tr><td style="${td}text-align:center;">${formatDateToDDMMYYYY(toVal)}</td><td style="${td}">${name}</td><td style="${td}text-align:center;">${getProductUnit(name)}</td><td style="${td}text-align:center;">${formatVal(item.tonDau)}</td><td style="${td}text-align:center;">${formatVal(item.nhapMoi)}</td><td style="${td}text-align:center;">${formatVal(item.nhapDoi)}</td><td style="${td}text-align:center;">${formatVal(item.xuat)}</td><td style="${td}text-align:center;">${formatVal(tonCuoi)}</td>${ghiChuCell}</tr>`;
             });
         });
-        if (!nxtRowsHtml) nxtRowsHtml = `<tr><td colspan="7" style="${td}text-align:center;color:#888;">Không có dữ liệu</td></tr>`;
+        if (!nxtRowsHtml) nxtRowsHtml = `<tr><td colspan="${nxtColCount}" style="${td}text-align:center;color:#888;">Không có dữ liệu</td></tr>`;
 
         const sxRowsHtml = Object.keys(spDataRange).map(name =>
             `<tr><td style="${td}">${name}</td><td style="${td}text-align:center;">${formatVal(spDataRange[name].sl)}</td><td style="${td}text-align:center;">${formatVal(spDataRange[name].kg)}</td></tr>`
@@ -16885,13 +17008,13 @@ async function viewFullReport() {
 
             <h2 style="font-size:15px;margin:18px 0 8px;">I. CHI TIẾT BÁN HÀNG</h2>
             <table style="width:100%;border-collapse:collapse;font-size:12px;">
-                <thead><tr><th style="${th}">Ngày</th><th style="${th}">Khách hàng</th><th style="${th}">Tên sản phẩm</th><th style="${th}">SL</th><th style="${th}">Đơn giá</th><th style="${th}">Thành tiền</th><th style="${th}">Ghi chú</th></tr></thead>
+                <thead><tr><th style="${th}">Ngày</th><th style="${th}">Khách hàng</th><th style="${th}">Tên sản phẩm</th><th style="${th}">ĐVT</th><th style="${th}">SL</th><th style="${th}">Đơn giá</th><th style="${th}">Thành tiền</th><th style="${th}">Ghi chú</th></tr></thead>
                 <tbody>${salesRowsHtml}</tbody>
             </table>
 
             <h2 style="font-size:15px;margin:18px 0 8px;">II. BÁO CÁO NHẬP XUẤT TỒN</h2>
             <table style="width:100%;border-collapse:collapse;font-size:12px;">
-                <thead><tr><th style="${th}">Ngày</th><th style="${th}">Tên sản phẩm</th><th style="${th}">Tồn đầu</th><th style="${th}">Nhập mới</th><th style="${th}">Đổi date/Hoàn trả</th><th style="${th}">Xuất</th><th style="${th}">Tồn cuối</th></tr></thead>
+                <thead><tr><th style="${th}">Ngày</th><th style="${th}">Tên sản phẩm</th><th style="${th}">ĐVT</th><th style="${th}">Tồn đầu</th><th style="${th}">Nhập mới</th><th style="${th}">Đổi date/Hoàn trả</th><th style="${th}">Xuất</th><th style="${th}">Tồn cuối</th>${anyGhiChuNxt ? ('<th style="' + th + '">Ghi chú</th>') : ''}</tr></thead>
                 <tbody>${nxtRowsHtml}</tbody>
             </table>
 
@@ -16917,7 +17040,6 @@ async function viewFullReport() {
         Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Không thể xem báo cáo tổng hợp!' });
     }
 }
-
 
 document.getElementById('date-from').addEventListener('change', updateDateDisplay);
 document.getElementById('date-to').addEventListener('change', updateDateDisplay);
@@ -18507,12 +18629,18 @@ function getRawNumber(id) {
 // Khởi tạo dữ liệu ban đầu cho trang Sản xuất (lấy số phiếu mới nhất...)
 // Nạp danh sách sản phẩm THẬT (window.allProductCache, cùng nguồn với Bán Hàng/Danh Mục SP)
 // vào dropdown "Tên sản phẩm" ở trang Sản Xuất - thay cho danh sách cứng cố định trước đây.
+// CHỈ LẤY nhóm "THỊT CHƯNG MẮM TÉP" (gồm TCMT các trọng lượng VÀ Mắm Bếp - dùng chung 1
+// nhóm phân loại với các báo cáo Tồn Kho/Tổng Hợp, xem NHOM_SP_DINH_NGHIA ở đầu file) -
+// KHÔNG lấy Quả Bùi, Mắm Tép Riu, Cơm Cháy, Trà Hoa Vàng, Ruốc Cá, Bánh Dứa, Hộp Túi... vì
+// trang Sản Xuất chỉ nấu/đóng gói nhóm hàng này, không sản xuất các nhóm còn lại.
 // Giữ nguyên lựa chọn đang chọn (nếu có) sau khi nạp lại, để không mất dở dữ liệu đang nhập.
 function populateSXProductDropdown() {
     const sel = document.getElementById('sxTenSP');
     if (!sel) return;
     const current = sel.value;
-    const products = (window.allProductCache || []).slice().sort((a, b) => compareProductDisplayOrder(a.name, b.name));
+    const products = (window.allProductCache || [])
+        .filter(p => p.name && xepNhomSanPham(p.name) === 'THỊT CHƯNG MẮM TÉP')
+        .slice().sort((a, b) => compareProductDisplayOrder(a.name, b.name));
     sel.innerHTML = '<option value="">-- Chọn sản phẩm --</option>' +
         products.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
     if (current && products.some(p => p.name === current)) sel.value = current;
