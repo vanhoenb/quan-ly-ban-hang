@@ -8320,7 +8320,11 @@ async function renderInventoryList(filter = 'today') {
         });
 
         if (groupHasVisibleRow) {
-            inventoryCardsHtml += `<div class="text-[10px] font-black uppercase tracking-wide text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 rounded-lg px-2.5 py-1 mb-1.5 mt-3 first:mt-0">${tenNhom}</div>` + groupRowsHtml;
+            inventoryCardsHtml += `
+            <div class="rounded-2xl border-2 ${getNhomBlockBorder(tenNhom)} ${getNhomBlockBg(tenNhom)} p-2.5 mb-3">
+                <div class="text-[10px] font-black uppercase tracking-wide ${getNhomHeaderColor(tenNhom)} border rounded-lg px-2.5 py-1 mb-2">${tenNhom}</div>
+                ${groupRowsHtml}
+            </div>`;
         }
     });
 
@@ -9615,7 +9619,10 @@ async function loadInventory() {
             const danhSachNhom = nhomMapKho.get(tenNhom);
             if (!danhSachNhom.length) return;
 
-            rowsHtmlParts.push(`<tr><td colspan="5" class="pt-3 pb-1 px-1 first:pt-0"><div class="text-[11px] md:text-xs font-black uppercase tracking-wide text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 rounded-lg px-3 py-1.5">${tenNhom}</div></td></tr>`);
+            // Gộp tiêu đề nhóm + TOÀN BỘ sản phẩm của nhóm vào 1 khối <div> viền riêng duy
+            // nhất (thay vì mỗi sản phẩm 1 <tr> rời rạc như trước) - để cả nhóm nhìn thành
+            // 1 khối box rõ ràng, tách biệt hẳn với nhóm kế tiếp.
+            let groupInnerHtml = `<div class="text-[11px] md:text-xs font-black uppercase tracking-wide ${getNhomHeaderColor(tenNhom)} border rounded-lg px-3 py-1.5 mb-2">${tenNhom}</div>`;
 
             danhSachNhom.forEach(item => {
             const qtyNum = stockMap[item.name] !== undefined ? stockMap[item.name] : 0;
@@ -9631,40 +9638,37 @@ async function loadInventory() {
             const displayQty = (Math.round(qtyNum * 100) / 100).toString();
             const barcode = (productData && productData.barcode) ? productData.barcode : '---';
 
-            rowsHtmlParts.push(`
-            <tr class="transition-all duration-300">
-                <td colspan="5" class="p-0.5">
-                    <div class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2 md:p-1.5 shadow-[0_4px_6px_-2px_rgba(0,0,0,0.2)]" style="border-left-color:#60a5fa !important; border-right-color:#60a5fa !important;">
-                        <div class="md:px-2 md:w-[40%] text-left">
-                            <div class="font-bold text-[13px] text-slate-800 dark:text-slate-100 leading-tight">${item.name}</div>
-                            <div class="text-[10px] text-gray-400 dark:text-slate-500 font-mono">Mã: ${barcode}</div>
+            groupInnerHtml += `
+                <div class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2 md:p-1.5 shadow-[0_4px_6px_-2px_rgba(0,0,0,0.2)] mb-1.5 last:mb-0" style="border-left-color:#60a5fa !important; border-right-color:#60a5fa !important;">
+                    <div class="md:px-2 md:w-[40%] text-left">
+                        <div class="font-bold text-[13px] text-slate-800 dark:text-slate-100 leading-tight">${item.name}</div>
+                        <div class="text-[10px] text-gray-400 dark:text-slate-500 font-mono">Mã: ${barcode}</div>
+                    </div>
+                    <div class="flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700">
+                        <span class="text-[11px] text-slate-400 md:hidden">ĐVT: <b class="text-slate-600 dark:text-slate-300">${item.unit}</b></span>
+                        <span class="hidden md:block md:px-1 md:w-[10%] md:text-center text-[12px] text-slate-600 dark:text-slate-400">${item.unit}</span>
+                        <span class="font-bold text-[13px] md:px-1 md:w-[10%] md:text-center ${qtyNum < 0 ? 'text-red-600' : 'text-blue-600 dark:text-blue-400'}">
+                            ${displayQty}
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-3 md:contents">
+                        <div class="flex-1 md:px-1 md:w-[20%] flex items-center gap-1">
+                            <span class="text-[10px] text-slate-400 md:hidden">Lẻ:</span>
+                            <input type="text" value="${retail}" 
+                                   class="w-full text-center text-[12px] text-slate-600 dark:text-slate-300 bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 focus:border-blue-500 outline-none"
+                                   onblur="updateProductPrice('${item.name}', this.value, 'retail')">
                         </div>
-                        <div class="flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700">
-                            <span class="text-[11px] text-slate-400 md:hidden">ĐVT: <b class="text-slate-600 dark:text-slate-300">${item.unit}</b></span>
-                            <span class="hidden md:block md:px-1 md:w-[10%] md:text-center text-[12px] text-slate-600 dark:text-slate-400">${item.unit}</span>
-                            <span class="font-bold text-[13px] md:px-1 md:w-[10%] md:text-center ${qtyNum < 0 ? 'text-red-600' : 'text-blue-600 dark:text-blue-400'}">
-                                ${displayQty}
-                            </span>
-                        </div>
-                        <div class="flex items-center gap-3 md:contents">
-                            <div class="flex-1 md:px-1 md:w-[20%] flex items-center gap-1">
-                                <span class="text-[10px] text-slate-400 md:hidden">Lẻ:</span>
-                                <input type="text" value="${retail}" 
-                                       class="w-full text-center text-[12px] text-slate-600 dark:text-slate-300 bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 focus:border-blue-500 outline-none"
-                                       onblur="updateProductPrice('${item.name}', this.value, 'retail')">
-                            </div>
-                            <div class="flex-1 md:px-1 md:w-[20%] flex items-center gap-1">
-                                <span class="text-[10px] text-slate-400 md:hidden">Sỉ:</span>
-                                <input type="text" value="${wholesale}" 
-                                       class="w-full text-center text-[12px] text-slate-600 dark:text-slate-300 bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 focus:border-blue-500 outline-none"
-                                       onblur="updateProductPrice('${item.name}', this.value, 'wholesale')">
-                            </div>
+                        <div class="flex-1 md:px-1 md:w-[20%] flex items-center gap-1">
+                            <span class="text-[10px] text-slate-400 md:hidden">Sỉ:</span>
+                            <input type="text" value="${wholesale}" 
+                                   class="w-full text-center text-[12px] text-slate-600 dark:text-slate-300 bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 focus:border-blue-500 outline-none"
+                                   onblur="updateProductPrice('${item.name}', this.value, 'wholesale')">
                         </div>
                     </div>
-                </td>
-            </tr>
-            `);
+                </div>`;
             });
+
+            rowsHtmlParts.push(`<tr><td colspan="5" class="py-1.5 px-1"><div class="rounded-2xl border-2 ${getNhomBlockBorder(tenNhom)} ${getNhomBlockBg(tenNhom)} p-2.5 md:p-3">${groupInnerHtml}</div></td></tr>`);
         });
 
         tbody.innerHTML = rowsHtmlParts.join('');
@@ -15805,6 +15809,33 @@ const THU_TU_HIEN_THI_NHOM = [
 function xepNhomSanPham(ten) {
     const nhom = NHOM_SP_DINH_NGHIA.find(g => g.khop(ten));
     return nhom ? nhom.ten : 'KHÁC';
+}
+
+// MÀU RIÊNG CHO TỪNG NHÓM SẢN PHẨM - dùng cho thanh tiêu đề nhóm + khung viền bao quanh cả
+// nhóm ở trang Kho Hàng và khối "CHI TIẾT TỒN KHO" ở Trang Chủ (trước đây tất cả các nhóm
+// đều tô 1 màu vàng giống nhau và không có khung riêng, giờ mỗi nhóm 1 màu + gói riêng
+// thành 1 khối để phân biệt nhanh bằng mắt khi cuộn danh sách dài). `header` dùng cho thanh
+// tiêu đề (chữ + nền đậm hơn), `border` dùng cho viền khung bao quanh cả khối (nhạt hơn) -
+// dùng chung 1 chỗ duy nhất để đổi màu ở đây là áp dụng đồng bộ cả 2 nơi.
+const NHOM_COLOR_MAP = {
+    'THỊT CHƯNG MẮM TÉP': { header: 'text-indigo-800 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-500/15 border-indigo-200 dark:border-indigo-500/30', border: 'border-indigo-400 dark:border-indigo-500/70', bg: 'bg-indigo-50/70 dark:bg-indigo-500/[0.07]' },
+    'MẮM TÉP RIU ĐỎ': { header: 'text-rose-800 dark:text-rose-300 bg-rose-100 dark:bg-rose-500/15 border-rose-200 dark:border-rose-500/30', border: 'border-rose-400 dark:border-rose-500/70', bg: 'bg-rose-50/70 dark:bg-rose-500/[0.07]' },
+    'QUẢ BÙI KỲ LÃO': { header: 'text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-500/15 border-emerald-200 dark:border-emerald-500/30', border: 'border-emerald-400 dark:border-emerald-500/70', bg: 'bg-emerald-50/70 dark:bg-emerald-500/[0.07]' },
+    'CƠM CHÁY': { header: 'text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/15 border-amber-200 dark:border-amber-500/30', border: 'border-amber-400 dark:border-amber-500/70', bg: 'bg-amber-50/70 dark:bg-amber-500/[0.07]' },
+    'TRÀ HOA VÀNG': { header: 'text-yellow-800 dark:text-yellow-300 bg-yellow-100 dark:bg-yellow-500/15 border-yellow-200 dark:border-yellow-500/30', border: 'border-yellow-400 dark:border-yellow-500/70', bg: 'bg-yellow-50/70 dark:bg-yellow-500/[0.07]' },
+    'RUỐC CÁ': { header: 'text-cyan-800 dark:text-cyan-300 bg-cyan-100 dark:bg-cyan-500/15 border-cyan-200 dark:border-cyan-500/30', border: 'border-cyan-400 dark:border-cyan-500/70', bg: 'bg-cyan-50/70 dark:bg-cyan-500/[0.07]' },
+    'BÁNH DỨA': { header: 'text-fuchsia-800 dark:text-fuchsia-300 bg-fuchsia-100 dark:bg-fuchsia-500/15 border-fuchsia-200 dark:border-fuchsia-500/30', border: 'border-fuchsia-400 dark:border-fuchsia-500/70', bg: 'bg-fuchsia-50/70 dark:bg-fuchsia-500/[0.07]' },
+    'CÁC LOẠI HỘP TÚI': { header: 'text-slate-800 dark:text-slate-300 bg-slate-200 dark:bg-slate-500/15 border-slate-300 dark:border-slate-500/30', border: 'border-slate-400 dark:border-slate-500/70', bg: 'bg-slate-100/70 dark:bg-slate-500/[0.07]' },
+    'KHÁC': { header: 'text-gray-800 dark:text-gray-300 bg-gray-200 dark:bg-gray-500/15 border-gray-300 dark:border-gray-500/30', border: 'border-gray-400 dark:border-gray-500/70', bg: 'bg-gray-100/70 dark:bg-gray-500/[0.07]' }
+};
+function getNhomHeaderColor(ten) {
+    return (NHOM_COLOR_MAP[ten] || NHOM_COLOR_MAP['KHÁC']).header;
+}
+function getNhomBlockBorder(ten) {
+    return (NHOM_COLOR_MAP[ten] || NHOM_COLOR_MAP['KHÁC']).border;
+}
+function getNhomBlockBg(ten) {
+    return (NHOM_COLOR_MAP[ten] || NHOM_COLOR_MAP['KHÁC']).bg;
 }
 
 // Lấy ĐVT (đơn vị tính) của 1 sản phẩm theo TÊN - dùng cho các báo cáo Nhập Xuất Tồn (gộp
