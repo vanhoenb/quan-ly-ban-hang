@@ -16463,6 +16463,7 @@ async function exportFullReport() {
                     // Đẩy vào mảng với Thành tiền đã bao gồm thuế
                     salesData.push([
                         dDateStr, 
+                        d.id || doc.id || '',
                         d.customer || 'Khách lẻ', 
                         i.isShipping ? ('🚚 ' + i.name) : i.name, 
                         i.unit || '',
@@ -16507,35 +16508,37 @@ async function exportFullReport() {
         const workbook = new ExcelJS.Workbook();
         const sheet = workbook.addWorksheet('Báo Cáo Tổng Hợp');
         
-        // Header
+        // Header - Phần I giờ có thêm cột "Số phiếu" (Ngày, Số phiếu, KH, Tên SP, ĐVT, SL,
+        // Đơn giá, Thành tiền, Ghi chú = 9 cột) để KHỚP ĐÚNG số cột với Phần II (cũng 9 cột
+        // cố định, xem bên dưới) - không cần ép buộc gì thêm, 2 bảng tự nhiên bằng nhau.
         const title = sheet.addRow(["BÁO CÁO TỔNG HỢP"]);
         title.font = { size: 16, bold: true };
-        sheet.mergeCells('A1:G1');
+        sheet.mergeCells(title.number, 1, title.number, 9);
         title.alignment = { horizontal: 'center' };
         
         const dateRow = sheet.addRow([`Từ ngày ${formatDateToDDMMYYYY(fromVal)} đến ngày ${formatDateToDDMMYYYY(toVal)}`]);
-        sheet.mergeCells('A2:G2');
+        sheet.mergeCells(dateRow.number, 1, dateRow.number, 9);
         dateRow.alignment = { horizontal: 'center' };
         sheet.addRow([]);
 
         // I. CHI TIẾT BÁN HÀNG
         const titleRow = sheet.addRow(["I. CHI TIẾT BÁN HÀNG"]);
         titleRow.font = { bold: true, size: 14 };
-        sheet.mergeCells(titleRow.number, 1, titleRow.number, 8); 
+        sheet.mergeCells(titleRow.number, 1, titleRow.number, 9); 
         titleRow.alignment = { horizontal: 'center' };
 
-        // Đổi tên tiêu đề cột 6 thành "Thành tiền (có thuế)"
-        const header1 = sheet.addRow(["Ngày tháng", "Khách hàng", "Tên sản phẩm", "ĐVT", "SL", "Đơn giá", "Thành tiền", "Ghi chú"]);
+        const header1 = sheet.addRow(["Ngày tháng", "Số phiếu", "Khách hàng", "Tên sản phẩm", "ĐVT", "SL", "Đơn giá", "Thành tiền", "Ghi chú"]);
 
-        // Chỉnh chiều cao dòng
-        header1.height = 25;
+        // Chỉnh chiều cao dòng - tăng lên (25 -> 30) để tiêu đề dài (VD "Đổi date/Hoàn trả"
+        // ở Phần II) đủ chỗ xuống 2 dòng thay vì bị cắt chữ.
+        header1.height = 30;
 
         header1.eachCell(c => { 
             c.font = { bold: true, size: 12 }; 
             // Màu nền hồng nhạt
             c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFCDD2' } }; 
             c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; 
-            c.alignment = { horizontal: 'center', vertical: 'middle' }; 
+            c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }; 
         });
 
         // SẮP XẾP LẠI DỮ LIỆU THEO NGÀY (YYYY-MM-DD) TRƯỚC KHI VẼ BẢNG
@@ -16555,57 +16558,59 @@ async function exportFullReport() {
                 }
             }
 
-            // Lúc này rowData[6] đã chứa giá trị (Thành tiền + Thuế) từ bước tính toán trước đó
+            // Lúc này rowData[7] đã chứa giá trị (Thành tiền + Thuế) từ bước tính toán trước đó
             const row = sheet.addRow(rowData);
             
             row.eachCell((c, col) => {
 				c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
 				c.font = { size: 12 };
 				
-				// CĂN GIỮA CÁC CỘT CẦN THIẾT: ngày (1), ĐVT (4), SL (5)
-				if (col === 1 || col === 4 || col === 5) {
+				// CĂN GIỮA CÁC CỘT CẦN THIẾT: ngày (1), Số phiếu (2), ĐVT (5), SL (6)
+				if (col === 1 || col === 2 || col === 5 || col === 6) {
 					c.alignment = { horizontal: 'center' };
 				}
 				
-				if (col === 5) c.font = { bold: true, size: 12 };
+				if (col === 6) c.font = { bold: true, size: 12 };
 				
 				// Định dạng số tiền
-				// Cột 6 là Đơn giá, cột 7 là Thành tiền (đã bao gồm thuế)
-				if (col === 6 || col === 7) c.numFmt = '#,##0';
+				// Cột 7 là Đơn giá, cột 8 là Thành tiền (đã bao gồm thuế)
+				if (col === 7 || col === 8) c.numFmt = '#,##0';
 
-				// Căn giữa theo chiều dọc cho cột Khách hàng (2), Tên sản phẩm (3) và Ghi chú
-				// (8) - đã BỎ wrapText theo yêu cầu, chữ dài sẽ tràn ra thay vì tự xuống dòng.
-				if (col === 2 || col === 3 || col === 8) {
+				// Căn giữa theo chiều dọc cho cột Khách hàng (3), Tên sản phẩm (4) và Ghi chú
+				// (9) - đã BỎ wrapText theo yêu cầu, chữ dài sẽ tràn ra thay vì tự xuống dòng.
+				if (col === 3 || col === 4 || col === 9) {
 					c.alignment = { vertical: 'middle' };
 				}
             });
         });
 
-        // GỘP CỘT "Khách hàng" (cột 2): 1 khách mua nhiều SP thì gộp các dòng liên tiếp
-        // thành 1 ô duy nhất, căn giữa cả ngang lẫn dọc - giống thao tác "Merge & Center"
-        // trong Excel, đúng như ảnh mẫu người dùng gửi.
+        // GỘP CỘT "Số phiếu" (2) và "Khách hàng" (3): 1 hoá đơn nhiều SP thì gộp các dòng
+        // liên tiếp CÙNG số phiếu thành 1 ô duy nhất, căn giữa cả ngang lẫn dọc - giống thao
+        // tác "Merge & Center" trong Excel, đúng như ảnh mẫu người dùng gửi. Gộp theo "Số
+        // phiếu" (định danh chính xác 1 hoá đơn) thay vì chỉ theo tên KH như trước, để không
+        // gộp nhầm 2 hoá đơn RIÊNG của cùng 1 khách mua vào 2 lần khác nhau trong kỳ.
         mergeExcelColumnByConsecutiveValue(sheet, 2, salesDataStartRow, sheet.rowCount);
+        mergeExcelColumnByConsecutiveValue(sheet, 3, salesDataStartRow, sheet.rowCount);
         
         // II. NXT
         sheet.addRow([]); 
-        // Cột "Ghi chú" (tên KH đổi date/hoàn trả) CHỈ hiện khi có ít nhất 1 sản phẩm phát
-        // sinh đổi date/hoàn trả có ghi tên KH/đại lý - ẩn hẳn cột nếu không có, theo đúng
-        // yêu cầu (ẩn cả khi xem/in lẫn xuất Excel).
-        const anyGhiChuNxt = Object.values(inventory).some(item => item.nhapDoiVendors && item.nhapDoiVendors.size);
-        const nxtTotalCols = anyGhiChuNxt ? 9 : 8;
+        // Cột "Ghi chú" (tên KH đổi date/hoàn trả) LUÔN hiển thị cố định ở Phần II (không ẩn
+        // hiện theo dữ liệu nữa) - Phần II vì vậy luôn 9 cột, khớp đúng 9 cột của Phần I ở
+        // trên (đã thêm cột Số phiếu) - không cần ép buộc gì thêm, 2 bảng tự nhiên bằng nhau.
+        const nxtTotalCols = 9;
 
-        // Gộp A-G/H và căn giữa
+        // Gộp A-I và căn giữa
         const titleRow2 = sheet.addRow(["II. BÁO CÁO NHẬP XUẤT TỒN"]);
         titleRow2.font = { bold: true, size: 14 };
         sheet.mergeCells(titleRow2.number, 1, titleRow2.number, nxtTotalCols); 
         titleRow2.alignment = { horizontal: 'center' };
         
-        const header2Cells = ["Ngày tháng", "Tên sản phẩm", "ĐVT", "Tồn đầu", "Nhập mới", "Đổi date/Hoàn trả", "Xuất", "Tồn cuối"];
-        if (anyGhiChuNxt) header2Cells.push("Ghi chú");
+        const header2Cells = ["Ngày tháng", "Tên sản phẩm", "ĐVT", "Tồn đầu", "Nhập mới", "Đổi date/Hoàn trả", "Xuất", "Tồn cuối", "Ghi chú"];
         const header2 = sheet.addRow(header2Cells);
         
-        // Chỉnh chiều cao dòng
-        header2.height = 25;
+        // Chỉnh chiều cao dòng - tăng lên (25 -> 30) để tiêu đề dài ("Đổi date/Hoàn trả") đủ
+        // chỗ xuống 2 dòng thay vì bị cắt chữ.
+        header2.height = 30;
 
         header2.eachCell(c => { 
             c.font = { bold: true, size: 12 };
@@ -16613,8 +16618,8 @@ async function exportFullReport() {
             c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFB3E5FC' } }; 
             c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; 
             
-            // Căn giữa cả ngang và dọc
-            c.alignment = { horizontal: 'center', vertical: 'middle' }; 
+            // Căn giữa cả ngang và dọc, tự xuống dòng nếu chữ dài
+            c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }; 
         });
 
         // Dùng bộ phân nhóm dùng chung NHOM_SP_DINH_NGHIA / xepNhomSanPham() đã định nghĩa
@@ -16662,9 +16667,9 @@ async function exportFullReport() {
                     formatVal(item.nhapMoi),
                     formatVal(item.nhapDoi),
                     formatVal(item.xuat),
-                    formatVal(tonCuoi)
+                    formatVal(tonCuoi),
+                    ghiChu
                 ];
-                if (anyGhiChuNxt) rowValues.push(ghiChu);
                 const row = sheet.addRow(rowValues);
 
                 row.eachCell((c, col) => {
@@ -16766,7 +16771,15 @@ async function exportFullReport() {
         
         // NỚI RỘNG các cột hay chứa chữ dài (Khách hàng / Tên sản phẩm / Ghi chú) - đã BỎ
         // wrapText theo yêu cầu, nên nới rộng cột là cách duy nhất giúp đỡ che chữ hơn.
-        sheet.columns = [{ width: 12 }, { width: 26 }, { width: 22 }, { width: 10 }, { width: 12 }, { width: 14 }, { width: 16 }, { width: 16 }, { width: 24 }];
+        // Độ rộng cột được cân đối để vừa với CẢ Phần I lẫn Phần II (2 bảng dùng CHUNG 1 bộ
+        // cột dù ý nghĩa từng cột khác nhau giữa 2 phần - VD cột C là "Tên sản phẩm" ở Phần I
+        // nhưng là "ĐVT" ở Phần II): cột chứa tên SP/KH/Ghi chú (thường dài) được nới rộng
+        // hơn, cột chứa số liệu ngắn (ĐVT, SL, Tồn đầu...) được thu hẹp lại tương ứng.
+        // Độ rộng cột được cân đối để vừa với CẢ Phần I lẫn Phần II (2 bảng dùng CHUNG 1 bộ
+        // cột dù ý nghĩa từng cột khác nhau giữa 2 phần - VD cột B là "Số phiếu" ở Phần I
+        // nhưng là "Tên sản phẩm" ở Phần II): cột chứa tên SP/KH/Ghi chú (thường dài) được
+        // nới rộng hơn, cột chứa số liệu ngắn (Số phiếu, ĐVT, SL, Tồn đầu...) thu hẹp lại.
+        sheet.columns = [{ width: 12 }, { width: 24 }, { width: 22 }, { width: 24 }, { width: 10 }, { width: 18 }, { width: 14 }, { width: 16 }, { width: 26 }];
 		
 		// --- CHÈN ĐOẠN CẤU HÌNH VÀO ĐÂY ---
         sheet.pageSetup.paperSize = 9; // A4
@@ -16920,7 +16933,7 @@ async function viewFullReport() {
                         noteFinal = noteFinal ? `${noteFinal} | ${totalNote}` : totalNote;
                     }
 
-                    salesData.push([dDateStr, d.customer || 'Khách lẻ', i.isShipping ? ('🚚 ' + i.name) : i.name, i.unit || '', qty, price, thanhTienCoThue, noteFinal]);
+                    salesData.push([dDateStr, d.id || doc.id || '', d.customer || 'Khách lẻ', i.isShipping ? ('🚚 ' + i.name) : i.name, i.unit || '', qty, price, thanhTienCoThue, noteFinal]);
                 }
             });
         });
@@ -16956,16 +16969,24 @@ async function viewFullReport() {
         salesData.sort((a, b) => new Date(a[0]) - new Date(b[0]));
         const td = 'border:1px solid #999;padding:6px 8px;';
         const th = 'border:1px solid #999;padding:7px 8px;background:#efefef;font-weight:bold;';
+        // Cột chữ dài (Tên sản phẩm/Khách hàng/Ghi chú) cần tự xuống dòng khi dùng bảng cột
+        // cố định (table-layout:fixed) bên dưới - nếu không chữ dài sẽ bị tràn ra ngoài ô.
+        const tdWrap = td + 'word-break:break-word;';
 
-        const salesMerge = buildMergedColumnRowSpans(salesData, 1); // Gộp cột "Khách hàng" (index 1)
+        const salesMerge = buildMergedColumnRowSpans(salesData, 1); // Gộp cột "Số phiếu" (index 1)
+        const custMerge = buildMergedColumnRowSpans(salesData, 2); // Gộp cột "Khách hàng" (index 2)
         const salesRowsHtml = salesData.map((r, rIdx) => {
             const [y, m, dd] = r[0].split('-');
-            const custCellHtml = salesMerge.skip.has(rIdx) ? '' :
+            const phieuCellHtml = salesMerge.skip.has(rIdx) ? '' :
                 (salesMerge.rowSpan[rIdx] > 1
-                    ? `<td rowspan="${salesMerge.rowSpan[rIdx]}" style="${td}text-align:left;vertical-align:middle;font-weight:bold;">${r[1]}</td>`
-                    : `<td style="${td}">${r[1]}</td>`);
-            return `<tr><td style="${td}text-align:center;">${dd}-${m}-${y}</td>${custCellHtml}<td style="${td}">${r[2]}</td><td style="${td}text-align:center;">${r[3]}</td><td style="${td}text-align:center;">${r[4]}</td><td style="${td}text-align:right;">${Math.round(r[5]).toLocaleString('vi-VN')}</td><td style="${td}text-align:right;">${Math.round(r[6]).toLocaleString('vi-VN')}</td><td style="${td}">${r[7] || ''}</td></tr>`;
-        }).join('') || `<tr><td colspan="8" style="${td}text-align:center;color:#888;">Không có dữ liệu</td></tr>`;
+                    ? `<td rowspan="${salesMerge.rowSpan[rIdx]}" style="${td}text-align:center;vertical-align:middle;font-weight:bold;">${r[1]}</td>`
+                    : `<td style="${td}text-align:center;">${r[1]}</td>`);
+            const custCellHtml = custMerge.skip.has(rIdx) ? '' :
+                (custMerge.rowSpan[rIdx] > 1
+                    ? `<td rowspan="${custMerge.rowSpan[rIdx]}" style="${tdWrap}text-align:left;vertical-align:middle;font-weight:bold;">${r[2]}</td>`
+                    : `<td style="${tdWrap}">${r[2]}</td>`);
+            return `<tr><td style="${td}text-align:center;white-space:nowrap;">${dd}-${m}-${y}</td>${phieuCellHtml}${custCellHtml}<td style="${tdWrap}">${r[3]}</td><td style="${td}text-align:center;">${r[4]}</td><td style="${td}text-align:center;">${r[5]}</td><td style="${td}text-align:right;">${Math.round(r[6]).toLocaleString('vi-VN')}</td><td style="${td}text-align:right;">${Math.round(r[7]).toLocaleString('vi-VN')}</td><td style="${tdWrap}">${r[8] || ''}</td></tr>`;
+        }).join('') || `<tr><td colspan="9" style="${td}text-align:center;color:#888;">Không có dữ liệu</td></tr>`;
 
         const nhomMap = new Map();
         const thuTuNhom = THU_TU_HIEN_THI_NHOM.concat(['KHÁC']); // Thứ tự HIỂN THỊ - tách riêng khỏi thứ tự khớp nhóm
@@ -16977,19 +16998,17 @@ async function viewFullReport() {
             if (Math.round(item.tonDau * 100) === 0 && Math.round(item.nhapMoi * 100) === 0 && Math.round(item.nhapDoi * 100) === 0 && Math.round(item.xuat * 100) === 0 && Math.round(tonCuoi * 100) === 0) return;
             nhomMap.get(xepNhomSanPham(name)).push({ name, item, tonCuoi });
         });
-        // Cột "Ghi chú" (tên KH đổi date/hoàn trả) CHỈ hiện khi có ít nhất 1 sản phẩm phát
-        // sinh đổi date/hoàn trả có ghi tên KH/đại lý - ẩn hẳn cột nếu không có, theo đúng
-        // yêu cầu (ẩn cả khi xem/in lẫn xuất Excel).
-        const anyGhiChuNxt = Array.from(nhomMap.values()).some(list => list.some(({ item }) => item.nhapDoiVendors && item.nhapDoiVendors.size));
-        const nxtColCount = anyGhiChuNxt ? 9 : 8;
+        // Cột "Ghi chú" (tên KH đổi date/hoàn trả) LUÔN hiển thị cố định ở Phần II - khớp
+        // đúng 9 cột của Phần I (đã có thêm Số phiếu), 2 bảng luôn cùng số cột.
+        const nxtColCount = 9;
         let nxtRowsHtml = '';
         thuTuNhom.forEach(tenNhom => {
             const danhSach = nhomMap.get(tenNhom);
             if (!danhSach.length) return;
             nxtRowsHtml += `<tr><td colspan="${nxtColCount}" style="${td}background:#fff9c4;font-weight:bold;">${tenNhom}</td></tr>`;
             danhSach.forEach(({ name, item, tonCuoi }) => {
-                const ghiChuCell = anyGhiChuNxt ? `<td style="${td}">${item.nhapDoiVendors && item.nhapDoiVendors.size ? Array.from(item.nhapDoiVendors).join(', ') : ''}</td>` : '';
-                nxtRowsHtml += `<tr><td style="${td}text-align:center;">${formatDateToDDMMYYYY(toVal)}</td><td style="${td}">${name}</td><td style="${td}text-align:center;">${getProductUnit(name)}</td><td style="${td}text-align:center;">${formatVal(item.tonDau)}</td><td style="${td}text-align:center;">${formatVal(item.nhapMoi)}</td><td style="${td}text-align:center;">${formatVal(item.nhapDoi)}</td><td style="${td}text-align:center;">${formatVal(item.xuat)}</td><td style="${td}text-align:center;">${formatVal(tonCuoi)}</td>${ghiChuCell}</tr>`;
+                const ghiChuCell = `<td style="${tdWrap}">${item.nhapDoiVendors && item.nhapDoiVendors.size ? Array.from(item.nhapDoiVendors).join(', ') : ''}</td>`;
+                nxtRowsHtml += `<tr><td style="${td}text-align:center;white-space:nowrap;">${formatDateToDDMMYYYY(toVal)}</td><td style="${tdWrap}">${name}</td><td style="${td}text-align:center;">${getProductUnit(name)}</td><td style="${td}text-align:center;">${formatVal(item.tonDau)}</td><td style="${td}text-align:center;">${formatVal(item.nhapMoi)}</td><td style="${td}text-align:center;">${formatVal(item.nhapDoi)}</td><td style="${td}text-align:center;">${formatVal(item.xuat)}</td><td style="${td}text-align:center;">${formatVal(tonCuoi)}</td>${ghiChuCell}</tr>`;
             });
         });
         if (!nxtRowsHtml) nxtRowsHtml = `<tr><td colspan="${nxtColCount}" style="${td}text-align:center;color:#888;">Không có dữ liệu</td></tr>`;
@@ -17007,14 +17026,34 @@ async function viewFullReport() {
             <p style="text-align:center;color:#555;font-size:13px;margin:0 0 20px;">Từ ngày ${formatDateToDDMMYYYY(fromVal)} đến ngày ${formatDateToDDMMYYYY(toVal)}</p>
 
             <h2 style="font-size:15px;margin:18px 0 8px;">I. CHI TIẾT BÁN HÀNG</h2>
-            <table style="width:100%;border-collapse:collapse;font-size:12px;">
-                <thead><tr><th style="${th}">Ngày</th><th style="${th}">Khách hàng</th><th style="${th}">Tên sản phẩm</th><th style="${th}">ĐVT</th><th style="${th}">SL</th><th style="${th}">Đơn giá</th><th style="${th}">Thành tiền</th><th style="${th}">Ghi chú</th></tr></thead>
+            <table style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:12px;">
+                <thead><tr>
+                    <th style="${th}width:9%;">Ngày</th>
+                    <th style="${th}width:8%;">Số phiếu</th>
+                    <th style="${th}width:13%;">Khách hàng</th>
+                    <th style="${th}width:22%;">Tên sản phẩm</th>
+                    <th style="${th}width:6%;">ĐVT</th>
+                    <th style="${th}width:6%;">SL</th>
+                    <th style="${th}width:11%;">Đơn giá</th>
+                    <th style="${th}width:11%;">Thành tiền</th>
+                    <th style="${th}width:14%;">Ghi chú</th>
+                </tr></thead>
                 <tbody>${salesRowsHtml}</tbody>
             </table>
 
             <h2 style="font-size:15px;margin:18px 0 8px;">II. BÁO CÁO NHẬP XUẤT TỒN</h2>
-            <table style="width:100%;border-collapse:collapse;font-size:12px;">
-                <thead><tr><th style="${th}">Ngày</th><th style="${th}">Tên sản phẩm</th><th style="${th}">ĐVT</th><th style="${th}">Tồn đầu</th><th style="${th}">Nhập mới</th><th style="${th}">Đổi date/Hoàn trả</th><th style="${th}">Xuất</th><th style="${th}">Tồn cuối</th>${anyGhiChuNxt ? ('<th style="' + th + '">Ghi chú</th>') : ''}</tr></thead>
+            <table style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:12px;">
+                <thead><tr>
+                    <th style="${th}width:9%;">Ngày</th>
+                    <th style="${th}width:21%;">Tên sản phẩm</th>
+                    <th style="${th}width:6%;">ĐVT</th>
+                    <th style="${th}width:9%;">Tồn đầu</th>
+                    <th style="${th}width:9%;">Nhập mới</th>
+                    <th style="${th}width:10%;">Đổi date/Hoàn trả</th>
+                    <th style="${th}width:7%;">Xuất</th>
+                    <th style="${th}width:8%;">Tồn cuối</th>
+                    <th style="${th}width:21%;">Ghi chú</th>
+                </tr></thead>
                 <tbody>${nxtRowsHtml}</tbody>
             </table>
 
@@ -17040,6 +17079,7 @@ async function viewFullReport() {
         Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Không thể xem báo cáo tổng hợp!' });
     }
 }
+
 
 document.getElementById('date-from').addEventListener('change', updateDateDisplay);
 document.getElementById('date-to').addEventListener('change', updateDateDisplay);
