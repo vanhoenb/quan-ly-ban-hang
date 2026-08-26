@@ -1892,8 +1892,8 @@ html:not(.dark) .bg-white {
                 <div class="flex flex-col gap-4 mb-4 border-b dark:border-slate-700 pb-4">
                     <h3 class="font-bold text-xl text-slate-800 dark:text-white whitespace-nowrap">📋 DANH SÁCH PHIẾU NHẬP</h3>
 
-                    <div class="grid grid-cols-2 gap-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-100 dark:border-slate-700 w-full">
-                        <div class="col-span-2">
+                    <div class="grid grid-cols-3 gap-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-100 dark:border-slate-700 w-full">
+                        <div>
                             <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase">Tháng</label>
                             <input type="month" id="filter-month" onchange="handleReceiptMonthChange()" class="w-full p-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-white rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
@@ -1907,7 +1907,7 @@ html:not(.dark) .bg-white {
                             <input type="date" id="filter-date-to" onchange="filterReceipts()" class="w-full p-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-white rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
 
-                        <div class="col-span-2">
+                        <div class="col-span-3">
                             <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase">Tìm kiếm (số phiếu hoặc tên sản phẩm)</label>
                             <input type="text" id="searchReceiptInput" list="prod-list" onkeyup="filterReceipts()" placeholder="Nhập số phiếu hoặc tên sản phẩm..." class="w-full p-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-white rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
                             <datalist id="prod-list"></datalist>
@@ -5174,24 +5174,22 @@ function renderParttimeTable() {
     const bodyEl = document.getElementById('chamcong-parttime-body');
     if (!headEl || !bodyEl) return;
     const thBase = 'border border-slate-300 dark:border-slate-700 p-2 text-slate-600 dark:text-slate-300';
-    // Đã bỏ cột "Ngày" riêng cho từng dòng (mỗi người 1 dòng) - vì giờ NGÀY được GỘP LẠI làm
-    // 1 dòng tiêu đề chung cho cả nhóm người làm cùng ngày đó (xem bên dưới), nên tổng số cột
-    // của bảng còn lại 12 cột (dòng tiêu đề nhóm sẽ dùng colspan="12").
+    // ĐÃ GỌN LẠI: "Giờ vào/Giờ ra/Số giờ" của mỗi buổi (sáng, chiều) trước đây là 3 cột
+    // riêng (x2 buổi = 6 cột) - giờ gộp thành 1 CỘT DUY NHẤT cho mỗi buổi (2 ô giờ nằm
+    // ngang + số giờ tính được hiện nhỏ ngay bên dưới trong CÙNG 1 ô, xem hàm bên dưới) -
+    // bảng còn lại 8 cột tổng cộng (từ 12 cột trước đây), không cần dòng tiêu đề phụ nữa.
     headEl.innerHTML = '<tr class="bg-slate-100 dark:bg-slate-800">' +
-            '<th class="' + thBase + ' w-8" rowspan="2">STT</th>' +
-            '<th class="' + thBase + ' min-w-[110px] text-left" rowspan="2">Họ và tên</th>' +
-            '<th class="' + thBase + '" colspan="3">Ca sáng</th>' +
-            '<th class="' + thBase + '" colspan="3">Ca chiều</th>' +
-            '<th class="' + thBase + ' min-w-[55px]" rowspan="2">Tổng giờ</th>' +
-            '<th class="' + thBase + ' min-w-[45px]" rowspan="2">Đơn giá/giờ</th>' +
-            '<th class="' + thBase + ' min-w-[70px]" rowspan="2">Thành tiền</th>' +
-            '<th class="' + thBase + ' w-14" rowspan="2"></th>' +
-        '</tr>' +
-        '<tr class="bg-slate-100 dark:bg-slate-800 text-[10px]">' +
-            '<th class="' + thBase + '">Giờ vào</th><th class="' + thBase + '">Giờ ra</th><th class="' + thBase + '">Số giờ</th>' +
-            '<th class="' + thBase + '">Giờ vào</th><th class="' + thBase + '">Giờ ra</th><th class="' + thBase + '">Số giờ</th>' +
+            '<th class="' + thBase + ' w-8">STT</th>' +
+            '<th class="' + thBase + ' min-w-[100px] text-left">Họ và tên</th>' +
+            '<th class="' + thBase + ' min-w-[95px]">🌅 Ca sáng</th>' +
+            '<th class="' + thBase + ' min-w-[95px]">🌇 Ca chiều</th>' +
+            '<th class="' + thBase + ' min-w-[50px]">Tổng giờ</th>' +
+            '<th class="' + thBase + ' min-w-[45px]">Đơn giá/giờ</th>' +
+            '<th class="' + thBase + ' min-w-[70px]">Thành tiền</th>' +
+            '<th class="' + thBase + ' w-14"></th>' +
         '</tr>';
 
+    const PT_COLSPAN = 8;
     const list = window.chamCongState.parttime || [];
     const tdBase = 'border border-slate-300 dark:border-slate-700';
     const weekdayLabels = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
@@ -5264,7 +5262,7 @@ function renderParttimeTable() {
             '</div>' : '';
 
         bodyHtml += '<tr class="bg-slate-50 dark:bg-slate-800/60">' +
-            '<td colspan="12" class="' + tdBase + ' p-0">' +
+            '<td colspan="' + PT_COLSPAN + '" class="' + tdBase + ' p-0">' +
                 '<div class="flex items-center justify-between gap-2 px-2 py-1.5">' +
                     '<button onclick="toggleParttimeGroup(\'' + key + '\')" class="flex items-center gap-1.5 text-left flex-1 min-w-0">' +
                         '<i data-lucide="' + (isCollapsed ? 'chevron-right' : 'chevron-down') + '" class="w-3.5 h-3.5 shrink-0 text-slate-400"></i>' +
@@ -5298,9 +5296,31 @@ function renderParttimeTable() {
             const morningWarnTitle = morningWarn ? 'Giờ ra đang sớm hơn/bằng giờ vào - kiểm tra lại' : '';
             const afternoonWarnTitle = afternoonWarn ? 'Giờ ra đang sớm hơn/bằng giờ vào - kiểm tra lại' : '';
 
-            const morningText = morningWarn ? '<span title="Giờ ra sớm hơn/bằng giờ vào">⚠️</span>' : (morningHours ? morningHours.toFixed(2) : '');
-            const afternoonText = afternoonWarn ? '<span title="Giờ ra sớm hơn/bằng giờ vào">⚠️</span>' : (afternoonHours ? afternoonHours.toFixed(2) : '');
+            const morningText = morningWarn ? '⚠️' : (morningHours ? morningHours.toFixed(2) + 'h' : '');
+            const afternoonText = afternoonWarn ? '⚠️' : (afternoonHours ? afternoonHours.toFixed(2) + 'h' : '');
             const dupWarningDiv = isDup ? '<div class="text-[9px] text-amber-600 dark:text-amber-400 font-bold" title="Tên này xuất hiện từ 2 dòng trở lên trong cùng ngày - kiểm tra lại có bị trùng/nhập nhầm không">⚠️ Trùng ca</div>' : '';
+
+            // Mỗi buổi (sáng/chiều) giờ GỘP thành 1 Ô DUY NHẤT: 2 ô giờ (vào - ra) xếp ngang
+            // sát nhau ở dòng trên, số giờ tính được hiện nhỏ ngay dưới - thay vì 3 cột tách
+            // rời như trước, giúp bảng gọn lại đáng kể (đặc biệt trên điện thoại).
+            const morningCell =
+                '<td class="' + tdBase + ' p-1 ' + morningWarnCls + '" title="' + morningWarnTitle + '">' +
+                    '<div class="flex items-center justify-center gap-0.5">' +
+                        '<input type="text" inputmode="numeric" maxlength="5" placeholder="--:--" value="' + (e.morningIn || '') + '" class="w-9 text-[11px] text-center font-bold bg-transparent outline-none dark:text-white" oninput="maskTimeTextInput(this)" onchange="commitParttimeTime(' + idx + ', \'morningIn\', this)">' +
+                        '<span class="text-slate-300 dark:text-slate-600">-</span>' +
+                        '<input type="text" inputmode="numeric" maxlength="5" placeholder="--:--" value="' + (e.morningOut || '') + '" class="w-9 text-[11px] text-center font-bold bg-transparent outline-none dark:text-white" oninput="maskTimeTextInput(this)" onchange="commitParttimeTime(' + idx + ', \'morningOut\', this)">' +
+                    '</div>' +
+                    (morningText ? '<div class="text-[9px] text-center text-slate-400 dark:text-slate-500">' + morningText + '</div>' : '') +
+                '</td>';
+            const afternoonCell =
+                '<td class="' + tdBase + ' p-1 ' + afternoonWarnCls + '" title="' + afternoonWarnTitle + '">' +
+                    '<div class="flex items-center justify-center gap-0.5">' +
+                        '<input type="text" inputmode="numeric" maxlength="5" placeholder="--:--" value="' + (e.afternoonIn || '') + '" class="w-9 text-[11px] text-center font-bold bg-transparent outline-none dark:text-white" oninput="maskTimeTextInput(this)" onchange="commitParttimeTime(' + idx + ', \'afternoonIn\', this)">' +
+                        '<span class="text-slate-300 dark:text-slate-600">-</span>' +
+                        '<input type="text" inputmode="numeric" maxlength="5" placeholder="--:--" value="' + (e.afternoonOut || '') + '" class="w-9 text-[11px] text-center font-bold bg-transparent outline-none dark:text-white" oninput="maskTimeTextInput(this)" onchange="commitParttimeTime(' + idx + ', \'afternoonOut\', this)">' +
+                    '</div>' +
+                    (afternoonText ? '<div class="text-[9px] text-center text-slate-400 dark:text-slate-500">' + afternoonText + '</div>' : '') +
+                '</td>';
 
             bodyHtml += '<tr class="' + rowWarnCls + '">' +
                 '<td class="' + tdBase + ' p-1 text-center">' + stt + '</td>' +
@@ -5308,12 +5328,8 @@ function renderParttimeTable() {
                     '<input type="text" value="' + escapeHtml(e.name || '') + '" placeholder="Nhập tên..." list="chamcong-parttime-namelist" class="w-full min-w-[100px] text-[11px] bg-transparent outline-none focus:bg-blue-50 dark:focus:bg-slate-800 dark:text-white" onchange="updateParttimeField(' + idx + ', \'name\', this.value)">' +
                     dupWarningDiv +
                 '</td>' +
-                '<td class="' + tdBase + ' p-1 ' + morningWarnCls + '" title="' + morningWarnTitle + '"><input type="text" inputmode="numeric" maxlength="5" placeholder="hh:mm" value="' + (e.morningIn || '') + '" class="w-full text-[11px] text-center font-bold bg-transparent outline-none dark:text-white" oninput="maskTimeTextInput(this)" onchange="commitParttimeTime(' + idx + ', \'morningIn\', this)"></td>' +
-                '<td class="' + tdBase + ' p-1 ' + morningWarnCls + '"><input type="text" inputmode="numeric" maxlength="5" placeholder="hh:mm" value="' + (e.morningOut || '') + '" class="w-full text-[11px] text-center font-bold bg-transparent outline-none dark:text-white" oninput="maskTimeTextInput(this)" onchange="commitParttimeTime(' + idx + ', \'morningOut\', this)"></td>' +
-                '<td class="' + tdBase + ' p-1 text-center dark:text-white">' + morningText + '</td>' +
-                '<td class="' + tdBase + ' p-1 ' + afternoonWarnCls + '" title="' + afternoonWarnTitle + '"><input type="text" inputmode="numeric" maxlength="5" placeholder="hh:mm" value="' + (e.afternoonIn || '') + '" class="w-full text-[11px] text-center font-bold bg-transparent outline-none dark:text-white" oninput="maskTimeTextInput(this)" onchange="commitParttimeTime(' + idx + ', \'afternoonIn\', this)"></td>' +
-                '<td class="' + tdBase + ' p-1 ' + afternoonWarnCls + '"><input type="text" inputmode="numeric" maxlength="5" placeholder="hh:mm" value="' + (e.afternoonOut || '') + '" class="w-full text-[11px] text-center font-bold bg-transparent outline-none dark:text-white" oninput="maskTimeTextInput(this)" onchange="commitParttimeTime(' + idx + ', \'afternoonOut\', this)"></td>' +
-                '<td class="' + tdBase + ' p-1 text-center dark:text-white">' + afternoonText + '</td>' +
+                morningCell +
+                afternoonCell +
                 '<td class="' + tdBase + ' p-1 text-center font-bold dark:text-white">' + (total ? total.toFixed(2) : 0) + '</td>' +
                 '<td class="' + tdBase + ' p-1">' +
                     '<input type="number" value="' + rate + '" class="w-full text-center text-[11px] bg-transparent outline-none dark:text-white focus:bg-blue-50 dark:focus:bg-slate-800" onchange="updateParttimeField(' + idx + ', \'rate\', this.value)">' +
@@ -5327,7 +5343,7 @@ function renderParttimeTable() {
         });
     });
 
-    bodyEl.innerHTML = bodyHtml || '<tr><td colspan="12" class="p-4 text-center text-slate-400 text-xs">Chưa có dữ liệu part-time - bấm "Thêm dòng chấm công" ở trên.</td></tr>';
+    bodyEl.innerHTML = bodyHtml || ('<tr><td colspan="' + PT_COLSPAN + '" class="p-4 text-center text-slate-400 text-xs">Chưa có dữ liệu part-time - bấm "Thêm dòng chấm công" ở trên.</td></tr>');
 
     // Gợi ý tên (datalist) - lấy các tên ĐÃ TỪNG GÕ trong chính bảng part-time tháng này, để
     // lần thêm dòng sau chỉ cần gõ vài ký tự là hiện gợi ý chọn nhanh, KHÔNG bắt buộc chọn từ
@@ -5940,6 +5956,56 @@ function printChamCong() {
 
         const emptyParttimeRow = '<tr><td colspan="12" style="border:1.5px solid #000;padding:14px;text-align:center;">Chưa có dữ liệu</td></tr>';
 
+        // TỔNG KẾT THEO TỪNG NGƯỜI: bảng chi tiết ở trên liệt kê TỪNG BUỔI LÀM (1 dòng = 1
+        // ca của 1 người trong 1 ngày) nên không thấy ngay tổng tiền cả tháng của 1 người -
+        // phải tự cộng nhiều dòng lại. Thêm bảng tóm tắt này để biết ngay mỗi người được bao
+        // nhiêu tiền cả tháng, không cần tự cộng tay.
+        const summaryMap = new Map();
+        list.forEach(e => {
+            const key = (e.name || '').trim() || '(Chưa đặt tên)';
+            const hours = calcShiftHours(e.morningIn, e.morningOut) + calcShiftHours(e.afternoonIn, e.afternoonOut);
+            if (!summaryMap.has(key)) summaryMap.set(key, { hours: 0, tien: 0, rate: e.rate || 0 });
+            const s = summaryMap.get(key);
+            s.hours += hours;
+            s.tien += hours * (e.rate || 0);
+            if (e.rate) s.rate = e.rate; // Lấy đơn giá gần nhất nếu có thay đổi giữa các dòng
+        });
+        let summaryRowsHtml = '';
+        let grandTotalTien = 0;
+        let stt2 = 0;
+        summaryMap.forEach((s, name) => {
+            stt2++;
+            grandTotalTien += s.tien;
+            summaryRowsHtml += '<tr>' +
+                '<td style="border:1.5px solid #000;padding:9px 4px;text-align:center;">' + stt2 + '</td>' +
+                '<td style="border:1.5px solid #000;padding:9px 6px;font-weight:bold;">' + name + '</td>' +
+                '<td style="border:1.5px solid #000;padding:9px 4px;text-align:center;">' + s.hours.toFixed(2) + '</td>' +
+                '<td style="border:1.5px solid #000;padding:9px 4px;text-align:center;">' + s.rate.toLocaleString('vi-VN') + '</td>' +
+                '<td style="border:1.5px solid #000;padding:9px 6px;text-align:right;font-weight:bold;">' + s.tien.toLocaleString('vi-VN') + '</td>' +
+                '<td style="border:1.5px solid #000;padding:9px 4px;"></td>' +
+            '</tr>';
+        });
+        const summaryTableHtml = summaryMap.size ? (
+            '<h3 style="text-align:center;font-size:14px;margin:18px 0 8px;">TỔNG KẾT PART-TIME THEO TỪNG NGƯỜI - THÁNG ' + monthLabel + '</h3>' +
+            '<table style="width:100%;border-collapse:collapse;font-size:13px;">' +
+                '<thead><tr>' +
+                    '<th style="border:1.5px solid #000;padding:9px 4px;background:#efefef;">STT</th>' +
+                    '<th style="border:1.5px solid #000;padding:9px 4px;background:#efefef;">Họ và tên</th>' +
+                    '<th style="border:1.5px solid #000;padding:9px 4px;background:#efefef;">Tổng giờ</th>' +
+                    '<th style="border:1.5px solid #000;padding:9px 4px;background:#efefef;">Đơn giá/giờ</th>' +
+                    '<th style="border:1.5px solid #000;padding:9px 4px;background:#efefef;">Tổng tiền</th>' +
+                    '<th style="border:1.5px solid #000;padding:9px 4px;background:#efefef;">Ký nhận</th>' +
+                '</tr></thead>' +
+                '<tbody>' + summaryRowsHtml +
+                    '<tr>' +
+                        '<td colspan="4" style="border:1.5px solid #000;padding:9px 6px;text-align:right;font-weight:bold;">TỔNG CỘNG</td>' +
+                        '<td style="border:1.5px solid #000;padding:9px 6px;text-align:right;font-weight:bold;">' + grandTotalTien.toLocaleString('vi-VN') + '</td>' +
+                        '<td style="border:1.5px solid #000;padding:9px 4px;"></td>' +
+                    '</tr>' +
+                '</tbody>' +
+            '</table>'
+        ) : '';
+
         return '<h2 style="text-align:center;font-size:17px;margin:24px 0 12px;">BẢNG CHẤM CÔNG PART-TIME THÁNG ' + monthLabel + '</h2>' +
         '<table style="width:100%;border-collapse:collapse;font-size:13px;">' +
             '<thead>' +
@@ -5963,7 +6029,8 @@ function printChamCong() {
                 '</tr>' +
             '</thead>' +
             '<tbody>' + (rowsHtml || emptyParttimeRow) + '</tbody>' +
-        '</table>';
+        '</table>' +
+        summaryTableHtml;
     }
 
     const bodyHtml = '<div style="font-family:\'Times New Roman\',serif;padding:20px;color:#1a1a1a;">' +
@@ -6179,6 +6246,68 @@ async function exportChamCongExcel() {
         const ptEmptyRow = ptSheet.addRow(['Chưa có dữ liệu']);
         ptSheet.mergeCells(ptEmptyRow.number, 1, ptEmptyRow.number, ptTotalCols);
         ptEmptyRow.alignment = { horizontal: 'center' };
+    }
+
+    // TỔNG KẾT THEO TỪNG NGƯỜI: bảng chi tiết ở trên liệt kê TỪNG BUỔI LÀM (1 dòng = 1 ca
+    // của 1 người trong 1 ngày) nên không thấy ngay tổng tiền cả tháng của 1 người - phải tự
+    // cộng nhiều dòng lại. Thêm bảng tóm tắt này để biết ngay mỗi người được bao nhiêu tiền
+    // cả tháng, không cần tự cộng tay.
+    if (ptList.length) {
+        const ptSummaryMap = new Map();
+        ptList.forEach(e => {
+            const key = (e.name || '').trim() || '(Chưa đặt tên)';
+            const hours = calcShiftHours(e.morningIn, e.morningOut) + calcShiftHours(e.afternoonIn, e.afternoonOut);
+            if (!ptSummaryMap.has(key)) ptSummaryMap.set(key, { hours: 0, tien: 0, rate: e.rate || 0 });
+            const s = ptSummaryMap.get(key);
+            s.hours += hours;
+            s.tien += hours * (e.rate || 0);
+            if (e.rate) s.rate = e.rate; // Lấy đơn giá gần nhất nếu có thay đổi giữa các dòng
+        });
+
+        ptSheet.addRow([]);
+        const ptSumTitleRow = ptSheet.addRow([`TỔNG KẾT PART-TIME THEO TỪNG NGƯỜI - THÁNG ${monthLabel}`]);
+        ptSumTitleRow.font = { bold: true, size: 12 };
+        ptSheet.mergeCells(ptSumTitleRow.number, 1, ptSumTitleRow.number, ptTotalCols);
+        ptSumTitleRow.alignment = { horizontal: 'center' };
+
+        const ptSumHeadRow = ptSheet.addRow(['STT', 'Họ và tên', '', 'Tổng giờ', '', '', '', '', 'Đơn giá/giờ', '', 'Tổng tiền', 'Ký nhận']);
+        ptSheet.mergeCells(ptSumHeadRow.number, 2, ptSumHeadRow.number, 3);
+        ptSheet.mergeCells(ptSumHeadRow.number, 4, ptSumHeadRow.number, 8);
+        ptSheet.mergeCells(ptSumHeadRow.number, 9, ptSumHeadRow.number, 10);
+        ptSumHeadRow.eachCell({ includeEmpty: true }, c => {
+            c.font = { bold: true };
+            c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F0F0' } };
+            c.alignment = { horizontal: 'center', vertical: 'middle' };
+            c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+        });
+
+        let ptSttSum = 0;
+        let ptGrandTotal = 0;
+        ptSummaryMap.forEach((s, name) => {
+            ptSttSum++;
+            ptGrandTotal += s.tien;
+            const row = ptSheet.addRow([ptSttSum, name, '', s.hours, '', '', '', '', s.rate, '', s.tien, '']);
+            ptSheet.mergeCells(row.number, 2, row.number, 3);
+            ptSheet.mergeCells(row.number, 4, row.number, 8);
+            ptSheet.mergeCells(row.number, 9, row.number, 10);
+            row.height = 20;
+            row.eachCell({ includeEmpty: true }, (c, col) => {
+                c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+                c.alignment = col === 2 ? { vertical: 'middle' } : { horizontal: 'center', vertical: 'middle' };
+                if (col === 9 || col === 11) c.numFmt = '#,##0';
+            });
+            ptSheet.getCell(row.number, 11).font = { bold: true };
+        });
+
+        const ptGrandRow = ptSheet.addRow(['', 'TỔNG CỘNG', '', '', '', '', '', '', '', '', ptGrandTotal, '']);
+        ptSheet.mergeCells(ptGrandRow.number, 2, ptGrandRow.number, 10);
+        ptGrandRow.eachCell({ includeEmpty: true }, (c, col) => {
+            c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+            c.font = { bold: true };
+        });
+        ptSheet.getCell(ptGrandRow.number, 2).alignment = { horizontal: 'right' };
+        ptSheet.getCell(ptGrandRow.number, 11).alignment = { horizontal: 'center' };
+        ptSheet.getCell(ptGrandRow.number, 11).numFmt = '#,##0';
     }
 
     ptSheet.addRow([]);
