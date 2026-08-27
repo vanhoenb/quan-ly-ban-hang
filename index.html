@@ -2083,20 +2083,37 @@ html:not(.dark) .bg-white {
                         onkeyup="filterInventory()" class="w-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-3 rounded-xl text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
 
-            <div class="col-span-1 md:col-span-3">
+            <div class="col-span-1 md:col-span-2">
                 <input type="month" id="inv-month" onchange="autoFillDates(this.value)" class="w-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-3 rounded-xl text-sm text-slate-800 dark:text-slate-100" title="Chọn tháng">
             </div>
-            <div class="col-span-1 md:col-span-3">
+            <div class="col-span-1 md:col-span-2">
                 <input type="date" id="inv-date-from" class="w-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-3 rounded-xl text-sm text-slate-800 dark:text-slate-100" title="Từ ngày">
             </div>
-            <div class="col-span-1 md:col-span-3">
+            <div class="col-span-1 md:col-span-2">
                 <input type="date" id="inv-date-to" class="w-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-3 rounded-xl text-sm text-slate-800 dark:text-slate-100" title="Đến ngày">
             </div>
-            <div class="col-span-1 md:col-span-3">
+            <div class="col-span-1 md:col-span-2">
                <!-- Nút Xuất Excel -->
 			<button onclick="exportToExcel()" 
 				class="w-full bg-green-600 dark:bg-green-700 text-white py-3 rounded-xl text-sm font-bold transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
 				📊 Xuất Excel
+			</button>
+            </div>
+            <div class="col-span-1 md:col-span-2">
+               <!-- Nút Tạo Báo Giá: mở popup chọn SP từ chính danh sách Kho Hàng (gộp theo
+                    nhóm sản phẩm giống hệt bảng Kho Hàng), lấy sẵn giá sỉ/giá lẻ, chỉ cần gõ
+                    số lượng rồi Lưu/In ra tờ báo giá có tiêu đề công ty giống hệt hoá đơn. -->
+			<button onclick="openBaoGiaModal()" 
+				class="w-full bg-indigo-600 dark:bg-indigo-700 text-white py-3 rounded-xl text-sm font-bold transition-all duration-75 border-b-[4px] border-indigo-800 dark:border-indigo-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+				🧾 Tạo Báo Giá
+			</button>
+            </div>
+            <div class="col-span-1 md:col-span-2">
+               <!-- Nút xem lại các báo giá ĐÃ LƯU trước đây (collection riêng 'quotations' -
+                    hoàn toàn độc lập, KHÔNG đụng tới tồn kho/nhập xuất/công nợ/doanh thu). -->
+			<button onclick="openBaoGiaHistoryModal()" 
+				class="w-full bg-slate-600 dark:bg-slate-700 text-white py-3 rounded-xl text-sm font-bold transition-all duration-75 border-b-[4px] border-slate-800 dark:border-slate-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+				📜 Báo Giá Đã Lưu
 			</button>
             </div>
         </div>
@@ -2117,6 +2134,85 @@ html:not(.dark) .bg-white {
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+
+    <!-- ===================== POPUP TẠO BÁO GIÁ ===================== -->
+    <!-- Danh sách sản phẩm lấy thẳng từ Kho Hàng (window.allProductCache), tự điền sẵn
+         Giá sỉ/Giá lẻ hiện tại của từng SP (vẫn cho sửa tay ngay trong popup nếu cần báo
+         giá khác giá niêm yết), người dùng chỉ cần gõ Số lượng cho SP muốn báo giá. -->
+    <div id="modal-baogia" class="hidden fixed inset-0 z-[9999] bg-black bg-opacity-60 flex items-center justify-center p-1 md:p-6">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-5xl h-[96vh] md:h-[92vh] flex flex-col overflow-hidden">
+            <!-- Header -->
+            <div class="flex items-center justify-between p-3 md:p-4 border-b border-slate-200 dark:border-slate-700 bg-indigo-600 dark:bg-indigo-800 shrink-0">
+                <h3 class="text-white font-bold text-sm md:text-lg flex items-center gap-2">🧾 Tạo Báo Giá</h3>
+                <button onclick="closeBaoGiaModal()" class="text-white hover:bg-white/20 rounded-lg p-1.5">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Thông tin khách hàng nhận báo giá -->
+            <div class="p-2.5 md:p-4 border-b border-slate-200 dark:border-slate-700 grid grid-cols-2 md:grid-cols-4 gap-2 bg-slate-50 dark:bg-slate-950 shrink-0">
+                <input type="text" id="bg-customer" placeholder="Tên khách hàng / Kính gửi" class="col-span-2 md:col-span-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2.5 rounded-xl text-xs md:text-sm dark:text-white">
+                <input type="text" id="bg-address" placeholder="Địa chỉ" class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2.5 rounded-xl text-xs md:text-sm dark:text-white">
+                <input type="text" id="bg-phone" placeholder="SĐT" class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2.5 rounded-xl text-xs md:text-sm dark:text-white">
+            </div>
+
+            <!-- Tìm SP + chọn loại giá tính Thành tiền -->
+            <div class="p-2.5 md:p-4 border-b border-slate-200 dark:border-slate-700 flex flex-col md:flex-row gap-2 shrink-0">
+                <input type="text" id="bg-search" placeholder="🔍 Tìm tên sản phẩm..." onkeyup="filterBaoGiaModal()" class="flex-1 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-xs md:text-sm dark:text-white">
+                <select id="bg-price-type" class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-xs md:text-sm dark:text-white" onchange="calcBaoGiaPreview()">
+                    <option value="retail">Tính thành tiền theo: Giá lẻ</option>
+                    <option value="wholesale">Tính thành tiền theo: Giá sỉ</option>
+                </select>
+            </div>
+
+            <!-- Danh sách sản phẩm (cuộn riêng) -->
+            <div class="flex-1 overflow-y-auto p-2.5 md:p-4">
+                <table class="min-w-full text-left text-[11px] md:text-sm border-collapse">
+                    <thead class="sticky top-0 bg-slate-100 dark:bg-slate-800 z-10 border-b border-slate-200 dark:border-slate-700">
+                        <tr class="text-slate-600 dark:text-slate-400 uppercase text-[10px] md:text-[11px] tracking-wider">
+                            <th class="p-2 md:p-3 w-[32%]">Tên SP</th>
+                            <th class="p-2 md:p-3 w-[8%] text-center">ĐVT</th>
+                            <th class="p-2 md:p-3 w-[18%] text-center">Giá sỉ</th>
+                            <th class="p-2 md:p-3 w-[18%] text-center">Giá lẻ</th>
+                            <th class="p-2 md:p-3 w-[24%] text-center">Số lượng</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bg-product-list" class="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300"></tbody>
+                </table>
+            </div>
+
+            <!-- Footer: xem tạm tính + nút Lưu / Lưu & In -->
+            <div class="p-2.5 md:p-4 border-t border-slate-200 dark:border-slate-700 flex flex-col md:flex-row items-center justify-between gap-2 bg-slate-50 dark:bg-slate-950 shrink-0">
+                <div class="text-xs md:text-sm w-full md:w-auto text-center md:text-left">
+                    Đã chọn: <b id="bg-count-selected">0</b> SP — Tạm tính: <b id="bg-preview-total" class="text-red-500">0 đ</b>
+                </div>
+                <div class="flex gap-2 w-full md:w-auto">
+                    <button onclick="closeBaoGiaModal()" class="flex-1 md:flex-none px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200">Đóng</button>
+                    <button onclick="saveBaoGia(false)" class="flex-1 md:flex-none px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold bg-emerald-600 text-white border-b-[3px] border-emerald-800 active:translate-y-[2px] active:border-b-[1px]">💾 Lưu</button>
+                    <button onclick="saveBaoGia(true)" class="flex-1 md:flex-none px-5 py-2.5 rounded-xl text-xs md:text-sm font-bold bg-blue-600 text-white border-b-[3px] border-blue-800 active:translate-y-[2px] active:border-b-[1px]">💾🖨 Lưu & In</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== POPUP DANH SÁCH BÁO GIÁ ĐÃ LƯU ===================== -->
+    <!-- Chỉ đọc/xoá từ collection RIÊNG 'quotations' - hoàn toàn độc lập, KHÔNG đụng tới
+         tồn kho (stock_counters), phiếu nhập/xuất, công nợ hay doanh thu ở bất kỳ đâu khác
+         trong ứng dụng. Xoá 1 báo giá đã lưu KHÔNG ảnh hưởng số liệu kho/doanh thu. -->
+    <div id="modal-baogia-history" class="hidden fixed inset-0 z-[9999] bg-black bg-opacity-60 flex items-center justify-center p-1 md:p-6">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-3xl h-[92vh] md:h-[85vh] flex flex-col overflow-hidden">
+            <div class="flex items-center justify-between p-3 md:p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-700 dark:bg-slate-800 shrink-0">
+                <h3 class="text-white font-bold text-sm md:text-lg flex items-center gap-2">📜 Báo Giá Đã Lưu</h3>
+                <button onclick="closeBaoGiaHistoryModal()" class="text-white hover:bg-white/20 rounded-lg p-1.5">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-2.5 md:p-4 border-b border-slate-200 dark:border-slate-700 shrink-0">
+                <input type="text" id="bg-history-search" placeholder="🔍 Tìm theo tên khách hàng hoặc số báo giá..." onkeyup="filterBaoGiaHistory()" class="w-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-xs md:text-sm dark:text-white">
+            </div>
+            <div id="bg-history-list" class="flex-1 overflow-y-auto p-2.5 md:p-4 space-y-2"></div>
         </div>
     </div>
 </div>
@@ -2546,6 +2642,73 @@ html:not(.dark) .bg-white {
         <div style="width: 30%;">
             <p style="margin: 0;"><strong>Thủ kho</strong></p>
             <p style="font-size: 12px; font-style: italic; color: #444;">(Ký, ghi rõ họ tên)</p>
+        </div>
+    </div>
+</div>
+
+      <!-- ===================== MẪU BÁO GIÁ (Tạo Báo Giá từ trang Kho Hàng) ===================== -->
+<div id="print-area-baogia" style="display: none; padding: 36px; font-family: 'Times New Roman', serif; color: #1a1a1a;">
+    <div style="display: flex; align-items: center; gap: 10px; padding-bottom: 14px; margin-bottom: 18px; border-bottom: 2px solid #111; font-family: 'Goldman', sans-serif;">
+        <div style="width: 20%; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
+            <img id="bg-print-logo" src="" style="width: 100%; height: auto; max-height: 120px; object-fit: contain;" alt="Logo HTX Thanh Nguyễn">
+        </div>
+        <div style="width: 80%; text-align: center;">
+            <h2 style="margin: 0; font-size: 17px; font-weight: bold; letter-spacing: .3px;">HTX SẢN XUẤT VÀ KINH DOANH NÔNG SẢN THANH NGUYỄN</h2>
+            <p style="margin: 4px 0 0; font-size: 12.5px; color: #333;">Địa chỉ: Số 9, ngõ 456, đường Xuân Thành, Phố Thượng, Phường Hoa Lư, Ninh Bình</p>
+            <p style="margin: 2px 0 0; font-size: 12.5px; color: #333;">Hotline: 0982 998 474 - 0949 558 525</p>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-bottom: 20px; font-family: 'Goldman', sans-serif;">
+        <h1 style="margin: 0; font-size: 26px; text-transform: uppercase; letter-spacing: 1.5px;">BÁO GIÁ SẢN PHẨM</h1>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; gap: 20px; border: 1px solid #ccc; padding: 16px 20px; margin-bottom: 20px; border-radius: 10px; background-color: #fafafa;">
+        <div style="width: 75%; font-size: 13.5px; line-height: 1.9;">
+            <p style="margin: 0;"><strong>Kính gửi:</strong> <span id="bg-print-customer" style="font-weight: bold;"></span></p>
+            <p style="margin: 0;"><strong>Địa chỉ:</strong> <span id="bg-print-address"></span></p>
+            <p style="margin: 0;"><strong>SĐT:</strong> <span id="bg-print-phone"></span></p>
+        </div>
+        <div style="width: 25%; border-left: 1px dashed #999; padding-left: 15px; font-size: 13.5px; line-height: 1.9;">
+            <p style="margin: 0;"><strong>Số BG:</strong> <span id="bg-print-id"></span></p>
+            <p style="margin: 0;"><strong>Ngày báo giá:</strong> <span id="bg-print-date"></span></p>
+        </div>
+    </div>
+
+    <table border="1" style="width: 100%; border-collapse: collapse; text-align: center; margin-bottom: 18px; font-size: 12.5px;">
+        <thead style="background: #efefef; font-weight: bold; font-family: 'Goldman', sans-serif;">
+            <tr>
+                <th style="padding: 8px 4px;"><div style="height:100%;text-align:center;">STT</div></th>
+                <th style="padding: 8px 4px;"><div style="height:100%;text-align:center;">Tên hàng</div></th>
+                <th style="padding: 8px 4px;"><div style="height:100%;text-align:center;">ĐVT</div></th>
+                <th style="padding: 8px 4px;"><div style="height:100%;text-align:center;">SL</div></th>
+                <th style="padding: 8px 4px;"><div style="height:100%;text-align:center;">Giá sỉ</div></th>
+                <th style="padding: 8px 4px;"><div style="height:100%;text-align:center;">Giá lẻ</div></th>
+                <th style="padding: 8px 4px;"><div style="height:100%;text-align:center;">Thành tiền</div></th>
+            </tr>
+        </thead>
+        <tbody id="bg-print-items"></tbody>
+    </table>
+
+    <p style="margin: 0 0 18px 0; font-size: 12px; font-style: italic; color: #555;">* Thành tiền tính theo <span id="bg-print-price-type-label">Giá lẻ</span>. Báo giá có thể thay đổi tuỳ thời điểm, vui lòng liên hệ để được tư vấn thêm.</p>
+
+    <div style="float: right; width: 340px; font-size: 13.5px;">
+        <div style="display: flex; justify-content: space-between; border-top: 1.5px solid #111; margin-top: 8px; padding-top: 8px; font-size: 16px; font-weight: bold;">
+            <span>Tổng cộng:</span> <span id="bg-print-total"></span>
+        </div>
+        <p style="margin: 8px 0 0 0; font-style: italic; font-size: 12.5px; text-align: right;">Bằng chữ: <span id="bg-print-total-word"></span></p>
+    </div>
+    <div style="clear: both;"></div>
+
+    <div style="margin-top: 36px; display: flex; justify-content: space-between; text-align: center;">
+        <div style="width: 45%;">
+            <p style="margin: 0;"><strong>Khách hàng</strong></p>
+            <p style="font-size: 12px; font-style: italic; color: #444;">(Ký, ghi rõ họ tên)</p>
+        </div>
+        <div style="width: 45%;">
+            <p style="margin: 0; white-space: nowrap; font-size: 13px;">Ninh Bình, ngày <span id="bg-print-day"></span> tháng <span id="bg-print-month"></span> năm <span id="bg-print-year"></span></p>
+            <p style="margin: 0;"><strong>Người báo giá</strong></p>
+            <p style="font-size: 12px; font-style: italic; color: #444;">(Ký, đóng dấu, ghi rõ họ tên)</p>
         </div>
     </div>
 </div>
@@ -3666,7 +3829,7 @@ html:not(.dark) .bg-white {
    		
 <style media="print">
     body * { visibility: hidden; }
-    #print-area, #print-area-xuatkho, #print-area-nhapkho { display: none; position: absolute; left: 0; top: 0; width: 100%; }
+    #print-area, #print-area-xuatkho, #print-area-nhapkho, #print-area-baogia { display: none; position: absolute; left: 0; top: 0; width: 100%; }
 
     body.print-mode-hoadon #print-area { display: block !important; visibility: visible; }
     body.print-mode-hoadon #print-area * { visibility: visible; }
@@ -3676,10 +3839,13 @@ html:not(.dark) .bg-white {
 
     body.print-mode-nhapkho #print-area-nhapkho { display: block !important; visibility: visible; }
     body.print-mode-nhapkho #print-area-nhapkho * { visibility: visible; }
+
+    body.print-mode-baogia #print-area-baogia { display: block !important; visibility: visible; }
+    body.print-mode-baogia #print-area-baogia * { visibility: visible; }
     
     /* Thêm các dòng này để bảng in đẹp hơn */
-    #print-area table, #print-area-xuatkho table, #print-area-nhapkho table { border: 1px solid #000; margin-top: 15px; }
-    #print-area th, #print-area td, #print-area-xuatkho th, #print-area-xuatkho td, #print-area-nhapkho th, #print-area-nhapkho td { padding: 8px; border: 1px solid #000; }
+    #print-area table, #print-area-xuatkho table, #print-area-nhapkho table, #print-area-baogia table { border: 1px solid #000; margin-top: 15px; }
+    #print-area th, #print-area td, #print-area-xuatkho th, #print-area-xuatkho td, #print-area-nhapkho th, #print-area-nhapkho td, #print-area-baogia th, #print-area-baogia td { padding: 8px; border: 1px solid #000; }
 
     /* Chữ ký mẫu chỉ dùng khi CHIA SẺ ảnh qua Zalo - khi in giấy thật thì luôn ẩn để
        người mua/người bán ký tay trực tiếp lên bản in. */
@@ -10091,6 +10257,377 @@ function filterInventory() {
     }
 }
 
+// =========================================================================
+// --- TẠO BÁO GIÁ (popup ở trang Kho Hàng) ---
+// Lấy đúng danh sách sản phẩm + giá sỉ/giá lẻ hiện có trong Kho Hàng
+// (window.allProductCache), GỘP THEO NHÓM SẢN PHẨM giống hệt bảng Kho Hàng (dùng
+// chung xepNhomSanPham/THU_TU_HIEN_THI_NHOM/màu nhóm), cho sửa tay giá ngay trong
+// popup nếu cần báo giá khác giá niêm yết, người dùng chỉ cần gõ Số lượng cho SP
+// muốn báo giá rồi Lưu/In ra 1 tờ báo giá có tiêu đề công ty giống hệt hoá đơn.
+//
+// LƯU BÁO GIÁ: ghi vào collection Firestore RIÊNG 'quotations' - hoàn toàn độc lập,
+// chỉ là 1 "tệp lưu trữ" báo giá đã tạo để xem/in lại sau này, KHÔNG cộng/trừ tồn
+// kho (không đụng 'stock_counters'), KHÔNG tạo phiếu nhập/xuất, KHÔNG tính vào công
+// nợ khách hàng hay doanh thu/lợi nhuận ở bất kỳ báo cáo nào khác trong ứng dụng.
+// =========================================================================
+
+// Nhớ lại số lượng/giá người dùng đã gõ khi họ gõ tìm kiếm rồi xoá tìm kiếm đi
+// (không mất dữ liệu đã nhập dở), key = tên sản phẩm.
+window.bgQtyMap = window.bgQtyMap || {};
+window.bgPriceOverride = window.bgPriceOverride || {}; // { [name]: {wholesale, retail} }
+
+function openBaoGiaModal() {
+    const source = (window.allProductCache && window.allProductCache.length) ? window.allProductCache : (window.allProducts || []);
+    if (!source.length) {
+        showAlert('Chưa có dữ liệu sản phẩm trong Kho Hàng!');
+        return;
+    }
+
+    // Mỗi lần mở lại popup thì làm mới danh sách số lượng/giá (tránh mang số lượng của
+    // lần báo giá trước sang lần sau gây nhầm lẫn).
+    window.bgQtyMap = {};
+    window.bgPriceOverride = {};
+
+    const sorted = [...source].sort((a, b) => compareProductDisplayOrder(a.name, b.name));
+
+    // Gộp theo nhóm sản phẩm - DÙNG CHUNG đúng cách phân nhóm + màu sắc đang áp dụng ở
+    // bảng Kho Hàng (xepNhomSanPham/THU_TU_HIEN_THI_NHOM/getNhomHeaderColor...) để danh
+    // sách chọn SP trong popup nhìn thống nhất, dễ tìm giống hệt trang Kho Hàng.
+    const nhomMap = new Map();
+    const thuTuNhom = THU_TU_HIEN_THI_NHOM.concat(['KHÁC']);
+    thuTuNhom.forEach(ten => nhomMap.set(ten, []));
+    sorted.forEach(item => nhomMap.get(xepNhomSanPham(item.name)).push(item));
+
+    const groupParts = [];
+    thuTuNhom.forEach(tenNhom => {
+        const list = nhomMap.get(tenNhom);
+        if (!list.length) return;
+
+        let inner = `<div class="text-[11px] md:text-xs font-black uppercase tracking-wide ${getNhomHeaderColor(tenNhom)} border rounded-lg px-3 py-1.5 mb-2">${tenNhom}</div>`;
+
+        list.forEach(item => {
+            const retail = Number(item.retail || 0);
+            const wholesale = Number(item.wholesale || 0);
+            const safeName = item.name.replace(/'/g, "\\'");
+            inner += `
+                <div class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2 md:p-1.5 shadow-[0_4px_6px_-2px_rgba(0,0,0,0.2)] mb-1.5 last:mb-0" style="border-left-color:#818cf8 !important; border-right-color:#818cf8 !important;" data-bg-name="${item.name}">
+                    <div class="md:px-2 md:w-[32%] text-left">
+                        <div class="font-bold text-[13px] text-slate-800 dark:text-slate-100 leading-tight">${item.name}</div>
+                    </div>
+                    <div class="flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700">
+                        <span class="text-[11px] text-slate-400 md:hidden">ĐVT: <b class="text-slate-600 dark:text-slate-300">${item.unit || ''}</b></span>
+                        <span class="hidden md:block md:px-1 md:w-[8%] md:text-center text-[12px] text-slate-600 dark:text-slate-400">${item.unit || ''}</span>
+                    </div>
+                    <div class="flex items-center gap-3 md:contents">
+                        <div class="flex-1 md:px-1 md:w-[18%] flex items-center gap-1">
+                            <span class="text-[10px] text-slate-400 md:hidden">Sỉ:</span>
+                            <input type="text" value="${wholesale.toLocaleString('vi-VN')}" 
+                                   class="w-full text-center text-[12px] text-slate-600 dark:text-slate-300 bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 focus:border-blue-500 outline-none"
+                                   oninput="updateBaoGiaPrice('${safeName}', this.value, 'wholesale')">
+                        </div>
+                        <div class="flex-1 md:px-1 md:w-[18%] flex items-center gap-1">
+                            <span class="text-[10px] text-slate-400 md:hidden">Lẻ:</span>
+                            <input type="text" value="${retail.toLocaleString('vi-VN')}" 
+                                   class="w-full text-center text-[12px] text-slate-600 dark:text-slate-300 bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 focus:border-blue-500 outline-none"
+                                   oninput="updateBaoGiaPrice('${safeName}', this.value, 'retail')">
+                        </div>
+                    </div>
+                    <div class="md:px-1 md:w-[24%]">
+                        <input type="number" min="0" step="any" placeholder="SL báo giá" value=""
+                               class="no-spinner w-full text-center bg-yellow-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg p-1.5 focus:ring-2 focus:ring-blue-500 outline-none text-[12px] font-bold"
+                               oninput="updateBaoGiaQty('${safeName}', this.value)">
+                    </div>
+                </div>`;
+        });
+
+        groupParts.push(`<tr data-bg-group="${tenNhom}"><td colspan="5" class="py-1.5 px-1"><div class="rounded-2xl border-2 ${getNhomBlockBorder(tenNhom)} ${getNhomBlockBg(tenNhom)} p-2.5 md:p-3">${inner}</div></td></tr>`);
+    });
+
+    const tbody = document.getElementById('bg-product-list');
+    if (tbody) tbody.innerHTML = groupParts.join('');
+
+    // Reset thông tin khách hàng + tìm kiếm của lần báo giá trước
+    ['bg-customer', 'bg-address', 'bg-phone', 'bg-search'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    calcBaoGiaPreview();
+
+    const modal = document.getElementById('modal-baogia');
+    if (modal) modal.classList.remove('hidden');
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function closeBaoGiaModal() {
+    const modal = document.getElementById('modal-baogia');
+    if (modal) modal.classList.add('hidden');
+}
+
+// Lọc theo tên - CHỈ ẩn/hiện từng dòng SP (giống filterInventory), không dựng lại
+// bảng, để KHÔNG làm mất số lượng/giá người dùng đã gõ dở khi họ đang tìm thêm SP
+// khác. Nhóm nào lọc hết sạch SP (không còn SP nào khớp) thì tự ẩn luôn cả khối
+// nhóm đó cho gọn.
+function filterBaoGiaModal() {
+    const input = (document.getElementById('bg-search').value || '').toLowerCase();
+    const groupRows = document.getElementById('bg-product-list').querySelectorAll('tr[data-bg-group]');
+    groupRows.forEach(groupRow => {
+        let anyVisible = false;
+        groupRow.querySelectorAll('[data-bg-name]').forEach(prodEl => {
+            const name = (prodEl.getAttribute('data-bg-name') || '').toLowerCase();
+            const match = name.includes(input);
+            prodEl.style.display = match ? '' : 'none';
+            if (match) anyVisible = true;
+        });
+        groupRow.style.display = anyVisible ? '' : 'none';
+    });
+}
+
+function updateBaoGiaQty(name, value) {
+    const qty = parseFloat(value);
+    window.bgQtyMap[name] = isNaN(qty) ? 0 : qty;
+    calcBaoGiaPreview();
+}
+
+function updateBaoGiaPrice(name, value, type) {
+    const clean = parseFloat(String(value).replace(/\./g, '').replace(/,/g, ''));
+    if (!window.bgPriceOverride[name]) window.bgPriceOverride[name] = {};
+    window.bgPriceOverride[name][type] = isNaN(clean) ? 0 : clean;
+    calcBaoGiaPreview();
+}
+
+// Lấy đúng giá hiện đang hiển thị trong popup cho 1 sản phẩm (ưu tiên giá đã sửa tay,
+// nếu chưa sửa thì lấy đúng giá gốc trong Kho Hàng).
+function getBaoGiaPrice(item, type) {
+    const override = window.bgPriceOverride[item.name];
+    if (override && override[type] !== undefined) return override[type];
+    return Number(item[type] || 0);
+}
+
+function calcBaoGiaPreview() {
+    const source = (window.allProductCache && window.allProductCache.length) ? window.allProductCache : (window.allProducts || []);
+    const priceType = (document.getElementById('bg-price-type') || {}).value || 'retail';
+    let total = 0, count = 0;
+    source.forEach(item => {
+        const qty = window.bgQtyMap[item.name] || 0;
+        if (qty > 0) {
+            count++;
+            total += qty * getBaoGiaPrice(item, priceType);
+        }
+    });
+    const elCount = document.getElementById('bg-count-selected');
+    const elTotal = document.getElementById('bg-preview-total');
+    if (elCount) elCount.innerText = count;
+    if (elTotal) elTotal.innerText = total.toLocaleString('vi-VN') + ' đ';
+}
+
+// Gom các SP đang có Số lượng > 0 trong popup thành 1 danh sách gọn (name/unit/qty/
+// wholesale/retail) - dùng chung cho cả LƯU và IN.
+function collectBaoGiaItems() {
+    const source = (window.allProductCache && window.allProductCache.length) ? window.allProductCache : (window.allProducts || []);
+    return source
+        .filter(item => (window.bgQtyMap[item.name] || 0) > 0)
+        .map(item => ({
+            name: item.name,
+            unit: item.unit || '',
+            qty: window.bgQtyMap[item.name],
+            wholesale: getBaoGiaPrice(item, 'wholesale'),
+            retail: getBaoGiaPrice(item, 'retail')
+        }));
+}
+
+// --- LƯU BÁO GIÁ (collection RIÊNG 'quotations' - độc lập, không đụng tồn kho/công
+// nợ/doanh thu) - tuỳ chọn In luôn sau khi lưu xong. ---
+async function saveBaoGia(alsoPrint) {
+    const items = collectBaoGiaItems();
+    if (!items.length) {
+        showAlert('Vui lòng nhập số lượng cho ít nhất 1 sản phẩm cần báo giá!');
+        return;
+    }
+
+    const priceType = (document.getElementById('bg-price-type') || {}).value || 'retail';
+    const customer = document.getElementById('bg-customer').value || '';
+    const address = document.getElementById('bg-address').value || '';
+    const phone = document.getElementById('bg-phone').value || '';
+
+    let total = 0;
+    items.forEach(i => { total += i.qty * (priceType === 'wholesale' ? i.wholesale : i.retail); });
+
+    const d = new Date();
+    const maBaoGia = 'BG' + d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0') + '-' + String(d.getHours()).padStart(2, '0') + String(d.getMinutes()).padStart(2, '0') + String(d.getSeconds()).padStart(2, '0');
+
+    showLoading();
+    try {
+        const docRef = await db.collection('quotations').add({
+            maBaoGia, customer, address, phone, priceType, items, total,
+            date: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        Swal.close();
+        showAlert('Đã lưu báo giá thành công!');
+
+        if (alsoPrint) {
+            fillAndPrintBaoGia({ maBaoGia, customer, address, phone, priceType, items, total, dateObj: d });
+        }
+        closeBaoGiaModal();
+    } catch (err) {
+        console.error('Lỗi khi lưu báo giá:', err);
+        Swal.close();
+        showAlert('Lỗi khi lưu báo giá: ' + (err.message || ''));
+    }
+}
+
+// --- ĐIỀN DỮ LIỆU + IN MẪU BÁO GIÁ (dùng chung tiêu đề công ty với mẫu hoá đơn) ---
+// Nhận sẵn 1 gói dữ liệu {maBaoGia, customer, address, phone, priceType, items, total,
+// dateObj} - dùng chung được cho cả báo giá VỪA TẠO lẫn báo giá IN LẠI từ lịch sử đã lưu.
+function fillAndPrintBaoGia({ maBaoGia, customer, address, phone, priceType, items, total, dateObj }) {
+    const d = dateObj || new Date();
+
+    // Dùng lại đúng logo công ty đã có sẵn ở mẫu hoá đơn - không phải lưu thêm 1 bản ảnh
+    // logo nữa cho mẫu báo giá.
+    const srcLogo = document.querySelector('#print-area img');
+    const bgLogo = document.getElementById('bg-print-logo');
+    if (srcLogo && bgLogo) bgLogo.src = srcLogo.src;
+
+    const fields = {
+        'bg-print-customer': customer || '',
+        'bg-print-address': address || '',
+        'bg-print-phone': phone || '',
+        'bg-print-id': maBaoGia || '',
+        'bg-print-date': d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+        'bg-print-day': String(d.getDate()).padStart(2, '0'),
+        'bg-print-month': String(d.getMonth() + 1).padStart(2, '0'),
+        'bg-print-year': d.getFullYear(),
+        'bg-print-price-type-label': priceType === 'wholesale' ? 'Giá sỉ' : 'Giá lẻ'
+    };
+    for (const [id, value] of Object.entries(fields)) {
+        const el = document.getElementById(id);
+        if (el) el.innerText = value;
+    }
+
+    let stt = 1;
+    const rowsHtml = items.map(i => {
+        const priceUsed = priceType === 'wholesale' ? i.wholesale : i.retail;
+        const subTotal = i.qty * priceUsed;
+        const qtyDisplay = (Math.round(i.qty * 100) / 100).toString();
+        return `<tr>
+            <td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">${stt++}</div></td>
+            <td style="padding: 7px 8px;"><div style="height:100%;text-align:left;">${i.name}</div></td>
+            <td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">${i.unit}</div></td>
+            <td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">${qtyDisplay}</div></td>
+            <td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">${Number(i.wholesale).toLocaleString('vi-VN')}</div></td>
+            <td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">${Number(i.retail).toLocaleString('vi-VN')}</div></td>
+            <td style="padding: 7px 8px;"><div style="height:100%;text-align:center;font-weight:bold;">${subTotal.toLocaleString('vi-VN')}</div></td>
+        </tr>`;
+    }).join('');
+
+    const elItems = document.getElementById('bg-print-items');
+    if (elItems) elItems.innerHTML = rowsHtml;
+
+    if (document.getElementById('bg-print-total')) document.getElementById('bg-print-total').innerText = Number(total).toLocaleString('vi-VN') + ' đ';
+    if (document.getElementById('bg-print-total-word')) document.getElementById('bg-print-total-word').innerText = docSo(Number(total));
+
+    triggerPrint('print-mode-baogia');
+}
+
+// =========================================================================
+// --- LỊCH SỬ BÁO GIÁ ĐÃ LƯU (collection RIÊNG 'quotations') ---
+// Chỉ để xem lại/in lại/xoá các báo giá đã lưu trước đây. Hoàn toàn độc lập với
+// tồn kho, phiếu nhập/xuất, công nợ và doanh thu - xoá 1 báo giá ở đây KHÔNG ảnh
+// hưởng bất kỳ số liệu nào khác trong ứng dụng.
+// =========================================================================
+window.__baoGiaHistoryCache = [];
+
+async function openBaoGiaHistoryModal() {
+    const modal = document.getElementById('modal-baogia-history');
+    if (modal) modal.classList.remove('hidden');
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    const listEl = document.getElementById('bg-history-list');
+    if (listEl) listEl.innerHTML = skeletonCards(5, 'h-16');
+
+    const searchEl = document.getElementById('bg-history-search');
+    if (searchEl) searchEl.value = '';
+
+    try {
+        const snap = await db.collection('quotations').orderBy('date', 'desc').limit(200).get();
+        window.__baoGiaHistoryCache = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderBaoGiaHistoryList(window.__baoGiaHistoryCache);
+    } catch (err) {
+        console.error('Lỗi khi tải lịch sử báo giá:', err);
+        if (listEl) listEl.innerHTML = '<p class="text-center text-sm text-red-500 py-6">Lỗi khi tải danh sách báo giá đã lưu!</p>';
+    }
+}
+
+function closeBaoGiaHistoryModal() {
+    const modal = document.getElementById('modal-baogia-history');
+    if (modal) modal.classList.add('hidden');
+}
+
+function renderBaoGiaHistoryList(list) {
+    const listEl = document.getElementById('bg-history-list');
+    if (!listEl) return;
+
+    if (!list.length) {
+        listEl.innerHTML = '<p class="text-center text-sm text-slate-400 py-6">Chưa có báo giá nào được lưu.</p>';
+        return;
+    }
+
+    listEl.innerHTML = list.map(q => {
+        const dateStr = (q.date && typeof q.date.toDate === 'function') ? q.date.toDate().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+        const soLuongSP = (q.items || []).length;
+        return `
+            <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 flex items-center justify-between gap-2">
+                <div class="min-w-0 flex-1">
+                    <p class="font-bold text-sm text-slate-800 dark:text-slate-100 truncate">${q.customer || '(Chưa có tên khách)'} <span class="font-normal text-slate-400 text-xs">— ${q.maBaoGia || ''}</span></p>
+                    <p class="text-[11px] text-slate-400">${dateStr} • ${soLuongSP} sản phẩm • <b class="text-red-500">${Number(q.total || 0).toLocaleString('vi-VN')} đ</b></p>
+                </div>
+                <div class="flex gap-1.5 shrink-0">
+                    <button onclick="reprintSavedBaoGia('${q.id}')" title="In lại" class="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700"><i data-lucide="printer" class="w-4 h-4"></i></button>
+                    <button onclick="deleteSavedBaoGia('${q.id}')" title="Xoá" class="bg-red-600 text-white p-2 rounded-lg hover:bg-red-700"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+            </div>`;
+    }).join('');
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function filterBaoGiaHistory() {
+    const input = (document.getElementById('bg-history-search').value || '').toLowerCase();
+    const filtered = window.__baoGiaHistoryCache.filter(q =>
+        (q.customer || '').toLowerCase().includes(input) || (q.maBaoGia || '').toLowerCase().includes(input)
+    );
+    renderBaoGiaHistoryList(filtered);
+}
+
+function reprintSavedBaoGia(docId) {
+    const q = window.__baoGiaHistoryCache.find(x => x.id === docId);
+    if (!q) return;
+    const dateObj = (q.date && typeof q.date.toDate === 'function') ? q.date.toDate() : new Date();
+    fillAndPrintBaoGia({
+        maBaoGia: q.maBaoGia, customer: q.customer, address: q.address, phone: q.phone,
+        priceType: q.priceType, items: q.items || [], total: q.total || 0, dateObj
+    });
+}
+
+async function deleteSavedBaoGia(docId) {
+    if (typeof canUserDelete === 'function' && !canUserDelete()) {
+        Swal.fire({ icon: 'warning', title: 'Không có quyền', text: 'Bạn không có quyền xóa dữ liệu. Vui lòng liên hệ Admin.' });
+        return;
+    }
+    const confirmRes = await Swal.fire({
+        title: 'Xoá báo giá này?', text: 'Chỉ xoá bản lưu báo giá, KHÔNG ảnh hưởng tồn kho/công nợ/doanh thu.',
+        icon: 'warning', showCancelButton: true, confirmButtonText: 'Xoá', cancelButtonText: 'Hủy', confirmButtonColor: '#dc2626'
+    });
+    if (!confirmRes.isConfirmed) return;
+
+    try {
+        await db.collection('quotations').doc(docId).delete();
+        window.__baoGiaHistoryCache = window.__baoGiaHistoryCache.filter(x => x.id !== docId);
+        renderBaoGiaHistoryList(window.__baoGiaHistoryCache);
+    } catch (err) {
+        console.error('Lỗi khi xoá báo giá:', err);
+        showAlert('Lỗi khi xoá báo giá: ' + (err.message || ''));
+    }
+}
+
 // 2. Hàm Xuất Excel (Đảm bảo đã thêm thư viện XLSX vào thẻ head)
 // XUẤT EXCEL KHO HÀNG - Viết lại hoàn toàn (bản cũ CÀO TRỰC TIẾP từ bảng HTML hiển thị trên
 // màn hình bằng innerText, nên khi bảng đổi sang dạng card/div lồng nhau (nhóm màu theo sản
@@ -12002,7 +12539,7 @@ function triggerPrint(modeClass) {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
 
     if (isMobile) {
-        const areaId = (modeClass === 'print-mode-xuatkho') ? 'print-area-xuatkho' : (modeClass === 'print-mode-nhapkho' ? 'print-area-nhapkho' : 'print-area');
+        const areaId = (modeClass === 'print-mode-xuatkho') ? 'print-area-xuatkho' : (modeClass === 'print-mode-nhapkho' ? 'print-area-nhapkho' : (modeClass === 'print-mode-baogia' ? 'print-area-baogia' : 'print-area'));
         const printElement = document.getElementById(areaId);
         
         if (!printElement) {
@@ -12061,14 +12598,14 @@ function triggerPrint(modeClass) {
     }
 
     // 2. IN TRÊN PC
-    document.body.classList.remove('print-mode-hoadon', 'print-mode-xuatkho', 'print-mode-nhapkho');
+    document.body.classList.remove('print-mode-hoadon', 'print-mode-xuatkho', 'print-mode-nhapkho', 'print-mode-baogia');
     document.body.classList.add(modeClass);
 
     let cleaned = false;
     const cleanup = () => {
         if (cleaned) return;
         cleaned = true;
-        document.body.classList.remove('print-mode-hoadon', 'print-mode-xuatkho', 'print-mode-nhapkho');
+        document.body.classList.remove('print-mode-hoadon', 'print-mode-xuatkho', 'print-mode-nhapkho', 'print-mode-baogia');
         window.removeEventListener('afterprint', cleanup);
     };
     window.addEventListener('afterprint', cleanup);
