@@ -2109,8 +2109,8 @@ html:not(.dark) .bg-white {
                             <th class="p-4 w-[40%]">Tên SP</th>
                             <th class="p-4 w-[10%] text-center">ĐVT</th>
                             <th class="p-4 w-[10%] text-center">SL</th>
-                            <th class="p-4 w-[20%] text-center price-cell">Giá lẻ</th>
                             <th class="p-4 w-[20%] text-center price-cell">Giá sỉ</th>
+                            <th class="p-4 w-[20%] text-center price-cell">Giá lẻ</th>
                         </tr>
                     </thead>
                     <tbody id="inventory-data" class="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
@@ -3213,21 +3213,22 @@ html:not(.dark) .bg-white {
     <div class="w-full">
         <h3 class="mb-6 font-bold text-2xl text-gray-800 px-2 md:px-0">LỊCH GHI CHÚ & CHẤM CÔNG</h3>
 
-        <!-- TAB ĐIỀU HƯỚNG: Lịch & Ghi Chú / Chấm Công (Chấm Công đã CHUYỂN từ trang Quản
-             Lý sang đây theo yêu cầu). Đổi sang đúng phong cách "tab 3D" giống Trang Chủ
+        <!-- TAB ĐIỀU HƯỚNG: Chấm Công / Lịch & Ghi Chú (đổi thứ tự + đổi tab mặc định theo
+             yêu cầu - "Chấm Công" giờ lên trước và là tab hiện sẵn khi vào trang, thay cho
+             "Lịch & Ghi Chú" như trước). Đổi sang đúng phong cách "tab 3D" giống Trang Chủ
              (NXT KHO/DOANH THU/TOP SP) thay vì kiểu gạch chân đơn giản trước đây. -->
         <div class="grid grid-cols-2 gap-2 md:gap-3 bg-slate-200 dark:bg-slate-950 p-1.5 rounded-2xl border border-slate-300 dark:border-slate-900 shadow-[inset_0_2px_6px_rgba(0,0,0,0.15)] dark:shadow-[inset_0_4px_12px_rgba(0,0,0,0.8)] select-none mb-4">
-            <button id="tab-btn-lichcv-calendar" onclick="switchLichCVTab('calendar')"
-                class="py-2.5 px-1 text-[11px] md:text-sm font-black rounded-xl transition-all duration-150 bg-gradient-to-b from-blue-500 to-blue-600 dark:from-blue-900/60 dark:to-blue-800/50 text-white dark:text-blue-400 border-b-[4px] border-blue-700 dark:border-blue-600 shadow-[0_4px_10px_rgba(59,130,246,0.15)] dark:shadow-[0_6px_15px_rgba(59,130,246,0.25)] uppercase tracking-wider flex items-center justify-center gap-2">
-                <i data-lucide="calendar-days" class="w-4 h-4"></i> Lịch &amp; Ghi Chú
-            </button>
             <button id="tab-btn-lichcv-chamcong" onclick="switchLichCVTab('chamcong')"
-                class="py-2.5 px-1 text-[11px] md:text-sm font-bold rounded-xl transition-all duration-150 bg-slate-100/80 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border-b-[2px] border-slate-300 dark:border-slate-950 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/80 hover:border-b-[4px] hover:border-slate-400 dark:hover:border-slate-800 uppercase tracking-wider flex items-center justify-center gap-2">
+                class="py-2.5 px-1 text-[11px] md:text-sm font-black rounded-xl transition-all duration-150 bg-gradient-to-b from-blue-500 to-blue-600 dark:from-blue-900/60 dark:to-blue-800/50 text-white dark:text-blue-400 border-b-[4px] border-blue-700 dark:border-blue-600 shadow-[0_4px_10px_rgba(59,130,246,0.15)] dark:shadow-[0_6px_15px_rgba(59,130,246,0.25)] uppercase tracking-wider flex items-center justify-center gap-2">
                 <i data-lucide="calendar-check-2" class="w-4 h-4"></i> Chấm Công
+            </button>
+            <button id="tab-btn-lichcv-calendar" onclick="switchLichCVTab('calendar')"
+                class="py-2.5 px-1 text-[11px] md:text-sm font-bold rounded-xl transition-all duration-150 bg-slate-100/80 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border-b-[2px] border-slate-300 dark:border-slate-950 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/80 hover:border-b-[4px] hover:border-slate-400 dark:hover:border-slate-800 uppercase tracking-wider flex items-center justify-center gap-2">
+                <i data-lucide="calendar-days" class="w-4 h-4"></i> Lịch &amp; Ghi Chú
             </button>
         </div>
 
-        <div id="lichcv-tab-calendar">
+        <div id="lichcv-tab-calendar" class="hidden">
 
         <div class="flex flex-col lg:flex-row gap-6">
             <div class="w-full lg:w-1/4 space-y-4">
@@ -3301,7 +3302,7 @@ html:not(.dark) .bg-white {
          ca (nhập số giờ trực tiếp) phía dưới - theo đúng mẫu Excel "Bảng chấm công" hiện có
          của cửa hàng. Lưu theo từng THÁNG (đổi tháng ở ô chọn phía trên sẽ tự nạp lại đúng
          dữ liệu tháng đó, hoặc tạo mới nếu tháng đó chưa chấm công lần nào). -->
-    <div id="lichcv-tab-chamcong" class="hidden space-y-4">
+    <div id="lichcv-tab-chamcong" class="space-y-4">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl p-3">
             <div class="flex items-center gap-2 flex-wrap">
                 <label class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase whitespace-nowrap">Tháng chấm công</label>
@@ -6848,9 +6849,9 @@ function showPage(pageId) {
             break;
 		// THÊM ĐOẠN NÀY VÀO TRƯỚC DẤU ĐÓNG CỦA SWITCH
         case 'page-LichCongViec':
-            // Mặc định luôn mở lại tab "Lịch & Ghi Chú" mỗi lần vào trang (tab "Chấm Công"
-            // xem thêm ở switchLichCVTab) - nhất quán, dễ đoán hơn là nhớ tab lần trước.
-            if (typeof switchLichCVTab === 'function') switchLichCVTab('calendar');
+            // Mặc định luôn mở lại tab "Chấm Công" mỗi lần vào trang (đổi theo yêu cầu - trước
+            // đây mặc định là "Lịch & Ghi Chú") - nhất quán, dễ đoán hơn là nhớ tab lần trước.
+            if (typeof switchLichCVTab === 'function') switchLichCVTab('chamcong');
             else if (typeof fixCalendarLayout === 'function') fixCalendarLayout();
             break;	
 
@@ -9653,16 +9654,16 @@ async function loadInventory() {
                     </div>
                     <div class="flex items-center gap-3 md:contents">
                         <div class="flex-1 md:px-1 md:w-[20%] flex items-center gap-1">
-                            <span class="text-[10px] text-slate-400 md:hidden">Lẻ:</span>
-                            <input type="text" value="${retail}" 
-                                   class="w-full text-center text-[12px] text-slate-600 dark:text-slate-300 bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 focus:border-blue-500 outline-none"
-                                   onblur="updateProductPrice('${item.name}', this.value, 'retail')">
-                        </div>
-                        <div class="flex-1 md:px-1 md:w-[20%] flex items-center gap-1">
                             <span class="text-[10px] text-slate-400 md:hidden">Sỉ:</span>
                             <input type="text" value="${wholesale}" 
                                    class="w-full text-center text-[12px] text-slate-600 dark:text-slate-300 bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 focus:border-blue-500 outline-none"
                                    onblur="updateProductPrice('${item.name}', this.value, 'wholesale')">
+                        </div>
+                        <div class="flex-1 md:px-1 md:w-[20%] flex items-center gap-1">
+                            <span class="text-[10px] text-slate-400 md:hidden">Lẻ:</span>
+                            <input type="text" value="${retail}" 
+                                   class="w-full text-center text-[12px] text-slate-600 dark:text-slate-300 bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 focus:border-blue-500 outline-none"
+                                   onblur="updateProductPrice('${item.name}', this.value, 'retail')">
                         </div>
                     </div>
                 </div>`;
@@ -10091,89 +10092,153 @@ function filterInventory() {
 }
 
 // 2. Hàm Xuất Excel (Đảm bảo đã thêm thư viện XLSX vào thẻ head)
+// XUẤT EXCEL KHO HÀNG - Viết lại hoàn toàn (bản cũ CÀO TRỰC TIẾP từ bảng HTML hiển thị trên
+// màn hình bằng innerText, nên khi bảng đổi sang dạng card/div lồng nhau (nhóm màu theo sản
+// phẩm) thì bị: (1) Tên SP/Mã vạch/ĐVT dính chung 1 cột do cào nhầm text của cả khối card,
+// (2) Giá lẻ/Giá sỉ bị THIẾU HẲN vì đó là <input value="..."> - innerText không đọc được giá
+// trị input, (3) thiếu sản phẩm do 1 số dòng bị phân tích sai. Bản mới lấy dữ liệu THẲNG từ
+// nguồn (window.allProductCache/allProducts + window.currentStockMap), không phụ thuộc vào
+// cách bảng đang hiển thị trên màn hình - luôn đủ và đúng dù giao diện có đổi thế nào. Đồng
+// thời làm thành 1 bảng báo giá có tiêu đề công ty (tên/địa chỉ/hotline) như hoá đơn, thay vì
+// chỉ có mỗi tên báo cáo trơn như trước.
 async function exportToExcel() {
-    const table = document.getElementById("kho-table");
-    if (!table) return Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Không tìm thấy bảng dữ liệu!' });
-
-    const dateFrom = document.getElementById('inv-date-from').value || "All";
-    const dateTo = document.getElementById('inv-date-to').value || "All";
-
     showLoading();
+    try {
+        if (typeof calculateAllStock === 'function') await calculateAllStock();
 
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet('Kho Hang');
+        const dateFrom = document.getElementById('inv-date-from')?.value || "";
+        const dateTo = document.getElementById('inv-date-to')?.value || "";
+        const stockMap = window.currentStockMap || {};
+        const products = (window.allProductCache && window.allProductCache.length) ? window.allProductCache : (window.allProducts || []);
 
-    // 1. Thêm tiêu đề chính và thông tin ngày tháng
-    sheet.addRow(['BÁO CÁO KHO HÀNG']);
-    sheet.addRow(['Từ ngày: ' + dateFrom + ' - Đến ngày: ' + dateTo]);
-    sheet.addRow([]); 
-
-    // 2. Định dạng tiêu đề chính (Gộp 6 cột: A đến F)
-    sheet.mergeCells('A1:F1'); 
-    sheet.getCell('A1').font = { size: 16, bold: true };
-    sheet.getCell('A1').alignment = { horizontal: 'center' };
-    
-    sheet.mergeCells('A2:F2'); 
-    sheet.getCell('A2').alignment = { horizontal: 'center' };
-
-    // 3. Lấy dữ liệu và xử lý tách cột
-    const rows = table.querySelectorAll('tr');
-    
-    rows.forEach((tr, rowIndex) => {
-        const cells = tr.querySelectorAll('th, td');
-        let rowData = [];
-
-        if (rowIndex === 0) {
-            // Xử lý dòng tiêu đề bảng (thêm cột Mã SP)
-            cells.forEach((cell, i) => {
-                rowData.push(cell.innerText.trim());
-                if (i === 0) rowData.push("Mã SP"); // Thêm cột Mã SP vào sau Tên SP
-            });
-        } else {
-            // Xử lý dòng dữ liệu
-            cells.forEach((cell, i) => {
-                let val = cell.innerText.trim();
-                if (i === 0 && val.includes("Mã:")) {
-                    const parts = val.split("Mã:");
-                    rowData.push(parts[0].trim()); // Tên SP
-                    rowData.push(parts[1].trim()); // Mã SP
-                } else {
-                    rowData.push(val);
-                }
-            });
-        }
-        
-        const row = sheet.addRow(rowData);
-
-        // Định dạng dòng tiêu đề bảng (Dòng thứ 4)
-        if (sheet.rowCount === 4) {
-            row.font = { bold: true };
-            row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } };
+        if (!products.length) {
+            Swal.close();
+            return Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Không tìm thấy danh mục sản phẩm để xuất!' });
         }
 
-        // Kẻ bảng
-        row.eachCell((cell) => {
-            cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet('Bảng Báo Giá');
+        const totalCols = 7; // STT, Tên SP, Mã vạch, ĐVT, Tồn kho, Giá sỉ, Giá lẻ
+
+        // ------ TIÊU ĐỀ CÔNG TY (giống hệt letterhead dùng ở hoá đơn/phiếu in khác) ------
+        const rCompany = sheet.addRow(['HTX SẢN XUẤT VÀ KINH DOANH NÔNG SẢN THANH NGUYỄN']);
+        rCompany.font = { size: 14, bold: true };
+        sheet.mergeCells(rCompany.number, 1, rCompany.number, totalCols);
+        rCompany.alignment = { horizontal: 'center' };
+
+        const rAddr = sheet.addRow(['Địa chỉ: Số 9, ngõ 456, đường Xuân Thành, Phố Thượng, Phường Hoa Lư, Ninh Bình']);
+        sheet.mergeCells(rAddr.number, 1, rAddr.number, totalCols);
+        rAddr.alignment = { horizontal: 'center' };
+        rAddr.font = { size: 11, italic: true };
+
+        const rPhone = sheet.addRow(['Hotline: 0982 998 474 - 0949 558 525']);
+        sheet.mergeCells(rPhone.number, 1, rPhone.number, totalCols);
+        rPhone.alignment = { horizontal: 'center' };
+        rPhone.font = { size: 11, italic: true };
+
+        sheet.addRow([]);
+
+        // ------ TÊN BẢNG ------
+        const rTitle = sheet.addRow(['BẢNG BÁO GIÁ SẢN PHẨM']);
+        rTitle.font = { size: 16, bold: true };
+        sheet.mergeCells(rTitle.number, 1, rTitle.number, totalCols);
+        rTitle.alignment = { horizontal: 'center' };
+
+        const ngayXuat = new Date().toLocaleDateString('vi-VN');
+        const rSub = sheet.addRow([
+            (dateFrom || dateTo) ? `Từ ngày: ${dateFrom ? formatDateToDDMMYYYY(dateFrom) : '---'} - Đến ngày: ${dateTo ? formatDateToDDMMYYYY(dateTo) : '---'}` : `Ngày xuất: ${ngayXuat}`
+        ]);
+        sheet.mergeCells(rSub.number, 1, rSub.number, totalCols);
+        rSub.alignment = { horizontal: 'center' };
+        rSub.font = { size: 11, color: { argb: 'FF666666' } };
+
+        sheet.addRow([]);
+
+        // ------ HEADER BẢNG ------
+        const header = sheet.addRow(['STT', 'Tên sản phẩm', 'Mã vạch', 'ĐVT', 'Tồn kho', 'Giá sỉ', 'Giá lẻ']);
+        header.height = 24;
+        header.eachCell(c => {
+            c.font = { bold: true, size: 12 };
+            c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFB3E5FC' } };
+            c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+            c.alignment = { horizontal: 'center', vertical: 'middle' };
         });
-        
-        // Ép kiểu cột Mã SP (cột B - index 2) là Text để không bị mất số 0 hoặc định dạng sai
-        row.getCell(2).numFmt = '@';
-    });
 
-    // Căn chỉnh độ rộng cột
-    sheet.columns.forEach(column => { column.width = 20; });
+        // ------ GOM THEO NHÓM SẢN PHẨM (đồng bộ cách phân nhóm với Kho Hàng/Báo Cáo) ------
+        const sortedProducts = [...products].filter(p => p && p.name).sort((a, b) => compareProductDisplayOrder(a.name, b.name));
+        const nhomMap = new Map();
+        const thuTuNhom = THU_TU_HIEN_THI_NHOM.concat(['KHÁC']);
+        thuTuNhom.forEach(ten => nhomMap.set(ten, []));
+        sortedProducts.forEach(p => nhomMap.get(xepNhomSanPham(p.name)).push(p));
 
-    // Xuất file
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `KhoHang_${dateFrom}_den_${dateTo}.xlsx`;
-    a.click();
-    
-    Swal.close();
+        let stt = 0;
+        let romanIdx = 0;
+        const soLaMa = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+        thuTuNhom.forEach(tenNhom => {
+            const danhSach = nhomMap.get(tenNhom);
+            if (!danhSach.length) return;
+
+            const rowNhom = sheet.addRow([`${soLaMa[romanIdx] || (romanIdx + 1)}. ${tenNhom}`]);
+            romanIdx++;
+            sheet.mergeCells(rowNhom.number, 1, rowNhom.number, totalCols);
+            rowNhom.eachCell(c => {
+                c.font = { bold: true, size: 12 };
+                c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFEB3B' } };
+                c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+            });
+
+            danhSach.forEach(p => {
+                stt += 1;
+                const stock = stockMap[p.name] !== undefined ? cleanQty(stockMap[p.name]) : 0;
+                const row = sheet.addRow([
+                    stt,
+                    p.name,
+                    p.barcode || '---',
+                    p.unit || '',
+                    stock,
+                    Number(p.wholesale || 0),
+                    Number(p.retail || 0)
+                ]);
+                row.getCell(3).numFmt = '@'; // Mã vạch giữ nguyên dạng chữ, không mất số 0 đầu
+                row.eachCell((c, col) => {
+                    c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+                    c.font = { size: 12 };
+                    if (col === 1 || col === 3 || col === 4 || col === 5) c.alignment = { horizontal: 'center' };
+                    if (col === 6 || col === 7) c.numFmt = '#,##0';
+                    if (col === 2) c.alignment = { vertical: 'middle' };
+                });
+            });
+        });
+
+        // ------ DÒNG NGÀY THÁNG + NGƯỜI LẬP CUỐI BẢNG (giống hoá đơn/phiếu in khác) ------
+        sheet.addRow([]);
+        const now = new Date();
+        const rNgay = sheet.addRow([`Ninh Bình, ngày ${now.getDate()} tháng ${now.getMonth() + 1} năm ${now.getFullYear()}`]);
+        sheet.mergeCells(rNgay.number, totalCols - 1, rNgay.number, totalCols);
+        rNgay.getCell(totalCols - 1).alignment = { horizontal: 'center' };
+        rNgay.getCell(totalCols - 1).font = { italic: true, size: 12 };
+
+        const rNguoiLap = sheet.addRow(['', '', '', '', '', 'Người lập']);
+        sheet.mergeCells(rNguoiLap.number, totalCols - 1, rNguoiLap.number, totalCols);
+        rNguoiLap.getCell(totalCols - 1).alignment = { horizontal: 'center' };
+        rNguoiLap.getCell(totalCols - 1).font = { bold: true, size: 12 };
+
+        sheet.columns = [{ width: 6 }, { width: 30 }, { width: 16 }, { width: 10 }, { width: 12 }, { width: 14 }, { width: 14 }];
+
+        sheet.pageSetup = { paperSize: 9, orientation: 'portrait', fitToPage: true, fitToWidth: 1, fitToHeight: 0, margins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4, header: 0, footer: 0 } };
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `BangBaoGia_KhoHang_${new Date().toISOString().split('T')[0]}.xlsx`;
+        a.click();
+        Swal.close();
+    } catch (err) {
+        console.error('Lỗi khi xuất Excel Kho Hàng:', err);
+        Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Không xuất được file Excel: ' + err.message });
+    }
 }
 
 
@@ -15777,7 +15842,10 @@ const NHOM_SP_DINH_NGHIA = [
     // nếu xét nó trước. Đặt ở ĐÂY (đầu mảng) chỉ để KHỚP ĐÚNG nhóm - vị trí HIỂN THỊ trong
     // báo cáo (ngay sau Thịt Chưng Mắm Tép) do THU_TU_HIEN_THI_NHOM quyết định, không phụ
     // thuộc việc nó nằm ở đầu mảng này.
-    { ten: 'MẮM TÉP RIU ĐỎ', khop: (n) => /riu \u0111[ỏo]/i.test(n) },
+    // Thêm "Mắm nguyên chất" vào nhóm này theo yêu cầu (VD: Mắm nguyên chất 300ml, Mắm
+    // nguyên chất 1l) - đặt CÙNG dòng với "riu đỏ" (đã xét TRƯỚC "THỊT CHƯNG MẮM TÉP" bên
+    // dưới) để không bị nhóm "mắm" chung chung ở dưới "nhặt" nhầm trước.
+    { ten: 'MẮM TÉP RIU ĐỎ', khop: (n) => /riu \u0111[ỏo]|nguy[êe]n ch[ấa]t/i.test(n) },
     // QUAN TRỌNG: "khay nhôm" chỉ là VẬT LIỆU ĐÓNG GÓI, không phải đặc trưng riêng của nhóm
     // TCMT - nhiều nhóm khác (VD: Quả Bùi Kỳ Lão) cũng đóng khay nhôm. Nếu để "khay nh[ôo]m"
     // ở đây, .find() sẽ bắt nhầm các sản phẩm đó vào nhóm này TRƯỚC KHI kịp tới lượt kiểm
