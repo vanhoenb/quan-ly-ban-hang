@@ -2162,8 +2162,8 @@ html:not(.dark) .bg-white {
             <div class="p-2.5 md:p-4 border-b border-slate-200 dark:border-slate-700 flex flex-col md:flex-row gap-2 shrink-0">
                 <input type="text" id="bg-search" placeholder="🔍 Tìm tên sản phẩm..." onkeyup="filterBaoGiaModal()" class="flex-1 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-xs md:text-sm dark:text-white">
                 <select id="bg-price-type" class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-xs md:text-sm dark:text-white" onchange="calcBaoGiaPreview()">
-                    <option value="retail">Tính thành tiền theo: Giá lẻ</option>
                     <option value="wholesale">Tính thành tiền theo: Giá sỉ</option>
+                    <option value="retail">Tính thành tiền theo: Giá lẻ</option>
                 </select>
             </div>
 
@@ -2183,15 +2183,16 @@ html:not(.dark) .bg-white {
                 </table>
             </div>
 
-            <!-- Footer: xem tạm tính + nút Lưu / Lưu & In -->
+            <!-- Footer: xem tạm tính + nút Lưu / Lưu & In / Lưu & Chia Sẻ Zalo -->
             <div class="p-2.5 md:p-4 border-t border-slate-200 dark:border-slate-700 flex flex-col md:flex-row items-center justify-between gap-2 bg-slate-50 dark:bg-slate-950 shrink-0">
                 <div class="text-xs md:text-sm w-full md:w-auto text-center md:text-left">
                     Đã chọn: <b id="bg-count-selected">0</b> SP — Tạm tính: <b id="bg-preview-total" class="text-red-500">0 đ</b>
                 </div>
-                <div class="flex gap-2 w-full md:w-auto">
+                <div class="flex flex-wrap gap-2 w-full md:w-auto justify-center md:justify-end">
                     <button onclick="closeBaoGiaModal()" class="flex-1 md:flex-none px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200">Đóng</button>
-                    <button onclick="saveBaoGia(false)" class="flex-1 md:flex-none px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold bg-emerald-600 text-white border-b-[3px] border-emerald-800 active:translate-y-[2px] active:border-b-[1px]">💾 Lưu</button>
-                    <button onclick="saveBaoGia(true)" class="flex-1 md:flex-none px-5 py-2.5 rounded-xl text-xs md:text-sm font-bold bg-blue-600 text-white border-b-[3px] border-blue-800 active:translate-y-[2px] active:border-b-[1px]">💾🖨 Lưu & In</button>
+                    <button onclick="saveBaoGia('none')" class="flex-1 md:flex-none px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold bg-emerald-600 text-white border-b-[3px] border-emerald-800 active:translate-y-[2px] active:border-b-[1px]">💾 Lưu</button>
+                    <button onclick="saveBaoGia('print')" class="flex-1 md:flex-none px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold bg-blue-600 text-white border-b-[3px] border-blue-800 active:translate-y-[2px] active:border-b-[1px]">💾🖨 Lưu & In</button>
+                    <button onclick="saveBaoGia('share')" class="flex-1 md:flex-none px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold bg-sky-500 text-white border-b-[3px] border-sky-700 active:translate-y-[2px] active:border-b-[1px]">📤 Lưu & Chia Sẻ</button>
                 </div>
             </div>
         </div>
@@ -3844,7 +3845,7 @@ html:not(.dark) .bg-white {
    		
 <style media="print">
     body * { visibility: hidden; }
-    #print-area, #print-area-xuatkho, #print-area-nhapkho, #print-area-baogia { display: none; position: absolute; left: 0; top: 0; width: 100%; }
+    #print-area, #print-area-xuatkho, #print-area-nhapkho, #print-area-baogia { display: none; position: absolute; left: 0; top: 0; width: 100%; box-sizing: border-box; }
 
     body.print-mode-hoadon #print-area { display: block !important; visibility: visible; }
     body.print-mode-hoadon #print-area * { visibility: visible; }
@@ -10387,7 +10388,7 @@ function openBaoGiaModal(prefill) {
     document.getElementById('bg-customer').value = prefill ? (prefill.customer || '') : '';
     document.getElementById('bg-address').value = prefill ? (prefill.address || '') : '';
     document.getElementById('bg-phone').value = prefill ? (prefill.phone || '') : '';
-    document.getElementById('bg-price-type').value = prefill ? (prefill.priceType || 'retail') : 'retail';
+    document.getElementById('bg-price-type').value = prefill ? (prefill.priceType || 'retail') : 'wholesale';
     document.getElementById('bg-search').value = '';
 
     const titleEl = document.getElementById('bg-modal-title');
@@ -10453,7 +10454,7 @@ function getBaoGiaPrice(item, type) {
 
 function calcBaoGiaPreview() {
     const source = (window.allProductCache && window.allProductCache.length) ? window.allProductCache : (window.allProducts || []);
-    const priceType = (document.getElementById('bg-price-type') || {}).value || 'retail';
+    const priceType = (document.getElementById('bg-price-type') || {}).value || 'wholesale';
     let total = 0, count = 0;
     source.forEach(item => {
         const qty = window.bgQtyMap[item.name] || 0;
@@ -10484,17 +10485,18 @@ function collectBaoGiaItems() {
 }
 
 // --- LƯU BÁO GIÁ (collection RIÊNG 'quotations' - độc lập, không đụng tồn kho/công
-// nợ/doanh thu) - tuỳ chọn In luôn sau khi lưu xong. Nếu đang ở CHẾ ĐỘ SỬA
-// (window.__editingBaoGiaId có giá trị) thì CẬP NHẬT đúng bản ghi cũ, giữ nguyên số
-// báo giá, thay vì tạo báo giá mới + tốn thêm 1 số thứ tự. ---
-async function saveBaoGia(alsoPrint) {
+// nợ/doanh thu) - `action`: 'none' (chỉ lưu) | 'print' (lưu rồi in) | 'share' (lưu rồi
+// chia sẻ Zalo). Nếu đang ở CHẾ ĐỘ SỬA (window.__editingBaoGiaId có giá trị) thì CẬP
+// NHẬT đúng bản ghi cũ, giữ nguyên số báo giá, thay vì tạo báo giá mới + tốn thêm 1 số
+// thứ tự. ---
+async function saveBaoGia(action) {
     const items = collectBaoGiaItems();
     if (!items.length) {
         showAlert('Vui lòng nhập số lượng cho ít nhất 1 sản phẩm cần báo giá!');
         return;
     }
 
-    const priceType = (document.getElementById('bg-price-type') || {}).value || 'retail';
+    const priceType = (document.getElementById('bg-price-type') || {}).value || 'wholesale';
     const customer = document.getElementById('bg-customer').value || '';
     const address = document.getElementById('bg-address').value || '';
     const phone = document.getElementById('bg-phone').value || '';
@@ -10539,8 +10541,11 @@ async function saveBaoGia(alsoPrint) {
         Swal.close();
         showAlert(isEditing ? 'Đã cập nhật báo giá thành công!' : 'Đã lưu báo giá thành công!');
 
-        if (alsoPrint) {
-            fillAndPrintBaoGia({ maBaoGia, customer, address, phone, priceType, items, total, dateObj: d });
+        const printData = { maBaoGia, customer, address, phone, priceType, items, total, dateObj: d };
+        if (action === 'print') {
+            fillAndPrintBaoGia(printData);
+        } else if (action === 'share') {
+            shareBaoGiaToZalo(printData);
         }
         closeBaoGiaModal();
     } catch (err) {
@@ -10550,10 +10555,10 @@ async function saveBaoGia(alsoPrint) {
     }
 }
 
-// --- ĐIỀN DỮ LIỆU + IN MẪU BÁO GIÁ (dùng chung tiêu đề công ty với mẫu hoá đơn) ---
-// Nhận sẵn 1 gói dữ liệu {maBaoGia, customer, address, phone, priceType, items, total,
-// dateObj} - dùng chung được cho cả báo giá VỪA TẠO lẫn báo giá IN LẠI từ lịch sử đã lưu.
-function fillAndPrintBaoGia({ maBaoGia, customer, address, phone, priceType, items, total, dateObj }) {
+// --- ĐIỀN DỮ LIỆU VÀO MẪU BÁO GIÁ (dùng chung tiêu đề công ty với mẫu hoá đơn) - CHỈ đổ
+// dữ liệu vào #print-area-baogia, KHÔNG tự in/chia sẻ - dùng chung cho cả in (
+// fillAndPrintBaoGia) lẫn chia sẻ Zalo (shareBaoGiaToZalo) để không lặp code. ---
+function populateBaoGiaPrintArea({ maBaoGia, customer, address, phone, priceType, items, total, dateObj }) {
     const d = dateObj || new Date();
 
     // Dùng lại đúng logo công ty đã có sẵn ở mẫu hoá đơn - không phải lưu thêm 1 bản ảnh
@@ -10599,8 +10604,18 @@ function fillAndPrintBaoGia({ maBaoGia, customer, address, phone, priceType, ite
 
     if (document.getElementById('bg-print-total')) document.getElementById('bg-print-total').innerText = Number(total).toLocaleString('vi-VN') + ' đ';
     if (document.getElementById('bg-print-total-word')) document.getElementById('bg-print-total-word').innerText = docSo(Number(total));
+}
 
+// --- ĐỔ DỮ LIỆU + IN MẪU BÁO GIÁ ---
+function fillAndPrintBaoGia(data) {
+    populateBaoGiaPrintArea(data);
     triggerPrint('print-mode-baogia');
+}
+
+// --- ĐỔ DỮ LIỆU + CHIA SẺ ẢNH BÁO GIÁ QUA ZALO (dùng chung hàm chụp ảnh với hoá đơn) ---
+function shareBaoGiaToZalo(data) {
+    populateBaoGiaPrintArea(data);
+    shareInvoiceViaZalo('print-area-baogia', 'print-mode-baogia', 'BaoGia', data.maBaoGia, data.customer, data.dateObj);
 }
 
 // =========================================================================
@@ -10658,6 +10673,7 @@ function renderBaoGiaHistoryList(list) {
                 <div class="flex gap-1.5 shrink-0">
                     <button onclick="editSavedBaoGia('${q.id}')" title="Sửa" class="bg-amber-500 text-white p-2 rounded-lg hover:bg-amber-600"><i data-lucide="pencil" class="w-4 h-4"></i></button>
                     <button onclick="reprintSavedBaoGia('${q.id}')" title="In lại" class="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700"><i data-lucide="printer" class="w-4 h-4"></i></button>
+                    <button onclick="shareSavedBaoGiaToZalo('${q.id}')" title="Chia sẻ Zalo" class="bg-sky-500 text-white p-2 rounded-lg hover:bg-sky-600"><i data-lucide="share-2" class="w-4 h-4"></i></button>
                     <button onclick="deleteSavedBaoGia('${q.id}')" title="Xoá" class="bg-red-600 text-white p-2 rounded-lg hover:bg-red-700"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                 </div>
             </div>`;
@@ -10690,6 +10706,16 @@ function reprintSavedBaoGia(docId) {
     if (!q) return;
     const dateObj = (q.date && typeof q.date.toDate === 'function') ? q.date.toDate() : new Date();
     fillAndPrintBaoGia({
+        maBaoGia: q.maBaoGia, customer: q.customer, address: q.address, phone: q.phone,
+        priceType: q.priceType, items: q.items || [], total: q.total || 0, dateObj
+    });
+}
+
+function shareSavedBaoGiaToZalo(docId) {
+    const q = window.__baoGiaHistoryCache.find(x => x.id === docId);
+    if (!q) return;
+    const dateObj = (q.date && typeof q.date.toDate === 'function') ? q.date.toDate() : new Date();
+    shareBaoGiaToZalo({
         maBaoGia: q.maBaoGia, customer: q.customer, address: q.address, phone: q.phone,
         priceType: q.priceType, items: q.items || [], total: q.total || 0, dateObj
     });
@@ -12622,98 +12648,67 @@ window.shareSaleZalo = async function (docId) {
 };
 
 // --- KÍCH HOẠT IN AN TOÀN (Tăng độ trễ lên 300ms để chờ hộp thoại Lịch sử đóng hẳn) ---
+// TRƯỚC ĐÂY: PC dùng cách "ẩn cả trang, chỉ hiện vùng cần in" bằng CSS @media print + đổi
+// class trên <body> - cách này phải "chiến đấu" với TOÀN BỘ CSS phức tạp của cả ứng dụng
+// (chế độ tối, các trang khác đang ẩn, animation, modal...) nên thỉnh thoảng bị lỗi ra
+// trang trắng trên 1 số máy/trình duyệt/máy in (rất khó dò đúng nguyên nhân vì mỗi máy
+// một kiểu). BÂY GIỜ: mọi nền tảng (điện thoại lẫn máy tính) đều dùng chung 1 khung iframe
+// ẩn, sạch, tách biệt hoàn toàn khỏi CSS phức tạp của ứng dụng - chỉ có đúng nội dung cần
+// in - giống hệt cách điện thoại đang dùng và luôn in đúng, ổn định hơn nhiều so với cách
+// ẩn/hiện cả trang.
 function triggerPrint(modeClass) {
-    // 1. Kiểm tra nếu là điện thoại -> Dùng Iframe ẩn để in (Chống lỗi văng sự cố trên Android)
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+    const areaId = (modeClass === 'print-mode-xuatkho') ? 'print-area-xuatkho' : (modeClass === 'print-mode-nhapkho' ? 'print-area-nhapkho' : (modeClass === 'print-mode-baogia' ? 'print-area-baogia' : 'print-area'));
+    const printElement = document.getElementById(areaId);
 
-    if (isMobile) {
-        const areaId = (modeClass === 'print-mode-xuatkho') ? 'print-area-xuatkho' : (modeClass === 'print-mode-nhapkho' ? 'print-area-nhapkho' : (modeClass === 'print-mode-baogia' ? 'print-area-baogia' : 'print-area'));
-        const printElement = document.getElementById(areaId);
-        
-        if (!printElement) {
-            showAlert("Không tìm thấy vùng dữ liệu cần in!");
-            return;
-        }
-
-        // Tạo hoặc lấy khung iframe ẩn chuyên dụng cho di động
-        let iframe = document.getElementById('mobile-print-iframe');
-        if (!iframe) {
-            iframe = document.createElement('iframe');
-            iframe.id = 'mobile-print-iframe';
-            iframe.style.position = 'fixed';
-            iframe.style.right = '0';
-            iframe.style.bottom = '0';
-            iframe.style.width = '0';
-            iframe.style.height = '0';
-            iframe.style.border = 'none';
-            document.body.appendChild(iframe);
-        }
-
-        // TRƯỚC ĐÂY: chờ mù 500ms rồi mới in, dù trang có thể đã sẵn sàng sớm hơn nhiều
-        // (hoặc trên máy/mạng chậm thì 500ms lại chưa chắc đã đủ). BÂY GIỜ: in ngay khi
-        // iframe báo đã tải xong nội dung (sự kiện 'load'), thường chỉ mất vài chục mili
-        // giây - nhanh hơn hẳn mà vẫn chắc chắn nội dung đã sẵn sàng. Vẫn giữ 1 mốc dự
-        // phòng 500ms để phòng trường hợp hiếm gặp trình duyệt không bắn sự kiện 'load'.
-        let printed = false;
-        const doPrint = () => {
-            if (printed) return;
-            printed = true;
-            iframe.contentWindow.focus();
-            iframe.contentWindow.print();
-        };
-        iframe.onload = doPrint;
-
-        // Đổ nội dung cần in vào iframe
-        const doc = iframe.contentWindow.document;
-        doc.open();
-        doc.write('<html><head><title>In chứng từ</title>');
-        doc.write('<meta name="viewport" content="width=device-width, initial-scale=1.0">');
-        // QUAN TRỌNG: nếu không ép chiều rộng cố định, nội dung in sẽ co lại theo đúng bề
-        // ngang màn hình điện thoại (rất hẹp) - làm cột "Số phiếu/Ngày lập/Ghi chú" (vốn
-        // chỉ chiếm 25% bề ngang) bị bóp hẹp, khiến chữ bị xuống dòng như trên máy tính
-        // không hề gặp phải. Ép cứng về 800px giống hệt máy tính để bố cục LUÔN giống
-        // nhau dù in từ điện thoại hay máy tính - máy in/app in sẽ tự co giãn vừa khổ giấy.
-        doc.write('<style>html,body{width:800px;}body{font-family:Arial,sans-serif;padding:15px;color:#000;background:#fff;}table{border-collapse:collapse!important;width:100%!important;margin-top:15px;}th,td{padding:8px!important;border:1px solid #000!important;font-size:14px;}</style>');
-        doc.write('</head><body>');
-        doc.write(printElement.innerHTML);
-        doc.write('</body></html>');
-        doc.close();
-
-        // Mốc dự phòng - chỉ chạy nếu sự kiện 'load' vì lý do gì đó không bắn ra
-        setTimeout(doPrint, 500);
-
-        return; // Dừng lại, không chạy code PC bên dưới
+    if (!printElement) {
+        showAlert("Không tìm thấy vùng dữ liệu cần in!");
+        return;
     }
 
-    // 2. IN TRÊN PC
-    document.body.classList.remove('print-mode-hoadon', 'print-mode-xuatkho', 'print-mode-nhapkho', 'print-mode-baogia');
-    document.body.classList.add(modeClass);
+    // Tạo hoặc lấy khung iframe ẩn chuyên dụng để in (dùng chung cho cả điện thoại lẫn PC)
+    let iframe = document.getElementById('mobile-print-iframe');
+    if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.id = 'mobile-print-iframe';
+        iframe.style.position = 'fixed';
+        iframe.style.right = '0';
+        iframe.style.bottom = '0';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
+        iframe.style.border = 'none';
+        document.body.appendChild(iframe);
+    }
 
-    let cleaned = false;
-    const cleanup = () => {
-        if (cleaned) return;
-        cleaned = true;
-        document.body.classList.remove('print-mode-hoadon', 'print-mode-xuatkho', 'print-mode-nhapkho', 'print-mode-baogia');
-        window.removeEventListener('afterprint', cleanup);
+    // In ngay khi iframe báo đã tải xong nội dung (sự kiện 'load'), thường chỉ mất vài
+    // chục mili giây. Vẫn giữ 1 mốc dự phòng 500ms để phòng trường hợp hiếm gặp trình
+    // duyệt không bắn sự kiện 'load'.
+    let printed = false;
+    const doPrint = () => {
+        if (printed) return;
+        printed = true;
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
     };
-    window.addEventListener('afterprint', cleanup);
+    iframe.onload = doPrint;
 
-    // TRƯỚC ĐÂY: chờ mù 600ms trước khi in - đoán đại 1 khoảng thời gian "chắc là đủ" để
-    // trình duyệt kịp áp CSS chế độ in (đổi class body) và vẽ lại trang, dù thực tế việc
-    // này thường chỉ mất 1 khung hình (~16ms).
-    // BÂY GIỜ: dùng requestAnimationFrame lồng 2 lần - đây là cách chuẩn để "chờ đúng lúc
-    // trình duyệt đã áp xong CSS và vẽ xong khung hình mới" thay vì chờ mù 1 khoảng thời
-    // gian cố định: lần rAF thứ nhất chạy ngay trước khi trình duyệt vẽ khung hình kế
-    // tiếp (lúc này CSS mới đã được tính toán xong), lần rAF thứ hai chạy sau khi khung
-    // hình đó đã thực sự được vẽ lên màn hình - đảm bảo hộp thoại in chụp đúng nội dung
-    // đã lên hình, mà không phải đợi lâu như trước.
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            window.print();
-        });
-    });
+    // Đổ nội dung cần in vào iframe
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write('<html><head><title>In chứng từ</title>');
+    doc.write('<meta name="viewport" content="width=device-width, initial-scale=1.0">');
+    // QUAN TRỌNG: nếu không ép chiều rộng cố định, nội dung in sẽ co lại theo đúng bề
+    // ngang màn hình điện thoại (rất hẹp) - làm cột "Số phiếu/Ngày lập/Ghi chú" (vốn
+    // chỉ chiếm 25% bề ngang) bị bóp hẹp, khiến chữ bị xuống dòng như trên máy tính
+    // không hề gặp phải. Ép cứng về 800px giống hệt máy tính để bố cục LUÔN giống
+    // nhau dù in từ điện thoại hay máy tính - máy in/app in sẽ tự co giãn vừa khổ giấy.
+    doc.write('<style>html,body{width:800px;}body{font-family:Arial,sans-serif;padding:15px;color:#000;background:#fff;}table{border-collapse:collapse!important;width:100%!important;margin-top:15px;}th,td{padding:8px!important;border:1px solid #000!important;font-size:14px;}</style>');
+    doc.write('</head><body>');
+    doc.write(printElement.innerHTML);
+    doc.write('</body></html>');
+    doc.close();
 
-    setTimeout(cleanup, 15000);
+    // Mốc dự phòng - chỉ chạy nếu sự kiện 'load' vì lý do gì đó không bắn ra
+    setTimeout(doPrint, 500);
 }
 
 // --- ĐIỀN DỮ LIỆU + IN MẪU HÓA ĐƠN BÁN HÀNG (dùng chung cho Bán Hàng và In lại ở Lịch Sử HĐ) ---
