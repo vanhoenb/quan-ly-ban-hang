@@ -2420,7 +2420,7 @@ html:not(.dark) .bg-white {
         <div style="width: 80%; text-align: center;">
             <h2 style="margin: 0; font-size: 17px; font-weight: bold; letter-spacing: .3px;">HTX SẢN XUẤT VÀ KINH DOANH NÔNG SẢN THANH NGUYỄN</h2>
             <p style="margin: 4px 0 0; font-size: 12.5px; color: #333;">Địa chỉ: Số 9, ngõ 456, đường Xuân Thành, Phố Thượng, Phường Hoa Lư, Ninh Bình</p>
-            <p style="margin: 2px 0 0; font-size: 12.5px; color: #333;">Hotline: 0982 398 474 - 0969 553 525</p>
+            <p style="margin: 2px 0 0; font-size: 12.5px; color: #333;">Hotline: 0982 398 474 - 099 553 525</p>
         </div>
     </div>
 
@@ -12030,14 +12030,26 @@ function renderProductGrid() {
     grid.innerHTML = '';
 
     // Bảng màu 3D glossy: nền gradient nhạt, viền, huy hiệu tồn kho, nút cộng gradient + đổ bóng khối
-    const themeClasses = [
-        { top: 'from-blue-100 to-blue-50/60 dark:from-blue-950/70 dark:to-slate-900',    ring: 'ring-blue-200 dark:ring-blue-500/20',    badge: 'bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300',    btn: 'from-blue-400 to-blue-600 dark:from-blue-500 dark:to-blue-700',    shadow: 'shadow-[0_6px_0_0_#1e40af,0_10px_16px_-4px_rgba(37,99,235,0.35)] dark:shadow-[0_6px_0_0_#1e3a8a,0_10px_16px_-4px_rgba(0,0,0,0.5)]' },
-        { top: 'from-emerald-100 to-emerald-50/60 dark:from-emerald-950/70 dark:to-slate-900', ring: 'ring-emerald-200 dark:ring-emerald-500/20', badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300', btn: 'from-emerald-400 to-emerald-600 dark:from-emerald-500 dark:to-emerald-700', shadow: 'shadow-[0_6px_0_0_#065f46,0_10px_16px_-4px_rgba(5,150,105,0.35)] dark:shadow-[0_6px_0_0_#064e3b,0_10px_16px_-4px_rgba(0,0,0,0.5)]' },
-        { top: 'from-amber-100 to-amber-50/60 dark:from-amber-950/70 dark:to-slate-900',   ring: 'ring-amber-200 dark:ring-amber-500/20',   badge: 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',   btn: 'from-amber-400 to-amber-600 dark:from-amber-500 dark:to-amber-700',   shadow: 'shadow-[0_6px_0_0_#92400e,0_10px_16px_-4px_rgba(217,119,6,0.35)] dark:shadow-[0_6px_0_0_#78350f,0_10px_16px_-4px_rgba(0,0,0,0.5)]' },
-        { top: 'from-rose-100 to-rose-50/60 dark:from-rose-950/70 dark:to-slate-900',    ring: 'ring-rose-200 dark:ring-rose-500/20',    badge: 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300',    btn: 'from-rose-400 to-rose-600 dark:from-rose-500 dark:to-rose-700',    shadow: 'shadow-[0_6px_0_0_#9f1239,0_10px_16px_-4px_rgba(225,29,72,0.35)] dark:shadow-[0_6px_0_0_#881337,0_10px_16px_-4px_rgba(0,0,0,0.5)]' },
-        { top: 'from-violet-100 to-violet-50/60 dark:from-violet-950/70 dark:to-slate-900', ring: 'ring-violet-200 dark:ring-violet-500/20', badge: 'bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300', btn: 'from-violet-400 to-violet-600 dark:from-violet-500 dark:to-violet-700', shadow: 'shadow-[0_6px_0_0_#6d28d9,0_10px_16px_-4px_rgba(124,58,237,0.35)] dark:shadow-[0_6px_0_0_#5b21b6,0_10px_16px_-4px_rgba(0,0,0,0.5)]' },
-        { top: 'from-cyan-100 to-cyan-50/60 dark:from-cyan-950/70 dark:to-slate-900',    ring: 'ring-cyan-200 dark:ring-cyan-500/20',    badge: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-300',    btn: 'from-cyan-400 to-cyan-600 dark:from-cyan-500 dark:to-cyan-700',    shadow: 'shadow-[0_6px_0_0_#155e75,0_10px_16px_-4px_rgba(8,145,178,0.35)] dark:shadow-[0_6px_0_0_#164e63,0_10px_16px_-4px_rgba(0,0,0,0.5)]' }
-    ];
+    // TRƯỚC ĐÂY: mỗi thẻ SP được tô màu theo VỊ TRÍ trong danh sách (index % số màu) - nên
+    // các SP CÙNG NHÓM lại hiện ra đủ màu lộn xộn không liên quan gì đến nhau.
+    // BÂY GIỜ: tô màu theo ĐÚNG NHÓM SẢN PHẨM (dùng chung xepNhomSanPham/NHOM_COLOR_MAP với
+    // trang Kho Hàng) - mỗi nhóm 1 màu cố định, đồng bộ với màu nhóm đang hiển thị ở Kho
+    // Hàng, giúp nhận ra ngay 1 SP thuộc nhóm nào chỉ bằng màu sắc.
+    const THEME_BY_NHOM = {
+        'THỊT CHƯNG MẮM TÉP': { top: 'from-fuchsia-100 to-fuchsia-50/60 dark:from-fuchsia-950/70 dark:to-slate-900', ring: 'ring-fuchsia-200 dark:ring-fuchsia-500/20', badge: 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/15 dark:text-fuchsia-300', btn: 'from-fuchsia-400 to-fuchsia-600 dark:from-fuchsia-500 dark:to-fuchsia-700', nameText: 'text-fuchsia-800 dark:text-fuchsia-200', shadow: 'shadow-[0_6px_0_0_#86198f,0_10px_16px_-4px_rgba(192,38,211,0.35)] dark:shadow-[0_6px_0_0_#701a75,0_10px_16px_-4px_rgba(0,0,0,0.5)]' },
+        'MẮM TÉP RIU ĐỎ':     { top: 'from-rose-100 to-rose-50/60 dark:from-rose-950/70 dark:to-slate-900',    ring: 'ring-rose-200 dark:ring-rose-500/20',    badge: 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300',    btn: 'from-rose-400 to-rose-600 dark:from-rose-500 dark:to-rose-700',    nameText: 'text-rose-800 dark:text-rose-200',    shadow: 'shadow-[0_6px_0_0_#9f1239,0_10px_16px_-4px_rgba(225,29,72,0.35)] dark:shadow-[0_6px_0_0_#881337,0_10px_16px_-4px_rgba(0,0,0,0.5)]' },
+        'QUẢ BÙI KỲ LÃO':     { top: 'from-emerald-100 to-emerald-50/60 dark:from-emerald-950/70 dark:to-slate-900', ring: 'ring-emerald-200 dark:ring-emerald-500/20', badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300', btn: 'from-emerald-400 to-emerald-600 dark:from-emerald-500 dark:to-emerald-700', nameText: 'text-emerald-800 dark:text-emerald-200', shadow: 'shadow-[0_6px_0_0_#065f46,0_10px_16px_-4px_rgba(5,150,105,0.35)] dark:shadow-[0_6px_0_0_#064e3b,0_10px_16px_-4px_rgba(0,0,0,0.5)]' },
+        'CƠM CHÁY':           { top: 'from-amber-100 to-amber-50/60 dark:from-amber-950/70 dark:to-slate-900',   ring: 'ring-amber-200 dark:ring-amber-500/20',   badge: 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',   btn: 'from-amber-400 to-amber-600 dark:from-amber-500 dark:to-amber-700',   nameText: 'text-amber-800 dark:text-amber-200',   shadow: 'shadow-[0_6px_0_0_#92400e,0_10px_16px_-4px_rgba(217,119,6,0.35)] dark:shadow-[0_6px_0_0_#78350f,0_10px_16px_-4px_rgba(0,0,0,0.5)]' },
+        'TRÀ HOA VÀNG':       { top: 'from-yellow-100 to-yellow-50/60 dark:from-yellow-950/70 dark:to-slate-900', ring: 'ring-yellow-200 dark:ring-yellow-500/20', badge: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-300', btn: 'from-yellow-400 to-yellow-600 dark:from-yellow-500 dark:to-yellow-700', nameText: 'text-yellow-800 dark:text-yellow-200', shadow: 'shadow-[0_6px_0_0_#854d0e,0_10px_16px_-4px_rgba(202,138,4,0.35)] dark:shadow-[0_6px_0_0_#713f12,0_10px_16px_-4px_rgba(0,0,0,0.5)]' },
+        'RUỐC CÁ':            { top: 'from-cyan-100 to-cyan-50/60 dark:from-cyan-950/70 dark:to-slate-900',    ring: 'ring-cyan-200 dark:ring-cyan-500/20',    badge: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-300',    btn: 'from-cyan-400 to-cyan-600 dark:from-cyan-500 dark:to-cyan-700',    nameText: 'text-cyan-800 dark:text-cyan-200',    shadow: 'shadow-[0_6px_0_0_#155e75,0_10px_16px_-4px_rgba(8,145,178,0.35)] dark:shadow-[0_6px_0_0_#164e63,0_10px_16px_-4px_rgba(0,0,0,0.5)]' },
+        'BÁNH DỨA':           { top: 'from-indigo-100 to-indigo-50/60 dark:from-indigo-950/70 dark:to-slate-900', ring: 'ring-indigo-200 dark:ring-indigo-500/20', badge: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300', btn: 'from-indigo-400 to-indigo-600 dark:from-indigo-500 dark:to-indigo-700', nameText: 'text-indigo-800 dark:text-indigo-200', shadow: 'shadow-[0_6px_0_0_#3730a3,0_10px_16px_-4px_rgba(79,70,229,0.35)] dark:shadow-[0_6px_0_0_#312e81,0_10px_16px_-4px_rgba(0,0,0,0.5)]' },
+        // Nhóm "CÁC LOẠI HỘP TÚI": trước dùng màu xanh da trời (sky) nhưng nhìn gần giống
+        // hệt màu xanh lơ (cyan) của nhóm "RUỐC CÁ" bên cạnh, khó phân biệt bằng mắt khi
+        // cuộn nhanh - đổi sang XANH CHANH (lime) là màu chưa nhóm nào dùng, nổi bật và
+        // tách bạch hẳn khỏi mọi nhóm còn lại.
+        'CÁC LOẠI HỘP TÚI':   { top: 'from-lime-100 to-lime-50/60 dark:from-lime-950/70 dark:to-slate-900',    ring: 'ring-lime-200 dark:ring-lime-500/20',    badge: 'bg-lime-100 text-lime-700 dark:bg-lime-500/15 dark:text-lime-300',    btn: 'from-lime-400 to-lime-600 dark:from-lime-500 dark:to-lime-700',    nameText: 'text-lime-800 dark:text-lime-200',    shadow: 'shadow-[0_6px_0_0_#3f6212,0_10px_16px_-4px_rgba(101,163,13,0.35)] dark:shadow-[0_6px_0_0_#365314,0_10px_16px_-4px_rgba(0,0,0,0.5)]' },
+        'KHÁC':               { top: 'from-gray-200 to-gray-50/60 dark:from-gray-800/70 dark:to-slate-900',    ring: 'ring-gray-300 dark:ring-gray-500/20',    badge: 'bg-gray-200 text-gray-700 dark:bg-gray-500/15 dark:text-gray-300',    btn: 'from-gray-400 to-gray-600 dark:from-gray-500 dark:to-gray-700',    nameText: 'text-gray-800 dark:text-gray-200',    shadow: 'shadow-[0_6px_0_0_#374151,0_10px_16px_-4px_rgba(75,85,99,0.35)] dark:shadow-[0_6px_0_0_#111827,0_10px_16px_-4px_rgba(0,0,0,0.5)]' }
+    };
 
     // Đưa sản phẩm HẾT HÀNG xuống cuối danh sách; trong TỪNG nhóm (còn hàng / hết hàng),
     // sắp xếp theo đúng thứ tự: TCMT -> Mắm Tép Riu Đỏ/Nguyên Chất -> Quả Bùi Kỳ Lão -> các
@@ -12065,7 +12077,7 @@ function renderProductGrid() {
         // Mức cảnh báo "SẮP HẾT" (còn ≤10) - giúp chủ động nhập hàng trước khi hết hẳn,
         // thay vì chỉ có 2 trạng thái còn/hết như trước.
         const isLowStock = !isOutOfStock && realStock <= 10;
-        const b = themeClasses[index % themeClasses.length];
+        const b = THEME_BY_NHOM[xepNhomSanPham(p.name)] || THEME_BY_NHOM['KHÁC'];
 
         return `
             <div id="product-card-${idName}" data-badge-class="${b.badge}"
@@ -12081,7 +12093,7 @@ function renderProductGrid() {
                 <div class="pointer-events-none absolute -top-6 -left-6 w-20 h-20 bg-white/50 dark:bg-white/10 rounded-full blur-xl"></div>
 
                 <div class="relative flex justify-between items-start gap-1 md:gap-3">
-                    <p class="font-black text-gray-700 dark:text-slate-100 text-[9px] md:text-sm leading-tight line-clamp-2 uppercase tracking-tight" title="${p.name}">
+                    <p class="font-black ${b.nameText} text-[9px] md:text-sm leading-tight line-clamp-2 uppercase tracking-tight" title="${p.name}">
                         ${p.name}
                     </p>
                     <button onclick="quickAdd('${safeName}', {shiftKey: true}); event.stopPropagation();"
@@ -16506,14 +16518,14 @@ function xepNhomSanPham(ten) {
 // tiêu đề (chữ + nền đậm hơn), `border` dùng cho viền khung bao quanh cả khối (nhạt hơn) -
 // dùng chung 1 chỗ duy nhất để đổi màu ở đây là áp dụng đồng bộ cả 2 nơi.
 const NHOM_COLOR_MAP = {
-    'THỊT CHƯNG MẮM TÉP': { header: 'text-indigo-800 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-500/15 border-indigo-200 dark:border-indigo-500/30', border: 'border-indigo-400 dark:border-indigo-500/70', bg: 'bg-indigo-50/70 dark:bg-indigo-500/[0.07]' },
+    'THỊT CHƯNG MẮM TÉP': { header: 'text-fuchsia-800 dark:text-fuchsia-300 bg-fuchsia-100 dark:bg-fuchsia-500/15 border-fuchsia-200 dark:border-fuchsia-500/30', border: 'border-fuchsia-400 dark:border-fuchsia-500/70', bg: 'bg-fuchsia-50/70 dark:bg-fuchsia-500/[0.07]' },
     'MẮM TÉP RIU ĐỎ': { header: 'text-rose-800 dark:text-rose-300 bg-rose-100 dark:bg-rose-500/15 border-rose-200 dark:border-rose-500/30', border: 'border-rose-400 dark:border-rose-500/70', bg: 'bg-rose-50/70 dark:bg-rose-500/[0.07]' },
     'QUẢ BÙI KỲ LÃO': { header: 'text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-500/15 border-emerald-200 dark:border-emerald-500/30', border: 'border-emerald-400 dark:border-emerald-500/70', bg: 'bg-emerald-50/70 dark:bg-emerald-500/[0.07]' },
     'CƠM CHÁY': { header: 'text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/15 border-amber-200 dark:border-amber-500/30', border: 'border-amber-400 dark:border-amber-500/70', bg: 'bg-amber-50/70 dark:bg-amber-500/[0.07]' },
     'TRÀ HOA VÀNG': { header: 'text-yellow-800 dark:text-yellow-300 bg-yellow-100 dark:bg-yellow-500/15 border-yellow-200 dark:border-yellow-500/30', border: 'border-yellow-400 dark:border-yellow-500/70', bg: 'bg-yellow-50/70 dark:bg-yellow-500/[0.07]' },
     'RUỐC CÁ': { header: 'text-cyan-800 dark:text-cyan-300 bg-cyan-100 dark:bg-cyan-500/15 border-cyan-200 dark:border-cyan-500/30', border: 'border-cyan-400 dark:border-cyan-500/70', bg: 'bg-cyan-50/70 dark:bg-cyan-500/[0.07]' },
-    'BÁNH DỨA': { header: 'text-fuchsia-800 dark:text-fuchsia-300 bg-fuchsia-100 dark:bg-fuchsia-500/15 border-fuchsia-200 dark:border-fuchsia-500/30', border: 'border-fuchsia-400 dark:border-fuchsia-500/70', bg: 'bg-fuchsia-50/70 dark:bg-fuchsia-500/[0.07]' },
-    'CÁC LOẠI HỘP TÚI': { header: 'text-slate-800 dark:text-slate-300 bg-slate-200 dark:bg-slate-500/15 border-slate-300 dark:border-slate-500/30', border: 'border-slate-400 dark:border-slate-500/70', bg: 'bg-slate-100/70 dark:bg-slate-500/[0.07]' },
+    'BÁNH DỨA': { header: 'text-indigo-800 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-500/15 border-indigo-200 dark:border-indigo-500/30', border: 'border-indigo-400 dark:border-indigo-500/70', bg: 'bg-indigo-50/70 dark:bg-indigo-500/[0.07]' },
+    'CÁC LOẠI HỘP TÚI': { header: 'text-lime-800 dark:text-lime-300 bg-lime-100 dark:bg-lime-500/15 border-lime-200 dark:border-lime-500/30', border: 'border-lime-400 dark:border-lime-500/70', bg: 'bg-lime-50/70 dark:bg-lime-500/[0.07]' },
     'KHÁC': { header: 'text-gray-800 dark:text-gray-300 bg-gray-200 dark:bg-gray-500/15 border-gray-300 dark:border-gray-500/30', border: 'border-gray-400 dark:border-gray-500/70', bg: 'bg-gray-100/70 dark:bg-gray-500/[0.07]' }
 };
 function getNhomHeaderColor(ten) {
