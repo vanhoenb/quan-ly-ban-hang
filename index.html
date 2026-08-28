@@ -2145,7 +2145,7 @@ html:not(.dark) .bg-white {
         <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-5xl h-[96vh] md:h-[92vh] flex flex-col overflow-hidden">
             <!-- Header -->
             <div class="flex items-center justify-between p-3 md:p-4 border-b border-slate-200 dark:border-slate-700 bg-indigo-600 dark:bg-indigo-800 shrink-0">
-                <h3 class="text-white font-bold text-sm md:text-lg flex items-center gap-2">🧾 Tạo Báo Giá</h3>
+                <h3 id="bg-modal-title" class="text-white font-bold text-sm md:text-lg flex items-center gap-2">🧾 Tạo Báo Giá</h3>
                 <button onclick="closeBaoGiaModal()" class="text-white hover:bg-white/20 rounded-lg p-1.5">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
@@ -2583,7 +2583,7 @@ html:not(.dark) .bg-white {
         <div style="width: 80%; text-align: center;">
             <h2 style="margin: 0; font-size: 17px; font-weight: bold; letter-spacing: .3px;">HTX SẢN XUẤT VÀ KINH DOANH NÔNG SẢN THANH NGUYỄN</h2>
             <p style="margin: 4px 0 0; font-size: 12.5px; color: #333;">Địa chỉ: Số 9, ngõ 456, đường Xuân Thành, Phố Thượng, Phường Hoa Lư, Ninh Bình</p>
-            <p style="margin: 2px 0 0; font-size: 12.5px; color: #333;">Hotline: 0982 998 474 - 0949 558 525</p>
+            <p style="margin: 2px 0 0; font-size: 12.5px; color: #333;">Hotline: 0982 398 474 - 0949 553 525</p>
         </div>
     </div>
 
@@ -2655,7 +2655,7 @@ html:not(.dark) .bg-white {
         <div style="width: 80%; text-align: center;">
             <h2 style="margin: 0; font-size: 17px; font-weight: bold; letter-spacing: .3px;">HTX SẢN XUẤT VÀ KINH DOANH NÔNG SẢN THANH NGUYỄN</h2>
             <p style="margin: 4px 0 0; font-size: 12.5px; color: #333;">Địa chỉ: Số 9, ngõ 456, đường Xuân Thành, Phố Thượng, Phường Hoa Lư, Ninh Bình</p>
-            <p style="margin: 2px 0 0; font-size: 12.5px; color: #333;">Hotline: 0982 998 474 - 0949 558 525</p>
+            <p style="margin: 2px 0 0; font-size: 12.5px; color: #333;">Hotline: 0982 398 474 - 0949 553 525</p>
         </div>
     </div>
 
@@ -2700,16 +2700,31 @@ html:not(.dark) .bg-white {
     </div>
     <div style="clear: both;"></div>
 
-    <div style="margin-top: 36px; display: flex; justify-content: space-between; text-align: center;">
+    <div style="margin-top: 26px; display: flex; justify-content: space-between; text-align: center;">
         <div style="width: 45%;">
             <p style="margin: 0;"><strong>Khách hàng</strong></p>
-            <p style="font-size: 12px; font-style: italic; color: #444;">(Ký, ghi rõ họ tên)</p>
+            <p style="margin: 0; font-size: 12px; font-style: italic; color: #444;">(Ký, ghi rõ họ tên)</p>
+            <div style="height: 70px;"></div>
         </div>
         <div style="width: 45%;">
             <p style="margin: 0; white-space: nowrap; font-size: 13px;">Ninh Bình, ngày <span id="bg-print-day"></span> tháng <span id="bg-print-month"></span> năm <span id="bg-print-year"></span></p>
             <p style="margin: 0;"><strong>Người báo giá</strong></p>
-            <p style="font-size: 12px; font-style: italic; color: #444;">(Ký, đóng dấu, ghi rõ họ tên)</p>
+            <p style="margin: 0; font-size: 12px; font-style: italic; color: #444;">(Ký, đóng dấu, ghi rõ họ tên)</p>
+            <div style="height: 70px;"></div>
         </div>
+    </div>
+
+    <!-- Điều khoản báo giá - đặt HẲN xuống dưới cùng, sau chữ ký. Chữ nhỏ, chia 2 cột cho gọn -->
+    <div style="margin-top: 6px; padding-top: 10px; border-top: 1px dashed #999; display: grid; grid-template-columns: 1fr 1fr; column-gap: 22px; row-gap: 3px; font-size: 10.5px; line-height: 1.6; color: #444;">
+        <p style="margin: 0;">- Giá bán lẻ là giá đề xuất của NSX dành cho các điểm bán lẻ</p>
+        <p style="margin: 0;">- Cam kết bán đúng giá đề xuất của NSX</p>
+        <p style="margin: 0;">- Thanh toán 100% khi nhận hàng</p>
+        <p style="margin: 0;">- Được đảo Date</p>
+        <p style="margin: 0;">- Được trả lại hàng khi không bán được</p>
+        <p style="margin: 0;">- Phí giao hàng lần đầu bên bán chịu</p>
+        <p style="margin: 0;">- Phí đảo Date và trả hàng bên Mua chịu</p>
+        <p style="margin: 0;">- Giá trên chưa bao gồm thuế VAT.</p>
+        <p style="margin: 0;">- Các loại hộp túi tính tiền riêng</p>
     </div>
 </div>
 
@@ -10275,8 +10290,16 @@ function filterInventory() {
 // (không mất dữ liệu đã nhập dở), key = tên sản phẩm.
 window.bgQtyMap = window.bgQtyMap || {};
 window.bgPriceOverride = window.bgPriceOverride || {}; // { [name]: {wholesale, retail} }
+// null = đang tạo báo giá MỚI. Có giá trị (docId) = đang SỬA 1 báo giá đã lưu trước đó
+// (mở từ nút "Sửa" trong "📜 Báo Giá Đã Lưu") - lúc lưu sẽ CẬP NHẬT đúng bản ghi này,
+// giữ nguyên số báo giá cũ, thay vì tạo báo giá mới.
+window.__editingBaoGiaId = null;
+window.__editingBaoGiaMa = '';
 
-function openBaoGiaModal() {
+// `prefill` (tuỳ chọn) = dữ liệu 1 báo giá đã lưu, dùng để mở popup ở CHẾ ĐỘ SỬA với
+// số lượng/giá/thông tin khách hàng đã điền sẵn y hệt lúc lưu. Không truyền gì = mở
+// popup trống để tạo báo giá mới (như bấm nút "🧾 Tạo Báo Giá" ở toolbar).
+function openBaoGiaModal(prefill) {
     const source = (window.allProductCache && window.allProductCache.length) ? window.allProductCache : (window.allProducts || []);
     if (!source.length) {
         showAlert('Chưa có dữ liệu sản phẩm trong Kho Hàng!');
@@ -10284,9 +10307,18 @@ function openBaoGiaModal() {
     }
 
     // Mỗi lần mở lại popup thì làm mới danh sách số lượng/giá (tránh mang số lượng của
-    // lần báo giá trước sang lần sau gây nhầm lẫn).
+    // lần báo giá trước sang lần sau gây nhầm lẫn) - trừ khi đang mở để SỬA, thì điền
+    // sẵn đúng số lượng/giá của báo giá đó.
     window.bgQtyMap = {};
     window.bgPriceOverride = {};
+    window.__editingBaoGiaId = prefill ? prefill.id : null;
+    window.__editingBaoGiaMa = prefill ? (prefill.maBaoGia || '') : '';
+    if (prefill) {
+        (prefill.items || []).forEach(i => {
+            window.bgQtyMap[i.name] = i.qty;
+            window.bgPriceOverride[i.name] = { wholesale: i.wholesale, retail: i.retail };
+        });
+    }
 
     const sorted = [...source].sort((a, b) => compareProductDisplayOrder(a.name, b.name));
 
@@ -10306,8 +10338,13 @@ function openBaoGiaModal() {
         let inner = `<div class="text-[11px] md:text-xs font-black uppercase tracking-wide ${getNhomHeaderColor(tenNhom)} border rounded-lg px-3 py-1.5 mb-2">${tenNhom}</div>`;
 
         list.forEach(item => {
-            const retail = Number(item.retail || 0);
-            const wholesale = Number(item.wholesale || 0);
+            // Nếu đang SỬA và SP này đã có giá override lưu sẵn trong báo giá thì lấy đúng
+            // giá đã lưu, nếu không thì lấy giá gốc hiện tại trong Kho Hàng như bình thường.
+            const override = window.bgPriceOverride[item.name];
+            const wholesale = Number((override && override.wholesale !== undefined) ? override.wholesale : (item.wholesale || 0));
+            const retail = Number((override && override.retail !== undefined) ? override.retail : (item.retail || 0));
+            const prefillQty = window.bgQtyMap[item.name];
+            const qtyValueAttr = (prefillQty !== undefined && prefillQty !== 0) ? prefillQty : '';
             const safeName = item.name.replace(/'/g, "\\'");
             inner += `
                 <div class="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2 md:p-1.5 shadow-[0_4px_6px_-2px_rgba(0,0,0,0.2)] mb-1.5 last:mb-0" style="border-left-color:#818cf8 !important; border-right-color:#818cf8 !important;" data-bg-name="${item.name}">
@@ -10333,7 +10370,7 @@ function openBaoGiaModal() {
                         </div>
                     </div>
                     <div class="md:px-1 md:w-[24%]">
-                        <input type="number" min="0" step="any" placeholder="SL báo giá" value=""
+                        <input type="number" min="0" step="any" placeholder="SL báo giá" value="${qtyValueAttr}"
                                class="no-spinner w-full text-center bg-yellow-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg p-1.5 focus:ring-2 focus:ring-blue-500 outline-none text-[12px] font-bold"
                                oninput="updateBaoGiaQty('${safeName}', this.value)">
                     </div>
@@ -10346,11 +10383,16 @@ function openBaoGiaModal() {
     const tbody = document.getElementById('bg-product-list');
     if (tbody) tbody.innerHTML = groupParts.join('');
 
-    // Reset thông tin khách hàng + tìm kiếm của lần báo giá trước
-    ['bg-customer', 'bg-address', 'bg-phone', 'bg-search'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-    });
+    // Thông tin khách hàng + loại giá + tìm kiếm: điền sẵn nếu đang SỬA, ngược lại reset trắng.
+    document.getElementById('bg-customer').value = prefill ? (prefill.customer || '') : '';
+    document.getElementById('bg-address').value = prefill ? (prefill.address || '') : '';
+    document.getElementById('bg-phone').value = prefill ? (prefill.phone || '') : '';
+    document.getElementById('bg-price-type').value = prefill ? (prefill.priceType || 'retail') : 'retail';
+    document.getElementById('bg-search').value = '';
+
+    const titleEl = document.getElementById('bg-modal-title');
+    if (titleEl) titleEl.innerText = prefill ? `✏️ Sửa Báo Giá ${prefill.maBaoGia || ''}` : '🧾 Tạo Báo Giá';
+
     calcBaoGiaPreview();
 
     const modal = document.getElementById('modal-baogia');
@@ -10358,9 +10400,15 @@ function openBaoGiaModal() {
     if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
+// Đóng popup - nếu đang ở CHẾ ĐỘ SỬA (mở từ danh sách "Báo Giá Đã Lưu") thì tự quay lại
+// đúng danh sách đó cho tiện, thay vì đóng hẳn.
 function closeBaoGiaModal() {
     const modal = document.getElementById('modal-baogia');
     if (modal) modal.classList.add('hidden');
+    const wasEditing = !!window.__editingBaoGiaId;
+    window.__editingBaoGiaId = null;
+    window.__editingBaoGiaMa = '';
+    if (wasEditing) openBaoGiaHistoryModal();
 }
 
 // Lọc theo tên - CHỈ ẩn/hiện từng dòng SP (giống filterInventory), không dựng lại
@@ -10436,7 +10484,9 @@ function collectBaoGiaItems() {
 }
 
 // --- LƯU BÁO GIÁ (collection RIÊNG 'quotations' - độc lập, không đụng tồn kho/công
-// nợ/doanh thu) - tuỳ chọn In luôn sau khi lưu xong. ---
+// nợ/doanh thu) - tuỳ chọn In luôn sau khi lưu xong. Nếu đang ở CHẾ ĐỘ SỬA
+// (window.__editingBaoGiaId có giá trị) thì CẬP NHẬT đúng bản ghi cũ, giữ nguyên số
+// báo giá, thay vì tạo báo giá mới + tốn thêm 1 số thứ tự. ---
 async function saveBaoGia(alsoPrint) {
     const items = collectBaoGiaItems();
     if (!items.length) {
@@ -10452,17 +10502,42 @@ async function saveBaoGia(alsoPrint) {
     let total = 0;
     items.forEach(i => { total += i.qty * (priceType === 'wholesale' ? i.wholesale : i.retail); });
 
+    const isEditing = !!window.__editingBaoGiaId;
     const d = new Date();
-    const maBaoGia = 'BG' + d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0') + '-' + String(d.getHours()).padStart(2, '0') + String(d.getMinutes()).padStart(2, '0') + String(d.getSeconds()).padStart(2, '0');
 
     showLoading();
     try {
-        const docRef = await db.collection('quotations').add({
-            maBaoGia, customer, address, phone, priceType, items, total,
-            date: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        let maBaoGia;
+        if (isEditing) {
+            maBaoGia = window.__editingBaoGiaMa || '';
+            await db.collection('quotations').doc(window.__editingBaoGiaId).update({
+                customer, address, phone, priceType, items, total,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        } else {
+            // Số báo giá NGẮN GỌN, tuần tự: BG01, BG02, BG03... - dùng chung 1 bộ đếm nhẹ
+            // app_meta/quotation_counter (đọc số hiện tại rồi cộng nguyên tử), giống hệt
+            // cách app đang đánh số phiếu nhập ở app_meta/receipt_counter.
+            const counterSnap = await db.collection('app_meta').doc('quotation_counter').get();
+            const nextNum = (counterSnap.exists ? parseInt(counterSnap.data().maxNum || 0) : 0) + 1;
+            maBaoGia = 'BG' + String(nextNum).padStart(2, '0');
+
+            await db.collection('quotations').add({
+                maBaoGia, customer, address, phone, priceType, items, total,
+                date: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            try {
+                await db.collection('app_meta').doc('quotation_counter').set({
+                    maxNum: firebase.firestore.FieldValue.increment(1)
+                }, { merge: true });
+            } catch (counterErr) {
+                console.warn('Không cập nhật được bộ đếm số báo giá (báo giá vẫn đã lưu đúng):', counterErr);
+            }
+        }
+
         Swal.close();
-        showAlert('Đã lưu báo giá thành công!');
+        showAlert(isEditing ? 'Đã cập nhật báo giá thành công!' : 'Đã lưu báo giá thành công!');
 
         if (alsoPrint) {
             fillAndPrintBaoGia({ maBaoGia, customer, address, phone, priceType, items, total, dateObj: d });
@@ -10581,6 +10656,7 @@ function renderBaoGiaHistoryList(list) {
                     <p class="text-[11px] text-slate-400">${dateStr} • ${soLuongSP} sản phẩm • <b class="text-red-500">${Number(q.total || 0).toLocaleString('vi-VN')} đ</b></p>
                 </div>
                 <div class="flex gap-1.5 shrink-0">
+                    <button onclick="editSavedBaoGia('${q.id}')" title="Sửa" class="bg-amber-500 text-white p-2 rounded-lg hover:bg-amber-600"><i data-lucide="pencil" class="w-4 h-4"></i></button>
                     <button onclick="reprintSavedBaoGia('${q.id}')" title="In lại" class="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700"><i data-lucide="printer" class="w-4 h-4"></i></button>
                     <button onclick="deleteSavedBaoGia('${q.id}')" title="Xoá" class="bg-red-600 text-white p-2 rounded-lg hover:bg-red-700"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                 </div>
@@ -10595,6 +10671,18 @@ function filterBaoGiaHistory() {
         (q.customer || '').toLowerCase().includes(input) || (q.maBaoGia || '').toLowerCase().includes(input)
     );
     renderBaoGiaHistoryList(filtered);
+}
+
+// Mở lại popup Tạo Báo Giá ở CHẾ ĐỘ SỬA, điền sẵn đúng khách hàng/số lượng/giá của báo
+// giá đã lưu này (giữ nguyên số báo giá cũ khi lưu lại, không sinh số mới).
+function editSavedBaoGia(docId) {
+    const q = window.__baoGiaHistoryCache.find(x => x.id === docId);
+    if (!q) return;
+    closeBaoGiaHistoryModal();
+    openBaoGiaModal({
+        id: q.id, maBaoGia: q.maBaoGia, customer: q.customer, address: q.address,
+        phone: q.phone, priceType: q.priceType, items: q.items || []
+    });
 }
 
 function reprintSavedBaoGia(docId) {
@@ -10668,7 +10756,7 @@ async function exportToExcel() {
         rAddr.alignment = { horizontal: 'center' };
         rAddr.font = { size: 11, italic: true };
 
-        const rPhone = sheet.addRow(['Hotline: 0982 998 474 - 0949 558 525']);
+        const rPhone = sheet.addRow(['Hotline: 0982 398 474 - 0949 553 525']);
         sheet.mergeCells(rPhone.number, 1, rPhone.number, totalCols);
         rPhone.alignment = { horizontal: 'center' };
         rPhone.font = { size: 11, italic: true };
