@@ -2420,7 +2420,7 @@ html:not(.dark) .bg-white {
         <div style="width: 80%; text-align: center;">
             <h2 style="margin: 0; font-size: 17px; font-weight: bold; letter-spacing: .3px;">HTX SẢN XUẤT VÀ KINH DOANH NÔNG SẢN THANH NGUYỄN</h2>
             <p style="margin: 4px 0 0; font-size: 12.5px; color: #333;">Địa chỉ: Số 9, ngõ 456, đường Xuân Thành, Phố Thượng, Phường Hoa Lư, Ninh Bình</p>
-            <p style="margin: 2px 0 0; font-size: 12.5px; color: #333;">Hotline: 0982 398 474 - 099 553 525</p>
+            <p style="margin: 2px 0 0; font-size: 12.5px; color: #333;">Hotline: 0982 398 474 - 0969 553 525</p>
         </div>
     </div>
 
@@ -3844,8 +3844,19 @@ html:not(.dark) .bg-white {
 
    		
 <style media="print">
+    /* @page không ép cứng khổ giấy (để người dùng vẫn tự chọn Dọc/Ngang trong hộp thoại In
+       như bình thường) - chỉ chuẩn hoá lề trang cho đồng nhất giữa 2 khổ. */
+    @page { margin: 8mm; }
+    html, body { width: 100%; margin: 0; padding: 0; }
+
     body * { visibility: hidden; }
-    #print-area, #print-area-xuatkho, #print-area-nhapkho, #print-area-baogia { display: none; position: absolute; left: 0; top: 0; width: 100%; box-sizing: border-box; }
+    /* SỬA LỖI: khổ ngang bị co vào giữa trang - nguyên nhân là "width: 100%" trên phần tử
+       position:absolute đôi khi được trình duyệt tính theo chiều rộng khổ DỌC (kích thước
+       trang lúc đầu) thay vì khổ NGANG người dùng vừa chọn trong hộp thoại in, khiến nội
+       dung bị "đóng khung" hẹp rồi hiện canh giữa phần trống còn lại. Đổi sang "left:0;
+       right:0" (không khai báo width) buộc trình duyệt tự tính lại đúng chiều rộng theo
+       đúng khổ giấy thực tế đang in mỗi lần, dù Dọc hay Ngang. */
+    #print-area, #print-area-xuatkho, #print-area-nhapkho, #print-area-baogia { display: none; position: absolute; left: 0; right: 0; top: 0; width: auto; margin: 0; box-sizing: border-box; }
 
     body.print-mode-hoadon #print-area { display: block !important; visibility: visible; }
     body.print-mode-hoadon #print-area * { visibility: visible; }
@@ -5310,6 +5321,14 @@ function calcShiftHours(inTime, outTime) {
     return diff > 0 ? diff : 0;
 }
 
+// Định dạng số giờ công để hiển thị: bỏ số 0 vô nghĩa ở cuối - 12 giờ hiện "12" (không phải
+// "12.00"), 12.5 giờ hiện "12.5", 12.25 giờ hiện "12.25" (giữ tối đa 2 chữ số thập phân khi
+// số giờ thực sự lẻ, không làm tròn mất số như .toFixed(0) sẽ làm).
+function formatGio(n) {
+    const num = Number(n) || 0;
+    return (Math.round(num * 100) / 100).toString();
+}
+
 // ============ Ô GÕ NGÀY/GIỜ TỰ ĐỊNH DẠNG (thay cho input type="date"/"time" chuẩn) ============
 // SỬA LỖI: ô ngày/giờ CHUẨN của trình duyệt (input type="date"/"time") chia thành nhiều
 // "ngăn" (ngày/tháng/năm, giờ/phút) do CHÍNH TRÌNH DUYỆT tự xử lý bàn phím - gõ nhanh, đặc
@@ -5451,7 +5470,7 @@ function renderParttimeTable() {
                         '<i data-lucide="' + (isCollapsed ? 'chevron-right' : 'chevron-down') + '" class="w-3.5 h-3.5 shrink-0 text-slate-400"></i>' +
                         '<span class="font-bold text-slate-700 dark:text-slate-200 text-xs">' + dateLabel + '</span>' +
                         weekdaySpan +
-                        '<span class="text-[10px] text-slate-400">(' + rows.length + ' người · ' + groupTotalHours.toFixed(2) + ' giờ · ' + groupTotalTien.toLocaleString('vi-VN') + ' đ)</span>' +
+                        '<span class="text-[10px] text-slate-400">(' + rows.length + ' người · ' + formatGio(groupTotalHours) + ' giờ · ' + groupTotalTien.toLocaleString('vi-VN') + ' đ)</span>' +
                     '</button>' +
                     actionButtons +
                 '</div>' +
@@ -5479,8 +5498,8 @@ function renderParttimeTable() {
             const morningWarnTitle = morningWarn ? 'Giờ ra đang sớm hơn/bằng giờ vào - kiểm tra lại' : '';
             const afternoonWarnTitle = afternoonWarn ? 'Giờ ra đang sớm hơn/bằng giờ vào - kiểm tra lại' : '';
 
-            const morningText = morningWarn ? '⚠️' : (morningHours ? morningHours.toFixed(2) + 'h' : '');
-            const afternoonText = afternoonWarn ? '⚠️' : (afternoonHours ? afternoonHours.toFixed(2) + 'h' : '');
+            const morningText = morningWarn ? '⚠️' : (morningHours ? formatGio(morningHours) + 'h' : '');
+            const afternoonText = afternoonWarn ? '⚠️' : (afternoonHours ? formatGio(afternoonHours) + 'h' : '');
             const dupWarningDiv = isDup ? '<div class="text-[9px] text-amber-600 dark:text-amber-400 font-bold" title="Tên này xuất hiện từ 2 dòng trở lên trong cùng ngày - kiểm tra lại có bị trùng/nhập nhầm không">⚠️ Trùng ca</div>' : '';
 
             // Mỗi buổi (sáng/chiều) giờ GỘP thành 1 Ô DUY NHẤT: 2 ô giờ (vào - ra) xếp ngang
@@ -5513,7 +5532,7 @@ function renderParttimeTable() {
                 '</td>' +
                 morningCell +
                 afternoonCell +
-                '<td class="' + tdBase + ' p-1 text-center font-bold dark:text-white">' + (total ? total.toFixed(2) : 0) + '</td>' +
+                '<td class="' + tdBase + ' p-1 text-center font-bold dark:text-white">' + formatGio(total) + '</td>' +
                 '<td class="' + tdBase + ' p-1">' +
                     '<input type="number" value="' + rate + '" class="w-full text-center text-[11px] bg-transparent outline-none dark:text-white focus:bg-blue-50 dark:focus:bg-slate-800" onchange="updateParttimeField(' + idx + ', \'rate\', this.value)">' +
                 '</td>' +
@@ -6127,11 +6146,11 @@ function printChamCong() {
                 '<td style="border:1.5px solid #000;padding:9px 6px;font-weight:bold;white-space:nowrap;">' + (e.name || '') + '</td>' +
                 '<td style="border:1.5px solid #000;padding:9px 4px;text-align:center;">' + (e.morningIn || '') + '</td>' +
                 '<td style="border:1.5px solid #000;padding:9px 4px;text-align:center;">' + (e.morningOut || '') + '</td>' +
-                '<td style="border:1.5px solid #000;padding:9px 4px;text-align:center;">' + (morningHours ? morningHours.toFixed(2) : '') + '</td>' +
+                '<td style="border:1.5px solid #000;padding:9px 4px;text-align:center;">' + (morningHours ? formatGio(morningHours) : '') + '</td>' +
                 '<td style="border:1.5px solid #000;padding:9px 4px;text-align:center;">' + (e.afternoonIn || '') + '</td>' +
                 '<td style="border:1.5px solid #000;padding:9px 4px;text-align:center;">' + (e.afternoonOut || '') + '</td>' +
-                '<td style="border:1.5px solid #000;padding:9px 4px;text-align:center;">' + (afternoonHours ? afternoonHours.toFixed(2) : '') + '</td>' +
-                '<td style="border:1.5px solid #000;padding:9px 4px;text-align:center;font-weight:bold;">' + (total ? total.toFixed(2) : 0) + '</td>' +
+                '<td style="border:1.5px solid #000;padding:9px 4px;text-align:center;">' + (afternoonHours ? formatGio(afternoonHours) : '') + '</td>' +
+                '<td style="border:1.5px solid #000;padding:9px 4px;text-align:center;font-weight:bold;">' + formatGio(total) + '</td>' +
                 '<td style="border:1.5px solid #000;padding:9px 6px;text-align:right;">' + thanhTien.toLocaleString('vi-VN') + '</td>' +
                 '<td style="border:1.5px solid #000;padding:9px 4px;"></td>' +
             '</tr>';
@@ -6162,7 +6181,7 @@ function printChamCong() {
             summaryRowsHtml += '<tr>' +
                 '<td style="border:1.5px solid #000;padding:9px 4px;text-align:center;">' + stt2 + '</td>' +
                 '<td style="border:1.5px solid #000;padding:9px 6px;font-weight:bold;">' + name + '</td>' +
-                '<td style="border:1.5px solid #000;padding:9px 4px;text-align:center;">' + s.hours.toFixed(2) + '</td>' +
+                '<td style="border:1.5px solid #000;padding:9px 4px;text-align:center;">' + formatGio(s.hours) + '</td>' +
                 '<td style="border:1.5px solid #000;padding:9px 4px;text-align:center;">' + s.rate.toLocaleString('vi-VN') + '</td>' +
                 '<td style="border:1.5px solid #000;padding:9px 6px;text-align:right;font-weight:bold;">' + s.tien.toLocaleString('vi-VN') + '</td>' +
                 '<td style="border:1.5px solid #000;padding:9px 4px;"></td>' +
@@ -12708,12 +12727,23 @@ function triggerPrint(modeClass) {
     doc.open();
     doc.write('<html><head><title>In chứng từ</title>');
     doc.write('<meta name="viewport" content="width=device-width, initial-scale=1.0">');
-    // QUAN TRỌNG: nếu không ép chiều rộng cố định, nội dung in sẽ co lại theo đúng bề
-    // ngang màn hình điện thoại (rất hẹp) - làm cột "Số phiếu/Ngày lập/Ghi chú" (vốn
-    // chỉ chiếm 25% bề ngang) bị bóp hẹp, khiến chữ bị xuống dòng như trên máy tính
-    // không hề gặp phải. Ép cứng về 800px giống hệt máy tính để bố cục LUÔN giống
-    // nhau dù in từ điện thoại hay máy tính - máy in/app in sẽ tự co giãn vừa khổ giấy.
-    doc.write('<style>html,body{width:800px;}body{font-family:Arial,sans-serif;padding:15px;color:#000;background:#fff;}table{border-collapse:collapse!important;width:100%!important;margin-top:15px;}th,td{padding:8px!important;border:1px solid #000!important;font-size:14px;}</style>');
+    // QUAN TRỌNG: nếu không ép chiều rộng cố định TRÊN ĐIỆN THOẠI, 1 số trình duyệt/app di
+    // động vẫn áp dụng thẻ <meta viewport width=device-width> ngay cả lúc IN (dù đang in qua
+    // iframe ẩn tách biệt), khiến nội dung co lại theo đúng bề ngang màn hình điện thoại (rất
+    // hẹp) - làm cột "Số phiếu/Ngày lập/Ghi chú" bị bóp hẹp, chữ xuống dòng lung tung. Ép cứng
+    // 800px giống hệt máy tính để bố cục LUÔN giống nhau dù in từ điện thoại hay máy tính.
+    // NHƯNG: ép cứng 800px này lên CẢ máy tính lại gây lỗi KHÁC - khi in khổ NGANG (trang giấy
+    // rộng hơn hẳn 800px), nội dung 800px + margin:0 auto bị "đóng khung" hẹp rồi nằm co giữa
+    // trang, dư 1 khoảng trắng lớn 2 bên, trong khi khổ DỌC thì không sao (800px gần khớp bề
+    // ngang khổ dọc nên không lộ ra). SỬA: CHỈ ép cứng 800px khi in từ ĐIỆN THOẠI THẬT (theo
+    // userAgent, không phải theo bề rộng cửa sổ - để không nhầm cửa sổ máy tính thu nhỏ thành
+    // điện thoại); trên máy tính, để width:100% cho nội dung TỰ LẤP ĐẦY đúng khổ giấy đang in,
+    // dù người dùng chọn Dọc hay Ngang trong hộp thoại in - không còn bị co giữa nữa.
+    const isMobilePrint = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const printBodyWidthCss = isMobilePrint
+        ? 'width:800px;max-width:100%;margin:0 auto;'
+        : 'width:100%;margin:0;';
+    doc.write('<style>body{' + printBodyWidthCss + 'box-sizing:border-box;font-family:Arial,sans-serif;padding:15px;color:#000;background:#fff;}table{border-collapse:collapse!important;width:100%!important;margin-top:15px;}th,td{padding:8px!important;border:1px solid #000!important;font-size:14px;}</style>');
     doc.write('</head><body>');
     doc.write(printElement.innerHTML);
     doc.write('</body></html>');
