@@ -16696,7 +16696,7 @@ async function viewInventoryReport() {
         // Cột "Ghi chú" (tên KH đổi date/hoàn trả) CHỈ hiện khi có ít nhất 1 sản phẩm có ghi
         // chú - theo đúng yêu cầu, để khỏi thừa 1 cột trống khi kỳ báo cáo không phát sinh
         // đổi date/hoàn trả nào.
-        const headers = ['STT', 'Tên sản phẩm', 'ĐVT', 'Tồn đầu', 'Nhập mới', 'Đổi date/Hoàn trả', 'Xuất', 'Tồn cuối'];
+        const headers = ['STT', 'Tên sản phẩm', 'ĐVT', 'Tồn đầu', 'Nhập mới', 'Đổi date Hoàn trả', 'Xuất', 'Tồn cuối'];
         const aligns = ['center', 'left', 'center', 'right', 'right', 'right', 'right', 'right'];
         if (anyGhiChu) { headers.push('Ghi chú'); aligns.push('left'); }
 
@@ -16853,7 +16853,7 @@ async function exportInventory() {
         sheet.addRow([]);
 
         // Header - căn giữa cả ngang lẫn dọc, tô nền xanh nhạt, in đậm, giống Báo Cáo Tổng Hợp
-        const headers = ["STT", "Tên sản phẩm", "ĐVT", "Tồn đầu", "Nhập mới", "Đổi date/Hoàn trả", "Xuất", "Tồn cuối"];
+        const headers = ["STT", "Tên sản phẩm", "ĐVT", "Tồn đầu", "Nhập mới", "Đổi date Hoàn trả", "Xuất", "Tồn cuối"];
         if (anyGhiChu) headers.push("Ghi chú");
         const headerRow = sheet.addRow(headers);
         headerRow.height = 25;
@@ -17495,7 +17495,7 @@ async function exportFullReport() {
         sheet.mergeCells(titleRow2.number, 1, titleRow2.number, nxtTotalCols); 
         titleRow2.alignment = { horizontal: 'center' };
         
-        const header2Cells = ["Ngày tháng", "Tên sản phẩm", "ĐVT", "Tồn đầu", "Nhập mới", "Đổi date/Hoàn trả", "Xuất", "Tồn cuối", "Ghi chú"];
+        const header2Cells = ["Ngày tháng", "Tên sản phẩm", "ĐVT", "Tồn đầu", "Nhập mới", "Đổi date Hoàn trả", "Xuất", "Tồn cuối", "Ghi chú"];
         const header2 = sheet.addRow(header2Cells);
         
         // Chỉnh chiều cao dòng - tăng lên (25 -> 30) để tiêu đề dài ("Đổi date/Hoàn trả") đủ
@@ -17939,7 +17939,7 @@ async function viewFullReport() {
                     <th style="${th}width:6%;">ĐVT</th>
                     <th style="${th}width:9%;">Tồn đầu</th>
                     <th style="${th}width:9%;">Nhập mới</th>
-                    <th style="${th}width:10%;">Đổi date/Hoàn trả</th>
+                    <th style="${th}width:10%;">Đổi date Hoàn trả</th>
                     <th style="${th}width:7%;">Xuất</th>
                     <th style="${th}width:8%;">Tồn cuối</th>
                     <th style="${th}width:21%;">Ghi chú</th>
