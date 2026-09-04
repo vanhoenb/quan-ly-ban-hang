@@ -1725,91 +1725,74 @@ html:not(.dark) .bg-white {
         </div>
     </div>
 
-    <!-- THANH TABS MENU 3D (ĐÃ KHẮC PHỤC RUNG LẮC) -->
-<div class="grid grid-cols-3 gap-2 md:gap-3 bg-slate-200 dark:bg-slate-950 p-1.5 rounded-2xl border border-slate-300 dark:border-slate-900 shadow-[inset_0_2px_6px_rgba(0,0,0,0.15)] dark:shadow-[inset_0_4px_12px_rgba(0,0,0,0.8)] select-none">
-    <!-- Tab 1: NXT KHO (Mặc định đang Active) -->
-    <button onclick="switchMainTab('inventory')" id="btn-main-inventory" 
-        class="py-2.5 px-1 text-[10px] md:text-sm font-black rounded-xl transition-all duration-150 bg-gradient-to-b from-blue-500 to-blue-600 dark:from-blue-900/60 dark:to-blue-800/50 text-white dark:text-blue-400 border-b-[4px] border-blue-700 dark:border-blue-600 shadow-[0_4px_10px_rgba(59,130,246,0.15)] dark:shadow-[0_6px_15px_rgba(59,130,246,0.25)] uppercase tracking-wider">
-        NXT KHO
-    </button>
-    
-    <!-- Tab 2: DOANH THU -->
-    <button onclick="switchMainTab('revenue')" id="btn-main-revenue" 
-        class="py-2.5 px-1 text-[10px] md:text-sm font-bold rounded-xl transition-all duration-150 bg-slate-100/80 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border-b-[2px] border-slate-300 dark:border-slate-950 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/80 hover:border-b-[4px] hover:border-slate-400 dark:hover:border-slate-800 uppercase tracking-wider">
-        DOANH THU
-    </button>
-    
-    <!-- Tab 3: TOP SP + KH NỢ -->
-    <button onclick="switchMainTab('products')" id="btn-main-products" 
-        class="py-2.5 px-1 text-[10px] md:text-sm font-bold rounded-xl transition-all duration-150 bg-slate-100/80 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 border-b-[2px] border-slate-300 dark:border-slate-950 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/80 hover:border-b-[4px] hover:border-slate-400 dark:hover:border-slate-800 uppercase tracking-wider">
-        TOP SP 
-    </button>
-</div>
+    <!-- BỐ CỤC 1 TRANG DUY NHẤT (đã bỏ 3 tab NXT KHO/DOANH THU/TOP SP, gộp lại xếp cùng lúc
+         trên 1 trang) - CHI TIẾT TỒN KHO chiếm khối to nhất (2/3 bề ngang trên màn hình
+         lớn), các khối còn lại xếp cân đối xung quanh - không thêm bớt nội dung gì, chỉ sắp
+         xếp lại đúng các khối đã có sẵn ở 3 tab cũ. -->
 
-    <!-- NỘI DUNG CHUYỂN ĐỔI TAB (TỒN KHO) -->
-    <div id="content-main-inventory" class="main-tab-content block">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-rose-100 dark:border-rose-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">CHI TIẾT TỒN KHO</h3>
-                    <div class="flex gap-2">
-                        <input type="date" id="inv-from" onchange="refreshInventory()" class="text-[10px] dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500 transition-all">
-                        <input type="date" id="inv-to" onchange="refreshInventory()" class="text-[10px] dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500 transition-all">
-                    </div>
-                </div>
-                <div id="home-inventory-list" class="space-y-2 overflow-y-auto custom-scrollbar pr-2 h-[400px] md:h-[500px]">
-                    <div class="animate-pulse h-14 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2"></div>
-                    <div class="animate-pulse h-14 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2"></div>
-                    <div class="animate-pulse h-14 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2"></div>
-                    <div class="animate-pulse h-14 bg-slate-200 dark:bg-slate-800 rounded-lg"></div>
+    <!-- HÀNG 1: CHI TIẾT TỒN KHO (to nhất) + THỜI GIAN CẤP HÀNG ĐẠI LÝ -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-rose-100 dark:border-rose-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">CHI TIẾT TỒN KHO</h3>
+                <div class="flex gap-2">
+                    <input type="date" id="inv-from" onchange="refreshInventory()" class="text-[10px] dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500 transition-all">
+                    <input type="date" id="inv-to" onchange="refreshInventory()" class="text-[10px] dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500 transition-all">
                 </div>
             </div>
-            
-            <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-blue-100 dark:border-blue-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
-                <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">THỜI GIAN CẤP HÀNG ĐẠI LÝ</h3>
-                <div class="flex items-center w-full px-2 mb-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">
-                    <div class="w-[15%]">Số phiếu</div>
-                    <div class="w-[30%]">Khách hàng</div>
-                    <div class="w-[20%] text-center">Ngày tháng</div>
-                    <div class="w-[20%] text-center">Tổng tiền</div>
-                    <div class="w-[15%] text-center">Trạng thái</div>
-                </div>
-                <div id="customer-orders-table" class="overflow-y-auto custom-scrollbar h-[400px] md:h-[500px] pr-2">
-                    <div class="animate-pulse h-12 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2"></div>
-                    <div class="animate-pulse h-12 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2"></div>
-                    <div class="animate-pulse h-12 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2"></div>
-                    <div class="animate-pulse h-12 bg-slate-200 dark:bg-slate-800 rounded-lg"></div>
-                </div>
+            <div id="home-inventory-list" class="space-y-2 overflow-y-auto custom-scrollbar pr-2 h-[320px] md:h-[380px]">
+                <div class="animate-pulse h-14 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2"></div>
+                <div class="animate-pulse h-14 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2"></div>
+                <div class="animate-pulse h-14 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2"></div>
+                <div class="animate-pulse h-14 bg-slate-200 dark:bg-slate-800 rounded-lg"></div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-1 bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-blue-100 dark:border-blue-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
+            <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">THỜI GIAN CẤP HÀNG ĐẠI LÝ</h3>
+            <div class="flex items-center w-full px-2 mb-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">
+                <div class="w-[15%]">Số phiếu</div>
+                <div class="w-[30%]">Khách hàng</div>
+                <div class="w-[20%] text-center">Ngày tháng</div>
+                <div class="w-[20%] text-center">Tổng tiền</div>
+                <div class="w-[15%] text-center">Trạng thái</div>
+            </div>
+            <div id="customer-orders-table" class="overflow-y-auto custom-scrollbar h-[320px] md:h-[380px] pr-2">
+                <div class="animate-pulse h-12 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2"></div>
+                <div class="animate-pulse h-12 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2"></div>
+                <div class="animate-pulse h-12 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2"></div>
+                <div class="animate-pulse h-12 bg-slate-200 dark:bg-slate-800 rounded-lg"></div>
             </div>
         </div>
     </div>
 
-    <!-- NỘI DUNG CHUYỂN ĐỔI TAB (BIỂU ĐỒ DOANH THU) -->
-    <div id="content-main-revenue" class="main-tab-content hidden space-y-6">
-        <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-rose-100 dark:border-rose-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
-            <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">Biểu đồ doanh thu ngày</h3>
-            <div class="h-[300px] md:h-[400px] w-full"><canvas id="revenueChart"></canvas></div>
-        </div>
-        <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-blue-100 dark:border-blue-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
-            <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">Doanh thu từng tháng</h3>
-            <div class="h-[300px] md:h-[400px] w-full"><canvas id="monthlyRevenueChart"></canvas></div>
-        </div>
-    </div>
-
-    <!-- NỘI DUNG CHUYỂN ĐỔI TAB (TOP SẢN PHẨM & CÔNG NỢ) -->
-    <div id="content-main-products" class="main-tab-content hidden">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-blue-100 dark:border-blue-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] flex flex-col">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">TOP 10 SP BÁN CHẠY</h3>
-                    <button onclick="showAllProductsSold()" class="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap">Xem tất cả ▸</button>
-                </div>
-                <div class="h-[400px] md:h-[500px] w-full"><canvas id="topProductsChart"></canvas></div>
+    <!-- HÀNG 2: 4 biểu đồ còn lại - xếp 1 HÀNG NGANG (4 cột trên màn hình lớn) để cả trang
+         gói gọn trong 1 khung, không phải cuộn xa như xếp 2x2 trước đó. -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <div class="bg-white dark:bg-slate-900 p-3 md:p-4 rounded-3xl border border-rose-100 dark:border-rose-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
+            <div class="flex items-center justify-between mb-2 md:mb-3">
+                <h3 class="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Doanh thu ngày</h3>
+                <button onclick="showAllDailyRevenue()" class="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap">Xem tất cả</button>
             </div>
-            <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-rose-100 dark:border-rose-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] flex flex-col">
-                <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">TỶ TRỌNG DOANH THU</h3>
-                <div class="h-[400px] md:h-[500px] w-full"><canvas id="revenueShareChart"></canvas></div>
+            <div class="h-[180px] md:h-[220px] w-full"><canvas id="revenueChart"></canvas></div>
+        </div>
+        <div class="bg-white dark:bg-slate-900 p-3 md:p-4 rounded-3xl border border-blue-100 dark:border-blue-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
+            <div class="flex items-center justify-between mb-2 md:mb-3">
+                <h3 class="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Doanh thu từng tháng</h3>
+                <button onclick="showAllMonthlyRevenue()" class="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap">Xem tất cả</button>
             </div>
+            <div class="h-[180px] md:h-[220px] w-full"><canvas id="monthlyRevenueChart"></canvas></div>
+        </div>
+        <div class="bg-white dark:bg-slate-900 p-3 md:p-4 rounded-3xl border border-blue-100 dark:border-blue-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] flex flex-col">
+            <div class="flex items-center justify-between mb-2 md:mb-3">
+                <h3 class="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Top 10 SP bán chạy</h3>
+                <button onclick="showAllProductsSold()" class="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap">Xem tất cả</button>
+            </div>
+            <div class="h-[180px] md:h-[220px] w-full"><canvas id="topProductsChart"></canvas></div>
+        </div>
+        <div class="bg-white dark:bg-slate-900 p-3 md:p-4 rounded-3xl border border-rose-100 dark:border-rose-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] flex flex-col">
+            <h3 class="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2 md:mb-3">Tỷ trọng doanh thu</h3>
+            <div class="h-[180px] md:h-[220px] w-full"><canvas id="revenueShareChart"></canvas></div>
         </div>
     </div>
 
@@ -7315,79 +7298,12 @@ document.addEventListener('DOMContentLoaded', () => {
  * @param {string} filter - 'today', 'week', 'month', hoặc 'YYYY-MM'
  */
  
+ // Trang Chủ đã bỏ 3 tab NXT KHO/DOANH THU/TOP SP (gộp hiển thị cùng lúc trên 1 trang) -
+ // hàm này giữ lại rỗng (không làm gì) chỉ để không phá vỡ chỗ đang gọi switchMainTab()
+ // khi vào lại Trang Chủ (xem showPage()), phòng khi cần dùng lại cơ chế tab sau này.
  function switchMainTab(tabName) {
-    // 1. Ẩn toàn bộ nội dung các tab
-    document.querySelectorAll('.main-tab-content').forEach(el => {
-        el.classList.add('hidden');
-        el.classList.remove('block', 'space-y-6');
-    });
-
-    // 2. Hiển thị nội dung tab được chọn
-    const activeContent = document.getElementById('content-main-' + tabName);
-    if (activeContent) {
-        activeContent.classList.remove('hidden');
-        if (tabName === 'revenue') {
-            activeContent.classList.add('space-y-6'); 
-        } else {
-            activeContent.classList.add('block');
-        }
-    }
-
-    // 3. Danh sách class khi Tab được chọn (PHẢI khớp CHÍNH XÁC với class tĩnh ban đầu
-    // trong HTML của nút "NXT KHO" - nếu không khớp, classList.remove() bên dưới sẽ không
-    // xoá được class cũ (do không tìm thấy đúng tên class để xoá), khiến class cũ dính lại
-    // chồng lên class mới thêm vào. Đây chính là nguyên nhân lỗi "mất chữ" ở chế độ sáng:
-    // 'text-white' của trạng thái active bị dính lại trên tab không active, chữ trắng trên
-    // nền sáng gần như vô hình - trong khi ở chế độ tối vẫn thấy được (chữ trắng + nền tối
-    // vẫn tương phản tốt) nên không lộ ra lỗi.
-    const activeClasses = [
-        'bg-gradient-to-b', 'from-blue-500', 'to-blue-600', 
-        'text-white', 
-        'border-b-[4px]', 'border-blue-700', 
-        'shadow-[0_4px_10px_rgba(59,130,246,0.15)]', 
-        'font-black',
-        // Các class cho Dark Mode
-        'dark:from-blue-900/60', 'dark:to-blue-800/50', 'dark:text-blue-400', 
-        'dark:border-blue-600', 
-        'dark:shadow-[0_6px_15px_rgba(59,130,246,0.25)]'
-    ];
-    
-    // 4. Danh sách class khi Tab KHÔNG được chọn (cũng khớp chính xác với class tĩnh ban
-    // đầu của nút "DOANH THU"/"TOP SP + KH NỢ" trong HTML).
-    const inactiveClasses = [
-        'bg-slate-100/80', 'text-slate-400', 
-        'border-b-[2px]', 'border-slate-300', 
-        'shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]', 
-        'hover:text-slate-700', 
-        'hover:bg-slate-50', 'hover:border-b-[4px]', 
-        'hover:border-slate-400', 
-        'hover:shadow-[0_4px_10px_rgba(0,0,0,0.1)]', 'font-bold',
-        // Các class cho Dark Mode
-        'dark:bg-slate-900/40', 'dark:text-slate-500', 'dark:border-slate-950', 
-        'dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]', 'dark:hover:text-slate-300', 
-        'dark:hover:bg-slate-900/80', 'dark:hover:border-slate-800', 
-        'dark:hover:shadow-[0_4px_10px_rgba(0,0,0,0.4)]'
-    ];
-
-    // Tạo danh sách tổng hợp để làm sạch hoàn toàn trạng thái cũ
-    const allClasses = [...activeClasses, ...inactiveClasses];
-
-    // 5. Cập nhật trạng thái hiển thị cho từng nút
-    const tabs = ['inventory', 'revenue', 'products'];
-    tabs.forEach(t => {
-        const btn = document.getElementById('btn-main-' + t);
-        if (btn) {
-            // XÓA SẠCH MỌI CLASS CŨ (cả sáng và tối) TRƯỚC KHI THÊM MỚI
-            btn.classList.remove(...allClasses);
-            
-            if (t === tabName) {
-                btn.classList.add(...activeClasses);
-            } else {
-                btn.classList.add(...inactiveClasses);
-            }
-        }
-    });
-}
+     // Không còn tab để chuyển - để trống có chủ đích.
+ }
 
 // Tải dữ liệu tổng quan (doanh thu, tồn kho...) cho Trang chủ
 // Chống RACE CONDITION: loadDashboard có thể bị gọi chồng lên nhau từ nhiều nơi khác nhau
@@ -8627,7 +8543,12 @@ function updateRevenueChart(filteredSales) {
         dailyData[dateStr] = (dailyData[dateStr] || 0) + (Number(order.total) || 0);
     });
 
-    const sortedDates = Object.keys(dailyData).sort();
+    const allSortedDates = Object.keys(dailyData).sort();
+    // Lưu lại đầy đủ TẤT CẢ các ngày (không giới hạn) để nút "Xem tất cả" mở ra xem được hết,
+    // còn biểu đồ nhỏ trên Trang Chủ chỉ hiện 5 NGÀY GẦN NHẤT cho gọn, đỡ chật khi khung biểu
+    // đồ giờ nhỏ (1/4 hàng ngang) mà kỳ xem có khi cả tháng (30 ngày) sẽ rất rối mắt.
+    window.__dashboardDailyRevenueMap = dailyData;
+    const sortedDates = allSortedDates.slice(-5);
     const labels = sortedDates.map(dateStr => {
         const [year, month, day] = dateStr.split('-');
         return `${day}.${month}`;
@@ -8800,7 +8721,10 @@ function updateMonthlyRevenueChart(allSales) {
         monthlyData[monthStr] = (monthlyData[monthStr] || 0) + (Number(order.total) || 0);
     });
 
-    const sortedMonths = Object.keys(monthlyData).sort();
+    // Lưu lại đầy đủ TẤT CẢ các tháng để nút "Xem tất cả" mở ra xem được hết, còn biểu đồ
+    // nhỏ trên Trang Chủ chỉ hiện 5 THÁNG GẦN NHẤT cho gọn.
+    window.__dashboardMonthlyRevenueMap = monthlyData;
+    const sortedMonths = Object.keys(monthlyData).sort().slice(-5);
     const dataValues = sortedMonths.map(m => monthlyData[m]);
     
     // Tính toán giá trị cao nhất để tạo khoảng trống phía trên
@@ -8974,11 +8898,11 @@ const outsidePieLabelsPlugin = {
         const textColor = isDark ? '#e2e8f0' : '#334155';
         const lineColor = isDark ? '#64748b' : '#94a3b8';
 
-        ctx.save();
-        ctx.font = '11px sans-serif';
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = lineColor;
-
+        // BƯỚC 1: tính vị trí "thô" (theo đúng góc lát bánh) cho từng nhãn trước, CHƯA vẽ vội.
+        // Trước đây vẽ luôn ngay trong 1 vòng lặp duy nhất nên các lát gần nhau (đặc biệt
+        // khi khung biểu đồ bị thu nhỏ lại) cho ra vị trí chữ quá sát nhau, chồng đè lên
+        // nhau không đọc được.
+        const raw = [];
         meta.data.forEach((arc, i) => {
             const value = dataset.data[i];
             if (!value) return;
@@ -8996,6 +8920,29 @@ const outsidePieLabelsPlugin = {
             const isRight = Math.cos(angle) >= 0;
             const endX = midX + (isRight ? 26 : -26);
 
+            raw.push({ startX, startY, midX, midY, endX, isRight, label: chart.data.labels[i], pct });
+        });
+
+        // BƯỚC 2: với các nhãn CÙNG BÊN (trái/phải), sắp theo chiều dọc rồi ép khoảng cách
+        // tối thiểu giữa 2 nhãn liền kề - nhãn nào quá sát nhãn phía trên thì bị đẩy xuống,
+        // đảm bảo không còn chữ nào chồng lên chữ nào nữa.
+        const MIN_GAP = 26;
+        ['left', 'right'].forEach(side => {
+            const group = raw.filter(r => (side === 'right') === r.isRight).sort((a, b) => a.midY - b.midY);
+            for (let i = 1; i < group.length; i++) {
+                const prev = group[i - 1], cur = group[i];
+                if (cur.midY - prev.midY < MIN_GAP) cur.midY = prev.midY + MIN_GAP;
+            }
+        });
+
+        // BƯỚC 3: vẽ đường kẻ chỉ + chữ ở đúng vị trí đã tính (có thể đã được đẩy xuống).
+        ctx.save();
+        ctx.font = '11px sans-serif';
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = lineColor;
+
+        raw.forEach(({ startX, startY, midX, midY, endX, isRight, label, pct }) => {
+            ctx.strokeStyle = lineColor;
             ctx.beginPath();
             ctx.moveTo(startX, startY);
             ctx.lineTo(midX, midY);
@@ -9005,12 +8952,11 @@ const outsidePieLabelsPlugin = {
             ctx.fillStyle = textColor;
             ctx.textAlign = isRight ? 'left' : 'right';
             ctx.textBaseline = 'bottom';
-            const label = chart.data.labels[i];
+            ctx.font = '11px sans-serif';
             ctx.fillText(label, endX + (isRight ? 4 : -4), midY - 2);
             ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
             ctx.font = '10px sans-serif';
             ctx.fillText(pct + '%', endX + (isRight ? 4 : -4), midY + 11);
-            ctx.font = '11px sans-serif';
         });
         ctx.restore();
     }
@@ -9025,8 +8971,10 @@ function updateRevenueShareChart(productRevenueMap) {
     const isDark = document.documentElement.classList.contains('dark');
 
     const entries = Object.entries(productRevenueMap || {}).sort((a, b) => b[1] - a[1]);
-    const top = entries.slice(0, 8);
-    const rest = entries.slice(8);
+    // Khung biểu đồ ở Trang Chủ giờ nhỏ gọn hơn trước nhiều (1/4 hàng ngang) - giảm số lát
+    // hiện nhãn từ 8 xuống 5 (+ "Khác") để đỡ chật chội, hạn chế nhãn phải chen chúc.
+    const top = entries.slice(0, 5);
+    const rest = entries.slice(5);
     const restTotal = rest.reduce((sum, [, v]) => sum + v, 0);
 
     const labels = top.map(e => e[0]);
@@ -9052,7 +9000,7 @@ function updateRevenueShareChart(productRevenueMap) {
             animation: false,
             // Chừa khoảng trống lớn quanh biểu đồ để nhãn + đường kẻ ra ngoài (do plugin
             // outsidePieLabels vẽ) không bị tràn ra ngoài khung/cắt mất chữ.
-            layout: { padding: 70 },
+            layout: { padding: 55 },
             plugins: {
                 // Tắt legend mặc định và nhãn % ở giữa lát bánh - đã thay bằng nhãn kéo ra
                 // ngoài kèm đường kẻ chỉ (outsidePieLabels) giống ảnh mẫu.
@@ -9101,6 +9049,78 @@ function showAllProductsSold() {
 
         content.innerHTML = `
             <div class="mb-3 text-[11px] text-slate-500 dark:text-slate-400">Tổng cộng <b>${entries.length}</b> sản phẩm đã bán trong kỳ đang xem ở Trang Chủ.</div>
+            <div class="max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar space-y-0.5">
+                ${rows}
+            </div>
+        `;
+    }
+
+    modal.classList.remove('hidden');
+}
+
+// Nút "Xem tất cả" ở biểu đồ "Doanh thu ngày" - biểu đồ nhỏ trên Trang Chủ chỉ vẽ 5 ngày
+// gần nhất cho gọn, bấm vào đây xem đủ TẤT CẢ các ngày có doanh thu trong kỳ đang xem.
+function showAllDailyRevenue() {
+    const dailyMap = window.__dashboardDailyRevenueMap || {};
+    const entries = Object.entries(dailyMap).sort((a, b) => b[0].localeCompare(a[0])); // Mới nhất lên đầu
+
+    const modal = document.getElementById('dashboard-detail-modal');
+    const title = document.getElementById('modal-detail-title');
+    const content = document.getElementById('modal-detail-content');
+    if (!modal || !title || !content) return;
+
+    title.innerText = 'Doanh thu tất cả các ngày (kỳ đang xem)';
+
+    if (entries.length === 0) {
+        content.innerHTML = '<p class="text-center text-sm p-4 text-slate-500 dark:text-slate-400">Chưa có dữ liệu doanh thu trong kỳ này.</p>';
+    } else {
+        const rows = entries.map(([dateStr, total], idx) => {
+            const [y, m, d] = dateStr.split('-');
+            return `
+            <div class="flex items-center gap-2 py-2 px-2.5 rounded-lg ${idx % 2 === 0 ? 'bg-slate-50 dark:bg-slate-800/40' : ''}">
+                <span class="text-xs font-bold text-slate-800 dark:text-slate-100 flex-1">${d}/${m}/${y}</span>
+                <span class="text-[11px] font-bold text-rose-600 dark:text-rose-400 shrink-0">${total.toLocaleString('vi-VN')} đ</span>
+            </div>`;
+        }).join('');
+
+        content.innerHTML = `
+            <div class="mb-3 text-[11px] text-slate-500 dark:text-slate-400">Tổng cộng <b>${entries.length}</b> ngày có doanh thu trong kỳ đang xem ở Trang Chủ.</div>
+            <div class="max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar space-y-0.5">
+                ${rows}
+            </div>
+        `;
+    }
+
+    modal.classList.remove('hidden');
+}
+
+// Nút "Xem tất cả" ở biểu đồ "Doanh thu từng tháng" - biểu đồ nhỏ trên Trang Chủ chỉ vẽ 5
+// tháng gần nhất cho gọn, bấm vào đây xem đủ TẤT CẢ các tháng đã có doanh thu.
+function showAllMonthlyRevenue() {
+    const monthlyMap = window.__dashboardMonthlyRevenueMap || {};
+    const entries = Object.entries(monthlyMap).sort((a, b) => b[0].localeCompare(a[0])); // Mới nhất lên đầu
+
+    const modal = document.getElementById('dashboard-detail-modal');
+    const title = document.getElementById('modal-detail-title');
+    const content = document.getElementById('modal-detail-content');
+    if (!modal || !title || !content) return;
+
+    title.innerText = 'Doanh thu tất cả các tháng';
+
+    if (entries.length === 0) {
+        content.innerHTML = '<p class="text-center text-sm p-4 text-slate-500 dark:text-slate-400">Chưa có dữ liệu doanh thu.</p>';
+    } else {
+        const rows = entries.map(([monthStr, total], idx) => {
+            const [y, m] = monthStr.split('-');
+            return `
+            <div class="flex items-center gap-2 py-2 px-2.5 rounded-lg ${idx % 2 === 0 ? 'bg-slate-50 dark:bg-slate-800/40' : ''}">
+                <span class="text-xs font-bold text-slate-800 dark:text-slate-100 flex-1">Tháng ${m}/${y}</span>
+                <span class="text-[11px] font-bold text-blue-600 dark:text-blue-400 shrink-0">${total.toLocaleString('vi-VN')} đ</span>
+            </div>`;
+        }).join('');
+
+        content.innerHTML = `
+            <div class="mb-3 text-[11px] text-slate-500 dark:text-slate-400">Tổng cộng <b>${entries.length}</b> tháng có dữ liệu doanh thu.</div>
             <div class="max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar space-y-0.5">
                 ${rows}
             </div>
@@ -9288,14 +9308,31 @@ db.collection('customers').onSnapshot(() => {
         cart = []; 
         resetImportFields();
 
+        // MỞ LẠI NÚT "LƯU" NGAY TỪ ĐÂY - phiếu nhập và tồn kho đã lưu đúng xong hết rồi,
+        // phần còn lại bên dưới chỉ là các bước PHỤ chạy ngầm (cập nhật giá mới vào Danh
+        // Mục SP, tải lại danh sách hiển thị...). TRƯỚC ĐÂY nút bị giữ ở trạng thái "Đang
+        // lưu..." cho tới khi TOÀN BỘ các bước phụ này xong (đặt trong khối finally) - mà
+        // bước cập nhật giá lại phải ĐỌC + GHI TUẦN TỰ TỪNG SẢN PHẨM MỘT (1 SP xong mới
+        // sang SP tiếp theo), nên nhập càng nhiều SP (5-6 SP trở lên) thì nút càng bị đứng
+        // "Đang lưu..." rất lâu, phải thoát app vào lại mới thấy đã lưu xong - đúng như mô
+        // tả. Giờ mở khoá nút ngay, không bắt người dùng phải chờ các bước phụ này nữa.
+        if (btn) {
+            btn.disabled = false;
+            btn.innerText = "Lưu nhập kho";
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
         // --- TỪ ĐÂY TRỞ XUỐNG LÀ CÁC BƯỚC "PHỤ" (cần đọc dữ liệu từ Firestore) ---
         // Bọc riêng từng bước trong try/catch: nếu bước nào lỗi (ví dụ hết quota đọc),
         // CHỈ bước đó bị ảnh hưởng - phiếu nhập và tồn kho ở trên vẫn đã lưu đúng, không
         // bị mất và không hiện nhầm thông báo "lưu thất bại".
 
-        // 3b. Cập nhật giá bán mới nhất vào danh mục sản phẩm (nếu đọc được)
+        // 3b. Cập nhật giá bán mới nhất vào danh mục sản phẩm (nếu đọc được) - chạy SONG
+        // SONG cho tất cả SP bằng Promise.all thay vì tuần tự từng SP một (trước đây SP
+        // thứ 6 phải đợi xong hết 5 SP trước đó mới tới lượt, giờ cả 6 SP cùng chạy 1 lúc,
+        // nhanh hơn nhiều lần).
         try {
-            for (const item of savedCart) {
+            await Promise.all(savedCart.map(async (item) => {
                 const snapshot = await db.collection('products')
                     .where('name', '==', item.name)
                     .where('unit', '==', item.unit)
@@ -9309,7 +9346,7 @@ db.collection('customers').onSnapshot(() => {
                         wholesale: newWholesale
                     });
                 }
-            }
+            }));
         } catch (priceErr) {
             console.warn('Không cập nhật được giá mới vào Danh Mục SP (có thể do hết quota đọc) - phiếu nhập vẫn đã lưu đúng:', priceErr);
         }
@@ -9327,7 +9364,9 @@ db.collection('customers').onSnapshot(() => {
     } catch (error) {
         console.error("Lỗi lưu phiếu nhập: ", error);
         Swal.fire('Lỗi', 'Không thể lưu: ' + error.message, 'error');
-    } finally {
+        // Lỗi xảy ra ở PHẦN QUAN TRỌNG (trước khi mở khoá nút ở trên) thì mở khoá nút lại
+        // ở đây để người dùng thử lưu lại được - nếu lỗi xảy ra ở phần phụ (đã mở khoá nút
+        // từ trước) thì đoạn này sẽ không chạy tới (nằm ngoài try/catch của bước phụ).
         if (btn) {
             btn.disabled = false;
             btn.innerText = "Lưu nhập kho";
