@@ -1679,8 +1679,9 @@ html:not(.dark) .bg-white {
         </div>
     </div>
 
-    <!-- 4 KHỐI CARD THỐNG KÊ 3D TRÊN 2 GIAO DIỆN SÁNG/TỐI -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 select-none">
+    <!-- 5 KHỐI CARD THỐNG KÊ 3D TRÊN 2 GIAO DIỆN SÁNG/TỐI - CHỈ hẹp CHIỀU RỘNG lại (do chia
+         5 cột thay vì 4), CHIỀU CAO giữ nguyên như bản gốc (h-[90px] md:h-[120px]). -->
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 select-none">
         
         <!-- Tổng Doanh Thu -->
         <div onclick="showDashboardDetail('revenue')" 
@@ -1699,7 +1700,7 @@ html:not(.dark) .bg-white {
             <div class="absolute top-2 left-2 md:top-3 md:left-3 w-6 h-6 md:w-8 md:h-8 rounded-lg md:rounded-xl bg-rose-500 text-white flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.4),0_2px_4px_rgba(244,63,94,0.35)]">
                 <i data-lucide="receipt-text" class="w-3.5 h-3.5 md:w-4 md:h-4"></i>
             </div>
-            <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-rose-500 dark:text-rose-300/80">Công Nợ Cần Thu (Kỳ Này)</p>
+            <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-rose-500 dark:text-rose-300/80">Công Nợ Cần Thu</p>
             <h3 id="total-debt-summary" class="text-md md:text-2xl font-black drop-shadow-[0_1.5px_3px_rgba(244,63,94,0.15)] dark:drop-shadow-[0_2px_4px_rgba(244,63,94,0.3)]">0 đ</h3>
         </div>
         
@@ -1709,7 +1710,7 @@ html:not(.dark) .bg-white {
             <div class="absolute top-2 left-2 md:top-3 md:left-3 w-6 h-6 md:w-8 md:h-8 rounded-lg md:rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.4),0_2px_4px_rgba(245,158,11,0.35)]">
                 <i data-lucide="truck" class="w-3.5 h-3.5 md:w-4 md:h-4"></i>
             </div>
-            <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-300/80">Nợ NCC (Kỳ Này)</p>
+            <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-300/80">Nợ NCC</p>
             <h3 id="total-debt-ncc-summary" class="text-md md:text-2xl font-black drop-shadow-[0_1.5px_3px_rgba(245,158,11,0.15)] dark:drop-shadow-[0_2px_4px_rgba(245,158,11,0.3)]">0 đ</h3>
         </div>
         
@@ -1723,6 +1724,19 @@ html:not(.dark) .bg-white {
             <h3 id="profit-summary" class="text-md md:text-2xl font-black drop-shadow-[0_1.5px_3px_rgba(16,185,129,0.15)] dark:drop-shadow-[0_2px_4px_rgba(16,185,129,0.3)]">0 đ</h3>
             <span id="profit-margin-badge" class="hidden mt-0.5 text-[9px] md:text-[11px] font-bold px-1.5 py-0.5 rounded-full"></span>
         </div>
+
+        <!-- Tổng Số Đơn (Ô THAY THẾ cho "SP Sắp Hết Hàng" cũ - bị báo sai/lúc nào cũng ra
+             "hết hàng" hết do đối chiếu nhầm dữ liệu tồn kho). Đếm số đơn bán hàng trong kỳ
+             đang xem - lấy thẳng từ đúng dữ liệu filteredSales đã tải sẵn cho các ô khác,
+             không phụ thuộc thêm vào nguồn dữ liệu tồn kho nào cả nên không bị lỗi tương tự. -->
+        <div onclick="showDashboardDetail('order-count')" 
+             class="relative bg-violet-100/70 dark:bg-violet-900/50 border-b-[4px] border-violet-300 dark:border-violet-800 text-violet-600 dark:text-violet-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(139,92,246,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-violet-200/70 dark:hover:bg-violet-800/60 hover:border-violet-400 dark:hover:border-violet-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
+            <div class="absolute top-2 left-2 md:top-3 md:left-3 w-6 h-6 md:w-8 md:h-8 rounded-lg md:rounded-xl bg-violet-500 text-white flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.4),0_2px_4px_rgba(139,92,246,0.35)]">
+                <i data-lucide="shopping-cart" class="w-3.5 h-3.5 md:w-4 md:h-4"></i>
+            </div>
+            <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-violet-500 dark:text-violet-300/80">Tổng Số Đơn</p>
+            <h3 id="order-count-summary" class="text-md md:text-2xl font-black drop-shadow-[0_1.5px_3px_rgba(139,92,246,0.15)] dark:drop-shadow-[0_2px_4px_rgba(139,92,246,0.3)]">0 đơn</h3>
+        </div>
     </div>
 
     <!-- BỐ CỤC 1 TRANG DUY NHẤT (đã bỏ 3 tab NXT KHO/DOANH THU/TOP SP, gộp lại xếp cùng lúc
@@ -1730,9 +1744,10 @@ html:not(.dark) .bg-white {
          lớn), các khối còn lại xếp cân đối xung quanh - không thêm bớt nội dung gì, chỉ sắp
          xếp lại đúng các khối đã có sẵn ở 3 tab cũ. -->
 
-    <!-- HÀNG 1: CHI TIẾT TỒN KHO (to nhất) + THỜI GIAN CẤP HÀNG ĐẠI LÝ -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-rose-100 dark:border-rose-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
+    <!-- HÀNG 1: CHI TIẾT TỒN KHO (to nhất, nhưng đã hẹp lại 1 chút so với trước) + THỜI GIAN
+         CẤP HÀNG ĐẠI LÝ (nới rộng thêm 1 chút) - tỉ lệ 3/2 (60%/40%) thay vì 2/1 (66%/33%). -->
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div class="lg:col-span-3 bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-rose-100 dark:border-rose-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">CHI TIẾT TỒN KHO</h3>
                 <div class="flex gap-2">
@@ -1748,7 +1763,7 @@ html:not(.dark) .bg-white {
             </div>
         </div>
 
-        <div class="lg:col-span-1 bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-blue-100 dark:border-blue-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
+        <div class="lg:col-span-2 bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-blue-100 dark:border-blue-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
             <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">THỜI GIAN CẤP HÀNG ĐẠI LÝ</h3>
             <div class="flex items-center w-full px-2 mb-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">
                 <div class="w-[15%]">Số phiếu</div>
@@ -7602,6 +7617,15 @@ async function loadDashboard(filter = 'default') {
         }
     } catch (e) { console.warn('Không tính được biên lợi nhuận:', e); }
 
+    // Đếm TỔNG SỐ ĐƠN bán hàng trong kỳ đang xem cho ô "Tổng Số Đơn" - lấy thẳng từ
+    // filteredSales (dữ liệu đã tải sẵn dùng chung cho các ô khác), không phụ thuộc thêm
+    // vào nguồn dữ liệu tồn kho nào cả.
+    try {
+        const orderCountEl = document.getElementById('order-count-summary');
+        if (orderCountEl) orderCountEl.innerText = filteredSales.length + ' đơn';
+        window.__dashboardOrdersList = filteredSales;
+    } catch (e) { console.warn('Không đếm được tổng số đơn:', e); }
+
     // Đã thay danh sách "Khách hàng công nợ" ở tab Top SP + KH Nợ bằng biểu đồ tỷ trọng
     // doanh thu (xem updateRevenueShareChart bên dưới) nên không cần gọi renderDebtCustomers
     // ở đây nữa - hàm renderDebtCustomers vẫn được giữ lại (không xoá) phòng khi cần dùng
@@ -7940,6 +7964,40 @@ function showDashboardDetail(type) {
         '<p class="mt-3 text-[10px] text-slate-400 dark:text-slate-500 italic">* Lợi nhuận ước tính = Doanh thu trừ tiền nhập nguyên liệu/hàng hoá phát sinh trong kỳ (chưa trừ các chi phí vận hành khác như lương, điện nước, mặt bằng...).</p>';
 
         content.innerHTML = html;
+    }
+
+    // TRƯỜNG HỢP 5: TỔNG SỐ ĐƠN (ĐỒNG BỘ DUAL THEME - NỀN MỜ VIOLET)
+    else if (type === 'order-count') {
+        title.innerText = "Danh sách đơn (kỳ đang xem)";
+        const list = (window.__dashboardOrdersList || []).slice().sort((a, b) => {
+            const da = a.date?.toDate ? a.date.toDate() : new Date(a.date);
+            const db = b.date?.toDate ? b.date.toDate() : new Date(b.date);
+            return db - da; // Mới nhất lên đầu
+        });
+
+        if (list.length === 0) {
+            content.innerHTML = '<p class="text-center text-sm p-4 text-slate-500 dark:text-slate-400">Chưa có đơn nào trong kỳ đang xem.</p>';
+        } else {
+            const rows = list.map((order, idx) => {
+                const d = order.date?.toDate ? order.date.toDate() : new Date(order.date);
+                const dateStr = d.toLocaleDateString('vi-VN');
+                const soPhieu = order.invoiceNumber || (order.id ? order.id.slice(-6) : '---');
+                return `
+                <div class="flex items-center gap-2 py-2 px-2.5 rounded-lg ${idx % 2 === 0 ? 'bg-slate-50 dark:bg-slate-800/40' : ''}">
+                    <span class="text-[10px] font-mono text-slate-400 shrink-0 w-14">${soPhieu}</span>
+                    <span class="text-xs font-bold text-slate-800 dark:text-slate-100 flex-1 truncate">${order.customer || 'Khách lẻ'}</span>
+                    <span class="text-[10px] text-slate-400 shrink-0">${dateStr}</span>
+                    <span class="text-[11px] font-black text-violet-600 dark:text-violet-400 shrink-0 w-24 text-right">${Number(order.total || 0).toLocaleString('vi-VN')} đ</span>
+                </div>`;
+            }).join('');
+
+            content.innerHTML = `
+                <div class="mb-3 text-[11px] text-slate-500 dark:text-slate-400">Tổng cộng <b>${list.length}</b> đơn trong kỳ đang xem ở Trang Chủ.</div>
+                <div class="max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar space-y-0.5">
+                    ${rows}
+                </div>
+            `;
+        }
     }
 }
 
