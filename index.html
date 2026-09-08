@@ -13186,13 +13186,23 @@ function renderXuatKhoTemplate({ receiptId, customer, address, phone, note, item
         // 1. Render sản phẩm bình thường
         normalItems.forEach(i => {
             const { wholesale, retail } = getKhoPrice(i.name, i.price);
-            const selectedPrice = exportPriceType === 'retail' ? retail : wholesale;
+
+            // QUAN TRỌNG: Phiếu Xuất Kho phải dùng đúng ĐƠN GIÁ THỰC TẾ đang lưu trên
+            // hóa đơn (i.price). Trước đây phần này lấy lại giá niêm yết trong Kho Hàng,
+            // nên khi người bán sửa giá trực tiếp trên giỏ hàng (ví dụ 200.000 -> 205.000),
+            // Hóa đơn hiện 205.000 nhưng Phiếu Xuất Kho vẫn hiện 200.000 và tổng bị lệch.
+            // Giá tham chiếu còn lại (Giá bán đề xuất khi bán sỉ) vẫn lấy từ Kho Hàng.
+            const salePrice = Number(i.price || 0);
+            const selectedPrice = salePrice;
             const thanhTien = i.qty * selectedPrice;
             subTotalAll += thanhTien;
+            
+            // Đã sửa cú pháp nối chuỗi để tránh lỗi lồng template string
             const priceCells = exportPriceType === 'wholesale'
-                ? '<td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">' + wholesale.toLocaleString('vi-VN') + '</div></td>' +
+                ? '<td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">' + salePrice.toLocaleString('vi-VN') + '</div></td>' +
                   '<td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">' + retail.toLocaleString('vi-VN') + '</div></td>'
-                : '<td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">' + retail.toLocaleString('vi-VN') + '</div></td>';
+                : '<td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">' + salePrice.toLocaleString('vi-VN') + '</div></td>';
+
             html += `<tr>
                 <td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">${stt++}</div></td>
                 <td style="padding: 7px 8px;"><div style="height:100%;text-align:left;">${i.name || ''}</div></td>
@@ -13217,6 +13227,7 @@ function renderXuatKhoTemplate({ receiptId, customer, address, phone, note, item
                 const priceCellsDate = exportPriceType === 'wholesale'
                     ? '<td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">0</div></td><td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">0</div></td>'
                     : '<td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">0</div></td>';
+
                 html += `<tr>
                     <td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">${stt++}</div></td>
                     <td style="padding: 7px 8px;"><div style="height:100%;text-align:left;">${i.name || ''}</div></td>
@@ -13498,6 +13509,9 @@ async function editInvoiceFromHistory(docId) {
         setVal('sell-note-global', data.note || '');
         setVal('global-vat', data.vatRate || 0);
         setVal('payment-method', data.paymentMethod || 'Tiền mặt');
+        // Giữ nguyên loại giá của hóa đơn khi mở lại để sửa. Nếu hóa đơn cũ chưa từng
+        // lưu priceType thì dùng mặc định Giá sỉ như logic của Phiếu Xuất Kho hiện tại.
+        setVal('global-price-type', data.priceType || 'wholesale');
 
         renderSellCart();
         if (typeof updateGrandTotal === 'function') updateGrandTotal();
