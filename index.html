@@ -1725,17 +1725,46 @@ html:not(.dark) .bg-white {
             <span id="profit-margin-badge" class="hidden mt-0.5 text-[9px] md:text-[11px] font-bold px-1.5 py-0.5 rounded-full"></span>
         </div>
 
-        <!-- Tổng Số Đơn (Ô THAY THẾ cho "SP Sắp Hết Hàng" cũ - bị báo sai/lúc nào cũng ra
-             "hết hàng" hết do đối chiếu nhầm dữ liệu tồn kho). Đếm số đơn bán hàng trong kỳ
-             đang xem - lấy thẳng từ đúng dữ liệu filteredSales đã tải sẵn cho các ô khác,
-             không phụ thuộc thêm vào nguồn dữ liệu tồn kho nào cả nên không bị lỗi tương tự. -->
-        <div onclick="showDashboardDetail('order-count')" 
-             class="relative bg-violet-100/70 dark:bg-violet-900/50 border-b-[4px] border-violet-300 dark:border-violet-800 text-violet-600 dark:text-violet-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(139,92,246,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-violet-200/70 dark:hover:bg-violet-800/60 hover:border-violet-400 dark:hover:border-violet-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
+        <!-- Đồng hồ + Thứ, ngày tháng (giờ Việt Nam) - đã thay cho ô "Tổng Số Đơn" cũ. Không
+             còn là số liệu bấm vào xem chi tiết được nữa nên đã bỏ onclick/hiệu ứng hover-nhấc
+             lên, chỉ giữ nguyên khung/màu cho đồng bộ với 4 thẻ còn lại. Giờ tự cập nhật mỗi
+             giây (xem hàm updateHomeClock ở cuối file), luôn hiển thị đúng giờ Việt Nam
+             (Asia/Ho_Chi_Minh) bất kể máy đang mở app đặt múi giờ nào. Đã thêm dòng Âm lịch
+             (tính bằng thuật toán chuyển đổi Dương lịch -> Âm lịch Việt Nam, xem
+             convertSolar2Lunar) và bấm vào cả ô sẽ mở lịch tháng đầy đủ (openFullCalendarModal). -->
+        <div onclick="openFullCalendarModal()" class="relative bg-violet-100/70 dark:bg-violet-900/50 border-b-[4px] border-violet-300 dark:border-violet-800 text-violet-600 dark:text-violet-400 p-3 md:p-6 rounded-2xl shadow-[0_4px_10px_rgba(139,92,246,0.1)] dark:shadow-[0_6px_12px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center h-[90px] md:h-[120px] cursor-pointer hover:bg-violet-200/70 dark:hover:bg-violet-800/60 hover:border-violet-400 dark:hover:border-violet-700 hover:-translate-y-[2px] active:translate-y-[2px] active:border-b-[1px] transition-all duration-150">
             <div class="absolute top-2 left-2 md:top-3 md:left-3 w-6 h-6 md:w-8 md:h-8 rounded-lg md:rounded-xl bg-violet-500 text-white flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.4),0_2px_4px_rgba(139,92,246,0.35)]">
-                <i data-lucide="shopping-cart" class="w-3.5 h-3.5 md:w-4 md:h-4"></i>
+                <i data-lucide="clock" class="w-3.5 h-3.5 md:w-4 md:h-4"></i>
             </div>
-            <p class="text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-violet-500 dark:text-violet-300/80">Tổng Số Đơn</p>
-            <h3 id="order-count-summary" class="text-md md:text-2xl font-black drop-shadow-[0_1.5px_3px_rgba(139,92,246,0.15)] dark:drop-shadow-[0_2px_4px_rgba(139,92,246,0.3)]">0 đơn</h3>
+            <p id="home-clock-date" class="text-[9px] md:text-[11px] font-bold uppercase tracking-wider text-violet-500 dark:text-violet-300/80 leading-tight">--</p>
+            <h3 id="home-clock-time" class="text-md md:text-2xl font-black drop-shadow-[0_1.5px_3px_rgba(139,92,246,0.15)] dark:drop-shadow-[0_2px_4px_rgba(139,92,246,0.3)] leading-tight">--:--:--</h3>
+            <p id="home-clock-lunar" class="text-[9px] md:text-[10px] font-semibold text-violet-500/80 dark:text-violet-300/70 leading-tight">--</p>
+        </div>
+    </div>
+
+    <!-- MODAL LỊCH THÁNG ĐẦY ĐỦ - mở khi bấm vào ô đồng hồ ở trên. Hiện đủ các ngày trong
+         tháng đang xem (mặc định = tháng hiện tại), có nút lùi/tiến tháng, mỗi ô ngày hiện
+         kèm ngày Âm lịch nhỏ bên dưới, ngày hôm nay được tô nổi bật riêng. -->
+    <div id="modal-full-calendar" class="hidden fixed inset-0 bg-black/60 z-[9995] flex items-center justify-center p-2 md:p-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+            <div class="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700 bg-violet-50 dark:bg-violet-950/30">
+                <button onclick="changeFullCalendarMonth(-1)" class="w-8 h-8 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold hover:bg-violet-100 dark:hover:bg-slate-700">‹</button>
+                <div class="text-center">
+                    <h3 id="fullcal-title" class="text-lg font-bold text-slate-800 dark:text-white">Tháng --/----</h3>
+                    <p id="fullcal-subtitle" class="text-[11px] text-violet-500 dark:text-violet-400">--</p>
+                </div>
+                <button onclick="changeFullCalendarMonth(1)" class="w-8 h-8 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold hover:bg-violet-100 dark:hover:bg-slate-700">›</button>
+                <button onclick="closeFullCalendarModal()" class="ml-2 text-slate-400 hover:text-slate-700 dark:hover:text-white text-2xl leading-none">&times;</button>
+            </div>
+            <div class="p-3 md:p-4">
+                <div class="grid grid-cols-7 gap-1 mb-1 text-center text-[11px] font-bold text-slate-400 dark:text-slate-500">
+                    <div>CN</div><div>T2</div><div>T3</div><div>T4</div><div>T5</div><div>T6</div><div>T7</div>
+                </div>
+                <div id="fullcal-grid" class="grid grid-cols-7 gap-1"></div>
+            </div>
+            <div class="px-4 pb-4">
+                <button onclick="goToTodayFullCalendar()" class="w-full bg-violet-600 hover:bg-violet-700 text-white py-2 rounded-xl font-bold text-sm">Về hôm nay</button>
+            </div>
         </div>
     </div>
 
@@ -7618,14 +7647,10 @@ async function loadDashboard(filter = 'default') {
         }
     } catch (e) { console.warn('Không tính được biên lợi nhuận:', e); }
 
-    // Đếm TỔNG SỐ ĐƠN bán hàng trong kỳ đang xem cho ô "Tổng Số Đơn" - lấy thẳng từ
-    // filteredSales (dữ liệu đã tải sẵn dùng chung cho các ô khác), không phụ thuộc thêm
-    // vào nguồn dữ liệu tồn kho nào cả.
-    try {
-        const orderCountEl = document.getElementById('order-count-summary');
-        if (orderCountEl) orderCountEl.innerText = filteredSales.length + ' đơn';
-        window.__dashboardOrdersList = filteredSales;
-    } catch (e) { console.warn('Không đếm được tổng số đơn:', e); }
+    // Ô "Tổng Số Đơn" đã được thay bằng đồng hồ (xem updateHomeClock) - không cần đếm/gán
+    // gì vào đây nữa, chỉ còn giữ lại window.__dashboardOrdersList vì vẫn được dùng ở nơi
+    // khác (modal xem chi tiết đơn hàng theo kỳ).
+    window.__dashboardOrdersList = filteredSales;
 
     // Đã thay danh sách "Khách hàng công nợ" ở tab Top SP + KH Nợ bằng biểu đồ tỷ trọng
     // doanh thu (xem updateRevenueShareChart bên dưới) nên không cần gọi renderDebtCustomers
@@ -22124,6 +22149,216 @@ window.html5QrCode = null;
 
 // 2. Khởi tạo Icon
 lucide.createIcons();
+
+// 3. Đồng hồ Trang Chủ (thay cho ô "Tổng Số Đơn" cũ) - luôn hiển thị ĐÚNG giờ Việt Nam
+// (Asia/Ho_Chi_Minh) bất kể máy/trình duyệt đang đặt múi giờ nào khác, tự chạy ngầm suốt
+// phiên làm việc (không phụ thuộc đang mở đúng Trang Chủ hay không, vì phần tử vẫn nằm
+// sẵn trong DOM dù đang ẩn ở trang khác - cập nhật 1 chỗ text không tốn kém gì).
+
+// ===== THUẬT TOÁN CHUYỂN DƯƠNG LỊCH -> ÂM LỊCH VIỆT NAM =====
+// Dựa theo thuật toán thiên văn chuẩn (tính điểm Sóc - New Moon - và kinh độ Mặt Trời) mà
+// hầu hết lịch Việt Nam đang dùng (tác giả gốc: Hồ Ngọc Đức) - cho kết quả khớp với lịch
+// Vạn Niên/lịch bloc giấy Việt Nam, có xét đúng năm nhuận âm lịch, múi giờ +7 (Việt Nam).
+function LC_jdFromDate(dd, mm, yy) {
+    const a = Math.floor((14 - mm) / 12);
+    const y = yy + 4800 - a;
+    const m = mm + 12 * a - 3;
+    let jd = dd + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
+    if (jd < 2299161) {
+        jd = dd + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - 32083;
+    }
+    return jd;
+}
+function LC_jdToDate(jd) {
+    let a, b, c;
+    if (jd > 2299160) {
+        a = jd + 32044; b = Math.floor((4 * a + 3) / 146097); c = a - Math.floor((b * 146097) / 4);
+    } else {
+        b = 0; c = jd + 32082;
+    }
+    const d = Math.floor((4 * c + 3) / 1461);
+    const e = c - Math.floor((1461 * d) / 4);
+    const m = Math.floor((5 * e + 2) / 153);
+    const day = e - Math.floor((153 * m + 2) / 5) + 1;
+    const month = m + 3 - 12 * Math.floor(m / 10);
+    const year = b * 100 + d - 4800 + Math.floor(m / 10);
+    return [day, month, year];
+}
+function LC_NewMoon(k) {
+    const T = k / 1236.85;
+    const T2 = T * T, T3 = T2 * T, dr = Math.PI / 180;
+    let Jd1 = 2415020.75933 + 29.53058868 * k + 0.0001178 * T2 - 0.000000155 * T3;
+    Jd1 += 0.00033 * Math.sin((166.56 + 132.87 * T - 0.009173 * T2) * dr);
+    const M = 359.2242 + 29.10535608 * k - 0.0000333 * T2 - 0.00000347 * T3;
+    const Mpr = 306.0253 + 385.81691806 * k + 0.0107306 * T2 + 0.00001236 * T3;
+    const F = 21.2964 + 390.67050646 * k - 0.0016528 * T2 - 0.00000239 * T3;
+    let C1 = (0.1734 - 0.000393 * T) * Math.sin(M * dr) + 0.0021 * Math.sin(2 * dr * M);
+    C1 -= 0.4068 * Math.sin(Mpr * dr) + 0.0161 * Math.sin(dr * 2 * Mpr);
+    C1 -= 0.0004 * Math.sin(dr * 3 * Mpr);
+    C1 += 0.0104 * Math.sin(dr * 2 * F) - 0.0051 * Math.sin(dr * (M + Mpr));
+    C1 -= 0.0074 * Math.sin(dr * (M - Mpr)) + 0.0004 * Math.sin(dr * (2 * F + M));
+    C1 -= 0.0004 * Math.sin(dr * (2 * F - M)) - 0.0006 * Math.sin(dr * (2 * F + Mpr));
+    C1 += 0.0010 * Math.sin(dr * (2 * F - Mpr)) + 0.0005 * Math.sin(dr * (2 * Mpr + M));
+    let deltat;
+    if (T < -11) deltat = 0.001 + 0.000839 * T + 0.0002261 * T2 - 0.00000845 * T3 - 0.000000081 * T * T3;
+    else deltat = -0.000278 + 0.000265 * T + 0.000262 * T2;
+    return Jd1 + C1 - deltat;
+}
+function LC_SunLongitude(jdn) {
+    const T = (jdn - 2451545.0) / 36525, T2 = T * T, dr = Math.PI / 180;
+    const M = 357.5291 + 35999.0503 * T - 0.0001559 * T2 - 0.00000048 * T * T2;
+    const L0 = 280.46645 + 36000.76983 * T + 0.0003032 * T2;
+    let DL = (1.9146 - 0.004817 * T - 0.000014 * T2) * Math.sin(dr * M);
+    DL += (0.019993 - 0.000101 * T) * Math.sin(dr * 2 * M) + 0.00029 * Math.sin(dr * 3 * M);
+    let L = L0 + DL;
+    L = L * dr; L = L - Math.PI * 2 * Math.floor(L / (Math.PI * 2));
+    return Math.floor(L / Math.PI * 6);
+}
+function LC_getNewMoonDay(k, timeZone) {
+    return Math.floor(LC_NewMoon(k) + 0.5 + timeZone / 24);
+}
+function LC_getSunLongitude(dayNumber, timeZone) {
+    return LC_SunLongitude(dayNumber - 0.5 - timeZone / 24);
+}
+function LC_getLunarMonth11(yy, timeZone) {
+    const off = LC_jdFromDate(31, 12, yy) - 2415021;
+    const k = Math.floor(off / 29.530588853);
+    let nm = LC_getNewMoonDay(k, timeZone);
+    const sunLong = LC_getSunLongitude(nm, timeZone);
+    if (sunLong >= 9) nm = LC_getNewMoonDay(k - 1, timeZone);
+    return nm;
+}
+function LC_getLeapMonthOffset(a11, timeZone) {
+    const k = Math.floor((a11 - 2415021.076998695) / 29.530588853 + 0.5);
+    let last = 0, i = 1, arc = LC_getSunLongitude(LC_getNewMoonDay(k + i, timeZone), timeZone);
+    do {
+        last = arc;
+        i++;
+        arc = LC_getSunLongitude(LC_getNewMoonDay(k + i, timeZone), timeZone);
+    } while (arc !== last && i < 14);
+    return i - 1;
+}
+// Kết quả: [ngàyÂL, thángÂL, nămÂL, làThángNhuận(1/0)]
+function convertSolar2Lunar(dd, mm, yy, timeZone) {
+    timeZone = timeZone || 7;
+    const dayNumber = LC_jdFromDate(dd, mm, yy);
+    const k = Math.floor((dayNumber - 2415021.076998695) / 29.530588853);
+    let monthStart = LC_getNewMoonDay(k + 1, timeZone);
+    if (monthStart > dayNumber) monthStart = LC_getNewMoonDay(k, timeZone);
+    let a11 = LC_getLunarMonth11(yy, timeZone);
+    let b11 = a11;
+    let lunarYear;
+    if (a11 >= monthStart) {
+        lunarYear = yy;
+        a11 = LC_getLunarMonth11(yy - 1, timeZone);
+    } else {
+        lunarYear = yy + 1;
+        b11 = LC_getLunarMonth11(yy + 1, timeZone);
+    }
+    const lunarDay = dayNumber - monthStart + 1;
+    const diff = Math.floor((monthStart - a11) / 29);
+    let lunarLeap = 0;
+    let lunarMonth = diff + 11;
+    if (b11 - a11 > 365) {
+        const leapMonthDiff = LC_getLeapMonthOffset(a11, timeZone);
+        if (diff >= leapMonthDiff) {
+            lunarMonth = diff + 10;
+            if (diff === leapMonthDiff) lunarLeap = 1;
+        }
+    }
+    if (lunarMonth > 12) lunarMonth -= 12;
+    if (lunarMonth >= 11 && diff < 4) lunarYear -= 1;
+    return [lunarDay, lunarMonth, lunarYear, lunarLeap];
+}
+const CAN_LIST = ['Giáp', 'Ất', 'Bính', 'Đinh', 'Mậu', 'Kỷ', 'Canh', 'Tân', 'Nhâm', 'Quý'];
+const CHI_LIST = ['Tý', 'Sửu', 'Dần', 'Mão', 'Thìn', 'Tỵ', 'Ngọ', 'Mùi', 'Thân', 'Dậu', 'Tuất', 'Hợi'];
+function getCanChiYear(lunarYear) {
+    return CAN_LIST[(lunarYear + 6) % 10] + ' ' + CHI_LIST[(lunarYear + 8) % 12];
+}
+
+function updateHomeClock() {
+    const dateEl = document.getElementById('home-clock-date');
+    const timeEl = document.getElementById('home-clock-time');
+    const lunarEl = document.getElementById('home-clock-lunar');
+    if (!dateEl || !timeEl) return;
+    const now = new Date();
+    const weekdayFmt = new Intl.DateTimeFormat('vi-VN', { weekday: 'long', timeZone: 'Asia/Ho_Chi_Minh' });
+    const dateFmt = new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' });
+    const timeFmt = new Intl.DateTimeFormat('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'Asia/Ho_Chi_Minh' });
+
+    let weekday = weekdayFmt.format(now);
+    weekday = weekday.charAt(0).toUpperCase() + weekday.slice(1); // "thứ ba" -> "Thứ ba"
+    dateEl.innerText = weekday + ', ' + dateFmt.format(now);
+    timeEl.innerText = timeFmt.format(now);
+
+    if (lunarEl) {
+        // Lấy đúng ngày/tháng/năm theo giờ Việt Nam (không dùng getDate/getMonth của trình
+        // duyệt vì có thể lệch múi giờ máy) để đưa vào thuật toán chuyển đổi.
+        const parts = new Intl.DateTimeFormat('en-CA', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' }).formatToParts(now);
+        const dd = parseInt(parts.find(p => p.type === 'day').value, 10);
+        const mm = parseInt(parts.find(p => p.type === 'month').value, 10);
+        const yy = parseInt(parts.find(p => p.type === 'year').value, 10);
+        const [lD, lM, lY, lLeap] = convertSolar2Lunar(dd, mm, yy, 7);
+        lunarEl.innerText = 'ÂL: ' + lD + '/' + lM + (lLeap ? ' (nhuận)' : '') + ' - ' + getCanChiYear(lY);
+    }
+}
+updateHomeClock();
+setInterval(updateHomeClock, 1000);
+
+// ===== MODAL LỊCH THÁNG ĐẦY ĐỦ =====
+window.__fullCalendarViewDate = null; // { year, month(1-12) } - tháng đang xem trong modal
+
+function openFullCalendarModal() {
+    const now = new Date();
+    const parts = new Intl.DateTimeFormat('en-CA', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' }).formatToParts(now);
+    const dd = parseInt(parts.find(p => p.type === 'day').value, 10);
+    const mm = parseInt(parts.find(p => p.type === 'month').value, 10);
+    const yy = parseInt(parts.find(p => p.type === 'year').value, 10);
+    window.__fullCalendarToday = { day: dd, month: mm, year: yy };
+    window.__fullCalendarViewDate = { year: yy, month: mm };
+    renderFullCalendarMonth();
+    document.getElementById('modal-full-calendar').classList.remove('hidden');
+}
+function closeFullCalendarModal() {
+    document.getElementById('modal-full-calendar').classList.add('hidden');
+}
+function changeFullCalendarMonth(delta) {
+    const v = window.__fullCalendarViewDate;
+    v.month += delta;
+    if (v.month > 12) { v.month = 1; v.year++; }
+    if (v.month < 1) { v.month = 12; v.year--; }
+    renderFullCalendarMonth();
+}
+function goToTodayFullCalendar() {
+    const t = window.__fullCalendarToday;
+    window.__fullCalendarViewDate = { year: t.year, month: t.month };
+    renderFullCalendarMonth();
+}
+function renderFullCalendarMonth() {
+    const { year, month } = window.__fullCalendarViewDate;
+    const today = window.__fullCalendarToday;
+    document.getElementById('fullcal-title').innerText = 'Tháng ' + month + '/' + year;
+
+    // Tính Âm lịch của ngày 1 đầu tháng để hiện phụ đề (ví dụ "Tháng 9 - ÂL bắt đầu từ 18/7")
+    const [l1D, l1M] = convertSolar2Lunar(1, month, year, 7);
+    document.getElementById('fullcal-subtitle').innerText = 'Ngày 1 nhằm ' + l1D + '/' + l1M + ' Âm lịch';
+
+    const firstDow = new Date(year, month - 1, 1).getDay(); // 0=CN
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const gridEl = document.getElementById('fullcal-grid');
+    let html = '';
+    for (let i = 0; i < firstDow; i++) html += '<div></div>';
+    for (let d = 1; d <= daysInMonth; d++) {
+        const isToday = today && today.day === d && today.month === month && today.year === year;
+        const [lD, lM] = convertSolar2Lunar(d, month, year, 7);
+        const lunarLabel = (lD === 1) ? (lD + '/' + lM + ' ÂL') : String(lD);
+        html += `<div class="rounded-lg p-1.5 text-center ${isToday ? 'bg-violet-600 text-white font-bold shadow-md' : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200'}">
+            <div class="text-sm font-bold">${d}</div>
+            <div class="text-[9px] ${isToday ? 'text-violet-100' : 'text-slate-400 dark:text-slate-500'}">${lunarLabel}</div>
+        </div>`;
+    }
+    gridEl.innerHTML = html;
+}
 
 // 3. Tải các thành phần giao diện & Dữ liệu
 updateReceiptNum();
