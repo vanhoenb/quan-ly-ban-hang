@@ -1,10 +1,13 @@
 {
   "name": "QUẢN LÝ KHO & BÁN HÀNG",
   "short_name": "BÁN HÀNG",
-  "start_url": "./index.html",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#0f172a",
+  "description": "Phần mềm quản lý kho và bán hàng",
   "icons": [
     {
       "src": "https://i.postimg.cc/qqzXK89L/H.png",
