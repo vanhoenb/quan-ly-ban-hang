@@ -16457,63 +16457,232 @@ function mergeExcelColumnByConsecutiveValue(sheet, colIndex, firstRow, lastRow) 
 }
 
 function reportPrintTableHtml(title, subtitle, headers, rows, totalRowHtml, aligns, mergeCol) {
-    const theadHtml = '<tr>' + headers.map(h => `<th style="border:1px solid #999;padding:7px 8px;background:#efefef;font-weight:bold;">${h}</th>`).join('') + '</tr>';
+    // Cố định bố cục cột để ngày không bị tràn sang cột kế bên khi xem/in.
+    const headerWidths = headers.map((h) => {
+        const x = String(h || '').toLowerCase();
+        if (x.includes('ngày')) return '12%';
+        if (x.includes('stt')) return '7%';
+        if (x.includes('số phiếu')) return '10%';
+        if (x.includes('đvt')) return '7%';
+        if (x === 'sl' || x.includes('số lượng')) return '8%';
+        if (x.includes('đơn giá')) return '12%';
+        if (x.includes('thành tiền')) return '13%';
+        if (x.includes('ghi chú')) return '14%';
+        if (x.includes('tên kh') || x.includes('nhà cung cấp')) return '16%';
+        if (x.includes('tên sản phẩm') || x.includes('tên nguyên liệu') || x.includes('tên hàng')) return '20%';
+        return '';
+    });
+    // Nếu tổng % vượt 100 do nhiều cột đặc thù, bỏ width inline để browser tự chia đều.
+    const widthTotal = headerWidths.reduce((sum, w) => sum + (w ? parseFloat(w) : 0), 0);
+    const useWidths = widthTotal <= 100.5;
+    const theadHtml = '<tr>' + headers.map((h, i) => `<th style="border:1px solid #999;padding:7px 8px;background:#efefef;font-weight:bold;${useWidths && headerWidths[i] ? `width:${headerWidths[i]};` : ''}white-space:normal;word-break:break-word;">${h}</th>`).join('') + '</tr>';
     const merge = (mergeCol !== undefined && mergeCol !== null) ? buildMergedColumnRowSpans(rows, mergeCol) : null;
     const bodyHtml = rows.map((r, rIdx) => '<tr>' + r.map((c, idx) => {
+        const isDateCol = String(headers[idx] || '').toLowerCase().includes('ngày');
+        const dateStyle = isDateCol ? 'white-space:nowrap;overflow:hidden;text-overflow:clip;' : 'word-break:break-word;overflow-wrap:anywhere;';
         if (merge && idx === mergeCol) {
             if (merge.skip.has(rIdx)) return ''; // Dòng đã được gộp vào ô phía trên - không vẽ ô này nữa
             const span = merge.rowSpan[rIdx];
             const rowspanAttr = span > 1 ? ` rowspan="${span}"` : '';
-            // Căn giữa DỌC (vertical-align:middle) nhưng căn lề TRÁI theo chiều ngang
-            // (text-align:left), giống mọi ô chữ khác trong bảng.
-            return `<td${rowspanAttr} style="border:1px solid #999;padding:6px 8px;text-align:left;vertical-align:middle;font-weight:bold;">${c}</td>`;
+            return `<td${rowspanAttr} style="border:1px solid #999;padding:6px 8px;text-align:left;vertical-align:middle;font-weight:bold;${dateStyle}">${c}</td>`;
         }
         const align = (aligns && aligns[idx]) ? aligns[idx] : (idx === 0 ? 'left' : 'right');
-        return `<td style="border:1px solid #999;padding:6px 8px;text-align:${align};">${c}</td>`;
+        return `<td style="border:1px solid #999;padding:6px 8px;text-align:${align};${dateStyle}">${c}</td>`;
     }).join('') + '</tr>').join('');
     return `
         <div style="font-family:Arial,sans-serif;padding:6px;color:#1a1a1a;">
         <h1 style="font-size:20px;text-align:center;margin:0 0 4px;">${title}</h1>
         <p style="text-align:center;color:#555;font-size:13px;margin:0 0 20px;">${subtitle}</p>
-        <table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead>${theadHtml}</thead><tbody>${bodyHtml}${totalRowHtml || ''}</tbody></table>
+        <table style="width:100%;border-collapse:collapse;table-layout:fixed;font-size:12.5px;"><colgroup>${useWidths ? headerWidths.map(w => `<col style="width:${w || (100 / Math.max(headers.length,1)).toFixed(2)+'%'};">`).join('') : ''}</colgroup><thead>${theadHtml}</thead><tbody>${bodyHtml}${totalRowHtml || ''}</tbody></table>
         </div>
     `;
 }
+
 // SỬA LẠI ĐÚNG THEO BẢN MẪU: bấm "👁 Xem" là ĐI THẲNG vào hộp thoại in của trình duyệt/hệ
 // điều hành ngay lập tức (như khi bấm "Xem" ở bản mẫu) - KHÔNG hiện khung xem trước trong
 // trang rồi phải bấm thêm 1 nút "In" nữa (cách làm trước đây khiến nút In bị đứng im,
 // không phản hồi ở một số máy). Nội dung được ghi vào 1 khung ẩn (iframe) rồi gọi lệnh in
 // ngay, không mở tab mới, không in kèm menu/sidebar của trang web.
 function printReportDirect(title, bodyHtml) {
-    const old = document.getElementById('print-frame-report');
-    if (old) old.remove();
-    const iframe = document.createElement('iframe');
-    iframe.id = 'print-frame-report';
-    iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;';
-    document.body.appendChild(iframe);
+    // === XEM BÁO CÁO TRONG MODAL; CHỈ TẠO IFRAME KHI BẤM IN ===
+    // Tránh lỗi Chrome khiến trang chính bị "đơ" sau khi đóng Print Preview.
+    const oldModal = document.getElementById('report-preview-modal');
+    if (oldModal) oldModal.remove();
 
-    let printed = false;
-    const doPrint = () => {
-        if (printed) return;
-        printed = true;
-        iframe.contentWindow.focus();
-        iframe.contentWindow.print();
+    const prevOverflow = document.body.style.overflow;
+    const prevPointerEvents = document.body.style.pointerEvents;
+
+    const safeTitle = String(title || 'Báo cáo').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const modal = document.createElement('div');
+    modal.id = 'report-preview-modal';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.style.cssText = 'position:fixed;inset:0;z-index:99999990;background:rgba(15,23,42,.68);display:flex;align-items:center;justify-content:center;padding:14px;box-sizing:border-box;';
+    modal.innerHTML = `
+        <div id="report-preview-panel" style="width:min(1100px,100%);height:min(92vh,100%);display:flex;flex-direction:column;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,.35);">
+            <div style="flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:#0f172a;color:#fff;">
+                <div style="font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${safeTitle}</div>
+                <div style="display:flex;gap:8px;flex-shrink:0;">
+                    <button type="button" id="report-preview-print-btn" style="border:0;border-radius:9px;padding:8px 12px;background:#2563eb;color:#fff;font-weight:800;cursor:pointer;">🖨 In</button>
+                    <button type="button" id="report-preview-pdf-btn" style="border:0;border-radius:9px;padding:8px 12px;background:#dc2626;color:#fff;font-weight:800;cursor:pointer;">📄 Lưu PDF</button>
+                    <button type="button" id="report-preview-image-btn" style="border:0;border-radius:9px;padding:8px 12px;background:#059669;color:#fff;font-weight:800;cursor:pointer;">📷 Lưu ảnh</button>
+                    <button type="button" id="report-preview-close-btn" style="border:0;border-radius:9px;padding:8px 12px;background:#475569;color:#fff;font-weight:800;cursor:pointer;">✕ Đóng</button>
+                </div>
+            </div>
+            <div id="report-preview-content" style="flex:1 1 auto;overflow:auto;padding:12px;background:#f8fafc;box-sizing:border-box;">
+                <div style="max-width:100%;margin:0 auto;background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;box-sizing:border-box;">
+                    ${bodyHtml}
+                </div>
+            </div>
+        </div>`;
+
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
+
+    // Giao diện xem báo cáo: ưu tiên bảng dễ đọc, cột cố định, chữ không tràn.
+    const previewContent = document.getElementById('report-preview-content');
+    if (previewContent) {
+        previewContent.querySelectorAll('table').forEach((tbl) => {
+            tbl.style.width = '100%';
+            tbl.style.maxWidth = '100%';
+            tbl.style.tableLayout = 'fixed';
+            tbl.style.borderCollapse = 'collapse';
+            tbl.style.fontSize = '12px';
+        });
+        previewContent.querySelectorAll('th,td').forEach((cell) => {
+            cell.style.boxSizing = 'border-box';
+            cell.style.overflowWrap = 'anywhere';
+            cell.style.wordBreak = 'break-word';
+            cell.style.verticalAlign = 'middle';
+        });
+    }
+
+    let closed = false;
+    const onKeyDown = (e) => { if (e.key === 'Escape') cleanupModal(); };
+    const cleanupModal = () => {
+        if (closed) return;
+        closed = true;
+        const m = document.getElementById('report-preview-modal');
+        if (m) m.remove();
+        document.body.style.overflow = prevOverflow;
+        document.body.style.pointerEvents = prevPointerEvents;
+        document.removeEventListener('keydown', onKeyDown);
+        try { window.focus(); } catch (_) {}
     };
-    // Gán onload TRƯỚC khi ghi nội dung (đúng thứ tự ổn định giống hàm in phiếu/hoá đơn) +
-    // mốc dự phòng 500ms phòng khi trình duyệt không bắn sự kiện 'load'.
-    iframe.onload = doPrint;
 
-    const doc = iframe.contentWindow.document;
-    doc.open();
-    doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title}</title></head><body>${bodyHtml}</body></html>`);
-    doc.close();
+    const printFromModal = () => {
+        const content = document.getElementById('report-preview-content');
+        if (!content) return;
+        const oldFrame = document.getElementById('print-frame-report');
+        if (oldFrame) oldFrame.remove();
 
-    setTimeout(doPrint, 500);
+        const iframe = document.createElement('iframe');
+        iframe.id = 'print-frame-report';
+        iframe.setAttribute('aria-hidden', 'true');
+        iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0;pointer-events:none;';
+        document.body.appendChild(iframe);
 
-    const cleanup = () => { const f = document.getElementById('print-frame-report'); if (f) f.remove(); };
-    iframe.contentWindow.onafterprint = cleanup;
-    setTimeout(cleanup, 60000);
+        let printed = false, cleaned = false;
+        const cleanupFrame = () => {
+            if (cleaned) return;
+            cleaned = true;
+            const f = document.getElementById('print-frame-report');
+            if (f) f.remove();
+            try { window.focus(); } catch (_) {}
+        };
+        const doPrint = () => {
+            if (printed) return;
+            printed = true;
+            try {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+            } catch (err) {
+                console.error('Lỗi in báo cáo:', err);
+                cleanupFrame();
+                if (typeof showAlert === 'function') showAlert('Không thể mở chức năng in báo cáo.');
+            }
+        };
+        iframe.onload = doPrint;
+
+        const printDoc = iframe.contentWindow.document;
+        printDoc.open();
+        printDoc.write(`<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"><title>${safeTitle}</title><style>
+            @page{margin:14mm;} html,body{margin:0;padding:0;background:#fff;color:#111;font-family:Arial,sans-serif;} *{box-sizing:border-box;}
+            table{width:100%!important;border-collapse:collapse!important;table-layout:fixed!important;} th,td{page-break-inside:avoid;overflow-wrap:anywhere;}
+            th{white-space:normal!important;} td:first-child{white-space:nowrap;}
+        </style></head><body>${content.innerHTML}</body></html>`);
+        printDoc.close();
+        try { iframe.contentWindow.addEventListener('afterprint', cleanupFrame, { once:true }); } catch (_) {}
+        const onParentFocus = () => { setTimeout(cleanupFrame,150); window.removeEventListener('focus', onParentFocus); };
+        window.addEventListener('focus', onParentFocus);
+        setTimeout(cleanupFrame,120000);
+    };
+
+    document.getElementById('report-preview-close-btn').onclick = cleanupModal;
+    document.getElementById('report-preview-print-btn').onclick = printFromModal;
+
+    // Nút Lưu PDF: mở trình in, nơi có thể chọn “Save as PDF”.
+    document.getElementById('report-preview-pdf-btn').onclick = () => {
+        printFromModal();
+    };
+
+    // Chụp ảnh trực tiếp từ vùng XEM báo cáo để ảnh giữ đúng bố cục đang nhìn thấy.
+    document.getElementById('report-preview-image-btn').onclick = async () => {
+        const target = document.getElementById('report-preview-content');
+        const imageBtn = document.getElementById('report-preview-image-btn');
+        if (!target) return;
+        let clone = null;
+        try {
+            if (typeof html2canvas !== 'function') {
+                return Swal.fire({icon:'error', title:'Thiếu thư viện', text:'Không có chức năng chụp ảnh báo cáo.'});
+            }
+            imageBtn.disabled = true;
+            imageBtn.textContent = '⏳ Đang chụp...';
+            clone = target.cloneNode(true);
+            clone.style.overflow = 'visible';
+            clone.style.maxHeight = 'none';
+            clone.style.height = 'auto';
+            clone.style.width = Math.max(target.scrollWidth, target.clientWidth) + 'px';
+            clone.style.background = '#f8fafc';
+            clone.style.position = 'fixed';
+            clone.style.left = '-100000px';
+            clone.style.top = '0';
+            clone.style.zIndex = '-1';
+            document.body.appendChild(clone);
+            clone.querySelectorAll('table').forEach((tbl) => {
+                tbl.style.width = '100%';
+                tbl.style.maxWidth = '100%';
+                tbl.style.tableLayout = 'fixed';
+                tbl.style.borderCollapse = 'collapse';
+            });
+            const canvas = await html2canvas(clone, {
+                scale: Math.min(3, Math.max(2, window.devicePixelRatio || 1)),
+                backgroundColor: '#f8fafc',
+                useCORS: true,
+                logging: false,
+                width: clone.scrollWidth,
+                height: clone.scrollHeight,
+                windowWidth: clone.scrollWidth
+            });
+            const link = document.createElement('a');
+            const stamp = new Date().toISOString().slice(0,19).replace(/[T:]/g,'-');
+            link.download = 'BaoCao-' + stamp + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        } catch (err) {
+            console.error('Lỗi chụp ảnh báo cáo:', err);
+            Swal.fire({icon:'error', title:'Không chụp được ảnh', text:'Vui lòng thử lại.'});
+        } finally {
+            if (clone && clone.parentNode) clone.parentNode.removeChild(clone);
+            imageBtn.disabled = false;
+            imageBtn.textContent = '📷 Lưu ảnh';
+        }
+    };
+
+    modal.addEventListener('click', (e) => { if (e.target === modal) cleanupModal(); });
+    document.addEventListener('keydown', onKeyDown);
 }
+
 // Bản dùng cho báo cáo dạng 1 bảng đơn giản (Bán hàng, Tồn kho, Hàng hết hạn...)
 function openReportPreviewWindow(title, subtitle, headers, rows, totalRowHtml, aligns, mergeCol) {
     printReportDirect(title, reportPrintTableHtml(title, subtitle, headers, rows, totalRowHtml, aligns, mergeCol));
@@ -18240,7 +18409,7 @@ async function viewFullReport() {
             <h2 style="font-size:15px;margin:18px 0 8px;">I. CHI TIẾT BÁN HÀNG</h2>
             <table style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:12px;">
                 <thead><tr>
-                    <th style="${th}width:9%;">Ngày</th>
+                    <th style="${th}width:11%;">Ngày</th>
                     <th style="${th}width:8%;">Số phiếu</th>
                     <th style="${th}width:13%;">Khách hàng</th>
                     <th style="${th}width:22%;">Tên sản phẩm</th>
@@ -18248,7 +18417,7 @@ async function viewFullReport() {
                     <th style="${th}width:6%;">SL</th>
                     <th style="${th}width:11%;">Đơn giá</th>
                     <th style="${th}width:11%;">Thành tiền</th>
-                    <th style="${th}width:14%;">Ghi chú</th>
+                    <th style="${th}width:12%;">Ghi chú</th>
                 </tr></thead>
                 <tbody>${salesRowsHtml}</tbody>
             </table>
@@ -18256,15 +18425,15 @@ async function viewFullReport() {
             <h2 style="font-size:15px;margin:18px 0 8px;">II. BÁO CÁO NHẬP XUẤT TỒN</h2>
             <table style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:12px;">
                 <thead><tr>
-                    <th style="${th}width:9%;">Ngày</th>
-                    <th style="${th}width:21%;">Tên sản phẩm</th>
+                    <th style="${th}width:11%;">Ngày</th>
+                    <th style="${th}width:28%;">Tên sản phẩm</th>
                     <th style="${th}width:6%;">ĐVT</th>
-                    <th style="${th}width:9%;">Tồn đầu</th>
+                    <th style="${th}width:8%;">Tồn đầu</th>
                     <th style="${th}width:9%;">Nhập mới</th>
                     <th style="${th}width:10%;">Đổi date/Hoàn trả</th>
                     <th style="${th}width:7%;">Xuất</th>
-                    <th style="${th}width:8%;">Tồn cuối</th>
-                    <th style="${th}width:21%;">Ghi chú</th>
+                    <th style="${th}width:9%;">Tồn cuối</th>
+                    <th style="${th}width:12%;">Ghi chú</th>
                 </tr></thead>
                 <tbody>${nxtRowsHtml}</tbody>
             </table>
