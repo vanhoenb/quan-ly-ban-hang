@@ -3079,32 +3079,56 @@ html:not(.dark) .bg-white {
         <h3 class="font-bold text-sm md:text-lg text-slate-800 mb-4 text-center">Sổ Kiểm Thực (3 Bước)</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <!-- Quyển 1 -->
-<button onclick="exportExcelQuyen1()" 
-    class="w-full bg-blue-600 dark:bg-blue-700 text-white py-2 rounded-lg font-bold text-[10px] md:text-xs transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
-    Quyển 1
-</button>
+            <div class="grid grid-cols-2 gap-1">
+                <button onclick="viewKiemThucQuyen1()"
+                    class="w-full bg-slate-600 dark:bg-slate-700 text-white py-2 rounded-lg font-bold text-[10px] md:text-xs transition-all duration-75 border-b-[3px] border-slate-800 dark:border-slate-900 hover:-translate-y-1 active:translate-y-[1px] shadow-md">
+                    👁 Xem
+                </button>
+                <button onclick="exportExcelQuyen1()" 
+                    class="w-full bg-blue-600 dark:bg-blue-700 text-white py-2 rounded-lg font-bold text-[10px] md:text-xs transition-all duration-75 border-b-[3px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[1px] shadow-md">
+                    ⬇ Excel
+                </button>
+            </div>
 
-<!-- Quyển 2 -->
-<button onclick="exportExcelQuyen2()" 
-    class="w-full bg-blue-700 dark:bg-blue-800 text-white py-2 rounded-lg font-bold text-[10px] md:text-xs transition-all duration-75 border-b-[4px] border-blue-900 dark:border-blue-950 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
-    Quyển 2
-</button>
+            <!-- Quyển 2 -->
+            <div class="grid grid-cols-2 gap-1">
+                <button onclick="viewKiemThucQuyen2()"
+                    class="w-full bg-slate-600 dark:bg-slate-700 text-white py-2 rounded-lg font-bold text-[10px] md:text-xs transition-all duration-75 border-b-[3px] border-slate-800 dark:border-slate-900 hover:-translate-y-1 active:translate-y-[1px] shadow-md">
+                    👁 Xem
+                </button>
+                <button onclick="exportExcelQuyen2()" 
+                    class="w-full bg-blue-700 dark:bg-blue-800 text-white py-2 rounded-lg font-bold text-[10px] md:text-xs transition-all duration-75 border-b-[3px] border-blue-900 dark:border-blue-950 hover:-translate-y-1 active:translate-y-[1px] shadow-md">
+                    ⬇ Excel
+                </button>
+            </div>
 
-<!-- Quyển 3 -->
-<button onclick="exportExcelQuyen3()" 
-    class="w-full bg-blue-800 dark:bg-blue-900 text-white py-2 rounded-lg font-bold text-[10px] md:text-xs transition-all duration-75 border-b-[4px] border-blue-950 dark:border-black hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
-    Quyển 3
-</button>
+            <!-- Quyển 3 -->
+            <div class="grid grid-cols-2 gap-1">
+                <button onclick="viewKiemThucQuyen3()"
+                    class="w-full bg-slate-600 dark:bg-slate-700 text-white py-2 rounded-lg font-bold text-[10px] md:text-xs transition-all duration-75 border-b-[3px] border-slate-800 dark:border-slate-900 hover:-translate-y-1 active:translate-y-[1px] shadow-md">
+                    👁 Xem
+                </button>
+                <button onclick="exportExcelQuyen3()" 
+                    class="w-full bg-blue-800 dark:bg-blue-900 text-white py-2 rounded-lg font-bold text-[10px] md:text-xs transition-all duration-75 border-b-[3px] border-blue-950 dark:border-black hover:-translate-y-1 active:translate-y-[1px] shadow-md">
+                    ⬇ Excel
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- Khối Sổ Lưu Mẫu -->
 		<div class="bg-white p-4 md:p-6 rounded-2xl border border-green-200 shadow-sm hover:shadow-lg transition-all">
 			<h3 class="font-bold text-sm md:text-lg text-slate-800 mb-2 text-center">Sổ Lưu Mẫu</h3>
-			<button onclick="exportExcelLuuMau()" 
-    class="w-full bg-green-700 dark:bg-green-800 text-white py-3 rounded-xl font-bold text-xs transition-all duration-75 border-b-[4px] border-green-900 dark:border-green-950 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
-    Xuất Excel Lưu Mẫu
-</button>
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="viewSoLuuMau()"
+                    class="w-full bg-slate-600 dark:bg-slate-700 text-white py-3 rounded-xl font-bold text-xs transition-all duration-75 border-b-[4px] border-slate-800 dark:border-slate-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+                    👁 Xem
+                </button>
+                <button onclick="exportExcelLuuMau()" 
+                    class="w-full bg-green-700 dark:bg-green-800 text-white py-3 rounded-xl font-bold text-xs transition-all duration-75 border-b-[4px] border-green-900 dark:border-green-950 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+                    ⬇ Excel
+                </button>
+            </div>
 		</div>
 	</div>
 </div>
@@ -16404,7 +16428,7 @@ async function getDocsByDate(collectionName, from, to) {
 // 1. Xuất báo cáo Bán hàng
 // ===== HÀM DÙNG CHUNG: hiển thị "Xem báo cáo" NGAY TRONG TRANG (giống cách bản mẫu hiển
 // thị chứng từ) - KHÔNG mở tab mới của trình duyệt nữa. Bảng số liệu hiện lên trong 1 khung
-// (modal) ngay trên trang hiện tại, có nút "In / Lưu PDF" riêng - khi bấm in, chỉ đúng nội
+// (modal) ngay trên trang hiện tại, có nút "In" và "Lưu ảnh" riêng - khi bấm in, chỉ đúng nội
 // dung bảng được đưa vào 1 khung ẩn (iframe) rồi gọi lệnh in, không in kèm menu/sidebar của
 // trang web. Dùng chung cho mọi báo cáo ở trang Báo Cáo. =====
 // SỬA LỖI CĂN LỀ: trước đây bảng LUÔN ép cột đầu tiên căn trái, TẤT CẢ các cột còn lại
@@ -16475,7 +16499,7 @@ function reportPrintTableHtml(title, subtitle, headers, rows, totalRowHtml, alig
     // Nếu tổng % vượt 100 do nhiều cột đặc thù, bỏ width inline để browser tự chia đều.
     const widthTotal = headerWidths.reduce((sum, w) => sum + (w ? parseFloat(w) : 0), 0);
     const useWidths = widthTotal <= 100.5;
-    const theadHtml = '<tr>' + headers.map((h, i) => `<th style="border:1px solid #999;padding:7px 8px;background:#efefef;font-weight:bold;${useWidths && headerWidths[i] ? `width:${headerWidths[i]};` : ''}white-space:normal;word-break:break-word;">${h}</th>`).join('') + '</tr>';
+    const theadHtml = '<tr>' + headers.map((h, i) => `<th style="border:1.5px solid #222;padding:7px 8px;background:#efefef;font-weight:800;${useWidths && headerWidths[i] ? `width:${headerWidths[i]};` : ''}white-space:normal;word-break:break-word;">${h}</th>`).join('') + '</tr>';
     const merge = (mergeCol !== undefined && mergeCol !== null) ? buildMergedColumnRowSpans(rows, mergeCol) : null;
     const bodyHtml = rows.map((r, rIdx) => '<tr>' + r.map((c, idx) => {
         const isDateCol = String(headers[idx] || '').toLowerCase().includes('ngày');
@@ -16484,10 +16508,13 @@ function reportPrintTableHtml(title, subtitle, headers, rows, totalRowHtml, alig
             if (merge.skip.has(rIdx)) return ''; // Dòng đã được gộp vào ô phía trên - không vẽ ô này nữa
             const span = merge.rowSpan[rIdx];
             const rowspanAttr = span > 1 ? ` rowspan="${span}"` : '';
-            return `<td${rowspanAttr} style="border:1px solid #999;padding:6px 8px;text-align:left;vertical-align:middle;font-weight:bold;${dateStyle}">${c}</td>`;
+            return `<td${rowspanAttr} style="border:1.5px solid #222;padding:6px 8px;text-align:left;vertical-align:middle;font-weight:bold;${dateStyle}">${c}</td>`;
         }
         const align = (aligns && aligns[idx]) ? aligns[idx] : (idx === 0 ? 'left' : 'right');
-        return `<td style="border:1px solid #999;padding:6px 8px;text-align:${align};${dateStyle}">${c}</td>`;
+        const headerText = String(headers[idx] || '').toLowerCase();
+        const boldCell = headerText.includes('tên kh') || headerText.includes('khách hàng') || headerText.includes('nhà cung cấp') || headerText === 'sl' || headerText.includes('số lượng') || headerText.includes('thành tiền') || headerText.includes('đơn giá');
+        const weight = boldCell ? 'font-weight:800;' : '';
+        return `<td style="border:1.5px solid #222;padding:6px 8px;text-align:${align};${weight}${dateStyle}">${c}</td>`;
     }).join('') + '</tr>').join('');
     return `
         <div style="font-family:Arial,sans-serif;padding:6px;color:#1a1a1a;">
@@ -16524,7 +16551,6 @@ function printReportDirect(title, bodyHtml) {
                 <div style="font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${safeTitle}</div>
                 <div style="display:flex;gap:8px;flex-shrink:0;">
                     <button type="button" id="report-preview-print-btn" style="border:0;border-radius:9px;padding:8px 12px;background:#2563eb;color:#fff;font-weight:800;cursor:pointer;">🖨 In</button>
-                    <button type="button" id="report-preview-pdf-btn" style="border:0;border-radius:9px;padding:8px 12px;background:#dc2626;color:#fff;font-weight:800;cursor:pointer;">📄 Lưu PDF</button>
                     <button type="button" id="report-preview-image-btn" style="border:0;border-radius:9px;padding:8px 12px;background:#059669;color:#fff;font-weight:800;cursor:pointer;">📷 Lưu ảnh</button>
                     <button type="button" id="report-preview-close-btn" style="border:0;border-radius:9px;padding:8px 12px;background:#475569;color:#fff;font-weight:800;cursor:pointer;">✕ Đóng</button>
                 </div>
@@ -16551,6 +16577,9 @@ function printReportDirect(title, bodyHtml) {
         });
         previewContent.querySelectorAll('th,td').forEach((cell) => {
             cell.style.boxSizing = 'border-box';
+            cell.style.borderColor = '#222';
+            cell.style.borderWidth = '1.5px';
+            cell.style.borderStyle = 'solid';
             cell.style.overflowWrap = 'anywhere';
             cell.style.wordBreak = 'break-word';
             cell.style.verticalAlign = 'middle';
@@ -16608,7 +16637,7 @@ function printReportDirect(title, bodyHtml) {
         printDoc.open();
         printDoc.write(`<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"><title>${safeTitle}</title><style>
             @page{margin:14mm;} html,body{margin:0;padding:0;background:#fff;color:#111;font-family:Arial,sans-serif;} *{box-sizing:border-box;}
-            table{width:100%!important;border-collapse:collapse!important;table-layout:fixed!important;} th,td{page-break-inside:avoid;overflow-wrap:anywhere;}
+            table{width:100%!important;border-collapse:collapse!important;table-layout:fixed!important;} th,td{page-break-inside:avoid;overflow-wrap:anywhere;border-color:#222!important;} th{border:1.5px solid #222!important;} td{border:1.5px solid #222!important;}
             th{white-space:normal!important;} td:first-child{white-space:nowrap;}
         </style></head><body>${content.innerHTML}</body></html>`);
         printDoc.close();
@@ -16620,11 +16649,6 @@ function printReportDirect(title, bodyHtml) {
 
     document.getElementById('report-preview-close-btn').onclick = cleanupModal;
     document.getElementById('report-preview-print-btn').onclick = printFromModal;
-
-    // Nút Lưu PDF: mở trình in, nơi có thể chọn “Save as PDF”.
-    document.getElementById('report-preview-pdf-btn').onclick = () => {
-        printFromModal();
-    };
 
     // Chụp ảnh trực tiếp từ vùng XEM báo cáo để ảnh giữ đúng bố cục đang nhìn thấy.
     document.getElementById('report-preview-image-btn').onclick = async () => {
@@ -16654,15 +16678,37 @@ function printReportDirect(title, bodyHtml) {
                 tbl.style.maxWidth = '100%';
                 tbl.style.tableLayout = 'fixed';
                 tbl.style.borderCollapse = 'collapse';
+                tbl.style.fontSize = '13px';
             });
+
+            // Làm chữ và SỐ trong ảnh đậm, rõ hơn bản xem trước.
+            // Các ô có số / tiền / ngày được ưu tiên font-weight cao để khi gửi Zalo hoặc
+            // phóng to ảnh vẫn dễ đọc; tiêu đề bảng cũng đậm hơn.
+            clone.querySelectorAll('th').forEach((cell) => {
+                cell.style.fontWeight = '800';
+                cell.style.color = '#111827';
+            });
+            clone.querySelectorAll('td').forEach((cell) => {
+                const txt = (cell.textContent || '').trim();
+                // Nhận diện các ô chủ yếu là số, tiền, ngày hoặc phần trăm.
+                if (/^[\d\s.,:%+\-đ₫/()]+$/.test(txt) && /\d/.test(txt)) {
+                    cell.style.fontWeight = '800';
+                    cell.style.color = '#111827';
+                }
+            });
+
+            // Tăng độ phân giải ảnh để chữ nhỏ và các con số không bị mờ.
+            const captureScale = Math.min(4, Math.max(2.5, (window.devicePixelRatio || 1) * 2));
             const canvas = await html2canvas(clone, {
-                scale: Math.min(3, Math.max(2, window.devicePixelRatio || 1)),
+                scale: captureScale,
                 backgroundColor: '#f8fafc',
                 useCORS: true,
                 logging: false,
                 width: clone.scrollWidth,
                 height: clone.scrollHeight,
-                windowWidth: clone.scrollWidth
+                windowWidth: clone.scrollWidth,
+                scrollX: 0,
+                scrollY: 0
             });
             const link = document.createElement('a');
             const stamp = new Date().toISOString().slice(0,19).replace(/[T:]/g,'-');
@@ -16684,6 +16730,56 @@ function printReportDirect(title, bodyHtml) {
 }
 
 // Bản dùng cho báo cáo dạng 1 bảng đơn giản (Bán hàng, Tồn kho, Hàng hết hạn...)
+function reportPrintTableHtmlTwoRowHeader(title, subtitle, columns, groups, rows, totalRowHtml, aligns, mergeCol) {
+    // Header 2 dòng: nhóm ở dòng trên, "Đạt/Không đạt" (hoặc tiêu đề con) ở dòng dưới.
+    const widths = columns.map(c => c.width || 'auto');
+    const top = [];
+    const bottom = [];
+    const grouped = new Set();
+    (groups || []).forEach(g => {
+        const start = g.start, span = g.span;
+        grouped.add(start);
+        for (let i = start + 1; i < start + span; i++) grouped.add(i);
+        top.push(`<th colspan="${span}" style="${g.style || ''}">${g.label}</th>`);
+    });
+    for (let i = 0; i < columns.length; i++) {
+        if (grouped.has(i)) continue;
+        const hasGroup = (groups || []).some(g => i >= g.start && i < g.start + g.span);
+        if (hasGroup) continue;
+        top.push(`<th rowspan="2" style="${columns[i].style || ''}">${columns[i].label}</th>`);
+    }
+    (groups || []).forEach(g => {
+        for (let i = g.start; i < g.start + g.span; i++) {
+            bottom.push(`<th style="${columns[i].style || ''}">${columns[i].label}</th>`);
+        }
+    });
+
+    const merge = (mergeCol !== undefined && mergeCol !== null) ? buildMergedColumnRowSpans(rows, mergeCol) : null;
+    const bodyHtml = rows.map((r, rIdx) => '<tr>' + r.map((c, idx) => {
+        if (merge && idx === mergeCol) {
+            if (merge.skip.has(rIdx)) return '';
+            const span = merge.rowSpan[rIdx];
+            const rowspanAttr = span > 1 ? ` rowspan="${span}"` : '';
+            return `<td${rowspanAttr} style="border:1.5px solid #222;padding:6px 7px;text-align:${(aligns&&aligns[idx])||'center'};vertical-align:middle;font-weight:bold;overflow-wrap:anywhere;">${c ?? ''}</td>`;
+        }
+        return `<td style="border:1.5px solid #222;padding:6px 7px;text-align:${(aligns&&aligns[idx])||'center'};vertical-align:middle;overflow-wrap:anywhere;">${c ?? ''}</td>`;
+    }).join('') + '</tr>').join('');
+
+    const colgroup = columns.map(c => `<col style="width:${c.width || (100/columns.length).toFixed(2)+'%'};">`).join('');
+    return `<div style="font-family:Arial,sans-serif;padding:6px;color:#111;">
+      <h1 style="font-size:20px;text-align:center;margin:0 0 4px;">${title}</h1>
+      <p style="text-align:center;color:#555;font-size:13px;margin:0 0 18px;">${subtitle}</p>
+      <table style="width:100%;border-collapse:collapse;table-layout:fixed;font-size:12px;">
+        <colgroup>${colgroup}</colgroup>
+        <thead>
+          <tr>${top.map(x=>x.replace('<th ', '<th style="border:1.5px solid #222;padding:7px 5px;background:#e5e7eb;font-weight:800;text-align:center;vertical-align:middle;white-space:normal;overflow-wrap:anywhere;" ')).join('')}</tr>
+          <tr>${bottom.map(x=>x.replace('<th ', '<th style="border:1.5px solid #222;padding:7px 5px;background:#f1f5f9;font-weight:800;text-align:center;vertical-align:middle;white-space:normal;overflow-wrap:anywhere;" ')).join('')}</tr>
+        </thead>
+        <tbody>${bodyHtml}${totalRowHtml||''}</tbody>
+      </table>
+    </div>`;
+}
+
 function openReportPreviewWindow(title, subtitle, headers, rows, totalRowHtml, aligns, mergeCol) {
     printReportDirect(title, reportPrintTableHtml(title, subtitle, headers, rows, totalRowHtml, aligns, mergeCol));
 }
@@ -17793,10 +17889,23 @@ async function exportFullReport() {
             // Lấy vatRate của hóa đơn (nếu không có thì mặc định là 0)
             const vatRate = parseFloat(d.vatRate || 0);
             const itemsArr = d.items || [];
-            // KH có TỪ 2 SẢN PHẨM TRỞ LÊN trong CÙNG 1 hoá đơn - chỉ khi đó mới cộng thêm
-            // "Tổng hoá đơn" vào Ghi chú (hoá đơn 1 sản phẩm thì Thành tiền đã hiện rõ rồi,
-            // không cần lặp lại).
+            // Chỉ hiện tổng hoá đơn trong Ghi chú khi hoá đơn có từ 2 dòng SP trở lên.
+            // Quan trọng: nếu hoá đơn có dòng "Đổi date" thì KHÔNG đặt tổng vào dòng Đổi date;
+            // tổng phải nằm ở dòng hàng bán có tiền.
             const isMultiProduct = itemsArr.length > 1;
+            const totalNoteTargetIdx = (() => {
+                for (let k = itemsArr.length - 1; k >= 0; k--) {
+                    const it = itemsArr[k] || {};
+                    const money = (parseFloat(it.qty || 0) * parseFloat(it.price || 0));
+                    if (!it.dateSwap && !it.isShipping && money > 0) return k;
+                }
+                for (let k = itemsArr.length - 1; k >= 0; k--) {
+                    const it = itemsArr[k] || {};
+                    const money = (parseFloat(it.qty || 0) * parseFloat(it.price || 0));
+                    if (!it.dateSwap && money > 0) return k;
+                }
+                return -1;
+            })();
             
             itemsArr.forEach((i, idx) => {
                 const qty = parseFloat(i.qty || 0); // Sửa thành parseFloat
@@ -17818,13 +17927,13 @@ async function exportFullReport() {
                 } else if (dDateStr >= fromVal && dDateStr <= toVal) {
                     if (!i.isShipping) inventory[i.name].xuat += qty;
 
-                    // Ở dòng CUỐI CÙNG của 1 hoá đơn có TỪ 2 SẢN PHẨM TRỞ LÊN, cộng thêm
-                    // "Tổng hoá đơn" vào cột Ghi chú - để biết ngay tổng tiền khách phải trả
-                    // của CẢ hoá đơn, khỏi phải tự cộng từng dòng Thành tiền lại với nhau.
+                    // Tổng hoá đơn phải nằm ở dòng HÀNG CÓ TIỀN; nếu có dòng Đổi date
+                    // (giá 0) ở cuối hoá đơn thì tuyệt đối không đưa tổng sang dòng đó.
+                    // Chỉ bôi đậm phần SỐ TIỀN, không bôi đậm chữ "Tổng HĐ:".
                     let noteFinal = i.note || "";
-                    if (isMultiProduct && idx === itemsArr.length - 1) {
+                    if (isMultiProduct && idx === totalNoteTargetIdx) {
                         const invoiceTotal = parseFloat(d.total || 0);
-                        const totalNote = `Tổng HĐ: ${invoiceTotal.toLocaleString('vi-VN')}đ`;
+                        const totalNote = `Tổng HĐ: <strong>${invoiceTotal.toLocaleString('vi-VN')}đ</strong>`;
                         noteFinal = noteFinal ? `${noteFinal} | ${totalNote}` : totalNote;
                     }
                     
@@ -18278,10 +18387,23 @@ async function viewFullReport() {
             const dDateStr = dDateObj.toISOString().split('T')[0];
             const vatRate = parseFloat(d.vatRate || 0);
             const itemsArr = d.items || [];
-            // KH có TỪ 2 SẢN PHẨM TRỞ LÊN trong CÙNG 1 hoá đơn - chỉ khi đó mới cộng thêm
-            // "Tổng hoá đơn" vào Ghi chú (hoá đơn 1 sản phẩm thì Thành tiền đã hiện rõ rồi,
-            // không cần lặp lại).
+            // Chỉ hiện tổng hoá đơn trong Ghi chú khi hoá đơn có từ 2 dòng SP trở lên.
+            // Quan trọng: nếu hoá đơn có dòng "Đổi date" thì KHÔNG đặt tổng vào dòng Đổi date;
+            // tổng phải nằm ở dòng hàng bán có tiền.
             const isMultiProduct = itemsArr.length > 1;
+            const totalNoteTargetIdx = (() => {
+                for (let k = itemsArr.length - 1; k >= 0; k--) {
+                    const it = itemsArr[k] || {};
+                    const money = (parseFloat(it.qty || 0) * parseFloat(it.price || 0));
+                    if (!it.dateSwap && !it.isShipping && money > 0) return k;
+                }
+                for (let k = itemsArr.length - 1; k >= 0; k--) {
+                    const it = itemsArr[k] || {};
+                    const money = (parseFloat(it.qty || 0) * parseFloat(it.price || 0));
+                    if (!it.dateSwap && money > 0) return k;
+                }
+                return -1;
+            })();
             itemsArr.forEach((i, idx) => {
                 const qty = parseFloat(i.qty || 0);
                 const price = parseFloat(i.price || 0);
@@ -18298,13 +18420,13 @@ async function viewFullReport() {
                 } else if (dDateStr >= fromVal && dDateStr <= toVal) {
                     if (!i.isShipping) inventory[i.name].xuat += qty;
 
-                    // Ở dòng CUỐI CÙNG của 1 hoá đơn có TỪ 2 SẢN PHẨM TRỞ LÊN, cộng thêm
-                    // "Tổng hoá đơn" vào cột Ghi chú - để biết ngay tổng tiền khách phải trả
-                    // của CẢ hoá đơn, khỏi phải tự cộng từng dòng Thành tiền lại với nhau.
+                    // Tổng hoá đơn phải nằm ở dòng HÀNG CÓ TIỀN; nếu có dòng Đổi date
+                    // (giá 0) ở cuối hoá đơn thì tuyệt đối không đưa tổng sang dòng đó.
+                    // Chỉ bôi đậm phần SỐ TIỀN, không bôi đậm chữ "Tổng HĐ:".
                     let noteFinal = i.note || "";
-                    if (isMultiProduct && idx === itemsArr.length - 1) {
+                    if (isMultiProduct && idx === totalNoteTargetIdx) {
                         const invoiceTotal = parseFloat(d.total || 0);
-                        const totalNote = `Tổng HĐ: ${invoiceTotal.toLocaleString('vi-VN')}đ`;
+                        const totalNote = `Tổng HĐ: <strong>${invoiceTotal.toLocaleString('vi-VN')}đ</strong>`;
                         noteFinal = noteFinal ? `${noteFinal} | ${totalNote}` : totalNote;
                     }
 
@@ -18349,7 +18471,7 @@ async function viewFullReport() {
         // ----- Dựng HTML cho khung xem trước / in -----
         salesData.sort((a, b) => new Date(a[0]) - new Date(b[0]));
         const td = 'border:1px solid #999;padding:6px 8px;';
-        const th = 'border:1px solid #999;padding:7px 8px;background:#efefef;font-weight:bold;';
+        const th = 'border:1.5px solid #222;padding:7px 8px;background:#efefef;font-weight:800;';
         // Cột chữ dài (Tên sản phẩm/Khách hàng/Ghi chú) cần tự xuống dòng khi dùng bảng cột
         // cố định (table-layout:fixed) bên dưới - nếu không chữ dài sẽ bị tràn ra ngoài ô.
         const tdWrap = td + 'word-break:break-word;';
@@ -18364,9 +18486,9 @@ async function viewFullReport() {
                     : `<td style="${td}text-align:center;">${r[1]}</td>`);
             const custCellHtml = custMerge.skip.has(rIdx) ? '' :
                 (custMerge.rowSpan[rIdx] > 1
-                    ? `<td rowspan="${custMerge.rowSpan[rIdx]}" style="${tdWrap}text-align:left;vertical-align:middle;font-weight:bold;">${r[2]}</td>`
-                    : `<td style="${tdWrap}">${r[2]}</td>`);
-            return `<tr><td style="${td}text-align:center;white-space:nowrap;">${dd}-${m}-${y}</td>${phieuCellHtml}${custCellHtml}<td style="${tdWrap}">${r[3]}</td><td style="${td}text-align:center;">${r[4]}</td><td style="${td}text-align:center;">${r[5]}</td><td style="${td}text-align:right;">${Math.round(r[6]).toLocaleString('vi-VN')}</td><td style="${td}text-align:right;">${Math.round(r[7]).toLocaleString('vi-VN')}</td><td style="${tdWrap}">${r[8] || ''}</td></tr>`;
+                    ? `<td rowspan="${custMerge.rowSpan[rIdx]}" style="${tdWrap}text-align:left;vertical-align:middle;font-weight:800;">${r[2]}</td>`
+                    : `<td style="${tdWrap}font-weight:800;">${r[2]}</td>`);
+            return `<tr><td style="${td}text-align:center;white-space:nowrap;">${dd}-${m}-${y}</td>${phieuCellHtml}${custCellHtml}<td style="${tdWrap}">${r[3]}</td><td style="${td}text-align:center;">${r[4]}</td><td style="${td}text-align:center;font-weight:800;">${r[5]}</td><td style="${td}text-align:right;font-weight:700;">${Math.round(r[6]).toLocaleString('vi-VN')}</td><td style="${td}text-align:right;font-weight:700;">${Math.round(r[7]).toLocaleString('vi-VN')}</td><td style="${tdWrap}">${r[8] || ''}</td></tr>`;
         }).join('') || `<tr><td colspan="9" style="${td}text-align:center;color:#888;">Không có dữ liệu</td></tr>`;
 
         const nhomMap = new Map();
@@ -18389,13 +18511,13 @@ async function viewFullReport() {
             nxtRowsHtml += `<tr><td colspan="${nxtColCount}" style="${td}background:#fff9c4;font-weight:bold;">${tenNhom}</td></tr>`;
             danhSach.forEach(({ name, item, tonCuoi }) => {
                 const ghiChuCell = `<td style="${tdWrap}">${item.nhapDoiVendors && item.nhapDoiVendors.size ? Array.from(item.nhapDoiVendors).join(', ') : ''}</td>`;
-                nxtRowsHtml += `<tr><td style="${td}text-align:center;white-space:nowrap;">${formatDateToDDMMYYYY(toVal)}</td><td style="${tdWrap}">${name}</td><td style="${td}text-align:center;">${getProductUnit(name)}</td><td style="${td}text-align:center;">${formatVal(item.tonDau)}</td><td style="${td}text-align:center;">${formatVal(item.nhapMoi)}</td><td style="${td}text-align:center;">${formatVal(item.nhapDoi)}</td><td style="${td}text-align:center;">${formatVal(item.xuat)}</td><td style="${td}text-align:center;">${formatVal(tonCuoi)}</td>${ghiChuCell}</tr>`;
+                nxtRowsHtml += `<tr><td style="${td}text-align:center;white-space:nowrap;">${formatDateToDDMMYYYY(toVal)}</td><td style="${tdWrap}">${name}</td><td style="${td}text-align:center;">${getProductUnit(name)}</td><td style="${td}text-align:center;font-weight:800;">${formatVal(item.tonDau)}</td><td style="${td}text-align:center;font-weight:800;">${formatVal(item.nhapMoi)}</td><td style="${td}text-align:center;font-weight:800;">${formatVal(item.nhapDoi)}</td><td style="${td}text-align:center;font-weight:800;">${formatVal(item.xuat)}</td><td style="${td}text-align:center;font-weight:800;">${formatVal(tonCuoi)}</td>${ghiChuCell}</tr>`;
             });
         });
         if (!nxtRowsHtml) nxtRowsHtml = `<tr><td colspan="${nxtColCount}" style="${td}text-align:center;color:#888;">Không có dữ liệu</td></tr>`;
 
         const sxRowsHtml = Object.keys(spDataRange).map(name =>
-            `<tr><td style="${td}">${name}</td><td style="${td}text-align:center;">${formatVal(spDataRange[name].sl)}</td><td style="${td}text-align:center;">${formatVal(spDataRange[name].kg)}</td></tr>`
+            `<tr><td style="${td}">${name}</td><td style="${td}text-align:center;font-weight:800;">${formatVal(spDataRange[name].sl)}</td><td style="${td}text-align:center;font-weight:800;">${formatVal(spDataRange[name].kg)}</td></tr>`
         ).join('') || `<tr><td colspan="3" style="${td}text-align:center;color:#888;">Không có dữ liệu</td></tr>`;
 
         const chuaDong = totalMeChoDongLuyKe - totalMeDaDongLuyKe;
@@ -18743,7 +18865,7 @@ async function viewDebtReport() {
             ? reportDataFull
             : (reportDataFull[selectedCustomer] ? { [selectedCustomer]: reportDataFull[selectedCustomer] } : {});
 
-        const th = 'border:1px solid #999;padding:7px 8px;background:#efefef;font-weight:bold;';
+        const th = 'border:1.5px solid #222;padding:7px 8px;background:#efefef;font-weight:800;';
         const td = 'border:1px solid #999;padding:6px 8px;';
         const headHtml = '<tr>' + ['STT', 'Ngày mua', 'Số phiếu', 'Sản phẩm', 'ĐVT', 'SL', 'Thành tiền', 'Thuế%', 'Tiền thuế']
             .map(h => `<th style="${th}">${h}</th>`).join('') + '</tr>';
@@ -18959,6 +19081,73 @@ async function saveExcelFile(workbook, filename) {
 }
 
 //================== 1. XUẤT QUYỂN 1 =====================
+function healthDateLabel(d){return `Từ ${formatDateToDDMMYYYY(d.from)} đến ${formatDateToDDMMYYYY(d.to)}`;}
+async function getProductionViewRows(dates){
+ const f=new Date(dates.from),t=new Date(dates.to);t.setHours(23,59,59,999);const snap=await db.collection('production').get(),g={};
+ snap.forEach(doc=>{const d=doc.data();if(!d.timestamp||!d.tenSP||!String(d.tenSP).trim())return;const dt=d.timestamp.toDate?d.timestamp.toDate():(d.timestamp.seconds?new Date(d.timestamp.seconds*1000):new Date(d.timestamp));if(dt<f||dt>t)return;const k=dt.toISOString().slice(0,10)+'_'+d.tenSP;if(!g[k])g[k]={tenSP:d.tenSP,sl:0,dvt:d.dvt||'',ca:dt.getHours()<12?'Sáng':'Chiều',date:dt};g[k].sl+=Number(d.sl||0);});
+ return Object.values(g).sort((a,b)=>a.date-b.date);
+}
+async function viewKiemThucQuyen1(){
+    const dates=getDates(); if(!dates) return;
+    try{
+        const {dataI,dataII}=await loadKiemThucQuyen1ViewData(dates);
+        const cols=[
+            ['TT','4%'],['Tên thực phẩm','10%'],['Thời gian nhập (ngày, giờ)','8%'],['Khối lượng (kg/lít...)','6%'],
+            ['Tên cơ sở','7%'],['Địa chỉ, điện thoại','8%'],['Tên người giao hàng','7%'],['Chứng từ, hóa đơn','5%'],
+            ['Giấy ĐK VS thú y','5%'],['Giấy kiểm dịch','5%'],['Đạt','6%'],['Không đạt','6%'],['Đạt','6%'],['Không đạt','6%'],
+            ['Biện pháp xử lý / Ghi chú','11%']
+        ].map(x=>({label:x[0],width:x[1]}));
+        const groups=[
+            {start:10,span:2,label:'Kiểm tra cảm quan'},
+            {start:12,span:2,label:'Xét nghiệm nhanh'}
+        ];
+        const rows=[...q1RowsView(dataI), ...q1RowsView(dataII)];
+        const html=reportPrintTableHtmlTwoRowHeader('SỔ KIỂM THỰC – QUYỂN 1 (BƯỚC 1)',getHealthReportDateLabel(dates),cols,groups,rows,'',
+            ['center','left','center','right','left','left','left','center','center','center','center','center','center','center','left']);
+        printReportDirect('SỔ KIỂM THỰC – QUYỂN 1 (BƯỚC 1)',getHealthReportDateLabel(dates),html);
+    }catch(e){ showAlert('Lỗi xem Quyển 1: '+e.message); }
+}
+
+
+async function viewKiemThucQuyen2(){
+    const dates=getDates(); if(!dates) return;
+    try{
+        const filtered=await loadProductionGroupsView(dates);
+        const cols=[
+            ['TT','4%'],['Ca (Bữa ăn, giờ ăn...)','7%'],['Tên sản phẩm','10%'],['Nguyên liệu chính để chế biến (tên, số lượng...)','15%'],
+            ['Số lượng','6%'],['Thời gian sơ chế xong (ngày, giờ)','7%'],['Thời gian chế biến xong (ngày, giờ)','7%'],
+            ['Người tham gia chế biến','7%'],['Trang thiết bị dụng cụ','7%'],['Khu vực chế biến và phụ trợ','7%'],
+            ['Đạt','6%'],['Không đạt','6%'],['Biện pháp xử lý/Ghi chú','11%']
+        ].map(x=>({label:x[0],width:x[1]}));
+        const groups=[{start:10,span:2,label:'Kiểm tra cảm quan thức ăn'}];
+        const rows=filtered.map((d,i)=>[i+1,d.ca,d.tenSP,'Thịt lợn, mỡ lợn, hành khô, mắm tép',d.sl,'','','Đạt','Đạt','Đạt','Đạt','','']);
+        const html=reportPrintTableHtmlTwoRowHeader('SỔ KIỂM THỰC – QUYỂN 2 (BƯỚC 2)',getHealthReportDateLabel(dates),cols,groups,rows,'',
+            ['center','center','left','left','right','center','center','center','center','center','center','center','left']);
+        printReportDirect('SỔ KIỂM THỰC – QUYỂN 2 (BƯỚC 2)',getHealthReportDateLabel(dates),html);
+    }catch(e){ showAlert('Lỗi xem Quyển 2: '+e.message); }
+}
+
+
+async function viewKiemThucQuyen3(){
+    const dates=getDates(); if(!dates) return;
+    try{
+        const filtered=await loadProductionGroupsView(dates);
+        const cols=[
+            ['TT','4%'],['Ca (Bữa ăn, giờ ăn...)','7%'],['Tên sản phẩm','10%'],['Số lượng','6%'],
+            ['Thời gian chia xong (ngày, giờ)','9%'],['Thời gian hoàn thành (ngày, giờ)','9%'],
+            ['Dụng cụ chia, chứa đựng, che đậy, bảo quản thức ăn','18%'],['Đạt','7%'],['Không đạt','7%'],['Biện pháp xử lý/Ghi chú','23%']
+        ].map(x=>({label:x[0],width:x[1]}));
+        const groups=[{start:7,span:2,label:'Kiểm tra cảm quan món ăn (màu, mùi, vị, trạng thái, bảo quản...)'}];
+        const rows=filtered.map((d,i)=>{const time=d.date.toLocaleString('vi-VN');return [i+1,d.ca,d.tenSP,d.sl+' '+(d.dvt||''),time,time,'','Đạt','',''];});
+        const html=reportPrintTableHtmlTwoRowHeader('SỔ KIỂM THỰC – QUYỂN 3 (BƯỚC 3)',getHealthReportDateLabel(dates),cols,groups,rows,'',
+            ['center','center','left','right','center','center','center','center','center','left']);
+        printReportDirect('SỔ KIỂM THỰC – QUYỂN 3 (BƯỚC 3)',getHealthReportDateLabel(dates),html);
+    }catch(e){ showAlert('Lỗi xem Quyển 3: '+e.message); }
+}
+
+
+async function viewSoLuuMau(){const dates=getDates();if(!dates)return;try{const a=await getProductionViewRows(dates);const rows=a.map((d,i)=>{const n=(d.tenSP||'').toLowerCase();let gc='';if(n.includes('thuỷ tinh')||n.includes('thủy tinh'))gc='6 tháng';else if(n.includes('nhựa')||n.includes('túi zip'))gc='25 ngày';const tm=d.date.toLocaleString('vi-VN');return[i+1,d.tenSP||'',d.ca,d.sl,'100g','Lọ thuỷ tinh','Nhiệt độ thường',tm,tm,gc,'',''];});openReportPreviewWindow('SỔ LƯU MẪU THEO DÕI VÀ HUỶ MẪU THỨC ĂN',healthDateLabel(dates),['TT','Tên mẫu sản phẩm','Ca (giờ ăn...)','Số lượng','Khối lượng/ thể tích mẫu (gam/ml)','Dụng cụ chứa mẫu thức ăn lưu','Nhiệt độ bảo quản mẫu (°C)','Thời gian lấy mẫu','Thời gian hủy mẫu','Ghi chú','Người lưu mẫu','Người hủy mẫu'],rows,'',['center','left','center','right','center','center','center','center','center','left','left','left']);}catch(e){showAlert('Lỗi xem Sổ Lưu Mẫu: '+e.message);}}
+
 async function exportExcelQuyen1() {
     const dates = getDates(); if (!dates) return;
     try {
@@ -18968,149 +19157,194 @@ async function exportExcelQuyen1() {
 
         const snap = await db.collection('material_imports').get();
         const suppliersSnap = await db.collection('suppliers').get();
-        
         const supplierMap = new Map();
         suppliersSnap.forEach(doc => {
             const s = doc.data();
-            supplierMap.set(s.name, s.address);
+            supplierMap.set(s.name, s.address || '');
         });
 
-        const dataI = []; 
-        let totalThitMo = 0; // Biến lưu tổng thịt + mỡ
-        const dataII_Raw = []; // Lưu các mục khô/gia vị thực tế
+        const dataI = [];
+        let totalThitMo = 0;
+        const dataII_Raw = [];
         const khoKeywords = ['hành', 'mắm', 'gia vị', 'phụ gia', 'khô'];
 
         snap.forEach(doc => {
             const d = doc.data();
-            let dDate = d.timestamp ? d.timestamp.toDate() : null;
-            
-            if (dDate && dDate >= fromDate && dDate <= toDate) {
-                d.address = supplierMap.get(d.ncc) || ""; 
-                const name = (d.tenNL || "").toLowerCase().trim();
-                const sl = Number(d.sl || 0);
-
-                if (name === 'thịt ăn') return; 
-
-                // Tính tổng thịt và mỡ
-                if (name.includes('thịt') || name.includes('mỡ')) {
-                    totalThitMo += sl;
-                }
-
-                if (khoKeywords.some(key => name.includes(key))) {
-                    dataII_Raw.push(d);
-                } else {
-                    dataI.push(d);
-                }
-            }
+            const dDate = d.timestamp?.toDate ? d.timestamp.toDate() : (d.timestamp ? new Date(d.timestamp) : null);
+            if (!dDate || dDate < fromDate || dDate > toDate) return;
+            d.address = supplierMap.get(d.ncc) || d.address || '';
+            const name = String(d.tenNL || '').toLowerCase().trim();
+            const sl = Number(d.sl || 0);
+            if (name === 'thịt ăn') return;
+            if (name.includes('thịt') || name.includes('mỡ')) totalThitMo += sl;
+            if (khoKeywords.some(key => name.includes(key))) dataII_Raw.push(d);
+            else dataI.push(d);
         });
 
-        // Tính toán hành/mắm dựa trên tổng thịt mỡ
         const luongHanh = (totalThitMo * (0.3 / 8.5)).toFixed(2);
         const luongMam = (totalThitMo * (1.3 / 8.5)).toFixed(2);
-
-        // Kết hợp dữ liệu khô thực tế và dữ liệu tính toán (chỉ thêm nếu có thịt)
-        let dataII = [...dataII_Raw];
+        const dataII = [...dataII_Raw];
         if (totalThitMo > 0) {
             const dayOfMeat = dataI.length > 0 ? dataI[0].timestamp : null;
             dataII.push(
-                { tenNL: "Hành khô", sl: luongHanh, csSX: "HKD Phạm Quang Huy", ncc: "Tổng đại lý Huy Lượt", nguoigiao: "Lượt", address: "Chợ đầu mối tổng hợp Ninh Bình", timestamp: dayOfMeat },
-                { tenNL: "Mắm tép", sl: luongMam, csSX: "Nguyễn Thị Điền", ncc: "Nguyễn Thị Điền", nguoigiao: "Điền", address: "Thôn 24, xã Gia Hòa, huyện Gia Viễn, tỉnh Ninh Bình.", timestamp: dayOfMeat }
+                { tenNL: 'Hành khô', sl: luongHanh, csSX: 'HKD Phạm Quang Huy', ncc: 'Tổng đại lý Huy Lượt', nguoigiao: 'Lượt', address: 'Chợ đầu mối tổng hợp Ninh Bình', timestamp: dayOfMeat },
+                { tenNL: 'Mắm tép', sl: luongMam, csSX: 'Nguyễn Thị Điền', ncc: 'Nguyễn Thị Điền', nguoigiao: 'Điền', address: 'Thôn 24, xã Gia Hòa, huyện Gia Viễn, tỉnh Ninh Bình.', timestamp: dayOfMeat }
             );
         }
 
         const workbook = new ExcelJS.Workbook();
         const sheet = workbook.addWorksheet('Bước 1');
+        sheet.views = [{ showGridLines: true }];
+        sheet.pageSetup = {
+            orientation: 'landscape', paperSize: 9, fitToPage: true, fitToWidth: 1, fitToHeight: 0,
+            margins: { left: 0.2, right: 0.2, top: 0.35, bottom: 0.35, header: 0.1, footer: 0.1 }
+        };
 
-        // --- 1. TIÊU ĐỀ CHÍNH ---
-        const d = new Date(dates.from);
-        const day = String(d.getDate()).padStart(2, '0');
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const year = d.getFullYear();
+        // ---------- HÀM ĐỊNH DẠNG Ô / KHUNG ----------
+        const thinBorder = {
+            top: { style: 'thin' }, bottom: { style: 'thin' },
+            left: { style: 'thin' }, right: { style: 'thin' }
+        };
+        const headerFont = { name: 'Times New Roman', size: 11, bold: true };
+        const normalFont = { name: 'Times New Roman', size: 11 };
+        const numFont = { name: 'Times New Roman', size: 11, italic: true };
+        const centerWrap = { horizontal: 'center', vertical: 'middle', wrapText: true };
 
-        sheet.mergeCells('A1:D1'); sheet.getCell('A1').value = 'Người kiểm tra: Nguyễn Văn Hoè';
-        sheet.mergeCells('A2:D2'); sheet.getCell('A2').value = `Thời gian kiểm tra: ngày ${day} tháng ${month} năm ${year}`;
-        sheet.mergeCells('A3:D3'); sheet.getCell('A3').value = 'Địa điểm kiểm tra: Tại xưởng sản xuất';
-        sheet.getCell('H1').value = 'Mẫu số 1: Kiểm tra trước khi chế biến thức ăn\n(Bước 1)';
-        sheet.getCell('H1').font = { bold: true, size: 16 };
-        
-        // --- 2. PHẦN I ---
-        let r = 5;
-        sheet.mergeCells(`A${r}:O${r}`);
-        sheet.getCell(`A${r}`).value = 'I. Thực phẩm tươi sống, đông lạnh: thịt, cá, rau, củ, quả...';
-        sheet.getCell(`A${r}`).font = { bold: true };
-        
-        sheet.mergeCells('A6:A7'); sheet.mergeCells('B6:B7'); sheet.mergeCells('C6:C7');
-        sheet.mergeCells('D6:D7'); sheet.mergeCells('H6:H7'); sheet.mergeCells('I6:I7');
-        sheet.mergeCells('J6:J7'); sheet.mergeCells('O6:O7');
-        sheet.mergeCells('E6:G6'); sheet.mergeCells('K6:L6'); sheet.mergeCells('M6:N6');
-
-        sheet.getCell('A6').value = "TT"; sheet.getCell('B6').value = "Tên thực phẩm";
-        sheet.getCell('C6').value = "Thời gian nhập ( ngày, giờ)"; sheet.getCell('D6').value = "Khối lượng (kg/lít....)";
-        sheet.getCell('E6').value = "Nơi cung cấp"; sheet.getCell('H6').value = "Chứng từ, hóa đơn";
-        sheet.getCell('I6').value = "Giấy ĐK VS thú y"; sheet.getCell('J6').value = "Giấy kiểm dịch";
-        sheet.getCell('K6').value = "Kiểm tra cảm quan"; sheet.getCell('M6').value = "Xét nghiệm nhanh";
-        sheet.getCell('O6').value = "Biện pháp xử lý /Ghi chú";
-
-        sheet.getCell('E7').value = "Tên cơ sở"; sheet.getCell('F7').value = "Địa chỉ, điện thoại";
-        sheet.getCell('G7').value = "Tên người giao hàng"; sheet.getCell('K7').value = "Đạt";
-        sheet.getCell('L7').value = "Không đạt"; sheet.getCell('M7').value = "Đạt"; sheet.getCell('N7').value = "Không đạt";
-        sheet.getRow(8).values = ["(1)", "(2)", "(3)", "(4)", "(5)", "(6)", "(7)", "(8)", "(9)", "(10)", "(11)", "(12)", "(13)", "(14)", "(15)"];
-
-        for(let i = 6; i <= 8; i++) {
-            sheet.getRow(i).font = { bold: true };
-            sheet.getRow(i).eachCell({ includeEmpty: true }, c => {
-                c.border = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} };
-                c.alignment = { horizontal: 'center', vertical: 'middle' };
-            });
+        function styleRange(r1, c1, r2, c2, font = headerFont) {
+            for (let rr = r1; rr <= r2; rr++) {
+                const row = sheet.getRow(rr);
+                for (let cc = c1; cc <= c2; cc++) {
+                    const cell = row.getCell(cc);
+                    cell.border = thinBorder;
+                    cell.alignment = centerWrap;
+                    cell.font = font;
+                }
+            }
         }
+        function mergeAndSet(r1, c1, r2, c2, value, opts = {}) {
+            // Đặt style trước khi merge để Excel giữ khung và Wrap Text ổn định.
+            styleRange(r1, c1, r2, c2, opts.font || headerFont);
+            sheet.mergeCells(r1, c1, r2, c2);
+            const cell = sheet.getCell(r1, c1);
+            cell.value = value;
+            cell.font = opts.font || headerFont;
+            cell.alignment = {
+                horizontal: opts.horizontal || 'center',
+                vertical: 'middle',
+                wrapText: true
+            };
+            if (opts.fill) cell.fill = opts.fill;
+        }
+        function setCell(addr, value, opts = {}) {
+            const cell = sheet.getCell(addr);
+            cell.value = value;
+            cell.border = thinBorder;
+            cell.font = opts.font || headerFont;
+            cell.alignment = {
+                horizontal: opts.horizontal || 'center', vertical: 'middle', wrapText: true
+            };
+            if (opts.fill) cell.fill = opts.fill;
+        }
+        function mergeAndSetNoBorder(r1, c1, r2, c2, value, opts = {}) {
+            sheet.mergeCells(r1, c1, r2, c2);
+            const cell = sheet.getCell(r1, c1);
+            cell.value = value;
+            cell.font = opts.font || { name: 'Times New Roman', size: 12 };
+            cell.alignment = {
+                horizontal: opts.horizontal || 'left',
+                vertical: 'middle',
+                wrapText: true
+            };
+            for (let rr = r1; rr <= r2; rr++) {
+                for (let cc = c1; cc <= c2; cc++) {
+                    sheet.getRow(rr).getCell(cc).border = {};
+                }
+            }
+        }
+
+        // ---------- TIÊU ĐỀ CHÍNH: KHÔNG KẺ KHUNG ----------
+        mergeAndSetNoBorder(1, 1, 1, 4, 'Người kiểm tra: Nguyễn Văn Hoè', { horizontal: 'left', font: { name: 'Times New Roman', size: 12 } });
+        mergeAndSetNoBorder(2, 1, 2, 4, `Thời gian kiểm tra: ngày ${String(new Date(dates.from).getDate()).padStart(2,'0')} tháng ${String(new Date(dates.from).getMonth()+1).padStart(2,'0')} năm ${new Date(dates.from).getFullYear()}`, { horizontal: 'left', font: { name: 'Times New Roman', size: 12 } });
+        mergeAndSetNoBorder(3, 1, 3, 4, 'Địa điểm kiểm tra: Tại xưởng sản xuất', { horizontal: 'left', font: { name: 'Times New Roman', size: 12 } });
+        mergeAndSetNoBorder(1, 8, 2, 15, 'Mẫu số 1: Kiểm tra trước khi chế biến thức ăn\n(Bước 1)', { horizontal: 'center', font: { name: 'Times New Roman', size: 15, bold: true } });
+        sheet.getRow(1).height = 24; sheet.getRow(2).height = 24; sheet.getRow(3).height = 24;
+
+        // ============================================================
+        // PHẦN I – TÊN PHẦN KHÔNG KẺ KHUNG
+        // ============================================================
+        let r = 5;
+        mergeAndSetNoBorder(r, 1, r, 15, 'I. Thực phẩm tươi sống, đông lạnh: thịt, cá, rau, củ, quả...', { horizontal: 'left', font: { name: 'Times New Roman', size: 12, bold: true } });
+        sheet.getRow(r).height = 22;
+
+        // DÒNG 6–7: các cột đơn GỘP DỌC
+        [1,2,3,4,8,9,10,15].forEach(c => mergeAndSet(6, c, 7, c, {
+            1:'TT', 2:'Tên thực phẩm', 3:'Thời gian nhập (\nngày, giờ)', 4:'Khối lượng (kg/lít...)',
+            8:'Chứng từ, hóa đơn', 9:'Giấy ĐK VS thú y', 10:'Giấy kiểm dịch', 15:'Biện pháp xử lý /Ghi chú'
+        }[c]));
+
+        // GỘP NGANG: Nơi cung cấp / Kiểm tra cảm quan / Xét nghiệm nhanh
+        mergeAndSet(6, 5, 6, 7, 'Nơi cung cấp');
+        mergeAndSet(6, 11, 6, 12, 'Kiểm tra cảm quan');
+        mergeAndSet(6, 13, 6, 14, 'Xét nghiệm nhanh (nếu có)');
+        setCell('E7', 'Tên cơ sở'); setCell('F7', 'Địa chỉ, điện thoại'); setCell('G7', 'Tên người giao hàng');
+        setCell('K7', 'Đạt'); setCell('L7', 'Không đạt');
+        setCell('M7', 'Đạt'); setCell('N7', 'Không đạt');
+
+        // Dòng đánh số 1–15 nằm riêng bên dưới hai dòng tiêu đề
+        for (let c = 1; c <= 15; c++) setCell(`${String.fromCharCode(64+c)}8`, `(${c})`, { font: numFont });
+        sheet.getRow(6).height = 92; sheet.getRow(7).height = 52; sheet.getRow(8).height = 24;
 
         dataI.forEach((d, i) => {
-            const dObj = d.timestamp ? d.timestamp.toDate() : new Date();
-            const row = sheet.addRow([i + 1, d.tenNL || "", dObj.toLocaleDateString(), d.sl || "", d.ncc || "", d.address || "", d.nguoigiao || "", "", "", "", "Đạt", "", "", "", ""]);
-            row.eachCell(c => { c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; c.alignment = { horizontal: 'center', vertical: 'middle' }; });
+            const dt = d.timestamp?.toDate ? d.timestamp.toDate() : new Date();
+            const row = sheet.addRow([i + 1, d.tenNL || '', dt.toLocaleDateString('vi-VN'), d.sl || '', d.ncc || '', d.address || '', d.nguoigiao || '', '', '', '', 'Đạt', '', '', '', '']);
+            row.eachCell(c => { c.border = thinBorder; c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }; c.font = normalFont; });
         });
 
-        // --- 3. PHẦN II ---
+        // ============================================================
+        // PHẦN II – GỘP DỌC / GỘP NGANG ĐÚNG MẪU, TÁCH RIÊNG 2 DÒNG
+        // ============================================================
         r = sheet.lastRow.number + 2;
-        sheet.mergeCells(`A${r}:O${r}`);
-        sheet.getCell(`A${r}`).value = 'II. Thực phẩm khô và thực phẩm bao gói sẵn, phụ gia thực phẩm';
-        sheet.getCell(`A${r}`).font = { bold: true };
-        
+        mergeAndSetNoBorder(r, 1, r, 15, 'II. Thực phẩm khô và thực phẩm bao gói sẵn, phụ gia thực phẩm', { horizontal: 'left', font: { name: 'Times New Roman', size: 12, bold: true } });
         r++;
-        const rowH1 = sheet.getRow(r);
-        rowH1.values = ["TT", "Tên thực phẩm", "Tên cơ sở sản xuất", "Địa chỉ sản xuất", "Thời gian nhập (ngày, giờ)", "Khối lượng (kg/lít...)", "Nơi cung cấp", "", "", "Hạn sử dụng", "Điều kiện bảo quản", "Chứng từ, hóa đơn", "Kiểm tra cảm quan (nhãn, bao bì, bảo quản, hạn sử dụng...)", "", "Biện pháp xử lý/Ghi chú"];
-        sheet.mergeCells(r, 7, r, 9);
-        sheet.mergeCells(r, 13, r, 14);
-        
-        r++;
-        const rowH2 = sheet.getRow(r);
-        rowH2.values = ["", "", "", "", "", "", "Tên cơ sở", "Tên chủ giao hàng", "Địa chỉ, điện thoại", "", "", "", "Đạt", "Không đạt", ""];
-        
-        r++;
-        sheet.getRow(r).values = ["(1)", "(2)", "(3)", "(4)", "(5)", "(6)", "(7)", "(8)", "(9)", "(10)", "(11)", "(12)", "(13)", "(14)", "(15)"];
+        const top = r, bottom = r + 1, numberRow = r + 2;
 
-        for(let i = r - 2; i <= r; i++) {
-            sheet.getRow(i).eachCell(c => { 
-                c.border = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} }; 
-                c.alignment = { horizontal: 'center', vertical: 'middle' }; 
-                c.font = { bold: true }; 
-            });
-        }
-        
-        const defaultDate = new Date(dates.from).toLocaleDateString();
+        // Gộp dọc các cột đơn theo đúng bố cục mẫu
+        [1,2,3,4,5,6,10,11,12,15].forEach(c => mergeAndSet(top, c, bottom, c, {
+            1:'TT', 2:'Tên thực phẩm', 3:'Tên cơ sở sản xuất', 4:'Địa chỉ sản xuất',
+            5:'Thời gian nhập (ngày, giờ)', 6:'Khối lượng (kg/lít...)', 10:'Hạn sử dụng',
+            11:'Điều kiện bảo quản', 12:'Chứng từ, hóa đơn', 15:'Biện pháp xử lý / Ghi chú'
+        }[c]));
+        // Gộp ngang nhóm Nơi cung cấp (3 cột) và Kiểm tra cảm quan (2 cột)
+        mergeAndSet(top, 7, top, 9, 'Nơi cung cấp');
+        mergeAndSet(top, 13, top, 14, 'Kiểm tra cảm quan (nhãn, bao bì, bảo quản, hạn sử dụng...)');
+        setCell(`${String.fromCharCode(64+7)}${bottom}`, 'Tên cơ sở');
+        setCell(`${String.fromCharCode(64+8)}${bottom}`, 'Tên chủ giao hàng');
+        setCell(`${String.fromCharCode(64+9)}${bottom}`, 'Địa chỉ, điện thoại');
+        setCell(`${String.fromCharCode(64+13)}${bottom}`, 'Đạt');
+        setCell(`${String.fromCharCode(64+14)}${bottom}`, 'Không đạt');
+        for (let c = 1; c <= 15; c++) setCell(`${String.fromCharCode(64+c)}${numberRow}`, `(${c})`, { font: numFont });
+        sheet.getRow(top).height = 96; sheet.getRow(bottom).height = 52; sheet.getRow(numberRow).height = 24;
+
+        const defaultDate = new Date(dates.from).toLocaleDateString('vi-VN');
         dataII.forEach((d, i) => {
-            const displayDate = d.timestamp ? d.timestamp.toDate().toLocaleDateString() : defaultDate;
-            const row = sheet.addRow([i + 1, d.tenNL || "", d.csSX || "", d.address || "", displayDate, d.sl || "", d.ncc || "", d.nguoigiao || "", d.address || "", "", "", "", "Đạt", "", ""]);
-            row.eachCell(c => { c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; c.alignment = { horizontal: 'center' }; });
+            const displayDate = d.timestamp?.toDate ? d.timestamp.toDate().toLocaleDateString('vi-VN') : defaultDate;
+            const row = sheet.addRow([i + 1, d.tenNL || '', d.csSX || '', d.address || '', displayDate, d.sl || '', d.ncc || '', d.nguoigiao || '', d.address || '', '', '', '', 'Đạt', '', '']);
+            row.eachCell(c => { c.border = thinBorder; c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }; c.font = normalFont; });
         });
 
-        sheet.pageSetup = { orientation: 'landscape', paperSize: 9, margins: { left: 0.2, right: 0.2, top: 0.5, bottom: 0.5 } };
-        const columnWidths = [4, 12, 10, 8, 10, 10, 10, 10, 10, 8, 8, 8, 6, 8, 8];
-        for (let i = 0; i < columnWidths.length; i++) { sheet.getColumn(i + 1).width = columnWidths[i]; }
-        sheet.views = [{ showGridLines: true }];
+        // ---------- ĐỘ RỘNG CỘT ----------
+        const widths = [5, 16, 13, 10, 15, 18, 17, 12, 12, 12, 10, 10, 10, 10, 18];
+        widths.forEach((w, i) => sheet.getColumn(i + 1).width = w);
+        sheet.getColumn(3).width = 14;
+        sheet.getColumn(4).width = 11;
+        sheet.getColumn(7).width = 16;
+        sheet.getColumn(15).width = 20;
 
         await saveExcelFile(workbook, 'So_Kiem_Thuc_Quyen_1');
-    } catch (err) { showAlert("Lỗi: " + err.message); }
+    } catch (err) {
+        console.error(err);
+        showAlert('Lỗi xuất Quyển 1: ' + err.message);
+    }
 }
 
 // ============== 1. XUẤT QUYỂN 2 ====================
@@ -19191,10 +19425,16 @@ async function exportExcelQuyen2() {
                 // --- THÊM  VÀO ĐÂY ---
                 c.alignment = { 
                     horizontal: 'center', 
-                    vertical: 'middle' 
+                    vertical: 'middle',
+                    wrapText: true
                 };
             });
         }
+        // Chiều cao tiêu đề để chữ xuống dòng đầy đủ như mẫu Word
+        sheet.getRow(5).height = 72;
+        sheet.getRow(6).height = 48;
+        sheet.getRow(7).height = 24;
+
         // --- 3. DỮ LIỆU (Bắt đầu từ hàng 8) ---
         filtered.forEach((d, i) => {
             const row = sheet.addRow([
@@ -19204,13 +19444,12 @@ async function exportExcelQuyen2() {
             
             row.eachCell(c => {
                 c.border = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} };
-                c.alignment = { horizontal: 'center', vertical: 'middle' };
+                c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
             });
         });
 
-        sheet.columns.forEach((col, i) => {
-            col.width = (i === 3) ? 30 : 15; 
-        });
+        const q2Widths = [6, 13, 18, 30, 10, 18, 18, 18, 18, 19, 12, 12, 20];
+        sheet.columns.forEach((col, i) => { col.width = q2Widths[i] || 15; });
         
         await saveExcelFile(workbook, 'So_Kiem_Thuc_Quyen_2');
     } catch (err) { showAlert("Lỗi xuất Q2: " + err.message); }
@@ -19269,27 +19508,48 @@ async function exportExcelQuyen3() {
 
         // --- 2. TIÊU ĐỀ CỘT (Dòng 3-4) ---
         let r = 3;
-        ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'J'].forEach(col => sheet.mergeCells(`${col}${r}:${col}${r+1}`));
-        sheet.mergeCells('H' + r + ':I' + r);
 
-        sheet.getRow(r).values = ["TT", "Ca (Bữa ăn, giờ ăn...)", "Tên sản phẩm", "Số lượng", "Thời gian chia xong (ngày, giờ)", "Thời gian hoàn thành(ngày, giờ)", "Dụng cụ chia, chứa đựng, che đậy, bảo quản thức ăn", "Kiểm tra cảm quan món ăn (màu, mùi, vị, trạng thái, bảo quản...)", "", "Biện pháp xử lý/Ghi chú"];
-        sheet.getRow(r + 1).values = ["", "", "", "", "", "", "", "Đạt", "Không đạt", ""];
+        // Gộp dọc các cột độc lập: dòng 3 + dòng 4.
+        ['A','B','C','D','E','F','G','J'].forEach(col => sheet.mergeCells(`${col}3:${col}4`));
+        // Gộp ngang tiêu đề nhóm kiểm tra cảm quan.
+        sheet.mergeCells('H3:I3');
 
-        // Dòng đánh số (1) -> (10)
-        const rowNumbering = sheet.addRow(["(1)", "(2)", "(3)", "(4)", "(5)", "(6)", "(7)", "(8)", "(9)", "(10)"]);
+        // Chỉ đặt giá trị vào ô đầu của các vùng merge.
+        const q3Top = {
+            A3:'TT',
+            B3:'Ca (Bữa ăn, giờ ăn...)',
+            C3:'Tên sản phẩm',
+            D3:'Số lượng',
+            E3:'Thời gian chia xong (ngày, giờ)',
+            F3:'Thời gian hoàn thành (ngày, giờ)',
+            G3:'Dụng cụ chia, chứa đựng, che đậy, bảo quản thức ăn',
+            H3:'Kiểm tra cảm quan món ăn (màu, mùi, vị, trạng thái, bảo quản...)',
+            J3:'Biện pháp xử lý/Ghi chú',
+            H4:'Đạt',
+            I4:'Không đạt'
+        };
+        Object.entries(q3Top).forEach(([addr,val]) => { sheet.getCell(addr).value = val; });
+
+        const rowNumbering = sheet.getRow(5);
+        rowNumbering.values = ['(1)','(2)','(3)','(4)','(5)','(6)','(7)','(8)','(9)','(10)'];
         rowNumbering.font = { italic: true };
-        rowNumbering.eachCell(c => {
-            c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-            c.alignment = { horizontal: 'center', vertical: 'middle' };
-            c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } };
-        });
+        rowNumbering.height = 22;
+        for(let c=1;c<=10;c++) {
+            const cell = rowNumbering.getCell(c);
+            cell.border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
+            cell.alignment = { horizontal:'center', vertical:'middle', wrapText:true };
+            cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFE0E0E0'} };
+        }
 
-        for (let i = r; i <= r + 1; i++) {
-            sheet.getRow(i).eachCell(c => {
-                c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-                c.alignment = { horizontal: 'center', vertical: 'middle' };
-                c.font = { bold: true };
-            });
+        sheet.getRow(3).height = 72;
+        sheet.getRow(4).height = 28;
+        for(let rr=3; rr<=4; rr++) {
+            for(let c=1;c<=10;c++) {
+                const cell = sheet.getRow(rr).getCell(c);
+                cell.border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
+                cell.alignment = { horizontal:'center', vertical:'middle', wrapText:true };
+                cell.font = { bold:true };
+            }
         }
 
         // Đổ dữ liệu
@@ -19315,6 +19575,139 @@ async function exportExcelQuyen3() {
 
         await saveExcelFile(workbook, 'So_Kiem_Thuc_Quyen_3');
     } catch (e) { showAlert("Lỗi: " + e.message); }
+}
+
+// ================== CÁC HÀM XEM SỔ Y TẾ ==================
+// Dùng chung hộp thoại Xem báo cáo của hệ thống, có nút In + Lưu ảnh.
+// Dữ liệu và cách lọc ngày được giữ đồng nhất với các nút Xuất Excel tương ứng.
+
+function getHealthReportDateLabel(dates) {
+    const d = new Date(dates.from);
+    return `Từ ngày ${formatDateToDDMMYYYY(dates.from)} đến ngày ${formatDateToDDMMYYYY(dates.to)}`;
+}
+
+async function loadKiemThucQuyen1ViewData(dates) {
+    const fromDate = new Date(dates.from);
+    const toDate = new Date(dates.to); toDate.setHours(23,59,59,999);
+    const [snap, suppliersSnap] = await Promise.all([
+        db.collection('material_imports').get(),
+        db.collection('suppliers').get()
+    ]);
+    const supplierMap = new Map();
+    suppliersSnap.forEach(doc => { const s=doc.data(); if(s.name) supplierMap.set(s.name, s.address || ''); });
+    const dataI=[]; let totalThitMo=0; const dataII_Raw=[];
+    const khoKeywords=['hành','mắm','gia vị','phụ gia','khô'];
+    snap.forEach(doc=>{
+        const d=doc.data();
+        const dDate=d.timestamp ? d.timestamp.toDate() : null;
+        if(!dDate || dDate<fromDate || dDate>toDate) return;
+        const name=(d.tenNL||'').toLowerCase().trim();
+        const sl=Number(d.sl||0);
+        if(name==='thịt ăn') return;
+        d.address=supplierMap.get(d.ncc)||'';
+        if(name.includes('thịt') || name.includes('mỡ')) totalThitMo += sl;
+        (khoKeywords.some(key=>name.includes(key)) ? dataII_Raw : dataI).push(d);
+    });
+    const luongHanh=(totalThitMo*(0.3/8.5)).toFixed(2);
+    const luongMam=(totalThitMo*(1.3/8.5)).toFixed(2);
+    const dataII=[...dataII_Raw];
+    if(totalThitMo>0){
+        const dayOfMeat=dataI.length>0 ? dataI[0].timestamp : null;
+        dataII.push({tenNL:'Hành khô',sl:luongHanh,csSX:'HKD Phạm Quang Huy',ncc:'Tổng đại lý Huy Lượt',nguoigiao:'Lượt',address:'Chợ đầu mối tổng hợp Ninh Bình',timestamp:dayOfMeat});
+        dataII.push({tenNL:'Mắm tép',sl:luongMam,csSX:'Nguyễn Thị Điền',ncc:'Nguyễn Thị Điền',nguoigiao:'Điền',address:'Thôn 24, xã Gia Hòa, huyện Gia Viễn, tỉnh Ninh Bình.',timestamp:dayOfMeat});
+    }
+    return {dataI,dataII};
+}
+
+function q1RowsView(data) {
+    const toDate=(v)=>v&&v.toDate?v.toDate(): (v?new Date(v):null);
+    const rows=[];
+    data.forEach((d,i)=>{
+        const dt=toDate(d.timestamp);
+        rows.push([
+            i+1,
+            d.tenNL||'',
+            dt ? dt.toLocaleString('vi-VN') : '',
+            String(d.sl ?? ''),
+            d.csSX||d.ncc||'',
+            d.address||'',
+            d.nguoigiao||'',
+            d.hoaDon||'', d.giayVS||'', d.giayKiemDich||'',
+            'Đạt','', 'Đạt','', ''
+        ]);
+    });
+    return rows;
+}
+
+async function viewKiemThucQuyen1(){
+    const dates=getDates(); if(!dates) return;
+    try{
+        const {dataI,dataII}=await loadKiemThucQuyen1ViewData(dates);
+        const headers=['TT','Tên thực phẩm','Thời gian nhập (ngày, giờ)','Khối lượng (kg/lít...)','Tên cơ sở','Địa chỉ, điện thoại','Tên người giao hàng','Chứng từ, hóa đơn','Giấy ĐK VS thú y','Giấy kiểm dịch','Cảm quan Đạt','Cảm quan Không đạt','Xét nghiệm nhanh Đạt','Xét nghiệm nhanh Không đạt','Biện pháp xử lý / Ghi chú'];
+        const rows=[...q1RowsView(dataI), ...q1RowsView(dataII)];
+        openReportPreviewWindow('SỔ KIỂM THỰC – QUYỂN 1 (BƯỚC 1)', getHealthReportDateLabel(dates), headers, rows, '',
+            ['center','left','center','right','left','left','left','center','center','center','center','center','center','center','left']);
+    }catch(e){ showAlert('Lỗi xem Quyển 1: '+e.message); }
+}
+
+async function loadProductionGroupsView(dates){
+    const fromDate=new Date(dates.from); const toDate=new Date(dates.to); toDate.setHours(23,59,59,999);
+    const snap=await db.collection('production').get();
+    const groups={};
+    snap.forEach(doc=>{
+        const d=doc.data();
+        if(!d.timestamp || !d.tenSP || !String(d.tenSP).trim()) return;
+        const dt=d.timestamp.seconds ? new Date(d.timestamp.seconds*1000) : (d.timestamp.toDate ? d.timestamp.toDate() : new Date(d.timestamp));
+        if(dt<fromDate || dt>toDate) return;
+        const key=dt.toISOString().split('T')[0]+'_'+d.tenSP;
+        if(!groups[key]) groups[key]={tenSP:d.tenSP,sl:0,ca:dt.getHours()<12?'Sáng':'Chiều',date:dt,dvt:d.dvt||''};
+        groups[key].sl += parseFloat(d.sl)||0;
+        if(!groups[key].dvt) groups[key].dvt=d.dvt||'';
+    });
+    return Object.values(groups).sort((a,b)=>a.date-b.date);
+}
+
+async function viewKiemThucQuyen2(){
+    const dates=getDates(); if(!dates) return;
+    try{
+        const filtered=await loadProductionGroupsView(dates);
+        const headers=['TT','Ca (Bữa ăn, giờ ăn...)','Tên sản phẩm','Nguyên liệu chính để chế biến (tên, số lượng...)','Số lượng','Thời gian sơ chế xong (ngày, giờ)','Thời gian chế biến xong (ngày, giờ)','Người tham gia chế biến','Trang thiết bị dụng cụ','Khu vực chế biến và phụ trợ','Cảm quan Đạt','Cảm quan Không đạt','Biện pháp xử lý/Ghi chú'];
+        const rows=filtered.map((d,i)=>[i+1,d.ca,d.tenSP,'Thịt lợn, mỡ lợn, hành khô, mắm tép',d.sl,'','','Đạt','Đạt','Đạt','Đạt','','']);
+        openReportPreviewWindow('SỔ KIỂM THỰC – QUYỂN 2 (BƯỚC 2)',getHealthReportDateLabel(dates),headers,rows,'',
+            ['center','center','left','left','right','center','center','center','center','center','center','center','left']);
+    }catch(e){ showAlert('Lỗi xem Quyển 2: '+e.message); }
+}
+
+async function viewKiemThucQuyen3(){
+    const dates=getDates(); if(!dates) return;
+    try{
+        const filtered=await loadProductionGroupsView(dates);
+        const headers=['TT','Ca (Bữa ăn, giờ ăn...)','Tên sản phẩm','Số lượng','Thời gian chia xong (ngày, giờ)','Thời gian hoàn thành (ngày, giờ)','Dụng cụ chia, chứa đựng, che đậy, bảo quản thức ăn','Cảm quan Đạt','Cảm quan Không đạt','Biện pháp xử lý/Ghi chú'];
+        const rows=filtered.map((d,i)=>{
+            const time=d.date.toLocaleString('vi-VN');
+            return [i+1,d.ca,d.tenSP,d.sl+' '+(d.dvt||''),time,time,'Đạt','Đạt','',''];
+        });
+        openReportPreviewWindow('SỔ KIỂM THỰC – QUYỂN 3 (BƯỚC 3)',getHealthReportDateLabel(dates),headers,rows,'',
+            ['center','center','left','right','center','center','center','center','center','left']);
+    }catch(e){ showAlert('Lỗi xem Quyển 3: '+e.message); }
+}
+
+async function viewSoLuuMau(){
+    const dates=getDates(); if(!dates) return;
+    try{
+        const filtered=await loadProductionGroupsView(dates);
+        const headers=['TT','Tên mẫu sản phẩm','Ca (giờ ăn...)','Số lượng','Khối lượng/ thể tích mẫu (gam/ml)','Dụng cụ chứa mẫu thức ăn lưu','Nhiệt độ bảo quản mẫu (°C)','Thời gian lấy mẫu (giờ, ngày, tháng, năm)','Thời gian hủy mẫu (giờ, ngày, tháng, năm)','Ghi chú (chất lượng mẫu thức ăn lưu...)','Người lưu mẫu (ký và ghi rõ họ tên)','Người hủy mẫu (ký và ghi rõ họ tên)'];
+        const rows=filtered.map((d,i)=>{
+            const time=d.date.toLocaleString('vi-VN');
+            const ten=(d.tenSP||'').toLowerCase();
+            let ghiChu='';
+            if(ten.includes('thuỷ tinh')||ten.includes('thủy tinh')) ghiChu='6 tháng';
+            else if(ten.includes('nhựa')||ten.includes('túi zip')) ghiChu='25 ngày';
+            return [i+1,d.tenSP||'',d.ca,d.sl,'100g','Lọ thuỷ tinh','Nhiệt độ thường',time,time,ghiChu,'',''];
+        });
+        openReportPreviewWindow('SỔ LƯU MẪU THEO DÕI VÀ HUỶ MẪU THỨC ĂN',getHealthReportDateLabel(dates),headers,rows,'',
+            ['center','left','center','right','center','center','center','center','center','left','left','left']);
+    }catch(e){ showAlert('Lỗi xem Sổ Lưu Mẫu: '+e.message); }
 }
 
 // ================ 3. XUẤT LƯU MẪU ================
@@ -19516,7 +19909,7 @@ async function viewSupplierDebtReport() {
         Swal.close();
         if (keys.length === 0) return showAlert("Không có dữ liệu!");
 
-        const th = 'border:1px solid #999;padding:7px 8px;background:#efefef;font-weight:bold;';
+        const th = 'border:1.5px solid #222;padding:7px 8px;background:#efefef;font-weight:800;';
         const td = 'border:1px solid #999;padding:6px 8px;';
         const headHtml = '<tr>' + ['STT', 'Ngày mua', 'Số phiếu', 'Nguyên liệu', 'ĐVT', 'SL', 'Thành tiền']
             .map(h => `<th style="${th}">${h}</th>`).join('') + '</tr>';
