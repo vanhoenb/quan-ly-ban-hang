@@ -1687,17 +1687,25 @@ document.addEventListener('DOMContentLoaded', function () {
 <div id="page-home" class="p-2 md:p-8 space-y-6 md:space-y-8 dark:bg-slate-950 min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-300">
     
     <div class="flex items-center justify-between gap-3 pb-2 border-b border-slate-200 dark:border-slate-900">
-        <div class="min-w-0">
+        <div class="min-w-0 shrink-0">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:drop-shadow-[0_2px_4px_rgba(255,255,255,0.1)]">BẢNG ĐIỀU KHIỂN</h2>
             <p class="text-slate-500 dark:text-slate-400 text-sm">Tổng quan tình hình kinh doanh</p>
         </div>
-        <div onclick="openFullCalendarModal()" class="shrink-0 cursor-pointer rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-4 py-1.5 md:px-6 md:py-2 transition-all shadow-sm min-w-[280px] md:min-w-[340px]">
-            <div class="flex items-center justify-center">
-                <div class="text-right leading-tight whitespace-nowrap">
-                    <p id="home-clock-date" class="text-[10px] md:text-xs font-extrabold uppercase tracking-wide text-slate-700 dark:text-slate-200">--</p>
-                    <div class="flex items-baseline justify-end gap-2">
-                        <h3 id="home-clock-time" class="text-2xl md:text-4xl leading-none font-black text-emerald-600 dark:text-emerald-400">--:--:--</h3>
-                        <p id="home-clock-lunar" class="hidden md:block text-[10px] md:text-[11px] leading-tight font-semibold text-amber-600 dark:text-amber-400">--</p>
+        <div id="dashboard-expiry-alert" onclick="openDashboardExpiryAlertModal()" class="min-w-0 flex-1 mx-2 md:mx-4 hidden cursor-pointer" title="Bấm để xem danh sách sản phẩm hết hạn và sắp hết hạn">
+            <div class="flex items-center justify-center gap-2 min-h-[56px] md:min-h-[66px]">
+                <div class="w-full max-w-[620px] rounded-xl px-3 py-2 text-center bg-transparent border-0 shadow-none">
+                    <div id="dashboard-expiry-alert-title" class="text-[11px] md:text-xs font-black text-slate-800 dark:text-slate-100 whitespace-nowrap overflow-hidden text-ellipsis">⚠️ Hạn sử dụng cần chú ý</div>
+                    <div id="dashboard-expiry-alert-list" class="mt-0.5 text-[10px] md:text-[11px] font-bold text-slate-700 dark:text-slate-200 whitespace-nowrap overflow-hidden text-ellipsis">--</div>
+                </div>
+            </div>
+        </div>
+        <div onclick="openFullCalendarModal()" class="shrink-0 cursor-pointer rounded-xl bg-transparent border-0 px-3 py-0.5 md:px-4 md:py-0 transition-all min-w-[300px] md:min-w-[380px]">
+            <div class="flex items-center justify-center min-h-[56px] md:min-h-[66px]">
+                <div class="flex items-center justify-center gap-4 md:gap-6 whitespace-nowrap">
+                    <h3 id="home-clock-time" class="text-3xl md:text-5xl leading-none font-black text-emerald-600 dark:text-emerald-400">--:--:--</h3>
+                    <div class="text-left leading-tight">
+                        <p id="home-clock-date" class="text-[12px] md:text-sm font-extrabold uppercase tracking-wide text-slate-700 dark:text-slate-200">--</p>
+                        <p id="home-clock-lunar" class="text-[12px] md:text-sm leading-tight font-bold text-amber-600 dark:text-amber-400">--</p>
                     </div>
                 </div>
             </div>
@@ -8312,7 +8320,7 @@ function calcRemainingMonthsDays(hsdValue, today = new Date()) {
         return null;
     const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     if (end < start) {
-        return { expired: true, months: 0, days: Math.floor((start - end) / (24 * 60 * 60 * 1000)) };
+        return { expired: true, months: 0, days: Math.floor((start - end) / (24 * 60 * 60 * 1000)), totalDays: -Math.floor((start - end) / (24 * 60 * 60 * 1000)) };
     }
     let months = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
     const anchor = new Date(start.getFullYear(), start.getMonth() + months, start.getDate());
@@ -8320,7 +8328,21 @@ function calcRemainingMonthsDays(hsdValue, today = new Date()) {
         months--;
     const afterMonths = new Date(start.getFullYear(), start.getMonth() + months, start.getDate());
     const days = Math.max(0, Math.round((end - afterMonths) / (24 * 60 * 60 * 1000)));
-    return { expired: false, months, days };
+    const totalDays = Math.max(0, Math.floor((end - start) / (24 * 60 * 60 * 1000)));
+    return { expired: false, months, days, totalDays };
+}
+
+// Màu HSD theo SỐ NGÀY thực tế, không dựa vào số tháng lịch:
+// 0-30 ngày: đỏ | 31-60 ngày: vàng | 61-90 ngày: xanh | >90 ngày: bình thường.
+function getExpiryColorLevel(rem) {
+    if (!rem) return 'normal';
+    if (rem.expired) return 'expired';
+    const d = Number(rem.totalDays);
+    if (!Number.isFinite(d)) return 'normal';
+    if (d <= 30) return 'red';
+    if (d <= 60) return 'yellow';
+    if (d <= 90) return 'green';
+    return 'normal';
 }
 function expiryBadgeHtml(info) {
     if (!info || !info.hsd)
@@ -8328,19 +8350,19 @@ function expiryBadgeHtml(info) {
     const rem = calcRemainingMonthsDays(info.hsd);
     if (!rem)
         return '';
-    let cls = 'bg-emerald-100 text-emerald-700 border-emerald-300';
+    let cls = 'bg-slate-100 text-slate-600 border-slate-300';
     let txt = 'Còn ' + rem.months + ' tháng' + (rem.days ? " " + rem.days + " ng\u00E0y" : '');
     if (rem.expired) {
         cls = 'bg-red-100 text-red-700 border-red-300';
         txt = 'ĐÃ HẾT HẠN ' + rem.days + ' ngày';
     }
-    else if (rem.months <= 1) {
+    else if (getExpiryColorLevel(rem) === 'red') {
         cls = 'bg-red-100 text-red-700 border-red-300';
     }
-    else if (rem.months === 2) {
+    else if (getExpiryColorLevel(rem) === 'yellow') {
         cls = 'bg-amber-100 text-amber-700 border-amber-300';
     }
-    else {
+    else if (getExpiryColorLevel(rem) === 'green') {
         cls = 'bg-emerald-100 text-emerald-700 border-emerald-300';
     }
     return "<span class=\"inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border text-[10px] font-black " + cls + "\">\u23F3 " + txt + " \u00B7 HSD " + formatDateToDDMMYYYY(info.hsd) + "</span>";
@@ -10028,7 +10050,11 @@ window.updateInventoryGroupedLotDate = async function (groupId, field, value, el
             return;
         const nextHanThang = field === 'hanThang' ? (normalized === '' ? null : Number(normalized)) : (group.hanThang ?? null);
         const nextNsx = field === 'ngaySX' ? (normalized || null) : (group.ngaySX || null);
-        const nextHsd = field === 'hsd' ? (normalized || null) : ((field === 'ngaySX' && nextNsx && nextHanThang && typeof addMonthsLocal === 'function') ? formatDateInputLocal(addMonthsLocal(new Date(nextNsx + 'T00:00:00'), nextHanThang)) : (group.hsd || null));
+        let nextHsd = field === 'hsd' ? (normalized || null) : (group.hsd || null);
+        // Có NSX + Thời hạn thì luôn tính HSD theo thời hạn, kể cả khi người dùng vừa nhập/sửa ô Thời hạn.
+        if (field !== 'hsd' && nextNsx && nextHanThang && typeof addMonthsLocal === 'function') {
+            nextHsd = formatDateInputLocal(addMonthsLocal(new Date(nextNsx + 'T00:00:00'), nextHanThang));
+        }
         let changedAny = false;
         for (const [receiptId, refs] of refsByReceipt.entries()) {
             let docRef = db.collection('receipts').doc(receiptId), snap = await docRef.get();
@@ -10126,17 +10152,21 @@ window.updateInventoryGroupedLotDate = async function (groupId, field, value, el
         let remainHtml = '<span class="text-slate-400 font-semibold">Chưa khai báo HSD</span>';
         let bgCls = 'bg-slate-50 dark:bg-slate-900/40 border-slate-200';
         if (rem) {
-            let cls = 'text-emerald-600';
-            if (rem.expired || rem.months <= 1) {
+            let cls = 'text-slate-600';
+            if (rem.expired || getExpiryColorLevel(rem) === 'red') {
                 cls = 'text-red-600';
                 bgCls = 'bg-red-100/80 border-red-300';
             }
-            else if (rem.months === 2) {
+            else if (getExpiryColorLevel(rem) === 'yellow') {
                 cls = 'text-amber-600';
                 bgCls = 'bg-amber-100/80 border-amber-300';
             }
-            else {
+            else if (getExpiryColorLevel(rem) === 'green') {
+                cls = 'text-emerald-600';
                 bgCls = 'bg-emerald-100/70 border-emerald-300';
+            }
+            else {
+                bgCls = 'bg-slate-50 dark:bg-slate-900/40 border-slate-200';
             }
             remainHtml = "<span class=\"" + cls + " font-black\">" + (rem.expired ? 'ĐÃ HẾT HẠN ' + rem.days + ' ngày' : "C\u00F2n " + rem.months + " th\u00E1ng" + (rem.days ? " " + rem.days + " ng\u00E0y" : '') + "") + "</span>";
         }
@@ -10183,18 +10213,29 @@ function expiryInventoryLotsDetailsHtml(name, lots) {
         if (lot.hsd) {
             const rem = calcRemainingMonthsDays(lot.hsd);
             if (rem) {
-                let cls = 'text-emerald-600';
-                if (rem.expired || rem.months <= 1)
+                let cls = 'text-slate-600';
+                if (rem.expired || getExpiryColorLevel(rem) === 'red')
                     cls = 'text-red-600';
-                else if (rem.months === 2)
+                else if (getExpiryColorLevel(rem) === 'yellow')
                     cls = 'text-amber-600';
+                else if (getExpiryColorLevel(rem) === 'green')
+                    cls = 'text-emerald-600';
                 remain = "<span class=\"" + cls + " font-black\">" + (rem.expired ? 'ĐÃ HẾT HẠN ' + rem.days + ' ngày' : "C\u00F2n " + rem.months + " th\u00E1ng" + (rem.days ? " " + rem.days + " ng\u00E0y" : '') + "") + "</span>";
             }
         }
         else {
             remain = '<span class="text-slate-400 font-semibold">Chưa khai báo HSD</span>';
         }
-        const detailBg = lot.hsd ? (calcRemainingMonthsDays(lot.hsd)?.expired || calcRemainingMonthsDays(lot.hsd)?.months <= 1 ? 'bg-red-100/80 border-red-300' : calcRemainingMonthsDays(lot.hsd)?.months === 2 ? 'bg-amber-100/80 border-amber-300' : 'bg-emerald-100/70 border-emerald-300') : 'bg-slate-50 dark:bg-slate-900/40 border-slate-200';
+        const detailRem = lot.hsd ? calcRemainingMonthsDays(lot.hsd) : null;
+        const detailBg = detailRem
+            ? (detailRem.expired || detailRem.months <= 1
+                ? 'bg-red-100/80 border-red-300'
+                : detailRem.months === 2
+                    ? 'bg-amber-100/80 border-amber-300'
+                    : detailRem.months === 3
+                        ? 'bg-emerald-100/70 border-emerald-300'
+                        : 'bg-slate-50 dark:bg-slate-900/40 border-slate-200')
+            : 'bg-slate-50 dark:bg-slate-900/40 border-slate-200';
         return "\n            <div data-lot-row=\"1\" class=\"grid grid-cols-[24px_1.15fr_1.15fr_0.8fr_1.35fr_0.75fr] gap-2 items-center py-1.5 px-1 border-b " + detailBg + " last:border-b-0 text-[10px]\">\n                <div class=\"text-slate-400 font-bold\">" + (i + 1) + "</div>\n                <div class=\"flex items-center gap-1 min-w-0\">\n                    <span class=\"text-slate-500 font-bold\">NSX</span>\n                    <input type=\"date\" value=\"" + nsxVal + "\" class=\"w-[30%] min-w-[92px] text-[10px] border border-slate-200 dark:border-slate-700 rounded px-1 py-0.5 bg-white dark:bg-slate-950\" oninput=\"handleInventoryLotDateInput(this,'" + groupId.replace(/'/g, "\\'") + "','ngaySX')\" onblur=\"handleInventoryLotDateBlur(this,'" + groupId.replace(/'/g, "\\'") + "','ngaySX')\" title=\"S\u1EEDa ng\u00E0y s\u1EA3n xu\u1EA5t c\u1EE7a c\u1EA3 l\u00F4 g\u1ED9p\">\n                </div>\n                <div class=\"flex items-center gap-1 min-w-0\">\n                    <span class=\"text-slate-500 font-bold\">HSD</span>\n                    <input type=\"date\" value=\"" + hsdVal + "\" class=\"w-[30%] min-w-[92px] text-[10px] border border-slate-200 dark:border-slate-700 rounded px-1 py-0.5 bg-white dark:bg-slate-950\" oninput=\"handleInventoryLotDateInput(this,'" + groupId.replace(/'/g, "\\'") + "','hsd')\" onblur=\"handleInventoryLotDateBlur(this,'" + groupId.replace(/'/g, "\\'") + "','hsd')\" title=\"S\u1EEDa h\u1EA1n s\u1EED d\u1EE5ng c\u1EE7a c\u1EA3 l\u00F4 g\u1ED9p\">\n                </div>\n                <div class=\"flex items-center gap-1 min-w-0\">\n                    <span class=\"text-slate-500 font-bold whitespace-nowrap\">Th\u1EDDi h\u1EA1n</span>\n                    <input type=\"number\" min=\"0.1\" step=\"0.1\" value=\"" + (lot.hanThang != null && lot.hanThang !== '' ? lot.hanThang : '') + "\" placeholder=\"th\u00E1ng\" class=\"w-1/2 min-w-[75px] text-[10px] border border-slate-200 dark:border-slate-700 rounded px-1 py-0.5 bg-white dark:bg-slate-950\" oninput=\"handleInventoryLotDateInput(this,'" + groupId.replace(/'/g, "\'") + "','hanThang')\" onblur=\"handleInventoryLotDateBlur(this,'" + groupId.replace(/'/g, "\'") + "','hanThang')\" title=\"Th\u1EDDi h\u1EA1n theo th\u00E1ng; c\u00F3 NSX th\u00EC t\u1EF1 t\u00EDnh HSD\">\n                </div>\n                <div class=\"text-center min-w-0\" data-lot-status=\"" + String(groupId).replace(/[^a-zA-Z0-9_-]/g, '_') + "\">" + remain + "</div>\n                <div class=\"text-right\"><b>SL:</b> " + Number(lot.qty || 0).toLocaleString('vi-VN', { maximumFractionDigits: 2 }) + "</div>\n            </div>";
     }).join('');
     const more = '';
@@ -10290,17 +10331,20 @@ async function loadInventory(options = {}) {
                     ? '<span class="inline-flex items-center justify-center whitespace-nowrap px-2 py-1 rounded-lg border text-[10px] font-black bg-slate-100 text-slate-600 border-slate-300">Có lô chưa HSD</span>'
                     : '<span class="text-[10px] text-slate-400">Chưa khai báo HSD</span>';
                 if (rem) {
-                    let cls = 'bg-emerald-100 text-emerald-700 border-emerald-300';
+                    let cls = 'bg-slate-100 text-slate-600 border-slate-300';
                     let txt = 'Còn ' + rem.months + ' tháng' + (rem.days ? ' ' + rem.days + ' ngày' : '');
                     if (rem.expired) {
                         cls = 'bg-red-100 text-red-700 border-red-300';
                         txt = 'ĐÃ HẾT HẠN ' + rem.days + ' ngày';
                     }
-                    else if (rem.months <= 1) {
+                    else if (getExpiryColorLevel(rem) === 'red') {
                         cls = 'bg-red-100 text-red-700 border-red-300';
                     }
-                    else if (rem.months === 2) {
+                    else if (getExpiryColorLevel(rem) === 'yellow') {
                         cls = 'bg-amber-100 text-amber-700 border-amber-300';
+                    }
+                    else if (getExpiryColorLevel(rem) === 'green') {
+                        cls = 'bg-emerald-100 text-emerald-700 border-emerald-300';
                     }
                     expiryStatusHtml =
                         '<span class="inline-flex items-center justify-center whitespace-nowrap px-2 py-1 rounded-lg border text-[10px] font-black ' +
@@ -11447,12 +11491,20 @@ async function addSellToCart(productName, qty = 1, priceType = 'retail') {
         total: parseFloat(price) * qty
     };
     sellCart.push(item);
+
+    // CỰC KỲ QUAN TRỌNG: mọi đường thêm SP vào giỏ (không chỉ quickAdd)
+    // phải cập nhật tồn khả dụng ngay lập tức. Trước đây 3 SP Quả Bùi thường đi
+    // qua addSellToCart nên giỏ đã có hàng nhưng badge tồn trên lưới vẫn giữ số cũ
+    // cho tới khi Lưu & In.
+    if (typeof recomputeCurrentStock === 'function') {
+        recomputeCurrentStock();
+    } else if (typeof updateAllStockBadges === 'function') {
+        updateAllStockBadges();
+    }
     renderSellCart();
-    // Toast thông báo thành công
-    const Toast = Swal.mixin({
-        toast: true, position: 'top-end', showConfirmButton: false, timer: 1000, timerProgressBar: true
-    });
-    Toast.fire({ icon: 'success', title: 'Đã thêm ' + p.name });
+    if (typeof updateCartTotalDisplay === 'function') updateCartTotalDisplay();
+
+    // Không hiện thông báo mỗi lần thêm SP vào giỏ; tránh làm chậm thao tác bán.
 }
 // --- TIỀN SHIP: thêm vào giỏ hàng giống 1 dòng sản phẩm, nhưng KHÔNG kiểm tra/trừ tồn kho
 // (không có NXT), và KHÔNG tính thuế/VAT dù hoá đơn có bật thuế (xem updateGrandTotal,
@@ -12312,6 +12364,12 @@ async function calculateAllStock() {
                     });
                     window.__stockCounterRefByNormalizedName = refMap;
                     window.baseInventoryMap = inventory;
+                    // Giữ một bản tồn gốc đã chuẩn hóa theo tên sản phẩm. Một số dữ liệu cũ
+                    // của Quả Bùi Kỳ Lão/nhóm khác có thể nằm ở stock_counters với tên có
+                    // khoảng trắng hoặc Unicode hơi khác tên trong Danh mục SP. Nếu chỉ dùng
+                    // inventory[name] nguyên văn thì lúc thêm giỏ recomputeCurrentStock()
+                    // sẽ trừ vào một key đang bằng 0 -> thẻ bán hàng không giảm tồn ngay.
+                    window.__normalizedBaseInventoryMap = normalizedInventory;
                     window.__normalizedStockMap = normalizedInventory;
                     recomputeCurrentStock();
                     console.log("Tồn kho gốc (stock_counters) vừa được cập nhật realtime:", inventory);
@@ -12340,17 +12398,37 @@ async function calculateAllStock() {
 // kho thật không đổi, chỉ đổi giỏ hàng nào đang được xem là "active" mà thôi,
 // nên không cần tốn 1 lượt đọc Firestore mỗi lần thao tác.
 function recomputeCurrentStock() {
-    let inventory = { ...(window.baseInventoryMap || {}) };
+    // Dựng tồn hiển thị theo TÊN CHUẨN của Danh mục SP, lấy số gốc từ map đã chuẩn hóa.
+    // Đây là điểm sửa quan trọng cho các SP có dữ liệu stock_counters cũ khác nhẹ tên,
+    // đặc biệt Quả Bùi Kỳ Lão Om 450g/350g/180g: thêm 1 vào giỏ phải làm tồn khả dụng
+    // giảm ngay trên thẻ bán hàng, không phải chờ Lưu & In.
+    const inventory = {};
+    const normalizedBase = window.__normalizedBaseInventoryMap || window.__normalizedStockMap || {};
+    const sourceBase = window.baseInventoryMap || {};
+    const productList = Array.isArray(window.allProductCache) ? window.allProductCache : [];
+    productList.forEach(p => {
+        if (!p || !p.name) return;
+        const key = normalizeProductStockKey(p.name);
+        const q = Number(normalizedBase[key] || 0);
+        inventory[p.name] = Number.isFinite(q) ? q : 0;
+    });
+    // Giữ cả các key tồn cũ không còn trong Danh mục để các báo cáo/chức năng khác
+    // không bị mất dữ liệu khỏi currentStockMap.
+    Object.keys(sourceBase).forEach(name => {
+        if (!Object.prototype.hasOwnProperty.call(inventory, name)) inventory[name] = sourceBase[name];
+    });
+
     if (typeof sellCart !== 'undefined' && Array.isArray(sellCart)) {
         sellCart.forEach(item => {
+            if (!item || item.isShipping || !item.name) return;
             inventory[item.name] = (inventory[item.name] || 0) - (parseFloat(item.qty) || 0);
         });
     }
     if (Array.isArray(window.heldOrders)) {
         window.heldOrders.forEach(order => {
-            if (order.id === window.activeHeldOrderId)
-                return;
+            if (order.id === window.activeHeldOrderId) return;
             (order.cart || []).forEach(item => {
+                if (!item || item.isShipping || !item.name) return;
                 inventory[item.name] = (inventory[item.name] || 0) - (parseFloat(item.qty) || 0);
             });
         });
@@ -12444,31 +12522,64 @@ function renderProductGrid() {
 // lưới, KHÔNG dựng lại toàn bộ lưới (dùng khi tồn kho vừa được cập nhật realtime từ máy
 // khác) - giữ nguyên bộ lọc tìm kiếm và vị trí cuộn hiện tại của người dùng.
 function updateAllStockBadges() {
-    if (!window.allProductCache)
-        return;
+    if (!Array.isArray(window.allProductCache)) return;
+
+    // QUAN TRỌNG: số Tồn hiển thị trên lưới Bán hàng phải được tính TRỰC TIẾP
+    // từ tồn gốc + giỏ hàng hiện tại, không phụ thuộc currentStockMap có vừa bị
+    // listener realtime ghi lại hay chưa. Như vậy vừa bấm thêm SP là badge giảm ngay.
+    const base = window.__normalizedBaseInventoryMap || window.__normalizedStockMap || {};
+    const cartUsed = {};
+    const heldUsed = {};
+
+    // QUAN TRỌNG: sellCart/heldOrders trong file này là biến global khai báo bằng
+    // let/const nên KHÔNG nhất thiết xuất hiện trên window. Trước đây dùng
+    // window.sellCart khiến hàm này nhìn thấy giỏ rỗng => toàn bộ sản phẩm trên
+    // danh sách KHÔNG giảm tồn cho tới khi Lưu & In.
+    const cartSource = (typeof sellCart !== 'undefined' && Array.isArray(sellCart)) ? sellCart : [];
+    cartSource.forEach(item => {
+        if (!item || item.isShipping || !item.name) return;
+        const key = normalizeProductStockKey(item.name);
+        cartUsed[key] = (cartUsed[key] || 0) + (parseFloat(item.qty) || 0);
+    });
+
+    const heldSource = (typeof heldOrders !== 'undefined' && Array.isArray(heldOrders)) ? heldOrders : [];
+    heldSource.forEach(order => {
+        if (order && order.id === window.activeHeldOrderId) return;
+        (order && order.cart || []).forEach(item => {
+            if (!item || item.isShipping || !item.name) return;
+            const key = normalizeProductStockKey(item.name);
+            heldUsed[key] = (heldUsed[key] || 0) + (parseFloat(item.qty) || 0);
+        });
+    });
+
     window.allProductCache.forEach(p => {
+        if (!p || !p.name) return;
         const idName = p.name.replace(/ /g, '_');
-        const cardEl = document.getElementById("product-card-" + idName + "");
-        const badgeEl = document.getElementById("stock-display-" + idName + "");
-        // Sản phẩm hiện không có thẻ trên lưới (ví dụ vừa tạo mới, chưa render lần nào) -
-        // bỏ qua, lần renderProductGrid() đầy đủ tiếp theo sẽ tự thêm đúng.
-        if (!cardEl || !badgeEl)
-            return;
-        const rawStock = typeof getCachedStockQty === 'function' ? getCachedStockQty(p.name) : (window.currentStockMap ? (window.currentStockMap[p.name] || 0) : 0);
-        const realStock = Number(Math.round(rawStock * 100) / 100);
+        const cardEl = document.getElementById('product-card-' + idName);
+        const badgeEl = document.getElementById('stock-display-' + idName);
+        if (!cardEl || !badgeEl) return;
+
+        const key = normalizeProductStockKey(p.name);
+        const baseQty = Number(base[key] || 0);
+        const availableQty = Math.max(0, baseQty - Number(cartUsed[key] || 0) - Number(heldUsed[key] || 0));
+        const realStock = Number(Math.round(availableQty * 100) / 100);
         const isOutOfStock = realStock <= 0;
         const isLowStock = !isOutOfStock && realStock <= 10;
         const badgeThemeClass = cardEl.dataset.badgeClass || 'bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300';
-        badgeEl.innerText = isOutOfStock ? 'HẾT' : (p.unit ? "" + realStock + " " + p.unit + "" : realStock);
-        badgeEl.className = "font-black rounded-full border md:border-2 shadow-sm " + (isOutOfStock ? 'text-[7px] md:text-[9px] px-1 md:px-1.5 py-0 md:py-0.5 bg-red-50 border-red-300 text-red-600 dark:bg-red-500/10 dark:border-red-500/40 dark:text-red-400' : (isLowStock ? 'text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-orange-100 border-orange-300 text-orange-700 dark:bg-orange-500/15 dark:border-orange-500/40 dark:text-orange-400' : "text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 " + badgeThemeClass + " border-white/70 dark:border-slate-900/40")) + "";
+
+        badgeEl.innerText = isOutOfStock ? 'HẾT' : (p.unit ? '' + realStock + ' ' + p.unit : realStock);
+        badgeEl.className = 'font-black rounded-full border md:border-2 shadow-sm ' +
+            (isOutOfStock
+                ? 'text-[7px] md:text-[9px] px-1 md:px-1.5 py-0 md:py-0.5 bg-red-50 border-red-300 text-red-600 dark:bg-red-500/10 dark:border-red-500/40 dark:text-red-400'
+                : (isLowStock
+                    ? 'text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-orange-100 border-orange-300 text-orange-700 dark:bg-orange-500/15 dark:border-orange-500/40 dark:text-orange-400'
+                    : 'text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 ' + badgeThemeClass + ' border-white/70 dark:border-slate-900/40'));
         cardEl.classList.toggle('grayscale', isOutOfStock);
         cardEl.classList.toggle('opacity-70', isOutOfStock);
-        // Cập nhật lại hành vi bấm vào thẻ cho khớp trạng thái mới (hết hàng thì báo lỗi
-        // thay vì cho thêm vào giỏ) - ghi đè trực tiếp thuộc tính onclick bằng JS, không
-        // cần viết lại toàn bộ HTML của thẻ.
         cardEl.onclick = isOutOfStock ? function () { showAlert('Hết hàng!'); } : function () { quickAdd(p.name); };
     });
 }
+
 // Lọc/tìm sản phẩm hiển thị trên lưới sản phẩm trang Bán hàng
 function filterProducts() {
     const searchTerm = document.getElementById('product-search').value.toLowerCase();
@@ -12517,12 +12628,14 @@ function renderSellLotOption(lot, index) {
         }
         else {
             statusText = "C\u00F2n " + rem.months + " th\u00E1ng" + (rem.days ? " " + rem.days + " ng\u00E0y" : '') + "";
-            if (rem.months <= 1)
+            if (getExpiryColorLevel(rem) === 'red')
                 statusCls = 'bg-red-100 text-red-700 border-red-300';
-            else if (rem.months === 2)
+            else if (getExpiryColorLevel(rem) === 'yellow')
                 statusCls = 'bg-amber-100 text-amber-700 border-amber-300';
-            else
+            else if (getExpiryColorLevel(rem) === 'green')
                 statusCls = 'bg-emerald-100 text-emerald-700 border-emerald-300';
+            else
+                statusCls = 'bg-slate-100 text-slate-600 border-slate-300';
         }
     }
     return "\n        <label class=\"block cursor-pointer\">\n            <input type=\"radio\" name=\"sell-lot-choice\" value=\"" + index + "\" class=\"sr-only sell-lot-radio\" " + (index === 0 ? 'checked' : '') + ">\n            <div class=\"sell-lot-card border-2 rounded-xl p-3 transition-all bg-white hover:bg-slate-50 border-slate-200 cursor-pointer\" data-sell-lot-index=\"" + index + "\">\n                <div class=\"flex items-center justify-between gap-2\">\n                    <div class=\"font-black text-sm text-slate-800\">\n                        " + (hasExpiry ? "NSX: " + (formatDateToDDMMYYYY(lot.ngaySX || '') || '—') + " \u00B7 HSD: " + formatDateToDDMMYYYY(lot.hsd) + "" : 'Lô chưa khai báo HSD') + "\n                    </div>\n                    <span class=\"px-2 py-1 rounded-lg border text-[10px] font-black " + statusCls + "\">" + statusText + "</span>\n                </div>\n                <div class=\"mt-1 text-xs text-slate-600\">T\u1ED3n l\u00F4: <b class=\"text-blue-700\">" + qty.toLocaleString('vi-VN', { maximumFractionDigits: 2 }) + "</b> " + (lot.unit || '') + "</div>\n                " + (index === 0 ? '<div class="mt-1 text-[10px] font-black text-emerald-700">⭐ Ưu tiên bán trước (FEFO)</div>' : '') + "\n            </div>\n        </label>";
@@ -13001,6 +13114,10 @@ async function quickAdd(productName, event, fromCamera) {
     // nhất quán với chính giỏ hàng hiện tại.
     if (typeof recomputeCurrentStock === 'function') recomputeCurrentStock();
     else if (typeof updateAllStockBadges === 'function') updateAllStockBadges();
+    if (typeof updateAllStockBadges === 'function') {
+        updateAllStockBadges();
+        requestAnimationFrame(() => updateAllStockBadges());
+    }
     renderSellCart();
     if (typeof updateCartTotalDisplay === 'function') updateCartTotalDisplay();
 
@@ -13107,20 +13224,19 @@ async function updateCartItem(index, field, value) {
             const existingTotal = await getSellCartTotalQty(item.name);
             const desiredTotal = Math.max(0, existingTotal - oldQty + newQty);
             await reserveSaleStock(item.name, desiredTotal);
-            const stockNow = Number(window.currentStockMap ? (window.currentStockMap[item.name] || 0) : 0);
+            // reserveSaleStock() đã kiểm tra tồn thật + giữ hàng bằng transaction.
+            // Không kiểm tra lại bằng currentStockMap ở đây vì map có thể vừa bị trừ
+            // theo giỏ hiện tại; kiểm tra lần 2 dễ tạo lỗi giả, đặc biệt với dữ liệu
+            // stock_counters cũ có tên SP khác nhẹ tên trong Danh mục.
+            const stockNow = Number(getCachedStockQty(item.name) || 0);
             const otherRowsQty = existingTotal - oldQty;
-            const availableForThisCart = Number(stockNow) + oldQty;
-            if (desiredTotal > Number(stockNow) + otherRowsQty + oldQty + 1e-9) {
-                await reserveSaleStock(item.name, existingTotal);
-                throw new Error('Số lượng vượt tồn khả dụng tại máy này.');
-            }
             item.qty = newQty;
             if (newQty === 0) {
                 const idx = sellCart.indexOf(item);
                 if (idx > -1) sellCart.splice(idx, 1);
             }
             await reallocateSellCartProductFEFO(item.name);
-            window.currentStockMap[item.name] = Math.max(0, Number(stockNow) - (desiredTotal - otherRowsQty));
+            if (typeof recomputeCurrentStock === 'function') recomputeCurrentStock();
             renderSellCart(); renderProductGrid(); updateGrandTotal();
         } catch (err) {
             Swal.fire({ icon: 'error', title: 'Không thể cập nhật số lượng', text: err.message || 'Không thể giữ hàng.' });
@@ -14304,7 +14420,7 @@ async function updateExistingSale() {
                             date: firebase.firestore.FieldValue.serverTimestamp(),
                             type: 'Nhập đổi',
                             dateStatus: (hasOkNow && hasExpiredNow) ? 'mixed' : (hasExpiredNow ? 'expired' : 'ok'),
-                            stockAdjusted: !hasExpiredNow,
+                            stockAdjusted: hasOkNow,
                             note: 'Tự động từ hóa đơn bán hàng ' + receiptId + ' (đổi date - cập nhật)',
                             fromSaleId: receiptId,
                             vendor: customer ? customer.trim() : null
@@ -14533,10 +14649,14 @@ async function saveAndPrint() {
         }).catch(e => console.warn('Không giải phóng hết giữ hàng sau khi bán:', e));
         // Cập nhật lại số tồn kho gốc trong bộ nhớ cho khớp với những gì vừa trừ ở trên,
         // không cần đọc lại Firestore (đỡ tốn 1 lượt đọc mạng ngay sau khi vừa ghi xong).
-        if (!window.baseInventoryMap)
-            window.baseInventoryMap = {};
+        if (!window.baseInventoryMap) window.baseInventoryMap = {};
+        if (!window.__normalizedBaseInventoryMap) window.__normalizedBaseInventoryMap = {};
         productNames.forEach(name => {
             window.baseInventoryMap[name] = (window.baseInventoryMap[name] || 0) - qtyByName[name];
+            const key = normalizeProductStockKey(name);
+            window.__normalizedBaseInventoryMap[key] = Number(window.__normalizedBaseInventoryMap[key] || 0) - qtyByName[name];
+            if (window.__normalizedBaseInventoryMap[key] < 0 && Math.abs(window.__normalizedBaseInventoryMap[key]) < 0.000001)
+                window.__normalizedBaseInventoryMap[key] = 0;
         });
         // ------------------------------------------------------------------
         // --- MỚI: TỰ ĐỘNG TẠO PHIẾU NHẬP KHO CHO CÁC SẢN PHẨM "ĐỔI DATE" TRONG HOÁ ĐƠN
@@ -18744,13 +18864,19 @@ async function viewFullReport() {
         const custMerge = buildMergedColumnRowSpans(salesData, 2); // Gộp cột "Khách hàng" (index 2)
         const salesRowsHtml = salesData.map((r, rIdx) => {
             const [y, m, dd] = r[0].split('-');
+            // Ghi chú có thể là Rich Text object (dùng cho ExcelJS để in đậm số tiền).
+            // Khi xem báo cáo trên màn hình, không thể nối object trực tiếp vì sẽ thành
+            // "[object Object]". Chuyển Rich Text về chuỗi hiển thị đầy đủ.
+            const noteDisplay = (r[8] && typeof r[8] === 'object' && Array.isArray(r[8].richText))
+                ? r[8].richText.map(part => part && part.text != null ? String(part.text) : '').join('')
+                : (r[8] == null ? '' : String(r[8]));
             const phieuCellHtml = salesMerge.skip.has(rIdx) ? '' :
                 (salesMerge.rowSpan[rIdx] > 1
                     ? "<td rowspan=\"" + salesMerge.rowSpan[rIdx] + "\" style=\"" + td + "text-align:center;vertical-align:middle;font-weight:bold;\">" + r[1] + "</td>" : "<td style=\"" + td + "text-align:center;\">" + r[1] + "</td>");
             const custCellHtml = custMerge.skip.has(rIdx) ? '' :
                 (custMerge.rowSpan[rIdx] > 1
                     ? "<td rowspan=\"" + custMerge.rowSpan[rIdx] + "\" style=\"" + tdWrap + "text-align:left;vertical-align:middle;font-weight:800;\">" + r[2] + "</td>" : "<td style=\"" + tdWrap + "font-weight:800;\">" + r[2] + "</td>");
-            return "<tr><td style=\"" + td + "text-align:center;white-space:nowrap;\">" + dd + "-" + m + "-" + y + "</td>" + phieuCellHtml + "" + custCellHtml + "<td style=\"" + tdWrap + "\">" + r[3] + "</td><td style=\"" + td + "text-align:center;\">" + r[4] + "</td><td style=\"" + td + "text-align:center;font-weight:800;\">" + r[5] + "</td><td style=\"" + td + "text-align:right;font-weight:700;\">" + Math.round(r[6]).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</td><td style=\"" + td + "text-align:right;font-weight:700;\">" + Math.round(r[7]).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</td><td style=\"" + tdWrap + "\">" + (r[8] || '') + "</td></tr>";
+            return "<tr><td style=\"" + td + "text-align:center;white-space:nowrap;\">" + dd + "-" + m + "-" + y + "</td>" + phieuCellHtml + "" + custCellHtml + "<td style=\"" + tdWrap + "\">" + r[3] + "</td><td style=\"" + td + "text-align:center;\">" + r[4] + "</td><td style=\"" + td + "text-align:center;font-weight:800;\">" + r[5] + "</td><td style=\"" + td + "text-align:right;font-weight:700;\">" + Math.round(r[6]).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</td><td style=\"" + td + "text-align:right;font-weight:700;\">" + Math.round(r[7]).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</td><td style=\"" + tdWrap + "\">" + noteDisplay + "</td></tr>";
         }).join('') || "<tr><td colspan=\"9\" style=\"" + td + "text-align:center;color:#888;\">Kh\u00F4ng c\u00F3 d\u1EEF li\u1EC7u</td></tr>";
         const nhomMap = new Map();
         const thuTuNhom = THU_TU_HIEN_THI_NHOM.concat(['KHÁC']); // Thứ tự HIỂN THỊ - tách riêng khỏi thứ tự khớp nhóm
@@ -22654,6 +22780,155 @@ const CHI_LIST = ['Tý', 'Sửu', 'Dần', 'Mão', 'Thìn', 'Tỵ', 'Ngọ', 'M�
 function getCanChiYear(lunarYear) {
     return CAN_LIST[(lunarYear + 6) % 10] + ' ' + CHI_LIST[(lunarYear + 8) % 12];
 }
+
+window.__dashboardExpiryWarningItems = [];
+
+function openDashboardExpiryAlertModal() {
+    const items = Array.isArray(window.__dashboardExpiryWarningItems)
+        ? window.__dashboardExpiryWarningItems.slice()
+        : [];
+    if (!items.length) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Hạn sử dụng',
+                text: 'Hiện không có sản phẩm nào hết hạn hoặc còn từ 90 ngày trở xuống.',
+                confirmButtonText: 'Đóng'
+            });
+        }
+        return;
+    }
+
+    const expired = items.filter(x => x.rem && x.rem.expired);
+    const near = items.filter(x => x.rem && !x.rem.expired);
+    const statusHtml = (x) => {
+        if (x.rem.expired) {
+            return '<span class="font-black text-red-600">ĐÃ HẾT HẠN ' + Number(x.rem.days || 0) + ' ngày</span>';
+        }
+        const level = getExpiryColorLevel(x.rem);
+        const cls = level === 'red' ? 'text-red-600' : (level === 'yellow' ? 'text-amber-600' : 'text-emerald-600');
+        return '<span class="font-black ' + cls + '">Còn ' + Number(x.rem.months || 0) + ' tháng' + (x.rem.days ? ' ' + Number(x.rem.days) + ' ngày' : '') + ' · ' + Number(x.rem.totalDays || 0) + ' ngày</span>';
+    };
+    const row = (x) => '<div class="flex items-start justify-between gap-3 py-2.5 border-b border-slate-200 dark:border-slate-700 text-left">' +
+        '<div class="min-w-0 flex-1"><div class="font-black text-sm text-slate-800 dark:text-slate-100 break-words">' + x.name + '</div>' +
+        '<div class="text-[11px] text-slate-500 mt-0.5">HSD: ' + formatDateToDDMMYYYY(x.hsd) + ' · Tồn: <b>' + Number(x.qty || 0).toLocaleString('vi-VN', { maximumFractionDigits: 2 }) + '</b></div></div>' +
+        '<div class="shrink-0 text-right text-[11px]">' + statusHtml(x) + '</div></div>';
+
+    let html = '<div class="text-left max-h-[60vh] overflow-y-auto pr-1">';
+    if (expired.length) {
+        html += '<div class="sticky top-0 bg-white dark:bg-slate-900 py-2 z-10"><div class="font-black text-red-600">⛔ HÀNG ĐÃ HẾT HẠN (' + expired.length + ' SP)</div></div>';
+        html += expired.map(row).join('');
+    }
+    if (near.length) {
+        html += '<div class="sticky top-0 bg-white dark:bg-slate-900 py-2 z-10 mt-2"><div class="font-black text-amber-600">⚠️ HÀNG SẮP HẾT HẠN (' + near.length + ' SP)</div></div>';
+        html += near.map(row).join('');
+    }
+    html += '</div>';
+
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: 'Danh sách hàng cần chú ý',
+            html,
+            width: 900,
+            confirmButtonText: 'Đóng',
+            customClass: { popup: 'rounded-2xl' }
+        });
+    }
+}
+
+async function updateDashboardExpiryAlert() {
+    const alertBox = document.getElementById('dashboard-expiry-alert');
+    const titleEl = document.getElementById('dashboard-expiry-alert-title');
+    const listEl = document.getElementById('dashboard-expiry-alert-list');
+    if (!alertBox || !titleEl || !listEl) return;
+
+    try {
+        // Không đọc thêm stock_counters ở đây. Chỉ dùng dữ liệu tồn đã có trong bộ nhớ
+        // và dữ liệu NSX/HSD đã được cache dùng chung với trang Kho hàng.
+        const stockMap = window.currentStockMap || {};
+        const expiryMap = await getCurrentExpiryByProduct();
+        const warningItems = [];
+
+        for (const [name, lots] of expiryMap.entries()) {
+            const stock = typeof getCachedStockQty === 'function'
+                ? Number(getCachedStockQty(name) || 0)
+                : Number(stockMap[name] || 0);
+            if (stock <= 0.000001) continue;
+
+            // Phân bổ tồn tổng hiện tại vào các nhóm lô theo đúng thứ tự FEFO,
+            // để không cảnh báo những lô đã bán hết.
+            const visibleLots = typeof buildGroupedInventoryLots === 'function'
+                ? buildGroupedInventoryLots(lots, stock).filter(x => Number(x.qty || 0) > 0.000001)
+                : lots.filter(x => x.hasExpiry && x.hsd);
+
+            let best = null;
+            visibleLots.forEach(lot => {
+                if (!lot.hasExpiry || !lot.hsd) return;
+                const rem = calcRemainingMonthsDays(lot.hsd);
+                if (!rem) return;
+                if (!best) {
+                    best = { lot, rem };
+                    return;
+                }
+                const bestEnd = best.lot.hsd || '9999-99-99';
+                if ((lot.hsd || '9999-99-99') < bestEnd) best = { lot, rem };
+            });
+
+            if (!best) continue;
+            const rem = best.rem;
+            if (!(rem.expired || getExpiryColorLevel(rem) !== 'normal')) continue;
+
+            warningItems.push({
+                name,
+                hsd: best.lot.hsd,
+                qty: Number(best.lot.qty || 0),
+                rem
+            });
+        }
+
+        warningItems.sort((a, b) => (a.hsd || '').localeCompare(b.hsd || '') || a.name.localeCompare(b.name, 'vi'));
+
+        window.__dashboardExpiryWarningItems = warningItems.slice();
+        if (!warningItems.length) {
+            alertBox.classList.add('hidden');
+            listEl.textContent = '';
+            return;
+        }
+
+        alertBox.classList.remove('hidden');
+        const expiredCount = warningItems.filter(x => x.rem.expired).length;
+        const nearCount = warningItems.length - expiredCount;
+        titleEl.textContent = expiredCount && nearCount
+            ? `⚠️ ${expiredCount} SP hết hạn · ${nearCount} SP sắp hết hạn`
+            : expiredCount
+                ? `⛔ ${expiredCount} SP đã hết hạn`
+                : `⚠️ ${nearCount} SP sắp hết hạn`;
+
+        const preview = warningItems.slice(0, 4).map(x => {
+            const status = x.rem.expired
+                ? `Hết hạn ${x.rem.days} ngày`
+                : `Còn ${x.rem.months} tháng${x.rem.days ? ' ' + x.rem.days + ' ngày' : ''}`;
+            let cls = 'text-slate-600 dark:text-slate-300';
+            if (x.rem.expired || getExpiryColorLevel(x.rem) === 'red') cls = 'text-red-600 dark:text-red-400';
+            else if (getExpiryColorLevel(x.rem) === 'yellow') cls = 'text-amber-600 dark:text-amber-400';
+            else if (getExpiryColorLevel(x.rem) === 'green') cls = 'text-emerald-600 dark:text-emerald-400';
+            return `<span class="${cls} font-black">${x.name} (${status})</span>`;
+        });
+        if (warningItems.length > 4) preview.push(`<span class="text-slate-500 font-bold">+ ${warningItems.length - 4} SP khác</span>`);
+        listEl.innerHTML = preview.join(' <span class="text-slate-300">•</span> ');
+        alertBox.title = warningItems.map(x => {
+            const status = x.rem.expired
+                ? `Hết hạn ${x.rem.days} ngày`
+                : `Còn ${x.rem.months} tháng${x.rem.days ? ' ' + x.rem.days + ' ngày' : ''}`;
+            return `${x.name}: ${status}`;
+        }).join('\n');
+    } catch (err) {
+        console.warn('Không cập nhật được cảnh báo HSD trên Bảng điều khiển:', err);
+        window.__dashboardExpiryWarningItems = [];
+        alertBox.classList.add('hidden');
+    }
+}
+
 function updateHomeClock() {
     const dateEl = document.getElementById('home-clock-date');
     const timeEl = document.getElementById('home-clock-time');
@@ -22681,6 +22956,9 @@ function updateHomeClock() {
 }
 updateHomeClock();
 setInterval(updateHomeClock, 1000);
+// Cảnh báo HSD được cập nhật ngay sau khi dữ liệu tồn kho + NSX/HSD khởi tạo xong ở cuối file.
+// Vẫn refresh định kỳ 30 giây để phản ánh bán/nhập từ máy khác.
+setInterval(updateDashboardExpiryAlert, 30000);
 // ===== MODAL LỊCH THÁNG ĐẦY ĐỦ =====
 window.__fullCalendarViewDate = null; // { year, month(1-12) } - tháng đang xem trong modal
 function openFullCalendarModal() {
@@ -22747,9 +23025,17 @@ loadReceipts();
 (async () => {
     try {
         console.log("Đang tải dữ liệu hệ thống...");
-        await loadInitSX(); // Chờ nạp dữ liệu xong xuôi
+        // Nạp tồn kho song song với dữ liệu khởi tạo để cảnh báo HSD xuất hiện ngay khi mở app,
+        // không phải chờ một lúc rồi mới hiện.
+        await Promise.all([
+            loadInitSX(),
+            (typeof calculateAllStock === 'function' ? calculateAllStock() : Promise.resolve())
+        ]);
         // Hiển thị trang chủ sau khi đã có dữ liệu
         showPage('page-home');
+        // Cập nhật cảnh báo HSD ngay lập tức sau khi tồn kho và NSX/HSD đã sẵn sàng.
+        if (typeof updateDashboardExpiryAlert === 'function')
+            updateDashboardExpiryAlert();
         // Khởi tạo thanh "Hóa đơn chờ" ở trang Bán Hàng
         if (typeof renderHeldOrdersBar === 'function')
             renderHeldOrdersBar();
