@@ -1528,12 +1528,11 @@ html.dark .customer-profile-popup .bg-rose-50{background-image:none!important;}
 #chamcong-attendance-card input, #chamcong-overtime-card input, #chamcong-salary-card input {
   font-family: "Times New Roman", Times, serif !important;
 }
-<style>/* BẢNG LƯƠNG: nhấn đậm các cột Lương, Tiền tăng ca, Tổng thu nhập, Thực lĩnh */
+/* BẢNG LƯƠNG: nhấn đậm các cột Lương, Tiền tăng ca, Tổng thu nhập, Thực lĩnh */
 #chamcong-salary-table th:nth-child(6), #chamcong-salary-table td:nth-child(6),
 #chamcong-salary-table th:nth-child(9), #chamcong-salary-table td:nth-child(9),
 #chamcong-salary-table th:nth-child(12), #chamcong-salary-table td:nth-child(12),
 #chamcong-salary-table th:nth-child(15), #chamcong-salary-table td:nth-child(15) { font-weight: 800 !important; }
-</style>
 </style>
 <style id="chamcong-font-12-override">
 /* Bảng chấm công, tăng ca và tính lương: nội dung 12px, Times New Roman */
@@ -1545,7 +1544,6 @@ html.dark .customer-profile-popup .bg-rose-50{background-image:none!important;}
 #chamcong-attendance-table, #chamcong-overtime-table, #chamcong-parttime-table, #chamcong-salary-table { border-collapse:collapse !important; border:1px solid #94a3b8 !important; }
 #chamcong-attendance-table th, #chamcong-attendance-table td, #chamcong-overtime-table th, #chamcong-overtime-table td, #chamcong-parttime-table th, #chamcong-parttime-table td, #chamcong-salary-table th, #chamcong-salary-table td { border:1px solid #94a3b8 !important; vertical-align:middle !important; }
 #chamcong-attendance-table thead th, #chamcong-overtime-table thead th, #chamcong-parttime-table thead th, #chamcong-salary-table thead th { border-color:#64748b !important; }
-</style>
 </style>
 </head>
 <body class="bg-gray-100 dark:bg-slate-950 flex h-screen transition-colors duration-300">
@@ -3877,7 +3875,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         </div><!-- /lichcv-tab-calendar -->
 
-    <!-- TAB 3: CHẤM CÔNG - 2 bảng: chấm công hàng ngày (X/1-2/N) phía trên, chấm giờ tăng
+    <!-- TAB 3: CHẤM CÔNG - 2 bảng: chấm công hàng ngày (X/1-2/0) phía trên, chấm giờ tăng
          ca (nhập số giờ trực tiếp) phía dưới - theo đúng mẫu Excel "Bảng chấm công" hiện có
          của cửa hàng. Lưu theo từng THÁNG (đổi tháng ở ô chọn phía trên sẽ tự nạp lại đúng
          dữ liệu tháng đó, hoặc tạo mới nếu tháng đó chưa chấm công lần nào). -->
@@ -3886,15 +3884,18 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="flex items-center gap-2 flex-wrap">
                 <label class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase whitespace-nowrap">Tháng chấm công</label>
                 <input type="month" id="chamcong-month" onchange="loadChamCongMonth()" class="border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-xl text-gray-800 dark:text-white text-sm outline-none">
+                <button onclick="copyChamCongFromPreviousMonth()" class="bg-violet-600 hover:bg-violet-700 text-white px-3 py-2 rounded-xl font-bold text-xs shadow-sm flex items-center gap-1" title="Lấy danh sách nhân viên và đơn giá từ tháng trước">
+                    <i data-lucide="copy" class="w-3.5 h-3.5"></i> Sao chép tháng trước
+                </button>
                 <!-- Ô tìm kiếm nhanh theo tên - lọc trực tiếp trên bảng Chấm Công Hàng Ngày và
                      bảng Tăng Ca (2 bảng dài, nhiều nhân viên) bằng cách ẩn/hiện dòng, không
                      đụng tới dữ liệu gốc. Xem filterChamCongRows(). -->
                 <div class="relative">
                     <i data-lucide="search" class="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" id="chamcong-search" oninput="filterChamCongRows()" placeholder="Tìm nhân viên theo tên..." class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 pl-8 pr-2 py-2 rounded-xl text-gray-800 dark:text-white text-sm outline-none w-48">
+                    <input type="text" id="chamcong-search" oninput="filterChamCongRows()" placeholder="Tìm nhân viên theo tên..." class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 pl-8 pr-2 py-2 rounded-xl text-gray-800 dark:text-white text-sm outline-none w-80">
                 </div>
             </div>
-            <div class="flex items-center gap-2 flex-wrap">
+            <div class="grid grid-cols-3 gap-2 w-full md:w-auto">
                 <button onclick="openStaffRosterManager()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all duration-75 border-b-[4px] border-indigo-800 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2">
                     <i data-lucide="users" class="w-4 h-4"></i> Sổ danh sách NV
                 </button>
@@ -3924,7 +3925,7 @@ document.addEventListener('DOMContentLoaded', function () {
              tự sinh, chỉ hiện khi đã qua ít nhất nửa tháng để tránh báo giả đầu tháng. -->
         <div id="chamcong-missing-warning"></div>
         <!-- Chỉ báo tự động lưu - phòng trường hợp quên bấm nút "Lưu bảng chấm công": mỗi
-             khi tích công (X/1-2/N), nhập giờ tăng ca, đổi đơn giá, hoặc thêm/xóa nhân viên,
+             khi tích công (X/1-2/0), nhập giờ tăng ca, đổi đơn giá, hoặc thêm/xóa nhân viên,
              hệ thống tự lưu ngầm sau khoảng 1.5 giây không thao tác gì thêm (xem
              scheduleChamCongAutoSave) - dòng chữ này chỉ để xác nhận đã lưu xong, không
              chặn thao tác nào của người dùng. -->
@@ -3935,11 +3936,9 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
                 <div>
                     <h3 class="font-bold text-slate-800 dark:text-white">BẢNG CHẤM CÔNG HÀNG NGÀY</h3>
-                    <p class="text-[11px] text-slate-400">Bấm vào từng ô ngày để đổi trạng thái theo vòng: (trống) → X (đi làm) → 1/2 (nửa công) → N (nghỉ) → quay lại trống.</p>
+                    <p class="text-[11px] text-slate-400">Bấm vào từng ô ngày để đổi trạng thái theo vòng: (trống) → X (đi làm) → 1/2 (nửa công) → 0 (nghỉ) → quay lại trống.</p>
                 </div>
-                <button onclick="addChamCongEmployee('attendance')" class="shrink-0 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
-                    <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Thêm nhân viên
-                </button>
+
             </div>
             <div class="overflow-x-auto">
                 <table class="text-xs border-collapse w-full" id="chamcong-attendance-table">
@@ -3956,9 +3955,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <h3 class="font-bold text-slate-800 dark:text-white">BẢNG TĂNG CA (SỐ GIỜ LÀM THÊM)</h3>
                     <p class="text-[11px] text-slate-400">Nhập trực tiếp số giờ tăng ca của từng ngày (để trống hoặc 0 nếu hôm đó không tăng ca).</p>
                 </div>
-                <button onclick="addChamCongEmployee('overtime')" class="shrink-0 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
-                    <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Thêm nhân viên
-                </button>
+
             </div>
             <div class="overflow-x-auto">
                 <table class="text-xs border-collapse w-full" id="chamcong-overtime-table">
@@ -3977,11 +3974,9 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
                 <div>
                     <h3 class="font-bold text-slate-800 dark:text-white">BẢNG CHẤM CÔNG PART-TIME</h3>
-                    <p class="text-[11px] text-slate-400">Các dòng được gộp theo từng ngày (bấm vào tiêu đề ngày để thu gọn/mở rộng). Tên nhập trực tiếp, không lấy từ danh sách. Bấm "+ Thêm người" trong 1 ngày để thêm nhanh người khác làm cùng ngày đó.</p>
+                    <p class="text-[11px] text-slate-400">Các dòng được gộp theo từng ngày (bấm vào tiêu đề ngày để thu gọn/mở rộng). Tên nhập trực tiếp, không lấy từ danh sách. Bấm <b>Thêm người</b> để thêm người vào ngày đang chọn; bấm dấu <b>+</b> ở dưới cột STT để thêm ngày mới. Thẻ ngày có thể thu gọn/mở rộng để bảng luôn gọn.</p>
                 </div>
-                <button onclick="addParttimeEntry()" class="shrink-0 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
-                    <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Thêm dòng chấm công
-                </button>
+
             </div>
             <div class="overflow-x-auto">
                 <table class="text-xs border-collapse w-full" id="chamcong-parttime-table">
@@ -5394,7 +5389,7 @@ function switchLichCVTab(tab) {
     if (typeof lucide !== 'undefined')
         lucide.createIcons();
 }
-// ===== CHẤM CÔNG: chấm công hàng ngày (X/1-2/N) + tăng ca (số giờ) theo từng tháng =====
+// ===== CHẤM CÔNG: chấm công hàng ngày (X/1-2/0) + tăng ca (số giờ) theo từng tháng =====
 window.chamCongState = { month: null, attendance: [], overtime: [], parttime: [], salary: [] };
 function getDaysInMonth(monthStr) {
     if (!monthStr)
@@ -5443,6 +5438,8 @@ async function loadChamCongMonth() {
         if (doc.exists) {
             const data = doc.data();
             window.chamCongState = { month: monthStr, attendance: data.attendance || [], overtime: data.overtime || [], parttime: data.parttime || [], salary: data.salary || [], nguoiCham: data.nguoiCham || '', locked: !!data.locked, salaryLocked: !!data.salaryLocked };
+            // Chuẩn hóa ký hiệu nghỉ cũ N -> 0 để tránh nhầm với X.
+            (window.chamCongState.attendance || []).forEach(emp => { if (emp && emp.days) Object.keys(emp.days).forEach(d => { if (emp.days[d] === 'N') emp.days[d] = '0'; }); });
         }
         else {
             window.chamCongState = { month: monthStr, attendance: [], overtime: [], parttime: [], salary: [], nguoiCham: '', locked: false, salaryLocked: false };
@@ -5475,7 +5472,7 @@ function chamCongCellClass(val) {
         return 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 font-black';
     if (val === '1/2')
         return 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 font-black';
-    if (val === 'N')
+    if (val === '0')
         return 'bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 font-bold';
     return 'text-slate-300 dark:text-slate-600';
 }
@@ -5501,8 +5498,8 @@ function renderChamCongTable(type, days) {
     // máy tính lẫn điện thoại.
     const thBase = 'border border-slate-300 dark:border-slate-700 p-2 text-slate-600 dark:text-slate-300';
     let headHtml = '<tr class="bg-slate-100 dark:bg-slate-800">' +
-        '<th class="' + thBase + ' sticky left-0 bg-slate-100 dark:bg-slate-800 z-10 w-8" rowspan="2">STT</th>' +
-        '<th class="' + thBase + ' sticky left-8 bg-slate-100 dark:bg-slate-800 z-10 min-w-[75px] text-left" rowspan="2">Họ và tên</th>';
+        '<th class="' + thBase + ' sticky left-0 bg-slate-100 dark:bg-slate-800 z-10 w-10" rowspan="2">STT</th>' +
+        '<th class="' + thBase + ' sticky left-10 bg-slate-100 dark:bg-slate-800 z-10 min-w-[75px] text-left" rowspan="2">Họ và tên</th>';
     for (let d = 1; d <= days; d++) {
         const wd = yy ? new Date(yy, mm - 1, d).getDay() : -1; // 0 = Chủ Nhật
         const isToday = isCurrentMonth && d === todayDate;
@@ -5537,7 +5534,7 @@ function renderChamCongTable(type, days) {
             const weekendBg = wd === 0 ? 'bg-rose-50/60 dark:bg-rose-950/20' : '';
             const todayRing = isToday ? 'ring-2 ring-inset ring-blue-400' : '';
             if (type === 'attendance') {
-                const val = (emp.days && emp.days[d]) || '';
+                const val = ((emp.days && emp.days[d]) || '') === 'N' ? '0' : ((emp.days && emp.days[d]) || '');
                 if (val === 'X')
                     total += 1;
                 else if (val === '1/2')
@@ -5555,29 +5552,40 @@ function renderChamCongTable(type, days) {
         const salaryRow = getSalaryRow(emp.name);
         const rate = type === 'attendance' ? (Number(salaryRow.dayRate)||0) : (Number(salaryRow.overtimeRate)||0);
         const salaryOt = getOvertimeForEmployee(emp.name);
-        const thanhTien = type === 'attendance' ? total * rate : total * rate;
+        const thanhTien = 0; // Cột Thành tiền trên 2 bảng nhập liệu để trống theo yêu cầu
         const quickFillBtn = type === 'attendance' ? '<button onclick="quickFillWeekdays(' + idx + ')" title="Chấm nhanh cả tháng: đánh dấu X cho các ngày T2-T7 còn trống, để trống Chủ Nhật" class="shrink-0 text-blue-500 hover:text-blue-700"><i data-lucide="zap" class="w-3.5 h-3.5"></i></button>' : '';
         bodyHtml += '<tr>' +
-            '<td class="' + tdBase + ' p-1 text-center sticky left-0 bg-white dark:bg-slate-900">' + (idx + 1) + '</td>' +
-            '<td class="' + tdBase + ' p-1 font-bold sticky left-8 bg-white dark:bg-slate-900 dark:text-white break-words">' +
-            '<div class="flex items-center gap-1">' +
-            '<span class="flex-1">' + emp.name + '</span>' +
+            '<td class="' + tdBase + ' p-1 text-center sticky left-0 bg-white dark:bg-slate-900 font-bold">' + (idx + 1) + '</td>' +
+            '<td class="' + tdBase + ' p-1 font-bold sticky left-10 bg-white dark:bg-slate-900 dark:text-white break-words cursor-pointer hover:bg-blue-50 dark:hover:bg-slate-800" data-picker-type="' + type + '" data-picker-idx="' + idx + '" onclick="openChamCongStaffPicker(this.dataset.pickerType, Number(this.dataset.pickerIdx))">' +
+            '<div class="flex items-center gap-1 min-h-[28px]">' +
+            '<span class="flex-1">' + (emp.name ? escapeHtml(emp.name) : '<span class=\"text-slate-400 font-normal italic\">Bấm để chọn nhân viên</span>') + '</span>' +
             quickFillBtn +
             '</div>' +
             '</td>' +
             cellsHtml +
             '<td class="' + tdBase + ' p-1 text-center font-bold dark:text-white">' + total + '</td>' +
             '<td class="' + tdBase + ' p-1 text-center font-semibold dark:text-white"><input type="text" inputmode="decimal" value="' + (rate ? Number(rate).toLocaleString('vi-VN') : '') + '" placeholder="0" class="w-full min-w-[55px] text-center bg-transparent outline-none focus:bg-blue-50 dark:focus:bg-slate-800 dark:text-white" onchange="updateChamCongRate(\'' + type + '\', ' + idx + ', this.value)"></td>' +
-            '<td class="' + tdBase + ' p-1 text-right font-bold dark:text-white">' + thanhTien.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + '</td>' +
+            '<td class="' + tdBase + ' p-1 text-right font-bold dark:text-white">' + '' + '</td>' +
             '<td class="' + tdBase + ' p-1 text-center">' +
             '<button onclick="removeChamCongEmployee(\'' + type + '\', ' + idx + ')" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>' +
             '</td>' +
             '</tr>';
     });
+    const addRowColspan = days + 5;
+    bodyHtml += '<tr class="bg-slate-50 dark:bg-slate-800/40">' +
+        '<td class="' + tdBase + ' p-1 text-center sticky left-0 bg-slate-50 dark:bg-slate-800/40">' +
+        '<button type="button" data-add-type="' + type + '" onclick="addEmptyChamCongRow(this.dataset.addType)" title="Thêm dòng" class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-black text-lg leading-none">+</button>' +
+        '</td>' +
+        '<td colspan="' + (addRowColspan - 1) + '" class="' + tdBase + ' p-1"></td>' +
+        '</tr>';
     bodyEl.innerHTML = bodyHtml;
     if (list.length === 0) {
-        const colspan = days + 5;
-        bodyEl.innerHTML = '<tr><td colspan="' + colspan + '" class="p-4 text-center text-slate-400 text-xs">Chưa có nhân viên nào - bấm "Thêm nhân viên" ở trên.</td></tr>';
+        bodyEl.innerHTML = '<tr class="bg-slate-50 dark:bg-slate-800/40">' +
+            '<td class="' + tdBase + ' p-1 text-center sticky left-0 bg-slate-50 dark:bg-slate-800/40">' +
+            '<button type="button" data-add-type="' + type + '" onclick="addEmptyChamCongRow(this.dataset.addType)" title="Thêm dòng" class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-black text-lg leading-none">+</button>' +
+            '</td>' +
+            '<td colspan="' + (addRowColspan - 1) + '" class="' + tdBase + ' p-3 text-center text-slate-400 text-xs">Chưa có dòng nào - bấm dấu + để thêm.</td>' +
+            '</tr>';
     }
     if (typeof lucide !== 'undefined')
         lucide.createIcons();
@@ -5611,7 +5619,7 @@ function filterChamCongRows() {
     });
 }
 // CẢNH BÁO NHÂN VIÊN CHƯA CHẤM CÔNG NGÀY NÀO: quét bảng Chấm Công Hàng Ngày, tìm nhân viên
-// không có bất kỳ ô X/1-2/N nào từ ngày 1 đến "mốc kiểm tra" (hôm nay nếu đang xem đúng
+// không có bất kỳ ô X/1-2/0 nào từ ngày 1 đến "mốc kiểm tra" (hôm nay nếu đang xem đúng
 // tháng hiện tại, hoặc hết tháng nếu đang xem tháng đã qua) - CHỈ cảnh báo khi mốc kiểm tra
 // đã >= 15 (đã qua ít nhất nửa tháng) để tránh báo giả vào đầu tháng khi ai cũng chưa chấm
 // gì cả. Bỏ qua hoàn toàn nếu đang xem 1 tháng TƯƠNG LAI (chưa tới).
@@ -5636,7 +5644,7 @@ function checkMissingAttendance() {
     const missing = list.filter(emp => {
         for (let d = 1; d <= cutoff; d++) {
             const v = emp.days && emp.days[d];
-            if (v === 'X' || v === '1/2' || v === 'N')
+            if (v === 'X' || v === '1/2' || v === '0')
                 return false;
         }
         return true;
@@ -5649,6 +5657,49 @@ function checkMissingAttendance() {
     if (typeof lucide !== 'undefined')
         lucide.createIcons();
 }
+// SAO CHÉP THÁNG TRƯỚC: chỉ lấy DANH SÁCH NHÂN VIÊN + ĐƠN GIÁ, không sao chép ngày công/giờ tăng ca
+// để tránh vô tình mang dữ liệu chấm công của tháng cũ sang tháng mới.
+async function copyChamCongFromPreviousMonth() {
+    const current = window.chamCongState.month;
+    if (!current) return showAlert('Vui lòng chọn tháng trước.');
+    const [y, m] = current.split('-').map(Number);
+    const prevDate = new Date(y, m - 2, 1);
+    const prev = prevDate.getFullYear() + '-' + String(prevDate.getMonth() + 1).padStart(2, '0');
+    if (prev === current) return;
+    const res = await Swal.fire({
+        title: 'Sao chép dữ liệu tháng trước?',
+        html: 'Sẽ lấy <b>danh sách nhân viên và đơn giá</b> từ tháng <b>' + prev.split('-').reverse().join('/') + '</b>.<br>Ngày công và giờ tăng ca của tháng trước <b>không được sao chép</b>.',
+        icon: 'question', showCancelButton: true, confirmButtonText: 'Sao chép', cancelButtonText: 'Hủy', confirmButtonColor: '#7c3aed'
+    });
+    if (!res.isConfirmed) return;
+    try {
+        showLoading();
+        const doc = await db.collection('cham_cong').doc(prev).get();
+        if (!doc.exists) { Swal.close(); return showAlert('Tháng ' + prev.split('-').reverse().join('/') + ' chưa có dữ liệu để sao chép.'); }
+        const data = doc.data() || {};
+        const cloneRows = arr => (Array.isArray(arr) ? arr : []).map(r => ({
+            ...r,
+            days: {}, hours: {}
+        }));
+        const attendance = cloneRows(data.attendance);
+        const overtime = cloneRows(data.overtime);
+        const parttime = [];
+        const salary = (Array.isArray(data.salary) ? data.salary : []).map(r => ({...r}));
+        window.chamCongState.attendance = attendance;
+        window.chamCongState.overtime = overtime;
+        window.chamCongState.parttime = parttime;
+        window.chamCongState.salary = salary;
+        window.chamCongState.nguoiCham = '';
+        window.chamCongState.locked = false;
+        window.chamCongState.salaryLocked = false;
+        renderChamCongTables();
+        updateChamCongLockUI();
+        scheduleChamCongAutoSave();
+        Swal.close();
+        const Toast = Swal.mixin({toast:true,position:'top-end',showConfirmButton:false,timer:2200});
+        Toast.fire({icon:'success',title:'Đã sao chép danh sách và đơn giá từ tháng trước'});
+    } catch(e) { Swal.close(); showAlert('Không thể sao chép tháng trước: ' + e.message); }
+}
 // KHÓA / MỞ KHÓA BẢNG CHẤM CÔNG THÁNG ĐANG XEM: dùng sau khi đã trả lương xong, tránh bấm
 // nhầm sửa số liệu đã chốt. Khi khóa: 3 bảng (chấm công/tăng ca/part-time) bị vô hiệu hóa
 // toàn bộ thao tác sửa (tô mờ + chặn click qua class "pointer-events-none", xem
@@ -5657,6 +5708,23 @@ async function toggleChamCongLock() {
     if (!window.chamCongState.month)
         return;
     const willLock = !window.chamCongState.locked;
+    if (willLock) {
+        checkMissingAttendance();
+        const banner = document.getElementById('chamcong-missing-warning');
+        const missingText = banner ? banner.innerText.trim() : '';
+        if (missingText) {
+            const confirmMissing = await Swal.fire({
+                title: 'Có nhân viên chưa chấm công',
+                text: missingText + ' Bạn vẫn muốn khóa bảng tháng này?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Vẫn khóa',
+                cancelButtonText: 'Quay lại kiểm tra',
+                confirmButtonColor: '#dc2626'
+            });
+            if (!confirmMissing.isConfirmed) return;
+        }
+    }
     const res = await Swal.fire({
         title: willLock ? 'Khóa bảng chấm công tháng này?' : 'Mở khóa bảng chấm công tháng này?',
         text: willLock
@@ -5708,7 +5776,7 @@ function updateChamCongLockUI() {
 // CHẤM NHANH CẢ THÁNG (nút tia sét ⚡ cạnh tên, chỉ ở bảng Chấm Công Hàng Ngày): tự động
 // đánh dấu "X" (đi làm) cho tất cả các ngày THỨ 2 - THỨ 7 CÒN ĐANG TRỐNG của người đó, để
 // trống Chủ Nhật - đỡ phải bấm từng ô một 26-27 lần cho 1 người mỗi tháng. CHỈ điền vào ô
-// TRỐNG, không đụng tới ô đã chấm sẵn (X/1-2/N) - an toàn để bấm nhiều lần, không ghi đè dữ
+// TRỐNG, không đụng tới ô đã chấm sẵn (X/1-2/0) - an toàn để bấm nhiều lần, không ghi đè dữ
 // liệu đã có.
 function quickFillWeekdays(idx) {
     const emp = window.chamCongState.attendance[idx];
@@ -6197,7 +6265,8 @@ function renderParttimeTable() {
     let bodyHtml = '';
     sortedKeys.forEach(key => {
         const rows = groups.get(key);
-        const isCollapsed = !!window.chamCongParttimeCollapsed[key];
+        const hasCollapseState = Object.prototype.hasOwnProperty.call(window.chamCongParttimeCollapsed, key);
+        const isCollapsed = hasCollapseState ? !!window.chamCongParttimeCollapsed[key] : true;
         const isNoDate = key === NO_DATE_KEY;
         let weekdayLabel = '';
         let dateLabel = 'Chưa có ngày';
@@ -6217,15 +6286,14 @@ function renderParttimeTable() {
             const t = calcShiftHours(e.morningIn, e.morningOut) + calcShiftHours(e.afternoonIn, e.afternoonOut);
             return s + t * (e.rate || 0);
         }, 0);
-        // DÒNG TIÊU ĐỀ NHÓM: bấm vào để THU GỌN/MỞ RỘNG cả nhóm ngày đó, có nút "+ Thêm người"
-        // để thêm nhanh 1 người nữa làm CÙNG NGÀY này mà không cần gõ lại ngày.
+        // DÒNG TIÊU ĐỀ NHÓM: bấm vào để THU GỌN/MỞ RỘNG cả nhóm ngày đó.
         const weekendBadgeCls = isSunday ? 'bg-rose-100 text-rose-600 dark:bg-rose-900/40 dark:text-rose-400' : 'bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-300';
         const weekdaySpan = weekdayLabel ? '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded ' + weekendBadgeCls + '">' + weekdayLabel + '</span>' : '';
-        const actionButtons = !isNoDate ?
+        const actionButtons =
             '<div class="flex items-center gap-2 shrink-0">' +
-                '<button onclick="duplicateParttimeGroup(\'' + key + '\')" title="Nhân bản cả nhóm (người + giờ giấc) của ngày ' + dateLabel + ' sang các ngày khác" class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-0.5"><i data-lucide="copy" class="w-3 h-3"></i>Nhân bản</button>' +
-                '<button onclick="addParttimeEntryForDate(\'' + key + '\')" title="Thêm người làm cùng ngày ' + dateLabel + '" class="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-0.5"><i data-lucide="plus" class="w-3 h-3"></i>Thêm người</button>' +
-                '</div>' : '';
+                '<button onclick="addParttimeEntryForDate(\'" + key + "\')" title="Thêm người vào ngày ' + dateLabel + '" class="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-0.5"><i data-lucide="user-plus" class="w-3 h-3"></i>Thêm người</button>' +
+                (!isNoDate ? '<button onclick="duplicateParttimeGroup(\'" + key + "\')" title="Nhân bản nhóm ngày ' + dateLabel + '" class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-0.5"><i data-lucide="copy" class="w-3 h-3"></i>Nhân bản</button>' : '') +
+            '</div>';
         bodyHtml += '<tr class="bg-slate-50 dark:bg-slate-800/60">' +
             '<td colspan="' + PT_COLSPAN + '" class="' + tdBase + ' p-0">' +
             '<div class="flex items-center justify-between gap-2 px-2 py-1.5">' +
@@ -6291,7 +6359,7 @@ function renderParttimeTable() {
                 '<td class="' + tdBase + ' p-1">' +
                 '<input type="number" value="' + rate + '" class="w-full text-center text-[11px] bg-transparent outline-none dark:text-white focus:bg-blue-50 dark:focus:bg-slate-800" onchange="updateParttimeField(' + idx + ', \'rate\', this.value)">' +
                 '</td>' +
-                '<td class="' + tdBase + ' p-1 text-right font-bold dark:text-white">' + thanhTien.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + '</td>' +
+                '<td class="' + tdBase + ' p-1 text-right font-bold dark:text-white">' + '' + '</td>' +
                 '<td class="' + tdBase + ' p-1 text-center whitespace-nowrap">' +
                 '<button onclick="promptChangeParttimeDate(' + idx + ')" title="Đổi ngày riêng cho dòng này" class="text-slate-400 hover:text-blue-500 mr-1"><i data-lucide="calendar" class="w-3.5 h-3.5"></i></button>' +
                 '<button onclick="removeParttimeEntry(' + idx + ')" title="Xóa dòng này" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>' +
@@ -6299,7 +6367,15 @@ function renderParttimeTable() {
                 '</tr>';
         });
     });
-    bodyEl.innerHTML = bodyHtml || ('<tr><td colspan="' + PT_COLSPAN + '" class="p-4 text-center text-slate-400 text-xs">Chưa có dữ liệu part-time - bấm "Thêm dòng chấm công" ở trên.</td></tr>');
+    // Dòng thêm mới: dấu + nằm BÊN DƯỚI cột STT, không nằm trong ô STT của dữ liệu.
+    // Mỗi lần thêm một dòng, dòng + luôn được đẩy xuống ngay dưới dòng vừa thêm.
+    bodyHtml += '<tr class="bg-white dark:bg-slate-900">' +
+        '<td class="' + tdBase + ' p-1 text-center">' +
+        '<button type="button" onclick="addParttimeEntry()" title="Thêm ngày làm việc mới" class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 font-black text-lg leading-none">+</button>' +
+        '</td>' +
+        '<td colspan="' + (PT_COLSPAN - 1) + '" class="' + tdBase + ' p-1"></td>' +
+        '</tr>';
+    bodyEl.innerHTML = bodyHtml || ('<tr><td colspan="' + PT_COLSPAN + '" class="p-4 text-center text-slate-400 text-xs">Chưa có dữ liệu part-time - bấm dấu + ở dưới cột STT để thêm dòng.</td></tr>');
     if (typeof lucide !== 'undefined')
         lucide.createIcons();
     updateChamCongTongLuong();
@@ -6313,21 +6389,6 @@ function toggleParttimeGroup(key) {
 }
 // Thêm nhanh 1 người NỮA làm CÙNG ngày với 1 nhóm đã có sẵn - không cần gõ lại ngày, giải
 // quyết đúng tình huống "1 ngày có 2-3 người làm part-time".
-function addParttimeEntryForDate(dateIso) {
-    if (!window.chamCongState.parttime)
-        window.chamCongState.parttime = [];
-    window.chamCongState.parttime.push({ employeeId:'', name: '', jobTitle:'', date: dateIso, morningIn: '', morningOut: '', afternoonIn: '', afternoonOut: '', rate: 0, note:'' });
-    if (!window.chamCongParttimeCollapsed)
-        window.chamCongParttimeCollapsed = {};
-    window.chamCongParttimeCollapsed[dateIso] = false; // mở nhóm ra để thấy dòng vừa thêm ngay
-    renderParttimeTable();
-    scheduleChamCongAutoSave();
-}
-// NHÂN BẢN CẢ NHÓM NGÀY (đúng người + đúng giờ giấc + đơn giá) SANG NHIỀU NGÀY KHÁC CÙNG
-// LÚC - giải quyết đúng tình huống "5 người làm part-time cả tháng, lịch giống nhau mỗi
-// ngày" mà trước đây phải gõ tay lại từ đầu cho từng ngày. Chỉ cần chấm công đúng 1 ngày
-// mẫu, rồi "Nhân bản" sang cả 1 khoảng ngày (VD 2 → 31) là xong, chỉ cần sửa lại những ngày
-// có gì khác biệt.
 async function duplicateParttimeGroup(sourceDateIso) {
     const sourceRows = (window.chamCongState.parttime || []).filter(e => e.date === sourceDateIso);
     if (!sourceRows.length)
@@ -6409,6 +6470,20 @@ function promptChangeParttimeDate(idx) {
         return;
     }
     updateParttimeField(idx, 'date', iso);
+}
+function addParttimeEntryForDate(dateIso) {
+    if (!window.chamCongState.parttime) window.chamCongState.parttime = [];
+    const monthStr = window.chamCongState.month || '';
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateIso) || (monthStr && dateIso.slice(0,7) !== monthStr)) return;
+    window.chamCongState.parttime.push({ employeeId:'', name:'', jobTitle:'', date:dateIso, morningIn:'', morningOut:'', afternoonIn:'', afternoonOut:'', rate:0, note:'' });
+    if (!window.chamCongParttimeCollapsed) window.chamCongParttimeCollapsed = {};
+    window.chamCongParttimeCollapsed[dateIso] = false;
+    renderParttimeTable();
+    scheduleChamCongAutoSave();
+    setTimeout(() => {
+        const inputs = document.querySelectorAll('#chamcong-parttime-body input[placeholder="Nhập tên..."]');
+        if (inputs.length) inputs[inputs.length - 1].focus();
+    }, 0);
 }
 function addParttimeEntry() {
     if (!window.chamCongState.parttime)
@@ -6506,7 +6581,7 @@ function cycleAttendanceCell(idx, day) {
     if (!emp.days)
         emp.days = {};
     const cur = emp.days[day] || '';
-    const next = cur === '' ? 'X' : cur === 'X' ? '1/2' : cur === '1/2' ? 'N' : '';
+    const next = cur === '' ? 'X' : cur === 'X' ? '1/2' : cur === '1/2' ? '0' : '';
     emp.days[day] = next;
     renderChamCongTable('attendance', getDaysInMonth(window.chamCongState.month));
     renderSalaryTable();
@@ -6790,78 +6865,74 @@ async function deleteStaffRosterEntry(docId) {
         console.error('Lỗi xóa tên khỏi sổ:', e);
     }
 }
-async function addChamCongEmployee(type) {
-    const tableLabel = type === 'attendance' ? 'chấm công' : 'tăng ca';
-    const rateField = type === 'attendance' ? 'rateAttendance' : 'rateOvertime';
-    const allStaff = await getAllStaffForChamCong();
-    // Loại những người ĐÃ CÓ SẴN trong đúng bảng này (so theo tên) - đỡ tick nhầm thêm
-    // trùng 1 người 2 lần.
-    const existingNames = new Set((window.chamCongState[type] || []).map(e => (e.name || '').trim().toLowerCase()));
-    const available = allStaff.filter(s => !existingNames.has(s.name.toLowerCase()));
-    // NÂNG CẤP: hiện sẵn đơn giá mặc định của từng người ngay trong danh sách tick chọn (lấy
-    // từ Sổ Danh Sách NV) - để biết trước sẽ tự điền bao nhiêu, không cần đoán.
-    let staffListHtml = '';
-    if (available.length > 0) {
-        available.forEach(s => {
-            const rateVal = s[rateField] || 0;
-            const rateText = rateVal > 0 ? rateVal.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + 'đ' : 'chưa đặt giá';
-            staffListHtml += '<label class="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">' +
-                '<input type="checkbox" class="chamcong-pick-staff w-4 h-4 rounded text-blue-600" value="' + escapeHtml(s.name) + '" data-rate="' + rateVal + '">' +
-                '<span class="text-sm dark:text-slate-200 flex-1">' + escapeHtml(s.name) + '</span>' +
-                '<span class="text-[11px] text-slate-400">' + rateText + '</span>' +
-                '</label>';
-        });
-    }
-    else {
-        staffListHtml = '<p class="text-xs text-slate-400 text-center py-2">Sổ danh sách nhân viên đang trống, hoặc mọi người đã có sẵn trong bảng này rồi - gõ tên bên dưới để thêm.</p>';
-    }
-    const selectAllBtn = available.length ? '<button type="button" onclick="document.querySelectorAll(\'.chamcong-pick-staff\').forEach(el=>el.checked=true)" class="text-[11px] font-bold text-blue-600 hover:underline shrink-0 ml-2">Chọn tất cả</button>' : '';
-    const html = '<div class="text-left">' +
-        '<div class="flex items-center justify-between mb-1">' +
-        '<p class="text-xs font-bold text-slate-500">Chọn nhanh từ sổ danh sách nhân viên (tick được nhiều người, đơn giá sẽ tự điền theo sổ):</p>' +
-        selectAllBtn +
-        '</div>' +
-        '<div class="max-h-56 overflow-y-auto border border-slate-200 dark:border-slate-700 rounded-lg mb-3">' + staffListHtml + '</div>' +
-        '<p class="text-xs font-bold text-slate-500 mb-1">Hoặc thêm người mới (cách nhau bằng dấu phẩy) - tên mới sẽ được lưu lại vào sổ để lần sau chọn nhanh:</p>' +
-        '<input id="swal-chamcong-manual-name" type="text" class="swal2-input !m-0 !w-full" placeholder="VD: Cô Ba, Chú Tư">' +
-        '</div>';
-    const { value: formValues } = await Swal.fire({
-        title: 'Thêm nhân viên vào bảng ' + tableLabel,
-        html: html,
-        focusConfirm: false,
-        showCancelButton: true,
-        confirmButtonText: 'Thêm vào bảng',
-        cancelButtonText: 'Hủy',
-        confirmButtonColor: '#2563eb',
-        preConfirm: () => {
-            const picked = Array.from(document.querySelectorAll('.chamcong-pick-staff:checked')).map(el => ({ name: el.value, rate: parseFloat(el.dataset.rate) || 0 }));
-            const manualRaw = (document.getElementById('swal-chamcong-manual-name').value || '').trim();
-            const manualNames = manualRaw ? manualRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
-            if (picked.length === 0 && manualNames.length === 0) {
-                Swal.showValidationMessage('Vui lòng chọn ít nhất 1 nhân viên hoặc gõ tên!');
-                return false;
-            }
-            return { picked, manualNames };
-        }
-    });
-    if (!formValues)
+async function addEmptyChamCongRow(type) {
+    if (window.chamCongState.locked) {
+        await Swal.fire({icon:'info', title:'Bảng đã khóa', text:'Hãy mở khóa tháng trước khi thêm dòng.'});
         return;
-    // Người TICK CHỌN từ sổ: tự điền đúng đơn giá mặc định đã lưu sẵn.
-    formValues.picked.forEach(p => {
-        window.chamCongState[type].push({ name: p.name, rate: p.rate, days: {}, hours: {} });
-    });
-    // Người GÕ TAY: nếu tên trùng (không phân biệt hoa/thường) với người ĐÃ CÓ SẴN trong sổ
-    // (lỡ quên tick, gõ tay lại) thì vẫn tự lấy đúng đơn giá đã lưu; tên hoàn toàn mới thì
-    // chưa có gì để lấy, để 0 - đặt đơn giá 1 lần trong Sổ Danh Sách NV thì tháng sau tự điền.
-    formValues.manualNames.forEach(name => {
-        const matched = allStaff.find(s => s.name.toLowerCase() === name.toLowerCase());
-        window.chamCongState[type].push({ name: name, rate: matched ? (matched[rateField] || 0) : 0, days: {}, hours: {} });
-    });
+    }
+    const list = window.chamCongState[type] || [];
+    list.push({ name:'', employeeId:'', jobTitle:'', rate:0, days:{}, hours:{} });
     renderChamCongTable(type, getDaysInMonth(window.chamCongState.month));
     scheduleChamCongAutoSave();
-    // Lưu các tên GÕ TAY (chưa có trong sổ) vào sổ danh sách nhân viên - để lần sau mở
-    // form này ra, tên đó tự hiện sẵn trong danh sách tick chọn, không cần gõ tay lại nữa.
-    formValues.manualNames.forEach(name => saveNewNameToStaffRoster(name));
+    // Tự mở chọn nhân viên cho dòng mới để thao tác nhanh.
+    setTimeout(() => openChamCongStaffPicker(type, list.length - 1), 0);
+}
+
+async function openChamCongStaffPicker(type, idx) {
+    if (window.chamCongState.locked) {
+        await Swal.fire({icon:'info', title:'Bảng đã khóa', text:'Hãy mở khóa tháng trước khi thay đổi nhân viên.'});
+        return;
+    }
+    const list = window.chamCongState[type] || [];
+    const row = list[idx];
+    if (!row) return;
+    const rateField = type === 'attendance' ? 'rateAttendance' : 'rateOvertime';
+    const allStaff = await getAllStaffForChamCong();
+    const currentId = row.employeeId || '';
+    const currentName = salaryNormalizeName(row.name || '');
+    const available = allStaff.filter(s => String(s.id || s.employeeId || '') === String(currentId) || salaryNormalizeName(s.name) === currentName || !list.some((e,i) => i !== idx && salaryNormalizeName(e.name) === salaryNormalizeName(s.name)));
+    let html = '<div class="text-left">' +
+        '<p class="text-xs text-slate-500 mb-2">Chọn nhân viên từ Sổ danh sách NV. Đơn giá sẽ tự điền theo hồ sơ.</p>' +
+        '<div class="max-h-72 overflow-y-auto border border-slate-200 dark:border-slate-700 rounded-lg">';
+    if (available.length) {
+        available.forEach(s => {
+            const rateVal = Number(s[rateField]) || 0;
+            const checked = (String(s.id || s.employeeId || '') === String(currentId) || salaryNormalizeName(s.name) === currentName) ? ' bg-blue-50 dark:bg-blue-950/30' : '';
+            html += '<button type="button" data-staff-id="' + escapeHtml(String(s.id || s.employeeId || '')) + '" class="w-full text-left flex items-center gap-2 py-2 px-3 border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800' + checked + '">' +
+                '<span class="font-semibold text-sm dark:text-slate-200 flex-1">' + escapeHtml(s.name) + '</span>' +
+                '<span class="text-[11px] text-slate-400">' + (rateVal ? rateVal.toLocaleString('vi-VN') + 'đ' : 'chưa đặt giá') + '</span></button>';
+        });
+    } else {
+        html += '<p class="text-xs text-slate-400 text-center py-4">Không còn nhân viên phù hợp trong sổ.</p>';
+    }
+    html += '</div><div class="mt-3 flex gap-2"><input id="swal-chamcong-new-name" type="text" class="swal2-input !m-0 !w-full" placeholder="Hoặc gõ tên nhân viên mới"></div></div>';
+    const res = await Swal.fire({title:'Chọn nhân viên', html, width:520, showCancelButton:true, confirmButtonText:'Chọn', cancelButtonText:'Hủy', confirmButtonColor:'#2563eb', focusConfirm:false,
+        didOpen: () => {
+            document.querySelectorAll('[data-staff-id]').forEach(btn => btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-staff-id]').forEach(b => b.classList.remove('ring-2','ring-blue-500'));
+                btn.classList.add('ring-2','ring-blue-500');
+                btn.dataset.selected='1';
+            }));
+        },
+        preConfirm: () => {
+            const selected = document.querySelector('[data-staff-id].ring-blue-500');
+            const manual = (document.getElementById('swal-chamcong-new-name')?.value || '').trim();
+            if (!selected && !manual) { Swal.showValidationMessage('Vui lòng chọn nhân viên hoặc nhập tên.'); return false; }
+            return { id:selected?.dataset.staffId || '', name: manual || selected?.querySelector('span')?.textContent.trim() || '' };
+        }
+    });
+    if (!res.isConfirmed || !res.value) return;
+    const chosenName = res.value.name;
+    const staff = allStaff.find(s => String(s.id || s.employeeId || '') === String(res.value.id) || salaryNormalizeName(s.name) === salaryNormalizeName(chosenName));
+    const duplicate = list.some((e,i) => i !== idx && salaryNormalizeName(e.name) === salaryNormalizeName(chosenName));
+    if (duplicate) { await Swal.fire({icon:'warning', title:'Nhân viên đã có trong bảng', text:'Hãy chọn người khác.'}); return; }
+    row.name = chosenName;
+    row.employeeId = staff ? (staff.employeeId || staff.id || makeEmployeeId(chosenName)) : makeEmployeeId(chosenName);
+    row.jobTitle = staff?.jobTitle || '';
+    row.rate = staff ? (Number(staff[rateField]) || 0) : 0;
+    renderChamCongTable(type, getDaysInMonth(window.chamCongState.month));
+    scheduleChamCongAutoSave();
+    if (!staff && chosenName) saveNewNameToStaffRoster(chosenName);
 }
 function removeChamCongEmployee(type, idx) {
     const emp = window.chamCongState[type][idx];
@@ -7048,7 +7119,7 @@ function printChamCong() {
         // -> 13px) cho các ô ngày để nhìn rõ hơn, tránh cảm giác "sát nhau" như bản trước.
         let dayHeaders = '';
         for (let d = 1; d <= days; d++) {
-            dayHeaders += '<th style="border:1px solid #000;padding:8px 2px;background:#f3f4f6;width:' + dayW + '%;">' + d + '</th>';
+            dayHeaders += '<th style="border:1px solid #000;padding:3px 2px;background:#f3f4f6;width:' + dayW + '%;">' + d + '</th>';
         }
         let rowsHtml = '';
         list.forEach((emp, idx) => {
@@ -7067,22 +7138,22 @@ function printChamCong() {
                         total += 1;
                     else if (val === '1/2')
                         total += 0.5;
-                    cells += '<td style="border:1px solid #000;padding:8px 4px;text-align:center;font-weight:bold;">' + val + '</td>';
+                    cells += '<td style="border:1px solid #000;padding:3px 4px;text-align:center;font-weight:bold;">' + val + '</td>';
                 }
                 else {
                     const val = parseFloat(emp.hours && emp.hours[d]) || 0;
                     total += val;
-                    cells += '<td style="border:1px solid #000;padding:12px 4px;text-align:center;">' + (val || '') + '</td>';
+                    cells += '<td style="border:1px solid #000;padding:3px 4px;text-align:center;">' + (val || '') + '</td>';
                 }
             }
             const thanhTien = total * printRate;
-            rowsHtml += '<tr style="height:36px;">' +
-                '<td style="border:1px solid #000;padding:8px 4px;text-align:center;">' + (idx + 1) + '</td>' +
-                '<td style="border:1px solid #000;padding:6px 6px;font-weight:bold;word-break:break-word;">' + emp.name + '</td>' +
+            rowsHtml += '<tr style="height:22px;">' +
+                '<td style="border:1px solid #000;padding:3px 4px;text-align:center;">' + (idx + 1) + '</td>' +
+                '<td style="border:1px solid #000;padding:3px 6px;font-weight:bold;word-break:break-word;">' + emp.name + '</td>' +
                 cells +
-                '<td style="border:1px solid #000;padding:6px 4px;text-align:center;font-weight:bold;">' + total + '</td>' +
-                '<td style="border:1px solid #000;padding:6px 6px;text-align:right;">' + thanhTien.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + '</td>' +
-                '<td style="border:1px solid #000;padding:6px 4px;"></td>' +
+                '<td style="border:1px solid #000;padding:3px 4px;text-align:center;font-weight:bold;">' + total + '</td>' +
+                '<td style="border:1px solid #000;padding:3px 6px;text-align:right;">' + '' + '</td>' +
+                '<td style="border:1px solid #000;padding:3px 4px;"></td>' +
                 '</tr>';
         });
         const totalLabel = type === 'attendance' ? 'công' : 'giờ';
@@ -7090,16 +7161,16 @@ function printChamCong() {
         return '<h2 style="text-align:center;font-size:17px;margin:24px 0 12px;">' + title + ' THÁNG ' + monthLabel + '</h2>' +
             '<table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed;">' +
             '<thead><tr>' +
-            '<th style="border:1px solid #000;padding:6px 4px;background:#f3f4f6;width:' + sttW + '%;">STT</th>' +
-            '<th style="border:1px solid #000;padding:6px 4px;background:#f3f4f6;width:' + nameW + '%;">Họ và tên</th>' +
+            '<th style="border:1px solid #000;padding:5px 4px;background:#f3f4f6;width:' + sttW + '%;">STT</th>' +
+            '<th style="border:1px solid #000;padding:5px 4px;background:#f3f4f6;width:' + nameW + '%;">Họ và tên</th>' +
             dayHeaders +
-            '<th style="border:1px solid #000;padding:6px 4px;background:#f3f4f6;width:' + tongW + '%;">Tổng<br>' + totalLabel + '</th>' +
-            '<th style="border:1px solid #000;padding:6px 4px;background:#f3f4f6;width:' + tienW + '%;">Thành tiền</th>' +
-            '<th style="border:1px solid #000;padding:6px 4px;background:#f3f4f6;width:' + kyW + '%;">Ký tên</th>' +
+            '<th style="border:1px solid #000;padding:5px 4px;background:#f3f4f6;width:' + tongW + '%;">Tổng<br>' + totalLabel + '</th>' +
+            '<th style="border:1px solid #000;padding:5px 4px;background:#f3f4f6;width:' + tienW + '%;">Thành tiền</th>' +
+            '<th style="border:1px solid #000;padding:5px 4px;background:#f3f4f6;width:' + kyW + '%;">Ký tên</th>' +
             '</tr></thead>' +
             '<tbody>' + (rowsHtml || emptyRow) + '</tbody>' +
             '</table>' +
-            '<p style="font-size:12px;margin:8px 0 0;"><strong>Ghi chú:</strong> X - 1 ngày công &nbsp;&nbsp; 1/2 - nửa ngày làm &nbsp;&nbsp; N - nghỉ</p>';
+            '<p style="font-size:12px;margin:8px 0 0;"><strong>Ghi chú:</strong> X - 1 ngày công &nbsp;&nbsp; 1/2 - nửa ngày làm &nbsp;&nbsp; 0 - nghỉ</p>';
     }
     // Bảng PART-TIME khi in TÁCH RIÊNG hẳn 1 bảng khác (không dùng chung khuôn cột-theo-ngày
     // như 2 bảng trên) - vì mỗi dòng là 1 buổi làm với giờ vào/ra ca sáng + ca chiều, không
@@ -7133,7 +7204,7 @@ function printChamCong() {
                 '<td style="border:1px solid #000;padding:9px 4px;text-align:center;">' + (e.afternoonOut || '') + '</td>' +
                 '<td style="border:1px solid #000;padding:9px 4px;text-align:center;">' + (afternoonHours ? formatGio(afternoonHours) : '') + '</td>' +
                 '<td style="border:1px solid #000;padding:9px 4px;text-align:center;font-weight:bold;">' + formatGio(total) + '</td>' +
-                '<td style="border:1px solid #000;padding:9px 6px;text-align:right;">' + thanhTien.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + '</td>' +
+                '<td style="border:1px solid #000;padding:9px 6px;text-align:right;">' + '' + '</td>' +
                 '<td style="border:1px solid #000;padding:9px 4px;"></td>' +
                 '</tr>';
         });
@@ -7320,7 +7391,7 @@ async function exportChamCongExcel() {
             sheet.mergeCells(emptyRow.number, 1, emptyRow.number, totalCols);
             emptyRow.alignment = { horizontal: 'center' };
         }
-        const noteRow = sheet.addRow(['Ghi chú: X - 1 ngày công    1/2 - nửa ngày làm    N - nghỉ']);
+        const noteRow = sheet.addRow(['Ghi chú: X - 1 ngày công    1/2 - nửa ngày làm    0 - nghỉ']);
         noteRow.font = { name: 'Times New Roman', italic: true, size: 10 };
         sheet.addRow([]); // dòng trống cách bảng tiếp theo
     }
