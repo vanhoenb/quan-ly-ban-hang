@@ -11274,6 +11274,22 @@ function toggleInventoryExpiryLots(name) {
 }
 // Cập nhật hàm loadInventory trong index.html
 // Bản sửa v20: bảng Kho Hàng dùng đủ 9 cột (có thêm Thời hạn); mỗi sản phẩm 1 dòng tổng, các lô NSX/HSD xem bằng nút “Xem x lô”.
+window.__inventoryStockMismatchReport = function () {
+    const products = Array.isArray(window.allProductCache) ? window.allProductCache : [];
+    const base = window.baseInventoryMap || {};
+    const norm = window.__normalizedBaseInventoryMap || window.__normalizedStockMap || {};
+    const mismatches = [];
+    products.forEach(p => {
+        if (!p || !p.name) return;
+        const exact = Number(base[p.name] || 0);
+        const normalized = Number(norm[normalizeProductStockKey(p.name)] || 0);
+        if (normalized > 0.000001 && exact <= 0.000001) {
+            mismatches.push({ name: p.name, exact, normalized });
+        }
+    });
+    console.table(mismatches);
+    return mismatches;
+};
 async function loadInventory(options = {}) {
     // --- TỐI ƯU QUAN TRỌNG ---
     // Lấy tồn hiện tại từ stock_counters và thông tin NSX/HSD từ dữ liệu lô.
@@ -11323,7 +11339,18 @@ async function loadInventory(options = {}) {
                 tenNhom +
                 '</div>';
             danhSachNhom.forEach(item => {
-                const qtyNum = stockMap[item.name] !== undefined ? stockMap[item.name] : 0;
+                // KHÔNG dùng stockMap[item.name] nguyên văn để quyết định có hiện SP hay không.
+                // Dữ liệu stock_counters cũ có thể chứa cùng một sản phẩm nhưng khác nhẹ Unicode/
+                // khoảng trắng (đặc biệt các dòng Quả Bùi Kỳ Lão Om 450g/350g/180g). Nếu tra exact
+                // name sẽ nhận 0 và làm SP biến mất khỏi Kho Hàng dù tồn thực tế vẫn còn.
+                const exactQty = Object.prototype.hasOwnProperty.call(stockMap, item.name)
+                    ? Number(stockMap[item.name] || 0)
+                    : NaN;
+                const normalizedQty = Number((window.__normalizedBaseInventoryMap || window.__normalizedStockMap || {})[normalizeProductStockKey(item.name)] || 0);
+                const currentQty = typeof getCachedStockQty === 'function' ? Number(getCachedStockQty(item.name) || 0) : 0;
+                const qtyNum = Number.isFinite(exactQty)
+                    ? Math.max(exactQty, normalizedQty, currentQty)
+                    : Math.max(normalizedQty, currentQty);
                 if (qtyNum <= 0.000001)
                     return;
                 const productData = window.__productsByName?.get(item.name) || null;
@@ -11332,6 +11359,22 @@ async function loadInventory(options = {}) {
                 const retail = Number(rVal).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE });
                 const wholesale = Number(wVal).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE });
                 const displayQty = (Math.round(qtyNum * 100) / 100).toString();
+                // Màu cảnh báo tồn kho: 1-5 = đỏ nhạt cả THẺ, >5-10 = vàng nhạt cả THẺ.
+                // Dùng nền đủ rõ ở cả giao diện sáng và tối; không chỉ đổi màu đường viền.
+                // SP hết (<=0) vẫn ẩn như logic hiện tại; SP >10 giữ giao diện bình thường.
+                const inventoryAlertClass = qtyNum <= 5
+                    ? 'bg-red-100 dark:bg-red-950/60 border-red-300 dark:border-red-700'
+                    : (qtyNum <= 10
+                        ? 'bg-amber-100 dark:bg-amber-950/60 border-amber-300 dark:border-amber-700'
+                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800');
+                const inventoryBorderStyle = qtyNum <= 5
+                    ? 'border-left-color:#f87171 !important; border-right-color:#f87171 !important;'
+                    : (qtyNum <= 10
+                        ? 'border-left-color:#fbbf24 !important; border-right-color:#fbbf24 !important;'
+                        : 'border-left-color:#60a5fa !important; border-right-color:#60a5fa !important;');
+                const inventoryQtyClass = qtyNum <= 5
+                    ? 'text-red-700 dark:text-red-400'
+                    : (qtyNum <= 10 ? 'text-amber-700 dark:text-amber-400' : 'text-blue-600 dark:text-blue-400');
                 const barcode = (productData && productData.barcode) ? productData.barcode : '---';
                 const safeNameAttr = String(item.name).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 const safeNameJs = JSON.stringify(String(item.name));
@@ -11393,7 +11436,7 @@ async function loadInventory(options = {}) {
                     ? '<input type="number" min="0.1" step="0.1" value="' + hanThangValue + '" placeholder="tháng" class="w-1/3 min-w-[42px] text-[10px] md:text-[11px] text-center border border-dashed border-slate-300 dark:border-slate-700 rounded-md px-1 py-1 bg-white/70 dark:bg-slate-950/40 focus:border-blue-500 outline-none" oninput="handleInventoryLotDateInput(this,\'' + primaryGroupId + '\',\'hanThang\')" onblur="handleInventoryLotDateBlur(this,\'' + primaryGroupId + '\',\'hanThang\')" data-inventory-lot-group="' + primaryGroupId + '" data-lot-field="hanThang" title="Nhập số tháng từ NSX để tự tính HSD">'
                     : '<span>—</span>';
                 groupInnerHtml +=
-                    '<div class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2 md:p-1.5 shadow-[0_4px_6px_-2px_rgba(0,0,0,0.2)] mb-1.5" style="border-left-color:#60a5fa !important; border-right-color:#60a5fa !important;">' +
+                    '<div class="w-full ' + inventoryAlertClass + ' border border-l-4 border-r-4 rounded-lg p-2 md:p-1.5 shadow-[0_4px_6px_-2px_rgba(0,0,0,0.2)] mb-1.5" style="' + inventoryBorderStyle + '">' +
                         '<div class="inventory-product-row grid grid-cols-1 md:grid-cols-[18%_12%_12%_6%_25%_7%_7%_6%_7%] items-center gap-1 md:gap-0">' +
                         '<div class="md:px-2 text-left min-w-0">' +
                         '<div class="font-bold text-[13px] text-slate-800 dark:text-slate-100 leading-tight truncate" title="' + safeNameAttr + '">' + safeNameAttr + '</div>' +
@@ -11404,7 +11447,7 @@ async function loadInventory(options = {}) {
                         '<div class="px-1 text-center text-[11px] text-slate-600 dark:text-slate-300"><span class="md:hidden text-slate-400 mr-1">Thời hạn:</span>' + hanThangInput + '</div>' +
                         '<div class="px-1 text-center">' + expiryStatusHtml + lotButton + '</div>' +
                         '<div class="px-1 text-center text-[12px] text-slate-600 dark:text-slate-400"><span class="md:hidden text-slate-400 mr-1">ĐVT:</span>' + item.unit + '</div>' +
-                        '<div class="font-bold text-[13px] px-1 text-center ' + (qtyNum < 0 ? 'text-red-600' : 'text-blue-600 dark:text-blue-400') + '"><span class="md:hidden text-slate-400 mr-1">SL:</span>' + displayQty + '</div>' +
+                        '<div class="font-bold text-[13px] px-1 text-center ' + inventoryQtyClass + '"><span class="md:hidden text-slate-400 mr-1">SL:</span>' + displayQty + '</div>' +
                         '<div class="px-1 flex items-center gap-1"><span class="text-[10px] text-slate-400 md:hidden">Sỉ:</span><input type="text" value="' + wholesale + '" class="w-full text-center text-[12px] text-slate-600 dark:text-slate-300 bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 focus:border-blue-500 outline-none" onblur="updateProductPrice(' + safeNameJs + ', this.value, \'wholesale\')"></div>' +
                         '<div class="px-1 flex items-center gap-1"><span class="text-[10px] text-slate-400 md:hidden">Lẻ:</span><input type="text" value="' + retail + '" class="w-full text-center text-[12px] text-slate-600 dark:text-slate-300 bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 focus:border-blue-500 outline-none" onblur="updateProductPrice(' + safeNameJs + ', this.value, \'retail\')"></div>' +
                         '</div>' +
@@ -12811,7 +12854,13 @@ async function addSellToCart(productName, qty = 1, priceType = 'retail') {
     const existingCartQty = (sellCart || [])
         .filter(item => item && !item.isShipping && item.name === cleanProductName)
         .reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
-    const stock = stockRemaining + existingCartQty;
+    // Khi sửa hóa đơn, giỏ đang chứa lại số lượng của phiếu cũ và recomputeCurrentStock()
+    // đã trừ số đó khỏi tồn hiển thị. Cộng lại số lượng gốc của phiếu để không khóa nhầm
+    // việc thêm hết phần tồn còn lại. Ví dụ kho còn 15 + phiếu cũ 15 => có thể đặt tổng 30.
+    const editingOriginalQty = typeof getEditingOriginalQty === 'function'
+        ? Math.max(0, Number(getEditingOriginalQty(cleanProductName) || 0))
+        : 0;
+    const stock = stockRemaining + existingCartQty + editingOriginalQty;
     // 3. KIỂM TRA TỒN KHO (CHẶN NẾU VƯỢT TỔNG TỒN)
     if (qty > stock) {
         Swal.fire({
@@ -12922,7 +12971,7 @@ function renderSellCart() {
                     ? 'bg-amber-50 dark:bg-amber-500/10'
                     : (index % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50 dark:bg-slate-800/70');
         const c = accentColors[index % accentColors.length];
-        return "\n    <tr class=\"" + rowBg + " border-b-2 border-gray-200 dark:border-slate-700 " + c.l + " border-l-4 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors\">\n        <td class=\"p-2 w-[120px] md:w-1/4\">\n            <div class=\"w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-left font-bold break-words text-[11px] p-1.5\">" + (i.isShipping ? '🚚 ' : '') + "" + i.name + "</div>" + ((!i.isShipping && Array.isArray(i.lotAllocations) && i.lotAllocations.length) ? "<div class=\"text-[9px] text-slate-500 mt-1\">FEFO: " + i.lotAllocations.length + " l\u00F4 \u00B7 HSD g\u1EA7n nh\u1EA5t " + (i.lotAllocations[0].hsd ? formatDateToDDMMYYYY(i.lotAllocations[0].hsd) : 'chưa khai báo') + "</div>" : '') + "\n        </td>\n        \n        <td class=\"p-2 w-[60px] md:w-[50px]\">" +
+        return "\n    <tr class=\"" + rowBg + " border-b-2 border-gray-200 dark:border-slate-700 " + c.l + " border-l-4 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors\">\n        <td class=\"p-2 w-[120px] md:w-1/4\">\n            <div class=\"w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-left font-bold break-words text-[11px] p-1.5\">" + (i.isShipping ? '🚚 ' : '') + "" + i.name + "</div>" + "\n        </td>\n        \n        <td class=\"p-2 w-[60px] md:w-[50px]\">" +
             (i.isShipping
                 ? "<div class=\"w-full text-center text-[10px] font-bold text-gray-400 p-1.5\">-</div>" : "<input type=\"number\" value=\"" + i.qty + "\" step=\"any\" class=\"w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-center font-bold text-xs p-1.5 focus:ring-2 focus:ring-blue-400 outline-none\" \n                   onchange=\"updateCartItem(" + index + ", 'qty', this.value)\">") + "\n        </td>\n        \n        <td class=\"p-2 w-[90px] md:w-[70px]\">" +
             (i.dateSwap
@@ -13909,7 +13958,15 @@ function updateAllStockBadges() {
 
         const key = normalizeProductStockKey(p.name);
         const baseQty = Number(base[key] || 0);
-        const availableQty = Math.max(0, baseQty - Number(cartUsed[key] || 0) - Number(heldUsed[key] || 0));
+        // Khi ĐANG SỬA phiếu, số lượng của chính phiếu cũ đã nằm trong sellCart
+        // nhưng nó cũng đã được tính vào tồn hiện tại. Vì vậy không được coi phần
+        // hàng cũ đó là hàng đã lấy thêm. Nếu phiếu cũ có 15 và kho hiện còn 15,
+        // card phải vẫn cho phép bấm thêm đủ 15 (tối đa nâng phiếu lên 30).
+        const originalQtyForEdit = (typeof getEditingOriginalQty === 'function')
+            ? Math.max(0, Number(getEditingOriginalQty(p.name) || 0))
+            : 0;
+        const editAllowance = window.__editingSaleId ? originalQtyForEdit : 0;
+        const availableQty = Math.max(0, baseQty - Number(cartUsed[key] || 0) + editAllowance - Number(heldUsed[key] || 0));
         const realStock = Number(Math.round(availableQty * 100) / 100);
         const isOutOfStock = realStock <= 0;
         const isLowStock = !isOutOfStock && realStock <= 10;
@@ -14218,10 +14275,39 @@ async function resolveActualStockRef(productName) {
     return { ref: canonicalRef, snap: canonicalSnap };
 }
 
+function getEditingOriginalQty(productName) {
+    if (!window.__editingSaleId || typeof window.__editingSaleOriginalItems === 'undefined') return 0;
+    const targetKey = typeof normalizeProductStockKey === 'function'
+        ? normalizeProductStockKey(productName)
+        : String(productName || '').normalize('NFC').replace(/\s+/g, ' ').trim().toLowerCase();
+    let total = 0;
+    (window.__editingSaleOriginalItems || []).forEach(item => {
+        if (!item || item.isShipping || !item.name) return;
+        const itemKey = typeof normalizeProductStockKey === 'function'
+            ? normalizeProductStockKey(item.name)
+            : String(item.name || '').normalize('NFC').replace(/\s+/g, ' ').trim().toLowerCase();
+        // Khi sửa hóa đơn, tên SP trong phiếu cũ có thể có khác biệt Unicode/khoảng trắng
+        // rất nhỏ so với tên hiện tại. Nếu so sánh tuyệt đối sẽ không nhận ra 15 SP đã bán,
+        // rồi reserveSaleStock() tưởng cần giữ cả 16 và báo hết hàng. Dùng khóa chuẩn hóa.
+        if (itemKey !== targetKey) return;
+        total += Number(item.qty) || 0;
+    });
+    return total;
+}
+
 async function reserveSaleStock(productName, desiredQty) {
-    const qtyWanted = Math.max(0, Number(desiredQty) || 0);
+    const requestedCartQty = Math.max(0, Number(desiredQty) || 0);
     const cleanName = String(productName || '').trim();
     if (!cleanName) throw new Error('Thiếu tên sản phẩm.');
+
+    // KHI SỬA HÓA ĐƠN: số lượng của phiếu cũ đã bị trừ khỏi stock_counters từ trước.
+    // Vì vậy không được coi toàn bộ requestedCartQty là hàng cần giữ thêm.
+    // Ví dụ: tồn thực tế còn 15, phiếu gốc đã bán 15. Mở sửa và tăng lên 16
+    // thì chỉ cần giữ THÊM 1. Khớp tên bằng khóa chuẩn hóa để không bị lỗi do Unicode/
+    // khoảng trắng khác nhẹ giữa dữ liệu cũ và tên sản phẩm hiện tại.
+    // Với phiếu mới (không có __editingSaleId), originalQty = 0 và logic vẫn như cũ.
+    const originalQty = getEditingOriginalQty(cleanName);
+    const qtyWanted = Math.max(0, requestedCartQty - originalQty);
     const sessionId = getSaleReservationSessionId();
     const aggregateRef = getSaleReservationAggregateRef(cleanName);
     const reservationDocRef = db.collection('stock_reservations').doc(getSaleReservationDocId(cleanName));
@@ -14277,7 +14363,10 @@ async function reserveSaleStock(productName, desiredQty) {
         });
         const availableForThisCart = Math.round((stockQty - otherReserved) * 1000) / 1000;
         if (qtyWanted > availableForThisCart + 1e-9) {
-            throw new Error('Không đủ hàng khả dụng. Tồn thực tế ' + stockQty.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + ', đã có ' + otherReserved.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + ' đang được người khác giữ. Bạn chỉ còn có thể giữ ' + Math.max(0, availableForThisCart).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + '.');
+            const editingNote = originalQty > 0
+                ? ' Phiếu đang sửa đã có ' + originalQty.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + ' ' + (window.allProductCache?.find(p => p?.name === cleanName)?.unit || '') + ' được trừ kho từ trước.'
+                : '';
+            throw new Error('Không đủ hàng khả dụng. Tồn thực tế ' + stockQty.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + ', đã có ' + otherReserved.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + ' đang được người khác giữ. Bạn chỉ còn có thể giữ thêm ' + Math.max(0, availableForThisCart).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + '.' + editingNote);
         }
         if (qtyWanted > 0) {
             nowMap[sessionId] = { qty: qtyWanted, expiresAt };
@@ -14302,7 +14391,7 @@ async function reserveSaleStock(productName, desiredQty) {
             }, { merge: true });
             transaction.delete(reservationDocRef);
         }
-        return { stockQty, otherReserved, availableForThisCart, qty: qtyWanted, stockRef: resolved.ref };
+        return { stockQty, otherReserved, availableForThisCart, qty: qtyWanted, requestedCartQty, originalQty, stockRef: resolved.ref };
     });
 }
 async function releaseSaleStockReservation(productName) {
@@ -14417,9 +14506,17 @@ async function quickAdd(productName, event, fromCamera) {
     const currentItems = (sellCart || []).filter(item => item && !item.isShipping && item.name === productName);
     const existingTotal = currentItems.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
     const desiredTotal = existingTotal + 1;
+    // Khi đang SỬA hóa đơn, currentStockMap đã trừ cả số lượng của phiếu cũ đang nằm trong giỏ.
+    // Vì vậy phải cộng lại số lượng gốc của chính phiếu đang sửa để biết tổng số SP có thể đặt
+    // trong giỏ. Ví dụ: kho còn 15, phiếu cũ đã bán 15, mở sửa -> map còn 0; được phép tăng
+    // phiếu từ 15 lên tối đa 30 (tức dùng toàn bộ 15 tồn còn lại), chứ không báo hết hàng ở 16.
+    // Với phiếu mới, editingOriginalQty = 0 nên logic cũ hoàn toàn không đổi.
+    const editingOriginalQty = typeof getEditingOriginalQty === 'function'
+        ? Math.max(0, Number(getEditingOriginalQty(productName) || 0))
+        : 0;
     // currentStockMap là tồn còn lại sau khi trừ chính giỏ hiện tại. Cộng lại existingTotal
-    // để kiểm tra theo tổng tồn thực của sản phẩm, tránh lỗi tồn 6 nhưng mới thêm 3 đã báo còn 3.
-    const stockForThisCart = stockRemaining + existingTotal;
+    // và, nếu đang sửa, cộng lại số lượng gốc của phiếu để kiểm tra đúng tổng tồn thực có thể dùng.
+    const stockForThisCart = stockRemaining + existingTotal + editingOriginalQty;
 
     if (stockForThisCart <= 0 || desiredTotal > stockForThisCart + 1e-9) {
         if (!fromCamera) Swal.fire({ icon:'warning', title:'Không đủ tồn kho', text:'Sản phẩm ' + productName + ' chỉ còn ' + stockRemaining.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + ' ' + (p.unit || '') + '.' });
@@ -14562,13 +14659,22 @@ async function updateCartItem(index, field, value) {
             const oldQty = Number(item.qty || 0);
             const existingTotal = await getSellCartTotalQty(item.name);
             const desiredTotal = Math.max(0, existingTotal - oldQty + newQty);
-            await reserveSaleStock(item.name, desiredTotal);
-            // reserveSaleStock() đã kiểm tra tồn thật + giữ hàng bằng transaction.
-            // Không kiểm tra lại bằng currentStockMap ở đây vì map có thể vừa bị trừ
-            // theo giỏ hiện tại; kiểm tra lần 2 dễ tạo lỗi giả, đặc biệt với dữ liệu
-            // stock_counters cũ có tên SP khác nhẹ tên trong Danh mục.
-            const stockNow = Number(getCachedStockQty(item.name) || 0);
-            const otherRowsQty = existingTotal - oldQty;
+            const editingOriginalQty = typeof getEditingOriginalQty === 'function'
+                ? Math.max(0, Number(getEditingOriginalQty(item.name) || 0))
+                : 0;
+
+            // Khi GIẢM số lượng trong phiếu đang sửa, tuyệt đối không yêu cầu kiểm tra
+            // "hàng khả dụng" theo phần tăng thêm. Ví dụ phiếu hiện tại đã lưu 30, tồn
+            // thực tế = 0 và máy khác đang giữ 12: sửa ô SL từ 30 xuống 15 chỉ là TRẢ
+            // LẠI 15 vào kho, không cần giữ thêm bất kỳ hàng nào.
+            // Chỉ gọi reserveSaleStock() khi số lượng mới vượt quá số lượng gốc của
+            // phiếu; khi giảm/về đúng số lượng gốc thì giải phóng reservation của máy này.
+            if (!window.__editingSaleId || desiredTotal > editingOriginalQty + 0.000001) {
+                await reserveSaleStock(item.name, desiredTotal);
+            } else {
+                await releaseSaleStockReservation(item.name);
+            }
+
             item.qty = newQty;
             if (newQty === 0) {
                 const idx = sellCart.indexOf(item);
@@ -15642,8 +15748,15 @@ async function updateExistingSale() {
         if (window.__editingSaleOriginalPaymentMethod === 'Công nợ' && window.__editingSaleOriginalCustomer && !oldCustomerRef) {
             throw new Error('Không tìm thấy khách hàng cũ để hoàn tác công nợ khi sửa hóa đơn.');
         }
+        // Resolve đúng document tồn thực tế trước transaction. Dữ liệu cũ có thể có
+        // stock_counters lệch nhẹ tên/Unicode; dùng cùng cơ chế resolveActualStockRef như
+        // lúc thêm hàng vào giỏ để sửa phiếu không bị kiểm tra nhầm vào một counter = 0.
+        const resolvedEditStockRefs = {};
+        for (const name of changedNames) {
+            resolvedEditStockRefs[name] = (await resolveActualStockRef(name)).ref;
+        }
         await db.runTransaction(async (transaction) => {
-            const refs = changedNames.map(name => getStockRef(name));
+            const refs = changedNames.map(name => resolvedEditStockRefs[name]);
             const reads = refs.map(ref => transaction.get(ref));
             const customerRefs = [];
             if (oldCustomerRef) customerRefs.push(oldCustomerRef);
@@ -24189,8 +24302,8 @@ window.runStockReportReconciliation = async function () {
 window.confirmStockReportReconciliation = function () { Swal.fire({ title: 'Đối chiếu tồn kho & báo cáo?', html: 'Hệ thống sẽ so sánh <b>tồn hiện tại</b> với toàn bộ lịch sử <b>Nhập + Xuất + Hoàn trả/Đổi date</b> để tìm sản phẩm lệch. Không thay đổi dữ liệu.', icon: 'info', showCancelButton: true, confirmButtonText: 'Kiểm tra ngay', cancelButtonText: 'Hủy', confirmButtonColor: '#059669' }).then(r => { if (r.isConfirmed)
     runStockReportReconciliation(); }); };
 // ============================================================
-// BẢN V13 - TỐI ƯU TỐC ĐỘ / READ / UX
-// Giữ nguyên giao diện và card sản phẩm 3D.
+// BẢN V14 - SỬA HIỂN THỊ KHO HÀNG + BẢO VỆ TỒN THEO TÊN CHUẨN
+// Giữ nguyên giao diện và card sản phẩm 3D. Không thay đổi dữ liệu tồn kho.
 // ============================================================
 // TRẠNG THÁI ONLINE / OFFLINE + ĐỒNG BỘ FIRESTORE
 // ============================================================
