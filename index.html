@@ -2389,7 +2389,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <!-- Hàng đầu: ô tìm kiếm + 2 nút hóa đơn nháp nằm thẳng hàng -->
             <div class="col-span-1 md:col-span-8">
                 <input type="text" id="search-inventory" placeholder="🔍 Tìm tên sản phẩm..." 
-                        onkeyup="filterInventory()" class="w-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-3 rounded-xl text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 outline-none">
+                        oninput="filterInventory()" class="w-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-3 rounded-xl text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
             <div class="col-span-1 md:col-span-2">
                 <button onclick="openHoaDonNhapModal()" 
@@ -3230,7 +3230,7 @@ document.addEventListener('DOMContentLoaded', function () {
            <div class="col-span-2 md:col-span-4">
 				<label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Tìm kiếm</label>
 				<input type="text" id="searchInput" placeholder="🔍 Số phiếu, KH..." 
-					   oninput="loadSalesList()" 
+					   oninput="debouncedLoadSalesList()" 
 					   class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
 			</div>
             
@@ -3241,16 +3241,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
             <div class="col-span-1 md:col-span-2">
                 <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Từ ngày</label>
-                <input type="date" id="dateFrom" onchange="loadSalesList()" class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                <input type="date" id="dateFrom" onchange="debouncedLoadSalesList()" class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
             
             <div class="col-span-1 md:col-span-2">
                 <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Đến ngày</label>
-                <input type="date" id="dateTo" onchange="loadSalesList()" class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                <input type="date" id="dateTo" onchange="debouncedLoadSalesList()" class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
 
             <div class="col-span-2 md:col-span-2">
-                <select id="filterPaymentMethod" onchange="loadSalesList()" class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-xs md:text-sm">
+                <select id="filterPaymentMethod" onchange="debouncedLoadSalesList()" class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-xs md:text-sm">
                     <option value="">💳 Tất cả thanh toán</option>
                     <option value="Tiền mặt">Tiền mặt</option>
                     <option value="Chuyển khoản">Chuyển khoản</option>
@@ -3258,7 +3258,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 </select>
             </div>
             <div class="col-span-2 md:col-span-2">
-                <select id="filterReturnStatus" onchange="loadSalesList()" class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-xs md:text-sm">
+                <select id="filterReturnStatus" onchange="debouncedLoadSalesList()" class="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-xs md:text-sm">
                     <option value="">↩️ Tất cả trạng thái</option>
                     <option value="returned">Đã hoàn trả</option>
                     <option value="normal">Chưa hoàn trả</option>
@@ -4384,11 +4384,24 @@ const db = firebase.firestore();
 window.__firestoreReadCache = window.__firestoreReadCache || new Map();
 window.firestoreCachedGet = async function(key, producer, ttlMs = 3000) {
     const now = Date.now();
-    const hit = window.__firestoreReadCache.get(key);
-    if (hit && (now - hit.time) < ttlMs && hit.value) return hit.value;
-    const value = await producer();
-    window.__firestoreReadCache.set(key, { time: Date.now(), value });
-    return value;
+    const cacheKey = String(key);
+    const hit = window.__firestoreReadCache.get(cacheKey);
+    if (hit) {
+        if (hit.promise) return hit.promise; // Gộp các lượt đọc giống nhau đang chạy đồng thời.
+        if ((now - hit.time) < ttlMs) return hit.value;
+    }
+    const promise = Promise.resolve().then(producer);
+    window.__firestoreReadCache.set(cacheKey, { time: now, value: null, promise });
+    try {
+        const value = await promise;
+        window.__firestoreReadCache.set(cacheKey, { time: Date.now(), value });
+        return value;
+    } catch (err) {
+        // Không cache lỗi; lần gọi sau được phép thử lại.
+        const current = window.__firestoreReadCache.get(cacheKey);
+        if (current && current.promise === promise) window.__firestoreReadCache.delete(cacheKey);
+        throw err;
+    }
 };
 window.clearFirestoreReadCache = function(prefix = '') {
     if (!prefix) { window.__firestoreReadCache.clear(); return; }
@@ -4397,7 +4410,18 @@ window.clearFirestoreReadCache = function(prefix = '') {
     }
 };
 window.invalidateFirestoreReadCaches = function(keys = []) {
-    (Array.isArray(keys) ? keys : [keys]).forEach(key => window.__firestoreReadCache.delete(String(key)));
+    const list = Array.isArray(keys) ? keys : [keys];
+    for (const rawKey of list) {
+        const key = String(rawKey || '');
+        if (!key) continue;
+        // Hỗ trợ cả key chính xác và tiền tố (ví dụ sales:) để không giữ cache cũ
+        // sau khi ghi dữ liệu. Đây cũng tránh việc phải xóa toàn bộ cache Firestore.
+        for (const cachedKey of Array.from(window.__firestoreReadCache.keys())) {
+            if (String(cachedKey) === key || String(cachedKey).startsWith(key)) {
+                window.__firestoreReadCache.delete(cachedKey);
+            }
+        }
+    }
 };
 
 // --- BẬT LƯU OFFLINE (Firestore Offline Persistence) ---
@@ -7983,6 +8007,9 @@ function updateSidebarActivePC(pageId) {
     });
 }
 function showPage(pageId) {
+    // Ghi nhớ trang đang hiển thị để cơ chế đồng bộ sau khi lưu chỉ tải lại đúng phần cần thiết.
+    // Nhờ vậy vẫn cập nhật ngay sau thao tác nhưng không đọc lại các bộ dữ liệu không liên quan.
+    window.__activePage = pageId;
     // 0. KIỂM TRA PHÂN QUYỀN TRƯỚC KHI CHO XEM TRANG
     const _curUser = (typeof getCurrentUser === 'function') ? getCurrentUser() : null;
     if (_curUser) {
@@ -8187,7 +8214,7 @@ async function fillProductDetails(name) {
     const retailInput = document.getElementById('imp-retail');
     const wholesaleInput = document.getElementById('imp-wholesale');
     // 1. Điền ĐVT (Logic cũ của bạn)
-    const product = window.allProducts.find(p => p.name === name);
+    const product = getProductByNameFast(name);
     if (product && unitSelect && product.unit) {
         let matched = false;
         for (let i = 0; i < unitSelect.options.length; i++) {
@@ -8222,7 +8249,11 @@ async function fillProductDetails(name) {
         // đã có giá trong danh mục ngay từ lần nhập kho đầu tiên (bước 3b của saveImport
         // luôn ghi giá vào 'products'), nên nhánh này chỉ còn là phòng hờ cho dữ liệu cũ.
         try {
-            const snapshot = await db.collection('receipts').orderBy('date', 'desc').limit(300).get();
+            const snapshot = await firestoreCachedGet(
+                'receipts:latest300:price-lookup',
+                () => db.collection('receipts').orderBy('date', 'desc').limit(300).get(),
+                60000
+            );
             let found = false;
             for (let doc of snapshot.docs) {
                 const item = doc.data().items.find(i => i.name === name);
@@ -8452,8 +8483,8 @@ async function loadDashboard(filter = 'default') {
         db.collection('sales')
             .where('date', '>=', queryStartDate)
             .get({ source: 'default' }),
-        firestoreCachedGet('dashboard:suppliers', () => db.collection('suppliers').get({ source: 'default' }), 3000),
-        firestoreCachedGet('dashboard:customers', () => db.collection('customers').get({ source: 'default' }), 3000),
+        firestoreCachedGet('dashboard:suppliers', () => db.collection('suppliers').get({ source: 'default' }), 30000),
+        firestoreCachedGet('dashboard:customers', () => db.collection('customers').get({ source: 'default' }), 30000),
         // Nợ NCC PHÁT SINH trong đúng kỳ đang chọn (mỗi lần nhập nguyên liệu ghi 1 dòng ở đây)
         db.collection('material_imports')
             .where('timestamp', '>=', startDate)
@@ -8461,9 +8492,9 @@ async function loadDashboard(filter = 'default') {
             .get({ source: 'default' }).catch(() => ({ docs: [] })),
         // Lấy TOÀN BỘ lịch sử trả nợ NCC (không lọc theo kỳ) - dùng để vừa tính số ĐÃ TRẢ
         // TRONG KỲ, vừa tính tổng ĐÃ TRẢ LUỸ KẾ của từng NCC để hiển thị trong popup.
-        firestoreCachedGet('dashboard:payments', () => db.collection('payments').get({ source: 'default' }).catch(() => ({ docs: [] })), 3000),
+        firestoreCachedGet('dashboard:payments', () => db.collection('payments').get({ source: 'default' }).catch(() => ({ docs: [] })), 30000),
         // Tương tự, lấy TOÀN BỘ lịch sử trả nợ của khách hàng.
-        firestoreCachedGet('dashboard:debt_history', () => db.collection('debt_history').get({ source: 'default' }).catch(() => ({ docs: [] })), 3000),
+        firestoreCachedGet('dashboard:debt_history', () => db.collection('debt_history').get({ source: 'default' }).catch(() => ({ docs: [] })), 30000),
         // Hàng hoàn trả - lấy CÙNG KHOẢNG với 'sales' ở trên (queryStartDate, ~4-5 tháng gần
         // nhất) - dùng để: (a) trừ vào "Doanh thu" của kỳ đang chọn, (b) trừ vào badge so
         // sánh "doanh thu tháng này/tháng trước" bên dưới, (c) cộng vào "đã trả trong kỳ" của
@@ -9337,7 +9368,7 @@ async function getCurrentExpiryByProduct() {
     // Lấy TẤT CẢ các dòng nhập hợp lệ, kể cả dòng cũ không có HSD.
     // Mục tiêu: một sản phẩm có lô cũ không HSD + lô mới có HSD sẽ KHÔNG bị hiểu nhầm
     // toàn bộ số tồn hiện tại đều có cùng một HSD.
-    const snap = await firestoreCachedGet('inventory:receipts-expiry', () => db.collection('receipts').get({ source: 'default' }), 3000);
+    const snap = await firestoreCachedGet('inventory:receipts-expiry', () => db.collection('receipts').get({ source: 'default' }), 60000);
     const map = new Map();
     snap.forEach(doc => {
         const r = doc.data();
@@ -10363,6 +10394,16 @@ async function saveImport() {
                 }, { merge: true });
             });
             await batch.commit();
+            // Cập nhật RAM ngay sau khi Firestore commit để màn hình Kho/Bán hàng
+            // phản ánh tồn mới lập tức, không phải chờ onSnapshot về sau.
+            if (!window.baseInventoryMap) window.baseInventoryMap = {};
+            if (!window.__normalizedBaseInventoryMap) window.__normalizedBaseInventoryMap = {};
+            Object.keys(qtyByName).forEach(name => {
+                const q = Number(qtyByName[name]) || 0;
+                window.baseInventoryMap[name] = Number(window.baseInventoryMap[name] || 0) + q;
+                const key = normalizeProductStockKey(name);
+                window.__normalizedBaseInventoryMap[key] = Number(window.__normalizedBaseInventoryMap[key] || 0) + q;
+            });
         } else {
             // Hàng Nhập đổi - Hết hạn: lưu phiếu nhưng không cộng tồn.
             await receiptRef.set(receipt);
@@ -10390,27 +10431,35 @@ async function saveImport() {
         }
 
         try {
-            await Promise.all(savedCart.map(async item => {
-                const snapshot = await db.collection('products')
-                    .where('name', '==', item.name)
-                    .where('unit', '==', item.unit)
-                    .get();
-                if (!snapshot.empty) {
-                    await db.collection('products').doc(snapshot.docs[0].id).update({
-                        retail: parseFloat(item.retail) || 0,
-                        wholesale: parseFloat(item.wholesale) || 0
-                    });
-                }
-            }));
+            // Không query products theo từng dòng sau khi lưu (trước đây mỗi SP = 1 READ).
+            // Dùng Map đã có sẵn từ danh mục sản phẩm, rồi ghi giá theo batch.
+            const priceBatch = db.batch();
+            const priceUpdates = [];
+            const seenProductIds = new Set();
+            (savedCart || []).forEach(item => {
+                const key = String(item?.name || '').trim() + '|' + String(item?.unit || '').trim();
+                const product = window.__productsByNameUnitFast?.get(key);
+                if (!product?.id || seenProductIds.has(product.id)) return;
+                seenProductIds.add(product.id);
+                const retail = parseFloat(item.retail) || 0;
+                const wholesale = parseFloat(item.wholesale) || 0;
+                priceBatch.update(db.collection('products').doc(product.id), { retail, wholesale });
+                priceUpdates.push({ product, retail, wholesale });
+            });
+            if (priceUpdates.length) {
+                await priceBatch.commit();
+                priceUpdates.forEach(({ product, retail, wholesale }) => {
+                    product.retail = retail;
+                    product.wholesale = wholesale;
+                });
+            }
         } catch (priceErr) {
             console.warn('Không cập nhật được giá mới vào Danh Mục SP:', priceErr);
         }
         try {
-            updateReceiptNum();
-            loadReceipts();
-            await refreshCache();
-            if (typeof calculateAllStock === 'function') await calculateAllStock();
-            window.dispatchEvent(new CustomEvent('dataChanged'));
+            // Firestore đã commit xong. Đồng bộ UI ngay tại đây, không chờ setTimeout và
+            // không đọc lặp lại products/stock/receipts nhiều lần.
+            await window.requestPostWriteSync(['receipts', 'stock', 'products']);
         } catch (refreshErr) {
             console.warn('Không tải lại được giao diện sau khi nhập:', refreshErr);
         }
@@ -10574,12 +10623,17 @@ function buildReceiptRowHtml(docId, displayId, dateStr, itemCount, type, dateSta
         ? "<span class=\"inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400 whitespace-nowrap\">\uD83D\uDD0E " + matchQtyLabel + "</span>" : '';
     return "\n\t\t\t\t<tr class=\"hover:bg-transparent transition-colors\">\n\t\t\t\t\t<td colspan=\"6\" class=\"p-2\">\n\t\t\t\t\t\t<div class=\"flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-3 md:p-3 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] transition-all hover:-translate-y-0.5\" style=\"border-left-color:#10b981 !important; border-right-color:#10b981 !important;\">\n\t\t\t\t\t\t\t<div class=\"flex items-center gap-2 md:contents\">\n\t\t\t\t\t\t\t\t<span class=\"shrink-0 md:w-[6%] md:text-center md:px-2\" onclick=\"event.stopPropagation()\">\n\t\t\t\t\t\t\t\t\t<input type=\"checkbox\" class=\"receipt-check w-4 h-4 rounded\" data-doc-id=\"" + docId + "\">\n\t\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t\t<span class=\"text-[12px] md:text-[11px] font-bold text-slate-700 dark:text-slate-300 md:w-[14%] truncate md:px-2 md:text-center\">" + displayId + "</span>\n\t\t\t\t\t\t\t\t<span class=\"text-[11px] font-bold text-slate-700 dark:text-slate-400 md:w-[14%] md:text-center md:px-2\">" + dateStr + "</span>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t<div class=\"flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700\">\n\t\t\t\t\t\t\t\t<div class=\"md:w-[40%] md:px-2 flex flex-col gap-1\">" + receiptTypeBadgeHtml(type, dateStatus, vendor, isReturn) + "" + matchHtml + "</div>\n\t\t\t\t\t\t\t\t<div class=\"flex items-center gap-3 md:contents\">\n\t\t\t\t\t\t\t\t\t<span class=\"text-[11px] text-slate-500 dark:text-slate-400 md:w-[10%] md:text-center md:px-2\">" + itemCount + " SP</span>\n\t\t\t\t\t\t\t\t\t<span class=\"md:w-[16%] md:text-center md:px-2\">\n\t\t\t\t\t\t\t\t\t\t<button onclick=\"viewReceipt('" + docId + "')\" class=\"px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-slate-800 dark:bg-slate-700 text-white hover:bg-slate-900 dark:hover:bg-slate-600 transition-colors whitespace-nowrap\">\uD83D\uDC41 Xem</button>\n\t\t\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</td>\n\t\t\t\t</tr>\n\t\t\t";
 }
-function loadReceipts() {
+window.__receiptsLoadToken = window.__receiptsLoadToken || 0;
+async function loadReceipts() {
+    const __myReceiptsToken = ++window.__receiptsLoadToken;
     console.log("Đang tải danh sách phiếu theo tháng...");
     const leftBody = document.getElementById('list-receipts-left');
     const rightBody = document.getElementById('list-receipts-right');
     if (!leftBody || !rightBody)
         return;
+    // Hiển thị skeleton ngay để người dùng thấy phản hồi tức thì thay vì bảng trắng.
+    leftBody.innerHTML = skeletonRows(5, 6);
+    rightBody.innerHTML = '';
     // Lấy giá trị tháng từ input (định dạng YYYY-MM)
     const filterMonth = document.getElementById('filter-month').value;
     // Nếu chưa chọn tháng, mặc định lấy tháng hiện tại
@@ -10597,12 +10651,17 @@ function loadReceipts() {
     const [ty, tm] = targetMonth.split('-').map(Number);
     const monthStart = new Date(ty, tm - 1, 1);
     const monthEnd = new Date(ty, tm, 0, 23, 59, 59);
-    db.collection('receipts')
-        .where('date', '>=', monthStart)
-        .where('date', '<=', monthEnd)
-        .orderBy('date', 'desc')
-        .get()
-        .then(snapshot => {
+    try {
+        // Cache ngắn theo THÁNG: tránh đọc lặp lại khi realtime sync, đổi tab hoặc
+        // nhiều thao tác UI xảy ra sát nhau. Cache sẽ bị vô hiệu hóa ngay sau khi có
+        // ghi receipts nên không làm chậm dữ liệu mới.
+        const receiptMonthCacheKey = 'receipts:month:' + targetMonth;
+        const snapshot = await firestoreCachedGet(receiptMonthCacheKey, () => db.collection('receipts')
+            .where('date', '>=', monthStart)
+            .where('date', '<=', monthEnd)
+            .orderBy('date', 'desc')
+            .get(), 10000);
+        if (__myReceiptsToken !== window.__receiptsLoadToken) return;
         window.allReceipts = [];
         const total = snapshot.docs.length;
         // QUAN TRỌNG: danh sách giờ CHỈ CÒN 1 CỘT DUY NHẤT (bảng phải "list-receipts-right"
@@ -10637,10 +10696,11 @@ function loadReceipts() {
         });
         leftBody.innerHTML = rowsHtml.join('');
         rightBody.innerHTML = '';
-    }).catch(err => {
+    } catch (err) {
         console.error("LỖI KẾT NỐI:", err);
         Swal.fire('Lỗi', 'Không thể tải danh sách!', 'error');
-    });
+        throw err;
+    }
 }
 // Tải TOÀN BỘ lịch sử phiếu nhập (mọi tháng) - CHỈ để phục vụ tìm kiếm không giới hạn
 // theo tháng. Chỉ thực sự đọc Firestore ở LẦN ĐẦU tiên người dùng gõ tìm kiếm trong
@@ -11222,22 +11282,24 @@ async function loadInventory(options = {}) {
         if (tbodySkeleton && !options.silent) {
             tbodySkeleton.innerHTML = skeletonRows(8, 5);
         }
-        const [stockSnap, expiryLotsByProduct] = await Promise.all([
-            db.collection('stock_counters').get(),
+        // stock_counters đã có listener onSnapshot trong calculateAllStock().
+        // Dùng bản trong RAM thay vì .get() lại toàn bộ collection mỗi lần mở Kho Hàng.
+        await calculateAllStock();
+        const [expiryLotsByProduct] = await Promise.all([
             getCurrentExpiryByProduct().catch(e => {
                 console.warn('Không tải được NSX/HSD để hiển thị Kho Hàng:', e);
                 return new Map();
             })
         ]);
-        const stockMap = {};
-        stockSnap.forEach(doc => {
-            const d = doc.data();
-            if (d && d.name)
-                stockMap[d.name] = parseFloat(d.qty || 0);
-        });
+        const stockMap = Object.assign({}, window.baseInventoryMap || {});
         const productsSource = (window.allProductCache && window.allProductCache.length)
             ? [...window.allProductCache].sort((a, b) => compareProductDisplayOrder(a.name, b.name))
             : [];
+        // Map tra sản phẩm giúp Kho Hàng không phải .find() lại toàn bộ danh mục cho từng dòng.
+        const productsByName = new Map();
+        productsSource.forEach(p => { if (p && p.name) productsByName.set(p.name, p); });
+        (window.allProducts || []).forEach(p => { if (p && p.name && !productsByName.has(p.name)) productsByName.set(p.name, p); });
+        window.__productsByName = productsByName;
         const tbody = document.getElementById('inventory-data');
         if (!tbody)
             return;
@@ -11264,7 +11326,7 @@ async function loadInventory(options = {}) {
                 const qtyNum = stockMap[item.name] !== undefined ? stockMap[item.name] : 0;
                 if (qtyNum <= 0.000001)
                     return;
-                const productData = (window.allProducts || []).find(p => p.name === item.name);
+                const productData = window.__productsByName?.get(item.name) || null;
                 const rVal = (productData && productData.retail) ? productData.retail : (item.retail || 0);
                 const wVal = (productData && productData.wholesale) ? productData.wholesale : (item.wholesale || 0);
                 const retail = Number(rVal).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE });
@@ -11680,7 +11742,7 @@ window.saveAllItemEdits = async function (docId) {
         // Báo cho toàn bộ ứng dụng biết dữ liệu vừa thay đổi để Kho Hàng / NXT Trang Chủ
         // tự làm mới theo đúng số tồn kho mới - trước đây thiếu bước này nên phải tự tải
         // lại trang mới thấy đúng.
-        window.dispatchEvent(new CustomEvent('dataChanged'));
+        window.dispatchEvent(new CustomEvent('dataChanged', { detail: { domains: ['receipts', 'stock', 'sales'] } }));
         // Gọi lại hàm xem để refresh modal với dữ liệu mới
         viewReceipt(docId);
     }
@@ -11718,14 +11780,49 @@ function autoFillDates(monthValue) {
         console.error("Không tìm thấy ID inv-date-from hoặc inv-date-to. Hãy kiểm tra lại file HTML!");
     }
 }
+// Tìm kiếm thông minh: bỏ dấu, chuẩn hóa khoảng trắng và cho phép tìm liền chữ.
+function normalizeSearchText(value) {
+    return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+        .toLowerCase()
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+function compactSearchText(value) {
+    return normalizeSearchText(value).replace(/\s+/g, '');
+}
+
 // 1. Hàm Tìm kiếm (Lọc sản phẩm)
 function filterInventory() {
-    let input = document.getElementById("search-inventory").value.toLowerCase();
-    let rows = document.getElementById("inventory-data").getElementsByTagName("tr");
-    for (let i = 0; i < rows.length; i++) {
-        let name = rows[i].getElementsByTagName("td")[0].innerText.toLowerCase();
-        rows[i].style.display = name.includes(input) ? "" : "none";
-    }
+    const inputEl = document.getElementById("search-inventory");
+    const container = document.getElementById("inventory-data");
+    if (!inputEl || !container) return;
+    const input = normalizeSearchText(inputEl.value);
+    const compactInput = compactSearchText(inputEl.value);
+    // Kho Hàng gom nhiều sản phẩm vào 1 khối <tr> theo NHÓM. Chỉ lọc từng
+    // .inventory-product-row để tìm "TCMT 450g Nhựa" chỉ còn đúng SP đó.
+    const groupRows = container.querySelectorAll('tr');
+    groupRows.forEach(groupRow => {
+        const productRows = groupRow.querySelectorAll('.inventory-product-row');
+        if (!productRows.length) {
+            groupRow.style.display = input === '' ? '' : 'none';
+            return;
+        }
+        let visibleCount = 0;
+        productRows.forEach(productRow => {
+            const nameEl = productRow.querySelector('.font-bold.text-slate-800');
+            const rawName = (nameEl?.getAttribute('title') || nameEl?.textContent || '').trim();
+            const name = normalizeSearchText(rawName);
+            const compactName = compactSearchText(rawName);
+            const matched = input === '' || name.includes(input) || (compactInput && compactName.includes(compactInput));
+            productRow.style.display = matched ? '' : 'none';
+            if (matched) visibleCount++;
+        });
+        // Ẩn luôn khối nhóm nếu không có sản phẩm nào khớp.
+        groupRow.style.display = visibleCount > 0 ? '' : 'none';
+    });
 }
 // =========================================================================
 // --- HÓA ĐƠN BÁN HÀNG BẢN NHÁP (popup ở trang Kho Hàng) ---
@@ -12705,7 +12802,7 @@ async function autoFillDetails(name) {
 async function addSellToCart(productName, qty = 1, priceType = 'retail') {
     // 1. Lấy thông tin sản phẩm từ cache
     const cleanProductName = String(productName || '').trim();
-    const p = window.allProductCache.find(i => String(i.name || '').trim() === cleanProductName);
+    const p = getProductByNameFast(cleanProductName);
     if (!p)
         return;
     // 2. currentStockMap đã trừ số lượng SP đang có trong giỏ hiện tại.
@@ -13027,9 +13124,9 @@ async function migrateStockCountersIfNeeded() {
                 // Phiếu Hoàn trả thường đã có receipt isReturn:true và đã được cộng trong snapNhap.
         // Chỉ cộng thêm returns không có receipt liên kết để không cộng trùng.
         const snapReturns = await db.collection('returns').get();
-        const snapReceiptsForReturn = await db.collection('receipts').get();
+        // Đã có toàn bộ phiếu nhập trong snapNhap ở trên -> không đọc receipts lần 2.
         const receiptIdsWithReturn = new Set();
-        snapReceiptsForReturn.forEach(rDoc => {
+        snapNhap.forEach(rDoc => {
             const rd = rDoc.data() || {};
             if (rd.isReturn === true) receiptIdsWithReturn.add(rDoc.id);
         });
@@ -13105,9 +13202,9 @@ window.forceResyncStockCounters = async function () {
         // nên đã được cộng qua snapNhap. Chỉ cộng thêm các bản ghi returns bị thiếu receipt
         // liên kết (trường hợp dữ liệu cũ/phiếu lỗi trước đây), tránh cộng trùng.
         const snapReturns = await db.collection('returns').get();
+        // Tái sử dụng snapNhap đã đọc ở trên, tránh đọc toàn bộ receipts thêm một lần.
         const receiptIdsWithReturn = new Set();
-        const snapReceiptsForReturn = await db.collection('receipts').get();
-        snapReceiptsForReturn.forEach(rDoc => {
+        snapNhap.forEach(rDoc => {
             const rd = rDoc.data() || {};
             if (rd.isReturn === true) receiptIdsWithReturn.add(rDoc.id);
         });
@@ -13760,7 +13857,7 @@ function renderProductGrid() {
         // thay vì chỉ có 2 trạng thái còn/hết như trước.
         const isLowStock = !isOutOfStock && realStock <= 10;
         const b = THEME_BY_NHOM[xepNhomSanPham(p.name)] || THEME_BY_NHOM['KHÁC'];
-        return "\n            <div id=\"product-card-" + idName + "\" data-badge-class=\"" + b.badge + "\"\n                 onclick=\"" + (isOutOfStock ? "showAlert('H\u1EBFt h\u00E0ng!')" : "quickAdd('" + safeName + "')") + "\"\n                 class=\"group relative bg-gradient-to-b " + b.top + " p-1.5 md:p-4 rounded-lg md:rounded-2xl border border-white/60 dark:border-slate-700 ring-1 " + b.ring + "\n                        " + b.shadow + " flex flex-col justify-between cursor-pointer h-16 md:h-28 overflow-hidden\n                        transition-all duration-200 ease-out\n                        hover:-translate-y-1.5 hover:shadow-[0_10px_0_0_rgba(0,0,0,0.15),0_16px_22px_-6px_rgba(0,0,0,0.3)]\n                        active:translate-y-[3px] active:shadow-none\n                        " + (isOutOfStock ? 'grayscale opacity-70' : '') + "\">\n\n                <!-- V\u1EC7t s\u00E1ng b\u00F3ng \u1EDF g\u00F3c tr\u00EAn \u0111\u1EC3 t\u1EA1o c\u1EA3m gi\u00E1c n\u1ED5i kh\u1ED1i/glossy -->\n                <div class=\"pointer-events-none absolute -top-6 -left-6 w-20 h-20 bg-white/50 dark:bg-white/10 rounded-full blur-xl\"></div>\n\n                <div class=\"relative flex justify-between items-start gap-1 md:gap-3\">\n                    <p class=\"font-black " + b.nameText + " text-[9px] md:text-sm leading-tight line-clamp-2 uppercase tracking-tight\" title=\"" + p.name + "\">\n                        " + p.name + "\n                    </p>\n                    <button onclick=\"quickAdd('" + safeName + "', {shiftKey: true}); event.stopPropagation();\"\n                            class=\"flex-shrink-0 w-5 h-5 md:w-9 md:h-9 flex items-center justify-center bg-gradient-to-b " + b.btn + " text-white rounded-full\n                                   shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),inset_0_-2px_3px_rgba(0,0,0,0.2),0_3px_6px_rgba(0,0,0,0.25)]\n                                   hover:brightness-110 hover:scale-105 active:scale-90 transition-all text-[10px] md:text-lg font-black\"\n                            title=\"Th\u00EAm d\u00F2ng m\u1EDBi\">\n                        +\n                    </button>\n                </div>\n\n                <div class=\"relative flex items-center gap-1 md:gap-1.5 mt-0.5 md:mt-1\">\n                    <span class=\"text-[7px] md:text-[9px] uppercase font-black " + (isOutOfStock ? 'text-red-600 dark:text-red-400' : (isLowStock ? 'text-orange-500 dark:text-orange-400' : 'text-slate-400 dark:text-slate-400')) + "\">T\u1ED3n</span>\n                    <span id=\"stock-display-" + idName + "\" class=\"font-black rounded-full border md:border-2 shadow-sm " + (isOutOfStock ? 'text-[7px] md:text-[9px] px-1 md:px-1.5 py-0 md:py-0.5 bg-red-50 border-red-300 text-red-600 dark:bg-red-500/10 dark:border-red-500/40 dark:text-red-400' : (isLowStock ? 'text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-orange-100 border-orange-300 text-orange-700 dark:bg-orange-500/15 dark:border-orange-500/40 dark:text-orange-400' : "text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 " + b.badge + " border-white/70 dark:border-slate-900/40")) + "\">\n                        " + (isOutOfStock ? 'HẾT' : (p.unit ? "" + realStock + " " + p.unit + "" : realStock)) + "\n                    </span>\n                </div>\n            </div>\n        ";
+        return "\n            <div id=\"product-card-" + idName + "\" data-badge-class=\"" + b.badge + "\"\n                 onclick=\"" + (isOutOfStock ? "showAlert('H\u1EBFt h\u00E0ng!')" : "quickAdd('" + safeName + "')") + "\"\n                 class=\"group relative bg-gradient-to-b " + b.top + " p-1.5 md:p-4 rounded-lg md:rounded-2xl border border-white/60 dark:border-slate-700 ring-1 " + b.ring + "\n                        " + b.shadow + " flex flex-col justify-between cursor-pointer h-16 md:h-28 overflow-hidden\n                        transition-all duration-200 ease-out\n                        hover:-translate-y-1.5 hover:shadow-[0_10px_0_0_rgba(0,0,0,0.15),0_16px_22px_-6px_rgba(0,0,0,0.3)]\n                        active:translate-y-[3px] active:shadow-none\n                        " + (isOutOfStock ? 'grayscale opacity-70' : '') + "\">\n\n                <!-- V\u1EC7t s\u00E1ng b\u00F3ng \u1EDF g\u00F3c tr\u00EAn \u0111\u1EC3 t\u1EA1o c\u1EA3m gi\u00E1c n\u1ED5i kh\u1ED1i/glossy -->\n                <div class=\"pointer-events-none absolute -top-6 -left-6 w-20 h-20 bg-white/50 dark:bg-white/10 rounded-full blur-xl\"></div>\n\n                <div class=\"relative flex justify-between items-start gap-1 md:gap-3\">\n                    <p class=\"font-black " + b.nameText + " text-[9px] md:text-sm leading-tight line-clamp-2 uppercase tracking-tight\" title=\"" + p.name + "\">\n                        " + p.name + "\n                    </p>\n                    <button onclick=\"quickAdd('" + safeName + "', {shiftKey: true}); event.stopPropagation();\"\n                            class=\"flex-shrink-0 w-5 h-5 md:w-9 md:h-9 flex items-center justify-center bg-gradient-to-b " + b.btn + " text-white rounded-full\n                                   shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),inset_0_-2px_3px_rgba(0,0,0,0.2),0_3px_6px_rgba(0,0,0,0.25)]\n                                   hover:brightness-110 hover:scale-105 active:scale-90 transition-all text-[10px] md:text-lg font-black\"\n                            title=\"Th\u00EAm d\u00F2ng m\u1EDBi\">\n                        +\n                    </button>\n                </div>\n\n                <div class=\"relative flex items-center gap-1 md:gap-1.5 mt-0.5 md:mt-1\">\n                    <span class=\"text-[7px] md:text-[9px] uppercase font-black " + (isOutOfStock ? 'text-red-600 dark:text-red-400' : (isLowStock ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400')) + "\">T\u1ED3n</span>\n                    <span id=\"stock-display-" + idName + "\" class=\"font-black rounded-full border md:border-2 shadow-sm " + (isOutOfStock ? 'text-[7px] md:text-[9px] px-1 md:px-1.5 py-0 md:py-0.5 bg-red-100 border-red-400 text-red-700 dark:bg-red-500/15 dark:border-red-500/50 dark:text-red-300' : (isLowStock ? 'text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-amber-100 border-amber-400 text-amber-800 dark:bg-amber-500/15 dark:border-amber-500/50 dark:text-amber-300' : "text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-emerald-100 border-emerald-400 text-emerald-800 dark:bg-emerald-500/15 dark:border-emerald-500/50 dark:text-emerald-300 border-white/70 dark:border-slate-900/40")) + "\">\n                        " + (isOutOfStock ? 'HẾT' : (p.unit ? "" + realStock + " " + p.unit + "" : realStock)) + "\n                    </span>\n                </div>\n            </div>\n        ";
     });
     grid.innerHTML = cardsHtml.join('');
     // Dựng lại lưới xong thì áp dụng lại đúng từ khóa đang gõ trong ô tìm kiếm (nếu có) -
@@ -13821,10 +13918,10 @@ function updateAllStockBadges() {
         badgeEl.innerText = isOutOfStock ? 'HẾT' : (p.unit ? '' + realStock + ' ' + p.unit : realStock);
         badgeEl.className = 'font-black rounded-full border md:border-2 shadow-sm ' +
             (isOutOfStock
-                ? 'text-[7px] md:text-[9px] px-1 md:px-1.5 py-0 md:py-0.5 bg-red-50 border-red-300 text-red-600 dark:bg-red-500/10 dark:border-red-500/40 dark:text-red-400'
+                ? 'text-[7px] md:text-[9px] px-1 md:px-1.5 py-0 md:py-0.5 bg-red-100 border-red-400 text-red-700 dark:bg-red-500/15 dark:border-red-500/50 dark:text-red-300'
                 : (isLowStock
-                    ? 'text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-orange-100 border-orange-300 text-orange-700 dark:bg-orange-500/15 dark:border-orange-500/40 dark:text-orange-400'
-                    : 'text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 ' + badgeThemeClass + ' border-white/70 dark:border-slate-900/40'));
+                    ? 'text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-amber-100 border-amber-400 text-amber-800 dark:bg-amber-500/15 dark:border-amber-500/50 dark:text-amber-300'
+                    : 'text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-emerald-100 border-emerald-400 text-emerald-800 dark:bg-emerald-500/15 dark:border-emerald-500/50 dark:text-emerald-300 border-white/70 dark:border-slate-900/40'));
         cardEl.classList.toggle('grayscale', isOutOfStock);
         cardEl.classList.toggle('opacity-70', isOutOfStock);
         cardEl.onclick = isOutOfStock ? function () { showAlert('Hết hàng!'); } : function () { quickAdd(p.name); };
@@ -14313,7 +14410,7 @@ async function waitPendingSaleReservations() {
 // Trước đây hàm phải chờ Firestore 2-3 lần trước khi render nên bấm SP bị chậm rõ rệt.
 async function quickAdd(productName, event, fromCamera) {
     const forceNew = !!(event && event.shiftKey);
-    const p = (window.allProductCache || []).find(i => i.name === productName);
+    const p = getProductByNameFast(productName);
     if (!p) return false;
 
     const stockRemaining = Math.max(0, Number(getCachedStockQty(productName) || 0));
@@ -15729,14 +15826,12 @@ async function updateExistingSale() {
             renderHoaDonTemplate(printOpts);
         }
         exitEditSaleMode();
-        if (typeof recomputeCurrentStock === 'function')
-            recomputeCurrentStock();
-        if (typeof loadSalesList === 'function')
-            loadSalesList();
-        if (typeof loadCustomers === 'function')
-            loadCustomers();
-        if (typeof refreshDashboardData === 'function')
-            await refreshDashboardData();
+        if (typeof invalidateSalesSearchCache === 'function') invalidateSalesSearchCache();
+        if (typeof window.requestPostWriteSync === 'function') {
+            await window.requestPostWriteSync(['sales', 'stock', 'customers']);
+        }
+        // requestPostWriteSync đã đồng bộ đúng trang đang mở; không gọi lại
+        // loadSalesList/loadCustomers/refreshDashboardData lần 2 vì sẽ tạo thêm READ.
     }
     catch (error) {
         console.error("Lỗi cập nhật phiếu:", error);
@@ -15993,6 +16088,19 @@ async function saveAndPrint() {
                     });
                 });
 
+                // Đồng bộ tồn trong RAM ngay sau khi phiếu Nhập đổi đã commit.
+                // Không chờ onSnapshot để tránh UI chậm 1 nhịp; đặc biệt quan trọng với
+                // đổi date còn hạn vì tồn thực tế sau cùng phải giữ nguyên.
+                if (hasOk) {
+                    if (!window.baseInventoryMap) window.baseInventoryMap = {};
+                    if (!window.__normalizedBaseInventoryMap) window.__normalizedBaseInventoryMap = {};
+                    Object.keys(qtyByName).forEach(name => {
+                        const q = Number(qtyByName[name]) || 0;
+                        window.baseInventoryMap[name] = Number(window.baseInventoryMap[name] || 0) + q;
+                        const key = normalizeProductStockKey(name);
+                        window.__normalizedBaseInventoryMap[key] = Number(window.__normalizedBaseInventoryMap[key] || 0) + q;
+                    });
+                }
                 const totalQty = autoReceiptItems.reduce((a, it) => a + it.qty, 0);
                 autoReceiptMsgs.push(totalQty + ' SP đổi date (phiếu ' + newReceiptNum + ')');
             }
@@ -16110,25 +16218,11 @@ async function saveAndPrint() {
         renderSellCart();
         if (typeof renderHeldOrdersBar === 'function')
             renderHeldOrdersBar();
-        // --- THAY ĐỔI ĐOẠN NÀY ---
-        setTimeout(async () => {
-            console.log("Đang làm mới dữ liệu...");
-            // Ép load lại dashboard với filter hiện tại
-            const from = document.getElementById('fin-from')?.value;
-            const to = document.getElementById('fin-to')?.value;
-            if (from && to) {
-                await loadDashboard({ from: from, to: to });
-            }
-            else {
-                await loadDashboard('default');
-            }
-            if (typeof updateSellReceiptNum === 'function')
-                updateSellReceiptNum();
-            if (typeof loadSalesList === 'function')
-                loadSalesList();
-            if (typeof loadCustomers === 'function')
-                loadCustomers();
-        }, 1000);
+        // Đồng bộ NGAY sau khi toàn bộ thao tác lưu đã commit thành công.
+        // Không dùng setTimeout 1 giây nữa: tránh cảm giác dữ liệu cập nhật chậm và
+        // đồng thời tránh 3 lượt đọc độc lập (dashboard + lịch sử + khách hàng) sau mỗi lần bán.
+        invalidateSalesSearchCache();
+        await window.requestPostWriteSync(['sales', 'stock']);
     }
     catch (error) {
         console.error("Lỗi: ", error);
@@ -16279,8 +16373,45 @@ async function undoReturn(returnDocId, saleDocId) {
         Swal.fire('Lỗi', 'Có lỗi khi hoàn tác: ' + e.message, 'error');
     }
 }
+// Tìm kiếm lịch sử HĐ: không gọi Firestore sau từng phím. Khi đang gõ,
+// toàn bộ lịch sử chỉ tải 1 lần rồi các ký tự tiếp theo lọc ngay trên RAM.
+window.__salesSearchCache = window.__salesSearchCache || { docs: null, loadedAt: 0, promise: null };
+window.__salesSearchDebounceTimer = window.__salesSearchDebounceTimer || null;
+function debouncedLoadSalesList() {
+    clearTimeout(window.__salesSearchDebounceTimer);
+    window.__salesSearchDebounceTimer = setTimeout(() => loadSalesList(), 280);
+}
+function invalidateSalesSearchCache() {
+    window.__salesSearchCache = { docs: null, loadedAt: 0, promise: null };
+}
+window.__salesListRequestSeq = window.__salesListRequestSeq || 0;
+window.__salesHistoryRows = window.__salesHistoryRows || [];
+window.__salesHistoryPage = 1;
+const SALES_HISTORY_PAGE_SIZE = 100;
+function renderSalesHistoryPage() {
+    const body = document.getElementById('sales-list-body');
+    if (!body) return;
+    const rows = window.__salesHistoryRows || [];
+    const page = Math.max(1, Number(window.__salesHistoryPage) || 1);
+    const end = page * SALES_HISTORY_PAGE_SIZE;
+    body.innerHTML = rows.slice(0, end).join('');
+    const table = document.getElementById('invoiceTable');
+    if (!table) return;
+    const oldPager = document.getElementById('sales-history-pager');
+    if (oldPager) oldPager.remove();
+    if (rows.length > end) {
+        const pager = document.createElement('div');
+        pager.id = 'sales-history-pager';
+        pager.className = 'flex justify-center py-3';
+        pager.innerHTML = '<button type="button" onclick="window.__salesHistoryPage++; renderSalesHistoryPage();" class="px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 font-bold text-xs shadow-sm hover:bg-slate-50">Xem thêm ' + Math.min(SALES_HISTORY_PAGE_SIZE, rows.length - end) + ' phiếu</button>';
+        table.parentElement.parentElement.appendChild(pager);
+    }
+}
+
 // hiển thị và tìm kiếm phiếu xuất trang lịch sử hđ
 async function loadSalesList() {
+    const requestSeq = ++window.__salesListRequestSeq;
+
     console.log("Đang bắt đầu hàm loadSalesList...");
     const body = document.getElementById('sales-list-body');
     if (!body)
@@ -16290,16 +16421,36 @@ async function loadSalesList() {
     const dateFrom = document.getElementById('dateFrom')?.value; // YYYY-MM-DD
     const dateTo = document.getElementById('dateTo')?.value; // YYYY-MM-DD
     // THÊM: Lấy giá trị từ ô tìm kiếm (giả sử ID là searchInput)
-    const searchQuery = document.getElementById('searchInput')?.value.toLowerCase() || '';
+    const searchQuery = normalizeSearchText(document.getElementById('searchInput')?.value || '');
+    const compactQuery = compactSearchText(document.getElementById('searchInput')?.value || '');
     const filterPaymentMethod = document.getElementById('filterPaymentMethod')?.value || '';
     const filterReturnStatus = document.getElementById('filterReturnStatus')?.value || '';
     try {
+        window.__salesHistoryPage = 1;
         let snapshot;
         if (searchQuery !== '') {
-            // Tìm theo số phiếu/tên khách cần quét toàn bộ lịch sử vì chưa có dịch vụ tìm
-            // kiếm chuyên dụng (Firestore không hỗ trợ tìm "chứa đoạn văn bản" trực tiếp) -
-            // việc này chỉ xảy ra khi người dùng chủ động gõ vào ô tìm kiếm, không tự động.
-            snapshot = await db.collection('sales').orderBy('date', 'desc').get();
+            // Firestore không hỗ trợ contains trực tiếp. Cache kết quả tải toàn bộ lịch sử
+            // trong 30 giây để gõ thêm ký tự không phải tải lại hàng nghìn hóa đơn.
+            const cache = window.__salesSearchCache || (window.__salesSearchCache = { docs: null, loadedAt: 0, promise: null });
+            const CACHE_TTL_MS = 30000;
+            let docs;
+            if (Array.isArray(cache.docs) && (Date.now() - cache.loadedAt) < CACHE_TTL_MS) {
+                docs = cache.docs;
+            } else {
+                if (!cache.promise) {
+                    cache.promise = db.collection('sales').orderBy('date', 'desc').get().then(snap => {
+                        cache.docs = snap.docs;
+                        cache.loadedAt = Date.now();
+                        cache.promise = null;
+                        return snap.docs;
+                    }).catch(err => {
+                        cache.promise = null;
+                        throw err;
+                    });
+                }
+                docs = await cache.promise;
+            }
+            snapshot = { docs, forEach: fn => docs.forEach(fn) };
         }
         else {
             // TỐI ƯU QUAN TRỌNG: trước đây luôn đọc TOÀN BỘ lịch sử hóa đơn rồi mới lọc
@@ -16328,7 +16479,7 @@ async function loadSalesList() {
                 .get();
         }
         window.allSales = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        body.innerHTML = '';
+        const rowsHtml = [];
         snapshot.forEach(doc => {
             const data = doc.data();
             const dateObj = data.date?.toDate ? data.date.toDate() : null;
@@ -16336,11 +16487,15 @@ async function loadSalesList() {
                 return;
             // Đã lọc đúng phạm vi ngay ở truy vấn Firestore (hoặc đang tìm kiếm toàn bộ),
             // ở đây chỉ cần lọc thêm theo từ khóa tìm kiếm (nếu có).
-            const receiptId = (data.id || '').toLowerCase();
-            const customerName = (data.customer || '').toLowerCase();
-            const customerPhone = (data.phone || '').toLowerCase();
-            const productText = (Array.isArray(data.items) ? data.items.map(i => i?.name || '').join(' ') : '').toLowerCase();
-            const searchMatch = searchQuery === '' || receiptId.includes(searchQuery) || customerName.includes(searchQuery) || customerPhone.includes(searchQuery) || productText.includes(searchQuery);
+            const receiptId = normalizeSearchText(data.id || '');
+            const customerName = normalizeSearchText(data.customer || '');
+            const customerPhone = normalizeSearchText(data.phone || '');
+            const productText = normalizeSearchText(Array.isArray(data.items) ? data.items.map(i => i?.name || '').join(' ') : '');
+            const compactReceiptId = compactSearchText(data.id || '');
+            const compactCustomerName = compactSearchText(data.customer || '');
+            const compactCustomerPhone = compactSearchText(data.phone || '');
+            const compactProductText = compactSearchText(Array.isArray(data.items) ? data.items.map(i => i?.name || '').join(' ') : '');
+            const searchMatch = searchQuery === '' || receiptId.includes(searchQuery) || customerName.includes(searchQuery) || customerPhone.includes(searchQuery) || productText.includes(searchQuery) || compactReceiptId.includes(compactQuery) || compactCustomerName.includes(compactQuery) || compactCustomerPhone.includes(compactQuery) || compactProductText.includes(compactQuery);
             const paymentMatch = !filterPaymentMethod || (data.paymentMethod || '') === filterPaymentMethod;
             const returnMatch = !filterReturnStatus || (filterReturnStatus === 'returned' ? data.hasReturns === true : data.hasReturns !== true);
             const isVisible = searchMatch && paymentMatch && returnMatch;
@@ -16349,11 +16504,15 @@ async function loadSalesList() {
                 const dateStr = dateObj.toLocaleDateString('vi-VN', { timeZone: APP_TIME_ZONE });
                 const totalAmount = data.grandTotal || data.total || 0;
                 const itemCount = (data.items && Array.isArray(data.items)) ? data.items.length : 0;
-                body.innerHTML += "\n\t\t\t\t\t<tr class=\"hover:bg-transparent transition-colors\">\n\t\t\t\t\t\t<td colspan=\"5\" class=\"p-2\">\n\t\t\t\t\t\t\t<div onclick=\"viewInvoiceDetails('" + doc.id + "')\" class=\"flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-3 md:p-3 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] cursor-pointer transition-all hover:-translate-y-0.5\" style=\"border-left-color:#a855f7 !important; border-right-color:#a855f7 !important;\">\n\t\t\t\t\t\t\t\t<div class=\"flex items-center gap-2 md:contents\">\n\t\t\t\t\t\t\t\t\t<span class=\"text-[12px] md:text-[11px] font-bold text-slate-700 dark:text-slate-300 md:w-[12%] truncate md:px-3\">" + (data.id || 'N/A') + "</span>\n\t\t\t\t\t\t\t\t\t<span class=\"text-[12px] md:text-[11px] font-bold text-slate-900 dark:text-slate-100 truncate flex-1 md:w-[33%] md:px-3\">" + (data.customer || 'Khách lẻ') + "" + (data.hasReturns ? ' <span class="inline-block align-middle ml-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-400 whitespace-nowrap">↩️ Đã hoàn trả</span>' : '') + "</span>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t<div class=\"flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700\">\n\t\t\t\t\t\t\t\t\t<div class=\"flex items-center gap-3 md:contents\">\n\t\t\t\t\t\t\t\t\t\t<span class=\"text-[11px] font-bold text-slate-700 dark:text-slate-400 md:w-[15%] md:text-center md:px-3\">" + dateStr + "</span>\n\t\t\t\t\t\t\t\t\t\t<span class=\"text-[11px] text-slate-500 dark:text-slate-400 md:w-[15%] md:text-center md:px-3\">" + itemCount + " SP</span>\n\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t\t<span class=\"text-[12px] md:text-[11px] font-black text-rose-600 dark:text-rose-400 md:w-[25%] md:text-right md:pl-2 md:pr-6\">" + Number(totalAmount).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + " VN\u0110</span>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t</tr>\n\t\t\t\t";
+                rowsHtml.push("\n\t\t\t\t\t<tr class=\"hover:bg-transparent transition-colors\">\n\t\t\t\t\t\t<td colspan=\"5\" class=\"p-2\">\n\t\t\t\t\t\t\t<div onclick=\"viewInvoiceDetails('" + doc.id + "')\" class=\"flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-3 md:p-3 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] cursor-pointer transition-all hover:-translate-y-0.5\" style=\"border-left-color:#a855f7 !important; border-right-color:#a855f7 !important;\">\n\t\t\t\t\t\t\t\t<div class=\"flex items-center gap-2 md:contents\">\n\t\t\t\t\t\t\t\t\t<span class=\"text-[12px] md:text-[11px] font-bold text-slate-700 dark:text-slate-300 md:w-[12%] truncate md:px-3\">" + (data.id || 'N/A') + "</span>\n\t\t\t\t\t\t\t\t\t<span class=\"text-[12px] md:text-[11px] font-bold text-slate-900 dark:text-slate-100 truncate flex-1 md:w-[33%] md:px-3\">" + (data.customer || 'Khách lẻ') + "" + (data.hasReturns ? ' <span class="inline-block align-middle ml-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-400 whitespace-nowrap">↩️ Đã hoàn trả</span>' : '') + "</span>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t<div class=\"flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700\">\n\t\t\t\t\t\t\t\t\t<div class=\"flex items-center gap-3 md:contents\">\n\t\t\t\t\t\t\t\t\t\t<span class=\"text-[11px] font-bold text-slate-700 dark:text-slate-400 md:w-[15%] md:text-center md:px-3\">" + dateStr + "</span>\n\t\t\t\t\t\t\t\t\t\t<span class=\"text-[11px] text-slate-500 dark:text-slate-400 md:w-[15%] md:text-center md:px-3\">" + itemCount + " SP</span>\n\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t\t<span class=\"text-[12px] md:text-[11px] font-black text-rose-600 dark:text-rose-400 md:w-[25%] md:text-right md:pl-2 md:pr-6\">" + Number(totalAmount).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + " VN\u0110</span>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t</tr>\n\t\t\t\t");
             }
         });
+        if (requestSeq !== window.__salesListRequestSeq) return;
+        window.__salesHistoryRows = rowsHtml;
+        renderSalesHistoryPage();
     }
     catch (err) {
+        if (requestSeq !== window.__salesListRequestSeq) return;
         console.error("Lỗi truy vấn Firestore:", err);
         showAlert("Có lỗi khi tải danh sách hóa đơn!");
     }
@@ -16377,7 +16536,7 @@ function handleMonthChange() {
     dateFrom.value = firstDayStr;
     dateTo.value = lastDayStr;
     // Tải lại dữ liệu
-    loadSalesList();
+    debouncedLoadSalesList();
 }
 // In lại hóa đơn bán hàng đã lưu
 async function reprintSale(docId) {
@@ -17567,36 +17726,163 @@ window.onload = async function () {
         sellDateTo.addEventListener('change', () => { if (typeof loadSalesList === 'function')
             loadSalesList(); });
 };
-// Lắng nghe sự kiện dataChanged để tự load lại dữ liệu
-window.addEventListener('dataChanged', async () => {
-    console.log("Dữ liệu thay đổi, đang làm mới cache và cập nhật giao diện...");
+// ================= ĐỒNG BỘ SAU KHI GHI - V12 =================
+// Mọi thao tác lưu/xóa quan trọng gọi cơ chế này sau khi Firestore đã commit thành công.
+// Mục tiêu: dữ liệu trên màn hình phải mới ngay, nhưng KHÔNG tải lại toàn bộ hệ thống.
+window.__postWriteSyncPromise = window.__postWriteSyncPromise || null;
+window.__postWritePendingDomains = window.__postWritePendingDomains || new Set();
+// ĐỒNG BỘ NHIỀU MÁY: mỗi máy có 1 clientId riêng. Sau khi ghi dữ liệu thành công,
+// máy đó phát 1 tín hiệu rất nhẹ vào 1 document app_meta/realtime_sync. Các máy khác
+// chỉ lắng nghe đúng 1 document này, KHÔNG phải onSnapshot toàn bộ sales/receipts.
+// Vì vậy: máy khác vẫn biết có dữ liệu mới gần như ngay lập tức nhưng quota READ vẫn thấp.
+window.__realtimeClientId = window.__realtimeClientId || (() => {
     try {
-        // 1. LÀM MỚI DANH MỤC SẢN PHẨM (nhẹ, không phụ thuộc độ dài lịch sử)
-        await refreshCache();
-        // 2. Cập nhật lại tồn kho (vì dữ liệu đã thay đổi)
-        if (typeof calculateAllStock === 'function') {
-            await calculateAllStock();
+        const key = 'app_realtime_client_id';
+        let id = localStorage.getItem(key);
+        if (!id) {
+            id = 'client_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
+            localStorage.setItem(key, id);
         }
-        // 3. Nếu ở trang Kho thì nó sẽ tự chạy loadInventory
-        if (typeof loadInventory === 'function') {
-            loadInventory();
-        }
-        // 4. Nếu ở trang Bán hàng thì nó sẽ tự chạy renderProductGrid
-        if (typeof renderProductGrid === 'function') {
-            renderProductGrid();
-        }
-        // 5. Nếu ở Trang Chủ thì làm mới tab "NXT KHO" - TRƯỚC ĐÂY BỊ THIẾU BƯỚC NÀY nên
-        // sau khi nhập/xuất kho, cột Nhập/Xuất và Tồn cuối ở Trang Chủ không tự cập nhật,
-        // phải bấm đổi ngày hoặc tải lại trang mới thấy đúng số.
-        if (typeof refreshInventory === 'function') {
-            refreshInventory();
-        }
-        // 6. Làm mới luôn Tổng doanh thu / Lợi nhuận ở Trang Chủ cho đồng bộ
-        if (typeof refreshFinance === 'function') {
-            refreshFinance();
-        }
+        return id;
+    } catch (_) {
+        return 'client_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
     }
-    catch (error) {
+})();
+window.__realtimeSyncUnsub = window.__realtimeSyncUnsub || null;
+window.__realtimeSyncFirstSnapshot = true;
+window.__realtimeSyncTimer = null;
+window.__realtimeRemoteDomains = new Set();
+window.__notifyRealtimeWrite = async function(domains) {
+    const list = (Array.isArray(domains) ? domains : [domains]).filter(Boolean).map(String);
+    if (!list.length) return;
+    try {
+        await db.collection('app_meta').doc('realtime_sync').set({
+            clientId: window.__realtimeClientId,
+            domains: Array.from(new Set(list)),
+            changedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+    } catch (err) {
+        // Tín hiệu realtime thất bại không được làm hỏng giao dịch đã commit.
+        console.warn('Không phát được tín hiệu đồng bộ nhiều máy:', err);
+    }
+};
+window.__startRealtimeSyncListener = function() {
+    if (window.__realtimeSyncUnsub || typeof db === 'undefined') return;
+    try {
+        window.__realtimeSyncUnsub = db.collection('app_meta').doc('realtime_sync').onSnapshot((snap) => {
+            if (!snap.exists) return;
+            const data = snap.data() || {};
+            if (window.__realtimeSyncFirstSnapshot) {
+                window.__realtimeSyncFirstSnapshot = false;
+                return;
+            }
+            if (data.clientId === window.__realtimeClientId) return;
+            const domains = Array.isArray(data.domains) && data.domains.length ? data.domains : ['receipts', 'sales', 'stock'];
+            domains.forEach(d => window.__realtimeRemoteDomains.add(String(d)));
+            clearTimeout(window.__realtimeSyncTimer);
+            window.__realtimeSyncTimer = setTimeout(() => {
+                const remoteDomains = Array.from(window.__realtimeRemoteDomains);
+                window.__realtimeRemoteDomains.clear();
+                if (typeof window.requestPostWriteSync === 'function') {
+                    window.requestPostWriteSync(remoteDomains, { remote: true });
+                }
+            }, 120);
+        }, (err) => {
+            console.warn('Realtime đồng bộ nhiều máy tạm thời lỗi:', err);
+            window.__realtimeSyncUnsub = null;
+        });
+    } catch (err) {
+        console.warn('Không khởi tạo được realtime sync:', err);
+    }
+};
+window.__startRealtimeSyncListener();
+window.requestPostWriteSync = function(domains = [], options = {}) {
+    const list = Array.isArray(domains) ? domains : [domains];
+    const isRemoteSync = !!options.remote;
+    list.filter(Boolean).forEach(d => window.__postWritePendingDomains.add(String(d)));
+    // Chỉ máy vừa ghi mới phát tín hiệu. Máy nhận tín hiệu tuyệt đối không phát lại,
+    // tránh vòng lặp vô hạn giữa nhiều máy.
+    if (!isRemoteSync) window.__notifyRealtimeWrite(list);
+    if (window.__postWriteSyncPromise) return window.__postWriteSyncPromise;
+    window.__postWriteSyncPromise = (async () => {
+        try {
+            // Nếu nhiều thao tác vừa hoàn tất sát nhau, gộp thành 1 lần refresh.
+            while (window.__postWritePendingDomains.size) {
+                const domainsNow = new Set(window.__postWritePendingDomains);
+                window.__postWritePendingDomains.clear();
+                const invalidate = new Set();
+                if (domainsNow.has('products')) invalidate.add('products:all');
+                if (domainsNow.has('sales')) invalidate.add('sales:');
+                if (domainsNow.has('receipts')) {
+                    invalidate.add('inventory:receipts-expiry');
+                    invalidate.add('receipts:month:');
+                }
+                if (domainsNow.has('returns')) invalidate.add('inventory:receipts-expiry');
+                if (domainsNow.has('customers')) invalidate.add('customers:list');
+                if (domainsNow.has('customers') || domainsNow.has('suppliers') || domainsNow.has('sales') || domainsNow.has('returns') || domainsNow.has('payments') || domainsNow.has('debt_history')) {
+                    invalidate.add('dashboard:suppliers');
+                    invalidate.add('dashboard:customers');
+                    invalidate.add('dashboard:payments');
+                    invalidate.add('dashboard:debt_history');
+                    invalidate.add('customers:debt_history');
+                }
+                if (invalidate.size) window.invalidateFirestoreReadCaches(Array.from(invalidate));
+                // Các cache tìm kiếm không nằm trong firestoreCachedGet nên phải xóa riêng sau khi ghi.
+                if (domainsNow.has('sales')) { window.__salesSearchCache = null; }
+                if (domainsNow.has('receipts')) { window.__allReceiptsFullLoaded = false; window.__allReceiptsFull = null; }
+
+                if (domainsNow.has('products')) {
+                    await refreshCache({ force: true });
+                }
+                if (domainsNow.has('stock') || domainsNow.has('receipts') || domainsNow.has('returns') || domainsNow.has('products')) {
+                    if (typeof calculateAllStock === 'function') await calculateAllStock();
+                }
+
+                const page = window.__activePage || '';
+                // Chỉ cập nhật phần đang nhìn thấy; lần mở trang sau sẽ đọc cache mới.
+                if (page === 'page-sell') {
+                    if (typeof recomputeCurrentStock === 'function') recomputeCurrentStock();
+                    if (typeof renderProductGrid === 'function') renderProductGrid();
+                    if (typeof updateSellReceiptNum === 'function' && !window.__editingSaleId) updateSellReceiptNum();
+                } else if (page === 'page-import') {
+                    if (typeof loadReceipts === 'function') await loadReceipts();
+                    if (typeof updateReceiptNum === 'function') updateReceiptNum();
+                } else if (page === 'page-inventory') {
+                    if (typeof loadInventory === 'function') await loadInventory({ silent: true });
+                } else if (page === 'page-history') {
+                    if (typeof loadSalesList === 'function') await loadSalesList();
+                } else if (page === 'page-customers') {
+                    if (typeof loadCustomers === 'function') await loadCustomers();
+                } else if (page === 'page-home') {
+                    if (typeof refreshInventory === 'function') await refreshInventory();
+                    if (typeof refreshDashboardData === 'function') await refreshDashboardData();
+                } else if (page === 'page-materials' || page === 'page-nguyenlieu') {
+                    if (typeof loadAllData === 'function') await loadAllData();
+                }
+            }
+        } finally {
+            window.__postWriteSyncPromise = null;
+        }
+    })();
+    return window.__postWriteSyncPromise;
+};
+
+// Lắng nghe sự kiện dataChanged để tự đồng bộ dữ liệu.
+// Các luồng cũ vẫn có thể phát event; V12 gom các event liên tiếp và chỉ refresh đúng trang đang mở.
+// Ngoài ra, listener app_meta/realtime_sync giúp các máy khác phát hiện thao tác lưu từ xa.
+window.addEventListener('dataChanged', async (event) => {
+    try {
+        // Không còn coi MỌI dataChanged là thay đổi toàn hệ thống. Điều này trước đây
+        // khiến một thao tác nhỏ (ví dụ sửa ngày lô nhập) cũng ép app đọc lại products,
+        // sales, customers, dashboard... gây tốn READ không cần thiết.
+        // Nếu luồng cũ không truyền detail, mặc định đây là thay đổi phiếu nhập + tồn kho
+        // vì dispatch legacy hiện có nằm trong luồng chỉnh phiếu nhập.
+        const detailDomains = event?.detail?.domains;
+        const domains = Array.isArray(detailDomains) && detailDomains.length
+            ? detailDomains
+            : ['receipts', 'stock'];
+        await window.requestPostWriteSync(domains);
+    } catch (error) {
         console.error("Lỗi khi cập nhật dữ liệu sau khi thay đổi:", error);
     }
 });
@@ -17612,15 +17898,36 @@ window.addEventListener('dataChanged', async () => {
 // đọc luôn cố định dù cửa hàng dùng bao lâu. Đồng thời sắp xếp sẵn theo thứ tự chuẩn
 // (khối lượng giảm dần, Thuỷ tinh > Nhựa) để Kho Hàng và NXT Trang Chủ hiển thị đúng
 // thứ tự mong muốn.
-async function refreshCache() {
+function getProductByNameFast(name) {
+    const clean = String(name || '').trim();
+    const map = window.__productsByName || window.__productsByNameFast;
+    if (map && typeof map.get === 'function') {
+        const hit = map.get(clean);
+        if (hit) return hit;
+    }
+    const source = Array.isArray(window.allProductCache) ? window.allProductCache : (window.allProducts || []);
+    return source.find(p => p && String(p.name || '').trim() === clean) || null;
+}
+async function refreshCache(options = {}) {
     try {
-        const snapshot = await db.collection('products').get();
+        const force = options === true || options.force === true;
+        if (force) window.invalidateFirestoreReadCaches(['products:all']);
+        const snapshot = await firestoreCachedGet('products:all', () => db.collection('products').get({ source: 'default' }), 300000);
         const products = [];
-        snapshot.forEach(doc => products.push(doc.data()));
+        const productsByNameUnit = new Map();
+        snapshot.forEach(doc => {
+            const data = doc.data() || {};
+            const product = { id: doc.id, ...data };
+            products.push(product);
+            const key = String(product.name || '').trim() + '|' + String(product.unit || '').trim();
+            if (product.name && !productsByNameUnit.has(key)) productsByNameUnit.set(key, product);
+        });
         products.sort((a, b) => compareProductDisplayOrder(a.name, b.name));
         window.allProducts = products;
         window.allProductCache = products;
         window.productList = products;
+        window.__productsByNameFast = new Map(products.filter(p => p && p.name).map(p => [String(p.name).trim(), p]));
+        window.__productsByNameUnitFast = productsByNameUnit;
     }
     catch (err) {
         // Hết quota đọc (hoặc mất mạng): GIỮ NGUYÊN cache hiện có (đã tải sẵn từ đầu
@@ -17654,8 +17961,8 @@ async function loadCustomers() {
         return;
     try {
         const [customersSnapshot, historySnapshot] = await Promise.all([
-            db.collection('customers').get(),
-            db.collection('debt_history').get()
+            firestoreCachedGet('customers:list', () => db.collection('customers').get({ source: 'default' }), 30000),
+            firestoreCachedGet('customers:debt_history', () => db.collection('debt_history').get({ source: 'default' }), 30000)
         ]);
         const paidMap = {};
         historySnapshot.forEach(h => {
@@ -17783,107 +18090,71 @@ document.addEventListener('click', function (e) {
 // nợ đầu kỳ
 async function setOpeningDebt(customerId, customerName) {
     const { value: amount } = await Swal.fire({
-        title: 'Nợ đầu kỳ: ' + customerName,
-        input: 'number',
-        inputLabel: 'Nhập số tiền nợ đầu kỳ:',
-        inputPlaceholder: 'Số tiền...',
-        showCancelButton: true,
-        confirmButtonText: 'Lưu',
-        cancelButtonText: 'Hủy'
+        title: 'Nợ đầu kỳ: ' + customerName, input: 'number', inputLabel: 'Nhập số tiền nợ đầu kỳ:',
+        inputPlaceholder: 'Số tiền...', showCancelButton: true, confirmButtonText: 'Lưu', cancelButtonText: 'Hủy'
     });
     if (amount) {
         const payAmount = parseFloat(amount);
+        if (!isFinite(payAmount) || payAmount <= 0) return;
         try {
-            // Lưu vào collection riêng để không lẫn với lịch sử trả nợ
-            await db.collection('opening_balances').add({
-                customerId: customerId,
-                customerName: customerName,
-                amount: payAmount,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            // Cộng trực tiếp vào nợ hiện tại của khách (nguyên tử, không đọc trước)
             const custRef = db.collection('customers').doc(customerId);
-            await custRef.update({ debt: firebase.firestore.FieldValue.increment(payAmount) });
+            const openingRef = db.collection('opening_balances').doc();
+            await db.runTransaction(async tx => {
+                const custSnap = await tx.get(custRef);
+                if (!custSnap.exists) throw new Error('Không tìm thấy khách hàng.');
+                tx.set(openingRef, { customerId, customerName, amount: payAmount, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+                tx.update(custRef, { debt: firebase.firestore.FieldValue.increment(payAmount) });
+            });
+            await window.requestPostWriteSync(['customers', 'debt_history']);
             Swal.fire('Thành công', 'Đã cập nhật nợ đầu kỳ!', 'success');
-            loadCustomers();
-        }
-        catch (error) {
-            Swal.fire('Lỗi', error.message, 'error');
-        }
+        } catch (error) { Swal.fire('Lỗi', error.message, 'error'); }
     }
 }
 // Thêm khách hàng/đại lý mới
-function addCustomer() {
-    const name = document.getElementById('cust-name').value;
-    const address = document.getElementById('cust-address').value;
-    const phone = document.getElementById('cust-phone').value;
-    if (!name)
-        return showAlert("Vui lòng nhập tên đại lý!");
-    db.collection('customers').add({
-        name: name,
-        address: address,
-        phone: phone,
-        debt: 0, // Khởi tạo công nợ = 0
-        createdAt: new Date()
-    }).then(() => {
+async function addCustomer() {
+    const name = document.getElementById('cust-name').value.trim();
+    const address = document.getElementById('cust-address').value.trim();
+    const phone = document.getElementById('cust-phone').value.trim();
+    if (!name) return showAlert("Vui lòng nhập tên đại lý!");
+    try {
+        await db.collection('customers').add({ name, address, phone, debt: 0, createdAt: new Date() });
         showAlert("Đã thêm đại lý!");
-        // Reset form
         document.getElementById('cust-name').value = '';
         document.getElementById('cust-address').value = '';
         document.getElementById('cust-phone').value = '';
-        loadCustomers();
-    });
+        await window.requestPostWriteSync(['customers']);
+    } catch (error) { showAlert("Lỗi khi thêm đại lý: " + error.message); }
 }
 // Ghi nhận khách hàng trả nợ (thanh toán công nợ)
 async function payDebt(id, currentDebt, customerName) {
     const { value: formValues } = await Swal.fire({
         title: 'Ghi nhận trả nợ: ' + customerName,
         html: '<label class="text-sm font-bold block text-left mb-1">Số tiền trả:</label>' +
-            '<input id="swal-amount" type="number" class="w-full p-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded mb-3" placeholder="Số tiền..."> ' +
+            '<input id="swal-amount" type="number" class="w-full p-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded mb-3" placeholder="Số tiền...">' +
             '<label class="text-sm font-bold block text-left mb-1">Ngày trả:</label>' +
-            '<input id="swal-date" type="date" class="w-full p-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded mb-3" value="' + getTodayVNISO() + '"> ' +
+            '<input id="swal-date" type="date" class="w-full p-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded mb-3" value="' + getTodayVNISO() + '">' +
             '<label class="text-sm font-bold block text-left mb-1">Ghi chú:</label>' +
             '<input id="swal-note" type="text" class="w-full p-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded" placeholder="Ghi chú (nếu có)...">',
-        focusConfirm: false,
-        confirmButtonText: 'Xác nhận',
-        showCancelButton: true,
-        cancelButtonText: 'Hủy',
-        preConfirm: () => {
-            return {
-                amount: document.getElementById('swal-amount').value,
-                date: document.getElementById('swal-date').value,
-                note: document.getElementById('swal-note').value
-            };
-        }
+        focusConfirm: false, confirmButtonText: 'Xác nhận', showCancelButton: true, cancelButtonText: 'Hủy',
+        preConfirm: () => ({ amount: document.getElementById('swal-amount').value, date: document.getElementById('swal-date').value, note: document.getElementById('swal-note').value })
     });
     if (formValues && formValues.amount) {
         const payAmount = parseFloat(formValues.amount);
+        if (!isFinite(payAmount) || payAmount <= 0) return;
         try {
-            // 1. Cập nhật nợ vào khách hàng - dùng increment (nguyên tử ở server) thay vì
-            // "currentDebt - payAmount": currentDebt ở đây là số lấy từ lúc RENDER giao diện,
-            // có thể đã cũ nếu có giao dịch khác xảy ra sau đó, gây mất dữ liệu (lost update).
-            await db.collection('customers').doc(id).update({
-                debt: firebase.firestore.FieldValue.increment(-payAmount)
+            const custRef = db.collection('customers').doc(id);
+            const paymentRef = db.collection('debt_history').doc();
+            await db.runTransaction(async tx => {
+                const custSnap = await tx.get(custRef);
+                if (!custSnap.exists) throw new Error('Không tìm thấy khách hàng.');
+                const current = Number(custSnap.data().debt) || 0;
+                if (payAmount > current + 0.000001) throw new Error('Số tiền trả vượt quá công nợ hiện tại.');
+                tx.update(custRef, { debt: firebase.firestore.FieldValue.increment(-payAmount) });
+                tx.set(paymentRef, { customerId: id, customerName, amount: payAmount, date: formValues.date, note: formValues.note, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
             });
-            // 2. Lưu vào lịch sử (nếu bạn có collection debt_history)
-            await db.collection('debt_history').add({
-                customerId: id,
-                customerName: customerName,
-                amount: payAmount,
-                date: formValues.date,
-                note: formValues.note,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
+            await window.requestPostWriteSync(['customers', 'debt_history', 'payments']);
             Swal.fire('Thành công!', 'Đã cập nhật nợ cho khách hàng.', 'success');
-            // Các lệnh cập nhật UI
-            loadCustomers(); // Load lại danh sách khách hàng
-            if (typeof loadDashboard === 'function') {
-                refreshDashboardData(); // Cập nhật lại số liệu Dashboard ở trang chủ (đúng kỳ đang chọn + tự vẽ lại popup nếu đang mở)
-            }
-        }
-        catch (error) {
-            Swal.fire('Lỗi!', error.message, 'error');
-        }
+        } catch (error) { Swal.fire('Lỗi!', error.message, 'error'); }
     }
 }
 // Hàm hiển thị danh sách các lần trả nợ
@@ -17923,52 +18194,45 @@ async function showDebtHistory(customerId, customerName) {
 // xoá nợ đầu kỳ 
 async function deleteOpeningDebt(id, customerId, amount) {
     if (typeof canUserDelete === 'function' && !canUserDelete()) {
-        if (typeof Swal !== 'undefined')
-            Swal.fire({ icon: 'warning', title: 'Không có quyền', text: 'Bạn không có quyền xóa dữ liệu. Vui lòng liên hệ Admin.' });
+        if (typeof Swal !== 'undefined') Swal.fire({ icon: 'warning', title: 'Không có quyền', text: 'Bạn không có quyền xóa dữ liệu. Vui lòng liên hệ Admin.' });
         return;
     }
-    if (!confirm("Bạn có chắc muốn xóa nợ đầu kỳ này và trừ số tiền khỏi tổng nợ hiện tại?"))
-        return;
+    if (!confirm("Bạn có chắc muốn xóa nợ đầu kỳ này và trừ số tiền khỏi tổng nợ hiện tại?")) return;
     try {
         const custRef = db.collection('customers').doc(customerId);
-        // 1. Trừ số tiền đầu kỳ ra khỏi tổng nợ (nguyên tử, không đọc debt cũ trước)
-        await custRef.update({ debt: firebase.firestore.FieldValue.increment(-amount) });
-        // 2. Xóa phiếu đầu kỳ
-        await db.collection('opening_balances').doc(id).delete();
+        const openingRef = db.collection('opening_balances').doc(id);
+        await db.runTransaction(async tx => {
+            const [custSnap, openingSnap] = await Promise.all([tx.get(custRef), tx.get(openingRef)]);
+            if (!custSnap.exists || !openingSnap.exists) throw new Error('Dữ liệu nợ đầu kỳ không còn tồn tại.');
+            const actualAmount = Number(openingSnap.data().amount) || Number(amount) || 0;
+            tx.update(custRef, { debt: firebase.firestore.FieldValue.increment(-actualAmount) });
+            tx.delete(openingRef);
+        });
+        await window.requestPostWriteSync(['customers', 'debt_history']);
         Swal.fire('Thành công', 'Đã cập nhật lại công nợ.', 'success');
         Swal.close();
-        loadCustomers();
-    }
-    catch (error) {
-        Swal.fire('Lỗi', error.message, 'error');
-    }
+    } catch (error) { Swal.fire('Lỗi', error.message, 'error'); }
 }
 // Hàm xóa phiếu trả nợ (dùng để sửa lỗi khi gõ nhầm)
 async function deletePayment(paymentId, customerId, amount) {
     if (typeof canUserDelete === 'function' && !canUserDelete()) {
-        if (typeof Swal !== 'undefined')
-            Swal.fire({ icon: 'warning', title: 'Không có quyền', text: 'Bạn không có quyền xóa dữ liệu. Vui lòng liên hệ Admin.' });
+        if (typeof Swal !== 'undefined') Swal.fire({ icon: 'warning', title: 'Không có quyền', text: 'Bạn không có quyền xóa dữ liệu. Vui lòng liên hệ Admin.' });
         return;
     }
-    if (!confirm("Xóa phiếu này và cộng ngược tiền lại vào công nợ?"))
-        return;
+    if (!confirm("Xóa phiếu này và cộng ngược tiền lại vào công nợ?")) return;
     try {
         const custRef = db.collection('customers').doc(customerId);
-        // Nguyên tử, không đọc debt cũ trước
-        await custRef.update({ debt: firebase.firestore.FieldValue.increment(amount) });
-        await db.collection('debt_history').doc(paymentId).delete();
+        const paymentRef = db.collection('debt_history').doc(paymentId);
+        await db.runTransaction(async tx => {
+            const [custSnap, paymentSnap] = await Promise.all([tx.get(custRef), tx.get(paymentRef)]);
+            if (!custSnap.exists || !paymentSnap.exists) throw new Error('Phiếu trả nợ không còn tồn tại.');
+            const actualAmount = Number(paymentSnap.data().amount) || Number(amount) || 0;
+            tx.update(custRef, { debt: firebase.firestore.FieldValue.increment(actualAmount) });
+            tx.delete(paymentRef);
+        });
+        await window.requestPostWriteSync(['customers', 'debt_history', 'payments']);
         Swal.fire('Thành công', 'Đã hoàn tác và cập nhật lại công nợ', 'success');
-        loadCustomers(); // Tải lại bảng chính
-        // BỔ SUNG: cập nhật lại Trang Chủ (Dashboard) ngay lập tức, không cần F5 -
-        // trước đây popup "Công nợ Khách hàng" ở trang chủ vẫn giữ số liệu cũ (đã lấy từ
-        // trước khi xóa) cho tới khi tải lại trang.
-        if (typeof loadDashboard === 'function') {
-            await refreshDashboardData();
-        }
-    }
-    catch (error) {
-        Swal.fire('Lỗi', error.message, 'error');
-    }
+    } catch (error) { Swal.fire('Lỗi', error.message, 'error'); }
 }
 // Xoá khách hàng khỏi danh sách
 async function deleteCustomer(id) {
@@ -17987,7 +18251,7 @@ async function deleteCustomer(id) {
     if (confirm("Xóa đại lý này?")) {
         try {
             await db.collection('customers').doc(id).delete();
-            loadCustomers();
+            await window.requestPostWriteSync(['customers']);
             showAlert("Đã xóa đại lý.");
             if (typeof ghiLog === 'function')
                 ghiLog('Khách Hàng', 'Xóa', data.name || id, "X\u00F3a kh\u00E1ch h\u00E0ng/\u0111\u1EA1i l\u00FD \"" + (data.name || id) + "\"");
@@ -22775,25 +23039,25 @@ async function paySupplierDebt(docId, nccName) {
     if (!amount || amount <= 0)
         return showAlert("Vui lòng nhập số tiền hợp lệ!");
     try {
-        await db.collection('payments').add({
-            supplierName: nccName,
-            amount: amount,
-            date: new Date()
-        });
-        await db.collection('suppliers').doc(docId).update({
-            debt: firebase.firestore.FieldValue.increment(-amount)
+        // Ghi khoản trả NCC + giảm công nợ trong CÙNG transaction để không xảy ra
+        // trạng thái lệch nếu một trong hai thao tác thất bại.
+        const supplierRef = db.collection('suppliers').doc(docId);
+        const paymentRef = db.collection('payments').doc();
+        await db.runTransaction(async tx => {
+            const supplierSnap = await tx.get(supplierRef);
+            if (!supplierSnap.exists) throw new Error('Không tìm thấy nhà cung cấp.');
+            const currentDebt = Number(supplierSnap.data().debt) || 0;
+            if (amount > currentDebt + 0.000001) throw new Error('Số tiền trả vượt quá công nợ nhà cung cấp hiện tại.');
+            tx.set(paymentRef, { supplierName: nccName, amount, date: new Date(), createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+            tx.update(supplierRef, { debt: firebase.firestore.FieldValue.increment(-amount) });
         });
         document.getElementById('popup-ncc').classList.add('hidden');
-        if (inputElement)
-            inputElement.value = '';
-        // 1. Cập nhật lại dữ liệu bảng trong trang nguyên liệu
-        if (typeof loadAllData === 'function') {
+        if (inputElement) inputElement.value = '';
+        // Chỉ refresh phần đang cần và phát tín hiệu để các máy khác cập nhật.
+        if (typeof window.requestPostWriteSync === 'function')
+            await window.requestPostWriteSync(['suppliers', 'payments']);
+        else if (typeof loadAllData === 'function')
             await loadAllData();
-        }
-        // 2. BỔ SUNG DÒNG NÀY ĐỂ TRANG CHỦ TỰ ĐỘNG CẬP NHẬT NGAY LẬP TỨC MÀ KHÔNG CẦN F5
-        if (typeof loadDashboard === 'function') {
-            await refreshDashboardData();
-        }
     }
     catch (error) {
         console.error("Lỗi khi thanh toán:", error);
@@ -23925,6 +24189,9 @@ window.runStockReportReconciliation = async function () {
 window.confirmStockReportReconciliation = function () { Swal.fire({ title: 'Đối chiếu tồn kho & báo cáo?', html: 'Hệ thống sẽ so sánh <b>tồn hiện tại</b> với toàn bộ lịch sử <b>Nhập + Xuất + Hoàn trả/Đổi date</b> để tìm sản phẩm lệch. Không thay đổi dữ liệu.', icon: 'info', showCancelButton: true, confirmButtonText: 'Kiểm tra ngay', cancelButtonText: 'Hủy', confirmButtonColor: '#059669' }).then(r => { if (r.isConfirmed)
     runStockReportReconciliation(); }); };
 // ============================================================
+// BẢN V13 - TỐI ƯU TỐC ĐỘ / READ / UX
+// Giữ nguyên giao diện và card sản phẩm 3D.
+// ============================================================
 // TRẠNG THÁI ONLINE / OFFLINE + ĐỒNG BỘ FIRESTORE
 // ============================================================
 (function initConnectivityStatus() {
@@ -24503,7 +24770,7 @@ window.showCustomerProfile=async function(customerId,customerName){
         Swal.fire({title:'HỒ SƠ KHÁCH HÀNG CHI TIẾT',html,width:'1100px',confirmButtonText:'Đóng',customClass:{popup:'customer-profile-popup'}});
     }catch(e){console.error(e);Swal.fire('Lỗi','Không thể tải hồ sơ khách hàng: '+(e.message||e),'error');}
 };
-window.resetSalesHistoryFilters=function(){['searchInput','filterMonth','dateFrom','dateTo','filterPaymentMethod','filterReturnStatus'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});if(typeof loadSalesList==='function')loadSalesList();};
+window.resetSalesHistoryFilters=function(){['searchInput','filterMonth','dateFrom','dateTo','filterPaymentMethod','filterReturnStatus'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});invalidateSalesSearchCache();if(typeof loadSalesList==='function')loadSalesList();};
 })();
 </script>
 
