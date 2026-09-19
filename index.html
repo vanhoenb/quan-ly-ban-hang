@@ -17909,6 +17909,9 @@ window.__startRealtimeSyncListener = function() {
     }
 };
 window.__startRealtimeSyncListener();
+window.__signalRealtimeWriteOnly = function(domains = []) {
+    if (typeof window.__notifyRealtimeWrite === 'function') window.__notifyRealtimeWrite(domains);
+};
 window.requestPostWriteSync = function(domains = [], options = {}) {
     const list = Array.isArray(domains) ? domains : [domains];
     const isRemoteSync = !!options.remote;
@@ -17931,6 +17934,7 @@ window.requestPostWriteSync = function(domains = [], options = {}) {
                     invalidate.add('receipts:month:');
                 }
                 if (domainsNow.has('returns')) invalidate.add('inventory:receipts-expiry');
+                if (domainsNow.has('production') && typeof invalidateProductionDocsCache === 'function') invalidateProductionDocsCache();
                 if (domainsNow.has('customers')) invalidate.add('customers:list');
                 if (domainsNow.has('customers') || domainsNow.has('suppliers') || domainsNow.has('sales') || domainsNow.has('returns') || domainsNow.has('payments') || domainsNow.has('debt_history')) {
                     invalidate.add('dashboard:suppliers');
@@ -17964,6 +17968,9 @@ window.requestPostWriteSync = function(domains = [], options = {}) {
                     if (typeof loadInventory === 'function') await loadInventory({ silent: true });
                 } else if (page === 'page-history') {
                     if (typeof loadSalesList === 'function') await loadSalesList();
+                } else if (page === 'page-SanXuat' && domainsNow.has('production')) {
+                    if (typeof filterSanXuat === 'function') await filterSanXuat();
+                    else if (typeof loadInitSX === 'function') await loadInitSX();
                 } else if (page === 'page-customers') {
                     if (typeof loadCustomers === 'function') await loadCustomers();
                 } else if (page === 'page-home') {
@@ -18689,7 +18696,7 @@ function printReportDirect(title, bodyHtml) {
         iframe.onload = doPrint;
         const printDoc = iframe.contentWindow.document;
         printDoc.open();
-        printDoc.write("<!DOCTYPE html><html lang=\"vi\"><head><meta charset=\"utf-8\"><title>" + safeTitle + "</title><style>\n            @page{margin:14mm;} html,body{margin:0;padding:0;background:#fff;color:#111;font-family:Arial,sans-serif;} *{box-sizing:border-box;}\n            table{width:100%!important;border-collapse:collapse!important;table-layout:fixed!important;} th,td{page-break-inside:avoid;overflow-wrap:anywhere;border-color:#222!important;} th{border:1.5px solid #222!important;} td{border:1.5px solid #222!important;}\n            th{white-space:normal!important;} th,td{padding:3px 4px!important;line-height:1.15!important;} td:first-child{white-space:nowrap;}\n        \n</style></head><body>" + content.innerHTML + "</body></html>");
+        printDoc.write("<!DOCTYPE html><html lang=\"vi\"><head><meta charset=\"utf-8\"><title>" + safeTitle + "</title><style>\n            @page{margin:14mm;} html,body{margin:0;padding:0;background:#fff;color:#111;font-family:Arial,sans-serif;} *{box-sizing:border-box;}\n            table{width:100%!important;border-collapse:collapse!important;table-layout:fixed!important;} th,td{page-break-inside:avoid;overflow-wrap:anywhere;border-color:#222!important;} th{border:1.5px solid #222!important;} td{border:1.5px solid #222!important;}\n            th{white-space:normal!important;} th,td{padding:3px 4px!important;line-height:1.15!important;} td:first-child{white-space:nowrap;}\n            html,body,*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}\n            tr,td,th{background-clip:padding-box;}\n        \n</style></head><body>" + content.innerHTML + "</body></html>");
         printDoc.close();
         try {
             iframe.contentWindow.addEventListener('afterprint', cleanupFrame, { once: true });
@@ -18997,7 +19004,7 @@ async function viewSalesReport() {
             const thueMoiMon = i.isShipping ? 0 : tienHangMoiMon * (vatRate / 100);
             const thanhTienCoThue = tienHangMoiMon + thueMoiMon;
             if (!i.isShipping) tongDoanhThu += thanhTienCoThue;
-            rows.push([date, sale.customer || 'Khách lẻ', i.isShipping ? ('🚚 ' + i.name) : i.name, i.unit || '', qty, price.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }), Math.round(thueMoiMon).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }), Math.round(thanhTienCoThue).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE })]);
+            rows.push([date, sale.customer || 'Khách lẻ', i.isShipping ? ('🚚 ' + i.name) : i.name, i.unit || '', qty, price.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }), Math.round(thueMoiMon).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }), Math.round(thanhTienCoThue).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }), i.note || sale.note || '']);
         });
     });
     // TRỪ HÀNG HOÀN TRẢ PHÁT SINH TRONG KỲ (theo ngày trả, không phải ngày bán gốc - xem
@@ -19006,8 +19013,8 @@ async function viewSalesReport() {
     let tongHoanTra = 0;
     returnsSnap.forEach(doc => { tongHoanTra += (parseFloat(doc.data().total) || 0); });
     const doanhThuThuan = tongDoanhThu - tongHoanTra;
-    const totalRowHtml = "\n        <tr style=\"background:#f8f9fa;\"><td colspan=\"7\" style=\"border:1px solid #999;padding:7px 8px;text-align:right;\">T\u1ED5ng ti\u1EC1n h\u00E0ng b\u00E1n (g\u1ED9p)</td><td style=\"border:1px solid #999;padding:7px 8px;text-align:right;\">" + Math.round(tongDoanhThu).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</td></tr>\n        <tr style=\"background:#fff3e0;color:#e65100;\"><td colspan=\"7\" style=\"border:1px solid #999;padding:7px 8px;text-align:right;\">Tr\u1EEB: H\u00E0ng ho\u00E0n tr\u1EA3 trong k\u1EF3</td><td style=\"border:1px solid #999;padding:7px 8px;text-align:right;\">-" + Math.round(tongHoanTra).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</td></tr>\n        <tr style=\"font-weight:bold;background:#f8f9fa;\"><td colspan=\"7\" style=\"border:1px solid #999;padding:7px 8px;text-align:right;\">DOANH THU THU\u1EA6N</td><td style=\"border:1px solid #999;padding:7px 8px;text-align:right;\">" + Math.round(doanhThuThuan).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</td></tr>";
-    openReportPreviewWindow('BÁO CÁO CHI TIẾT BÁN HÀNG', "T\u1EEB ng\u00E0y: " + formatDateToDDMMYYYY(from) + " - \u0110\u1EBFn ng\u00E0y: " + formatDateToDDMMYYYY(to) + "", ['Ngày', 'Tên KH', 'Tên SP', 'ĐVT', 'SL', 'Đơn giá', 'Thuế', 'Thành tiền (có thuế)'], rows, totalRowHtml, ['left', 'left', 'left', 'center', 'right', 'right', 'right', 'right'], 1 // Gộp cột "Tên KH" (index 1): 1 khách mua nhiều SP thì gộp thành 1 ô, căn giữa
+    const totalRowHtml = "\n        <tr style=\"background:#f8f9fa;\"><td colspan=\"8\" style=\"border:1px solid #999;padding:7px 8px;text-align:right;\">T\u1ED5ng ti\u1EC1n h\u00E0ng b\u00E1n (g\u1ED9p)</td><td style=\"border:1px solid #999;padding:7px 8px;text-align:right;\">" + Math.round(tongDoanhThu).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</td></tr>\n        <tr style=\"background:#fff3e0;color:#e65100;\"><td colspan=\"8\" style=\"border:1px solid #999;padding:7px 8px;text-align:right;\">Tr\u1EEB: H\u00E0ng ho\u00E0n tr\u1EA3 trong k\u1EF3</td><td style=\"border:1px solid #999;padding:7px 8px;text-align:right;\">-" + Math.round(tongHoanTra).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</td></tr>\n        <tr style=\"font-weight:bold;background:#f8f9fa;\"><td colspan=\"8\" style=\"border:1px solid #999;padding:7px 8px;text-align:right;\">DOANH THU THU\u1EA6N</td><td style=\"border:1px solid #999;padding:7px 8px;text-align:right;\">" + Math.round(doanhThuThuan).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</td></tr>";
+    openReportPreviewWindow('BÁO CÁO CHI TIẾT BÁN HÀNG', "T\u1EEB ng\u00E0y: " + formatDateToDDMMYYYY(from) + " - \u0110\u1EBFn ng\u00E0y: " + formatDateToDDMMYYYY(to) + "", ['Ngày', 'Tên KH', 'Tên SP', 'ĐVT', 'SL', 'Đơn giá', 'Thuế', 'Thành tiền (có thuế)', 'Ghi chú'], rows, totalRowHtml, ['left', 'left', 'left', 'center', 'right', 'right', 'right', 'right', 'left'], 1 // Gộp cột "Tên KH" (index 1): 1 khách mua nhiều SP thì gộp thành 1 ô, căn giữa
     );
 }
 // 1b. Xuất Excel báo cáo bán hàng (bản XEM TRƯỚC ở hàm viewSalesReport() phía trên
@@ -19026,11 +19033,11 @@ async function exportSales() {
     const sheet = workbook.addWorksheet('Báo cáo bán hàng');
     const titleRow = sheet.addRow(["BÁO CÁO CHI TIẾT BÁN HÀNG"]);
     titleRow.font = { size: 16, bold: true };
-    sheet.mergeCells('A1:H1');
+    sheet.mergeCells('A1:I1');
     titleRow.alignment = { horizontal: 'center' };
     sheet.addRow(["T\u1EEB ng\u00E0y: " + formatDateToDDMMYYYY(from) + " - \u0110\u1EBFn ng\u00E0y: " + formatDateToDDMMYYYY(to) + ""]);
     sheet.addRow([]);
-    const headerRow = sheet.addRow(["Ngày", "Tên KH", "Tên SP", "ĐVT", "SL", "Đơn giá", "Thuế", "Thành tiền (có thuế)"]);
+    const headerRow = sheet.addRow(["Ngày", "Tên KH", "Tên SP", "ĐVT", "SL", "Đơn giá", "Thuế", "Thành tiền (có thuế)", "Ghi chú"]);
     headerRow.eachCell((cell) => {
         cell.font = { bold: true };
         cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } };
@@ -19060,7 +19067,8 @@ async function exportSales() {
                 qty,
                 price,
                 Math.round(thueMoiMon),
-                Math.round(thanhTienCoThue)
+                Math.round(thanhTienCoThue),
+                i.note || sale.note || ''
             ]);
             row.eachCell((cell, col) => {
                 cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
@@ -19083,25 +19091,25 @@ async function exportSales() {
     let tongTienShip = 0;
     snapshot.forEach(doc => { (doc.data().items || []).forEach(i => { if (i.isShipping) tongTienShip += (Number(i.qty)||0) * (Number(i.price)||0); }); });
     sheet.addRow([]);
-    const grossRow = sheet.addRow(['', '', '', '', '', '', 'Tổng doanh thu hàng hóa (gộp)', Math.round(tongDoanhThu)]);
+    const grossRow = sheet.addRow(['', '', '', '', '', '', '', 'Tổng doanh thu hàng hóa (gộp)', Math.round(tongDoanhThu)]);
     grossRow.eachCell((cell) => { cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }; });
     if (tongTienShip) {
-        const shipRow = sheet.addRow(['', '', '', '', '', '', 'Phí vận chuyển (không tính doanh thu)', Math.round(tongTienShip)]);
+        const shipRow = sheet.addRow(['', '', '', '', '', '', '', 'Phí vận chuyển (không tính doanh thu)', Math.round(tongTienShip)]);
         shipRow.font = { color: { argb: 'FF64748B' } };
         shipRow.eachCell((cell) => { cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }; });
     }
-    const returnRow = sheet.addRow(['', '', '', '', '', '', 'Trừ: Hàng hoàn trả trong kỳ', -Math.round(tongHoanTra)]);
+    const returnRow = sheet.addRow(['', '', '', '', '', '', '', 'Trừ: Hàng hoàn trả trong kỳ', -Math.round(tongHoanTra)]);
     returnRow.font = { color: { argb: 'FFE65100' } };
     returnRow.eachCell((cell) => { cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }; });
     // Thêm hàng tổng cộng vào cuối
-    const totalRow = sheet.addRow(['', '', '', '', '', '', 'DOANH THU THUẦN', Math.round(doanhThuThuan)]);
+    const totalRow = sheet.addRow(['', '', '', '', '', '', '', 'DOANH THU THUẦN', Math.round(doanhThuThuan)]);
     totalRow.font = { bold: true };
     totalRow.eachCell((cell) => {
         cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
     });
     sheet.columns = [
         { width: 15 }, { width: 20 }, { width: 25 }, { width: 10 },
-        { width: 10 }, { width: 15 }, { width: 15 }, { width: 20 }
+        { width: 10 }, { width: 15 }, { width: 15 }, { width: 20 }, { width: 28 }
     ];
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -19196,6 +19204,58 @@ function getNhomBlockBg(ten) {
 function getProductUnit(name) {
     const p = (window.allProducts || []).find(x => x.name === name);
     return (p && p.unit) || '';
+}
+// Chuẩn hoá tên sản phẩm trong BC Tồn Kho trước khi tính toán.
+// Báo cáo đọc dữ liệu từ nhiều nơi (Danh mục SP, receipts, sales, stock_counters),
+// nên chỉ cần khác Unicode/khoảng trắng là cùng một sản phẩm có thể bị tách thành 2 dòng
+// hoặc currentStockMap không khớp với inventory. Hàm này gộp về tên chuẩn trong danh mục
+// nếu có, đồng thời gộp cả số liệu và tồn kho; không làm thay đổi dữ liệu Firestore.
+function canonicalizeInventoryReportState(inventory, currentStockMap) {
+    if (!inventory || !currentStockMap) return;
+    const catalogNames = [];
+    const catalogByKey = new Map();
+    (window.allProducts || []).forEach(p => {
+        const name = String(p && p.name || '').trim();
+        if (!name) return;
+        const key = normalizeProductStockKey(name);
+        if (!catalogByKey.has(key)) {
+            catalogByKey.set(key, name);
+            catalogNames.push(name);
+        }
+    });
+    const canonicalName = (name) => {
+        const raw = String(name || '').trim();
+        if (!raw) return raw;
+        return catalogByKey.get(normalizeProductStockKey(raw)) || raw;
+    };
+    const mergeInventoryItem = (target, source) => {
+        if (!source) return target;
+        if (!target) {
+            target = { nhapMoi: 0, nhapDoi: 0, xuat: 0, gapNet: 0, nhapDoiVendors: new Set(), ghiChuEvents: [] };
+        }
+        target.nhapMoi += Number(source.nhapMoi) || 0;
+        target.nhapDoi += Number(source.nhapDoi) || 0;
+        target.xuat += Number(source.xuat) || 0;
+        target.gapNet += Number(source.gapNet) || 0;
+        if (!target.nhapDoiVendors) target.nhapDoiVendors = new Set();
+        if (source.nhapDoiVendors) source.nhapDoiVendors.forEach(v => target.nhapDoiVendors.add(v));
+        if (!target.ghiChuEvents) target.ghiChuEvents = [];
+        if (Array.isArray(source.ghiChuEvents)) target.ghiChuEvents.push(...source.ghiChuEvents);
+        return target;
+    };
+    const oldInventory = Object.entries(inventory);
+    Object.keys(inventory).forEach(k => delete inventory[k]);
+    oldInventory.forEach(([name, item]) => {
+        const canon = canonicalName(name);
+        inventory[canon] = mergeInventoryItem(inventory[canon], item);
+    });
+
+    const oldStock = Object.entries(currentStockMap);
+    Object.keys(currentStockMap).forEach(k => delete currentStockMap[k]);
+    oldStock.forEach(([name, qty]) => {
+        const canon = canonicalName(name);
+        currentStockMap[canon] = (Number(currentStockMap[canon]) || 0) + (Number(qty) || 0);
+    });
 }
 // Dựng preview BC NXT có dòng phân nhóm giống trang Kho hàng/Excel.
 function openGroupedInventoryReportPreview(title, subtitle, headers, groupedRows, totalRowHtml) {
@@ -19569,7 +19629,7 @@ async function exportInventory() {
                     if (col === 1 || col === 3)
                         c.alignment = { horizontal: 'center' };
                     if (col >= 4 && col <= 8) {
-                        c.alignment = { horizontal: 'center' };
+                        c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
                         c.font = { bold: true, size: 12 };
                     }
                     // SỬA LỖI CHE CHỮ: cột Tên sản phẩm (2) và Ghi chú (9, nếu có) cho tự xuống
@@ -19855,12 +19915,24 @@ async function exportReturnsReport() {
         Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Không thể xuất báo cáo!' });
     }
 }
+// Kiểm tra khoảng ngày dùng chung cho BC Tổng Hợp.
+function validateReportDateRange(fromVal, toVal) {
+    if (!fromVal || !toVal) {
+        Swal.fire({ icon: 'warning', title: 'Thông báo', text: 'Vui lòng chọn ngày!' });
+        return false;
+    }
+    if (fromVal > toVal) {
+        Swal.fire({ icon: 'warning', title: 'Khoảng ngày không hợp lệ', text: 'Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc.' });
+        return false;
+    }
+    return true;
+}
+
 // 3. Xuất báo cáo Tổng hợp
 async function exportFullReport() {
     const fromVal = document.getElementById('date-from').value;
     const toVal = document.getElementById('date-to').value;
-    if (!fromVal || !toVal)
-        return Swal.fire({ icon: 'warning', title: 'Thông báo', text: 'Vui lòng chọn ngày!' });
+    if (!validateReportDateRange(fromVal, toVal)) return;
     const formatVal = (val) => {
         if (!val)
             return "";
@@ -20021,29 +20093,44 @@ async function exportFullReport() {
             });
         });
         // TÍNH TOÁN DỮ LIỆU SẢN XUẤT TRONG KHOẢNG (fromVal ĐẾN toVal)
+        // TÍNH TOÁN DỮ LIỆU SẢN XUẤT TRONG KHOẢNG (fromVal ĐẾN toVal)
+        // Với mỗi sản phẩm: Tồn đầu lấy từ dòng sản xuất đầu tiên trong kỳ, Tồn cuối lấy từ dòng cuối cùng trong kỳ.
+        // SL và Số Kg vẫn cộng dồn các dòng trong kỳ.
         let spDataRange = {};
         let totalKgDaDongRange = 0, totalMeDaDongRange = 0;
         let totalMeChuaNauLuyKe = 0, totalMeChoDongLuyKe = 0, totalMeDaDongLuyKe = 0;
-        prodSnap.forEach(doc => {
+        const productionDocsSorted = prodSnap.docs.slice().sort((a, b) => {
+            const da = toReportDate(a.data()?.timestamp) || new Date(0);
+            const dbb = toReportDate(b.data()?.timestamp) || new Date(0);
+            return da - dbb;
+        });
+        productionDocsSorted.forEach(doc => {
             const d = doc.data();
             const dDate = toReportDate(d.timestamp) || new Date(0);
             const dDateStr = dDate.toISOString().split('T')[0];
-            // Lũy kế đến ngày kết thúc (toVal) để tính tồn kho chưa đóng/nấu
             if (dDateStr <= toVal) {
                 totalMeChuaNauLuyKe += parseFloat(d.meChuaNau || 0);
                 totalMeChoDongLuyKe += parseFloat(d.meChuaDong || 0);
                 totalMeDaDongLuyKe += parseFloat(d.soMe || 0);
             }
-            // GOM DỮ LIỆU TRONG KHOẢNG [fromVal, toVal]
-            if (dDateStr >= fromVal && dDateStr <= toVal) {
+            if (dDateStr >= fromVal && dDateStr <= toVal && d.tenSP) {
+                const name = String(d.tenSP).trim();
+                if (!spDataRange[name]) {
+                    spDataRange[name] = { sl: 0, kg: 0, tonDau: parseFloat(d.tonDau || 0) || 0, tonCuoi: parseFloat(d.tonCuoi || 0) || 0, firstDate: dDate.getTime(), lastDate: dDate.getTime() };
+                }
+                spDataRange[name].sl += parseFloat(d.sl || 0);
+                spDataRange[name].kg += parseFloat(d.soKg || 0);
+                const currentTime = dDate.getTime();
+                if (currentTime < spDataRange[name].firstDate) {
+                    spDataRange[name].firstDate = currentTime;
+                    spDataRange[name].tonDau = parseFloat(d.tonDau || 0) || 0;
+                }
+                if (currentTime >= spDataRange[name].lastDate) {
+                    spDataRange[name].lastDate = currentTime;
+                    spDataRange[name].tonCuoi = parseFloat(d.tonCuoi || 0) || 0;
+                }
                 totalKgDaDongRange += parseFloat(d.soKg || 0);
                 totalMeDaDongRange += parseFloat(d.soMe || 0);
-                if (d.tenSP) {
-                    if (!spDataRange[d.tenSP])
-                        spDataRange[d.tenSP] = { sl: 0, kg: 0 };
-                    spDataRange[d.tenSP].sl += parseFloat(d.sl || 0);
-                    spDataRange[d.tenSP].kg += parseFloat(d.soKg || 0);
-                }
             }
         });
         // Làm tròn để tránh lỗi cộng dồn số thập phân của JavaScript (VD: 0.1+0.2 =
@@ -20084,6 +20171,8 @@ async function exportFullReport() {
         // SẮP XẾP LẠI DỮ LIỆU THEO NGÀY (YYYY-MM-DD) TRƯỚC KHI VẼ BẢNG
         salesData.sort((a, b) => new Date(a[0]) - new Date(b[0]));
         const salesDataStartRow = sheet.rowCount + 1; // Dòng đầu tiên của phần dữ liệu (ngay sau header)
+        let excelInvoiceStripe = -1;
+        let excelInvoiceKey = null;
         salesData.forEach(item => {
             // TẠO BẢN SAO ĐỂ KHÔNG LÀM THAY ĐỔI DỮ LIỆU GỐC
             let rowData = [...item];
@@ -20096,13 +20185,46 @@ async function exportFullReport() {
             }
             // Lúc này rowData[7] đã chứa giá trị (Thành tiền + Thuế) từ bước tính toán trước đó
             const row = sheet.addRow(rowData);
+            // Tự tăng chiều cao theo nội dung để tên KH, tên SP và Ghi chú dài không bị che/cắt.
+            const estimateLines = (value, charsPerLine) => {
+                if (value == null) return 1;
+                if (typeof value === 'object' && Array.isArray(value.richText))
+                    value = value.richText.map(part => part && part.text != null ? String(part.text) : '').join('');
+                const text = String(value).replace(/\r/g, '');
+                if (!text) return 1;
+                return Math.max(1, text.split('\n').reduce((sum, part) => sum + Math.ceil(Math.max(1, part.length) / charsPerLine), 0));
+            };
+            const estimatedLines = Math.max(
+                estimateLines(rowData[2], 22),
+                estimateLines(rowData[3], 34),
+                estimateLines(rowData[8], 24)
+            );
+            row.height = Math.min(60, Math.max(20, 15 * estimatedLines));
+            row.eachCell(c => {
+                c.alignment = Object.assign({}, c.alignment || {}, { vertical: 'middle', wrapText: true });
+            });
+            // Tô xen kẽ theo TỪNG PHIẾU, không phải từng dòng. Phiếu nhiều sản phẩm được tô
+            // cùng một màu trên toàn bộ các dòng của phiếu.
+            const currentInvoiceKey = String(rowData[1] || '') + '|' + String(rowData[0] || '');
+            if (currentInvoiceKey !== excelInvoiceKey) {
+                excelInvoiceStripe++;
+                excelInvoiceKey = currentInvoiceKey;
+            }
+            const invoiceFill = (excelInvoiceStripe % 2 === 1)
+                ? { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFCD5B4' } }
+                : null;
+            row.eachCell((c) => {
+                if (invoiceFill) c.fill = invoiceFill;
+            });
             row.eachCell((c, col) => {
                 c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
                 c.font = { size: 12 };
                 // CĂN GIỮA CÁC CỘT CẦN THIẾT: ngày (1), Số phiếu (2), ĐVT (5), SL (6)
                 if (col === 1 || col === 2 || col === 5 || col === 6) {
-                    c.alignment = { horizontal: 'center' };
+                    c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
                 }
+                if (col === 3)
+                    c.font = { bold: true, size: 12 };
                 if (col === 6)
                     c.font = { bold: true, size: 12 };
                 // Định dạng số tiền
@@ -20112,7 +20234,7 @@ async function exportFullReport() {
                 // Căn giữa theo chiều dọc cho cột Khách hàng (3), Tên sản phẩm (4) và Ghi chú
                 // (9) - đã BỎ wrapText theo yêu cầu, chữ dài sẽ tràn ra thay vì tự xuống dòng.
                 if (col === 3 || col === 4 || col === 9) {
-                    c.alignment = { vertical: 'middle' };
+                    c.alignment = { vertical: 'middle', wrapText: true };
                 }
             });
         });
@@ -20198,7 +20320,7 @@ async function exportFullReport() {
                     c.font = { size: 12 };
                     // ĐVT (3) căn giữa; các cột số lượng (4-8) căn giữa + in đậm
                     if (col === 3)
-                        c.alignment = { horizontal: 'center' };
+                        c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
                     if (col >= 4 && col <= 8) {
                         c.alignment = { horizontal: 'center' };
                         c.font = { bold: true, size: 12 };
@@ -20206,7 +20328,7 @@ async function exportFullReport() {
                     // SỬA LỖI CHE CHỮ: cột Tên sản phẩm (2) và Ghi chú (9, nếu có) cho tự
                     // xuống dòng khi chữ dài
                     if (col === 2 || col === 9) {
-                        c.alignment = { vertical: 'middle' };
+                        c.alignment = { vertical: 'middle', wrapText: true };
                     }
                 });
             });
@@ -20231,7 +20353,7 @@ async function exportFullReport() {
             }
         });
         Object.keys(spDataRange).forEach(name => {
-            const row = sheet.addRow(["", name, "", formatVal(spDataRange[name].sl), formatVal(spDataRange[name].kg), ""]);
+            const row = sheet.addRow(["", name, formatVal(spDataRange[name].tonDau), formatVal(spDataRange[name].sl), formatVal(spDataRange[name].kg), formatVal(spDataRange[name].tonCuoi)]);
             // Kẻ bảng và căn giữa từ cột B (2) đến F (6)
             row.eachCell((c, col) => {
                 if (col > 1) {
@@ -20331,8 +20453,7 @@ async function exportFullReport() {
 async function viewFullReport() {
     const fromVal = document.getElementById('date-from').value;
     const toVal = document.getElementById('date-to').value;
-    if (!fromVal || !toVal)
-        return Swal.fire({ icon: 'warning', title: 'Thông báo', text: 'Vui lòng chọn ngày!' });
+    if (!validateReportDateRange(fromVal, toVal)) return;
     const formatVal = (val) => {
         if (!val)
             return "";
@@ -20476,10 +20597,18 @@ async function viewFullReport() {
                 }
             });
         });
+        // TÍNH TOÁN DỮ LIỆU SẢN XUẤT TRONG KHOẢNG (fromVal ĐẾN toVal)
+        // Với mỗi sản phẩm: Tồn đầu lấy từ dòng sản xuất đầu tiên trong kỳ, Tồn cuối lấy từ dòng cuối cùng trong kỳ.
+        // SL và Số Kg vẫn cộng dồn các dòng trong kỳ.
         let spDataRange = {};
         let totalKgDaDongRange = 0, totalMeDaDongRange = 0;
         let totalMeChuaNauLuyKe = 0, totalMeChoDongLuyKe = 0, totalMeDaDongLuyKe = 0;
-        prodSnap.forEach(doc => {
+        const productionDocsSorted = prodSnap.docs.slice().sort((a, b) => {
+            const da = toReportDate(a.data()?.timestamp) || new Date(0);
+            const dbb = toReportDate(b.data()?.timestamp) || new Date(0);
+            return da - dbb;
+        });
+        productionDocsSorted.forEach(doc => {
             const d = doc.data();
             const dDate = toReportDate(d.timestamp) || new Date(0);
             const dDateStr = dDate.toISOString().split('T')[0];
@@ -20488,15 +20617,24 @@ async function viewFullReport() {
                 totalMeChoDongLuyKe += parseFloat(d.meChuaDong || 0);
                 totalMeDaDongLuyKe += parseFloat(d.soMe || 0);
             }
-            if (dDateStr >= fromVal && dDateStr <= toVal) {
+            if (dDateStr >= fromVal && dDateStr <= toVal && d.tenSP) {
+                const name = String(d.tenSP).trim();
+                if (!spDataRange[name]) {
+                    spDataRange[name] = { sl: 0, kg: 0, tonDau: parseFloat(d.tonDau || 0) || 0, tonCuoi: parseFloat(d.tonCuoi || 0) || 0, firstDate: dDate.getTime(), lastDate: dDate.getTime() };
+                }
+                spDataRange[name].sl += parseFloat(d.sl || 0);
+                spDataRange[name].kg += parseFloat(d.soKg || 0);
+                const currentTime = dDate.getTime();
+                if (currentTime < spDataRange[name].firstDate) {
+                    spDataRange[name].firstDate = currentTime;
+                    spDataRange[name].tonDau = parseFloat(d.tonDau || 0) || 0;
+                }
+                if (currentTime >= spDataRange[name].lastDate) {
+                    spDataRange[name].lastDate = currentTime;
+                    spDataRange[name].tonCuoi = parseFloat(d.tonCuoi || 0) || 0;
+                }
                 totalKgDaDongRange += parseFloat(d.soKg || 0);
                 totalMeDaDongRange += parseFloat(d.soMe || 0);
-                if (d.tenSP) {
-                    if (!spDataRange[d.tenSP])
-                        spDataRange[d.tenSP] = { sl: 0, kg: 0 };
-                    spDataRange[d.tenSP].sl += parseFloat(d.sl || 0);
-                    spDataRange[d.tenSP].kg += parseFloat(d.soKg || 0);
-                }
             }
         });
         // Làm tròn để tránh lỗi cộng dồn số thập phân của JavaScript (VD: 0.1+0.2 =
@@ -20514,8 +20652,18 @@ async function viewFullReport() {
         const tdWrap = td + 'word-break:break-word;';
         const salesMerge = buildMergedColumnRowSpans(salesData, 1); // Gộp cột "Số phiếu" (index 1)
         const custMerge = buildMergedColumnRowSpans(salesData, 2); // Gộp cột "Khách hàng" (index 2)
+        let salesInvoiceStripe = -1;
+        let salesInvoiceKey = null;
         const salesRowsHtml = salesData.map((r, rIdx) => {
             const [y, m, dd] = r[0].split('-');
+            // Tô xen kẽ theo TỪNG PHIẾU: phiếu 1 màu gốc, phiếu 2 xanh nhạt, phiếu 3 màu gốc...
+            // Mọi dòng sản phẩm của cùng một phiếu dùng cùng một màu.
+            const currentInvoiceKey = String(r[1] || '') + '|' + String(r[0] || '');
+            if (currentInvoiceKey !== salesInvoiceKey) {
+                salesInvoiceStripe++;
+                salesInvoiceKey = currentInvoiceKey;
+            }
+            const rowBg = (salesInvoiceStripe % 2 === 1) ? 'background:#fcd5b4;' : '';
             // Ghi chú có thể là Rich Text object (dùng cho ExcelJS để in đậm số tiền).
             // Khi xem báo cáo trên màn hình, không thể nối object trực tiếp vì sẽ thành
             // "[object Object]". Chuyển Rich Text về chuỗi hiển thị đầy đủ.
@@ -20528,7 +20676,7 @@ async function viewFullReport() {
             const custCellHtml = custMerge.skip.has(rIdx) ? '' :
                 (custMerge.rowSpan[rIdx] > 1
                     ? "<td rowspan=\"" + custMerge.rowSpan[rIdx] + "\" style=\"" + tdWrap + "text-align:left;vertical-align:middle;font-weight:800;\">" + r[2] + "</td>" : "<td style=\"" + tdWrap + "font-weight:800;\">" + r[2] + "</td>");
-            return "<tr><td style=\"" + td + "text-align:center;white-space:nowrap;\">" + dd + "-" + m + "-" + y + "</td>" + phieuCellHtml + "" + custCellHtml + "<td style=\"" + tdWrap + "\">" + r[3] + "</td><td style=\"" + td + "text-align:center;\">" + r[4] + "</td><td style=\"" + td + "text-align:center;font-weight:800;\">" + r[5] + "</td><td style=\"" + td + "text-align:right;font-weight:700;\">" + Math.round(r[6]).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</td><td style=\"" + td + "text-align:right;font-weight:700;\">" + Math.round(r[7]).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</td><td style=\"" + tdWrap + "\">" + noteDisplay + "</td></tr>";
+            return "<tr style=\"" + rowBg + "\"><td style=\"" + td + "text-align:center;white-space:nowrap;\">" + dd + "-" + m + "-" + y + "</td>" + phieuCellHtml + "" + custCellHtml + "<td style=\"" + tdWrap + "\">" + r[3] + "</td><td style=\"" + td + "text-align:center;\">" + r[4] + "</td><td style=\"" + td + "text-align:center;font-weight:800;\">" + r[5] + "</td><td style=\"" + td + "text-align:right;font-weight:700;\">" + Math.round(r[6]).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</td><td style=\"" + td + "text-align:right;font-weight:700;\">" + Math.round(r[7]).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</td><td style=\"" + tdWrap + "\">" + noteDisplay + "</td></tr>";
         }).join('') || "<tr><td colspan=\"9\" style=\"" + td + "text-align:center;color:#888;\">Kh\u00F4ng c\u00F3 d\u1EEF li\u1EC7u</td></tr>";
         const nhomMap = new Map();
         const thuTuNhom = THU_TU_HIEN_THI_NHOM.concat(['KHÁC']); // Thứ tự HIỂN THỊ - tách riêng khỏi thứ tự khớp nhóm
@@ -20558,10 +20706,10 @@ async function viewFullReport() {
         });
         if (!nxtRowsHtml)
             nxtRowsHtml = "<tr><td colspan=\"" + nxtColCount + "\" style=\"" + td + "text-align:center;color:#888;\">Kh\u00F4ng c\u00F3 d\u1EEF li\u1EC7u</td></tr>";
-        const sxRowsHtml = Object.keys(spDataRange).map(name => "<tr><td style=\"" + td + "\">" + name + "</td><td style=\"" + td + "text-align:center;font-weight:800;\">" + formatVal(spDataRange[name].sl) + "</td><td style=\"" + td + "text-align:center;font-weight:800;\">" + formatVal(spDataRange[name].kg) + "</td></tr>").join('') || "<tr><td colspan=\"3\" style=\"" + td + "text-align:center;color:#888;\">Kh\u00F4ng c\u00F3 d\u1EEF li\u1EC7u</td></tr>";
+        const sxRowsHtml = Object.keys(spDataRange).map(name => "<tr><td style=\"" + td + "\">" + name + "</td><td style=\"" + td + "text-align:center;font-weight:800;\">" + formatVal(spDataRange[name].tonDau) + "</td><td style=\"" + td + "text-align:center;font-weight:800;\">" + formatVal(spDataRange[name].sl) + "</td><td style=\"" + td + "text-align:center;font-weight:800;\">" + formatVal(spDataRange[name].kg) + "</td><td style=\"" + td + "text-align:center;font-weight:800;\">" + formatVal(spDataRange[name].tonCuoi) + "</td></tr>").join('') || "<tr><td colspan=\"5\" style=\"" + td + "text-align:center;color:#888;\">Kh\u00F4ng c\u00F3 d\u1EEF li\u1EC7u</td></tr>";
         const chuaDong = totalMeChoDongLuyKe - totalMeDaDongLuyKe;
         const chuaNau = totalMeChuaNauLuyKe - totalMeChoDongLuyKe;
-        const bodyHtml = "\n            <div style=\"font-family:Arial,sans-serif;padding:6px;color:#1a1a1a;\">\n            <h1 style=\"font-size:20px;text-align:center;margin:0 0 4px;\">B\u00C1O C\u00C1O T\u1ED4NG H\u1EE2P</h1>\n            <p style=\"text-align:center;color:#555;font-size:13px;margin:0 0 20px;\">T\u1EEB ng\u00E0y " + formatDateToDDMMYYYY(fromVal) + " \u0111\u1EBFn ng\u00E0y " + formatDateToDDMMYYYY(toVal) + "</p>\n\n            <h2 style=\"font-size:15px;margin:18px 0 8px;\">I. CHI TI\u1EBET B\u00C1N H\u00C0NG</h2>\n            <table style=\"width:100%;table-layout:fixed;border-collapse:collapse;font-size:12px;\">\n                <thead><tr>\n                    <th style=\"" + th + "width:11%;\">Ng\u00E0y</th>\n                    <th style=\"" + th + "width:8%;\">S\u1ED1 phi\u1EBFu</th>\n                    <th style=\"" + th + "width:13%;\">Kh\u00E1ch h\u00E0ng</th>\n                    <th style=\"" + th + "width:22%;\">T\u00EAn s\u1EA3n ph\u1EA9m</th>\n                    <th style=\"" + th + "width:6%;\">\u0110VT</th>\n                    <th style=\"" + th + "width:6%;\">SL</th>\n                    <th style=\"" + th + "width:11%;\">\u0110\u01A1n gi\u00E1</th>\n                    <th style=\"" + th + "width:11%;\">Th\u00E0nh ti\u1EC1n</th>\n                    <th style=\"" + th + "width:12%;\">Ghi ch\u00FA</th>\n                </tr></thead>\n                <tbody>" + salesRowsHtml + "</tbody>\n            </table>\n\n            <h2 style=\"font-size:15px;margin:18px 0 8px;\">II. B\u00C1O C\u00C1O NH\u1EACP XU\u1EA4T T\u1ED2N</h2>\n            <table style=\"width:100%;table-layout:fixed;border-collapse:collapse;font-size:12px;\">\n                <thead><tr>\n                    <th style=\"" + th + "width:11%;\">Ng\u00E0y</th>\n                    <th style=\"" + th + "width:28%;\">T\u00EAn s\u1EA3n ph\u1EA9m</th>\n                    <th style=\"" + th + "width:6%;\">\u0110VT</th>\n                    <th style=\"" + th + "width:8%;\">T\u1ED3n \u0111\u1EA7u</th>\n                    <th style=\"" + th + "width:9%;\">Nh\u1EADp m\u1EDBi</th>\n                    <th style=\"" + th + "width:10%;\">\u0110\u1ED5i date/Ho\u00E0n tr\u1EA3</th>\n                    <th style=\"" + th + "width:7%;\">Xu\u1EA5t</th>\n                    <th style=\"" + th + "width:9%;\">T\u1ED3n cu\u1ED1i</th>\n                    <th style=\"" + th + "width:12%;\">Ghi ch\u00FA</th>\n                </tr></thead>\n                <tbody>" + nxtRowsHtml + "</tbody>\n            </table>\n\n            <h2 style=\"font-size:15px;margin:18px 0 8px;\">III. CHI TI\u1EBET S\u1EA2N XU\u1EA4T</h2>\n            <table style=\"width:100%;border-collapse:collapse;font-size:12px;\">\n                <thead><tr><th style=\"" + th + "\">T\u00EAn s\u1EA3n ph\u1EA9m</th><th style=\"" + th + "\">S\u1ED1 l\u01B0\u1EE3ng</th><th style=\"" + th + "\">S\u1ED1 Kg</th></tr></thead>\n                <tbody>" + sxRowsHtml + "</tbody>\n            </table>\n            <table style=\"width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;\">\n                <tbody>\n                    <tr><td style=\"" + td + "font-weight:bold;\">S\u1ED0 M\u1EBA \u0110\u00C3 \u0110\u00D3NG</td><td style=\"" + td + "text-align:center;\">" + totalMeDaDongRange + " m\u1EBB</td><td style=\"" + td + "text-align:center;\">" + totalKgDaDongRange + " kg</td></tr>\n                    <tr><td style=\"" + td + "font-weight:bold;\">CH\u01AFA \u0110\u00D3NG</td><td style=\"" + td + "text-align:center;\" colspan=\"2\">" + chuaDong + " m\u1EBB</td></tr>\n                    <tr><td style=\"" + td + "font-weight:bold;\">CH\u01AFA N\u1EA4U</td><td style=\"" + td + "text-align:center;\" colspan=\"2\">" + chuaNau + " m\u1EBB</td></tr>\n                </tbody>\n            </table>\n            </div>\n        ";
+        const bodyHtml = "\n            <div style=\"font-family:Arial,sans-serif;padding:6px;color:#1a1a1a;\">\n            <h1 style=\"font-size:20px;text-align:center;margin:0 0 4px;\">B\u00C1O C\u00C1O T\u1ED4NG H\u1EE2P</h1>\n            <p style=\"text-align:center;color:#555;font-size:13px;margin:0 0 20px;\">T\u1EEB ng\u00E0y " + formatDateToDDMMYYYY(fromVal) + " \u0111\u1EBFn ng\u00E0y " + formatDateToDDMMYYYY(toVal) + "</p>\n\n            <h2 style=\"font-size:15px;margin:18px 0 8px;\">I. CHI TI\u1EBET B\u00C1N H\u00C0NG</h2>\n            <table style=\"width:100%;table-layout:fixed;border-collapse:collapse;font-size:12px;\">\n                <thead><tr>\n                    <th style=\"" + th + "width:11%;\">Ng\u00E0y</th>\n                    <th style=\"" + th + "width:8%;\">S\u1ED1 phi\u1EBFu</th>\n                    <th style=\"" + th + "width:13%;\">Kh\u00E1ch h\u00E0ng</th>\n                    <th style=\"" + th + "width:22%;\">T\u00EAn s\u1EA3n ph\u1EA9m</th>\n                    <th style=\"" + th + "width:6%;\">\u0110VT</th>\n                    <th style=\"" + th + "width:6%;\">SL</th>\n                    <th style=\"" + th + "width:11%;\">\u0110\u01A1n gi\u00E1</th>\n                    <th style=\"" + th + "width:11%;\">Th\u00E0nh ti\u1EC1n</th>\n                    <th style=\"" + th + "width:12%;\">Ghi ch\u00FA</th>\n                </tr></thead>\n                <tbody>" + salesRowsHtml + "</tbody>\n            </table>\n\n            <h2 style=\"font-size:15px;margin:18px 0 8px;\">II. B\u00C1O C\u00C1O NH\u1EACP XU\u1EA4T T\u1ED2N</h2>\n            <table style=\"width:100%;table-layout:fixed;border-collapse:collapse;font-size:12px;\">\n                <thead><tr>\n                    <th style=\"" + th + "width:11%;\">Ng\u00E0y</th>\n                    <th style=\"" + th + "width:28%;\">T\u00EAn s\u1EA3n ph\u1EA9m</th>\n                    <th style=\"" + th + "width:6%;\">\u0110VT</th>\n                    <th style=\"" + th + "width:8%;\">T\u1ED3n \u0111\u1EA7u</th>\n                    <th style=\"" + th + "width:9%;\">Nh\u1EADp m\u1EDBi</th>\n                    <th style=\"" + th + "width:10%;\">\u0110\u1ED5i date/Ho\u00E0n tr\u1EA3</th>\n                    <th style=\"" + th + "width:7%;\">Xu\u1EA5t</th>\n                    <th style=\"" + th + "width:9%;\">T\u1ED3n cu\u1ED1i</th>\n                    <th style=\"" + th + "width:12%;\">Ghi ch\u00FA</th>\n                </tr></thead>\n                <tbody>" + nxtRowsHtml + "</tbody>\n            </table>\n\n            <h2 style=\"font-size:15px;margin:18px 0 8px;\">III. CHI TI\u1EBET S\u1EA2N XU\u1EA4T</h2>\n            <table style=\"width:100%;border-collapse:collapse;font-size:12px;\">\n                <thead><tr><th style=\"" + th + "\">T\u00EAn s\u1EA3n ph\u1EA9m</th><th style=\"" + th + "\">T\u1ED3n \u0111\u1EA7u</th><th style=\"" + th + "\">S\u1ED1 l\u01B0\u1EE3ng</th><th style=\"" + th + "\">S\u1ED1 Kg</th><th style=\"" + th + "\">T\u1ED3n cu\u1ED1i</th></tr></thead>\n                <tbody>" + sxRowsHtml + "</tbody>\n            </table>\n            <table style=\"width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;\">\n                <tbody>\n                    <tr><td style=\"" + td + "font-weight:bold;\">S\u1ED0 M\u1EBA \u0110\u00C3 \u0110\u00D3NG</td><td style=\"" + td + "text-align:center;\">" + totalMeDaDongRange + " m\u1EBB</td><td style=\"" + td + "text-align:center;\">" + totalKgDaDongRange + " kg</td></tr>\n                    <tr><td style=\"" + td + "font-weight:bold;\">CH\u01AFA \u0110\u00D3NG</td><td style=\"" + td + "text-align:center;\" colspan=\"2\">" + chuaDong + " m\u1EBB</td></tr>\n                    <tr><td style=\"" + td + "font-weight:bold;\">CH\u01AFA N\u1EA4U</td><td style=\"" + td + "text-align:center;\" colspan=\"2\">" + chuaNau + " m\u1EBB</td></tr>\n                </tbody>\n            </table>\n            </div>\n        ";
         printReportDirect('BÁO CÁO TỔNG HỢP', bodyHtml);
     }
     catch (err) {
@@ -22343,6 +22491,8 @@ function themSanPhamVaoGioSX() {
     const dvt = document.getElementById('sxDVT').value;
     const tonDau = parseInt(document.getElementById('sxTonDau').value) || 0;
     const sl = parseInt(document.getElementById('sxSL').value) || 0;
+    // Luôn tính lại ngay trước khi đưa vào giỏ để không bao giờ lưu Tồn cuối bị cũ/stale.
+    tinhTonCuoi();
     const tonCuoi = getRawNumber('sxTonCuoi');
     const soKg = document.getElementById('sxSoKg').value || "0";
     const soMe = parseInt(document.getElementById('sxSoMe').value) || 0;
@@ -22414,24 +22564,33 @@ async function luuSanXuat() {
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang lưu...';
         }
-        // Lưu lần lượt từng dòng trong giỏ, dùng chung 1 số phiếu + 1 thời điểm tạo
-        for (const item of sxCart) {
+        // Lưu toàn bộ các dòng của cùng một phiếu bằng 1 batch để tránh trạng thái
+        // lưu dở dang và giảm số lượt round-trip mạng khi phiếu có nhiều dòng.
+        const productionBatch = db.batch();
+        (sxCart || []).forEach(item => {
+            const tonDau = Number(item.tonDau) || 0;
+            const sl = Number(item.sl) || 0;
             const data = {
                 soPhieu,
                 tenSP: item.tenSP,
                 dvt: item.dvt,
-                tonDau: item.tonDau,
-                sl: item.sl,
-                tonCuoi: item.tonCuoi,
-                soKg: item.soKg,
-                soMe: item.soMe,
-                meChuaDong: item.meChuaDong,
-                meChuaNau: item.meChuaNau,
+                tonDau,
+                sl,
+                // Tồn cuối luôn theo đúng công thức trên trang Sản Xuất.
+                tonCuoi: tonDau + sl,
+                soKg: item.soKg || "0",
+                soMe: Number(item.soMe) || 0,
+                meChuaDong: Number(item.meChuaDong) || 0,
+                meChuaNau: Number(item.meChuaNau) || 0,
                 timestamp
             };
-            await db.collection('production').add(data);
-        }
+            productionBatch.set(db.collection('production').doc(), data);
+        });
+        await productionBatch.commit();
         invalidateProductionDocsCache();
+        // Đồng bộ ngay cho các máy khác; trước đây phiếu sản xuất không phát tín hiệu realtime.
+        if (typeof window.__signalRealtimeWriteOnly === 'function')
+            window.__signalRealtimeWriteOnly(['production']);
         // TRƯỚC ĐÂY dùng showAlert() báo thành công - đây là hộp thoại CHẶN trang, phải bấm OK
         // mới chạy tiếp, và gây cảm giác "rung/loà" cả trang trên điện thoại. Đổi sang
         // toast góc màn hình, không chặn, tự biến mất.
@@ -22475,9 +22634,17 @@ function groupAndRenderSX(docs) {
         const data = doc.data();
         const id = doc.id;
         const soPhieu = data.soPhieu || "---";
-        const dateObj = data.timestamp
-            ? (typeof data.timestamp.toDate === 'function' ? data.timestamp.toDate() : new Date(data.timestamp.seconds * 1000))
-            : null;
+        const dateObj = (() => {
+            if (!data.timestamp) return null;
+            try {
+                if (typeof data.timestamp.toDate === 'function') return data.timestamp.toDate();
+                if (typeof data.timestamp.seconds === 'number') return new Date(data.timestamp.seconds * 1000);
+                const parsed = new Date(data.timestamp);
+                return isNaN(parsed.getTime()) ? null : parsed;
+            } catch (_) {
+                return null;
+            }
+        })();
         if (!groups[soPhieu]) {
             groups[soPhieu] = {
                 soPhieu,
@@ -22614,8 +22781,15 @@ function editDongPhieuSX(id, soPhieu) {
 async function saveEditedDongSX(id, soPhieu, newData) {
     showLoading();
     try {
-        await db.collection('production').doc(id).update(newData);
+        const normalizedData = { ...newData };
+        normalizedData.tonDau = Number(normalizedData.tonDau) || 0;
+        normalizedData.sl = Number(normalizedData.sl) || 0;
+        // Tồn cuối luôn được tính theo Tồn đầu + SL, tránh lưu số liệu lệch công thức.
+        normalizedData.tonCuoi = normalizedData.tonDau + normalizedData.sl;
+        await db.collection('production').doc(id).update(normalizedData);
         invalidateProductionDocsCache();
+        if (typeof window.__signalRealtimeWriteOnly === 'function')
+            window.__signalRealtimeWriteOnly(['production']);
         Swal.close();
         Swal.fire({ icon: 'success', title: 'Đã lưu thay đổi!', toast: true, position: 'top-end', timer: 1500, showConfirmButton: false });
         if (typeof ghiLog === 'function')
@@ -22641,6 +22815,8 @@ async function xoaDongTrongPhieuSX(id, soPhieu) {
         const tenSP = snapDoc.exists ? (snapDoc.data().tenSP || '(Chỉ mẻ)') : '';
         await db.collection('production').doc(id).delete();
         invalidateProductionDocsCache();
+        if (typeof window.__signalRealtimeWriteOnly === 'function')
+            window.__signalRealtimeWriteOnly(['production']);
         if (typeof filterSanXuat === 'function') {
             await filterSanXuat();
         }
@@ -22681,6 +22857,8 @@ async function huyPhieuSXGroup(soPhieu) {
         const soDong = snap.docs.length;
         await Promise.all(snap.docs.map(d => d.ref.delete()));
         invalidateProductionDocsCache();
+        if (typeof window.__signalRealtimeWriteOnly === 'function')
+            window.__signalRealtimeWriteOnly(['production']);
         Swal.fire({ icon: 'success', title: 'Đã xóa phiếu ' + soPhieu + '!', toast: true, position: 'top-end', timer: 1500, showConfirmButton: false });
         if (typeof filterSanXuat === 'function') {
             await filterSanXuat();
@@ -22786,6 +22964,8 @@ async function huyPhieuSX(id) {
         const tenSP = d ? (d.tenSP || '') : '';
         await db.collection('production').doc(id).delete();
         invalidateProductionDocsCache();
+        if (typeof window.__signalRealtimeWriteOnly === 'function')
+            window.__signalRealtimeWriteOnly(['production']);
         showAlert("Đã xóa!");
         // Cập nhật lại bảng danh sách
         if (typeof filterSanXuat === 'function') {
@@ -23180,28 +23360,102 @@ async function paySupplierDebt(docId, nccName) {
 // Truy vấn và hiển thị lịch sử trả tiền của NCC
 async function openHistoryModal(nccName) {
     try {
-        console.log("Đang tải dữ liệu cho:", nccName);
-        const snaps = await db.collection('payments').where('supplierName', '==', nccName).orderBy('date', 'desc').get();
-        console.log("Truy vấn xong, số bản ghi:", snaps.size);
-        let html = "<div class=\"max-h-60 overflow-y-auto\">";
-        if (snaps.empty) {
-            html += "Chưa có dữ liệu thanh toán.";
-        }
-        else {
-            snaps.forEach(doc => {
-                const d = doc.data();
-                const dateStr = d.date?.toDate()?.toLocaleDateString() || "N/A";
-                // --- SỬA Ở DÒNG NÀY ---
-                // Đổi 'deletePayment' thành 'deletePaymentNCC'
-                html += "<div class=\"flex justify-between border-b py-2 text-sm\">\n                    <span>" + dateStr + ": " + d.amount?.toLocaleString() + "</span>\n                    <button onclick=\"deletePaymentNCC('" + doc.id + "', '" + nccName.replace(/'/g, "\\'") + "', " + d.amount + ")\" \n                            title=\"X\u00F3a\" class=\"text-red-500 hover:text-red-700\"><i data-lucide=\"trash-2\" class=\"w-3.5 h-3.5\"></i></button>\n                </div>";
+        const safeName = String(nccName || '').replace(/'/g, "\\'");
+        // Lịch sử NCC không chỉ là các lần trả nợ. Lấy cả PHIẾU NHẬP NGUYÊN LIỆU
+        // và các khoản THANH TOÁN, sau đó ghép thành một dòng thời gian duy nhất.
+        const [paymentsSnap, importsSnap] = await Promise.all([
+            db.collection('payments').where('supplierName', '==', nccName).get(),
+            db.collection('material_imports').where('ncc', '==', nccName).get()
+        ]);
+
+        const toDate = (v) => {
+            if (!v) return null;
+            if (typeof v.toDate === 'function') return v.toDate();
+            const d = v instanceof Date ? v : new Date(v);
+            return Number.isNaN(d.getTime()) ? null : d;
+        };
+        const moneyNcc = (v) => (Number(v) || 0).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + ' đ';
+        const dateNcc = (v) => {
+            const d = toDate(v);
+            return d ? d.toLocaleDateString('vi-VN', { timeZone: APP_TIME_ZONE }) : '-';
+        };
+
+        // Gom các dòng material_imports thành từng PHIẾU nhập, vì một phiếu có thể có nhiều NL.
+        const importMap = new Map();
+        importsSnap.forEach(doc => {
+            const d = doc.data() || {};
+            const soPhieu = String(d.soPhieu || doc.id || 'Chưa rõ số phiếu');
+            const dt = toDate(d.timestamp || d.date) || toDate(d.ngayHd) || new Date(0);
+            if (!importMap.has(soPhieu)) {
+                importMap.set(soPhieu, {
+                    soPhieu,
+                    date: dt,
+                    soHd: d.soHd || '',
+                    ngayHd: d.ngayHd || '',
+                    items: [],
+                    total: 0
+                });
+            }
+            const g = importMap.get(soPhieu);
+            if (dt.getTime() < g.date.getTime()) g.date = dt;
+            if (!g.soHd && d.soHd) g.soHd = d.soHd;
+            if (!g.ngayHd && d.ngayHd) g.ngayHd = d.ngayHd;
+            const amount = Number(d.thanhTien) || ((Number(d.sl) || 0) * (Number(d.donGia) || 0));
+            g.items.push({ tenNL: d.tenNL || 'Nguyên liệu', sl: Number(d.sl) || 0, donGia: Number(d.donGia) || 0, thanhTien: amount });
+            g.total += amount;
+        });
+
+        const importRows = Array.from(importMap.values()).sort((a,b) => b.date.getTime() - a.date.getTime());
+        const paymentRows = paymentsSnap.docs.map(doc => {
+            const d = doc.data() || {};
+            return { id: doc.id, date: toDate(d.date || d.createdAt) || new Date(0), amount: Number(d.amount) || 0 };
+        }).sort((a,b) => b.date.getTime() - a.date.getTime());
+
+        const totalImported = importRows.reduce((s, x) => s + x.total, 0);
+        const totalPaid = paymentRows.reduce((s, x) => s + x.amount, 0);
+        const supplier = Object.values(window.allSuppliersData || {}).find(x => x.name === nccName);
+        const currentDebt = Number(supplier?.debt) || 0;
+
+        let html = '<div class="text-left space-y-3 max-h-[70vh] overflow-y-auto pr-1">';
+        html += '<div class="grid grid-cols-3 gap-2">' +
+            '<div class="rounded-xl border-2 border-blue-200 bg-blue-50 dark:border-blue-900/60 dark:bg-blue-950/30 p-2"><div class="text-[10px] font-bold text-blue-600 dark:text-blue-400">TỔNG NHẬP</div><div class="font-black text-sm">' + moneyNcc(totalImported) + '</div></div>' +
+            '<div class="rounded-xl border-2 border-emerald-200 bg-emerald-50 dark:border-emerald-900/60 dark:bg-emerald-950/30 p-2"><div class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">ĐÃ TRẢ</div><div class="font-black text-sm">' + moneyNcc(totalPaid) + '</div></div>' +
+            '<div class="rounded-xl border-2 border-red-200 bg-red-50 dark:border-red-900/60 dark:bg-red-950/30 p-2"><div class="text-[10px] font-bold text-red-600 dark:text-red-400">CÒN NỢ</div><div class="font-black text-sm">' + moneyNcc(currentDebt) + '</div></div>' +
+            '</div>';
+
+        html += '<details open class="border-2 border-slate-300 dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-900">' +
+            '<summary class="cursor-pointer p-3 font-black bg-slate-100 dark:bg-slate-800">📦 Lịch sử phiếu nhập nguyên liệu (' + importRows.length + ')</summary>';
+        if (!importRows.length) {
+            html += '<div class="p-3 text-sm text-slate-500 dark:text-slate-400">Chưa có phiếu nhập nguyên liệu cho NCC này.</div>';
+        } else {
+            html += '<div class="p-2 space-y-2">';
+            importRows.forEach(p => {
+                const itemText = p.items.map(it => escapeHtml(it.tenNL) + ' × ' + it.sl.toLocaleString('vi-VN') + ' = <b>' + moneyNcc(it.thanhTien) + '</b>').join('<br>');
+                html += '<div class="rounded-lg border-2 border-slate-200 dark:border-slate-700 p-2.5 bg-slate-50 dark:bg-slate-950/40">' +
+                    '<div class="flex items-start justify-between gap-2"><div><b>Phiếu ' + escapeHtml(p.soPhieu) + '</b><div class="text-[11px] text-slate-500 dark:text-slate-400">Ngày: ' + dateNcc(p.date) + (p.soHd ? ' • HĐ: ' + escapeHtml(p.soHd) : '') + '</div></div><b class="text-indigo-600 dark:text-indigo-400 whitespace-nowrap">' + moneyNcc(p.total) + '</b></div>' +
+                    '<div class="mt-2 text-xs leading-5">' + itemText + '</div>' +
+                    '</div>';
             });
+            html += '</div>';
         }
-        html += "</div>";
-        showPopup("Lịch sử: " + nccName, html);
-    }
-    catch (err) {
-        console.error("Lỗi chi tiết:", err);
-        showAlert("Lỗi: " + err.message);
+        html += '</details>';
+
+        html += '<details open class="border-2 border-slate-300 dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-900">' +
+            '<summary class="cursor-pointer p-3 font-black bg-slate-100 dark:bg-slate-800">💰 Lịch sử trả nợ (' + paymentRows.length + ')</summary>';
+        if (!paymentRows.length) {
+            html += '<div class="p-3 text-sm text-slate-500 dark:text-slate-400">Chưa có lần trả nợ nào.</div>';
+        } else {
+            html += '<div class="p-2">';
+            paymentRows.forEach(d => {
+                html += '<div class="flex items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-700 py-2 text-sm"><span>📅 ' + dateNcc(d.date) + '</span><span class="font-bold text-emerald-600">' + moneyNcc(d.amount) + '</span><button onclick="deletePaymentNCC(\'' + d.id.replace(/'/g, "\\'") + '\', \'' + safeName + '\', ' + d.amount + ')" title="Xóa" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div>';
+            });
+            html += '</div>';
+        }
+        html += '</details></div>';
+        showPopup('Lịch sử NCC: ' + nccName, html);
+    } catch (err) {
+        console.error('Lỗi tải lịch sử NCC:', err);
+        showAlert('Không thể tải lịch sử NCC: ' + err.message);
     }
 }
 // Đổi tên thành deletePaymentNCC để tách biệt hoàn toàn với deletePayment của KH
@@ -24920,3 +25174,64 @@ window.resetSalesHistoryFilters=function(){['searchInput','filterMonth','dateFro
 </html>
 
 <style id="v11-upgrade-css">#chamcong-salary-table th:nth-child(16),#chamcong-salary-table td:nth-child(16){font-weight:800!important}#chamcong-salary-table th:nth-child(15),#chamcong-salary-table td:nth-child(15){width:72px!important;min-width:72px!important}#chamcong-salary-table th:nth-child(16),#chamcong-salary-table td:nth-child(16){width:88px!important;min-width:88px!important}#chamcong-salary-table th:nth-child(17),#chamcong-salary-table td:nth-child(17){width:160px!important;min-width:160px!important}</style>
+
+<style>
+/* V29: Làm rõ đường viền Hồ sơ khách hàng chi tiết ở giao diện sáng, giữ giao diện tối rõ như cũ. */
+.customer-profile-popup {
+  border: 1.5px solid #94a3b8 !important;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.22) !important;
+}
+.customer-profile-popup .cp-card {
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 2px 7px rgba(15, 23, 42, 0.07) !important;
+}
+.customer-profile-popup .cp-card > table,
+.customer-profile-popup .cp-card table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+.customer-profile-popup .cp-card table thead th {
+  border-bottom: 1.5px solid #94a3b8 !important;
+}
+.customer-profile-popup .cp-card table tbody td {
+  border-bottom: 1px solid #d7dee8 !important;
+}
+.customer-profile-popup .cp-card table tbody tr:last-child td {
+  border-bottom: 0 !important;
+}
+.customer-profile-popup .cp-soft,
+.customer-profile-popup .cp-blue,
+.customer-profile-popup .cp-indigo,
+.customer-profile-popup .cp-emerald,
+.customer-profile-popup .cp-red,
+.customer-profile-popup .cp-rose {
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 1px 5px rgba(15, 23, 42, 0.06) !important;
+}
+.customer-profile-popup details.cp-card > summary {
+  border-radius: inherit;
+}
+.customer-profile-popup details.cp-card[open] > summary {
+  border-bottom: 1px solid #cbd5e1 !important;
+}
+.dark .customer-profile-popup,
+.dark .customer-profile-popup .cp-card,
+.dark .customer-profile-popup .cp-soft,
+.dark .customer-profile-popup .cp-blue,
+.dark .customer-profile-popup .cp-indigo,
+.dark .customer-profile-popup .cp-emerald,
+.dark .customer-profile-popup .cp-red,
+.dark .customer-profile-popup .cp-rose {
+  border-color: #475569 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28) !important;
+}
+.dark .customer-profile-popup .cp-card table thead th {
+  border-bottom-color: #475569 !important;
+}
+.dark .customer-profile-popup .cp-card table tbody td {
+  border-bottom-color: #334155 !important;
+}
+.dark .customer-profile-popup details.cp-card[open] > summary {
+  border-bottom-color: #475569 !important;
+}
+</style>
