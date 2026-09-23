@@ -10266,10 +10266,10 @@ db.collection('sales').onSnapshot((snap) => {
     clearTimeout(__salesDebounceTimer);
     __salesDebounceTimer = setTimeout(() => {
         if (typeof refreshDashboardData === 'function') {
-            refreshDashboardData(true).catch(err => console.warn('Không cập nhật Dashboard sau thay đổi sales:', err));
+            Promise.resolve(refreshDashboardData(true)).catch(err => console.warn('Không cập nhật Dashboard sau thay đổi sales:', err));
         }
         if (typeof refreshInventory === 'function') {
-            refreshInventory(true).catch(err => console.warn('Không cập nhật NXT sau thay đổi sales:', err));
+            Promise.resolve(refreshInventory(true)).catch(err => console.warn('Không cập nhật NXT sau thay đổi sales:', err));
         }
     }, 80);
 });
