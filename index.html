@@ -2725,6 +2725,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="bg-blue-100 dark:bg-slate-900 p-2 md:p-4 rounded-2xl border-4 border-blue-400 shadow-sm space-y-3">
                 <div class="relative flex gap-2">
                     <input type="text" id="sell-receipt" class="w-1/4 border border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-xs dark:text-white" placeholder="Số phiếu" readonly>
+                    <div id="firestore-read-status-sell-inline" class="hidden absolute left-2 right-2 top-full mt-1 z-20 rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 px-2 py-1.5 text-[10px] md:text-xs font-bold text-amber-800 dark:text-amber-200 shadow-sm">Chưa đồng bộ do hết read</div>
                     
                     <div class="relative w-3/4">
                         <input type="text" id="sell-customer" placeholder="Tên khách hàng" 
@@ -2734,7 +2735,6 @@ document.addEventListener('DOMContentLoaded', function () {
                            autocomplete="off">
                         <div id="dropdown-list" class="absolute z-[100] w-full bg-gray-50 dark:bg-slate-950 border border-gray-300 dark:border-slate-700 rounded-xl mt-1 shadow-lg max-h-48 overflow-y-auto hidden text-xs dark:text-white">
                         </div>
-                        <div id="firestore-read-status-sell-inline" class="hidden mt-1 rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 px-2 py-1.5 text-[10px] md:text-xs font-bold text-amber-800 dark:text-amber-200 shadow-sm">Chưa đồng bộ do hết read</div>
                     </div>
                 </div>
                 <div class="flex gap-2">
@@ -4360,6 +4360,7 @@ document.addEventListener('DOMContentLoaded', function () {
     </main>
   </main>
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+   <script src="script.js"></script>
 
     <script>/* ==================================================================================
    MỤC LỤC (BẢN ĐỒ CODE) - Dò Ctrl+F theo tiêu đề "TRANG ..." bên dưới để nhảy nhanh
@@ -10266,7 +10267,7 @@ db.collection('sales').onSnapshot((snap) => {
     clearTimeout(__salesDebounceTimer);
     __salesDebounceTimer = setTimeout(() => {
         if (typeof refreshDashboardData === 'function') {
-            Promise.resolve(refreshDashboardData(true)).catch(err => console.warn('Không cập nhật Dashboard sau thay đổi sales:', err));
+            refreshDashboardData(true).catch(err => console.warn('Không cập nhật Dashboard sau thay đổi sales:', err));
         }
         if (typeof refreshInventory === 'function') {
             Promise.resolve(refreshInventory(true)).catch(err => console.warn('Không cập nhật NXT sau thay đổi sales:', err));
@@ -10385,10 +10386,12 @@ async function saveImport() {
     const receiptNum = document.getElementById('imp-receipt').value;
     if (cart.length === 0) {
         Swal.fire('Lỗi', 'Giỏ hàng đang trống!', 'error');
+        window.__importSaveInProgress = false;
         return;
     }
     if (typeValue === 'Nhập đổi' && !window.__impDateStatus) {
         Swal.fire('Thiếu thông tin', 'Vui lòng chọn tình trạng hàng đổi date: Còn hạn hay Hết hạn.', 'warning');
+        window.__importSaveInProgress = false;
         return;
     }
     const isExpired = (typeValue === 'Nhập đổi' && window.__impDateStatus === 'expired');
@@ -10408,9 +10411,10 @@ async function saveImport() {
             dateStatus: dateStatusValue,
             stockAdjusted: !isExpired,
             vendor: vendorValue || null,
-            syncPending: !!window.__firestoreReadUnavailable,
-            syncStatus: window.__firestoreReadUnavailable ? 'pending' : 'synced',
-            syncReason: window.__firestoreReadUnavailable ? 'Chưa đồng bộ do hết READ' : null
+            syncStatus: 'synced',
+            syncPending: false,
+            syncMode: 'normal',
+            syncAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         const receiptRef = db.collection('receipts').doc();
 
@@ -10649,6 +10653,21 @@ function receiptTypeBadgeHtml(type, dateStatus, vendor, isReturn) {
     }
     return "<div class=\"flex items-center gap-1.5 flex-wrap\">" + tagHtml + "" + vendorHtml + "</div>";
 }
+// Trạng thái đồng bộ dùng chung cho các phiếu/giao dịch.
+// Xanh = đã ghi nhận đầy đủ; đỏ = còn chờ đồng bộ hoặc có lỗi. Chỉ hiện chi tiết khi rê chuột.
+function syncStatusBadgeHtml(data) {
+    const d = data || {};
+    const pending = d.syncPending === true || d.syncStatus === 'pending' ||
+        d.syncMode === 'read-fallback' || d.syncMode === 'local-only-read-unavailable' ||
+        d.localOnly === true || d.dateSwapSyncNeeded === true;
+    const err = String(d.syncError || d.syncReason || d.dateSwapSyncError || d.errorMessage || d.lastSyncError || '').trim();
+    if (pending || err) {
+        const title = err || 'Chưa đồng bộ do hết read';
+        return '<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400 text-[12px] font-black leading-none cursor-help" title="' + String(title).replace(/"/g, '&quot;') + '">!</span>';
+    }
+    return '<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100 text-green-600 dark:bg-green-500/15 dark:text-green-400 text-[12px] font-black leading-none cursor-help" title="Đã được đồng bộ">✓</span>';
+}
+
 // Dựng HTML cho 1 dòng phiếu nhập kho (dùng chung cho cả tải theo tháng lẫn tìm kiếm toàn bộ)
 // Đồng bộ giao diện với các danh sách phiếu khác trong ứng dụng (Lịch Sử HĐ, Kho Hàng...):
 // mỗi dòng là 1 "thẻ" bo góc, có viền màu nhấn 2 bên, đổ bóng nhẹ, nổi lên khi hover -
@@ -10659,7 +10678,7 @@ function buildReceiptRowHtml(docId, displayId, dateStr, itemCount, type, dateSta
     // lượng của SP đang tìm trong PHIẾU NÀY, để không phải mở từng phiếu ra xem mới biết.
     const matchHtml = matchQtyLabel
         ? "<span class=\"inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400 whitespace-nowrap\">\uD83D\uDD0E " + matchQtyLabel + "</span>" : '';
-    return "\n\t\t\t\t<tr class=\"hover:bg-transparent transition-colors\">\n\t\t\t\t\t<td colspan=\"6\" class=\"p-2\">\n\t\t\t\t\t\t<div class=\"flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-3 md:p-3 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] transition-all hover:-translate-y-0.5\" style=\"border-left-color:#10b981 !important; border-right-color:#10b981 !important;\">\n\t\t\t\t\t\t\t<div class=\"flex items-center gap-2 md:contents\">\n\t\t\t\t\t\t\t\t<span class=\"shrink-0 md:w-[6%] md:text-center md:px-2\" onclick=\"event.stopPropagation()\">\n\t\t\t\t\t\t\t\t\t<input type=\"checkbox\" class=\"receipt-check w-4 h-4 rounded\" data-doc-id=\"" + docId + "\">\n\t\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t\t<span class=\"text-[12px] md:text-[11px] font-bold text-slate-700 dark:text-slate-300 md:w-[14%] truncate md:px-2 md:text-center\">" + displayId + syncStatusBadgeHtml(syncData || {}) + "</span>\n\t\t\t\t\t\t\t\t<span class=\"text-[11px] font-bold text-slate-700 dark:text-slate-400 md:w-[14%] md:text-center md:px-2\">" + dateStr + "</span>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t<div class=\"flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700\">\n\t\t\t\t\t\t\t\t<div class=\"md:w-[40%] md:px-2 flex flex-col gap-1\">" + receiptTypeBadgeHtml(type, dateStatus, vendor, isReturn) + "" + matchHtml + "</div>\n\t\t\t\t\t\t\t\t<div class=\"flex items-center gap-3 md:contents\">\n\t\t\t\t\t\t\t\t\t<span class=\"text-[11px] text-slate-500 dark:text-slate-400 md:w-[10%] md:text-center md:px-2\">" + itemCount + " SP</span>\n\t\t\t\t\t\t\t\t\t<span class=\"md:w-[16%] md:text-center md:px-2\">\n\t\t\t\t\t\t\t\t\t\t<button onclick=\"viewReceipt('" + docId + "')\" class=\"px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-slate-800 dark:bg-slate-700 text-white hover:bg-slate-900 dark:hover:bg-slate-600 transition-colors whitespace-nowrap\">\uD83D\uDC41 Xem</button>\n\t\t\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</td>\n\t\t\t\t</tr>\n\t\t\t";
+    return "\n\t\t\t\t<tr class=\"hover:bg-transparent transition-colors\">\n\t\t\t\t\t<td colspan=\"6\" class=\"p-2\">\n\t\t\t\t\t\t<div class=\"flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-3 md:p-3 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] transition-all hover:-translate-y-0.5\" style=\"border-left-color:#10b981 !important; border-right-color:#10b981 !important;\">\n\t\t\t\t\t\t\t<div class=\"flex items-center gap-2 md:contents\">\n\t\t\t\t\t\t\t\t<span class=\"shrink-0 md:w-[6%] md:text-center md:px-2\" onclick=\"event.stopPropagation()\">\n\t\t\t\t\t\t\t\t\t<input type=\"checkbox\" class=\"receipt-check w-4 h-4 rounded\" data-doc-id=\"" + docId + "\">\n\t\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t\t<span class=\"text-[12px] md:text-[11px] font-bold text-slate-700 dark:text-slate-300 md:w-[14%] truncate md:px-2 md:text-center\">" + displayId + "</span>\n\t\t\t\t\t\t\t\t" + syncStatusBadgeHtml(syncData) + "\n\t\t\t\t\t\t\t\t<span class=\"text-[11px] font-bold text-slate-700 dark:text-slate-400 md:w-[14%] md:text-center md:px-2\">" + dateStr + "</span>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t<div class=\"flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700\">\n\t\t\t\t\t\t\t\t<div class=\"md:w-[40%] md:px-2 flex flex-col gap-1\">" + receiptTypeBadgeHtml(type, dateStatus, vendor, isReturn) + "" + matchHtml + "</div>\n\t\t\t\t\t\t\t\t<div class=\"flex items-center gap-3 md:contents\">\n\t\t\t\t\t\t\t\t\t<span class=\"text-[11px] text-slate-500 dark:text-slate-400 md:w-[10%] md:text-center md:px-2\">" + itemCount + " SP</span>\n\t\t\t\t\t\t\t\t\t<span class=\"md:w-[16%] md:text-center md:px-2\">\n\t\t\t\t\t\t\t\t\t\t<button onclick=\"viewReceipt('" + docId + "')\" class=\"px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-slate-800 dark:bg-slate-700 text-white hover:bg-slate-900 dark:hover:bg-slate-600 transition-colors whitespace-nowrap\">\uD83D\uDC41 Xem</button>\n\t\t\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</td>\n\t\t\t\t</tr>\n\t\t\t";
 }
 window.__receiptsLoadToken = window.__receiptsLoadToken || 0;
 async function loadReceipts() {
@@ -10968,7 +10987,9 @@ async function filterReceipts() {
             type: r.type || 'Nhập mới',
             dateStatus: r.dateStatus || null,
             vendor: r.vendor || null,
-            isReturn: r.isReturn === true
+            isReturn: r.isReturn === true,
+            syncPending: r.syncPending === true, syncStatus: r.syncStatus || null, syncMode: r.syncMode || null,
+            syncReason: r.syncReason || '', syncError: r.syncError || '', dateSwapSyncNeeded: r.dateSwapSyncNeeded === true
         }));
     }
     leftBody.innerHTML = '';
@@ -10976,7 +10997,7 @@ async function filterReceipts() {
     // Danh sách giờ chỉ còn 1 cột duy nhất (bảng phải đã ẩn vĩnh viễn) - dồn hết vào bảng trái.
     // Gom HTML vào mảng rồi gán 1 lần (thay vì "+=" lặp lại) - quan trọng ở đây vì khi có
     // từ khóa tìm kiếm, "matched" có thể là TOÀN BỘ lịch sử phiếu từ trước tới giờ.
-    const rowsHtml = matched.map(r => buildReceiptRowHtml(r.docId, r.displayId, r.dateStr, r.itemCount, r.type, r.dateStatus, r.vendor, r.isReturn, matchQtyByDocId ? matchQtyByDocId[r.docId] : null));
+    const rowsHtml = matched.map(r => buildReceiptRowHtml(r.docId, r.displayId, r.dateStr, r.itemCount, r.type, r.dateStatus, r.vendor, r.isReturn, matchQtyByDocId ? matchQtyByDocId[r.docId] : null, r));
     leftBody.innerHTML = rowsHtml.join('');
     if (matched.length === 0) {
         leftBody.innerHTML = '<tr><td class="p-4 text-center text-slate-400 text-sm">Không tìm thấy phiếu nào</td></tr>';
@@ -11548,42 +11569,45 @@ window.allProducts = [];
 window.choicesInstances = {};
 //Sửa giá SP ====
 window.updateProductPrice = async function (productName, newValue, type) {
-    const cleanValue = parseFloat(newValue.replace(/\./g, ''));
+    const cleanValue = parseFloat(String(newValue || '').replace(/\./g, ''));
     if (isNaN(cleanValue)) {
         showAlert("Vui lòng nhập số hợp lệ!");
         loadInventory();
         return;
     }
     try {
-        const cleanName = productName.trim();
-        const snapshot = await db.collection('products').where('name', '==', cleanName).get();
-        if (!snapshot.empty) {
-            const docId = snapshot.docs[0].id;
-            const updateData = {};
-            updateData[type] = cleanValue;
-            await db.collection('products').doc(docId).update(updateData);
-            // 1. Cập nhật cache allProducts
-            const pIdx = window.allProducts.findIndex(p => p.name && p.name.trim() === cleanName);
-            if (pIdx > -1) {
-                window.allProducts[pIdx][type] = cleanValue;
-            }
-            // 2. CẬP NHẬT THÊM allProductCache (Dành cho hàm quickAdd)
-            if (window.allProductCache) {
-                const cIdx = window.allProductCache.findIndex(p => p.name && p.name.trim() === cleanName);
-                if (cIdx > -1) {
-                    window.allProductCache[cIdx][type] = cleanValue;
-                }
-            }
-            console.log("\u0110\u00E3 c\u1EADp nh\u1EADt " + type + " cho " + cleanName + " th\u00E0nh " + cleanValue + "");
+        const cleanName = String(productName || '').trim();
+        let docId = null;
+        // Ưu tiên ID đã có trong cache để không READ lại chỉ vì sửa giá trên Kho Hàng.
+        const sources = [window.allProducts, window.allProductCache, window.productList];
+        for (const list of sources) {
+            if (!Array.isArray(list)) continue;
+            const found = list.find(p => p && String(p.name || '').trim() === cleanName && p.id);
+            if (found) { docId = found.id; break; }
         }
-        else {
-            console.error("Không tìm thấy sản phẩm với tên chính xác là:", cleanName);
+        if (!docId) {
+            const snapshot = await db.collection('products').where('name', '==', cleanName).limit(1).get();
+            if (!snapshot.empty) docId = snapshot.docs[0].id;
+        }
+        if (!docId) {
             showAlert("Không tìm thấy sản phẩm: " + cleanName + " trong danh mục!");
+            return;
         }
-    }
-    catch (err) {
+        const updateData = { [type]: cleanValue, updatedAt: firebase.firestore.FieldValue.serverTimestamp(), syncStatus: 'synced', syncPending: false };
+        await db.collection('products').doc(docId).update(updateData);
+        for (const list of sources) {
+            if (!Array.isArray(list)) continue;
+            const item = list.find(p => p && p.id === docId);
+            if (item) item[type] = cleanValue;
+            const byName = list.find(p => p && String(p.name || '').trim() === cleanName);
+            if (byName) byName[type] = cleanValue;
+        }
+        console.log("Đã cập nhật " + type + " cho " + cleanName + " thành " + cleanValue);
+    } catch (err) {
         console.error("Lỗi cập nhật giá:", err);
-        showAlert("Có lỗi xảy ra, vui lòng thử lại!");
+        const msg = isFirestoreReadBlockedError(err) ? 'Chưa đồng bộ do hết read: ' + (err.message || 'Firestore READ không khả dụng') : (err.message || 'Có lỗi xảy ra, vui lòng thử lại!');
+        showAlert(msg);
+        if (isFirestoreReadBlockedError(err) && typeof window.__setReadQuotaState === 'function') window.__setReadQuotaState(err, ['products']);
     }
 };
 // Tải danh sách sản phẩm từ Firebase và đổ vào các ô chọn (dropdown) toàn hệ thống
@@ -11593,7 +11617,7 @@ async function updateProductDropdowns() {
         window.allProducts = [];
         let optionsHtml = '<option value="">-- Chọn sản phẩm --</option>';
         snapshot.forEach(doc => {
-            const p = doc.data();
+            const p = { id: doc.id, ...doc.data() };
             window.allProducts.push(p);
             optionsHtml += "<option value=\"" + p.name + "\">" + p.name + "</option>";
         });
@@ -13844,10 +13868,14 @@ async function calculateAllStock() {
                     });
                     window.__stockCounterRefByNormalizedName = refMap;
                     // Có snapshot thành công => READ đã hoạt động trở lại.
-                    const __readWasUnavailable = !!window.__firestoreReadUnavailable;
-                    window.__firestoreReadUnavailable = false;
-                    window.__readRecoveryProbeIndex = 0;
-                    window.__stopReadRecoveryProbe();
+                    const __readWasUnavailable = window.__readRecoveryState !== 'healthy';
+                    const __serverSnapshot = !snap.metadata || snap.metadata.fromCache !== true;
+                    if (__readWasUnavailable && __serverSnapshot) {
+                        window.__readRecoveryState = 'recovering';
+                        window.__firestoreReadUnavailable = true;
+                        window.__readRecoveryProbeIndex = 0;
+                        window.__stopReadRecoveryProbe();
+                    }
                     window.baseInventoryMap = inventory;
                     // Giữ một bản tồn gốc đã chuẩn hóa theo tên sản phẩm. Một số dữ liệu cũ
                     // của Quả Bùi Kỳ Lão/nhóm khác có thể nằm ở stock_counters với tên có
@@ -13863,18 +13891,15 @@ async function calculateAllStock() {
                         resolve();
                         if (typeof window.__flushLocalOnlySalesToFirestore === 'function') setTimeout(() => window.__flushLocalOnlySalesToFirestore(), 0);
                     }
-                    if (__readWasUnavailable) {
+                    if (__readWasUnavailable && __serverSnapshot) {
                         setTimeout(() => {
-                            if (typeof window.__flushLocalOnlySalesToFirestore === 'function') window.__flushLocalOnlySalesToFirestore();
                             if (typeof window.__runReadRecoverySync === 'function') window.__runReadRecoverySync();
                         }, 0);
                     }
                 }, err => {
                     console.warn('Không lắng nghe được thay đổi tồn kho realtime (stock_counters) - có thể do mất mạng/hết quota:', err);
                     if (isFirestoreReadBlockedError(err)) {
-                        window.__firestoreReadUnavailable = true;
-                        window.__readRecoveryProbeIndex = 0;
-                        scheduleReadRecoveryProbe();
+                        if (typeof window.__markFirestoreReadUnavailable === 'function') window.__markFirestoreReadUnavailable(err, ['stock']);
                     }
                     if (!firstSnapshotReceived) {
                         firstSnapshotReceived = true;
@@ -13895,11 +13920,6 @@ async function calculateAllStock() {
 // kho thật không đổi, chỉ đổi giỏ hàng nào đang được xem là "active" mà thôi,
 // nên không cần tốn 1 lượt đọc Firestore mỗi lần thao tác.
 function recomputeCurrentStock() {
-    // Trong lúc Lưu & In, baseInventoryMap có thể đã được trừ tồn thật nhưng sellCart
-    // vẫn còn nguyên cho tới cuối luồng. Không được tính sellCart thêm lần nữa, nếu không
-    // ví dụ tồn 14 bán 6 sẽ tạm nhảy thành 2 trước khi reset giỏ về 8.
-    // Luồng Lưu & In sẽ gọi lại hàm này ngay sau khi sellCart = [] và mở khóa UI.
-    if (window.__saleSaveUiLock) return;
     // Dựng tồn hiển thị theo TÊN CHUẨN của Danh mục SP, lấy số gốc từ map đã chuẩn hóa.
     // Đây là điểm sửa quan trọng cho các SP có dữ liệu stock_counters cũ khác nhẹ tên,
     // đặc biệt Quả Bùi Kỳ Lão Om 450g/350g/180g: thêm 1 vào giỏ phải làm tồn khả dụng
@@ -15805,7 +15825,7 @@ async function updateExistingSale() {
                 });
                 const allDateNames = Array.from(new Set([...Object.keys(oldQtyByName), ...Object.keys(newQtyByName)]));
                 const counterRef = db.collection('app_meta').doc('receipt_counter');
-                const newReceiptRef = autoReceiptItems.length ? db.collection('receipts').doc('dateSwap_' + docId) : null;
+                const newReceiptRef = autoReceiptItems.length ? db.collection('receipts').doc() : null;
 
                 let newReceiptNum = null;
                 await db.runTransaction(async transaction => {
@@ -15924,8 +15944,26 @@ async function updateExistingSale() {
         }
     }
 }
-// Cảnh báo READ dùng chung cho Bán hàng/Xuất hóa đơn và Nhập kho. Chỉ hiện khi READ
-// thực sự bị đánh dấu lỗi; khi READ hồi phục + các hàng đợi đồng bộ chạy xong thì tự ẩn.
+// ============================================================
+// READ CONTROLLER - V75
+// ------------------------------------------------------------
+// Một trạng thái duy nhất cho READ Firestore:
+//   healthy    : READ hoạt động bình thường -> chạy luồng bình thường.
+//   quota      : READ vừa lỗi/quota -> không READ nền, chỉ cho các luồng fallback.
+//   recovering : READ đã có tín hiệu trở lại nhưng đang đồng bộ hàng chờ ->
+//                vẫn giữ chế độ an toàn cho tới khi đồng bộ xong.
+// Không được chuyển về healthy chỉ vì một snapshot/cache thành công.
+// ============================================================
+window.__readRecoveryState = window.__readRecoveryState || (window.__firestoreReadUnavailable ? 'quota' : 'healthy');
+window.__firestoreReadUnavailable = window.__readRecoveryState !== 'healthy';
+window.__readRecoveryDomains = window.__readRecoveryDomains || new Set();
+window.__readRecoveryRunning = false;
+window.__readRecoveryProbeRunning = false;
+window.__readRecoveryProbeTimer = window.__readRecoveryProbeTimer || null;
+window.__readFallbackPending = !!window.__readFallbackPending;
+window.__readFallbackRetryRequested = !!window.__readFallbackRetryRequested;
+window.__readRecoverySyncFailed = false;
+
 window.__updateReadStatusBanner = function(show) {
     ['firestore-read-status-sell', 'firestore-read-status-import', 'firestore-read-status-sell-inline', 'firestore-read-status-import-inline'].forEach(id => {
         const el = document.getElementById(id);
@@ -15934,82 +15972,6 @@ window.__updateReadStatusBanner = function(show) {
     });
 };
 
-// Cờ trạng thái READ của Firestore. Khi listener/READ báo quota 429 hoặc mất kết nối,
-// tuyệt đối không để luồng bán tiếp tục dùng transaction READ với dữ liệu cache cũ;
-// nếu không một sản phẩm có thể báo thiếu tồn trong bộ nhớ dù sản phẩm khác vẫn bán được.
-/* ================= TRẠNG THÁI ĐỒNG BỘ CHỨNG TỪ ================= */
-function getDocumentSyncStatus(data) {
-    const d=data||{}; const mode=String(d.syncMode||'').toLowerCase();
-    const pending=d.syncPending===true||d.localOnly===true||d.savedWithoutRead===true||d.dateSwapSyncNeeded===true||d.syncStatus==='pending'||d.syncStatus==='error'||mode.includes('read-fallback')||mode.includes('local-only')||mode.includes('fallback');
-    if(!pending) return {synced:true,reason:'Đã đồng bộ'};
-    let reason=String(d.syncError||d.syncReason||d.dateSwapSyncError||'').trim();
-    if(!reason) reason=d.localOnly===true||mode.includes('local-only')?'Chưa đồng bộ do hết READ hoặc đang chờ đồng bộ':(d.savedWithoutRead===true||mode.includes('read-fallback')?'Chưa đồng bộ do hết READ':(d.dateSwapSyncNeeded===true?'Chưa đồng bộ phần đổi date':'Chưa đồng bộ do lỗi cần kiểm tra'));
-    return {synced:false,reason};
-}
-function syncStatusBadgeHtml(data){
-    const info=getDocumentSyncStatus(data); const safe=typeof escapeHtml==='function'?escapeHtml(info.reason):String(info.reason).replace(/"/g,'&quot;');
-    return info.synced?'<span class="inline-flex items-center justify-center align-middle ml-1 w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[11px] font-black cursor-help" title="Đã đồng bộ">✓</span>':'<span class="inline-flex items-center justify-center align-middle ml-1 w-5 h-5 rounded-full bg-red-100 dark:bg-red-500/15 text-red-600 dark:text-red-400 text-[10px] font-black cursor-help" title="'+safe+'">●</span>';
-}
-async function hasPendingReadFallbackTasks(){
-    if(window.__firestoreReadUnavailable) return true;
-    try{
-        const types=['customer_debt_from_sale','customer_debt_from_deleted_sale','customer_debt_from_return','customer_debt_from_edit_old','customer_debt_from_edit_new','sale_edit_reconcile'];
-        const snap=await db.collection('app_meta').where('type','in',types).limit(100).get();
-        return !snap.empty || snap.size >= 100;
-    }catch(e){
-        if(typeof isFirestoreReadBlockedError==='function' && isFirestoreReadBlockedError(e)){
-            window.__markFirestoreReadUnavailable?.(e,['sales','customers','receipts','returns']);
-            return true;
-        }
-        console.warn('Không kiểm tra được tác vụ READ-fallback:',e);
-        return true;
-    }
-}
-async function flushDocumentSyncStatus(){
-    if(window.__firestoreReadUnavailable) return false;
-    let changed=false;
-    // Chỉ chuyển xanh những chứng từ đang ở trạng thái pending do luồng READ-fallback.
-    // Không được xoá cờ đỏ của một lỗi nghiệp vụ/ghi dữ liệu khác.
-    const readableReadReasons = new Set([
-        'Chưa đồng bộ do hết READ',
-        'Chưa đồng bộ do hết read',
-        'Chưa đồng bộ do hết READ hoặc đang chờ đồng bộ',
-        'Chưa đồng bộ do hết read hoặc đang chờ đồng bộ'
-    ]);
-    for(const [col,limit] of [['sales',100],['receipts',100],['material_imports',200],['production',200]]){
-        try{
-            const snap=await db.collection(col).where('syncPending','==',true).limit(limit).get();
-            if(snap.empty) continue;
-            const batch=db.batch(); let count=0;
-            snap.docs.forEach(doc=>{
-                const d=doc.data()||{};
-                const reason=String(d.syncReason||'').trim();
-                const mode=String(d.syncMode||'').toLowerCase();
-                const readFallback = d.savedWithoutRead===true || d.localOnly===true ||
-                    mode.includes('read-fallback') || mode.includes('local-only') ||
-                    readableReadReasons.has(reason);
-                // syncStatus=error phải tiếp tục đỏ cho tới khi chính luồng lỗi xử lý xong.
-                if(d.syncStatus==='error' && !readFallback) return;
-                if(!readFallback) return;
-                batch.set(doc.ref,{syncPending:false,syncStatus:'synced',syncReason:firebase.firestore.FieldValue.delete(),syncError:firebase.firestore.FieldValue.delete(),syncSyncedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
-                count++;
-            });
-            if(count){ await batch.commit(); changed=true; }
-        }catch(e){
-            if(typeof isFirestoreReadBlockedError==='function'&&isFirestoreReadBlockedError(e)){
-                window.__markFirestoreReadUnavailable?.(e,[col]);
-                return changed;
-            }
-            console.warn('Không cập nhật trạng thái đồng bộ '+col+':',e);
-        }
-    }
-    return changed;
-}
-/* ======================================================================== */
-
-window.__firestoreReadUnavailable = !!window.__firestoreReadUnavailable;
-window.__readRecoveryState = window.__firestoreReadUnavailable ? 'blocked' : 'healthy';
-window.__readRecoveryLastError = window.__readRecoveryLastError || '';
 function isFirestoreReadBlockedError(err) {
     const code = String(err?.code || '').toLowerCase();
     const msg = String(err?.message || err || '').toLowerCase();
@@ -16018,66 +15980,51 @@ function isFirestoreReadBlockedError(err) {
         msg.includes('too many requests') || msg.includes('429') ||
         msg.includes('failed to fetch') || msg.includes('network');
 }
-// V47: CHẾ ĐỘ WRITE-ONLY KHI READ HẾT QUOTA
-// Mọi thao tác ghi vẫn phải đi được bằng batch/increment; các phần báo cáo cần READ
-// được xếp hàng để chạy lại ngay khi listener/READ của Firestore hoạt động trở lại.
-window.__readRecoveryDomains = window.__readRecoveryDomains || new Set();
-window.__queueReadRecoveryDomains = function(domains) {
-    (Array.isArray(domains) ? domains : [domains]).filter(Boolean).forEach(d => window.__readRecoveryDomains.add(String(d)));
-    // Chỉ xếp hàng khi READ thật sự lỗi. READ còn bình thường tuyệt đối không tạo recovery giả.
-    if (window.__firestoreReadUnavailable || window.__readRecoveryState === 'recovering') window.__readFallbackPending = true;
-};
-window.__markFirestoreReadUnavailable = function(err, domains) {
+
+window.__setReadQuotaState = function(err, domains) {
+    window.__readRecoveryState = 'quota';
     window.__firestoreReadUnavailable = true;
-    window.__readRecoveryState = 'blocked';
-    window.__readRecoveryLastError = String(err?.message || err || 'READ Firestore không khả dụng');
-    if (typeof window.__updateReadStatusBanner === 'function') window.__updateReadStatusBanner(true);
+    window.__readRecoverySyncFailed = false;
     window.__readRecoveryProbeIndex = 0;
     if (domains) window.__queueReadRecoveryDomains(domains);
-    if (typeof scheduleReadFallbackRecovery === 'function') scheduleReadFallbackRecovery();
+    if (typeof window.__updateReadStatusBanner === 'function') window.__updateReadStatusBanner(true);
     scheduleReadRecoveryProbe();
     return true;
 };
-window.__readRecoveryProbeTimer = window.__readRecoveryProbeTimer || null;
-window.__readRecoveryProbeRunning = false;
+window.__markFirestoreReadUnavailable = window.__setReadQuotaState;
+
+window.__queueReadRecoveryDomains = function(domains) {
+    const list = Array.isArray(domains) ? domains : [domains];
+    list.filter(Boolean).forEach(d => window.__readRecoveryDomains.add(String(d)));
+    // Chỉ có ý nghĩa khi READ đang quota/recovering. READ healthy tuyệt đối
+    // không tự tạo hàng chờ recovery.
+    if (window.__readRecoveryState !== 'healthy' || window.__firestoreReadUnavailable) {
+        window.__readFallbackPending = true;
+    }
+};
+
 window.__stopReadRecoveryProbe = function() {
     if (window.__readRecoveryProbeTimer) {
         clearTimeout(window.__readRecoveryProbeTimer);
         window.__readRecoveryProbeTimer = null;
     }
 };
+
 window.__probeFirestoreReadRecovery = async function() {
-    if (!window.__firestoreReadUnavailable || window.__readRecoveryProbeRunning) return false;
+    if (window.__readRecoveryState !== 'quota' || window.__readRecoveryProbeRunning) return false;
     window.__readRecoveryProbeRunning = true;
     try {
-        // Chỉ thăm dò khi READ đang bị đánh dấu lỗi. Khi READ còn bình thường,
-        // tuyệt đối không thêm READ nền nào. Một probe nhẹ giúp phục hồi ngay cả
-        // khi onSnapshot cũ đã đóng sau RESOURCE_EXHAUSTED.
-        await db.collection('app_meta').doc('realtime_sync').get();
-        // READ đã phản hồi, nhưng CHƯA được coi là healthy cho tới khi toàn bộ hàng chờ
-        // được xử lý xong. Giữ trạng thái recovering để không xoá dấu đỏ quá sớm.
-        window.__firestoreReadUnavailable = false;
+        // Chỉ probe khi READ đã lỗi. Không có READ nền khi healthy.
+        const snap = await db.collection('app_meta').doc('realtime_sync').get({ source: 'server' });
+        if (!snap || !snap.exists) throw new Error('READ server chưa xác nhận hồi phục.');
         window.__readRecoveryState = 'recovering';
+        window.__firestoreReadUnavailable = true;
         window.__readRecoveryRetryIndex = 0;
         window.__readFallbackRetryIndex = 0;
         window.__stopReadRecoveryProbe();
-        setTimeout(async () => {
-            try {
-                if (typeof flushPendingReadFallbackSync === 'function') await flushPendingReadFallbackSync(true);
-                if (typeof window.__runReadRecoverySync === 'function') await window.__runReadRecoverySync();
-                if (typeof window.__flushLocalOnlySalesToFirestore === 'function') await window.__flushLocalOnlySalesToFirestore();
-                if (typeof flushDocumentSyncStatus === 'function' && !window.__firestoreReadUnavailable && !(window.__readRecoveryDomains && window.__readRecoveryDomains.size) && !window.__readFallbackPending) await flushDocumentSyncStatus();
-                if (!window.__firestoreReadUnavailable && !(window.__readRecoveryDomains && window.__readRecoveryDomains.size) && !window.__readFallbackPending) {
-                    if (typeof window.__updateReadStatusBanner === 'function') window.__updateReadStatusBanner(false);
-                }
-            } catch (e) {
-                window.__readRecoveryLastError = String(e?.message || e || 'Lỗi đồng bộ');
-                window.__readRecoveryState = isFirestoreReadBlockedError(e) ? 'blocked' : 'recovering';
-                if (isFirestoreReadBlockedError(e)) window.__firestoreReadUnavailable = true;
-                if (typeof window.__updateReadStatusBanner === 'function') window.__updateReadStatusBanner(true);
-                console.warn('Đồng bộ ngay sau khi READ hồi phục chưa hoàn tất:', e);
-            }
-        }, 0);
+        if (typeof window.__runReadRecoverySync === 'function') {
+            setTimeout(() => window.__runReadRecoverySync(), 0);
+        }
         return true;
     } catch (e) {
         if (!isFirestoreReadBlockedError(e)) console.warn('Probe READ Firestore chưa khôi phục:', e);
@@ -16086,8 +16033,9 @@ window.__probeFirestoreReadRecovery = async function() {
         window.__readRecoveryProbeRunning = false;
     }
 };
+
 function scheduleReadRecoveryProbe() {
-    if (!window.__firestoreReadUnavailable || window.__readRecoveryProbeTimer) return;
+    if (window.__readRecoveryState !== 'quota' || window.__readRecoveryProbeTimer) return;
     const delays = [5000, 15000, 30000, 60000];
     const idx = Math.min(Number(window.__readRecoveryProbeIndex || 0), delays.length - 1);
     const delay = delays[idx];
@@ -16095,57 +16043,80 @@ function scheduleReadRecoveryProbe() {
     window.__readRecoveryProbeTimer = setTimeout(async () => {
         window.__readRecoveryProbeTimer = null;
         const recovered = await window.__probeFirestoreReadRecovery();
-        if (!recovered && window.__firestoreReadUnavailable) scheduleReadRecoveryProbe();
+        if (!recovered && window.__readRecoveryState === 'quota') scheduleReadRecoveryProbe();
     }, delay);
 }
+
+window.__finishReadRecovery = function() {
+    const localPending = window.__localSaleQueueReadyForRecovery === true ? true : false;
+    const clear = window.__readRecoveryState === 'recovering' &&
+        !window.__readRecoveryDomains.size &&
+        !window.__readFallbackPending &&
+        !window.__readFallbackRetryRequested &&
+        !localPending &&
+        !window.__readRecoverySyncFailed;
+    if (!clear) return false;
+    window.__readRecoveryState = 'healthy';
+    window.__firestoreReadUnavailable = false;
+    window.__readRecoveryRetryIndex = 0;
+    window.__readFallbackRetryIndex = 0;
+    window.__readRecoverySyncFailed = false;
+    if (typeof window.__updateReadStatusBanner === 'function') window.__updateReadStatusBanner(false);
+    return true;
+};
+
 window.__runReadRecoverySync = async function() {
-    if (window.__readRecoveryRunning || window.__firestoreReadUnavailable) return false;
+    if (window.__readRecoveryRunning || window.__readRecoveryState !== 'recovering') return false;
     window.__readRecoveryRunning = true;
-    window.__readRecoveryState = 'recovering';
-    if (typeof window.__updateReadStatusBanner === 'function') window.__updateReadStatusBanner(true);
+    window.__readRecoverySyncFailed = false;
     try {
-        if (typeof flushPendingReadFallbackSync === 'function') await flushPendingReadFallbackSync(true);
-        if (typeof window.__flushLocalOnlySalesToFirestore === 'function') await window.__flushLocalOnlySalesToFirestore();
-
-        for (let round = 0; round < 3; round++) {
-            const domains = Array.from(window.__readRecoveryDomains || []);
-            if (!domains.length) break;
-            if (typeof window.requestPostWriteSync !== 'function') throw new Error('Thiếu hàm đồng bộ sau ghi.');
-            await window.requestPostWriteSync(domains, { remote: true, readRecovery: true, refreshAll: true });
-            if (window.__firestoreReadUnavailable) throw new Error('READ Firestore vừa hết lượt trong lúc đồng bộ.');
-            domains.forEach(d => window.__readRecoveryDomains.delete(d));
+        // 1) Công nợ/tác vụ WRITE-only phải hoàn tất trước.
+        if (typeof flushPendingReadFallbackSync === 'function') {
+            const debtOk = await flushPendingReadFallbackSync(true);
+            if (debtOk === false) throw new Error('Còn dữ liệu công nợ chờ đồng bộ.');
         }
-
-        // Không được chuyển xanh nếu vẫn còn bất kỳ hàng chờ nào.
-        if (window.__readRecoveryDomains && window.__readRecoveryDomains.size) throw new Error('Vẫn còn dữ liệu chờ đồng bộ.');
-        if (window.__readFallbackPending) throw new Error('Vẫn còn tác vụ READ-fallback chờ xử lý.');
-        if (typeof hasPendingLocalOnlySales === 'function' && await hasPendingLocalOnlySales()) throw new Error('Vẫn còn phiếu bán tạm trên máy chưa đồng bộ.');
-        if (typeof hasPendingReadFallbackTasks === 'function' && await hasPendingReadFallbackTasks()) throw new Error('Vẫn còn tác vụ đối soát chờ xử lý.');
-
-        if (typeof flushDocumentSyncStatus === 'function') await flushDocumentSyncStatus();
-        if (window.__firestoreReadUnavailable) throw new Error('READ vừa lỗi lại khi cập nhật trạng thái chứng từ.');
-
-        window.__readFallbackRetryIndex = 0;
-        window.__readRecoveryState = 'healthy';
-        window.__readRecoveryLastError = '';
-        window.__firestoreReadUnavailable = false;
-        if (typeof window.__updateReadStatusBanner === 'function') window.__updateReadStatusBanner(false);
-        if (typeof flushDocumentSyncStatus === 'function') await flushDocumentSyncStatus();
-        return true;
+        // 2) Hóa đơn bán local-only phải được đẩy lên server.
+        if (typeof window.__flushLocalOnlySalesToFirestore === 'function') {
+            await window.__flushLocalOnlySalesToFirestore();
+            if (window.__readRecoveryState !== 'recovering') throw new Error('READ mất lại trong lúc đồng bộ hóa đơn.');
+        }
+        // 3) Chỉ refresh những domain thực sự đã ghi trong thời gian READ hết.
+        const domains = Array.from(window.__readRecoveryDomains || []);
+        if (domains.length && typeof window.requestPostWriteSync === 'function') {
+            const ok = await window.requestPostWriteSync(domains, { remote: true, readRecovery: true, refreshAll: true });
+            if (ok === false) throw new Error('Chưa hoàn tất đồng bộ dữ liệu sau khi READ hồi phục.');
+            window.__readRecoveryDomains.clear();
+        }
+        // 4) Chỉ lúc mọi hàng chờ đã sạch mới cho READ về healthy.
+        if (!window.__readRecoveryDomains.size && !window.__readFallbackPending && !window.__readFallbackRetryRequested) {
+            window.__finishReadRecovery();
+            return true;
+        }
+        return false;
     } catch (e) {
-        window.__readRecoveryState = isFirestoreReadBlockedError(e) ? 'blocked' : 'recovering';
-        window.__readRecoveryLastError = String(e?.message || e || 'Lỗi đồng bộ');
-        window.__readFallbackPending = true;
-        if (isFirestoreReadBlockedError(e)) window.__firestoreReadUnavailable = true;
-        if (typeof window.__updateReadStatusBanner === 'function') window.__updateReadStatusBanner(true);
-        console.warn('READ đã quay lại nhưng đồng bộ chưa hoàn tất, sẽ tự thử lại:', e);
+        window.__readRecoverySyncFailed = true;
+        if (isFirestoreReadBlockedError(e)) {
+            window.__readRecoveryState = 'quota';
+            window.__firestoreReadUnavailable = true;
+            window.__readRecoveryProbeIndex = 0;
+            scheduleReadRecoveryProbe();
+        }
+        console.warn('READ đã quay lại nhưng đồng bộ chưa hoàn tất:', e);
         return false;
     } finally {
         window.__readRecoveryRunning = false;
-        if (window.__firestoreReadUnavailable) scheduleReadRecoveryProbe();
-        else if (window.__readFallbackPending || (window.__readRecoveryDomains && window.__readRecoveryDomains.size)) scheduleReadFallbackRecovery();
+        if (window.__readRecoveryState === 'recovering' &&
+            (window.__readRecoveryDomains.size || window.__readFallbackPending || window.__readFallbackRetryRequested)) {
+            scheduleReadFallbackRecovery();
+        }
     }
 };
+
+if (window.__readRecoveryState === 'quota') {
+    window.__updateReadStatusBanner(true);
+    scheduleReadRecoveryProbe();
+}
+
 function getCachedCustomerRefByName(customerName) {
     const name = String(customerName || '').trim().toLowerCase();
     if (!name || !Array.isArray(window.allCustomersData)) return null;
@@ -16267,6 +16238,9 @@ async function saveSaleWithoutFirestoreReads({ saleRef, saleData, productNames, 
         ...saleData,
         syncMode: 'read-fallback',
         savedWithoutRead: true,
+        syncPending: true,
+        syncStatus: 'pending',
+        syncReason: 'Chưa đồng bộ do hết read',
         savedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
     batch.set(saleRef, fallbackSaleData, { merge: true });
@@ -16304,12 +16278,12 @@ async function saveSaleWithoutFirestoreReads({ saleRef, saleData, productNames, 
     return true;
 }
 async function flushPendingReadFallbackSync(skipRecoveryRun = false) {
-    if (!window.__readFallbackPending && !window.__readFallbackRetryRequested) return;
+    if (!window.__readFallbackPending && !window.__readFallbackRetryRequested) return true;
     window.__readFallbackRetryRequested = false;
     const pendingTypes = ['customer_debt_from_sale','customer_debt_from_deleted_sale','customer_debt_from_return','customer_debt_from_edit_old','customer_debt_from_edit_new'];
+    let unresolved = false;
     try {
         const pending = await db.collection('app_meta').where('type', 'in', pendingTypes).limit(100).get();
-        let unresolved = pending.size >= 100;
         for (const doc of pending.docs) {
             const d = doc.data() || {};
             const customerName = String(d.customerName || '').trim();
@@ -16317,28 +16291,38 @@ async function flushPendingReadFallbackSync(skipRecoveryRun = false) {
             if (!customerName || !amount) { unresolved = true; continue; }
             const q = await db.collection('customers').where('name', '==', customerName).limit(1).get();
             if (q.empty) { unresolved = true; continue; }
+            let applied = false;
             await db.runTransaction(async tx => {
                 const customerRef = q.docs[0].ref;
                 const snap = await tx.get(customerRef);
                 if (!snap.exists) return;
                 tx.update(customerRef, { debt: firebase.firestore.FieldValue.increment(amount), updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
                 tx.delete(doc.ref);
+                applied = true;
             });
+            if (!applied) unresolved = true;
         }
         window.__readFallbackPending = unresolved;
         window.__readFallbackRetryDelay = 0;
-        if (!window.__readFallbackPending && !skipRecoveryRun && typeof window.__runReadRecoverySync === 'function') await window.__runReadRecoverySync();
+        if (unresolved) {
+            window.__readFallbackRetryRequested = true;
+            return false;
+        }
+        if (!skipRecoveryRun && typeof window.__runReadRecoverySync === 'function') await window.__runReadRecoverySync();
+        return true;
     } catch (err) {
         window.__readFallbackPending = true;
         window.__readFallbackRetryRequested = true;
-        if (isFirestoreReadBlockedError(err)) window.__firestoreReadUnavailable = true;
+        if (isFirestoreReadBlockedError(err) && typeof window.__markFirestoreReadUnavailable === 'function') window.__markFirestoreReadUnavailable(err, ['customers','sales','returns']);
         console.warn('Chưa thể đồng bộ phần dữ liệu chờ khi READ quay lại:', err);
         throw err;
     }
 }
 function scheduleReadFallbackRecovery() {
-    if (!window.__readFallbackPending && !(window.__readRecoveryDomains && window.__readRecoveryDomains.size)) return;
-    if (window.__firestoreReadUnavailable) return;
+    // Không chạy recovery timer khi READ đang healthy. Hàng chờ chỉ tồn tại trong
+    // quota/recovering và chỉ retry sau một lần đồng bộ chưa hoàn tất.
+    if (window.__readRecoveryState !== 'recovering') return;
+    if (!window.__readFallbackPending && !(window.__readRecoveryDomains && window.__readRecoveryDomains.size) && !window.__readFallbackRetryRequested) return;
     if (window.__readFallbackRetryTimer) return;
     const delays = [30000, 120000, 300000, 900000];
     const idx = Math.min(Number(window.__readFallbackRetryIndex || 0), delays.length - 1);
@@ -16346,8 +16330,8 @@ function scheduleReadFallbackRecovery() {
     window.__readFallbackRetryIndex = Math.min(idx + 1, delays.length - 1);
     window.__readFallbackRetryTimer = setTimeout(() => {
         window.__readFallbackRetryTimer = null;
-        flushPendingReadFallbackSync().finally(() => {
-            if (window.__readFallbackPending) scheduleReadFallbackRecovery();
+        window.__runReadRecoverySync().finally(() => {
+            if (window.__readRecoveryState === 'recovering' && (window.__readFallbackPending || window.__readRecoveryDomains.size || window.__readFallbackRetryRequested)) scheduleReadFallbackRecovery();
         });
     }, delay);
 }
@@ -16375,9 +16359,8 @@ document.addEventListener('visibilitychange', () => {
     }
 });
 if (window.__firestoreReadUnavailable) scheduleReadRecoveryProbe();
-// Không mở thêm listener app_meta cho hàng đợi pending. Recovery probe + realtime_sync
-// đã đủ để phát hiện READ quay lại mà không tạo thêm READ nền liên tục.
-
+// Không mở listener riêng cho hàng đợi READ fallback.
+// Recovery controller chỉ probe khi READ thực sự quota/recovering.
 // ============================================================
 // V54 - BÁN HÀNG LOCAL-ONLY KHI READ FIRESTORE HẾT QUOTA
 // ------------------------------------------------------------
@@ -16388,6 +16371,7 @@ const LOCAL_SALE_QUEUE_DB = 'banhang_local_sale_queue_v54';
 const LOCAL_SALE_QUEUE_STORE = 'pending_sales';
 let __localSaleQueueDbPromise = null;
 let __localSaleQueueSyncRunning = false;
+window.__localSaleQueueReadyForRecovery = false;
 
 function openLocalSaleQueueDb() {
     if (__localSaleQueueDbPromise) return __localSaleQueueDbPromise;
@@ -16522,6 +16506,7 @@ async function saveSaleLocalOnlyWhenReadUnavailable({ saleRef, saleData, itemsTo
     const localSale = { ...saleData, id: localReceiptId, date: localDate, localDate, localOnly:true, syncPending:true, syncMode:'local-only-read-unavailable', localOnlyOperationId:operationId, _docId:saleRef.id, _localOnly:true };
     const record = { operationId, docId:saleRef.id, receiptId:localReceiptId, originalReceiptId:receiptId||'', saleData:localSale, itemsToSave:itemsToSave||[], productNames:productNames||Object.keys(qtyByName||{}), qtyByName:qtyByName||{}, grandTotal:Number(grandTotal)||0, customer:String(customer||'').trim(), paymentMethod:paymentMethod||'Tiền mặt', createdAt:Date.now(), status:'pending' };
     await localSaleQueuePut(record);
+    window.__localSaleQueueReadyForRecovery = true;
     localSaleApplyRamStock(itemsToSave);
     localSaleAddToRamHistory(localSale);
     localSaleSetNextReceiptInput(localReceiptId);
@@ -16539,7 +16524,7 @@ async function syncOneLocalOnlySaleToFirestore(record) {
         if(!customerRef){const qs=await db.collection('customers').where('name','==',record.customer).limit(1).get();if(!qs.empty)customerRef=qs.docs[0].ref;}
     }
     const names=Object.keys(record.qtyByName||{}), refs=names.map(getCachedStockRefForSale), dateSwapItems=(record.itemsToSave||[]).filter(i=>i&&i.dateSwap);
-    const receiptRef=dateSwapItems.length?db.collection('receipts').doc('dateSwap_' + saleRef.id):null;
+    const receiptRef=dateSwapItems.length?db.collection('receipts').doc():null;
     await db.runTransaction(async tx=>{
         const txRefs=[saleRef,...refs]; if(customerRef)txRefs.push(customerRef);
         const snaps=typeof tx.getAll==='function'?await tx.getAll(...txRefs):await Promise.all(txRefs.map(r=>tx.get(r)));
@@ -16584,19 +16569,15 @@ async function flushLocalOnlySalesToFirestore(){
                 await localSaleQueueDelete(record.operationId);
                 synced.push(record);
             }catch(e){
-                if(isFirestoreReadBlockedError(e)){window.__firestoreReadUnavailable=true;break;}
+                if(isFirestoreReadBlockedError(e)){ if (typeof window.__markFirestoreReadUnavailable === 'function') window.__markFirestoreReadUnavailable(e, ['sales','stock','customers','receipts']); break; }
                 record.status='blocked';
                 record.blockedReason=String(e?.message||e||'Không xác định');
                 try{await localSaleQueuePut(record);}catch(_){}
             }
         }
-        if(synced.length && !window.__firestoreReadUnavailable) {
-            await reconcileLocalSaleCounter(synced);
-            try {
-                invalidateSalesSearchCache();
-                if (document.getElementById('page-history')) loadSalesList();
-            } catch (e) { console.warn('Không làm mới Lịch Sử HĐ sau đồng bộ local:', e); }
-        }
+        if(synced.length && !window.__firestoreReadUnavailable) await reconcileLocalSaleCounter(synced);
+        const remaining = (await localSaleQueueGetAll()).filter(r => r && r.status !== 'blocked');
+        window.__localSaleQueueReadyForRecovery = remaining.length > 0;
     }finally{__localSaleQueueSyncRunning=false;}
 }
 window.__flushLocalOnlySalesToFirestore=flushLocalOnlySalesToFirestore;
@@ -16644,10 +16625,10 @@ async function saveSaleFastWrite({ saleRef, saleData, productNames, qtyByName, g
     const fastSaleData = {
         ...saleData,
         syncMode: 'fast-write',
-        savedWithoutRead: !!window.__firestoreReadUnavailable,
-        syncPending: !!window.__firestoreReadUnavailable,
-        syncStatus: window.__firestoreReadUnavailable ? 'pending' : 'synced',
-        syncReason: window.__firestoreReadUnavailable ? 'Chưa đồng bộ do hết READ' : null,
+        savedWithoutRead: false,
+        syncPending: false,
+        syncStatus: 'synced',
+        syncAt: firebase.firestore.FieldValue.serverTimestamp(),
         savedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 
@@ -16682,13 +16663,10 @@ async function saveSaleFastWrite({ saleRef, saleData, productNames, qtyByName, g
         }
     }
 
-    // Đổi date: khi READ còn hoạt động, để luồng transaction chuẩn tạo đúng 1 phiếu PNxx.
-    // Khi READ đã hết, Fast Write tự tạo đúng 1 phiếu PN-OFF và saveAndPrint sẽ bỏ qua
-    // khối tạo phiếu thứ hai bên dưới.
+    // Đổi date: tạo luôn phiếu Nhập đổi trong cùng Batch, không chạy transaction thứ hai.
     const dateSwapItems = (itemsToSave || []).filter(i => i && i.dateSwap);
-    if (dateSwapItems.length && !window.__firestoreReadUnavailable) return false;
     if (dateSwapItems.length) {
-        const receiptRef = db.collection('receipts').doc('dateSwap_' + saleRef.id);
+        const receiptRef = db.collection('receipts').doc();
         const autoReceiptItems = dateSwapItems.map(it => ({
             name: it.name,
             unit: it.unit || 'Cái',
@@ -16710,10 +16688,7 @@ async function saveSaleFastWrite({ saleRef, saleData, productNames, qtyByName, g
             note: 'Tự động từ hóa đơn bán hàng ' + receiptId + ' (đổi date)',
             fromSaleId: receiptId,
             vendor: customer ? String(customer).trim() : null,
-            syncMode: 'fast-write',
-            syncPending: !!window.__firestoreReadUnavailable,
-            syncStatus: window.__firestoreReadUnavailable ? 'pending' : 'synced',
-            syncReason: window.__firestoreReadUnavailable ? 'Chưa đồng bộ do hết READ' : null
+            syncMode: 'fast-write'
         });
         if (okItems.length) {
             const okQtyByName = {};
@@ -16758,9 +16733,7 @@ async function saveSaleFastWrite({ saleRef, saleData, productNames, qtyByName, g
         window.__normalizedBaseInventoryMap[key] = Number(window.__normalizedBaseInventoryMap[key] || 0) + q;
     });
     if (typeof recomputeCurrentStock === 'function') recomputeCurrentStock();
-    if (window.__firestoreReadUnavailable && typeof window.__queueReadRecoveryDomains === 'function') {
-        window.__queueReadRecoveryDomains(['sales','stock','customers','receipts']);
-    }
+    if (typeof window.__queueReadRecoveryDomains === 'function') window.__queueReadRecoveryDomains(['sales','stock','customers','receipts']);
     return true;
 }
 
@@ -16901,14 +16874,18 @@ async function saveAndPrint() {
             // V52: đường nhanh mặc định - chỉ 1 Batch WRITE, không READ/transaction.
             // Nếu cache tồn không đủ rõ ràng, hàm trả false và tự quay về transaction cũ.
             try {
-                usedFastWrite = await saveSaleFastWrite({
-                    saleRef, saleData, productNames, qtyByName, grandTotal, customer,
-                    paymentMethod, receiptId, itemsToSave
-                });
+                // READ còn hoạt động: ưu tiên luồng Firestore bình thường để lấy tồn server chính xác.
+                // Chỉ dùng Fast Write khi READ đang quota/recovering.
+                if (window.__readRecoveryState !== 'healthy' || window.__firestoreReadUnavailable) {
+                    usedFastWrite = await saveSaleFastWrite({
+                        saleRef, saleData, productNames, qtyByName, grandTotal, customer,
+                        paymentMethod, receiptId, itemsToSave
+                    });
+                }
             } catch (fastErr) {
                 console.warn('Lưu nhanh bán hàng không thành công, chuyển sang luồng an toàn:', fastErr);
                 usedFastWrite = false;
-                if (isFirestoreReadBlockedError(fastErr)) window.__firestoreReadUnavailable = true;
+                if (isFirestoreReadBlockedError(fastErr) && typeof window.__markFirestoreReadUnavailable === 'function') window.__markFirestoreReadUnavailable(fastErr, ['sales','stock','customers','receipts']);
             }
             if (usedFastWrite) {
                 console.info('Đã lưu bán hàng bằng 1 Batch WRITE nhanh.');
@@ -16990,7 +16967,7 @@ async function saveAndPrint() {
                 throw txError;
             }
             if (!isFirestoreReadBlockedError(txError)) throw txError;
-            window.__firestoreReadUnavailable = true;
+            if (typeof window.__markFirestoreReadUnavailable === 'function') window.__markFirestoreReadUnavailable(error, ['sales','stock','customers','receipts']);
             const localSaved = await saveSaleLocalOnlyWhenReadUnavailable({ saleRef, saleData, itemsToSave, productNames, qtyByName, grandTotal, customer, paymentMethod, receiptId });
             window.__lastInvoicePrintOpts = { receiptId: localSaved.receiptId, customer, address, phone, note: noteGlobal, items: itemsToSave, vatRate, priceType, dateObj: new Date(localSaved.createdAt) };
             const printType = (document.getElementById('print-doc-type-value') || {}).value || 'hoadon';
@@ -17013,16 +16990,13 @@ async function saveAndPrint() {
             return;
         }
         if (usedFastWrite) {
-            // READ còn hoạt động: không đưa giao dịch bình thường vào hàng chờ recovery.
-            // Chỉ refresh nền theo luồng bình thường; nếu READ vừa chuyển sang lỗi thì
-            // requestPostWriteSync sẽ tự xếp domain vào recovery.
-            if (typeof window.requestPostWriteSync === 'function') {
-                window.requestPostWriteSync(['sales', 'stock', 'customers', 'receipts'], { refreshAll: true })
-                    .catch(err => {
-                        if (isFirestoreReadBlockedError(err) && typeof window.__markFirestoreReadUnavailable === 'function') {
-                            window.__markFirestoreReadUnavailable(err, ['sales', 'stock', 'customers', 'receipts']);
-                        }
-                    });
+            // Đường nhanh chỉ chạy khi READ đang không khỏe; đưa domain vào recovery.
+            if (window.__readRecoveryState !== 'healthy' || window.__firestoreReadUnavailable) {
+                window.__readFallbackPending = true;
+                scheduleReadFallbackRecovery();
+            }
+            if (typeof window.__signalRealtimeWriteOnly === 'function') {
+                window.__signalRealtimeWriteOnly(['sales', 'stock', 'customers', 'receipts']);
             }
         } else if (usedReadFallback) {
             console.warn('Đã lưu hóa đơn bằng WRITE-only fallback vì READ Firestore đang không khả dụng.');
@@ -17071,12 +17045,10 @@ async function saveAndPrint() {
         // lưu hoá đơn thất bại, chỉ cảnh báo để nhân viên tự tạo phiếu nhập tay.
         const autoReceiptMsgs = [];
         try {
-            // Fast Write khi READ đã hết đã tạo phiếu Nhập đổi ngay trong cùng Batch.
-            // Tuyệt đối không tạo thêm một phiếu thứ hai ở đây.
-            const dateSwapItems = usedFastWrite ? [] : itemsToSave.filter(i => i.dateSwap);
-            if (dateSwapItems.length) {
+            const dateSwapItems = itemsToSave.filter(i => i.dateSwap);
+            if (dateSwapItems.length && !usedFastWrite) {
                 const counterRef = db.collection('app_meta').doc('receipt_counter');
-                const receiptRef = db.collection('receipts').doc('dateSwap_' + saleRef.id);
+                const receiptRef = db.collection('receipts').doc();
                 const autoReceiptItems = dateSwapItems.map(it => ({
                     name: it.name,
                     unit: it.unit || 'Cái',
@@ -17304,8 +17276,7 @@ async function saveAndPrint() {
     }
     finally {
         window.__saleSubmitInProgress = false;
-        // sellCart đã được reset ở trên. Mở khóa TRƯỚC khi tính lại tồn để hàm
-        // nhìn thấy giỏ rỗng và giữ đúng tồn thật sau khi bán.
+        // Mở khóa UI sau khi mọi cập nhật tồn đã xong rồi mới dựng lưới 1 lần.
         window.__saleSaveUiLock = false;
         try {
             if (typeof recomputeCurrentStock === 'function') recomputeCurrentStock();
@@ -17496,26 +17467,6 @@ function renderSalesHistoryPage() {
     }
 }
 
-// Khi READ đang hết lượt, Lịch Sử HĐ vẫn phải hiện các phiếu bán tạm trên máy.
-async function renderLocalPendingSalesHistoryOnly() {
-    const body = document.getElementById('sales-list-body');
-    if (!body) return;
-    try {
-        const pending = await localSaleQueueGetAll();
-        const rows = pending.filter(r => r && r.saleData).map(r => {
-            const data = r.saleData || {};
-            const docId = String(r.docId || data._docId || '');
-            const dateObj = data.date ? new Date(data.date) : new Date(r.createdAt || Date.now());
-            const dateStr = dateObj.toLocaleDateString('vi-VN', { timeZone: APP_TIME_ZONE });
-            const totalAmount = data.grandTotal || data.total || 0;
-            const itemCount = Array.isArray(data.items) ? data.items.length : 0;
-            return "\n<tr class=\"hover:bg-transparent transition-colors\"><td colspan=\"5\" class=\"p-2\"><div onclick=\"viewInvoiceDetails('" + docId + "')\" class=\"flex items-center w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-3 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] cursor-pointer\" style=\"border-left-color:#a855f7 !important;border-right-color:#a855f7 !important;\"><span class=\"text-[12px] md:text-[11px] font-bold text-slate-700 dark:text-slate-300 w-[12%] shrink-0 px-3 truncate\">" + (data.id || 'N/A') + "</span><span class=\"text-[12px] md:text-[11px] font-bold text-slate-900 dark:text-slate-100 w-[33%] shrink-0 px-3 whitespace-nowrap\">" + (data.customer || 'Khách lẻ') + " <span class=\"ml-1 inline align-middle text-[10px] font-bold text-amber-700 dark:text-amber-300 whitespace-nowrap\">(Chưa đồng bộ do hết read)</span></span><span class=\"text-[11px] font-bold text-slate-700 dark:text-slate-400 w-[15%] shrink-0 text-center px-3\">" + dateStr + "</span><span class=\"text-[11px] text-slate-500 dark:text-slate-400 w-[15%] shrink-0 text-center px-3\">" + itemCount + " SP</span><span class=\"text-[12px] md:text-[11px] font-black text-rose-600 dark:text-rose-400 w-[25%] shrink-0 text-right pl-2 pr-6\">" + Number(totalAmount).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + " VNĐ</span></div></td></tr>\n";
-        });
-        window.__salesHistoryRows = rows;
-        window.__salesHistoryPage = 1;
-        renderSalesHistoryPage();
-    } catch (e) { console.warn('Không dựng được Lịch Sử HĐ từ phiếu local:', e); }
-}
 // hiển thị và tìm kiếm phiếu xuất trang lịch sử hđ
 async function loadSalesList() {
     const requestSeq = ++window.__salesListRequestSeq;
@@ -17587,35 +17538,19 @@ async function loadSalesList() {
                 .orderBy('date', 'desc')
                 .get(), 5000);
         }
-        let localPendingRecords = [];
-        try { localPendingRecords = await localSaleQueueGetAll(); } catch (e) { localPendingRecords = []; }
-        const localPendingByDoc = new Map();
-        localPendingRecords.forEach(r => { if (r && r.docId && r.saleData) localPendingByDoc.set(String(r.docId), r); });
         window.allSales = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         window.__saleDataCache = window.__saleDataCache || {};
         snapshot.docs.forEach(doc => {
             const d = doc.data() || {};
             window.__saleDataCache[doc.id] = d;
-            localPendingByDoc.delete(String(doc.id));
-        });
-        const historyEntries = snapshot.docs.map(doc => ({ docId: doc.id, data: doc.data() || {}, localPending: false }));
-        localPendingByDoc.forEach(record => historyEntries.push({
-            docId: String(record.docId),
-            data: { ...(record.saleData || {}), localOnly: true, syncPending: true, _docId: String(record.docId) },
-            localPending: true
-        }));
-        historyEntries.sort((a,b) => {
-            const da = a.data?.date?.toDate ? a.data.date.toDate() : new Date(a.data?.date || a.data?.localDate || 0);
-            const db = b.data?.date?.toDate ? b.data.date.toDate() : new Date(b.data?.date || b.data?.localDate || 0);
-            return db - da;
         });
         const rowsHtml = [];
-        historyEntries.forEach(entry => {
-            const docId = entry.docId;
-            const data = entry.data || {};
-            const dateObj = data.date?.toDate ? data.date.toDate() : (data.date ? new Date(data.date) : null);
-            if (!dateObj || isNaN(dateObj.getTime()))
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const dateObj = data.date?.toDate ? data.date.toDate() : null;
+            if (!dateObj)
                 return;
+            // Đã lọc đúng phạm vi ngay ở truy vấn Firestore (hoặc đang tìm kiếm toàn bộ),
             // ở đây chỉ cần lọc thêm theo từ khóa tìm kiếm (nếu có).
             const receiptId = normalizeSearchText(data.id || '');
             const customerName = normalizeSearchText(data.customer || '');
@@ -17628,16 +17563,14 @@ async function loadSalesList() {
             const searchMatch = searchQuery === '' || receiptId.includes(searchQuery) || customerName.includes(searchQuery) || customerPhone.includes(searchQuery) || productText.includes(searchQuery) || compactReceiptId.includes(compactQuery) || compactCustomerName.includes(compactQuery) || compactCustomerPhone.includes(compactQuery) || compactProductText.includes(compactQuery);
             const paymentMatch = !filterPaymentMethod || (data.paymentMethod || '') === filterPaymentMethod;
             const returnMatch = !filterReturnStatus || (filterReturnStatus === 'returned' ? data.hasReturns === true : data.hasReturns !== true);
-            const fromMatch = !dateFrom || dateObj >= new Date(dateFrom + 'T00:00:00');
-            const toMatch = !dateTo || dateObj <= new Date(dateTo + 'T23:59:59');
-            const isVisible = searchMatch && paymentMatch && returnMatch && fromMatch && toMatch;
+            const isVisible = searchMatch && paymentMatch && returnMatch;
+            const __syncBadge = syncStatusBadgeHtml(data);
             // Render
             if (isVisible) {
                 const dateStr = dateObj.toLocaleDateString('vi-VN', { timeZone: APP_TIME_ZONE });
                 const totalAmount = data.grandTotal || data.total || 0;
                 const itemCount = (data.items && Array.isArray(data.items)) ? data.items.length : 0;
-                const syncWarningHtml = syncStatusBadgeHtml(entry.localPending ? { ...data, syncPending:true, syncStatus:'pending', syncReason:'Chưa đồng bộ do hết READ' } : data);
-                rowsHtml.push("\n\t\t\t\t\t<tr class=\"hover:bg-transparent transition-colors\">\n\t\t\t\t\t\t<td colspan=\"5\" class=\"p-2\">\n\t\t\t\t\t\t\t<div onclick=\"viewInvoiceDetails('" + docId + "')\" class=\"flex items-center w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-3 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] cursor-pointer transition-all hover:-translate-y-0.5\" style=\"border-left-color:#a855f7 !important; border-right-color:#a855f7 !important;\">\n\t\t\t\t\t\t\t\t<span class=\"text-[12px] md:text-[11px] font-bold text-slate-700 dark:text-slate-300 w-[12%] shrink-0 px-3 truncate\">" + (data.id || 'N/A') + "</span>\n\t\t\t\t\t\t\t\t<span class=\"text-[12px] md:text-[11px] font-bold text-slate-900 dark:text-slate-100 w-[33%] shrink-0 px-3 whitespace-nowrap\">" + (data.customer || 'Khách lẻ') + syncWarningHtml + (data.hasReturns ? ' <span class=\"inline-block align-middle ml-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-400 whitespace-nowrap\">↩️ Đã hoàn trả</span>' : '') + "</span>\n\t\t\t\t\t\t\t\t<span class=\"text-[11px] font-bold text-slate-700 dark:text-slate-400 w-[15%] shrink-0 text-center px-3\">" + dateStr + "</span>\n\t\t\t\t\t\t\t\t<span class=\"text-[11px] text-slate-500 dark:text-slate-400 w-[15%] shrink-0 text-center px-3\">" + itemCount + " SP</span>\n\t\t\t\t\t\t\t\t<span class=\"text-[12px] md:text-[11px] font-black text-rose-600 dark:text-rose-400 w-[25%] shrink-0 text-right pl-2 pr-6\">" + Number(totalAmount).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + " VN\u0110</span>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t</tr>\n\t\t\t\t");
+                rowsHtml.push("\n\t\t\t\t\t<tr class=\"hover:bg-transparent transition-colors\">\n\t\t\t\t\t\t<td colspan=\"5\" class=\"p-2\">\n\t\t\t\t\t\t\t<div onclick=\"viewInvoiceDetails('" + doc.id + "')\" class=\"flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-3 md:p-3 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] cursor-pointer transition-all hover:-translate-y-0.5\" style=\"border-left-color:#a855f7 !important; border-right-color:#a855f7 !important;\">\n\t\t\t\t\t\t\t\t<div class=\"flex items-center gap-2 md:contents\">\n\t\t\t\t\t\t\t\t\t<span class=\"text-[12px] md:text-[11px] font-bold text-slate-700 dark:text-slate-300 md:w-[12%] truncate md:px-3\">" + (data.id || 'N/A') + "</span>\n\t\t\t\t\t\t\t\t\t<span class=\"text-[12px] md:text-[11px] font-bold text-slate-900 dark:text-slate-100 truncate flex-1 md:w-[33%] md:px-3\">" + (data.customer || 'Khách lẻ') + ' ' + __syncBadge + (data.hasReturns ? ' <span class="inline-block align-middle ml-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-400 whitespace-nowrap">↩️ Đã hoàn trả</span>' : '') + "</span>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t<div class=\"flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700\">\n\t\t\t\t\t\t\t\t\t<div class=\"flex items-center gap-3 md:contents\">\n\t\t\t\t\t\t\t\t\t\t<span class=\"text-[11px] font-bold text-slate-700 dark:text-slate-400 md:w-[15%] md:text-center md:px-3\">" + dateStr + "</span>\n\t\t\t\t\t\t\t\t\t\t<span class=\"text-[11px] text-slate-500 dark:text-slate-400 md:w-[15%] md:text-center md:px-3\">" + itemCount + " SP</span>\n\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t\t<span class=\"text-[12px] md:text-[11px] font-black text-rose-600 dark:text-rose-400 md:w-[25%] md:text-right md:pl-2 md:pr-6\">" + Number(totalAmount).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + " VN\u0110</span>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t</tr>\n\t\t\t\t");
             }
         });
         if (requestSeq !== window.__salesListRequestSeq) return;
@@ -17647,10 +17580,6 @@ async function loadSalesList() {
     catch (err) {
         if (requestSeq !== window.__salesListRequestSeq) return;
         console.error("Lỗi truy vấn Firestore:", err);
-        if (isFirestoreReadBlockedError(err) || window.__firestoreReadUnavailable) {
-            await renderLocalPendingSalesHistoryOnly();
-            return;
-        }
         showAlert("Có lỗi khi tải danh sách hóa đơn!");
     }
 }
@@ -17912,7 +17841,7 @@ async function deleteSale(docId) {
         const cachedFast = window.__saleDataCache?.[docId] || (window.allSales || []).find(s => s.id === docId);
         const fastReady = !!(cachedFast && Array.isArray(cachedFast.items) &&
             (cachedFast.hasReturns !== true || Array.isArray(cachedFast.returnedItems)) &&
-            (!cachedFast.items.some(it => it && it.dateSwap) || Array.isArray(cachedFast.autoDateReceiptIds)));
+            (!cachedFast.items.some(it => it && it.dateSwap) || (Array.isArray(cachedFast.autoDateReceiptIds) && cachedFast.autoDateReceiptIds.length <= 1)));
         if (!window.__firestoreReadUnavailable && fastReady) {
             try {
                 await deleteSaleWithoutFirestoreReads({ saleRef, docId, data: cachedFast });
@@ -19128,11 +19057,7 @@ window.__startRealtimeSyncListener = function() {
 };
 window.__startRealtimeSyncListener();
 window.__signalRealtimeWriteOnly = function(domains = []) {
-    // Tín hiệu nhiều máy vẫn phát như cũ, nhưng chỉ xếp recovery khi READ thực sự hết.
-    // Khi READ còn bình thường, không tạo cờ pending và không sinh READ nền ngoài luồng.
-    if (window.__firestoreReadUnavailable && typeof window.__queueReadRecoveryDomains === 'function') {
-        window.__queueReadRecoveryDomains(domains);
-    }
+    if (window.__readRecoveryState !== 'healthy' && typeof window.__queueReadRecoveryDomains === 'function') window.__queueReadRecoveryDomains(domains);
     if (typeof window.__notifyRealtimeWrite === 'function') window.__notifyRealtimeWrite(domains);
 };
 window.requestPostWriteSync = function(domains = [], options = {}) {
@@ -19140,7 +19065,7 @@ window.requestPostWriteSync = function(domains = [], options = {}) {
     // READ hết quota: tuyệt đối không gọi các hàm refresh/query ở đây. Ghi dữ liệu đã
     // commit bằng WRITE thì giữ nguyên; chỉ xếp domain vào hàng chờ để chạy lại khi READ
     // hồi phục. Điều này áp dụng cho bán, nhập, xóa, trả hàng, công nợ, NCC...
-    if (window.__firestoreReadUnavailable && !options.readRecovery) {
+    if (window.__readRecoveryState !== 'healthy' && !options.readRecovery) {
         if (typeof window.__queueReadRecoveryDomains === 'function') window.__queueReadRecoveryDomains(list);
         if (typeof scheduleReadFallbackRecovery === 'function') scheduleReadFallbackRecovery();
         if (typeof recomputeCurrentStock === 'function') recomputeCurrentStock();
@@ -19212,7 +19137,7 @@ window.requestPostWriteSync = function(domains = [], options = {}) {
                 __refreshResults.forEach((r, idx) => {
                     if (r.status === 'rejected') {
                         console.warn('Làm mới báo cáo sau giao dịch thất bại #' + idx + ':', r.reason);
-                        if (isFirestoreReadBlockedError(r.reason)) scheduleReadFallbackRecovery();
+                        if (isFirestoreReadBlockedError(r.reason) && typeof window.__markFirestoreReadUnavailable === 'function') window.__markFirestoreReadUnavailable(r.reason, Array.from(domainsNow || []));
                     }
                 });
 
@@ -19242,7 +19167,7 @@ window.requestPostWriteSync = function(domains = [], options = {}) {
             }
         } catch (syncErr) {
             console.warn('Đồng bộ sau ghi tạm hoãn vì Firestore READ chưa khả dụng:', syncErr);
-            if (isFirestoreReadBlockedError(syncErr)) scheduleReadFallbackRecovery();
+            if (isFirestoreReadBlockedError(syncErr) && typeof window.__markFirestoreReadUnavailable === 'function') window.__markFirestoreReadUnavailable(syncErr, list);
         } finally {
             window.__postWriteSyncPromise = null;
         }
@@ -23895,6 +23820,7 @@ async function luuSanXuat() {
     // Bắt buộc phải thêm vào giỏ trước khi lưu
     if (sxCart.length === 0) {
         Swal.fire({ icon: 'warning', title: 'Giỏ hàng đang trống! Vui lòng bấm "THÊM VÀO GIỎ" trước khi lưu phiếu.', toast: true, position: 'top-end', timer: 2200, showConfirmButton: false });
+        window.__productionSaveInProgress = false;
         return;
     }
     const soPhieu = document.getElementById('sxSoPhieu').value || "";
@@ -23922,10 +23848,11 @@ async function luuSanXuat() {
                 soMe: Number(item.soMe) || 0,
                 meChuaDong: Number(item.meChuaDong) || 0,
                 meChuaNau: Number(item.meChuaNau) || 0,
-                syncPending: !!window.__firestoreReadUnavailable,
-                syncStatus: window.__firestoreReadUnavailable ? 'pending' : 'synced',
-                syncReason: window.__firestoreReadUnavailable ? 'Chưa đồng bộ do hết READ' : null,
-                timestamp
+                timestamp,
+                syncStatus: 'synced',
+                syncPending: false,
+                syncMode: 'normal',
+                syncAt: firebase.firestore.FieldValue.serverTimestamp()
             };
             productionBatch.set(db.collection('production').doc(), data);
         });
@@ -23998,14 +23925,10 @@ function groupAndRenderSX(docs) {
                 soPhieu,
                 dateObj,
                 ngay: dateObj ? dateObj.toLocaleDateString('vi-VN', { timeZone: APP_TIME_ZONE }) : "---",
-                items: [],
-                syncPending:false, syncStatus:'synced', syncReason:''
+                items: []
             };
             order.push(soPhieu);
         }
-        groups[soPhieu].syncPending=groups[soPhieu].syncPending||data.syncPending===true||data.savedWithoutRead===true;
-        if(data.syncReason) groups[soPhieu].syncReason=data.syncReason;
-        if(data.syncError) groups[soPhieu].syncReason=data.syncError;
         groups[soPhieu].items.push({
             id,
             tenSP: data.tenSP || "",
@@ -24016,7 +23939,12 @@ function groupAndRenderSX(docs) {
             soKg: data.soKg || "0",
             soMe: data.soMe || 0,
             meChuaDong: data.meChuaDong || 0,
-            meChuaNau: data.meChuaNau || 0
+            meChuaNau: data.meChuaNau || 0,
+            syncStatus: data.syncStatus || null,
+            syncPending: data.syncPending === true,
+            syncMode: data.syncMode || null,
+            syncReason: data.syncReason || '',
+            syncError: data.syncError || ''
         });
     });
     window.sxPhieuData = groups;
@@ -24037,7 +23965,7 @@ function groupAndRenderSX(docs) {
             accentColor = '#10b981'; // xanh lá: đã đóng xong hết
         else if (sumDong > 0 || sumCho > 0)
             accentColor = '#f59e0b'; // vàng cam: đang dở dang
-        htmlRows += "<tr class=\"" + (isOld ? 'old-production' : '') + " hover:bg-transparent transition-colors\">\n            <td colspan=\"6\" class=\"p-1.5 md:p-1\">\n                <div onclick=\"xemChiTietPhieuSX('" + soPhieu + "')\"\n                     class=\"flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-3 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] cursor-pointer transition-all hover:-translate-y-0.5\"\n                     style=\"border-left-color:" + accentColor + " !important; border-right-color:" + accentColor + " !important;\">\n                    <div class=\"flex items-center gap-2 md:contents\">\n                        <span class=\"text-[11px] text-slate-500 dark:text-slate-400 md:w-[13%] md:px-3\">" + g.ngay + "</span>\n                        <span class=\"text-[12px] font-bold text-slate-800 dark:text-slate-100 md:w-[13%] md:px-3\">" + soPhieu + syncStatusBadgeHtml(g) + "</span>\n                    </div>\n                    <div class=\"text-[12px] text-slate-700 dark:text-slate-300 truncate md:w-[26%] md:px-3 pt-1 md:pt-0 border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700\" title=\"" + tenHienThi + "\">" + tenHienThi + "</div>\n                    <div class=\"flex items-center justify-between md:contents\">\n                        <div class=\"flex items-center gap-3 md:contents\">\n                            <span class=\"text-[11px] text-slate-500 dark:text-slate-400 md:w-[8%] md:text-center md:px-3\">SL: <b class=\"text-slate-700 dark:text-slate-200\">" + sumSL + "</b></span>\n                            <span class=\"text-[11px] text-blue-600 dark:text-blue-400 font-bold md:w-[14%] md:text-center md:px-3\">M\u1EDBi: " + sumMoi + "</span>\n                            <span class=\"text-[11px] text-amber-600 dark:text-amber-400 font-bold md:w-[14%] md:text-center md:px-3\">Ch\u1EDD: " + sumCho + "</span>\n                            <span class=\"text-[11px] text-green-600 dark:text-green-400 font-bold md:w-[12%] md:text-center md:px-3\">Xong: " + sumDong + "</span>\n                        </div>\n                    </div>\n                </div>\n            </td>\n        </tr>";
+        htmlRows += "<tr class=\"" + (isOld ? 'old-production' : '') + " hover:bg-transparent transition-colors\">\n            <td colspan=\"6\" class=\"p-1.5 md:p-1\">\n                <div onclick=\"xemChiTietPhieuSX('" + soPhieu + "')\"\n                     class=\"flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-3 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] cursor-pointer transition-all hover:-translate-y-0.5\"\n                     style=\"border-left-color:" + accentColor + " !important; border-right-color:" + accentColor + " !important;\">\n                    <div class=\"flex items-center gap-2 md:contents\">\n                        <span class=\"text-[11px] text-slate-500 dark:text-slate-400 md:w-[13%] md:px-3\">" + g.ngay + "</span>\n                        <span class=\"text-[12px] font-bold text-slate-800 dark:text-slate-100 md:w-[13%] md:px-3\">" + soPhieu + "</span>\n                    " + syncStatusBadgeHtml(g.items[0]) + "\n                    </div>\n                    <div class=\"text-[12px] text-slate-700 dark:text-slate-300 truncate md:w-[26%] md:px-3 pt-1 md:pt-0 border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700\" title=\"" + tenHienThi + "\">" + tenHienThi + "</div>\n                    <div class=\"flex items-center justify-between md:contents\">\n                        <div class=\"flex items-center gap-3 md:contents\">\n                            <span class=\"text-[11px] text-slate-500 dark:text-slate-400 md:w-[8%] md:text-center md:px-3\">SL: <b class=\"text-slate-700 dark:text-slate-200\">" + sumSL + "</b></span>\n                            <span class=\"text-[11px] text-blue-600 dark:text-blue-400 font-bold md:w-[14%] md:text-center md:px-3\">M\u1EDBi: " + sumMoi + "</span>\n                            <span class=\"text-[11px] text-amber-600 dark:text-amber-400 font-bold md:w-[14%] md:text-center md:px-3\">Ch\u1EDD: " + sumCho + "</span>\n                            <span class=\"text-[11px] text-green-600 dark:text-green-400 font-bold md:w-[12%] md:text-center md:px-3\">Xong: " + sumDong + "</span>\n                        </div>\n                    </div>\n                </div>\n            </td>\n        </tr>";
     });
     return htmlRows;
 }
@@ -24138,9 +24066,10 @@ async function saveEditedDongSX(id, soPhieu, newData) {
         normalizedData.sl = Number(normalizedData.sl) || 0;
         // Tồn cuối luôn được tính theo Tồn đầu + SL, tránh lưu số liệu lệch công thức.
         normalizedData.tonCuoi = normalizedData.tonDau + normalizedData.sl;
-        normalizedData.syncPending = !!window.__firestoreReadUnavailable;
-        normalizedData.syncStatus = window.__firestoreReadUnavailable ? 'pending' : 'synced';
-        normalizedData.syncReason = window.__firestoreReadUnavailable ? 'Chưa đồng bộ do hết READ' : firebase.firestore.FieldValue.delete();
+        normalizedData.syncStatus = 'synced';
+        normalizedData.syncPending = false;
+        normalizedData.syncMode = 'normal';
+        normalizedData.syncAt = firebase.firestore.FieldValue.serverTimestamp();
         await db.collection('production').doc(id).update(normalizedData);
         invalidateProductionDocsCache();
         if (typeof window.__signalRealtimeWriteOnly === 'function')
@@ -24757,12 +24686,9 @@ async function openHistoryModal(nccName) {
             const soPhieu = String(d.soPhieu || doc.id || 'Chưa rõ số phiếu');
             const dt = toDate(d.timestamp || d.date) || toDate(d.ngayHd) || new Date(0);
             if (!importMap.has(soPhieu)) {
-                importMap.set(soPhieu, { soPhieu, date: dt, soHd: d.soHd || '', ngayHd: d.ngayHd || '', items: [], total: 0, syncPending:false, syncReason:'' });
+                importMap.set(soPhieu, { soPhieu, date: dt, soHd: d.soHd || '', ngayHd: d.ngayHd || '', items: [], total: 0 });
             }
             const g = importMap.get(soPhieu);
-            g.syncPending=g.syncPending||d.syncPending===true||d.savedWithoutRead===true;
-            if(d.syncReason) g.syncReason=d.syncReason;
-            if(d.syncError) g.syncReason=d.syncError;
             if (dt.getTime() < g.date.getTime()) g.date = dt;
             if (!g.soHd && d.soHd) g.soHd = d.soHd;
             if (!g.ngayHd && d.ngayHd) g.ngayHd = d.ngayHd;
@@ -24803,7 +24729,7 @@ async function openHistoryModal(nccName) {
                 const escapedJsNo = String(p.soPhieu).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
                 const escapedJsNcc = String(nccName).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
                 html += '<button type="button" onclick="showSupplierImportDetail(\'' + escapedJsNo + '\', \'' + escapedJsNcc + '\')" class="w-full grid grid-cols-[1.1fr_1fr_1.2fr] gap-2 items-center text-left px-3 py-3 mb-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 hover:bg-blue-50 dark:hover:bg-slate-800 hover:border-blue-300 dark:hover:border-blue-700 transition-colors">' +
-                    '<span class="font-black text-indigo-700 dark:text-indigo-300 truncate">' + escapedNo + syncStatusBadgeHtml(p) + '</span>' +
+                    '<span class="font-black text-indigo-700 dark:text-indigo-300 truncate">' + escapedNo + '</span>' +
                     '<span class="text-sm text-slate-600 dark:text-slate-300">' + dateNcc(p.date) + '</span>' +
                     '<span class="font-black text-right text-slate-800 dark:text-slate-100 whitespace-nowrap">' + moneyNcc(p.total) + '</span>' +
                 '</button>';
@@ -25158,7 +25084,7 @@ async function saveFullInvoice() {
     const batch = db.batch();
     cartNL.forEach(item => {
         const rowRef = db.collection('material_imports').doc();
-        batch.set(rowRef, { soPhieu: soPhieu, ncc: nccName, nccId: nccId, soHd: document.getElementById('in-so-hd').value, ngayHd: document.getElementById('in-ngay-hd').value, tenNL: item.nl, sl: item.sl, donGia: item.gia, thanhTien: item.thanhTien, timestamp: now });
+        batch.set(rowRef, { soPhieu: soPhieu, ncc: nccName, nccId: nccId, soHd: document.getElementById('in-so-hd').value, ngayHd: document.getElementById('in-ngay-hd').value, tenNL: item.nl, sl: item.sl, donGia: item.gia, thanhTien: item.thanhTien, timestamp: now, syncStatus: 'synced', syncPending: false, syncMode: 'normal', syncAt: firebase.firestore.FieldValue.serverTimestamp() });
     });
     batch.update(nccDoc.ref, { debt: firebase.firestore.FieldValue.increment(totalInvoice) });
     await batch.commit();
@@ -25252,7 +25178,7 @@ async function filterNhapKho() {
             if (dateObj >= startDate && dateObj <= endDate) {
                 const id = data.soPhieu || "Chưa rõ số phiếu";
                 if (!grouped[id]) {
-                    grouped[id] = { soPhieu: id, ngay: dateObj, ncc: data.ncc || "Chưa có NCC", items: [], tongTien: 0 };
+                    grouped[id] = { soPhieu: id, ngay: dateObj, ncc: data.ncc || "Chưa có NCC", items: [], tongTien: 0, syncStatus: data.syncStatus || null, syncPending: data.syncPending === true, syncMode: data.syncMode || null, syncReason: data.syncReason || '', syncError: data.syncError || '' };
                 }
                 grouped[id].items.push(data);
                 grouped[id].tongTien += (parseFloat(data.thanhTien) || 0);
@@ -25264,7 +25190,7 @@ async function filterNhapKho() {
             listBody.innerHTML = "<tr><td colspan='4' class='text-center p-4'>Không có dữ liệu trong khoảng này</td></tr>";
             return;
         }
-        let htmlRows = keys.map(p => "\n    <tr>\n        <td colspan=\"4\" class=\"p-1\">\n            <div onclick=\"xemChiTietPhieu('" + p.soPhieu + "')\" class=\"flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2 cursor-pointer transition-all hover:-translate-y-0.5\n                        shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] text-[12px]\" style=\"border-left-color:#a3e635 !important; border-right-color:#a3e635 !important;\">\n                <div class=\"flex items-center justify-between gap-2 md:contents\">\n                    <div class=\"flex items-center gap-2 min-w-0 md:contents\">\n                        <span class=\"font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap md:w-[18%] md:px-3\">" + p.soPhieu + "</span>\n                        <span class=\"text-slate-500 dark:text-slate-400 whitespace-nowrap md:w-[17%] md:px-3\">" + (p.ngay instanceof Date ? p.ngay.toLocaleDateString('vi-VN', { timeZone: APP_TIME_ZONE }) : "---") + "</span>\n                    </div>\n                    <span class=\"font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap md:hidden\">" + p.tongTien.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + " \u0111</span>\n                </div>\n                <div class=\"flex items-center justify-between gap-2 mt-1.5 pt-1.5 md:mt-0 md:pt-0 border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700 md:contents\">\n                    <span class=\"text-slate-700 dark:text-slate-200 truncate md:w-[45%] md:px-3 md:order-3\">" + p.ncc + "</span>\n                    <span class=\"hidden md:block md:w-[20%] md:pl-2 md:pr-4 md:text-right md:order-4 font-bold text-slate-800 dark:text-slate-100\">" + p.tongTien.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + " \u0111</span>\n                </div>\n            </div>\n        </td>\n    </tr>\n").join('');
+        let htmlRows = keys.map(p => "\n    <tr>\n        <td colspan=\"4\" class=\"p-1\">\n            <div onclick=\"xemChiTietPhieu('" + p.soPhieu + "')\" class=\"flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2 cursor-pointer transition-all hover:-translate-y-0.5\n                        shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] text-[12px]\" style=\"border-left-color:#a3e635 !important; border-right-color:#a3e635 !important;\">\n                <div class=\"flex items-center justify-between gap-2 md:contents\">\n                    <div class=\"flex items-center gap-2 min-w-0 md:contents\">\n                        <span class=\"font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap md:w-[18%] md:px-3\">" + p.soPhieu + "</span>\n                        " + syncStatusBadgeHtml(p) + "\n                        <span class=\"text-slate-500 dark:text-slate-400 whitespace-nowrap md:w-[17%] md:px-3\">" + (p.ngay instanceof Date ? p.ngay.toLocaleDateString('vi-VN', { timeZone: APP_TIME_ZONE }) : "---") + "</span>\n                    </div>\n                    <span class=\"font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap md:hidden\">" + p.tongTien.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + " \u0111</span>\n                </div>\n                <div class=\"flex items-center justify-between gap-2 mt-1.5 pt-1.5 md:mt-0 md:pt-0 border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700 md:contents\">\n                    <span class=\"text-slate-700 dark:text-slate-200 truncate md:w-[45%] md:px-3 md:order-3\">" + p.ncc + "</span>\n                    <span class=\"hidden md:block md:w-[20%] md:pl-2 md:pr-4 md:text-right md:order-4 font-bold text-slate-800 dark:text-slate-100\">" + p.tongTien.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + " \u0111</span>\n                </div>\n            </div>\n        </td>\n    </tr>\n").join('');
         listBody.innerHTML = htmlRows;
         if (typeof lucide !== 'undefined')
             lucide.createIcons();
@@ -25465,7 +25391,7 @@ async function saveEditedImportReceipt(soPhieu, oldData, newData) {
         }
         newData.rows.forEach(row => {
             const rowRef = db.collection('material_imports').doc();
-            batch.set(rowRef, { soPhieu, ncc: newData.nccName, nccId: newNccId, soHd: newData.soHd, ngayHd: newData.ngayHd, tenNL: row.tenNL, sl: row.sl, donGia: row.donGia, thanhTien: row.sl * row.donGia, timestamp: originalTimestamp });
+            batch.set(rowRef, { soPhieu, ncc: newData.nccName, nccId: newNccId, soHd: newData.soHd, ngayHd: newData.ngayHd, tenNL: row.tenNL, sl: row.sl, donGia: row.donGia, thanhTien: row.sl * row.donGia, timestamp: originalTimestamp, syncStatus: 'synced', syncPending: false, syncMode: 'normal', syncAt: firebase.firestore.FieldValue.serverTimestamp() });
         });
         await batch.commit();
         Swal.close();
@@ -26024,11 +25950,11 @@ window.confirmStockReportReconciliation = function () { Swal.fire({ title: 'Đ�
 })();
 // --- ĐĂNG KÝ SERVICE WORKER (hoàn thiện PWA: cache giao diện app để mở được khi mất mạng) ---
 // File sw.js cần được đặt CÙNG THƯ MỤC với file HTML này trên server khi triển khai.
-if ('serviceWorker' in navigator && (location.protocol === 'http:' || location.protocol === 'https:')) {
+if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js')
             .then(() => console.log('Service Worker: đã đăng ký thành công.'))
-            .catch((err) => console.warn('Service Worker: đăng ký thất bại:', err));
+            .catch((err) => console.warn('Service Worker: đăng ký thất bại (app vẫn hoạt động bình thường, chỉ là không cache được khi mất mạng):', err));
     });
 }
 // --- KHỞI TẠO HỆ THỐNG ---
