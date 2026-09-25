@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POS Pro - Hệ thống quản lý v82</title>
+    <title>POS Pro - Hệ thống quản lý v83</title>
 	<link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <script src="https://cdn.tailwindcss.com"><!-- Bản V44: READ-safe sale fallback + deferred recovery -->
@@ -14129,7 +14129,7 @@ function renderProductGrid() {
         // thay vì chỉ có 2 trạng thái còn/hết như trước.
         const isLowStock = !isOutOfStock && realStock <= 10;
         const b = THEME_BY_NHOM[xepNhomSanPham(p.name)] || THEME_BY_NHOM['KHÁC'];
-        return "\n            <div id=\"product-card-" + idName + "\" data-badge-class=\"" + b.badge + "\"\n                 onclick=\"" + (isOutOfStock ? "showAlert('H\u1EBFt h\u00E0ng!')" : "quickAdd('" + safeName + "')") + "\"\n                 class=\"group relative bg-gradient-to-b " + b.top + " p-1.5 md:p-4 rounded-lg md:rounded-2xl border border-white/60 dark:border-slate-700 ring-1 " + b.ring + "\n                        " + b.shadow + " flex flex-col justify-between cursor-pointer h-16 md:h-28 overflow-hidden\n                        transition-all duration-200 ease-out\n                        hover:-translate-y-1.5 hover:shadow-[0_10px_0_0_rgba(0,0,0,0.15),0_16px_22px_-6px_rgba(0,0,0,0.3)]\n                        active:translate-y-[3px] active:shadow-none\n                        " + (isOutOfStock ? 'grayscale opacity-70' : '') + "\">\n\n                <!-- V\u1EC7t s\u00E1ng b\u00F3ng \u1EDF g\u00F3c tr\u00EAn \u0111\u1EC3 t\u1EA1o c\u1EA3m gi\u00E1c n\u1ED5i kh\u1ED1i/glossy -->\n                <div class=\"pointer-events-none absolute -top-6 -left-6 w-20 h-20 bg-white/50 dark:bg-white/10 rounded-full blur-xl\"></div>\n\n                <div class=\"relative flex justify-between items-start gap-1 md:gap-3\">\n                    <p class=\"font-black " + b.nameText + " text-[9px] md:text-sm leading-tight line-clamp-2 uppercase tracking-tight\" title=\"" + p.name + "\">\n                        " + p.name + "\n                    </p>\n                    <button onclick=\"quickAdd('" + safeName + "', {shiftKey: true}); event.stopPropagation();\"\n                            class=\"flex-shrink-0 w-5 h-5 md:w-9 md:h-9 flex items-center justify-center bg-gradient-to-b " + b.btn + " text-white rounded-full\n                                   shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),inset_0_-2px_3px_rgba(0,0,0,0.2),0_3px_6px_rgba(0,0,0,0.25)]\n                                   hover:brightness-110 hover:scale-105 active:scale-90 transition-all text-[10px] md:text-lg font-black\"\n                            title=\"Th\u00EAm d\u00F2ng m\u1EDBi\">\n                        +\n                    </button>\n                </div>\n\n                <div class=\"relative flex items-center gap-1 md:gap-1.5 mt-0.5 md:mt-1\">\n                    <span class=\"text-[7px] md:text-[9px] uppercase font-black " + (isOutOfStock ? 'text-red-600 dark:text-red-400' : (isLowStock ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400')) + "\">T\u1ED3n</span>\n                    <span id=\"stock-display-" + idName + "\" class=\"font-black rounded-full border md:border-2 shadow-sm " + (isOutOfStock ? 'text-[7px] md:text-[9px] px-1 md:px-1.5 py-0 md:py-0.5 bg-red-100 border-red-400 text-red-700 dark:bg-red-500/15 dark:border-red-500/50 dark:text-red-300' : (isLowStock ? 'text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-amber-100 border-amber-400 text-amber-800 dark:bg-amber-500/15 dark:border-amber-500/50 dark:text-amber-300' : "text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-emerald-100 border-emerald-400 text-emerald-800 dark:bg-emerald-500/15 dark:border-emerald-500/50 dark:text-emerald-300 border-white/70 dark:border-slate-900/40")) + "\">\n                        " + (isOutOfStock ? 'HẾT' : (p.unit ? "" + realStock + " " + p.unit + "" : realStock)) + "\n                    </span>\n                </div>\n            </div>\n        ";
+        return "\n            <div id=\"product-card-" + idName + "\" data-badge-class=\"" + b.badge + "\" data-out-of-stock=\"" + isOutOfStock + "\"\n                 onclick=\"" + (isOutOfStock ? "showAlert('H\u1EBFt h\u00E0ng!')" : "quickAdd('" + safeName + "')") + "\"\n                 class=\"group relative bg-gradient-to-b " + b.top + " p-1.5 md:p-4 rounded-lg md:rounded-2xl border border-white/60 dark:border-slate-700 ring-1 " + b.ring + "\n                        " + b.shadow + " flex flex-col justify-between cursor-pointer h-16 md:h-28 overflow-hidden\n                        transition-all duration-200 ease-out\n                        hover:-translate-y-1.5 hover:shadow-[0_10px_0_0_rgba(0,0,0,0.15),0_16px_22px_-6px_rgba(0,0,0,0.3)]\n                        active:translate-y-[3px] active:shadow-none\n                        " + (isOutOfStock ? 'grayscale opacity-70' : '') + "\">\n\n                <!-- V\u1EC7t s\u00E1ng b\u00F3ng \u1EDF g\u00F3c tr\u00EAn \u0111\u1EC3 t\u1EA1o c\u1EA3m gi\u00E1c n\u1ED5i kh\u1ED1i/glossy -->\n                <div class=\"pointer-events-none absolute -top-6 -left-6 w-20 h-20 bg-white/50 dark:bg-white/10 rounded-full blur-xl\"></div>\n\n                <div class=\"relative flex justify-between items-start gap-1 md:gap-3\">\n                    <p class=\"font-black " + b.nameText + " text-[9px] md:text-sm leading-tight line-clamp-2 uppercase tracking-tight\" title=\"" + p.name + "\">\n                        " + p.name + "\n                    </p>\n                    <button onclick=\"quickAdd('" + safeName + "', {shiftKey: true}); event.stopPropagation();\"\n                            class=\"flex-shrink-0 w-5 h-5 md:w-9 md:h-9 flex items-center justify-center bg-gradient-to-b " + b.btn + " text-white rounded-full\n                                   shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),inset_0_-2px_3px_rgba(0,0,0,0.2),0_3px_6px_rgba(0,0,0,0.25)]\n                                   hover:brightness-110 hover:scale-105 active:scale-90 transition-all text-[10px] md:text-lg font-black\"\n                            title=\"Th\u00EAm d\u00F2ng m\u1EDBi\">\n                        +\n                    </button>\n                </div>\n\n                <div class=\"relative flex items-center gap-1 md:gap-1.5 mt-0.5 md:mt-1\">\n                    <span class=\"text-[7px] md:text-[9px] uppercase font-black " + (isOutOfStock ? 'text-red-600 dark:text-red-400' : (isLowStock ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400')) + "\">T\u1ED3n</span>\n                    <span id=\"stock-display-" + idName + "\" class=\"font-black rounded-full border md:border-2 shadow-sm " + (isOutOfStock ? 'text-[7px] md:text-[9px] px-1 md:px-1.5 py-0 md:py-0.5 bg-red-100 border-red-400 text-red-700 dark:bg-red-500/15 dark:border-red-500/50 dark:text-red-300' : (isLowStock ? 'text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-amber-100 border-amber-400 text-amber-800 dark:bg-amber-500/15 dark:border-amber-500/50 dark:text-amber-300' : "text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-emerald-100 border-emerald-400 text-emerald-800 dark:bg-emerald-500/15 dark:border-emerald-500/50 dark:text-emerald-300 border-white/70 dark:border-slate-900/40")) + "\">\n                        " + (isOutOfStock ? 'HẾT' : (p.unit ? "" + realStock + " " + p.unit + "" : realStock)) + "\n                    </span>\n                </div>\n            </div>\n        ";
     });
     grid.innerHTML = cardsHtml.join('');
     // Dựng lại lưới xong thì áp dụng lại đúng từ khóa đang gõ trong ô tìm kiếm (nếu có) -
@@ -14143,6 +14143,13 @@ function renderProductGrid() {
 // khác) - giữ nguyên bộ lọc tìm kiếm và vị trí cuộn hiện tại của người dùng.
 function updateAllStockBadges() {
     if (!Array.isArray(window.allProductCache)) return;
+    // V81: trước đây hàm này CHỈ vá lại số tồn/màu huy hiệu trên đúng thẻ đang có sẵn,
+    // không xếp lại vị trí - nên 1 SP đang HẾT HÀNG (đã bị đẩy xuống cuối lưới) sau khi
+    // được nhập thêm hàng thì SỐ đổi đúng nhưng thẻ vẫn nằm ở cuối, phải bấm F5 (gọi lại
+    // renderProductGrid()) mới nhảy về đúng nhóm còn hàng. Giờ: nếu phát hiện có ít nhất
+    // 1 sản phẩm đổi trạng thái CÒN HÀNG <-> HẾT HÀNG so với thẻ đang hiển thị, dựng lại
+    // toàn bộ lưới (đã tự xếp đúng nhóm) thay vì chỉ vá tại chỗ.
+    let __stockStatusChanged = false;
 
     // QUAN TRỌNG: số Tồn hiển thị trên lưới Bán hàng phải được tính TRỰC TIẾP
     // từ tồn gốc + giỏ hàng hiện tại, không phụ thuộc currentStockMap có vừa bị
@@ -14205,7 +14212,17 @@ function updateAllStockBadges() {
         cardEl.classList.toggle('grayscale', isOutOfStock);
         cardEl.classList.toggle('opacity-70', isOutOfStock);
         cardEl.onclick = isOutOfStock ? function () { showAlert('Hết hàng!'); } : function () { quickAdd(p.name); };
+        if (cardEl.dataset.outOfStock !== String(isOutOfStock)) __stockStatusChanged = true;
+        cardEl.dataset.outOfStock = String(isOutOfStock);
     });
+    if (__stockStatusChanged && typeof renderProductGrid === 'function') {
+        // Giữ nguyên vị trí cuộn + từ khóa tìm kiếm đang gõ dở, chỉ dựng lại thứ tự thẻ.
+        const gridEl = document.getElementById('product-grid');
+        const scrollParent = gridEl ? gridEl.closest('.overflow-y-auto, .overflow-auto') : null;
+        const scrollTop = scrollParent ? scrollParent.scrollTop : null;
+        renderProductGrid();
+        if (scrollParent && scrollTop !== null) scrollParent.scrollTop = scrollTop;
+    }
 }
 
 // Lọc/tìm sản phẩm hiển thị trên lưới sản phẩm trang Bán hàng
