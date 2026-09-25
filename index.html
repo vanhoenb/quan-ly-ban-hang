@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POS Pro - Hệ thống quản lý v86</title>
+    <title>POS Pro - Hệ thống quản lý v89</title>
 	<link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <script src="https://cdn.tailwindcss.com"><!-- Bản V44: READ-safe sale fallback + deferred recovery -->
@@ -4522,9 +4522,53 @@ window.__clearWriteOnlySyncFlags = async function () {
     if (window.__v84ShimInstalled) return;
     window.__v84ShimInstalled = true;
     window.__allowServerRead = false;
+    // V88: THỜI GIAN CHỜ TỐI ĐA cho 1 lượt đọc SERVER trước khi coi như hết READ.
+    // LÝ DO: khi hết quota READ thật, Firestore SDK tự lặp lại request ở tầng mạng nhiều
+    // lần (thấy rõ trên F12: cùng 1 request lặp đi lặp lại) TRƯỚC KHI promise .get()/
+    // runTransaction() bị reject - có khi mất vài PHÚT mới reject. Nếu ngồi CHỜ đúng lúc
+    // đó thì thao tác Lưu/Xóa treo rất lâu dù logic fallback bên dưới hoàn toàn đúng.
+    // Nên: đặt giới hạn thời gian chờ riêng của TA; hết giờ mà chưa có phản hồi thì coi
+    // luôn như hết READ và dùng dữ liệu offline ngay, KHÔNG chờ Firestore tự bỏ cuộc.
+    window.__v84ReadTimeoutMs = window.__v84ReadTimeoutMs || 2000;
+    window.__v84TxTimeoutMs = window.__v84TxTimeoutMs || 2500;
     const state = () => window.__readRecoveryState || 'healthy';
     const markDown = (err) => {
         try { if (typeof window.__markFirestoreReadUnavailable === 'function') window.__markFirestoreReadUnavailable(err); } catch (_) {}
+    };
+    // V89: MỘT LƯỢT DÒ SERVER TẠI 1 THỜI ĐIỂM (single-flight). Trước đây mỗi .get() gọi cùng lúc
+    // (ví dụ trang vừa mở gọi nhiều nơi tải dữ liệu song song) đều tự chờ riêng đủ
+    // __v84ReadTimeoutMs rồi mới biết hết READ - nếu 4-5 lượt đọc bị TRÙNG THỜI ĐIỂM (không đọc
+    // nối tiếp mà mỗi cái lệch nhau một chút), tổng thời gian CHỜ CỘNG DỒN có thể vượt xa
+    // __v84ReadTimeoutMs (khớp với việc người dùng thấy 1 thao tác mất 10-15 giây dù mỗi lượt
+    // đọc chỉ giới hạn 2-3 giây). Cách xử lý: khi đã có 1 lượt dò server đang chạy, các lượt
+    // đọc khác gọi tới trong lúc đó CHỈ CẦN CHỜ CHUNG kết quả của lượt đang chạy, không tự bắn
+    // thêm request và tự chờ riêng - tổng thời gian chờ tệ nhất luôn chỉ khoảng 1 lượt timeout.
+    let __probeInFlight = null;
+    // Đua 1 promise đọc SERVER với đồng hồ đếm ngược. Nếu hết giờ trước, coi như hết READ
+    // và trả kết quả thay thế (thường là đọc cache) - KHÔNG hủy được request gốc (SDK
+    // không cho hủy) nhưng bỏ mặc nó chạy nền, gắn catch rỗng để không báo lỗi thừa trên
+    // Console; nếu sau đó nó thành công thật thì cũng chỉ bị bỏ qua kết quả, không dùng.
+    const raceWithTimeout = (promise, ms, onTimeoutOrFail) => {
+        return new Promise((resolve, reject) => {
+            let settled = false;
+            const timer = setTimeout(() => {
+                if (settled) return;
+                settled = true;
+                resolve(onTimeoutOrFail(new Error('Hết thời gian chờ READ (' + ms + 'ms) - coi như hết quota.')));
+            }, ms);
+            promise.then((r) => {
+                if (settled) return;
+                settled = true;
+                clearTimeout(timer);
+                resolve(r);
+            }, (err) => {
+                if (settled) { console.warn('READ vẫn thất bại sau khi đã bỏ qua do hết thời gian chờ:', err); return; }
+                settled = true;
+                clearTimeout(timer);
+                if (!isFirestoreReadBlockedError(err)) { reject(err); return; }
+                resolve(onTimeoutOrFail(err));
+            });
+        });
     };
     const ownerOfGet = (obj) => {
         let p = Object.getPrototypeOf(obj);
@@ -4540,12 +4584,27 @@ window.__clearWriteOnlySyncFlags = async function () {
             const src = options && options.source;
             if (src === 'cache') return orig.call(self, options);
             if (state() === 'quota' && !window.__allowServerRead) return orig.call(self, { source: 'cache' });
-            if (state() !== 'healthy' || window.__allowServerRead) return orig.call(self, options); // recovering/probe: đọc server thật
-            return orig.call(self, options).catch(function (err) {
-                if (!isFirestoreReadBlockedError(err)) throw err;
-                markDown(err); // READ vừa hết: chuyển 'quota' rồi trả dữ liệu offline
-                return orig.call(self, { source: 'cache' });
-            });
+            if (window.__allowServerRead) {
+                // Lượt dò hồi phục chủ động: luôn tự đọc riêng, không dùng chung single-flight
+                // với luồng đọc thường (không muốn 1 request thường trì hoãn việc xác nhận hồi phục).
+                return raceWithTimeout(orig.call(self, options), window.__v84ReadTimeoutMs, (err) => {
+                    markDown(err);
+                    return orig.call(self, { source: 'cache' });
+                });
+            }
+            if (__probeInFlight) {
+                // Đã có 1 lượt dò server khác đang chạy dở - CHỜ CHUNG kết quả đó thay vì tự
+                // bắn thêm 1 request y hệt và tự đếm giờ riêng.
+                return __probeInFlight.then((ok) => ok ? orig.call(self, options) : orig.call(self, { source: 'cache' }));
+            }
+            const probe = raceWithTimeout(
+                orig.call(self, options).then((r) => ({ __ok: true, r: r })),
+                window.__v84ReadTimeoutMs,
+                (err) => { markDown(err); return { __ok: false }; }
+            );
+            __probeInFlight = probe.then((x) => x.__ok);
+            __probeInFlight.finally(() => { __probeInFlight = null; });
+            return probe.then((x) => x.__ok ? x.r : orig.call(self, { source: 'cache' }));
         };
         proto.__v84Patched = true;
     };
@@ -4577,12 +4636,25 @@ window.__clearWriteOnlySyncFlags = async function () {
     const origRunTx = db.runTransaction.bind(db);
     db.runTransaction = async function (updateFn, options) {
         if (state() === 'quota' && !window.__allowServerRead) return window.__runTransactionWriteOnly(updateFn);
-        try { return await origRunTx(updateFn, options); }
-        catch (err) {
-            if (state() !== 'healthy' || !isFirestoreReadBlockedError(err)) throw err;
-            markDown(err);
-            return window.__runTransactionWriteOnly(updateFn);
+        if (__probeInFlight && !window.__allowServerRead) {
+            // V89: có 1 lượt .get() khác đang dò server cùng lúc - đợi chung kết quả trước khi
+            // tự mở thêm 1 transaction thật (tránh 2 lượt đọc treo song song cộng dồn thời gian chờ).
+            const okNow = await __probeInFlight;
+            if (!okNow) return window.__runTransactionWriteOnly(updateFn);
         }
+        // V88: cũng KHÔNG chờ quá __v84TxTimeoutMs cho 1 giao dịch thật (transaction đọc/ghi
+        // qua server đều bị chậm giống hệt .get() khi hết quota). Giao dịch gốc vẫn được để
+        // chạy tiếp trong nền (không hủy được) - nếu sau này nó thật sự thành công, chỉ ghi
+        // cảnh báo ra Console để người quản trị biết mà đối chiếu lại, không tự động làm gì thêm.
+        const txPromise = origRunTx(updateFn, options);
+        return raceWithTimeout(txPromise, window.__v84TxTimeoutMs, (err) => {
+            markDown(err);
+            txPromise.then(
+                () => console.warn('CẢNH BÁO: 1 giao dịch tưởng đã hết READ lại thành công SAU khi đã chuyển sang ghi WRITE-only - kiểm tra lại tồn kho/công nợ liên quan để tránh cộng/trừ 2 lần.'),
+                () => {}
+            );
+            return window.__runTransactionWriteOnly(updateFn);
+        });
     };
 })();
 
@@ -14499,48 +14571,10 @@ function getEditingOriginalQty(productName) {
     return total;
 }
 
-async function reallocateSellCartProductFEFO(productName) {
-    const rows = (sellCart || []).filter(item => item && !item.isShipping && item.name === productName && Number(item.qty || 0) > 0);
-    if (!rows.length) return true;
-    const totalQty = rows.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
-    const originalStock = window.currentStockMap ? window.currentStockMap[productName] : 0;
-    try {
-        window.currentStockMap[productName] = Number(originalStock || 0) + totalQty;
-        const allocations = await allocateSellLotsFEFO(productName, totalQty);
-        if (allocations === null) throw new Error('Không đủ số lượng tồn theo lô để phân bổ FEFO.');
-        const list = Array.isArray(allocations) ? allocations : [];
-        let pos = 0;
-        rows.forEach(row => {
-            const need = Number(row.qty || 0);
-            const rowAlloc = [];
-            let remain = need;
-            while (remain > 1e-9 && pos < list.length) {
-                const a = list[pos];
-                const take = Math.min(remain, Number(a.qty || 0));
-                if (take > 0) rowAlloc.push(Object.assign({}, a, { qty: take }));
-                remain -= take;
-                if (take >= Number(a.qty || 0) - 1e-9) pos++;
-                else list[pos] = Object.assign({}, a, { qty: Number(a.qty || 0) - take });
-            }
-            if (remain > 1e-9) throw new Error('Không đủ tồn theo lô để phân bổ FEFO cho giỏ hàng.');
-            row.lotAllocations = rowAlloc;
-            row.selectedLot = rowAlloc.length ? rowAlloc[0] : null;
-        });
-        return true;
-    } finally {
-        window.currentStockMap[productName] = originalStock;
-    }
-}
-
-window.__pendingSaleReservationQueues = window.__pendingSaleReservationQueues || {};
-function queueSaleReservation(productName, task) {
-    // V45: tuyệt đối không thực thi task reservation. Giữ API cũ để các đoạn giao diện
-    // cũ không phải sửa hàng loạt, nhưng không tạo bất kỳ READ/WRITE Firestore nào.
-    return Promise.resolve(null);
-}
-document.addEventListener('visibilitychange', () => {});
-window.addEventListener('pageshow', () => {});
-async function waitPendingSaleReservations() { return true; }
+// V87: đã gỡ 2 bản MỚI-HƠN của reallocateSellCartProductFEFO/queueSaleReservation/
+// waitPendingSaleReservations phía dưới - JS hoisting khiến bản khai báo SAU (giữ nguyên,
+// có xử lý hàng đợi reservation thật) mới là bản thực sự chạy; bản ở đây trước giờ là
+// mã chết (không bao giờ được gọi tới), gỡ bớt cho gọn, không đổi hành vi phần mềm.
 
 async function getSellCartTotalQty(productName) {
     return (sellCart || []).reduce((sum, item) => {
@@ -15670,6 +15704,15 @@ async function editInvoiceFromHistory(docId) {
         window.__editingSaleOriginalCustomer = data.customer || '';
         window.__editingSaleOriginalPaymentMethod = data.paymentMethod || 'Tiền mặt';
         window.__editingSaleOriginalDate = data.date || null;
+        // V87: lưu thêm để sau khi SỬA xong có thể dựng lại đúng bản ghi đầy đủ cho
+        // window.__saleDataCache / window.allSales - nếu không, XÓA phiếu ngay sau khi SỬA
+        // (nhất là phiếu có dòng "Đổi date") sẽ dùng nhầm dữ liệu CŨ (trước khi sửa) và
+        // trừ/hoàn tồn kho sai (xem hàm updateExistingSale, đoạn đồng bộ cache cuối hàm).
+        window.__editingSaleOriginalHasReturns = data.hasReturns === true;
+        window.__editingSaleOriginalReturnedItems = Array.isArray(data.returnedItems) ? JSON.parse(JSON.stringify(data.returnedItems)) : null;
+        window.__editingSaleOriginalReturnedDebtTotal = Number(data.returnedDebtTotal || 0);
+        window.__editingSaleOriginalAutoDateReceiptIds = Array.isArray(data.autoDateReceiptIds) ? [...data.autoDateReceiptIds] : [];
+        window.__editingSaleOriginalAutoDateReceiptItems = Array.isArray(data.autoDateReceiptItems) ? JSON.parse(JSON.stringify(data.autoDateReceiptItems)) : [];
         showPage('page-sell');
         // Điền lại giỏ hàng đúng dữ liệu phiếu cũ
         sellCart = (data.items || []).map(i => {
@@ -15730,6 +15773,11 @@ function exitEditSaleMode() {
     window.__editingSaleOriginalCustomer = '';
     window.__editingSaleOriginalPaymentMethod = '';
     window.__editingSaleOriginalDate = null;
+    window.__editingSaleOriginalHasReturns = false;
+    window.__editingSaleOriginalReturnedItems = null;
+    window.__editingSaleOriginalReturnedDebtTotal = 0;
+    window.__editingSaleOriginalAutoDateReceiptIds = [];
+    window.__editingSaleOriginalAutoDateReceiptItems = [];
     sellCart = [];
     renderSellCart();
     // Khi đang sửa, recomputeCurrentStock() trước đó vẫn trừ giỏ hàng đang sửa.
@@ -16053,9 +16101,25 @@ async function updateExistingSale() {
                     dateSwapSyncNeeded: false,
                     dateSwapSyncAt: firebase.firestore.FieldValue.serverTimestamp()
                 }, { merge: true });
+                // V87: phiếu Nhập đổi cũ đã bị xóa và thay bằng cái mới (hoặc không còn cái nào) -
+                // phải cập nhật LẠI 2 trường này trên đúng tài liệu 'sales', nếu không tài liệu
+                // vẫn còn trỏ tới ID phiếu Nhập đổi ĐÃ BỊ XÓA -> lần XÓA hóa đơn sau này sẽ tính
+                // sai số cần hoàn về kho (bug đã gặp: sửa phiếu đúng nhưng xóa phiếu vừa sửa lại sai tồn).
+                window.__editSaleFinalAutoDateReceiptIds = newReceiptRef ? [newReceiptRef.id] : [];
+                window.__editSaleFinalAutoDateReceiptItems = autoReceiptItems;
+                await db.collection('sales').doc(docId).set({
+                    autoDateReceiptIds: window.__editSaleFinalAutoDateReceiptIds,
+                    autoDateReceiptItems: window.__editSaleFinalAutoDateReceiptItems
+                }, { merge: true });
             } catch (dateSwapReceiptErr) {
                 console.error('Không tái tạo được phiếu Nhập đổi tự động sau khi sửa phiếu:', dateSwapReceiptErr);
                 // Chỉ ghi cờ để bộ đối chiếu biết hóa đơn cần kiểm tra; không tự ý ghi đè tồn.
+                // V87: KHÔNG rõ trạng thái autoDateReceiptIds/Items cuối cùng trên server (có thể
+                // đã xóa phiếu cũ nhưng chưa tạo phiếu mới) -> đánh dấu 'không rõ' để bước đồng bộ
+                // cache bên dưới KHÔNG lưu bản ghi này vào cache nhanh, buộc lần XÓA kế tiếp phải
+                // đọc lại từ Firestore cho an toàn, thay vì xóa nhanh bằng dữ liệu có thể sai.
+                window.__editSaleFinalAutoDateReceiptIds = undefined;
+                window.__editSaleFinalAutoDateReceiptItems = undefined;
                 try {
                     await db.collection('sales').doc(docId).set({
                         dateSwapSyncNeeded: true,
@@ -16063,6 +16127,36 @@ async function updateExistingSale() {
                     }, { merge: true });
                 } catch (_) {}
             }
+        } else {
+            // Phiếu gốc và phiếu sau khi sửa đều không dính "Đổi date" -> 2 trường này
+            // vốn đã trống/không đổi, giữ nguyên để bước đồng bộ cache bên dưới dùng.
+            window.__editSaleFinalAutoDateReceiptIds = window.__editingSaleOriginalAutoDateReceiptIds || [];
+            window.__editSaleFinalAutoDateReceiptItems = window.__editingSaleOriginalAutoDateReceiptItems || [];
+        }
+        // V87: ĐỒNG BỘ LẠI window.__saleDataCache và window.allSales cho đúng phiếu VỪA SỬA.
+        // Trước đây 2 chỗ này KHÔNG được cập nhật sau khi sửa -> nếu người dùng XÓA hóa đơn
+        // ngay sau khi sửa, deleteSale() dùng nhầm dữ liệu CŨ (trước khi sửa) để tính hoàn tồn
+        // kho/công nợ, dẫn tới tồn kho sai sau khi xóa dù bước SỬA trước đó đã đúng.
+        if (window.__editSaleFinalAutoDateReceiptIds !== undefined) {
+            const __finalSaleCacheEntry = {
+                id: docId,
+                ...saleData,
+                hasReturns: window.__editingSaleOriginalHasReturns || false,
+                returnedItems: window.__editingSaleOriginalReturnedItems || undefined,
+                returnedDebtTotal: window.__editingSaleOriginalReturnedDebtTotal || 0,
+                autoDateReceiptIds: window.__editSaleFinalAutoDateReceiptIds,
+                autoDateReceiptItems: window.__editSaleFinalAutoDateReceiptItems
+            };
+            window.__saleDataCache = window.__saleDataCache || {};
+            window.__saleDataCache[docId] = __finalSaleCacheEntry;
+            if (Array.isArray(window.allSales)) {
+                const __idx = window.allSales.findIndex(s => s?.id === docId);
+                if (__idx !== -1) window.allSales[__idx] = { ...window.allSales[__idx], ...__finalSaleCacheEntry };
+            }
+        } else if (window.__saleDataCache) {
+            // Trạng thái không rõ (lỗi tái tạo phiếu Nhập đổi) -> xóa cache cũ, KHÔNG để lại
+            // dữ liệu có thể sai cho lần xóa kế tiếp dùng nhầm.
+            delete window.__saleDataCache[docId];
         }
         // Công nợ đã được điều chỉnh nguyên tử trong transaction cùng với phiếu bán và tồn kho.
         Swal.fire({ icon: 'success', title: 'Đã cập nhật phiếu ' + receiptId + '!', toast: true, position: 'top-end', timer: 1500, showConfirmButton: false });
