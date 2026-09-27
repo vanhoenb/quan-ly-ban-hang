@@ -3732,6 +3732,9 @@ document.addEventListener('DOMContentLoaded', function () {
 				THÊM NCC
 			</button>
             </div>
+            <!-- NÂNG CẤP: ô tìm nhanh NCC theo tên/SĐT/địa chỉ - danh sách NCC nhiều thì đỡ
+                 phải cuộn dò mắt. Lọc ngay trên các dòng đã render, không cần đọc lại Firestore. -->
+            <input id="search-ncc" oninput="filterNccTable(this)" placeholder="🔍 Tìm theo tên, SĐT hoặc địa chỉ..." class="w-full mb-3 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-sm text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
             <div class="overflow-x-visible overflow-y-visible border rounded-lg min-h-[250px]">
                 <table class="w-full text-sm text-left">
                     <thead class="bg-gray-50 dark:bg-slate-800 text-xs uppercase text-gray-600 dark:text-slate-300">
@@ -24971,12 +24974,27 @@ function showPopup(title, content, hideFooterClose = false) {
         const popupTitle = String(title || '');
         const isSupplierHistory = popupTitle.startsWith('Lịch sử NCC:');
         const isSupplierImportDetail = popupTitle.startsWith('Chi tiết phiếu nhập:');
-        popupBox.classList.add(isSupplierImportDetail ? 'max-w-5xl' : (isSupplierHistory ? 'max-w-4xl' : 'max-w-sm'));
+        // SỬA: khung "Lịch sử NCC" giờ có thể hiện 2 cột song song (xem renderImportCol ở
+        // openHistoryModal) nên nới rộng bằng đúng khung "Chi tiết phiếu nhập" (max-w-5xl)
+        // để 2 cột không bị ép chật.
+        popupBox.classList.add((isSupplierImportDetail || isSupplierHistory) ? 'max-w-5xl' : 'max-w-sm');
     }
     if (typeof lucide !== 'undefined')
         lucide.createIcons();
 }
 // Render bảng danh sách NCC và tính toán công nợ
+// NÂNG CẤP: lọc nhanh bảng NCC & Công Nợ theo tên/SĐT/địa chỉ (đã gắn sẵn data-ncc-search
+// trên từng dòng khi render ở loadTableNCC) - lọc ngay trên giao diện, không cần đọc lại
+// Firestore, gõ tới đâu lọc tới đó.
+window.filterNccTable = function (inputEl) {
+    const term = String(inputEl.value || '').trim().toLowerCase();
+    const bodyNCC = document.getElementById('body-ncc');
+    if (!bodyNCC) return;
+    bodyNCC.querySelectorAll('tr[data-ncc-search]').forEach(tr => {
+        const match = !term || (tr.dataset.nccSearch || '').includes(term);
+        tr.style.display = match ? '' : 'none';
+    });
+};
 async function loadTableNCC() {
     const bodyNCC = document.getElementById('body-ncc');
     if (!bodyNCC)
@@ -24997,7 +25015,11 @@ async function loadTableNCC() {
     // Dựng toàn bộ HTML vào 1 biến trước, chỉ gán vào trang 1 lần duy nhất ở cuối
     let html = '';
     window.allSuppliersData = {};
-    for (const doc of nccSnap.docs) {
+    // NÂNG CẤP: sắp xếp NCC nợ nhiều nhất lên đầu (trước đây không sắp xếp gì, hiện theo thứ
+    // tự Firestore trả về - thường là thứ tự tạo, không phản ánh NCC nào cần chú ý trả nợ
+    // trước). Đồng bộ với cách sắp xếp "NỢ NCC" đã dùng ở Trang Chủ/Báo Cáo.
+    const sortedNccDocs = [...nccSnap.docs].sort((a, b) => (Number(b.data().debt) || 0) - (Number(a.data().debt) || 0));
+    for (const doc of sortedNccDocs) {
         const d = doc.data();
         const totalPaid = paidBySupplier[d.name] || 0;
         // Tạo biến an toàn cho dữ liệu
@@ -25011,7 +25033,7 @@ async function loadTableNCC() {
         if (d.address || d.phone) {
             mobileAddressPhone = "<div class=\"text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 md:hidden\">" + (d.address || '') + "" + (d.address && d.phone ? ' • ' : '') + "" + (d.phone || '') + "</div>";
         }
-        html += "\n            <tr class=\"transition-all duration-300\">\n                <td colspan=\"5\" class=\"p-1\">\n                <div onclick=\"xemChiTietNCC('" + doc.id + "')\" class=\"flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2 cursor-pointer transition-all hover:-translate-y-0.5 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]\" style=\"border-left-color:#84cc16 !important; border-right-color:#84cc16 !important;\">\n                        <div class=\"md:contents\">\n                            <div class=\"text-sm md:text-[11px] font-bold text-slate-800 dark:text-slate-100 md:w-[30%] md:px-3 md:truncate\">" + d.name + "</div>\n                            " + mobileAddressPhone + "\n                            <div class=\"hidden md:block md:text-[11px] md:text-slate-600 md:dark:text-slate-400 md:w-[28%] md:px-3 md:truncate\">" + (d.address || '') + "</div>\n                            <div class=\"hidden md:block md:text-[11px] md:text-slate-600 md:dark:text-slate-400 md:w-[14%] md:px-3 md:text-center\">" + (d.phone || '') + "</div>\n                        </div>\n                        <div class=\"flex items-center justify-between gap-2 mt-2 pt-2 md:mt-0 md:pt-0 border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700 md:contents\">\n                            <div class=\"flex items-center gap-3 text-xs md:contents\">\n                                <span class=\"text-slate-500 dark:text-slate-400 md:hidden\">N\u1EE3: <b class=\"text-red-600\">" + (d.debt || 0).toLocaleString() + "</b></span>\n                                <span class=\"hidden md:block md:text-[11px] md:font-bold md:text-red-600 md:w-[14%] md:px-3 md:text-center\">" + (d.debt || 0).toLocaleString() + "</span>\n                                <span class=\"text-slate-500 dark:text-slate-400 md:hidden\">\u0110\u00E3 tr\u1EA3: <b class=\"text-green-600\">" + totalPaid.toLocaleString() + "</b></span>\n                                <span class=\"hidden md:block md:text-[11px] md:font-bold md:text-green-600 md:w-[14%] md:px-3 md:text-center\">" + totalPaid.toLocaleString() + "</span>\n                            </div>\n                        </div>\n                    </div>\n                </td>\n            </tr>";
+        html += "\n            <tr data-ncc-search=\"" + (d.name + ' ' + (d.phone || '') + ' ' + (d.address || '')).toLowerCase().replace(/"/g, '&quot;') + "\" class=\"transition-all duration-300\">\n                <td colspan=\"5\" class=\"p-1\">\n                <div onclick=\"xemChiTietNCC('" + doc.id + "')\" class=\"flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2 cursor-pointer transition-all hover:-translate-y-0.5 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]\" style=\"border-left-color:#84cc16 !important; border-right-color:#84cc16 !important;\">\n                        <div class=\"md:contents\">\n                            <div class=\"text-sm md:text-[11px] font-bold text-slate-800 dark:text-slate-100 md:w-[30%] md:px-3 md:truncate\">" + d.name + "</div>\n                            " + mobileAddressPhone + "\n                            <div class=\"hidden md:block md:text-[11px] md:text-slate-600 md:dark:text-slate-400 md:w-[28%] md:px-3 md:truncate\">" + (d.address || '') + "</div>\n                            <div class=\"hidden md:block md:text-[11px] md:text-slate-600 md:dark:text-slate-400 md:w-[14%] md:px-3 md:text-center\">" + (d.phone || '') + "</div>\n                        </div>\n                        <div class=\"flex items-center justify-between gap-2 mt-2 pt-2 md:mt-0 md:pt-0 border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700 md:contents\">\n                            <div class=\"flex items-center gap-3 text-xs md:contents\">\n                                <span class=\"text-slate-500 dark:text-slate-400 md:hidden\">N\u1EE3: <b class=\"text-red-600\">" + (d.debt || 0).toLocaleString() + "</b></span>\n                                <span class=\"hidden md:block md:text-[11px] md:font-bold md:text-red-600 md:w-[14%] md:px-3 md:text-center\">" + (d.debt || 0).toLocaleString() + "</span>\n                                <span class=\"text-slate-500 dark:text-slate-400 md:hidden\">\u0110\u00E3 tr\u1EA3: <b class=\"text-green-600\">" + totalPaid.toLocaleString() + "</b></span>\n                                <span class=\"hidden md:block md:text-[11px] md:font-bold md:text-green-600 md:w-[14%] md:px-3 md:text-center\">" + totalPaid.toLocaleString() + "</span>\n                            </div>\n                        </div>\n                    </div>\n                </td>\n            </tr>";
     }
     bodyNCC.innerHTML = html;
     if (typeof lucide !== 'undefined')
@@ -25191,6 +25213,17 @@ async function paySupplierDebt(docId, nccName) {
         window.__supplierPaymentInProgress = false;
     }
 }
+// Lọc nhanh danh sách "Lịch sử phiếu nhập nguyên liệu" theo số phiếu (dùng ở openHistoryModal
+// khi danh sách dài >12 phiếu, chia 2 cột kèm ô tìm nhanh phía trên).
+window.filterNccImportRows = function (inputEl) {
+    const term = String(inputEl.value || '').trim().toLowerCase();
+    const container = inputEl.closest('.p-2');
+    if (!container) return;
+    container.querySelectorAll('button[data-so-phieu]').forEach(btn => {
+        const match = !term || (btn.dataset.soPhieu || '').includes(term);
+        btn.style.display = match ? '' : 'none';
+    });
+};
 // Truy vấn và hiển thị lịch sử NCC: phiếu nhập + các lần trả nợ.
 async function openHistoryModal(nccName) {
     try {
@@ -25254,21 +25287,44 @@ async function openHistoryModal(nccName) {
         if (!importRows.length) {
             html += '<div class="p-4 text-sm text-slate-500 dark:text-slate-400">Chưa có phiếu nhập nguyên liệu cho NCC này.</div>';
         } else {
-            html += '<div class="p-2">' +
-                '<div class="grid grid-cols-[1.1fr_1fr_1.2fr] gap-2 px-3 py-2 mb-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-black text-slate-600 dark:text-slate-300">' +
+            // SỬA: danh sách phiếu nhập của 1 NCC nhập nhiều lần (vd 61 phiếu) xếp thành 1 cột
+            // dài lê thê, dù có thể co gọn (<details>) nhưng mở ra vẫn phải cuộn rất nhiều.
+            // Từ 12 phiếu trở lên, chia đôi danh sách thành 2 CỘT hiển thị song song (cột 1:
+            // các phiếu mới hơn, cột 2: tiếp theo) - giảm gần một nửa chiều cao phải cuộn.
+            // Dưới 12 phiếu vẫn hiện 1 cột như cũ cho gọn, khỏi chia nhỏ không cần thiết.
+            const renderImportCol = (rowsForCol) => {
+                let colHtml = '<div class="grid grid-cols-[1.1fr_1fr_1.2fr] gap-2 px-3 py-2 mb-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-black text-slate-600 dark:text-slate-300">' +
                     '<span>Số phiếu</span><span>Ngày nhập</span><span class="text-right">Tổng tiền</span>' +
-                '</div>';
-            importRows.forEach(p => {
-                const escapedNo = escapeHtml(p.soPhieu);
-                const escapedJsNo = String(p.soPhieu).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-                const escapedJsNcc = String(nccName).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-                html += '<button type="button" onclick="showSupplierImportDetail(\'' + escapedJsNo + '\', \'' + escapedJsNcc + '\')" class="w-full grid grid-cols-[1.1fr_1fr_1.2fr] gap-2 items-center text-left px-3 py-3 mb-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 hover:bg-blue-50 dark:hover:bg-slate-800 hover:border-blue-300 dark:hover:border-blue-700 transition-colors">' +
-                    '<span class="font-black text-indigo-700 dark:text-indigo-300 truncate">' + escapedNo + '</span>' +
-                    '<span class="text-sm text-slate-600 dark:text-slate-300">' + dateNcc(p.date) + '</span>' +
-                    '<span class="font-black text-right text-slate-800 dark:text-slate-100 whitespace-nowrap">' + moneyNcc(p.total) + '</span>' +
-                '</button>';
-            });
-            html += '</div>';
+                    '</div>';
+                rowsForCol.forEach(p => {
+                    const escapedNo = escapeHtml(p.soPhieu);
+                    const escapedJsNo = String(p.soPhieu).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                    const escapedJsNcc = String(nccName).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                    colHtml += '<button type="button" data-so-phieu="' + escapedNo.toLowerCase() + '" onclick="showSupplierImportDetail(\'' + escapedJsNo + '\', \'' + escapedJsNcc + '\')" class="w-full grid grid-cols-[1.1fr_1fr_1.2fr] gap-2 items-center text-left px-3 py-3 mb-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 hover:bg-blue-50 dark:hover:bg-slate-800 hover:border-blue-300 dark:hover:border-blue-700 transition-colors">' +
+                        '<span class="font-black text-indigo-700 dark:text-indigo-300 truncate">' + escapedNo + '</span>' +
+                        '<span class="text-sm text-slate-600 dark:text-slate-300">' + dateNcc(p.date) + '</span>' +
+                        '<span class="font-black text-right text-slate-800 dark:text-slate-100 whitespace-nowrap">' + moneyNcc(p.total) + '</span>' +
+                    '</button>';
+                });
+                return colHtml;
+            };
+            if (importRows.length > 12) {
+                const mid = Math.ceil(importRows.length / 2);
+                const col1Rows = importRows.slice(0, mid);
+                const col2Rows = importRows.slice(mid);
+                // NÂNG CẤP: danh sách dài (>12 phiếu) nên thêm ô tìm nhanh theo số phiếu ngay
+                // trên 2 cột - gõ vào là lọc tức thì (khớp thì hiện, không khớp thì ẩn tạm),
+                // đỡ phải dò mắt qua hàng chục dòng khi cần tìm đúng 1 phiếu cụ thể.
+                html += '<div class="p-2">' +
+                    '<input type="text" placeholder="🔍 Tìm nhanh theo số phiếu..." oninput="filterNccImportRows(this)" ' +
+                    'class="w-full mb-2 px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-950 dark:text-white outline-none focus:ring-2 focus:ring-blue-400">' +
+                    '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">' +
+                    '<div>' + renderImportCol(col1Rows) + '</div>' +
+                    '<div>' + renderImportCol(col2Rows) + '</div>' +
+                    '</div></div>';
+            } else {
+                html += '<div class="p-2">' + renderImportCol(importRows) + '</div>';
+            }
         }
         html += '</details>';
 
@@ -25415,7 +25471,24 @@ async function deleteDoc(col, soPhieu) {
             Swal.fire({ icon: 'warning', title: 'Không có quyền', text: 'Bạn không có quyền xóa dữ liệu. Vui lòng liên hệ Admin.' });
         return;
     }
-    if (!confirm("Xác nhận xóa phiếu nhập " + soPhieu + " và trừ nợ NCC?"))
+    // SỬA LỖI: trước đây dùng CHUNG 1 câu xác nhận viết cho "xóa phiếu nhập" cho MỌI loại xóa,
+    // nên khi xóa NCC lại hiện câu "Xác nhận xóa phiếu nhập [ID] và trừ nợ NCC?" - sai hẳn ngữ
+    // cảnh, người dùng dễ hoang mang không hiểu đang xóa cái gì.
+    // NÂNG CẤP (đồng bộ với deleteCustomer): xóa NCC còn đang nợ tiền giờ CHẶN HẲN, không cho
+    // xóa - giống hệt chuẩn đã áp dụng khi xóa Khách hàng (deleteCustomer chặn nếu debt > 0).
+    // Trước đây (bản vá trước) chỉ CẢNH BÁO rồi vẫn cho xóa - không nhất quán và rủi ro mất
+    // dấu vết công nợ hơn.
+    let confirmText = "Xác nhận xóa phiếu nhập " + soPhieu + " và trừ nợ NCC?";
+    if (col === 'suppliers') {
+        const nccInfo = (window.allSuppliersData || {})[soPhieu];
+        const nccDebt = Number(nccInfo?.debt) || 0;
+        if (nccDebt !== 0) {
+            showAlert("Không thể xóa! Nhà cung cấp" + (nccInfo?.name ? " \"" + nccInfo.name + "\"" : "") + " đang " + (nccDebt > 0 ? "còn nợ" : "âm nợ (đã trả dư)") + ": " + nccDebt.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "đ. Hãy tất toán hết công nợ trước khi xóa.");
+            return;
+        }
+        confirmText = "Xác nhận xóa nhà cung cấp" + (nccInfo?.name ? " \"" + nccInfo.name + "\"" : "") + "?";
+    }
+    if (!confirm(confirmText))
         return;
     try {
         if (col === 'material_imports') {
@@ -27014,7 +27087,11 @@ window.showCustomerProfile=async function(customerId,customerName){
         const paid=Number(c.totalPaid||debts.reduce((s,d)=>s+Number(d.amount||0),0)||0);
         const debt=Number(c.debt||0);
         const avg=sales.length?total/sales.length:0;
-        const saleRows=sales.slice(0,200).map(d=>{const items=Array.isArray(d.items)?d.items.filter(x=>!x.isShipping):[];const hd=Number(d.total||d.grandTotal||items.reduce((s,x)=>s+Number(x.qty||0)*Number(x.price||0),0)||0);const names=items.map(x=>(x.name||'')+' × '+qty2(x.qty)).join(', ');return '<tr class="border-b"><td class="p-2 whitespace-nowrap">'+esc2((formatDateOnlyVN(d.date||d.ngay||d.createdAt||d.timestamp||'')||'-'))+'</td><td class="p-2 font-semibold whitespace-nowrap">'+esc2(d.id||d.docId||'')+'</td><td class="p-2">'+esc2(names||'-')+'</td><td class="p-2 text-right font-bold whitespace-nowrap">'+money(hd)+'</td><td class="p-2">'+esc2(d.paymentMethod||'-')+'</td></tr>';}).join('')||'<tr><td colspan="5" class="p-4 text-center text-slate-400">Chưa có hóa đơn</td></tr>';
+        // NÂNG CẤP: cho bấm thẳng vào 1 dòng hóa đơn trong hồ sơ khách hàng để mở đúng chi
+        // tiết hóa đơn đó (dùng lại viewInvoiceDetails() đã có sẵn ở trang "Lịch sử HĐ") -
+        // trước đây dòng chỉ hiện chữ tóm tắt sản phẩm, muốn xem đầy đủ phải tự ra trang
+        // Lịch sử HĐ rồi tìm lại đúng hóa đơn đó theo số/ngày, khá mất công.
+        const saleRows=sales.slice(0,200).map(d=>{const items=Array.isArray(d.items)?d.items.filter(x=>!x.isShipping):[];const hd=Number(d.total||d.grandTotal||items.reduce((s,x)=>s+Number(x.qty||0)*Number(x.price||0),0)||0);const names=items.map(x=>(x.name||'')+' × '+qty2(x.qty)).join(', ');return '<tr class="border-b cursor-pointer hover:bg-blue-50 dark:hover:bg-slate-800" onclick="viewInvoiceDetails(\''+d.id+'\')" title="Bấm để xem chi tiết hóa đơn"><td class="p-2 whitespace-nowrap">'+esc2((formatDateOnlyVN(d.date||d.ngay||d.createdAt||d.timestamp||'')||'-'))+'</td><td class="p-2 font-semibold whitespace-nowrap text-indigo-700 dark:text-indigo-300">'+esc2(d.id||d.docId||'')+'</td><td class="p-2">'+esc2(names||'-')+'</td><td class="p-2 text-right font-bold whitespace-nowrap">'+money(hd)+'</td><td class="p-2">'+esc2(d.paymentMethod||'-')+'</td></tr>';}).join('')||'<tr><td colspan="5" class="p-4 text-center text-slate-400">Chưa có hóa đơn</td></tr>';
         const productRows=topProducts.map(x=>'<tr class="border-b"><td class="p-2">'+esc2(x.name)+'</td><td class="p-2 text-right font-bold">'+qty2(x.qty)+'</td><td class="p-2 text-right">'+money(x.total)+'</td></tr>').join('')||'<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu</td></tr>';
         const debtRows=debts.slice(0,200).map(d=>'<tr class="border-b"><td class="p-2 whitespace-nowrap">'+esc2((formatDateOnlyVN(d.date||d.ngay||d.createdAt||d.timestamp||'')||'-'))+'</td><td class="p-2 text-right">'+money(d.amount)+'</td><td class="p-2">'+esc2(d.note||d.description||'-')+'</td></tr>').join('')||'<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có lịch sử trả nợ</td></tr>';
         const returnRows=returns.slice(0,100).map(d=>'<tr class="border-b"><td class="p-2">'+esc2((formatDateOnlyVN(d.date||d.ngay||d.createdAt||d.timestamp||'')||'-'))+'</td><td class="p-2">'+esc2(d.originalReceiptNo||d.originalInvoiceId||'-')+'</td><td class="p-2">'+esc2((d.items||[]).map(x=>(x.name||'')+' × '+qty2(x.qty)).join(', '))+'</td><td class="p-2 text-right font-bold text-rose-600">'+money(d.total||d.refundAmount)+'</td></tr>').join('')||'<tr><td colspan="4" class="p-4 text-center text-slate-400">Chưa có hàng hoàn</td></tr>';
