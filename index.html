@@ -11500,6 +11500,10 @@ async function loadInventory(options = {}) {
             nhomMapKho.get(nhom).push(item);
         });
         const rowsHtmlParts = [];
+        // Bản sửa: SP hết hàng (tồn <= 0) TRƯỚC ĐÂY bị ẨN HẲN khỏi Kho Hàng (return, không
+        // render). Giờ KHÔNG ẩn nữa - gom lại và đẩy xuống thành 1 khối riêng "HẾT HÀNG" ở
+        // CUỐI CÙNG của toàn trang (sau mọi nhóm còn hàng), thay vì mất tích khỏi danh sách.
+        const outOfStockRowsHtml = [];
         thuTuNhomKho.forEach(tenNhom => {
             const danhSachNhom = nhomMapKho.get(tenNhom);
             if (!danhSachNhom || !danhSachNhom.length)
@@ -11509,6 +11513,7 @@ async function loadInventory(options = {}) {
                 ' border rounded-lg px-3 py-1.5 mb-2">' +
                 tenNhom +
                 '</div>';
+            let inStockCountInGroup = 0;
             danhSachNhom.forEach(item => {
                 // KHÔNG dùng stockMap[item.name] nguyên văn để quyết định có hiện SP hay không.
                 // Dữ liệu stock_counters cũ có thể chứa cùng một sản phẩm nhưng khác nhẹ Unicode/
@@ -11522,8 +11527,9 @@ async function loadInventory(options = {}) {
                 const qtyNum = Number.isFinite(exactQty)
                     ? Math.max(exactQty, normalizedQty, currentQty)
                     : Math.max(normalizedQty, currentQty);
-                if (qtyNum <= 0.000001)
-                    return;
+                // Bản sửa: KHÔNG return/ẩn SP hết hàng nữa - chỉ đánh dấu để đẩy xuống cuối
+                // trang (xem đoạn gom outOfStockRowsHtml bên dưới, sau khi dựng xong dòng).
+                const isOutOfStock = qtyNum <= 0.000001;
                 const productData = window.__productsByName?.get(item.name) || null;
                 const rVal = (productData && productData.retail) ? productData.retail : (item.retail || 0);
                 const wVal = (productData && productData.wholesale) ? productData.wholesale : (item.wholesale || 0);
@@ -11613,7 +11619,7 @@ async function loadInventory(options = {}) {
                 const hanThangInput = expiryPrimary
                     ? '<input type="number" min="0.1" step="0.1" value="' + hanThangValue + '" placeholder="tháng" class="w-1/3 min-w-[42px] text-[10px] md:text-[11px] text-center border border-dashed border-slate-300 dark:border-slate-700 rounded-md px-1 py-1 bg-white/70 dark:bg-slate-950/40 focus:border-blue-500 outline-none" oninput="handleInventoryLotDateInput(this,\'' + primaryGroupId + '\',\'hanThang\')" onblur="handleInventoryLotDateBlur(this,\'' + primaryGroupId + '\',\'hanThang\')" data-inventory-lot-group="' + primaryGroupId + '" data-lot-field="hanThang" title="Nhập số tháng từ NSX để tự tính HSD">'
                     : '<span>—</span>';
-                groupInnerHtml +=
+                const rowHtml =
                     '<div class="w-full ' + inventoryAlertClass + ' border border-l-4 border-r-4 rounded-lg p-2 md:p-1.5 shadow-[0_4px_6px_-2px_rgba(0,0,0,0.2)] mb-1.5" style="' + inventoryBorderStyle + '">' +
                         '<div class="inventory-product-row grid grid-cols-1 md:grid-cols-[18%_12%_12%_6%_19%_7%_7%_6%_7%_6%] items-center gap-1 md:gap-0">' +
                         '<div class="md:px-2 text-left min-w-0">' +
@@ -11632,11 +11638,31 @@ async function loadInventory(options = {}) {
                         '</div>' +
                         (expirySummary.count > 1 ? expiryInventoryLotsDetailsHtml(item.name, expirySummary.lots) : '') +
                         '</div>';
+                if (isOutOfStock) {
+                    outOfStockRowsHtml.push(rowHtml);
+                } else {
+                    inStockCountInGroup++;
+                    groupInnerHtml += rowHtml;
+                }
             });
+            // Nhóm này KHÔNG còn SP nào còn hàng (toàn bộ đã chuyển xuống khối "HẾT HÀNG" ở
+            // cuối trang) - không hiện tiêu đề nhóm trơ trọi không có dòng SP nào bên dưới.
+            if (inStockCountInGroup === 0)
+                return;
             rowsHtmlParts.push('<tr><td colspan="10" class="py-1.5 px-1"><div class="rounded-2xl border-2 ' +
                 getNhomBlockBorder(tenNhom) + ' ' + getNhomBlockBg(tenNhom) +
                 ' p-2.5 md:p-3">' + groupInnerHtml + '</div></td></tr>');
         });
+        // Khối "HẾT HÀNG" - LUÔN ở cuối cùng của toàn trang Kho Hàng, sau mọi nhóm còn hàng.
+        if (outOfStockRowsHtml.length) {
+            const outOfStockHeader = '<div class="group-header-unified text-[11px] md:text-xs font-black !font-bold uppercase tracking-wide ' +
+                'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-300 border border-slate-300 dark:border-slate-700' +
+                ' rounded-lg px-3 py-1.5 mb-2">' +
+                'HẾT HÀNG (' + outOfStockRowsHtml.length + ')' +
+                '</div>';
+            rowsHtmlParts.push('<tr><td colspan="10" class="py-1.5 px-1"><div class="rounded-2xl border-2 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40' +
+                ' p-2.5 md:p-3">' + outOfStockHeader + outOfStockRowsHtml.join('') + '</div></td></tr>');
+        }
         tbody.innerHTML = rowsHtmlParts.join('');
     }
     catch (err) {
@@ -12800,7 +12826,8 @@ async function exportToExcel() {
         }
         const workbook = new ExcelJS.Workbook();
         const sheet = workbook.addWorksheet('Bảng Báo Giá');
-        const totalCols = 7; // STT, Tên SP, Mã vạch, ĐVT, Tồn kho, Giá sỉ, Giá lẻ
+        // Bản sửa: thiếu cột "Giá bán đề xuất" (mới thêm ở Kho Hàng) khi xuất Excel.
+        const totalCols = 8; // STT, Tên SP, Mã vạch, ĐVT, Tồn kho, Giá sỉ, Giá lẻ, Giá bán đề xuất
         // ------ TIÊU ĐỀ CÔNG TY (giống hệt letterhead dùng ở hoá đơn/phiếu in khác) ------
         const rCompany = sheet.addRow(['HTX SẢN XUẤT VÀ KINH DOANH NÔNG SẢN THANH NGUYỄN']);
         rCompany.font = { size: 14, bold: true };
@@ -12829,7 +12856,7 @@ async function exportToExcel() {
         rSub.font = { size: 11, color: { argb: 'FF666666' } };
         sheet.addRow([]);
         // ------ HEADER BẢNG ------
-        const header = sheet.addRow(['STT', 'Tên sản phẩm', 'Mã vạch', 'ĐVT', 'Tồn kho', 'Giá sỉ', 'Giá lẻ']);
+        const header = sheet.addRow(['STT', 'Tên sản phẩm', 'Mã vạch', 'ĐVT', 'Tồn kho', 'Giá sỉ', 'Giá lẻ', 'Giá bán đề xuất']);
         header.height = 24;
         header.eachCell(c => {
             c.font = { bold: true, size: 12 };
@@ -12868,7 +12895,8 @@ async function exportToExcel() {
                     p.unit || '',
                     stock,
                     Number(p.wholesale || 0),
-                    Number(p.retail || 0)
+                    Number(p.retail || 0),
+                    Number(p.suggestedRetail || 0)
                 ]);
                 row.getCell(3).numFmt = '@'; // Mã vạch giữ nguyên dạng chữ, không mất số 0 đầu
                 row.eachCell((c, col) => {
@@ -12894,7 +12922,7 @@ async function exportToExcel() {
         sheet.mergeCells(rNguoiLap.number, totalCols - 1, rNguoiLap.number, totalCols);
         rNguoiLap.getCell(totalCols - 1).alignment = { horizontal: 'center' };
         rNguoiLap.getCell(totalCols - 1).font = { bold: true, size: 12 };
-        sheet.columns = [{ width: 6 }, { width: 30 }, { width: 16 }, { width: 10 }, { width: 12 }, { width: 14 }, { width: 14 }];
+        sheet.columns = [{ width: 6 }, { width: 30 }, { width: 16 }, { width: 10 }, { width: 12 }, { width: 14 }, { width: 14 }, { width: 16 }];
         sheet.pageSetup = { paperSize: 9, orientation: 'portrait', fitToPage: true, fitToWidth: 1, fitToHeight: 0, margins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4, header: 0, footer: 0 } };
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -19748,9 +19776,35 @@ function renderCustomerList() {
 // Bấm vào 1 dòng đại lý -> mở bảng chi tiết có đầy đủ nút thao tác bên trong (thay cho
 // dropdown "Thao tác ▾" cũ) - đỡ lo bấm nhầm khi đang lướt danh sách.
 function xemChiTietDaiLy(id) {
+    // Bản sửa: TRƯỚC ĐÂY hàm này CHỈ tìm trong window.allCustomersData - dữ liệu này chỉ
+    // được nạp khi đã từng mở trang "KH & Công Nợ" (do loadCustomers() nạp). Nếu vừa mở
+    // phần mềm, vào thẳng Trang Chủ, bấm vào ô "Công nợ cần thu" rồi bấm vào tên 1 khách -
+    // window.allCustomersData vẫn đang RỖNG nên find() trả về undefined, hàm return luôn,
+    // KHÔNG hiện popup, KHÔNG báo lỗi gì - tưởng nút bị hỏng.
+    // Giờ: nếu chưa có trong cache, TỰ tải (gọi loadCustomers(), đúng hàm KH & Công Nợ vẫn
+    // dùng) rồi tra lại - đảm bảo đủ trường "Đã trả" (totalPaid, vốn được TÍNH RIÊNG từ
+    // debt_history chứ không có sẵn trên chính document khách hàng) thay vì hiện sai 0đ.
     const data = (window.allCustomersData || []).find(c => c.id === id);
-    if (!data)
+    if (!data) {
+        if (typeof loadCustomers === 'function') {
+            Promise.resolve(loadCustomers()).then(() => {
+                const loaded = (window.allCustomersData || []).find(c => c.id === id);
+                if (!loaded) {
+                    showAlert('Không tìm thấy khách hàng này.');
+                    return;
+                }
+                xemChiTietDaiLyRender(loaded);
+            }).catch(err => {
+                console.warn('Không tải được chi tiết khách hàng:', err);
+                showAlert(isFirestoreReadBlockedError(err) ? 'Hệ thống đang tạm hết lượt đọc dữ liệu, vui lòng thử lại sau ít phút.' : 'Không thể mở chi tiết khách hàng lúc này.');
+            });
+        }
         return;
+    }
+    xemChiTietDaiLyRender(data);
+}
+function xemChiTietDaiLyRender(data) {
+    const id = data.id;
     const debt = data.debt || 0;
     const totalPaid = data.totalPaid || 0;
     const safeName = (data.name || '').replace(/'/g, "\\'");
