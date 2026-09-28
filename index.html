@@ -10,7 +10,6 @@
 </script>
     <link href="https://fonts.googleapis.com/css2?family=Goldman&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
-	<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
     <style>
@@ -4177,7 +4176,7 @@ document.addEventListener('DOMContentLoaded', function () {
          nút bấm, bỏ hết đoạn văn hướng dẫn dài). Nội dung hướng dẫn đầy đủ giờ chuyển vào
          hộp thoại xác nhận hiện ra khi bấm nút (xem các hàm confirmXxx trong JS) - vừa gọn
          giao diện, vừa không mất thông tin hướng dẫn (chỉ ẩn đi cho tới khi cần). -->
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+    <div id="quanly-tools-cards" class="grid grid-cols-2 md:grid-cols-5 gap-3">
         <div class="bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-800 rounded-2xl p-3 flex flex-col gap-2 items-center text-center">
             <p class="font-bold text-amber-800 dark:text-amber-300 text-xs flex items-center gap-1.5 justify-center">
                 <i data-lucide="wrench" class="w-3.5 h-3.5"></i> Sửa lại tồn kho
@@ -4331,17 +4330,20 @@ document.addEventListener('DOMContentLoaded', function () {
     <!-- TAB 3: SỔ QUỸ TIỀN MẶT - THU TIỀN HÀNG (cấp hàng đại lý) & MUA ĐỒ XƯỞNG (chi mua
          nguyên vật liệu/đồ dùng xưởng) - ghi chép độc lập, không đụng tới công nợ KH/NCC. -->
     <div id="quanly-tab-soquy" class="hidden space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 p-3 bg-gray-50 dark:bg-slate-950 rounded-lg border border-gray-200 dark:border-slate-700">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-3 p-3 bg-gray-50 dark:bg-slate-950 rounded-lg border border-gray-200 dark:border-slate-700">
             <div>
                 <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Từ ngày</label>
-                <input type="date" id="soquyFilterFrom" onchange="loadCashLedger()" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white text-sm outline-none">
+                <input type="date" id="soquyFilterFrom" onchange="window.__soquyAutoRange=false;loadCashLedger()" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white text-sm outline-none">
             </div>
             <div>
                 <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Đến ngày</label>
-                <input type="date" id="soquyFilterTo" onchange="loadCashLedger()" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white text-sm outline-none">
+                <input type="date" id="soquyFilterTo" onchange="window.__soquyAutoRange=false;loadCashLedger()" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white text-sm outline-none">
             </div>
             <div class="flex items-end">
-                <button onclick="document.getElementById('soquyFilterFrom').value='';document.getElementById('soquyFilterTo').value='';loadCashLedger();" class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+                <input type="text" id="soquySearch" oninput="renderCashLedger()" placeholder="🔍 Tìm nội dung/ghi chú..." class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white text-sm outline-none">
+            </div>
+            <div class="flex items-end">
+                <button onclick="document.getElementById('soquyFilterFrom').value='';document.getElementById('soquyFilterTo').value='';document.getElementById('soquySearch').value='';window.__soquyAutoRange=true;loadCashLedger();" class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
                     <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Bỏ lọc - Xem tất cả
                 </button>
             </div>
@@ -4353,6 +4355,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> Xuất Excel
                 </button>
             </div>
+        </div>
+
+        <!-- Chốt thanh toán: các khoản đang hiển thị chuyển vào Lịch sử thanh toán -->
+        <div class="flex flex-wrap items-center gap-2">
+            <button onclick="settleCashLedger()" class="whitespace-nowrap bg-blue-600 dark:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold text-sm transition-all duration-75 border-b-[3px] border-blue-800 hover:-translate-y-0.5 active:translate-y-[1px] active:border-b-[1px] shadow-md flex items-center gap-1.5">
+                <i data-lucide="check-circle" class="w-4 h-4"></i> Thanh toán
+            </button>
+            <button onclick="openCashLedgerHistory()" class="whitespace-nowrap bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-4 py-2 rounded-xl font-bold text-sm border border-slate-300 dark:border-slate-600 shadow-sm flex items-center gap-1.5">
+                <i data-lucide="history" class="w-4 h-4"></i> Lịch sử thanh toán
+            </button>
+            <span class="text-xs text-slate-500 dark:text-slate-400">Danh sách bên dưới chỉ hiện các khoản <b>chưa thanh toán</b>.</span>
         </div>
 
         <!-- Ô tổng kết: Thu - Chi = Còn lại -->
@@ -4379,10 +4392,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
                 <div class="grid grid-cols-2 gap-2 p-3 border-b border-slate-200 dark:border-slate-700">
                     <input type="date" id="soquy-thu-date" value="" class="col-span-1 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-lg text-gray-800 dark:text-white text-sm outline-none">
-                    <input type="number" id="soquy-thu-amount" placeholder="Số tiền" class="col-span-1 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-lg text-gray-800 dark:text-white text-sm outline-none">
-                    <input type="text" id="soquy-thu-content" placeholder="Nội dung (VD: Thu tiền cấp hàng đại lý ABC)" class="col-span-1 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-lg text-gray-800 dark:text-white text-sm outline-none">
+                    <input type="text" id="soquy-thu-content" list="soquy-cust-list" autocomplete="off" placeholder="Chọn KH từ danh sách hoặc gõ nội dung..." class="col-span-1 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-lg text-gray-800 dark:text-white text-sm outline-none">
+                    <input type="number" id="soquy-thu-amount" oninput="soquyAmountHint('thu')" onkeydown="if(event.key==='Enter')addCashLedgerEntry('thu')" placeholder="Số tiền" class="col-span-1 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-lg text-gray-800 dark:text-white text-sm outline-none">
                     <input type="text" id="soquy-thu-note" placeholder="Ghi chú (không bắt buộc)" class="col-span-1 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-lg text-gray-800 dark:text-white text-sm outline-none">
-                    <div class="col-span-2 flex justify-end">
+                    <datalist id="soquy-cust-list"></datalist>
+                    <div class="col-span-2 flex justify-between items-center">
+                        <span id="soquy-thu-hint" class="text-xs font-bold text-slate-500 dark:text-slate-400"></span>
                         <button onclick="addCashLedgerEntry('thu')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded-lg font-bold text-xs">+ Thêm khoản thu</button>
                     </div>
                 </div>
@@ -4409,10 +4424,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
                 <div class="grid grid-cols-2 gap-2 p-3 border-b border-slate-200 dark:border-slate-700">
                     <input type="date" id="soquy-chi-date" value="" class="col-span-1 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-lg text-gray-800 dark:text-white text-sm outline-none">
-                    <input type="number" id="soquy-chi-amount" placeholder="Số tiền" class="col-span-1 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-lg text-gray-800 dark:text-white text-sm outline-none">
                     <input type="text" id="soquy-chi-content" placeholder="Nội dung (VD: Mua bao bì, hộp đựng...)" class="col-span-1 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-lg text-gray-800 dark:text-white text-sm outline-none">
+                    <input type="number" id="soquy-chi-amount" oninput="soquyAmountHint('chi')" onkeydown="if(event.key==='Enter')addCashLedgerEntry('chi')" placeholder="Số tiền" class="col-span-1 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-lg text-gray-800 dark:text-white text-sm outline-none">
                     <input type="text" id="soquy-chi-note" placeholder="Ghi chú (không bắt buộc)" class="col-span-1 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-lg text-gray-800 dark:text-white text-sm outline-none">
-                    <div class="col-span-2 flex justify-end">
+                    <div class="col-span-2 flex justify-between items-center">
+                        <span id="soquy-chi-hint" class="text-xs font-bold text-slate-500 dark:text-slate-400"></span>
                         <button onclick="addCashLedgerEntry('chi')" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-1.5 rounded-lg font-bold text-xs">+ Thêm khoản chi</button>
                     </div>
                 </div>
@@ -4479,7 +4495,6 @@ document.addEventListener('DOMContentLoaded', function () {
     </main>
   </main>
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-   <script src="script.js"></script>
 
     <script>/* ==================================================================================
    MỤC LỤC (BẢN ĐỒ CODE) - Dò Ctrl+F theo tiêu đề "TRANG ..." bên dưới để nhảy nhanh
@@ -5590,6 +5605,10 @@ function switchQuanLyTab(tab) {
     });
     if (addBtn)
         addBtn.classList.toggle('hidden', tab !== 'users');
+    // Các thẻ công cụ hệ thống (Sửa tồn kho, Sao lưu, Khôi phục...) chỉ hiện ở tab Người Dùng & Phân Quyền
+    const toolCards = document.getElementById('quanly-tools-cards');
+    if (toolCards)
+        toolCards.classList.toggle('hidden', tab !== 'users');
     if (tab === 'activitylog')
         loadActivityLog();
     if (tab === 'soquy')
@@ -7902,42 +7921,98 @@ window.__cashLedgerData = { thu: [], chi: [] };
 function cashLedgerMoney(n) {
     return Math.round(Number(n) || 0).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + ' đ';
 }
+// Nạp gợi ý tên khách hàng (từ danh sách "KH & Công Nợ") cho ô Nội dung ở PHẦN 1: chọn
+// từ danh sách hoặc vẫn gõ tự do bình thường (datalist không chặn nhập tay).
+async function fillSoquyCustomerList() {
+    const dl = document.getElementById('soquy-cust-list');
+    if (!dl)
+        return;
+    try {
+        let names = (window.allCustomersData || []).map(c => c.name).filter(Boolean);
+        if (!names.length) {
+            const snap = await firestoreCachedGet('customers:list', () => db.collection('customers').get({ source: 'default' }), 30000);
+            names = [];
+            snap.forEach(doc => { const n = doc.data().name; if (n) names.push(n); });
+        }
+        names = [...new Set(names)].sort((a, b) => a.localeCompare(b, 'vi'));
+        dl.innerHTML = names.map(n => '<option value="' + escapeHtml(n) + '"></option>').join('');
+    } catch (err) {
+        console.warn('Không nạp được danh sách KH cho Sổ Quỹ:', err);
+    }
+}
 async function loadCashLedger() {
+    fillSoquyCustomerList();
+    // Điền sẵn ngày hôm nay cho 2 ô ngày nhập (nếu đang trống) để đỡ phải chọn mỗi lần
+    ['soquy-thu-date', 'soquy-chi-date'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && !el.value) el.value = getTodayVNISO();
+    });
     const thuBody = document.getElementById('soquy-thu-body');
     const chiBody = document.getElementById('soquy-chi-body');
     if (!thuBody || !chiBody)
         return;
     thuBody.innerHTML = skeletonRows(3, 5);
     chiBody.innerHTML = skeletonRows(3, 5);
-    const from = document.getElementById('soquyFilterFrom')?.value || '';
-    const to = document.getElementById('soquyFilterTo')?.value || '';
     try {
         const snap = await db.collection('cash_ledger').orderBy('date', 'desc').limit(1000).get();
-        const thu = [], chi = [];
+        const allThu = [], allChi = [];
         snap.forEach(doc => {
             const d = doc.data();
+            if (d.settledId) return; // đã thanh toán -> nằm trong Lịch sử thanh toán, không hiện ở danh sách hiện tại
             const row = { id: doc.id, date: d.date || '', content: d.content || '', amount: Number(d.amount) || 0, note: d.note || '' };
-            if (from && row.date < from) return;
-            if (to && row.date > to) return;
-            if (d.type === 'chi') chi.push(row); else thu.push(row);
+            if (d.type === 'chi') allChi.push(row); else allThu.push(row);
         });
-        window.__cashLedgerData = { thu, chi };
-        const renderRows = (rows, type) => rows.map(r => "\n            <tr>\n                <td class=\"py-2 px-2\">" + formatDateToDDMMYYYY(r.date) + "</td>\n                <td class=\"py-2 px-2\">" + escapeHtml(r.content) + "</td>\n                <td class=\"py-2 px-2 text-right font-bold whitespace-nowrap\">" + cashLedgerMoney(r.amount) + "</td>\n                <td class=\"py-2 px-2 text-slate-500 dark:text-slate-400\">" + escapeHtml(r.note) + "</td>\n                <td class=\"py-2 px-1 text-center\"><button onclick=\"deleteCashLedgerEntry('" + r.id + "')\" title=\"Xóa\" class=\"text-red-500 hover:text-red-700\"><i data-lucide=\"trash-2\" class=\"w-3.5 h-3.5\"></i></button></td>\n            </tr>").join('') ||
-            '<tr><td colspan="5" class="p-4 text-center text-slate-400">Chưa có khoản nào.</td></tr>';
-        thuBody.innerHTML = renderRows(thu, 'thu');
-        chiBody.innerHTML = renderRows(chi, 'chi');
-        const tongThu = thu.reduce((s, r) => s + r.amount, 0);
-        const tongChi = chi.reduce((s, r) => s + r.amount, 0);
-        document.getElementById('soquy-tong-thu').innerText = cashLedgerMoney(tongThu);
-        document.getElementById('soquy-tong-chi').innerText = cashLedgerMoney(tongChi);
-        const conLaiEl = document.getElementById('soquy-con-lai');
-        conLaiEl.innerText = cashLedgerMoney(tongThu - tongChi);
-        conLaiEl.className = 'text-xl font-black mt-1 ' + ((tongThu - tongChi) < 0 ? 'text-red-600' : 'text-blue-700 dark:text-blue-400');
-        if (typeof lucide !== 'undefined') lucide.createIcons();
+        // Chế độ tự động (mặc định): Từ ngày = ngày XA NHẤT trong các khoản chưa thanh toán (thu hoặc
+        // chi, cái nào sớm hơn), Đến ngày = ngày MỚI NHẤT. Chọn tay 1 trong 2 ô thì giữ nguyên lựa chọn
+        // của bạn cho tới khi bấm "Bỏ lọc - Xem tất cả" (quay lại tự động).
+        const fromEl = document.getElementById('soquyFilterFrom');
+        const toEl = document.getElementById('soquyFilterTo');
+        if (window.__soquyAutoRange !== false) {
+            const dates = [...allThu, ...allChi].map(r => r.date).filter(Boolean).sort();
+            fromEl.value = dates.length ? dates[0] : '';
+            toEl.value = dates.length ? dates[dates.length - 1] : '';
+        }
+        const from = fromEl.value || '';
+        const to = toEl.value || '';
+        const inRange = r => !(from && r.date < from) && !(to && r.date > to);
+        const thu = allThu.filter(inRange), chi = allChi.filter(inRange);
+        window.__cashLedgerAll = { thu, chi };
+        renderCashLedger();
     } catch (err) {
         console.error('Lỗi tải Sổ Quỹ:', err);
         thuBody.innerHTML = chiBody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-red-500">Lỗi tải dữ liệu.</td></tr>';
     }
+}
+// Vẽ 2 bảng + 3 ô tổng từ dữ liệu đã tải, có áp dụng ô tìm kiếm. Kết quả sau lọc được lưu vào
+// window.__cashLedgerData để nút Xem & In / Xuất Excel in đúng những gì đang hiển thị.
+function renderCashLedger() {
+    const thuBody = document.getElementById('soquy-thu-body');
+    const chiBody = document.getElementById('soquy-chi-body');
+    if (!thuBody || !chiBody)
+        return;
+    const all = window.__cashLedgerAll || { thu: [], chi: [] };
+    const term = (document.getElementById('soquySearch')?.value || '').trim().toLowerCase();
+    const match = r => !term || (r.content + ' ' + r.note).toLowerCase().includes(term);
+    const thu = all.thu.filter(match), chi = all.chi.filter(match);
+    window.__cashLedgerData = { thu, chi };
+    const renderRows = rows => rows.map(r => "\n            <tr>\n                <td class=\"py-2 px-2\">" + formatDateToDDMMYYYY(r.date) + "</td>\n                <td class=\"py-2 px-2\">" + escapeHtml(r.content) + "</td>\n                <td class=\"py-2 px-2 text-right font-bold whitespace-nowrap\">" + cashLedgerMoney(r.amount) + "</td>\n                <td class=\"py-2 px-2 text-slate-500 dark:text-slate-400\">" + escapeHtml(r.note) + "</td>\n                <td class=\"py-2 px-1 text-center whitespace-nowrap\"><button onclick=\"editCashLedgerEntry('" + r.id + "')\" title=\"Sửa\" class=\"text-blue-500 hover:text-blue-700 mr-1\"><i data-lucide=\"pencil\" class=\"w-3.5 h-3.5\"></i></button><button onclick=\"deleteCashLedgerEntry('" + r.id + "')\" title=\"Xóa\" class=\"text-red-500 hover:text-red-700\"><i data-lucide=\"trash-2\" class=\"w-3.5 h-3.5\"></i></button></td>\n            </tr>").join('') ||
+        '<tr><td colspan="5" class="p-4 text-center text-slate-400">Chưa có khoản nào.</td></tr>';
+    thuBody.innerHTML = renderRows(thu);
+    chiBody.innerHTML = renderRows(chi);
+    const tongThu = thu.reduce((s, r) => s + r.amount, 0);
+    const tongChi = chi.reduce((s, r) => s + r.amount, 0);
+    document.getElementById('soquy-tong-thu').innerText = cashLedgerMoney(tongThu);
+    document.getElementById('soquy-tong-chi').innerText = cashLedgerMoney(tongChi);
+    const conLaiEl = document.getElementById('soquy-con-lai');
+    conLaiEl.innerText = cashLedgerMoney(tongThu - tongChi);
+    conLaiEl.className = 'text-xl font-black mt-1 ' + ((tongThu - tongChi) < 0 ? 'text-red-600' : 'text-blue-700 dark:text-blue-400');
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+// Hiện số tiền đã định dạng dưới ô nhập (VD gõ 5000000 -> "5.000.000 đ") cho dễ soát số 0
+function soquyAmountHint(type) {
+    const v = parseFloat(document.getElementById('soquy-' + type + '-amount').value);
+    const el = document.getElementById('soquy-' + type + '-hint');
+    if (el) el.innerText = (isFinite(v) && v > 0) ? cashLedgerMoney(v) : '';
 }
 async function addCashLedgerEntry(type) {
     const prefix = type === 'chi' ? 'soquy-chi-' : 'soquy-thu-';
@@ -7955,12 +8030,49 @@ async function addCashLedgerEntry(type) {
             type, date, content, amount, note: noteEl.value.trim(),
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-        dateEl.value = ''; amountEl.value = ''; contentEl.value = ''; noteEl.value = '';
+        // Giữ nguyên ngày vừa nhập (thường nhập nhiều khoản cùng ngày), chỉ xóa các ô còn lại
+        amountEl.value = ''; contentEl.value = ''; noteEl.value = '';
+        soquyAmountHint(type === 'chi' ? 'chi' : 'thu');
         if (typeof ghiLog === 'function')
             ghiLog('Sổ Quỹ', 'Thêm', content, (type === 'chi' ? 'Mua đồ xưởng' : 'Thu tiền hàng') + ': ' + cashLedgerMoney(amount));
         await loadCashLedger();
+        contentEl.focus();
     } catch (err) {
         showAlert('Lỗi khi lưu: ' + err.message);
+    }
+}
+// Sửa 1 khoản đã nhập (trước đây chỉ có xóa, nhập nhầm phải xóa rồi nhập lại)
+async function editCashLedgerEntry(id) {
+    const all = window.__cashLedgerAll || { thu: [], chi: [] };
+    const row = all.thu.find(r => r.id === id) || all.chi.find(r => r.id === id);
+    if (!row) return;
+    const inp = 'class="swal2-input" style="width:100%;margin:6px 0"';
+    const res = await Swal.fire({
+        title: 'Sửa khoản',
+        html: '<input id="sq-e-date" type="date" ' + inp + ' value="' + escapeHtml(row.date) + '">' +
+            '<input id="sq-e-amount" type="number" placeholder="Số tiền" ' + inp + ' value="' + row.amount + '">' +
+            '<input id="sq-e-content" type="text" placeholder="Nội dung" ' + inp + ' value="' + escapeHtml(row.content) + '">' +
+            '<input id="sq-e-note" type="text" placeholder="Ghi chú" ' + inp + ' value="' + escapeHtml(row.note) + '">',
+        showCancelButton: true, confirmButtonText: 'Lưu', cancelButtonText: 'Hủy', focusConfirm: false,
+        preConfirm: () => {
+            const date = document.getElementById('sq-e-date').value;
+            const amount = parseFloat(document.getElementById('sq-e-amount').value);
+            const content = document.getElementById('sq-e-content').value.trim();
+            if (!date || !content || !isFinite(amount) || amount <= 0) {
+                Swal.showValidationMessage('Cần đủ Ngày, Nội dung và Số tiền lớn hơn 0');
+                return false;
+            }
+            return { date, amount, content, note: document.getElementById('sq-e-note').value.trim() };
+        }
+    });
+    if (!res.isConfirmed) return;
+    try {
+        await db.collection('cash_ledger').doc(id).update(res.value);
+        if (typeof ghiLog === 'function')
+            ghiLog('Sổ Quỹ', 'Sửa', res.value.content, cashLedgerMoney(row.amount) + ' → ' + cashLedgerMoney(res.value.amount));
+        await loadCashLedger();
+    } catch (err) {
+        showAlert('Lỗi khi sửa: ' + err.message);
     }
 }
 async function deleteCashLedgerEntry(id) {
@@ -7972,11 +8084,14 @@ async function deleteCashLedgerEntry(id) {
         showAlert('Lỗi khi xóa: ' + err.message);
     }
 }
-function printCashLedgerReport() {
-    const { thu, chi } = window.__cashLedgerData || { thu: [], chi: [] };
-    const from = document.getElementById('soquyFilterFrom')?.value || '';
-    const to = document.getElementById('soquyFilterTo')?.value || '';
-    const rangeText = (from || to) ? "(t\u1EEB " + (from ? formatDateToDDMMYYYY(from) : '...') + " \u0111\u1EBFn " + (to ? formatDateToDDMMYYYY(to) : '...') + ")" : '(toàn bộ)';
+function printCashLedgerReport(opt) {
+    // opt (tùy chọn) = 1 đợt đã thanh toán trong lịch sử; không truyền thì in danh sách hiện tại
+    const { thu, chi } = opt || window.__cashLedgerData || { thu: [], chi: [] };
+    const from = opt ? (opt.from || '') : (document.getElementById('soquyFilterFrom')?.value || '');
+    const to = opt ? (opt.to || '') : (document.getElementById('soquyFilterTo')?.value || '');
+    const paidPrefix = opt ? 'ĐÃ THANH TOÁN ngày ' + formatDateToDDMMYYYY(opt.paidDate) + (opt.note ? ' — ' + escapeHtml(opt.note) : '') + ' ' : '';
+    const rangeCore = (from || to) ? "(t\u1EEB " + (from ? formatDateToDDMMYYYY(from) : '...') + " \u0111\u1EBFn " + (to ? formatDateToDDMMYYYY(to) : '...') + ")" : '(toàn bộ)';
+    const rangeText = paidPrefix + rangeCore;
     const buildTable = (rows, title) => {
         const bodyRows = rows.map(r => '<tr><td>' + formatDateToDDMMYYYY(r.date) + '</td><td>' + escapeHtml(r.content) + '</td><td style="text-align:right">' + cashLedgerMoney(r.amount) + '</td><td>' + escapeHtml(r.note) + '</td></tr>').join('') ||
             '<tr><td colspan="4" style="text-align:center;color:#94a3b8">Chưa có khoản nào.</td></tr>';
@@ -7993,14 +8108,14 @@ function printCashLedgerReport() {
         '<div style="padding:12px;border:2px solid #e11d48;border-radius:8px;text-align:center"><div style="font-size:11px;font-weight:700;color:#be123c;text-transform:uppercase">Tổng mua đồ xưởng</div><div style="font-size:18px;font-weight:800;color:#be123c;margin-top:4px">' + cashLedgerMoney(tongChi) + '</div></div>' +
         '<div style="padding:12px;border:2px solid #0f172a;border-radius:8px;text-align:center"><div style="font-size:11px;font-weight:700;color:#0f172a;text-transform:uppercase">Còn lại (Thu − Chi)</div><div style="font-size:18px;font-weight:800;color:#0f172a;margin-top:4px">' + cashLedgerMoney(tongThu - tongChi) + '</div></div>' +
         '</div>';
-    printReportDirect('SỔ QUỸ TIỀN MẶT', html);
+    printReportDirect(opt ? 'SỔ QUỸ TIỀN MẶT - ĐÃ THANH TOÁN' : 'SỔ QUỸ TIỀN MẶT', html);
 }
-async function exportCashLedgerExcel() {
-    const { thu, chi } = window.__cashLedgerData || { thu: [], chi: [] };
+async function exportCashLedgerExcel(opt) {
+    const { thu, chi } = opt || window.__cashLedgerData || { thu: [], chi: [] };
     try {
         const workbook = new ExcelJS.Workbook();
         const sheet = workbook.addWorksheet('SoQuy');
-        const titleRow = sheet.addRow(['SỔ QUỸ TIỀN MẶT']);
+        const titleRow = sheet.addRow([opt ? 'SỔ QUỸ TIỀN MẶT - ĐÃ THANH TOÁN NGÀY ' + formatDateToDDMMYYYY(opt.paidDate) : 'SỔ QUỸ TIỀN MẶT']);
         titleRow.font = { bold: true, size: 14 };
         sheet.mergeCells('A1:D1');
         titleRow.alignment = { horizontal: 'center' };
@@ -8035,11 +8150,139 @@ async function exportCashLedgerExcel() {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'So_Quy_Tien_Mat_' + getTodayVNISO() + '.xlsx';
+        a.download = (opt ? 'So_Quy_Da_Thanh_Toan_' + opt.paidDate : 'So_Quy_Tien_Mat_' + getTodayVNISO()) + '.xlsx';
         a.click();
         Swal.fire({ icon: 'success', title: 'Đã xuất file Sổ Quỹ!', toast: true, position: 'top-end', timer: 1800, showConfirmButton: false });
     } catch (err) {
         showAlert('Lỗi khi xuất Excel: ' + err.message);
+    }
+}
+// === ĐÃ THANH TOÁN: chốt các khoản đang hiển thị vào "Lịch sử thanh toán" ===
+// Lưu 1 bản chụp (snapshot) các khoản + tổng vào collection 'cash_ledger_settlements', đồng
+// thời đánh dấu settledId lên từng khoản để chúng không còn hiện ở danh sách hiện tại nữa.
+// Có thể xem lại/in/xuất Excel từng đợt, hoặc Hoàn tác nếu bấm nhầm.
+async function settleCashLedger() {
+    if ((document.getElementById('soquySearch')?.value || '').trim())
+        return showAlert('Vui lòng xóa ô tìm kiếm trước khi bấm "Thanh toán" để chốt đúng toàn bộ các khoản đang lọc theo ngày.');
+    const all = window.__cashLedgerAll || { thu: [], chi: [] };
+    const thu = all.thu, chi = all.chi;
+    if (!thu.length && !chi.length)
+        return showAlert('Chưa có khoản nào để thanh toán.');
+    const tongThu = thu.reduce((s, r) => s + r.amount, 0);
+    const tongChi = chi.reduce((s, r) => s + r.amount, 0);
+    const from = document.getElementById('soquyFilterFrom')?.value || '';
+    const to = document.getElementById('soquyFilterTo')?.value || '';
+    const inp = 'class="swal2-input" style="width:100%;margin:6px 0"';
+    const res = await Swal.fire({
+        title: 'Xác nhận thanh toán?',
+        html: '<div style="text-align:left;font-size:14px;line-height:1.8">' +
+            'Thu tiền hàng: <b>' + cashLedgerMoney(tongThu) + '</b> (' + thu.length + ' khoản)<br>' +
+            'Mua đồ xưởng: <b>' + cashLedgerMoney(tongChi) + '</b> (' + chi.length + ' khoản)<br>' +
+            'Còn lại (Thu − Chi): <b>' + cashLedgerMoney(tongThu - tongChi) + '</b></div>' +
+            '<label style="display:block;text-align:left;font-size:12px;margin-top:10px">Ngày thanh toán</label>' +
+            '<input id="sq-s-date" type="date" ' + inp + ' value="' + getTodayVNISO() + '">' +
+            '<input id="sq-s-note" type="text" placeholder="Ghi chú (không bắt buộc)" ' + inp + '>' +
+            '<div style="font-size:12px;color:#64748b;margin-top:6px">Các khoản này sẽ chuyển vào "Lịch sử thanh toán" và không còn hiện ở danh sách hiện tại.</div>',
+        showCancelButton: true, confirmButtonText: '✅ Thanh toán', cancelButtonText: 'Hủy', focusConfirm: false,
+        preConfirm: () => {
+            const paidDate = document.getElementById('sq-s-date').value;
+            if (!paidDate) { Swal.showValidationMessage('Vui lòng chọn ngày thanh toán'); return false; }
+            return { paidDate, note: document.getElementById('sq-s-note').value.trim() };
+        }
+    });
+    if (!res.isConfirmed) return;
+    try {
+        const ref = db.collection('cash_ledger_settlements').doc();
+        const ids = [...thu, ...chi].map(r => r.id);
+        const settlement = {
+            paidDate: res.value.paidDate, note: res.value.note, from, to,
+            tongThu, tongChi, conLai: tongThu - tongChi, thu, chi, entryIds: ids,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        const CH = 400;
+        for (let i = 0; i < ids.length; i += CH) {
+            const batch = db.batch();
+            if (i === 0) batch.set(ref, settlement);
+            ids.slice(i, i + CH).forEach(id => batch.update(db.collection('cash_ledger').doc(id), { settledId: ref.id }));
+            await batch.commit();
+        }
+        if (typeof ghiLog === 'function')
+            ghiLog('Sổ Quỹ', 'Thanh toán', formatDateToDDMMYYYY(res.value.paidDate), 'Thu ' + cashLedgerMoney(tongThu) + ' / Chi ' + cashLedgerMoney(tongChi) + ' / Còn lại ' + cashLedgerMoney(tongThu - tongChi));
+        Swal.fire({ icon: 'success', title: 'Đã lưu vào Lịch sử thanh toán!', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+        await loadCashLedger();
+    } catch (err) {
+        showAlert('Lỗi khi lưu thanh toán: ' + err.message);
+        loadCashLedger();
+    }
+}
+async function openCashLedgerHistory() {
+    let snap;
+    try {
+        snap = await db.collection('cash_ledger_settlements').orderBy('paidDate', 'desc').limit(100).get();
+    } catch (err) {
+        return showAlert('Lỗi khi tải lịch sử: ' + err.message);
+    }
+    window.__cashSettlements = {};
+    let rows = '';
+    snap.forEach(doc => {
+        const d = doc.data();
+        window.__cashSettlements[doc.id] = { id: doc.id, ...d };
+        const range = (d.from || d.to) ? (d.from ? formatDateToDDMMYYYY(d.from) : '...') + ' → ' + (d.to ? formatDateToDDMMYYYY(d.to) : '...') : 'Toàn bộ';
+        rows += '<tr class="border-b border-slate-200 dark:border-slate-700">' +
+            '<td class="p-2 whitespace-nowrap font-bold">' + formatDateToDDMMYYYY(d.paidDate) + (d.note ? '<div class="text-[11px] font-normal text-slate-500">' + escapeHtml(d.note) + '</div>' : '') + '</td>' +
+            '<td class="p-2 whitespace-nowrap text-xs">' + range + '</td>' +
+            '<td class="p-2 text-right whitespace-nowrap text-emerald-700 font-bold">' + cashLedgerMoney(d.tongThu) + '</td>' +
+            '<td class="p-2 text-right whitespace-nowrap text-rose-700 font-bold">' + cashLedgerMoney(d.tongChi) + '</td>' +
+            '<td class="p-2 text-right whitespace-nowrap font-black">' + cashLedgerMoney(d.conLai) + '</td>' +
+            '<td class="p-2 whitespace-nowrap text-center">' +
+            '<button onclick="viewCashSettlement(\'' + doc.id + '\')" class="px-2 py-1 rounded bg-slate-700 text-white text-xs font-bold mr-1">Xem/In</button>' +
+            '<button onclick="exportCashLedgerExcel(window.__cashSettlements[\'' + doc.id + '\'])" class="px-2 py-1 rounded bg-green-600 text-white text-xs font-bold mr-1">Excel</button>' +
+            '<button onclick="undoCashSettlement(\'' + doc.id + '\')" class="px-2 py-1 rounded bg-amber-500 text-white text-xs font-bold">Hoàn tác</button>' +
+            '</td></tr>';
+    });
+    Swal.fire({
+        title: 'Lịch sử thanh toán',
+        width: 900,
+        showConfirmButton: false, showCloseButton: true,
+        html: rows
+            ? '<div style="max-height:60vh;overflow:auto"><table class="w-full text-sm text-left"><thead class="sticky top-0 bg-slate-100 dark:bg-slate-800 text-xs uppercase"><tr><th class="p-2">Ngày TT</th><th class="p-2">Khoảng</th><th class="p-2 text-right">Thu</th><th class="p-2 text-right">Chi</th><th class="p-2 text-right">Còn lại</th><th class="p-2"></th></tr></thead><tbody>' + rows + '</tbody></table></div>'
+            : '<div class="p-6 text-slate-500">Chưa có đợt thanh toán nào.</div>'
+    });
+}
+function viewCashSettlement(id) {
+    const opt = (window.__cashSettlements || {})[id];
+    if (!opt) return;
+    Swal.close(); // đóng lịch sử trước để 2 popup không chồng lên nhau
+    printCashLedgerReport(opt);
+}
+async function undoCashSettlement(id) {
+    const opt = (window.__cashSettlements || {})[id];
+    if (!opt) return;
+    if (!confirm('Hoàn tác đợt thanh toán ngày ' + formatDateToDDMMYYYY(opt.paidDate) + '? Các khoản trong đợt này sẽ hiện lại ở danh sách hiện tại.'))
+        return;
+    try {
+        const ids = opt.entryIds || [];
+        const CH = 400;
+        for (let i = 0; i < ids.length; i += CH) {
+            const chunk = ids.slice(i, i + CH);
+            try {
+                const batch = db.batch();
+                chunk.forEach(eid => batch.update(db.collection('cash_ledger').doc(eid), { settledId: firebase.firestore.FieldValue.delete() }));
+                await batch.commit();
+            } catch (e) {
+                // 1 khoản nào đó không còn tồn tại thì làm từng khoản, bỏ qua khoản lỗi
+                for (const eid of chunk) {
+                    try { await db.collection('cash_ledger').doc(eid).update({ settledId: firebase.firestore.FieldValue.delete() }); } catch (e2) { }
+                }
+            }
+        }
+        await db.collection('cash_ledger_settlements').doc(id).delete();
+        if (typeof ghiLog === 'function')
+            ghiLog('Sổ Quỹ', 'Hoàn tác thanh toán', formatDateToDDMMYYYY(opt.paidDate), 'Thu ' + cashLedgerMoney(opt.tongThu) + ' / Chi ' + cashLedgerMoney(opt.tongChi));
+        await loadCashLedger();
+        await openCashLedgerHistory();
+    } catch (err) {
+        showAlert('Lỗi khi hoàn tác: ' + err.message);
     }
 }
 async function loadActivityLog() {
