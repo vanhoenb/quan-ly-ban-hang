@@ -4246,6 +4246,9 @@ document.addEventListener('DOMContentLoaded', function () {
         <button id="tab-btn-activitylog" onclick="switchQuanLyTab('activitylog')" class="px-4 py-2.5 font-bold text-sm rounded-t-lg border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center gap-2">
             <i data-lucide="history" class="w-4 h-4"></i> Nhật Ký Hoạt Động
         </button>
+        <button id="tab-btn-soquy" onclick="switchQuanLyTab('soquy')" class="px-4 py-2.5 font-bold text-sm rounded-t-lg border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center gap-2">
+            <i data-lucide="wallet" class="w-4 h-4"></i> Sổ Quỹ Tiền Mặt
+        </button>
     </div>
 
     <!-- TAB 1: DANH SÁCH NGƯỜI DÙNG -->
@@ -4321,6 +4324,112 @@ document.addEventListener('DOMContentLoaded', function () {
                     </thead>
                     <tbody id="activity-log-body" class="divide-y divide-slate-100 dark:divide-slate-700 text-xs md:text-sm"></tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 3: SỔ QUỸ TIỀN MẶT - THU TIỀN HÀNG (cấp hàng đại lý) & MUA ĐỒ XƯỞNG (chi mua
+         nguyên vật liệu/đồ dùng xưởng) - ghi chép độc lập, không đụng tới công nợ KH/NCC. -->
+    <div id="quanly-tab-soquy" class="hidden space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 p-3 bg-gray-50 dark:bg-slate-950 rounded-lg border border-gray-200 dark:border-slate-700">
+            <div>
+                <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Từ ngày</label>
+                <input type="date" id="soquyFilterFrom" onchange="loadCashLedger()" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white text-sm outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Đến ngày</label>
+                <input type="date" id="soquyFilterTo" onchange="loadCashLedger()" class="w-full border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white text-sm outline-none">
+            </div>
+            <div class="flex items-end">
+                <button onclick="document.getElementById('soquyFilterFrom').value='';document.getElementById('soquyFilterTo').value='';loadCashLedger();" class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+                    <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Bỏ lọc - Xem tất cả
+                </button>
+            </div>
+            <div class="flex items-end justify-end gap-2">
+                <button onclick="printCashLedgerReport()" class="whitespace-nowrap bg-slate-700 dark:bg-slate-600 text-white px-3 py-2.5 rounded-xl font-bold text-xs transition-all duration-75 border-b-[3px] border-slate-900 hover:-translate-y-0.5 active:translate-y-[1px] active:border-b-[1px] shadow-md flex items-center gap-1.5">
+                    <i data-lucide="printer" class="w-3.5 h-3.5"></i> Xem &amp; In
+                </button>
+                <button onclick="exportCashLedgerExcel()" class="whitespace-nowrap bg-green-600 dark:bg-green-700 text-white px-3 py-2.5 rounded-xl font-bold text-xs transition-all duration-75 border-b-[3px] border-green-800 hover:-translate-y-0.5 active:translate-y-[1px] active:border-b-[1px] shadow-md flex items-center gap-1.5">
+                    <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> Xuất Excel
+                </button>
+            </div>
+        </div>
+
+        <!-- Ô tổng kết: Thu - Chi = Còn lại -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="rounded-2xl p-4 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 text-center">
+                <div class="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 uppercase">Tổng thu tiền hàng</div>
+                <div id="soquy-tong-thu" class="text-xl font-black text-emerald-700 dark:text-emerald-400 mt-1">0 đ</div>
+            </div>
+            <div class="rounded-2xl p-4 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 text-center">
+                <div class="text-[11px] font-bold text-rose-700 dark:text-rose-400 uppercase">Tổng mua đồ xưởng</div>
+                <div id="soquy-tong-chi" class="text-xl font-black text-rose-700 dark:text-rose-400 mt-1">0 đ</div>
+            </div>
+            <div class="rounded-2xl p-4 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 text-center">
+                <div class="text-[11px] font-bold text-blue-700 dark:text-blue-400 uppercase">Còn lại (Thu − Chi)</div>
+                <div id="soquy-con-lai" class="text-xl font-black text-blue-700 dark:text-blue-400 mt-1">0 đ</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <!-- PHẦN 1: THU TIỀN HÀNG -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
+                <div class="p-3 bg-emerald-600 dark:bg-emerald-700 text-white font-black flex items-center gap-2">
+                    <i data-lucide="banknote" class="w-4 h-4"></i> PHẦN 1: THU TIỀN HÀNG
+                </div>
+                <div class="grid grid-cols-2 gap-2 p-3 border-b border-slate-200 dark:border-slate-700">
+                    <input type="date" id="soquy-thu-date" value="" class="col-span-1 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-lg text-gray-800 dark:text-white text-sm outline-none">
+                    <input type="number" id="soquy-thu-amount" placeholder="Số tiền" class="col-span-1 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-lg text-gray-800 dark:text-white text-sm outline-none">
+                    <input type="text" id="soquy-thu-content" placeholder="Nội dung (VD: Thu tiền cấp hàng đại lý ABC)" class="col-span-1 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-lg text-gray-800 dark:text-white text-sm outline-none">
+                    <input type="text" id="soquy-thu-note" placeholder="Ghi chú (không bắt buộc)" class="col-span-1 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-lg text-gray-800 dark:text-white text-sm outline-none">
+                    <div class="col-span-2 flex justify-end">
+                        <button onclick="addCashLedgerEntry('thu')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded-lg font-bold text-xs">+ Thêm khoản thu</button>
+                    </div>
+                </div>
+                <div class="max-h-[50vh] overflow-y-auto">
+                    <table class="w-full text-xs text-left border-collapse">
+                        <thead class="sticky top-0 z-10 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold uppercase">
+                            <tr>
+                                <th class="py-2 px-2 border-b border-slate-200 dark:border-slate-700 w-[15%]">Ngày</th>
+                                <th class="py-2 px-2 border-b border-slate-200 dark:border-slate-700 w-[35%]">Nội dung</th>
+                                <th class="py-2 px-2 border-b border-slate-200 dark:border-slate-700 text-right w-[18%]">Số tiền</th>
+                                <th class="py-2 px-2 border-b border-slate-200 dark:border-slate-700 w-[22%]">Ghi chú</th>
+                                <th class="py-2 px-1 border-b border-slate-200 dark:border-slate-700 text-center w-[10%]"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="soquy-thu-body" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PHẦN 2: MUA ĐỒ XƯỞNG -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
+                <div class="p-3 bg-rose-600 dark:bg-rose-700 text-white font-black flex items-center gap-2">
+                    <i data-lucide="shopping-cart" class="w-4 h-4"></i> PHẦN 2: MUA ĐỒ XƯỞNG
+                </div>
+                <div class="grid grid-cols-2 gap-2 p-3 border-b border-slate-200 dark:border-slate-700">
+                    <input type="date" id="soquy-chi-date" value="" class="col-span-1 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-lg text-gray-800 dark:text-white text-sm outline-none">
+                    <input type="number" id="soquy-chi-amount" placeholder="Số tiền" class="col-span-1 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-lg text-gray-800 dark:text-white text-sm outline-none">
+                    <input type="text" id="soquy-chi-content" placeholder="Nội dung (VD: Mua bao bì, hộp đựng...)" class="col-span-1 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-lg text-gray-800 dark:text-white text-sm outline-none">
+                    <input type="text" id="soquy-chi-note" placeholder="Ghi chú (không bắt buộc)" class="col-span-1 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 rounded-lg text-gray-800 dark:text-white text-sm outline-none">
+                    <div class="col-span-2 flex justify-end">
+                        <button onclick="addCashLedgerEntry('chi')" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-1.5 rounded-lg font-bold text-xs">+ Thêm khoản chi</button>
+                    </div>
+                </div>
+                <div class="max-h-[50vh] overflow-y-auto">
+                    <table class="w-full text-xs text-left border-collapse">
+                        <thead class="sticky top-0 z-10 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold uppercase">
+                            <tr>
+                                <th class="py-2 px-2 border-b border-slate-200 dark:border-slate-700 w-[15%]">Ngày</th>
+                                <th class="py-2 px-2 border-b border-slate-200 dark:border-slate-700 w-[35%]">Nội dung</th>
+                                <th class="py-2 px-2 border-b border-slate-200 dark:border-slate-700 text-right w-[18%]">Số tiền</th>
+                                <th class="py-2 px-2 border-b border-slate-200 dark:border-slate-700 w-[22%]">Ghi chú</th>
+                                <th class="py-2 px-1 border-b border-slate-200 dark:border-slate-700 text-center w-[10%]"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="soquy-chi-body" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -5458,7 +5567,8 @@ function xemQuyenNguoiDung(username) {
 function switchQuanLyTab(tab) {
     const tabs = {
         users: { content: document.getElementById('quanly-tab-users'), btn: document.getElementById('tab-btn-users') },
-        activitylog: { content: document.getElementById('quanly-tab-activitylog'), btn: document.getElementById('tab-btn-activitylog') }
+        activitylog: { content: document.getElementById('quanly-tab-activitylog'), btn: document.getElementById('tab-btn-activitylog') },
+        soquy: { content: document.getElementById('quanly-tab-soquy'), btn: document.getElementById('tab-btn-soquy') }
     };
     const addBtn = document.getElementById('btn-add-user-header');
     const activeCls = ['border-blue-600', 'text-blue-600', 'dark:text-blue-400'];
@@ -5482,6 +5592,8 @@ function switchQuanLyTab(tab) {
         addBtn.classList.toggle('hidden', tab !== 'users');
     if (tab === 'activitylog')
         loadActivityLog();
+    if (tab === 'soquy')
+        loadCashLedger();
     if (typeof lucide !== 'undefined')
         lucide.createIcons();
 }
@@ -7781,6 +7893,155 @@ async function exportChamCongExcel() {
 }
 // --- TẢI NHẬT KÝ HOẠT ĐỘNG (AI SỬA/XÓA GÌ, KHI NÀO) ---
 window.activityLogCache = [];
+// === SỔ QUỸ TIỀN MẶT (tab "Quản Lý" > "Sổ Quỹ Tiền Mặt") ===
+// Ghi chép riêng, không đụng vào công nợ KH/NCC: Phần 1 "Thu tiền hàng" (tiền thu khi cấp
+// hàng cho đại lý), Phần 2 "Mua đồ xưởng" (tiền chủ bỏ ra mua nguyên vật liệu/đồ dùng cho
+// xưởng sản xuất). Còn lại = Tổng thu − Tổng chi. Lưu trong collection Firestore
+// 'cash_ledger', mỗi dòng {type:'thu'|'chi', date, content, amount, note, createdAt}.
+window.__cashLedgerData = { thu: [], chi: [] };
+function cashLedgerMoney(n) {
+    return Math.round(Number(n) || 0).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + ' đ';
+}
+async function loadCashLedger() {
+    const thuBody = document.getElementById('soquy-thu-body');
+    const chiBody = document.getElementById('soquy-chi-body');
+    if (!thuBody || !chiBody)
+        return;
+    thuBody.innerHTML = skeletonRows(3, 5);
+    chiBody.innerHTML = skeletonRows(3, 5);
+    const from = document.getElementById('soquyFilterFrom')?.value || '';
+    const to = document.getElementById('soquyFilterTo')?.value || '';
+    try {
+        const snap = await db.collection('cash_ledger').orderBy('date', 'desc').limit(1000).get();
+        const thu = [], chi = [];
+        snap.forEach(doc => {
+            const d = doc.data();
+            const row = { id: doc.id, date: d.date || '', content: d.content || '', amount: Number(d.amount) || 0, note: d.note || '' };
+            if (from && row.date < from) return;
+            if (to && row.date > to) return;
+            if (d.type === 'chi') chi.push(row); else thu.push(row);
+        });
+        window.__cashLedgerData = { thu, chi };
+        const renderRows = (rows, type) => rows.map(r => "\n            <tr>\n                <td class=\"py-2 px-2\">" + formatDateToDDMMYYYY(r.date) + "</td>\n                <td class=\"py-2 px-2\">" + escapeHtml(r.content) + "</td>\n                <td class=\"py-2 px-2 text-right font-bold whitespace-nowrap\">" + cashLedgerMoney(r.amount) + "</td>\n                <td class=\"py-2 px-2 text-slate-500 dark:text-slate-400\">" + escapeHtml(r.note) + "</td>\n                <td class=\"py-2 px-1 text-center\"><button onclick=\"deleteCashLedgerEntry('" + r.id + "')\" title=\"Xóa\" class=\"text-red-500 hover:text-red-700\"><i data-lucide=\"trash-2\" class=\"w-3.5 h-3.5\"></i></button></td>\n            </tr>").join('') ||
+            '<tr><td colspan="5" class="p-4 text-center text-slate-400">Chưa có khoản nào.</td></tr>';
+        thuBody.innerHTML = renderRows(thu, 'thu');
+        chiBody.innerHTML = renderRows(chi, 'chi');
+        const tongThu = thu.reduce((s, r) => s + r.amount, 0);
+        const tongChi = chi.reduce((s, r) => s + r.amount, 0);
+        document.getElementById('soquy-tong-thu').innerText = cashLedgerMoney(tongThu);
+        document.getElementById('soquy-tong-chi').innerText = cashLedgerMoney(tongChi);
+        const conLaiEl = document.getElementById('soquy-con-lai');
+        conLaiEl.innerText = cashLedgerMoney(tongThu - tongChi);
+        conLaiEl.className = 'text-xl font-black mt-1 ' + ((tongThu - tongChi) < 0 ? 'text-red-600' : 'text-blue-700 dark:text-blue-400');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    } catch (err) {
+        console.error('Lỗi tải Sổ Quỹ:', err);
+        thuBody.innerHTML = chiBody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-red-500">Lỗi tải dữ liệu.</td></tr>';
+    }
+}
+async function addCashLedgerEntry(type) {
+    const prefix = type === 'chi' ? 'soquy-chi-' : 'soquy-thu-';
+    const dateEl = document.getElementById(prefix + 'date');
+    const amountEl = document.getElementById(prefix + 'amount');
+    const contentEl = document.getElementById(prefix + 'content');
+    const noteEl = document.getElementById(prefix + 'note');
+    const date = dateEl.value || getTodayVNISO();
+    const amount = parseFloat(amountEl.value);
+    const content = contentEl.value.trim();
+    if (!content) return showAlert('Vui lòng nhập Nội dung.');
+    if (!isFinite(amount) || amount <= 0) return showAlert('Vui lòng nhập Số tiền hợp lệ (lớn hơn 0).');
+    try {
+        await db.collection('cash_ledger').add({
+            type, date, content, amount, note: noteEl.value.trim(),
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        dateEl.value = ''; amountEl.value = ''; contentEl.value = ''; noteEl.value = '';
+        if (typeof ghiLog === 'function')
+            ghiLog('Sổ Quỹ', 'Thêm', content, (type === 'chi' ? 'Mua đồ xưởng' : 'Thu tiền hàng') + ': ' + cashLedgerMoney(amount));
+        await loadCashLedger();
+    } catch (err) {
+        showAlert('Lỗi khi lưu: ' + err.message);
+    }
+}
+async function deleteCashLedgerEntry(id) {
+    if (!confirm('Xóa khoản này khỏi Sổ Quỹ?')) return;
+    try {
+        await db.collection('cash_ledger').doc(id).delete();
+        await loadCashLedger();
+    } catch (err) {
+        showAlert('Lỗi khi xóa: ' + err.message);
+    }
+}
+function printCashLedgerReport() {
+    const { thu, chi } = window.__cashLedgerData || { thu: [], chi: [] };
+    const from = document.getElementById('soquyFilterFrom')?.value || '';
+    const to = document.getElementById('soquyFilterTo')?.value || '';
+    const rangeText = (from || to) ? "(t\u1EEB " + (from ? formatDateToDDMMYYYY(from) : '...') + " \u0111\u1EBFn " + (to ? formatDateToDDMMYYYY(to) : '...') + ")" : '(toàn bộ)';
+    const buildTable = (rows, title) => {
+        const bodyRows = rows.map(r => '<tr><td>' + formatDateToDDMMYYYY(r.date) + '</td><td>' + escapeHtml(r.content) + '</td><td style="text-align:right">' + cashLedgerMoney(r.amount) + '</td><td>' + escapeHtml(r.note) + '</td></tr>').join('') ||
+            '<tr><td colspan="4" style="text-align:center;color:#94a3b8">Chưa có khoản nào.</td></tr>';
+        const tong = rows.reduce((s, r) => s + r.amount, 0);
+        return '<h3 style="margin:16px 0 6px">' + title + '</h3><table style="width:100%;border-collapse:collapse"><thead><tr><th>Ngày</th><th>Nội dung</th><th style="text-align:right">Số tiền</th><th>Ghi chú</th></tr></thead><tbody>' + bodyRows + '</tbody><tfoot><tr style="font-weight:800"><td colspan="2">Cộng</td><td style="text-align:right">' + cashLedgerMoney(tong) + '</td><td></td></tr></tfoot></table>';
+    };
+    const tongThu = thu.reduce((s, r) => s + r.amount, 0);
+    const tongChi = chi.reduce((s, r) => s + r.amount, 0);
+    const html = '<div style="text-align:center;color:#64748b;font-size:13px;margin-bottom:8px">' + rangeText + '</div>' +
+        buildTable(thu, '💰 PHẦN 1: THU TIỀN HÀNG') +
+        buildTable(chi, '🛒 PHẦN 2: MUA ĐỒ XƯỞNG') +
+        '<div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">' +
+        '<div style="padding:12px;border:2px solid #10b981;border-radius:8px;text-align:center"><div style="font-size:11px;font-weight:700;color:#047857;text-transform:uppercase">Tổng thu tiền hàng</div><div style="font-size:18px;font-weight:800;color:#047857;margin-top:4px">' + cashLedgerMoney(tongThu) + '</div></div>' +
+        '<div style="padding:12px;border:2px solid #e11d48;border-radius:8px;text-align:center"><div style="font-size:11px;font-weight:700;color:#be123c;text-transform:uppercase">Tổng mua đồ xưởng</div><div style="font-size:18px;font-weight:800;color:#be123c;margin-top:4px">' + cashLedgerMoney(tongChi) + '</div></div>' +
+        '<div style="padding:12px;border:2px solid #0f172a;border-radius:8px;text-align:center"><div style="font-size:11px;font-weight:700;color:#0f172a;text-transform:uppercase">Còn lại (Thu − Chi)</div><div style="font-size:18px;font-weight:800;color:#0f172a;margin-top:4px">' + cashLedgerMoney(tongThu - tongChi) + '</div></div>' +
+        '</div>';
+    printReportDirect('SỔ QUỸ TIỀN MẶT', html);
+}
+async function exportCashLedgerExcel() {
+    const { thu, chi } = window.__cashLedgerData || { thu: [], chi: [] };
+    try {
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet('SoQuy');
+        const titleRow = sheet.addRow(['SỔ QUỸ TIỀN MẶT']);
+        titleRow.font = { bold: true, size: 14 };
+        sheet.mergeCells('A1:D1');
+        titleRow.alignment = { horizontal: 'center' };
+        sheet.addRow([]);
+        const addSection = (rows, title) => {
+            const hRow = sheet.addRow([title]);
+            hRow.font = { bold: true };
+            sheet.mergeCells('A' + hRow.number + ':D' + hRow.number);
+            const cols = sheet.addRow(['Ngày', 'Nội dung', 'Số tiền', 'Ghi chú']);
+            cols.font = { bold: true };
+            cols.eachCell(c => { c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5F5F5' } }; setBorderStyle(c); });
+            rows.forEach(r => {
+                const row = sheet.addRow([formatDateToDDMMYYYY(r.date), r.content, r.amount, r.note]);
+                row.eachCell((c, col) => { setBorderStyle(c); if (col === 3) c.numFmt = '#,##0'; });
+            });
+            const tong = rows.reduce((s, r) => s + r.amount, 0);
+            const totalRow = sheet.addRow(['', 'Cộng', tong, '']);
+            totalRow.font = { bold: true };
+            totalRow.eachCell((c, col) => { setBorderStyle(c); if (col === 3) c.numFmt = '#,##0'; });
+            sheet.addRow([]);
+        };
+        addSection(thu, 'PHẦN 1: THU TIỀN HÀNG');
+        addSection(chi, 'PHẦN 2: MUA ĐỒ XƯỞNG');
+        const tongThu = thu.reduce((s, r) => s + r.amount, 0);
+        const tongChi = chi.reduce((s, r) => s + r.amount, 0);
+        const finalRow = sheet.addRow(['', 'CÒN LẠI (Thu - Chi)', tongThu - tongChi, '']);
+        finalRow.font = { bold: true, size: 12 };
+        finalRow.eachCell((c, col) => { setBorderStyle(c); if (col === 3) c.numFmt = '#,##0'; });
+        sheet.columns = [{ width: 15 }, { width: 40 }, { width: 18 }, { width: 30 }];
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'So_Quy_Tien_Mat_' + getTodayVNISO() + '.xlsx';
+        a.click();
+        Swal.fire({ icon: 'success', title: 'Đã xuất file Sổ Quỹ!', toast: true, position: 'top-end', timer: 1800, showConfirmButton: false });
+    } catch (err) {
+        showAlert('Lỗi khi xuất Excel: ' + err.message);
+    }
+}
 async function loadActivityLog() {
     const body = document.getElementById('activity-log-body');
     if (!body)
