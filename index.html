@@ -13,6 +13,16 @@
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
     <style>
+        .chamcong-loading { opacity: .55; pointer-events: none; }
+        /* Sổ Quỹ Tiền Mặt: kẻ dòng + kẻ cột rõ, dòng chẵn lẻ xen màu, rê chuột sáng dòng */
+        .soquy-table { border-collapse: collapse; }
+        .soquy-table th, .soquy-table td { border: 1px solid #cbd5e1; }
+        .soquy-table tbody tr:nth-child(even) { background-color: #f8fafc; }
+        .soquy-table tbody tr:hover { background-color: #eff6ff; }
+        .soquy-table thead th { box-shadow: inset 0 -2px 0 #94a3b8; }
+        .dark .soquy-table th, .dark .soquy-table td { border-color: #475569; }
+        .dark .soquy-table tbody tr:nth-child(even) { background-color: rgba(30, 41, 59, 0.6); }
+        .dark .soquy-table tbody tr:hover { background-color: rgba(51, 65, 85, 0.8); }
         #imp-vendor-box { display: none; }
         #imp-vendor-box.imp-v-on { display: block; }
         @media (min-width: 768px) { #imp-vendor-box { display: block; } }
@@ -2049,11 +2059,11 @@ document.addEventListener('DOMContentLoaded', function () {
          CẤP HÀNG ĐẠI LÝ (nới rộng thêm 1 chút) - tỉ lệ 3/2 (60%/40%) thay vì 2/1 (66%/33%). -->
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <div class="lg:col-span-3 bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-rose-100 dark:border-rose-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">CHI TIẾT TỒN KHO</h3>
+            <div class="flex justify-between items-center -mx-4 md:-mx-6 -mt-4 md:-mt-6 mb-4 px-4 md:px-6 py-3 rounded-t-[23px] bg-blue-600 dark:bg-blue-700">
+                <h3 class="text-xs font-black text-white uppercase tracking-widest">📦 CHI TIẾT TỒN KHO</h3>
                 <div class="flex gap-2">
-                    <input type="date" id="inv-from" onchange="refreshInventory()" class="text-[10px] dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500 transition-all">
-                    <input type="date" id="inv-to" onchange="refreshInventory()" class="text-[10px] dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500 transition-all">
+                    <input type="date" id="inv-from" onchange="refreshInventory()" class="text-[10px] bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500 transition-all">
+                    <input type="date" id="inv-to" onchange="refreshInventory()" class="text-[10px] bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500 transition-all">
                 </div>
             </div>
             <div id="home-inventory-list" class="space-y-2 overflow-y-auto custom-scrollbar pr-2 h-[320px] md:h-[380px]">
@@ -2065,7 +2075,7 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
 
         <div class="lg:col-span-2 bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-blue-100 dark:border-blue-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
-            <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">THỜI GIAN CẤP HÀNG ĐẠI LÝ</h3>
+            <h3 class="-mx-4 md:-mx-6 -mt-4 md:-mt-6 mb-4 px-4 md:px-6 py-3 rounded-t-[23px] bg-rose-600 dark:bg-rose-700 text-white font-black text-xs uppercase tracking-widest">🚚 THỜI GIAN CẤP HÀNG ĐẠI LÝ</h3>
             <div class="flex items-center w-full px-2 mb-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">
                 <div class="w-[15%]">Số phiếu</div>
                 <div class="w-[30%]">Khách hàng</div>
@@ -2086,28 +2096,28 @@ document.addEventListener('DOMContentLoaded', function () {
          gói gọn trong 1 khung, không phải cuộn xa như xếp 2x2 trước đó. -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <div class="bg-white dark:bg-slate-900 p-3 md:p-4 rounded-3xl border border-rose-100 dark:border-rose-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
-            <div class="flex items-center justify-between mb-2 md:mb-3">
-                <h3 class="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Doanh thu ngày</h3>
-                <button onclick="showAllDailyRevenue()" class="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap">Xem tất cả</button>
+            <div class="flex items-center justify-between gap-2 -mx-3 md:-mx-4 -mt-3 md:-mt-4 mb-2 md:mb-3 px-3 md:px-4 py-2.5 rounded-t-[23px] bg-emerald-600 dark:bg-emerald-700">
+                <h3 class="text-[10px] md:text-xs font-black text-white uppercase tracking-widest">Doanh thu ngày</h3>
+                <button onclick="showAllDailyRevenue()" class="text-[10px] font-bold text-white/90 hover:text-white underline whitespace-nowrap">Xem tất cả</button>
             </div>
             <div class="h-[180px] md:h-[220px] w-full"><canvas id="revenueChart"></canvas></div>
         </div>
         <div class="bg-white dark:bg-slate-900 p-3 md:p-4 rounded-3xl border border-blue-100 dark:border-blue-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
-            <div class="flex items-center justify-between mb-2 md:mb-3">
-                <h3 class="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Doanh thu từng tháng</h3>
-                <button onclick="showAllMonthlyRevenue()" class="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap">Xem tất cả</button>
+            <div class="flex items-center justify-between gap-2 -mx-3 md:-mx-4 -mt-3 md:-mt-4 mb-2 md:mb-3 px-3 md:px-4 py-2.5 rounded-t-[23px] bg-indigo-600 dark:bg-indigo-700">
+                <h3 class="text-[10px] md:text-xs font-black text-white uppercase tracking-widest">Doanh thu từng tháng</h3>
+                <button onclick="showAllMonthlyRevenue()" class="text-[10px] font-bold text-white/90 hover:text-white underline whitespace-nowrap">Xem tất cả</button>
             </div>
             <div class="h-[180px] md:h-[220px] w-full"><canvas id="monthlyRevenueChart"></canvas></div>
         </div>
         <div class="bg-white dark:bg-slate-900 p-3 md:p-4 rounded-3xl border border-blue-100 dark:border-blue-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] flex flex-col">
-            <div class="flex items-center justify-between mb-2 md:mb-3">
-                <h3 class="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Top 10 SP bán chạy</h3>
-                <button onclick="showAllProductsSold()" class="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap">Xem tất cả</button>
+            <div class="flex items-center justify-between gap-2 -mx-3 md:-mx-4 -mt-3 md:-mt-4 mb-2 md:mb-3 px-3 md:px-4 py-2.5 rounded-t-[23px] bg-amber-600 dark:bg-amber-700">
+                <h3 class="text-[10px] md:text-xs font-black text-white uppercase tracking-widest">Top 10 SP bán chạy</h3>
+                <button onclick="showAllProductsSold()" class="text-[10px] font-bold text-white/90 hover:text-white underline whitespace-nowrap">Xem tất cả</button>
             </div>
             <div class="h-[180px] md:h-[220px] w-full"><canvas id="topProductsChart"></canvas></div>
         </div>
         <div class="bg-white dark:bg-slate-900 p-3 md:p-4 rounded-3xl border border-rose-100 dark:border-rose-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] flex flex-col">
-            <h3 class="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2 md:mb-3">Tỷ trọng doanh thu</h3>
+            <h3 class="-mx-3 md:-mx-4 -mt-3 md:-mt-4 mb-2 md:mb-3 px-3 md:px-4 py-2.5 rounded-t-[23px] bg-violet-600 dark:bg-violet-700 text-white font-black text-[10px] md:text-xs uppercase tracking-widest">Tỷ trọng doanh thu</h3>
             <div class="h-[180px] md:h-[220px] w-full"><canvas id="revenueShareChart"></canvas></div>
         </div>
     </div>
@@ -2192,7 +2202,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="w-full lg:w-1/2 px-4 mb-6">
             <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl border border-blue-200 dark:border-slate-700 shadow-lg h-full flex flex-col">
                 <div class="flex flex-col gap-4 mb-4 border-b dark:border-slate-700 pb-4">
-                    <h3 class="font-bold text-xl text-slate-800 dark:text-white whitespace-nowrap">📋 DANH SÁCH PHIẾU NHẬP</h3>
+                    <h3 class="-mx-4 md:-mx-6 -mt-4 md:-mt-6 px-4 md:px-6 py-3 rounded-t-[15px] bg-emerald-600 dark:bg-emerald-700 text-white font-black text-base md:text-lg whitespace-nowrap">📋 DANH SÁCH PHIẾU NHẬP</h3>
 
                     <div class="grid grid-cols-3 gap-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-100 dark:border-slate-700 w-full">
                         <div>
@@ -2397,7 +2407,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <div id="page-inventory" class="hidden space-y-4 p-2 md:p-6 w-full">
     <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 w-full">
         
-        <h2 class="text-lg md:text-xl font-bold mb-4 text-slate-800 dark:text-white border-b dark:border-slate-700 pb-2">KHO HÀNG THỰC TẾ</h2>
+        <h2 class="-mx-4 md:-mx-6 -mt-4 md:-mt-6 mb-4 px-4 md:px-6 py-3 rounded-t-[15px] bg-blue-600 dark:bg-blue-700 text-white font-black text-base md:text-lg">📦 KHO HÀNG THỰC TẾ</h2>
         
         <div class="grid grid-cols-1 md:grid-cols-12 gap-3 mb-6">
             <!-- Hàng đầu: ô tìm kiếm + 2 nút hóa đơn nháp nằm thẳng hàng -->
@@ -3166,7 +3176,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       <!-- PHẦN 5: KHÁCH HÀNG -->
 <div id="page-customers" class="space-y-6 p-2 md:p-6 hidden">
-    <h2 class="text-2xl font-bold text-slate-800 dark:text-white border-b border-slate-200 dark:border-slate-700 pb-2">DS ĐẠI LÝ & CÔNG NỢ</h2>
+    <h2 class="px-4 py-3 rounded-2xl bg-violet-600 dark:bg-violet-700 text-white font-black text-lg md:text-xl shadow-lg">👥 DS ĐẠI LÝ &amp; CÔNG NỢ</h2>
     
     <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 grid grid-cols-1 md:grid-cols-5 gap-4">
         <input type="text" id="cust-name" placeholder="Tên đại lý" class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none w-full dark:text-white">
@@ -3202,7 +3212,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <!-- QUẢN LÝ DANH MỤC SẢN PHẨM -->
 <div id="page-products-manage" class="hidden p-2 md:p-6 space-y-6">
-    <h2 class="text-2xl font-bold text-gray-800">QUẢN LÝ DANH MỤC SẢN PHẨM</h2>
+    <h2 class="px-4 py-3 rounded-2xl bg-teal-600 dark:bg-teal-700 text-white font-black text-lg md:text-xl shadow-lg">🏷️ QUẢN LÝ DANH MỤC SẢN PHẨM</h2>
     
     <div class="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-4 gap-4">
         <input type="text" id="new-prod-name" placeholder="Tên sản phẩm" class="border border-gray-200 p-3 rounded-xl w-full focus:ring-2 focus:ring-blue-500 outline-none">
@@ -3239,7 +3249,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <!-- LỊCH SỬ HOÁ ĐƠN BÁN HÀNG -->
 
 <div id="page-history" class="hidden p-2 md:p-6 space-y-6">
-    <h2 class="text-2xl font-bold text-slate-800 border-b pb-2">LỊCH SỬ HOÁ ĐƠN</h2>
+    <h2 class="px-4 py-3 rounded-2xl bg-indigo-600 dark:bg-indigo-700 text-white font-black text-lg md:text-xl shadow-lg">🧾 LỊCH SỬ HOÁ ĐƠN</h2>
     
     <div class="bg-white p-4 md:p-6 rounded-2xl shadow-lg border border-blue-200">
         <div class="grid grid-cols-2 md:grid-cols-12 gap-3 items-end">
@@ -3567,7 +3577,7 @@ document.addEventListener('DOMContentLoaded', function () {
       <!-- Cột Danh sách (2/3 chiều rộng, bảng được làm ngắn lại độ cao max-h-[420px]) -->
       <div class="w-full lg:w-2/3 px-4 mb-6">
         <div class="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-lg p-6 rounded-xl flex flex-col h-full">
-          <h5 class="mb-4 font-bold text-gray-600 dark:text-gray-300">DANH SÁCH PHIẾU SẢN XUẤT</h5>
+          <h5 class="-mx-6 -mt-6 mb-4 px-6 py-3 rounded-t-[11px] bg-orange-600 dark:bg-orange-700 text-white font-black text-base">🏭 DANH SÁCH PHIẾU SẢN XUẤT</h5>
           
           <div class="relative mb-4">
             <input type="text" id="searchInputSX" 
@@ -3779,7 +3789,7 @@ document.addEventListener('DOMContentLoaded', function () {
     <div class="flex flex-col-reverse lg:grid lg:grid-cols-12 gap-6">
         <!-- Danh sách: order-2 (nằm dưới trên đt) -->
         <div class="col-span-12 lg:col-span-9 bg-white dark:bg-slate-900 p-4 md:p-5 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700">
-            <h4 class="font-bold mb-4 text-gray-700 dark:text-slate-200">DANH SÁCH CHI TIẾT NHẬP</h4>
+            <h4 class="-mx-4 md:-mx-5 -mt-4 md:-mt-5 mb-4 px-4 md:px-5 py-3 rounded-t-[11px] bg-amber-600 dark:bg-amber-700 text-white font-black text-base">🧾 DANH SÁCH CHI TIẾT NHẬP</h4>
             
             <!-- BỘ LỌC MỚI ĐƯỢC THÊM VÀO -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 p-3 bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-slate-700">
@@ -4012,9 +4022,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         <!-- BẢNG CHẤM CÔNG HÀNG NGÀY -->
         <div id="chamcong-attendance-card" class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 p-3">
+            <div class="-mx-3 -mt-3 mb-3 px-3 py-2.5 rounded-t-[15px] bg-blue-600 dark:bg-blue-700 text-white font-black text-sm md:text-base">📅 BẢNG CHẤM CÔNG HÀNG NGÀY</div>
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
                 <div>
-                    <h3 class="font-bold text-slate-800 dark:text-white">BẢNG CHẤM CÔNG HÀNG NGÀY</h3>
                     <p class="text-[11px] text-slate-400">Bấm vào từng ô ngày để đổi trạng thái theo vòng: (trống) → X (đi làm) → 1/2 (nửa công) → 0 (nghỉ) → quay lại trống.</p>
                 </div>
 
@@ -4029,9 +4039,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         <!-- BẢNG TĂNG CA -->
         <div id="chamcong-overtime-card" class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 p-3">
+            <div class="-mx-3 -mt-3 mb-3 px-3 py-2.5 rounded-t-[15px] bg-amber-600 dark:bg-amber-700 text-white font-black text-sm md:text-base">⏱️ BẢNG TĂNG CA (SỐ GIỜ LÀM THÊM)</div>
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
                 <div>
-                    <h3 class="font-bold text-slate-800 dark:text-white">BẢNG TĂNG CA (SỐ GIỜ LÀM THÊM)</h3>
                     <p class="text-[11px] text-slate-400">Nhập trực tiếp số giờ tăng ca của từng ngày (để trống hoặc 0 nếu hôm đó không tăng ca).</p>
                 </div>
 
@@ -4050,9 +4060,9 @@ document.addEventListener('DOMContentLoaded', function () {
              Giờ vào/ra của ca sáng và ca chiều được nhập trực tiếp (input type="time"), hệ
              thống tự tính ra số giờ của từng ca rồi cộng lại thành Tổng giờ trong ngày. -->
         <div id="chamcong-parttime-card" class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 p-3">
+            <div class="-mx-3 -mt-3 mb-3 px-3 py-2.5 rounded-t-[15px] bg-purple-600 dark:bg-purple-700 text-white font-black text-sm md:text-base">🕒 BẢNG CHẤM CÔNG PART-TIME</div>
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
                 <div>
-                    <h3 class="font-bold text-slate-800 dark:text-white">BẢNG CHẤM CÔNG PART-TIME</h3>
                     <p class="text-[11px] text-slate-400">Các dòng được gộp theo từng ngày (bấm vào tiêu đề ngày để thu gọn/mở rộng). Tên nhập trực tiếp, không lấy từ danh sách. Bấm dấu <b>+</b> ở dưới cột STT để thêm dòng mới.</p>
                 </div>
 
@@ -4368,6 +4378,9 @@ document.addEventListener('DOMContentLoaded', function () {
             <button onclick="settleCashLedger()" class="whitespace-nowrap bg-blue-600 dark:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold text-sm transition-all duration-75 border-b-[3px] border-blue-800 hover:-translate-y-0.5 active:translate-y-[1px] active:border-b-[1px] shadow-md flex items-center gap-1.5">
                 <i data-lucide="check-circle" class="w-4 h-4"></i> Thanh toán
             </button>
+            <button onclick="loadCashLedger(true)" title="Đọc lại dữ liệu mới nhất từ máy chủ (dùng khi có máy khác cùng nhập Sổ Quỹ)" class="whitespace-nowrap bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-4 py-2 rounded-xl font-bold text-sm border border-slate-300 dark:border-slate-600 shadow-sm flex items-center gap-1.5">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i> Tải lại
+            </button>
             <button onclick="openCashLedgerHistory()" class="whitespace-nowrap bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-4 py-2 rounded-xl font-bold text-sm border border-slate-300 dark:border-slate-600 shadow-sm flex items-center gap-1.5">
                 <i data-lucide="history" class="w-4 h-4"></i> Lịch sử thanh toán
             </button>
@@ -4408,7 +4421,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     </div>
                 </div>
                 <div class="max-h-[50vh] overflow-y-auto">
-                    <table class="w-full text-xs text-left border-collapse">
+                    <table class="soquy-table w-full text-xs text-left border-collapse">
                         <thead class="sticky top-0 z-10 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold uppercase">
                             <tr>
                                 <th class="py-2 px-2 border-b border-slate-200 dark:border-slate-700 w-[15%]">Ngày</th>
@@ -4418,7 +4431,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 <th class="py-2 px-1 border-b border-slate-200 dark:border-slate-700 text-center w-[10%]"></th>
                             </tr>
                         </thead>
-                        <tbody id="soquy-thu-body" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody>
+                        <tbody id="soquy-thu-body"></tbody>
                     </table>
                 </div>
             </div>
@@ -4439,7 +4452,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     </div>
                 </div>
                 <div class="max-h-[50vh] overflow-y-auto">
-                    <table class="w-full text-xs text-left border-collapse">
+                    <table class="soquy-table w-full text-xs text-left border-collapse">
                         <thead class="sticky top-0 z-10 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold uppercase">
                             <tr>
                                 <th class="py-2 px-2 border-b border-slate-200 dark:border-slate-700 w-[15%]">Ngày</th>
@@ -4449,7 +4462,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 <th class="py-2 px-1 border-b border-slate-200 dark:border-slate-700 text-center w-[10%]"></th>
                             </tr>
                         </thead>
-                        <tbody id="soquy-chi-body" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody>
+                        <tbody id="soquy-chi-body"></tbody>
                     </table>
                 </div>
             </div>
@@ -5695,7 +5708,7 @@ function getDaysInMonth(monthStr) {
 }
 async function migrateEmployeeIdentityData() {
     try {
-        const staff = await getAllStaffForChamCong(true);
+        const staff = await getAllStaffForChamCong(false);
         const byName = new Map(staff.map(s => [salaryNormalizeName(s.name), s]));
         let rosterChanged = false;
         for (const s of staff) {
@@ -5708,6 +5721,15 @@ async function migrateEmployeeIdentityData() {
         if(rosterChanged) window.__chamCongStaffList=null;
         // Không ghi DB nếu chưa có thay đổi để tránh tốn lượt ghi khi mở tháng.
     } catch(e){ console.warn('Không thể chuẩn hóa ID nhân viên:',e); }
+}
+function setChamCongLoading(on) {
+    ['chamcong-attendance-card', 'chamcong-overtime-card', 'chamcong-parttime-card', 'chamcong-salary-card'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('chamcong-loading', !!on);
+    });
+    const st = document.getElementById('chamcong-autosave-status');
+    if (st && on) st.innerText = '⏳ Đang tải bảng chấm công...';
+    else if (st && st.innerText.indexOf('Đang tải') >= 0) st.innerText = '';
 }
 async function loadChamCongMonth() {
     const monthEl = document.getElementById('chamcong-month');
@@ -5728,9 +5750,18 @@ async function loadChamCongMonth() {
             await saveChamCongData(true);
         }
     }
-    showLoading();
+    // KHÔNG dùng hộp thoại "Đang xử lý..." (Swal) nữa: nó làm mờ cả trang, khóa thanh cuộn rồi
+    // đóng lại -> trang bị giật/nháy mỗi lần mở. Thay bằng làm mờ nhẹ 4 bảng + dòng chữ nhỏ.
+    const reqId = window.__chamCongLoadSeq = (window.__chamCongLoadSeq || 0) + 1;
+    setChamCongLoading(true);
     try {
-        const doc = await db.collection('cham_cong').doc(monthStr).get();
+        // Đọc song song bảng chấm công + sổ nhân viên (trước đây đọc nối tiếp nên chờ lâu gấp đôi)
+        const [doc] = await Promise.all([
+            db.collection('cham_cong').doc(monthStr).get(),
+            getAllStaffForChamCong(false).catch(() => null)
+        ]);
+        if (reqId !== window.__chamCongLoadSeq)
+            return; // đã đổi sang tháng khác trong lúc chờ -> bỏ kết quả cũ
         if (doc.exists) {
             const data = doc.data();
             window.chamCongState = { month: monthStr, attendance: data.attendance || [], overtime: data.overtime || [], parttime: data.parttime || [], salary: data.salary || [], nguoiCham: data.nguoiCham || '', locked: !!data.locked, salaryLocked: !!data.salaryLocked };
@@ -5747,12 +5778,14 @@ async function loadChamCongMonth() {
         if (statusEl)
             statusEl.innerText = '';
         await migrateEmployeeIdentityData();
+        if (reqId !== window.__chamCongLoadSeq)
+            return;
         renderChamCongTables();
         updateChamCongLockUI();
-        Swal.close();
+        setChamCongLoading(false);
     }
     catch (e) {
-        Swal.close();
+        setChamCongLoading(false);
         showAlert('Không tải được bảng chấm công: ' + e.message);
     }
 }
@@ -7933,6 +7966,9 @@ async function fillSoquyCustomerList() {
     const dl = document.getElementById('soquy-cust-list');
     if (!dl)
         return;
+    // Đã nạp gần đây (và danh sách còn nội dung) thì khỏi nạp lại -> không tốn lượt đọc khách hàng
+    if (dl.options.length && (Date.now() - (window.__soquyCustAt || 0)) < 600000)
+        return;
     try {
         let names = (window.allCustomersData || []).map(c => c.name).filter(Boolean);
         if (!names.length) {
@@ -7942,11 +7978,18 @@ async function fillSoquyCustomerList() {
         }
         names = [...new Set(names)].sort((a, b) => a.localeCompare(b, 'vi'));
         dl.innerHTML = names.map(n => '<option value="' + escapeHtml(n) + '"></option>').join('');
+        window.__soquyCustAt = Date.now();
     } catch (err) {
         console.warn('Không nạp được danh sách KH cho Sổ Quỹ:', err);
     }
 }
-async function loadCashLedger() {
+// TIẾT KIỆM LƯỢT ĐỌC FIREBASE: dữ liệu Sổ Quỹ (các khoản CHƯA thanh toán) được giữ trong bộ nhớ
+// (window.__cashLedgerRaw). Đổi ngày lọc / mở lại tab / thêm-sửa-xóa-thanh toán đều xử lý ngay trên
+// bộ nhớ, KHÔNG đọc lại Firebase. Chỉ đọc lại khi: lần đầu mở, bấm "Tải lại", cache quá 5 phút,
+// hoặc sau "Hoàn tác thanh toán" (các khoản quay lại danh sách). loadCashLedger(true) = ép đọc lại.
+window.__cashLedgerRaw = null; // { thu: [], chi: [], at: thời điểm đọc }
+const CASH_LEDGER_CACHE_MS = 5 * 60 * 1000;
+async function loadCashLedger(force) {
     fillSoquyCustomerList();
     // Điền sẵn ngày hôm nay cho 2 ô ngày nhập (nếu đang trống) để đỡ phải chọn mỗi lần
     ['soquy-thu-date', 'soquy-chi-date'].forEach(id => {
@@ -7957,37 +8000,59 @@ async function loadCashLedger() {
     const chiBody = document.getElementById('soquy-chi-body');
     if (!thuBody || !chiBody)
         return;
-    thuBody.innerHTML = skeletonRows(3, 5);
-    chiBody.innerHTML = skeletonRows(3, 5);
-    try {
-        const snap = await db.collection('cash_ledger').orderBy('date', 'desc').limit(1000).get();
-        const allThu = [], allChi = [];
-        snap.forEach(doc => {
-            const d = doc.data();
-            if (d.settledId) return; // đã thanh toán -> nằm trong Lịch sử thanh toán, không hiện ở danh sách hiện tại
-            const row = { id: doc.id, date: d.date || '', content: d.content || '', amount: Number(d.amount) || 0, note: d.note || '' };
-            if (d.type === 'chi') allChi.push(row); else allThu.push(row);
-        });
-        // Chế độ tự động (mặc định): Từ ngày = ngày XA NHẤT trong các khoản chưa thanh toán (thu hoặc
-        // chi, cái nào sớm hơn), Đến ngày = ngày MỚI NHẤT. Chọn tay 1 trong 2 ô thì giữ nguyên lựa chọn
-        // của bạn cho tới khi bấm "Bỏ lọc - Xem tất cả" (quay lại tự động).
-        const fromEl = document.getElementById('soquyFilterFrom');
-        const toEl = document.getElementById('soquyFilterTo');
-        if (window.__soquyAutoRange !== false) {
-            const dates = [...allThu, ...allChi].map(r => r.date).filter(Boolean).sort();
-            fromEl.value = dates.length ? dates[0] : '';
-            toEl.value = dates.length ? dates[dates.length - 1] : '';
+    const raw = window.__cashLedgerRaw;
+    const fresh = raw && (Date.now() - raw.at) < CASH_LEDGER_CACHE_MS;
+    if (force === true || !fresh) {
+        thuBody.innerHTML = skeletonRows(3, 5);
+        chiBody.innerHTML = skeletonRows(3, 5);
+        try {
+            const snap = await db.collection('cash_ledger').orderBy('date', 'desc').limit(1000).get();
+            const allThu = [], allChi = [];
+            snap.forEach(doc => {
+                const d = doc.data();
+                if (d.settledId) return; // đã thanh toán -> nằm trong Lịch sử thanh toán, không hiện ở danh sách hiện tại
+                const row = { id: doc.id, date: d.date || '', content: d.content || '', amount: Number(d.amount) || 0, note: d.note || '' };
+                if (d.type === 'chi') allChi.push(row); else allThu.push(row);
+            });
+            window.__cashLedgerRaw = { thu: allThu, chi: allChi, at: Date.now() };
+        } catch (err) {
+            console.error('Lỗi tải Sổ Quỹ:', err);
+            thuBody.innerHTML = chiBody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-red-500">Lỗi tải dữ liệu.</td></tr>';
+            return;
         }
-        const from = fromEl.value || '';
-        const to = toEl.value || '';
-        const inRange = r => !(from && r.date < from) && !(to && r.date > to);
-        const thu = allThu.filter(inRange), chi = allChi.filter(inRange);
-        window.__cashLedgerAll = { thu, chi };
-        renderCashLedger();
-    } catch (err) {
-        console.error('Lỗi tải Sổ Quỹ:', err);
-        thuBody.innerHTML = chiBody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-red-500">Lỗi tải dữ liệu.</td></tr>';
     }
+    applyCashLedgerRange();
+}
+// Áp dụng khoảng ngày lên dữ liệu trong bộ nhớ rồi vẽ lại (không đọc Firebase).
+// Chế độ tự động (mặc định): Từ ngày = ngày XA NHẤT trong các khoản chưa thanh toán (thu hoặc
+// chi, cái nào sớm hơn), Đến ngày = ngày MỚI NHẤT. Chọn tay 1 trong 2 ô thì giữ nguyên lựa chọn
+// của bạn cho tới khi bấm "Bỏ lọc - Xem tất cả" (quay lại tự động).
+function applyCashLedgerRange() {
+    const raw = window.__cashLedgerRaw || { thu: [], chi: [] };
+    const fromEl = document.getElementById('soquyFilterFrom');
+    const toEl = document.getElementById('soquyFilterTo');
+    if (!fromEl || !toEl)
+        return;
+    if (window.__soquyAutoRange !== false) {
+        const dates = [...raw.thu, ...raw.chi].map(r => r.date).filter(Boolean).sort();
+        fromEl.value = dates.length ? dates[0] : '';
+        toEl.value = dates.length ? dates[dates.length - 1] : '';
+    }
+    const from = fromEl.value || '';
+    const to = toEl.value || '';
+    const inRange = r => !(from && r.date < from) && !(to && r.date > to);
+    window.__cashLedgerAll = { thu: raw.thu.filter(inRange), chi: raw.chi.filter(inRange) };
+    renderCashLedger();
+}
+// Sửa dữ liệu trong bộ nhớ sau khi thêm/sửa/xóa/thanh toán thành công (thay cho việc đọc lại Firebase)
+function cashLedgerLocalChange(fn) {
+    if (!window.__cashLedgerRaw)
+        return loadCashLedger(true);
+    fn(window.__cashLedgerRaw);
+    const byDateDesc = (x, y) => String(y.date).localeCompare(String(x.date));
+    window.__cashLedgerRaw.thu.sort(byDateDesc);
+    window.__cashLedgerRaw.chi.sort(byDateDesc);
+    applyCashLedgerRange();
 }
 // Vẽ 2 bảng + 3 ô tổng từ dữ liệu đã tải, có áp dụng ô tìm kiếm. Kết quả sau lọc được lưu vào
 // window.__cashLedgerData để nút Xem & In / Xuất Excel in đúng những gì đang hiển thị.
@@ -8032,8 +8097,9 @@ async function addCashLedgerEntry(type) {
     if (!content) return showAlert('Vui lòng nhập Nội dung.');
     if (!isFinite(amount) || amount <= 0) return showAlert('Vui lòng nhập Số tiền hợp lệ (lớn hơn 0).');
     try {
-        await db.collection('cash_ledger').add({
-            type, date, content, amount, note: noteEl.value.trim(),
+        const noteVal = noteEl.value.trim();
+        const newRef = await db.collection('cash_ledger').add({
+            type, date, content, amount, note: noteVal,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         // Giữ nguyên ngày vừa nhập (thường nhập nhiều khoản cùng ngày), chỉ xóa các ô còn lại
@@ -8041,7 +8107,9 @@ async function addCashLedgerEntry(type) {
         soquyAmountHint(type === 'chi' ? 'chi' : 'thu');
         if (typeof ghiLog === 'function')
             ghiLog('Sổ Quỹ', 'Thêm', content, (type === 'chi' ? 'Mua đồ xưởng' : 'Thu tiền hàng') + ': ' + cashLedgerMoney(amount));
-        await loadCashLedger();
+        cashLedgerLocalChange(raw => {
+            (type === 'chi' ? raw.chi : raw.thu).push({ id: newRef.id, date, content, amount, note: noteVal });
+        });
         contentEl.focus();
     } catch (err) {
         showAlert('Lỗi khi lưu: ' + err.message);
@@ -8076,7 +8144,10 @@ async function editCashLedgerEntry(id) {
         await db.collection('cash_ledger').doc(id).update(res.value);
         if (typeof ghiLog === 'function')
             ghiLog('Sổ Quỹ', 'Sửa', res.value.content, cashLedgerMoney(row.amount) + ' → ' + cashLedgerMoney(res.value.amount));
-        await loadCashLedger();
+        cashLedgerLocalChange(raw => {
+            const r = raw.thu.find(x => x.id === id) || raw.chi.find(x => x.id === id);
+            if (r) Object.assign(r, res.value);
+        });
     } catch (err) {
         showAlert('Lỗi khi sửa: ' + err.message);
     }
@@ -8085,7 +8156,10 @@ async function deleteCashLedgerEntry(id) {
     if (!confirm('Xóa khoản này khỏi Sổ Quỹ?')) return;
     try {
         await db.collection('cash_ledger').doc(id).delete();
-        await loadCashLedger();
+        cashLedgerLocalChange(raw => {
+            raw.thu = raw.thu.filter(x => x.id !== id);
+            raw.chi = raw.chi.filter(x => x.id !== id);
+        });
     } catch (err) {
         showAlert('Lỗi khi xóa: ' + err.message);
     }
@@ -8170,6 +8244,9 @@ async function exportCashLedgerExcel(opt) {
 async function settleCashLedger() {
     if ((document.getElementById('soquySearch')?.value || '').trim())
         return showAlert('Vui lòng xóa ô tìm kiếm trước khi bấm "Thanh toán" để chốt đúng toàn bộ các khoản đang lọc theo ngày.');
+    // Chốt thanh toán là thao tác quan trọng nên luôn đọc dữ liệu mới nhất từ Firebase trước
+    // (tránh chốt trùng nếu máy khác vừa thanh toán / thêm khoản trong lúc cache cũ)
+    await loadCashLedger(true);
     const all = window.__cashLedgerAll || { thu: [], chi: [] };
     const thu = all.thu, chi = all.chi;
     if (!thu.length && !chi.length)
@@ -8215,10 +8292,14 @@ async function settleCashLedger() {
         if (typeof ghiLog === 'function')
             ghiLog('Sổ Quỹ', 'Thanh toán', formatDateToDDMMYYYY(res.value.paidDate), 'Thu ' + cashLedgerMoney(tongThu) + ' / Chi ' + cashLedgerMoney(tongChi) + ' / Còn lại ' + cashLedgerMoney(tongThu - tongChi));
         Swal.fire({ icon: 'success', title: 'Đã lưu vào Lịch sử thanh toán!', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
-        await loadCashLedger();
+        const doneIds = new Set(ids);
+        cashLedgerLocalChange(raw => {
+            raw.thu = raw.thu.filter(x => !doneIds.has(x.id));
+            raw.chi = raw.chi.filter(x => !doneIds.has(x.id));
+        });
     } catch (err) {
         showAlert('Lỗi khi lưu thanh toán: ' + err.message);
-        loadCashLedger();
+        loadCashLedger(true);
     }
 }
 async function openCashLedgerHistory() {
@@ -8251,7 +8332,7 @@ async function openCashLedgerHistory() {
         width: 900,
         showConfirmButton: false, showCloseButton: true,
         html: rows
-            ? '<div style="max-height:60vh;overflow:auto"><table class="w-full text-sm text-left"><thead class="sticky top-0 bg-slate-100 dark:bg-slate-800 text-xs uppercase"><tr><th class="p-2">Ngày TT</th><th class="p-2">Khoảng</th><th class="p-2 text-right">Thu</th><th class="p-2 text-right">Chi</th><th class="p-2 text-right">Còn lại</th><th class="p-2"></th></tr></thead><tbody>' + rows + '</tbody></table></div>'
+            ? '<div style="max-height:60vh;overflow:auto"><table class="soquy-table w-full text-sm text-left"><thead class="sticky top-0 bg-slate-100 dark:bg-slate-800 text-xs uppercase"><tr><th class="p-2">Ngày TT</th><th class="p-2">Khoảng</th><th class="p-2 text-right">Thu</th><th class="p-2 text-right">Chi</th><th class="p-2 text-right">Còn lại</th><th class="p-2"></th></tr></thead><tbody>' + rows + '</tbody></table></div>'
             : '<div class="p-6 text-slate-500">Chưa có đợt thanh toán nào.</div>'
     });
 }
@@ -8285,7 +8366,7 @@ async function undoCashSettlement(id) {
         await db.collection('cash_ledger_settlements').doc(id).delete();
         if (typeof ghiLog === 'function')
             ghiLog('Sổ Quỹ', 'Hoàn tác thanh toán', formatDateToDDMMYYYY(opt.paidDate), 'Thu ' + cashLedgerMoney(opt.tongThu) + ' / Chi ' + cashLedgerMoney(opt.tongChi));
-        await loadCashLedger();
+        await loadCashLedger(true);
         await openCashLedgerHistory();
     } catch (err) {
         showAlert('Lỗi khi hoàn tác: ' + err.message);
