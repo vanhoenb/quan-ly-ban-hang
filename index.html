@@ -13,6 +13,9 @@
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
     <style>
+        #imp-vendor-box { display: none; }
+        #imp-vendor-box.imp-v-on { display: block; }
+        @media (min-width: 768px) { #imp-vendor-box { display: block; } }
         @media (max-width: 768px) {
             #sidebar { 
                 position: fixed; 
@@ -1461,8 +1464,8 @@ html:not(.dark) .bg-white {
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1"></script>
 <!-- Chartjs Plugin Datalabels -->
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -2259,16 +2262,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     <!-- Hàng 1: Số phiếu, Loại, Nhà cung cấp - PC cùng 1 dòng (3 cột).
                          Điện thoại: Số phiếu + Loại chung 1 dòng (2 cột), ẩn hẳn ô Nhà cung
                          cấp đi cho gọn (vẫn hiện đầy đủ trên PC). -->
-                    <div class="grid grid-cols-2 md:grid-cols-2 gap-3 mb-3">
-                        <div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                        <div class="md:col-span-1">
                             <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Số phiếu</label>
                             <input type="text" id="imp-receipt" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-950 font-bold text-blue-600 dark:text-blue-400" readonly>
                             <div id="firestore-read-status-import-inline" class="hidden mt-1 rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 px-2 py-1.5 text-[10px] md:text-xs font-bold text-amber-800 dark:text-amber-200">Chưa đồng bộ do hết read</div>
                         </div>
-                        <div class="hidden md:block">
-                            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nhà cung cấp (Chọn hoặc nhập)</label>
-                            <input type="text" id="imp-vendor" list="cust-list" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-950 text-gray-800 dark:text-white" placeholder="Chọn hoặc nhập tên NCC..." onkeydown="handleEnter(event, 'imp-name')">
-                            <datalist id="cust-list"></datalist>
+                        <!-- Khách hàng: PC luôn hiện (2/3 hàng); điện thoại chỉ hiện khi chọn Đổi date / Hoàn trả -->
+                        <div id="imp-vendor-box" class="md:col-span-2 relative" style="z-index:100000;">
+                            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Khách hàng (Chọn hoặc nhập)</label>
+                            <input type="text" id="imp-vendor" autocomplete="off" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-950 text-gray-800 dark:text-white" placeholder="Bấm để chọn khách hàng hoặc gõ tên..." onfocus="impVendorFilter(this.value)" onblur="impVendorHide()" onclick="impVendorFilter(this.value)" oninput="impVendorFilter(this.value)" onkeydown="if(event.key==='Enter'){impVendorHide();} handleEnter(event, 'imp-name')">
+                            <div id="imp-vendor-dropdown" class="hidden absolute left-0 right-0 mt-1 max-h-60 overflow-y-auto bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl shadow-lg" style="z-index:2147483000;"></div>
                         </div>
                     </div>
 
@@ -2277,11 +2281,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="mb-3">
                         <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Loại nhập</label>
                         <input type="hidden" id="imp-type" value="Nhập mới">
-                        <div class="grid grid-cols-2 gap-2">
+                        <div class="grid grid-cols-3 gap-2">
                             <button type="button" id="imp-type-btn-new" onclick="setImpType('Nhập mới')" class="py-2.5 rounded-xl text-xs font-bold border-2 transition-colors">🆕 Nhập mới</button>
                             <button type="button" id="imp-type-btn-swap" onclick="setImpType('Nhập đổi')" class="py-2.5 rounded-xl text-xs font-bold border-2 transition-colors">🔄 Đổi date</button>
+                            <button type="button" id="imp-type-btn-return" onclick="setImpType('Hoàn trả')" class="py-2.5 rounded-xl text-xs font-bold border-2 transition-colors">↩️ Hoàn trả</button>
                         </div>
                     </div>
+
 
                     <!-- Chỉ hiện khi chọn Loại = "Nhập đổi": chọn hàng đổi date còn hạn (cộng
                          lại vào tồn kho để bán tiếp) hay đã hết hạn (huỷ, KHÔNG cộng vào tồn
@@ -2360,7 +2366,7 @@ document.addEventListener('DOMContentLoaded', function () {
 </div>
 
 <div id="modal-receipt" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] overflow-y-auto">
+    <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[85vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-2 border-b dark:border-slate-700 pb-2">
             <h3 class="text-lg font-bold text-gray-800 dark:text-white">Chi tiết phiếu: <span id="modal-receipt-id"></span></h3>
             <button onclick="document.getElementById('modal-receipt').classList.add('hidden')" class="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white font-bold text-xl">✕</button>
@@ -2368,7 +2374,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <div id="modal-receipt-datestatus-tag" class="hidden mb-3"></div>
         <table class="w-full border-collapse border border-gray-200 dark:border-slate-700 text-sm">
             <thead class="sticky top-0 z-10 bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-slate-700 text-gray-800 dark:text-gray-200 shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
-                <tr><th class="border dark:border-slate-700 p-2">Sản phẩm</th><th class="border dark:border-slate-700 p-2">ĐVT</th><th class="border dark:border-slate-700 p-2">SL</th><th class="border dark:border-slate-700 p-2">Giá</th></tr>
+                <tr><th class="border dark:border-slate-700 p-2">Sản phẩm</th><th class="border dark:border-slate-700 p-2">ĐVT</th><th class="border dark:border-slate-700 p-2">SL</th><th class="border dark:border-slate-700 p-2">Giá</th><th class="border dark:border-slate-700 p-2">NSX</th><th class="border dark:border-slate-700 p-2">HSD</th><th class="border dark:border-slate-700 p-2">Thời hạn (tháng)</th></tr>
             </thead>
             <tbody id="modal-receipt-body" class="text-gray-800 dark:text-gray-300"></tbody>
         </table>
@@ -8671,6 +8677,8 @@ function showPage(pageId) {
                 loadReceipts();
             if (typeof renderImpTypeButtons === 'function')
                 renderImpTypeButtons();
+            if (typeof toggleImpVendorBox === 'function')
+                toggleImpVendorBox();
             break;
         case 'page-NguyenLieu':
             // TRƯỚC ĐÂY: chỉ tải danh sách NCC vào ô "Chọn NCC" khi bấm chuyển tab (openNLTab),
@@ -10956,21 +10964,28 @@ async function saveImport() {
     if (window.__importSaveInProgress) return;
     window.__importSaveInProgress = true;
     const btn = document.getElementById('save-import-btn');
-    const typeValue = document.getElementById('imp-type').value;
+    // Loại nhập trên giao diện có 3 nút: Nhập mới / Đổi date ('Nhập đổi') / Hoàn trả.
+    // "Hoàn trả" thực chất được lưu như 1 phiếu 'Nhập đổi' còn hạn (cộng lại kho, cộng vào cột
+    // "Đổi date/Hoàn trả" của mọi báo cáo) + cờ manualReturn:true để nhận biết. KHÔNG dùng
+    // isReturn:true vì cờ đó dành riêng cho phiếu sinh từ chức năng Trả hàng (không xoá trực tiếp được).
+    const impTypeUi = document.getElementById('imp-type').value;
+    const isManualReturn = (impTypeUi === 'Hoàn trả');
+    const typeValue = isManualReturn ? 'Nhập đổi' : impTypeUi;
     const receiptNum = document.getElementById('imp-receipt').value;
     if (cart.length === 0) {
         Swal.fire('Lỗi', 'Giỏ hàng đang trống!', 'error');
         window.__importSaveInProgress = false;
         return;
     }
-    if (typeValue === 'Nhập đổi' && !window.__impDateStatus) {
+    if (typeValue === 'Nhập đổi' && !isManualReturn && !window.__impDateStatus) {
         Swal.fire('Thiếu thông tin', 'Vui lòng chọn tình trạng hàng đổi date: Còn hạn hay Hết hạn.', 'warning');
         window.__importSaveInProgress = false;
         return;
     }
-    const isExpired = (typeValue === 'Nhập đổi' && window.__impDateStatus === 'expired');
-    const dateStatusValue = (typeValue === 'Nhập đổi') ? window.__impDateStatus : null;
-    const vendorValue = (document.getElementById('imp-vendor').value || '').trim();
+    const isExpired = (typeValue === 'Nhập đổi' && !isManualReturn && window.__impDateStatus === 'expired');
+    const dateStatusValue = isManualReturn ? 'ok' : ((typeValue === 'Nhập đổi') ? window.__impDateStatus : null);
+    // Tên khách chỉ lưu khi là Đổi date / Hoàn trả; Nhập mới thì bỏ qua.
+    const vendorValue = (impTypeUi === 'Nhập mới') ? '' : (document.getElementById('imp-vendor').value || '').trim();
     if (btn) {
         btn.disabled = true;
         btn.innerText = 'Đang lưu...';
@@ -10985,6 +11000,7 @@ async function saveImport() {
             dateStatus: dateStatusValue,
             stockAdjusted: !isExpired,
             vendor: vendorValue || null,
+            ...(isManualReturn ? { manualReturn: true } : {}),
             syncStatus: 'synced',
             syncPending: false,
             syncMode: 'normal',
@@ -11150,19 +11166,129 @@ function setImpType(value) {
         typeEl.value = value;
     renderImpTypeButtons();
     toggleImpDateStatusBox();
+    toggleImpVendorBox();
 }
 function renderImpTypeButtons() {
     const typeEl = document.getElementById('imp-type');
     const newBtn = document.getElementById('imp-type-btn-new');
     const swapBtn = document.getElementById('imp-type-btn-swap');
+    const returnBtn = document.getElementById('imp-type-btn-return');
     if (!typeEl || !newBtn || !swapBtn)
         return;
-    const isNew = typeEl.value !== 'Nhập đổi';
-    newBtn.className = 'py-2.5 rounded-xl text-xs font-bold border-2 transition-colors ' +
-        (isNew ? 'bg-slate-900 dark:bg-slate-700 border-slate-900 dark:border-slate-700 text-white' : 'bg-gray-50 dark:bg-slate-950 border-gray-300 dark:border-slate-700 text-gray-600 dark:text-gray-300');
-    swapBtn.className = 'py-2.5 rounded-xl text-xs font-bold border-2 transition-colors ' +
-        (!isNew ? 'bg-slate-900 dark:bg-slate-700 border-slate-900 dark:border-slate-700 text-white' : 'bg-gray-50 dark:bg-slate-950 border-gray-300 dark:border-slate-700 text-gray-600 dark:text-gray-300');
+    const v = typeEl.value;
+    const on = 'bg-slate-900 dark:bg-slate-700 border-slate-900 dark:border-slate-700 text-white';
+    const off = 'bg-gray-50 dark:bg-slate-950 border-gray-300 dark:border-slate-700 text-gray-600 dark:text-gray-300';
+    const base = 'py-2.5 rounded-xl text-xs font-bold border-2 transition-colors ';
+    newBtn.className = base + ((v !== 'Nhập đổi' && v !== 'Hoàn trả') ? on : off);
+    swapBtn.className = base + (v === 'Nhập đổi' ? on : off);
+    if (returnBtn)
+        returnBtn.className = base + (v === 'Hoàn trả' ? on : off);
 }
+// Ô "Khách hàng" chỉ hiện khi Loại nhập = Đổi date hoặc Hoàn trả. Về "Nhập mới" thì ẩn + xoá trắng.
+function toggleImpVendorBox() {
+    const typeEl = document.getElementById('imp-type');
+    const box = document.getElementById('imp-vendor-box');
+    if (!typeEl || !box)
+        return;
+    impVendorLoadNames(); // nạp sẵn danh sách KH (dùng chung cache với trang KH & Công Nợ)
+    if (typeEl.value === 'Nhập đổi' || typeEl.value === 'Hoàn trả') {
+        box.classList.add('imp-v-on');
+    }
+    else {
+        box.classList.remove('imp-v-on');
+        const v = document.getElementById('imp-vendor');
+        if (v)
+            v.value = '';
+        impVendorHide();
+    }
+}
+// ----- Danh sách khách hàng cho ô "Khách hàng" ở Nhập kho -----
+// TRƯỚC ĐÂY dùng <datalist> chỉ được nạp khi từng mở trang Bán hàng / KH & Công Nợ nên vào thẳng
+// Nhập kho thì trống, và trên điện thoại ô này bị ẩn. Giờ tự nạp khi cần + dạng xổ xuống bấm là hiện.
+window.__impVendorList = [];
+window.__impVendorLoading = null;
+function impVendorLoadNames() {
+    if (Array.isArray(window.allCustomersData) && window.allCustomersData.length) {
+        window.__impVendorList = window.allCustomersData
+            .map(c => ({ name: String(c.name || '').trim(), phone: String(c.phone || '') }))
+            .filter(c => c.name);
+    }
+    else if (!window.__impVendorLoading && (!window.__impVendorList.length || Date.now() - (window.__impVendorFetchedAt || 0) > 300000)) {
+        window.__impVendorLoading = firestoreCachedGet('customers:list', () => db.collection('customers').get({ source: 'default' }), 30000)
+            .then(snap => {
+            const arr = [];
+            snap.forEach(doc => { const d = doc.data() || {}; const n = String(d.name || '').trim(); if (n)
+                arr.push({ name: n, phone: String(d.phone || '') }); });
+            window.__impVendorList = arr;
+            window.__impVendorFetchedAt = Date.now();
+        })
+            .catch(err => { console.warn('Không nạp được danh sách KH cho Nhập kho:', err); })
+            .finally(() => {
+            window.__impVendorLoading = null;
+            const inp = document.getElementById('imp-vendor');
+            if (inp && document.activeElement === inp)
+                impVendorFilter(inp.value);
+        });
+    }
+    window.__impVendorList.sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+    return window.__impVendorLoading;
+}
+function impVendorHide() {
+    const dd = document.getElementById('imp-vendor-dropdown');
+    if (dd)
+        dd.classList.add('hidden');
+}
+function impVendorFilter(val) {
+    const dd = document.getElementById('imp-vendor-dropdown');
+    if (!dd)
+        return;
+    impVendorLoadNames();
+    const q = String(val || '').trim().toLowerCase();
+    const seen = new Set();
+    const list = (window.__impVendorList || []).filter(c => {
+        const key = c.name.toLowerCase();
+        if (seen.has(key))
+            return false;
+        seen.add(key);
+        return !q || key.includes(q) || (c.phone && c.phone.includes(q));
+    });
+    dd.innerHTML = '';
+    // Bấm/kéo thanh cuộn trong danh sách không làm ô nhập mất focus (nếu không danh sách sẽ tự đóng)
+    dd.onmousedown = ev => ev.preventDefault();
+    if (!list.length) {
+        if (window.__impVendorLoading) {
+            const d = document.createElement('div');
+            d.className = 'p-2.5 text-xs italic text-gray-400';
+            d.textContent = 'Đang tải danh sách khách hàng...';
+            dd.appendChild(d);
+            dd.classList.remove('hidden');
+        }
+        else {
+            dd.classList.add('hidden');
+        }
+        return;
+    }
+    list.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'p-2.5 hover:bg-blue-50 dark:hover:bg-slate-800 cursor-pointer border-b border-gray-100 dark:border-slate-800 text-sm text-gray-700 dark:text-gray-200';
+        div.textContent = c.name;
+        // mousedown (không phải click) để chọn được trước khi ô nhập mất focus
+        div.addEventListener('mousedown', ev => {
+            ev.preventDefault();
+            const inp = document.getElementById('imp-vendor');
+            if (inp)
+                inp.value = c.name;
+            impVendorHide();
+        });
+        dd.appendChild(div);
+    });
+    dd.classList.remove('hidden');
+}
+document.addEventListener('click', e => {
+    const box = document.getElementById('imp-vendor-box');
+    if (box && !box.contains(e.target))
+        impVendorHide();
+});
 // ===== NHẬP ĐỔI: chọn hàng đổi date CÒN HẠN (cộng lại vào tồn kho) hay HẾT HẠN
 // (huỷ, KHÔNG cộng vào tồn kho, chỉ lưu phiếu lại để theo dõi số lượng hàng huỷ) =====
 window.__impDateStatus = null;
@@ -11171,6 +11297,7 @@ function toggleImpDateStatusBox() {
     const box = document.getElementById('imp-date-status-box');
     if (!typeEl || !box)
         return;
+    // Chỉ "Đổi date" mới cần chọn Còn hạn / Hết hạn. "Hoàn trả" luôn nhập lại kho (còn hạn).
     if (typeEl.value === 'Nhập đổi') {
         box.classList.remove('hidden');
         // Mặc định chọn "Còn hạn" khi vừa chuyển sang Nhập đổi, để không quên chọn
@@ -11248,6 +11375,9 @@ function syncStatusBadgeHtml(data) {
 // thay vì kiểu bảng kẻ ô trơn khác biệt như trước. Vẫn giữ checkbox chọn nhiều phiếu +
 // nút "Xem" riêng (không bấm cả dòng) như thiết kế gốc, để tránh bấm nhầm khi chỉ muốn tick chọn.
 function buildReceiptRowHtml(docId, displayId, dateStr, itemCount, type, dateStatus, vendor, isReturn, matchQtyLabel, syncData) {
+    // Phiếu Hoàn trả nhập tay (manualReturn) hiện nhãn "Hoàn trả" như phiếu Trả hàng, nhưng vẫn xoá/sửa được bình thường.
+    if (!isReturn && syncData && syncData.manualReturn === true)
+        isReturn = true;
     // matchQtyLabel: chỉ có giá trị khi đang TÌM THEO SẢN PHẨM - hiện nổi bật đúng số
     // lượng của SP đang tìm trong PHIẾU NÀY, để không phải mở từng phiếu ra xem mới biết.
     const matchHtml = matchQtyLabel
@@ -11321,6 +11451,7 @@ async function loadReceipts(options = {}) {
                 stockAdjusted: data.stockAdjusted !== false,
                 vendor: data.vendor || null,
                 isReturn: data.isReturn === true,
+                manualReturn: data.manualReturn === true,
                 note: data.note || '',
                 fromSaleId: data.fromSaleId || null
             });
@@ -11368,7 +11499,8 @@ async function ensureAllReceiptsFullLoaded() {
             type: data.type || 'Nhập mới',
             dateStatus: data.dateStatus || null,
             vendor: data.vendor || null,
-            isReturn: data.isReturn === true
+            isReturn: data.isReturn === true,
+            manualReturn: data.manualReturn === true
         });
     });
     window.__allReceiptsFullLoaded = true;
@@ -11584,6 +11716,7 @@ async function filterReceipts() {
             dateStatus: r.dateStatus || null,
             vendor: r.vendor || null,
             isReturn: r.isReturn === true,
+            manualReturn: r.manualReturn === true,
             syncPending: r.syncPending === true, syncStatus: r.syncStatus || null, syncMode: r.syncMode || null,
             syncReason: r.syncReason || '', syncError: r.syncError || '', dateSwapSyncNeeded: r.dateSwapSyncNeeded === true
         }));
@@ -12324,6 +12457,7 @@ window.viewReceipt = async function (docId) {
                 dateStatus: d.dateStatus || null,
                 vendor: d.vendor || null,
                 isReturn: d.isReturn === true,
+                manualReturn: d.manualReturn === true,
                 fromSaleId: d.fromSaleId || null,
                 note: d.note || ''
             };
@@ -12358,7 +12492,11 @@ window.viewReceipt = async function (docId) {
         else if (receipt.fromSaleId) {
             linkedWarningHtml = "<div class=\"mt-2 text-[11px] font-semibold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-lg px-2.5 py-1.5\">\u2139\uFE0F Phi\u1EBFu n\u00E0y t\u1EF1 \u0111\u1ED9ng sinh ra t\u1EEB h\u00F3a \u0111\u01A1n b\u00E1n h\u00E0ng <b>" + escapeHtml(receipt.fromSaleId) + "</b>. S\u1EEDa s\u1ED1 l\u01B0\u1EE3ng \u1EDF \u0111\u00E2y s\u1EBD T\u1EF0 \u0110\u1ED8NG c\u1EADp nh\u1EADt l\u1EA1i \u0111\u00FAng d\u00F2ng t\u01B0\u01A1ng \u1EE9ng tr\u00EAn h\u00F3a \u0111\u01A1n g\u1ED1c.</div>";
         }
-        if (receipt.isReturn) {
+        if (receipt.manualReturn && !receipt.isReturn) {
+            tagEl.innerHTML = '<span class="inline-block px-2.5 py-1 rounded-full text-[11px] font-bold bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-400">↩️ Hoàn trả — đã nhập lại kho</span>' + linkedWarningHtml;
+            tagEl.classList.remove('hidden');
+        }
+        else if (receipt.isReturn) {
             tagEl.innerHTML = "<span class=\"inline-block px-2.5 py-1 rounded-full text-[11px] font-bold bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-400\">\u21A9\uFE0F Phi\u1EBFu ho\u00E0n tr\u1EA3 \u2014 " + escapeHtml(receipt.note || '') + "</span>" + linkedWarningHtml + "";
             tagEl.classList.remove('hidden');
         }
@@ -12404,7 +12542,12 @@ window.viewReceipt = async function (docId) {
             // như bạn thấy khi bấm xem phiếu. Giờ luôn có số mặc định 0 khi thiếu dữ liệu.
             const safeQty = (item.qty != null && item.qty !== '') ? item.qty : 0;
             const safePrice = (item.price != null && item.price !== '') ? item.price : 0;
-            body.innerHTML += "\n                <tr class=\"border-b dark:border-slate-700\">\n                    <td class=\"p-2\">" + item.name + "" + itemTag + "</td>\n                    <td class=\"p-2 text-center\">" + (item.unit || '') + "</td>\n                    <td class=\"p-2 text-center\"><input type=\"number\" id=\"edit-qty-" + index + "\" value=\"" + safeQty + "\" class=\"w-16 mx-auto block text-center border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 p-1 rounded\"></td>\n                    <td class=\"p-2 text-center\"><input type=\"number\" id=\"edit-price-" + index + "\" value=\"" + safePrice + "\" class=\"w-20 mx-auto block text-center border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 p-1 rounded\"></td>\n                </tr>\n            ";
+            // NÂNG CẤP: cho sửa cả NSX / HSD / Thời hạn (tháng) ngay trong bảng này - trước đây
+            // chỉ sửa được SL và Giá, muốn sửa hạn sử dụng phải xóa dòng nhập lại từ đầu.
+            const safeNsx = item.ngaySX || '';
+            const safeHsd = item.hsd || '';
+            const safeHanThang = (item.hanThang != null && item.hanThang !== '') ? item.hanThang : '';
+            body.innerHTML += "\n                <tr class=\"border-b dark:border-slate-700\">\n                    <td class=\"p-2\">" + item.name + "" + itemTag + "</td>\n                    <td class=\"p-2 text-center\">" + (item.unit || '') + "</td>\n                    <td class=\"p-2 text-center\"><input type=\"number\" id=\"edit-qty-" + index + "\" value=\"" + safeQty + "\" class=\"w-16 mx-auto block text-center border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 p-1 rounded\"></td>\n                    <td class=\"p-2 text-center\"><input type=\"number\" id=\"edit-price-" + index + "\" value=\"" + safePrice + "\" class=\"w-20 mx-auto block text-center border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 p-1 rounded\"></td>\n                    <td class=\"p-2 text-center\"><input type=\"date\" id=\"edit-nsx-" + index + "\" value=\"" + safeNsx + "\" onchange=\"autoCalcEditHsd(" + index + ")\" class=\"w-32 mx-auto block text-center border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 p-1 rounded\"></td>\n                    <td class=\"p-2 text-center\"><input type=\"date\" id=\"edit-hsd-" + index + "\" value=\"" + safeHsd + "\" class=\"w-32 mx-auto block text-center border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 p-1 rounded\"></td>\n                    <td class=\"p-2 text-center\"><input type=\"number\" min=\"0.1\" step=\"0.1\" id=\"edit-hanthang-" + index + "\" value=\"" + safeHanThang + "\" onchange=\"autoCalcEditHsd(" + index + ")\" placeholder=\"tháng\" class=\"w-20 mx-auto block text-center border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 p-1 rounded\"></td>\n                </tr>\n            ";
         });
     }
     else {
@@ -12416,6 +12559,19 @@ window.viewReceipt = async function (docId) {
         modal.classList.remove('hidden');
     if (typeof lucide !== 'undefined')
         lucide.createIcons();
+};
+// NÂNG CẤP: tự tính lại HSD khi sửa NSX hoặc Thời hạn (tháng) trong bảng "Chi tiết phiếu" -
+// giống hệt cách tự tính khi nhập phiếu mới, để khỏi phải tự cộng tháng bằng tay.
+window.autoCalcEditHsd = function (index) {
+    const nsxEl = document.getElementById('edit-nsx-' + index);
+    const hanThangEl = document.getElementById('edit-hanthang-' + index);
+    const hsdEl = document.getElementById('edit-hsd-' + index);
+    if (!nsxEl || !hanThangEl || !hsdEl) return;
+    const nsx = nsxEl.value;
+    const hanThang = parseFloat(hanThangEl.value);
+    if (nsx && isFinite(hanThang) && hanThang > 0) {
+        hsdEl.value = formatDateInputLocal(addMonthsLocal(new Date(nsx + 'T00:00:00'), hanThang));
+    }
 };
 window.saveAllItemEdits = async function (docId) {
     try {
@@ -12446,6 +12602,14 @@ window.saveAllItemEdits = async function (docId) {
             const oldQty = parseFloat(item.qty) || 0;
             item.qty = newQty;
             item.price = newPrice;
+            // NÂNG CẤP: lưu luôn NSX / HSD / Thời hạn (tháng) nếu người dùng có sửa - không có
+            // ô này thì giữ nguyên hành vi cũ (phiếu không có hạn dùng vẫn hoạt động bình thường).
+            const nsxInput = document.getElementById("edit-nsx-" + index + "");
+            const hsdInput = document.getElementById("edit-hsd-" + index + "");
+            const hanThangInput = document.getElementById("edit-hanthang-" + index + "");
+            if (nsxInput) item.ngaySX = nsxInput.value || null;
+            if (hsdInput) item.hsd = hsdInput.value || null;
+            if (hanThangInput) item.hanThang = (hanThangInput.value !== '' && isFinite(parseFloat(hanThangInput.value))) ? parseFloat(hanThangInput.value) : null;
             const delta = newQty - oldQty;
             // Với phiếu GỘP (có cả SP còn hạn + hết hạn), dòng nào tự mang dateStatus:'expired'
             // thì KHÔNG được cộng/trừ tồn kho theo delta (vì dòng đó chưa từng cộng vào tồn).
@@ -21047,7 +21211,7 @@ function renderPhieuNhapKhoTemplate(receipt) {
         'nk-day2': ngayStr, 'nk-month2': thangStr, 'nk-year2': namStr,
         'nk-receipt-id': receipt.displayId || '',
         'nk-vendor': receipt.vendor || '---',
-        'nk-note': receiptTypeLabelPlain(receipt.type, receipt.dateStatus, receipt.isReturn)
+        'nk-note': receiptTypeLabelPlain(receipt.type, receipt.dateStatus, receipt.isReturn || receipt.manualReturn)
     };
     Object.keys(nkFields).forEach(id => {
         const el = document.getElementById(id);
@@ -21110,7 +21274,7 @@ function printReceiptsById(docIds) {
     list.forEach(r => {
         const rDate = toReportDate(r.date);
         const dateStr = rDate ? rDate.toLocaleDateString('vi-VN', { timeZone: APP_TIME_ZONE }) : '---';
-        const typeLabel = receiptTypeLabelPlain(r.type, r.dateStatus, r.isReturn);
+        const typeLabel = receiptTypeLabelPlain(r.type, r.dateStatus, r.isReturn || r.manualReturn);
         (r.items || []).forEach((it, idx) => {
             rows.push([
                 idx === 0 ? r.displayId : '',
@@ -21602,7 +21766,7 @@ async function viewInventoryReport() {
                         inv.nhapDoi += qty;
                         if (data.vendor) {
                             inv.nhapDoiVendors.add(data.vendor);
-                            const noteType = data.isReturn ? 'hoàn' : (data.fromSaleId ? 'đổi date' : 'nhập lại kho');
+                            const noteType = (data.isReturn || data.manualReturn) ? 'hoàn' : (data.fromSaleId ? 'đổi date' : 'nhập lại kho');
                             inv.ghiChuEvents.push({ vendor: String(data.vendor), qty: qty, type: noteType });
                         }
                     }
@@ -21760,7 +21924,7 @@ async function exportInventory() {
                         inv.nhapDoi += qty;
                         if (data.vendor) {
                             inv.nhapDoiVendors.add(data.vendor);
-                            const noteType = data.isReturn ? 'hoàn' : (data.fromSaleId ? 'đổi date' : 'nhập lại kho');
+                            const noteType = (data.isReturn || data.manualReturn) ? 'hoàn' : (data.fromSaleId ? 'đổi date' : 'nhập lại kho');
                             inv.ghiChuEvents.push({ vendor: String(data.vendor), qty: qty, type: noteType });
                         }
                     }
@@ -22559,7 +22723,9 @@ async function exportFullReport() {
                 c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
             });
             danhSach.forEach(({ name, item, tonCuoi }) => {
-                const ghiChu = (item.ghiChuEvents || []).length ? Array.from((() => { const m = new Map(); (item.ghiChuEvents || []).forEach(e => { const k = e.vendor + '|' + e.type; m.set(k, (m.get(k) || 0) + (Number(e.qty) || 0)); }); return m; })().entries()).map(([k,q]) => { const a=k.split('|'); return a[0] + ' ' + a[1] + ' (' + cleanQty(q) + ')'; }).join('; ') : '';
+                // Ghi chú = tên KH đổi date / hoàn trả của sản phẩm này - GIỐNG HỆT bản xem/in.
+                // (Trước đây đọc từ item.ghiChuEvents nhưng hàm này chỉ nạp nhapDoiVendors nên Excel luôn trống.)
+                const ghiChu = (item.nhapDoiVendors && item.nhapDoiVendors.size) ? Array.from(item.nhapDoiVendors).join(', ') : '';
                 const rowValues = [
                     formatDateToDDMMYYYY(toVal),
                     name,
