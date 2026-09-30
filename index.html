@@ -21693,6 +21693,23 @@ const NHOM_COLOR_MAP = {
     'CÁC LOẠI HỘP TÚI': { header: 'text-lime-800 dark:text-lime-300 bg-lime-100 dark:bg-lime-500/15 border-lime-200 dark:border-lime-500/30', border: 'border-lime-400 dark:border-lime-500/70', bg: 'bg-lime-50/70 dark:bg-lime-500/[0.07]' },
     'KHÁC': { header: 'text-gray-800 dark:text-gray-300 bg-gray-200 dark:bg-gray-500/15 border-gray-300 dark:border-gray-500/30', border: 'border-gray-400 dark:border-gray-500/70', bg: 'bg-gray-100/70 dark:bg-gray-500/[0.07]' }
 };
+// MÀU EXCEL CHO TỪNG NHÓM SẢN PHẨM - cùng tông màu với NHOM_COLOR_MAP (trang Kho Hàng) nhưng ĐẬM HƠN:
+// head = nền thanh tiêu đề nhóm (sắc 300), text = chữ tiêu đề (sắc 900), tint = nền nhạt cho các dòng sản
+// phẩm trong nhóm (sắc 50), line = viền đóng khối nhóm (sắc 500). Dùng khi xuất Excel Báo Cáo Tổng Hợp.
+const NHOM_EXCEL_COLORS = {
+    'THỊT CHƯNG MẮM TÉP': { head: 'FFF0ABFC', text: 'FF701A75', tint: 'FFFDF4FF', line: 'FFD946EF' }, // hồng tím (fuchsia)
+    'MẮM TÉP RIU ĐỎ': { head: 'FFFDA4AF', text: 'FF881337', tint: 'FFFFF1F2', line: 'FFF43F5E' }, // hồng đỏ (rose)
+    'QUẢ BÙI KỲ LÃO': { head: 'FF6EE7B7', text: 'FF064E3B', tint: 'FFECFDF5', line: 'FF10B981' }, // xanh lá (emerald)
+    'CƠM CHÁY': { head: 'FFFCD34D', text: 'FF78350F', tint: 'FFFFFBEB', line: 'FFF59E0B' }, // cam vàng (amber)
+    'TRÀ HOA VÀNG': { head: 'FFFDE047', text: 'FF713F12', tint: 'FFFEFCE8', line: 'FFEAB308' }, // vàng (yellow)
+    'RUỐC CÁ': { head: 'FF67E8F9', text: 'FF164E63', tint: 'FFECFEFF', line: 'FF06B6D4' }, // xanh ngọc (cyan)
+    'BÁNH DỨA': { head: 'FFA5B4FC', text: 'FF312E81', tint: 'FFEEF2FF', line: 'FF6366F1' }, // chàm (indigo)
+    'CÁC LOẠI HỘP TÚI': { head: 'FFBEF264', text: 'FF365314', tint: 'FFF7FEE7', line: 'FF84CC16' }, // xanh chanh (lime)
+    'KHÁC': { head: 'FFD1D5DB', text: 'FF111827', tint: 'FFF9FAFB', line: 'FF6B7280' } // xám
+};
+function getNhomExcelColor(ten) {
+    return NHOM_EXCEL_COLORS[ten] || NHOM_EXCEL_COLORS['KHÁC'];
+}
 function getNhomHeaderColor(ten) {
     return (NHOM_COLOR_MAP[ten] || NHOM_COLOR_MAP['KHÁC']).header;
 }
@@ -22795,15 +22812,18 @@ async function exportFullReport() {
             if (danhSach.length === 0)
                 return; // Nhóm không có sản phẩm nào -> bỏ qua, không hiện tiêu đề thừa
             // Dòng tiêu đề nhóm - tô vàng, in đậm, gộp hết chiều ngang bảng, giống mẫu
+            const mauNhom = getNhomExcelColor(tenNhom);
             const rowNhom = sheet.addRow(["" + (soLaMa[romanIdx] || (romanIdx + 1)) + ". " + tenNhom + ""]);
             romanIdx++;
             sheet.mergeCells(rowNhom.number, 1, rowNhom.number, nxtTotalCols);
+            rowNhom.height = 22;
             rowNhom.eachCell(c => {
-                c.font = { bold: true, size: 12 };
-                c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFEB3B' } };
+                c.font = { bold: true, size: 13, color: { argb: 'FF000000' } };
+                c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: mauNhom.head } };
+                c.alignment = { vertical: 'middle', indent: 1 };
                 c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
             });
-            danhSach.forEach(({ name, item, tonCuoi }) => {
+            danhSach.forEach(({ name, item, tonCuoi }, viTri) => {
                 // Ghi chú = tên KH đổi date / hoàn trả của sản phẩm này - GIỐNG HỆT bản xem/in.
                 // (Trước đây đọc từ item.ghiChuEvents nhưng hàm này chỉ nạp nhapDoiVendors nên Excel luôn trống.)
                 const ghiChu = (item.nhapDoiVendors && item.nhapDoiVendors.size) ? Array.from(item.nhapDoiVendors).join(', ') : '';
@@ -22820,6 +22840,7 @@ async function exportFullReport() {
                 ];
                 const row = sheet.addRow(rowValues);
                 row.eachCell((c, col) => {
+                    // Dòng sản phẩm giữ nguyên: viền đen, không tô nền, chữ đen (chỉ thanh tiêu đề nhóm có màu)
                     c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
                     c.font = { size: 12 };
                     // ĐVT (3) căn giữa; các cột số lượng (4-8) căn giữa + in đậm
