@@ -1974,7 +1974,7 @@ html.glass.dark div[class~="h-8"][class~="rounded-lg"][class~="overflow-hidden"]
   border-right: 1px solid rgba(255,255,255,.18) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.3) !important; }
 
 /* --- Thanh dưới điện thoại + menu "Khác" (kính khói; ĐÂY mới cần làm mờ vì nội dung cuộn phía sau) --- */
-html.glass #mobile-bottom-nav{ background-color: rgba(18,24,48,.68) !important;
+html.glass #mobile-bottom-nav{ background-color: rgba(18,24,48,.88) !important;
   -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%);
   border-top: 1px solid rgba(255,255,255,.22) !important; box-shadow: 0 -6px 20px rgba(20,30,80,.25), inset 0 1px 0 rgba(255,255,255,.25) !important; }
 html.glass #mobile-bottom-nav :is([class*="text-slate-500"],[class*="text-slate-400"],[class*="text-gray-500"],[class*="text-gray-400"]){ color: rgba(226,232,240,.88) !important; }
@@ -1984,7 +1984,9 @@ html.glass #more-menu-list{ background-color: rgba(18,24,48,.80) !important; bor
 html.glass .swal2-popup{ background-color: rgba(255,255,255,.86) !important; border: 1px solid rgba(255,255,255,.9) !important; border-radius: 28px !important;
   box-shadow: 0 20px 50px rgba(30,40,110,.26), inset 0 1.5px 0 rgba(255,255,255,.95) !important; }
 html.glass.dark .swal2-popup{ background-color: rgba(20,27,50,.90) !important; border-color: rgba(255,255,255,.16) !important; box-shadow: 0 20px 50px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.16) !important; }
-html.glass .swal2-container{ background: rgba(20,30,70,.28) !important; }
+/* Phủ tối nền CHỈ cho hộp thoại thường (modal). Thông báo nhỏ (toast "Đã lưu...") là container riêng, KHÔNG được có nền (nếu không sẽ thành vệt dọc cả chiều cao màn hình) */
+html.glass .swal2-container.swal2-backdrop-show:not(:has(> .swal2-toast)){ background: rgba(20,30,70,.28) !important; }
+html.glass .swal2-container:has(> .swal2-toast), html.glass body.swal2-toast-shown:not(.swal2-shown) .swal2-container{ background: transparent !important; }
 html.glass .swal2-styled{ border-radius: 9999px !important; box-shadow: inset 0 1.5px 0 rgba(255,255,255,.7), 0 6px 14px rgba(30,41,90,.25) !important; }
 html.glass .choices__inner{ background-color: rgba(255,255,255,.82) !important; border: 1.5px solid rgba(71,85,105,.34) !important; border-radius: 14px !important; box-shadow: inset 0 1px 3px rgba(15,23,42,.07) !important; }
 html.glass .choices__list--dropdown, html.glass .choices__list[aria-expanded]{ background-color: rgba(255,255,255,.94) !important; border: 1px solid rgba(71,85,105,.25) !important; border-radius: 14px !important; box-shadow: 0 12px 26px rgba(30,41,90,.2) !important; }
@@ -2038,6 +2040,174 @@ html.glass.dark span[id^="stock-display-"][class~="bg-red-100"]{ background-colo
 /* Kho hàng: ô ngày NSX/HSD hẹp (8%) -> thu nhỏ đệm/cỡ chữ để vẫn hiện đủ ngày + biểu tượng lịch */
 html.glass #inventory-data input[type="date"]{ padding-left: 5px !important; padding-right: 3px !important; font-size: 10px !important; border-radius: 10px !important; }
 html.glass #inventory-data input[type="number"][placeholder="tháng"]{ border-radius: 10px !important; padding-left: 3px !important; padding-right: 3px !important; }
+
+/* ===== PHẦN TỬ DÍNH / NỔI PHẢI ĐẶC (không trong suốt): tiêu đề cột khi cuộn, thanh nổi, cửa sổ ===== */
+html.glass :is(thead,th,td,tr,div)[class~="sticky"]{
+  background-color: #f4f7fc !important;
+  background-image: linear-gradient(180deg, #fbfcff, #edf1f9) !important;
+  box-shadow: 0 1px 0 rgba(71,85,105,.20), 0 5px 10px rgba(30,41,90,.07) !important;
+}
+html.glass.dark :is(thead,th,td,tr,div)[class~="sticky"]{
+  background-color: #121a2e !important;
+  background-image: linear-gradient(180deg, #1a2440, #121a2e) !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,.14), 0 5px 10px rgba(0,0,0,.35) !important;
+}
+/* cột dính bên trái (bảng chấm công): cùng nền đặc nhưng không đổ bóng ngang */
+html.glass :is(th,td)[class~="sticky"][class*="left-"]{ box-shadow: 1px 0 0 rgba(71,85,105,.18) !important; }
+html.glass.dark :is(th,td)[class~="sticky"][class*="left-"]{ box-shadow: 1px 0 0 rgba(255,255,255,.12) !important; }
+/* tiêu đề cột bên trong thead dính: để trong suốt cho lộ nền đặc của thead */
+html.glass thead[class~="sticky"] > tr > th{ background-color: transparent !important; }
+/* thanh nổi cố định ở dưới điện thoại (giỏ hàng/tổng tiền...) */
+html.glass div[class~="fixed"][class~="bg-white"]{ background-color: #f8faff !important; background-image: none !important; }
+html.glass.dark div[class~="fixed"][class~="bg-white"]{ background-color: #121a2e !important; }
+/* menu trái dạng ngăn kéo trên điện thoại: đặc để không thấy nội dung phía sau */
+@media (max-width: 767px){
+  html.glass aside#sidebar{ background-color: #f4f7fc !important; }
+  html.glass.dark aside#sidebar{ background-color: #101728 !important; }
+}
+/* cửa sổ/hộp thoại tự làm (nằm trên lớp phủ tối): nội dung phải đặc để dễ đọc */
+html.glass div[class~="fixed"][class*="inset-0"] div[class~="bg-white"]{ background-color: #fbfcff !important; border-color: rgba(71,85,105,.18) !important; box-shadow: 0 10px 30px rgba(15,23,42,.25) !important; }
+html.glass.dark div[class~="fixed"][class*="inset-0"] div[class~="dark:bg-slate-900"]{ background-color: #121a2e !important; border-color: rgba(255,255,255,.12) !important; box-shadow: 0 10px 30px rgba(0,0,0,.55) !important; }
+
+/* ===== CHAU CHUỐT & ĐỒNG NHẤT ===== */
+/* 1) Khung tô màu pastel (vàng, xanh, tím...) -> kính nhuốm màu cùng tông, viền mảnh cùng màu */
+html.glass :is(div,section,form,label)[class*="rounded"][class*="border"]:is([class~="bg-blue-50"],[class~="bg-blue-100"]):not([class~="border-l-4"]):not([class~="border-dashed"]){ --t:96,165,250;
+  background-color: rgba(96,165,250,.17) !important;
+  background-image: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.10)) !important;
+  border-color: rgba(96,165,250,.52) !important;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.9), 0 4px 12px rgba(96,165,250,.12) !important; }
+html.glass :is(div,section,form,label)[class*="rounded"][class*="border"]:is([class~="bg-yellow-50"],[class~="bg-yellow-100"]):not([class~="border-l-4"]):not([class~="border-dashed"]){ --t:250,204,21;
+  background-color: rgba(250,204,21,.17) !important;
+  background-image: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.10)) !important;
+  border-color: rgba(250,204,21,.52) !important;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.9), 0 4px 12px rgba(250,204,21,.12) !important; }
+html.glass :is(div,section,form,label)[class*="rounded"][class*="border"]:is([class~="bg-emerald-50"],[class~="bg-emerald-100"]):not([class~="border-l-4"]):not([class~="border-dashed"]){ --t:52,211,153;
+  background-color: rgba(52,211,153,.17) !important;
+  background-image: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.10)) !important;
+  border-color: rgba(52,211,153,.52) !important;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.9), 0 4px 12px rgba(52,211,153,.12) !important; }
+html.glass :is(div,section,form,label)[class*="rounded"][class*="border"]:is([class~="bg-amber-50"],[class~="bg-amber-100"]):not([class~="border-l-4"]):not([class~="border-dashed"]){ --t:251,191,36;
+  background-color: rgba(251,191,36,.17) !important;
+  background-image: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.10)) !important;
+  border-color: rgba(251,191,36,.52) !important;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.9), 0 4px 12px rgba(251,191,36,.12) !important; }
+html.glass :is(div,section,form,label)[class*="rounded"][class*="border"]:is([class~="bg-violet-50"],[class~="bg-violet-100"]):not([class~="border-l-4"]):not([class~="border-dashed"]){ --t:167,139,250;
+  background-color: rgba(167,139,250,.17) !important;
+  background-image: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.10)) !important;
+  border-color: rgba(167,139,250,.52) !important;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.9), 0 4px 12px rgba(167,139,250,.12) !important; }
+html.glass :is(div,section,form,label)[class*="rounded"][class*="border"]:is([class~="bg-sky-50"],[class~="bg-sky-100"]):not([class~="border-l-4"]):not([class~="border-dashed"]){ --t:56,189,248;
+  background-color: rgba(56,189,248,.17) !important;
+  background-image: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.10)) !important;
+  border-color: rgba(56,189,248,.52) !important;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.9), 0 4px 12px rgba(56,189,248,.12) !important; }
+html.glass :is(div,section,form,label)[class*="rounded"][class*="border"]:is([class~="bg-fuchsia-50"],[class~="bg-fuchsia-100"]):not([class~="border-l-4"]):not([class~="border-dashed"]){ --t:232,121,249;
+  background-color: rgba(232,121,249,.17) !important;
+  background-image: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.10)) !important;
+  border-color: rgba(232,121,249,.52) !important;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.9), 0 4px 12px rgba(232,121,249,.12) !important; }
+html.glass :is(div,section,form,label)[class*="rounded"][class*="border"]:is([class~="bg-rose-50"],[class~="bg-rose-100"]):not([class~="border-l-4"]):not([class~="border-dashed"]){ --t:251,113,133;
+  background-color: rgba(251,113,133,.17) !important;
+  background-image: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.10)) !important;
+  border-color: rgba(251,113,133,.52) !important;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.9), 0 4px 12px rgba(251,113,133,.12) !important; }
+html.glass :is(div,section,form,label)[class*="rounded"][class*="border"]:is([class~="bg-indigo-50"],[class~="bg-indigo-100"]):not([class~="border-l-4"]):not([class~="border-dashed"]){ --t:129,140,248;
+  background-color: rgba(129,140,248,.17) !important;
+  background-image: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.10)) !important;
+  border-color: rgba(129,140,248,.52) !important;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.9), 0 4px 12px rgba(129,140,248,.12) !important; }
+html.glass :is(div,section,form,label)[class*="rounded"][class*="border"]:is([class~="bg-teal-50"],[class~="bg-teal-100"]):not([class~="border-l-4"]):not([class~="border-dashed"]){ --t:45,212,191;
+  background-color: rgba(45,212,191,.17) !important;
+  background-image: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.10)) !important;
+  border-color: rgba(45,212,191,.52) !important;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.9), 0 4px 12px rgba(45,212,191,.12) !important; }
+html.glass :is(div,section,form,label)[class*="rounded"][class*="border"]:is([class~="bg-orange-50"],[class~="bg-orange-100"]):not([class~="border-l-4"]):not([class~="border-dashed"]){ --t:251,146,60;
+  background-color: rgba(251,146,60,.17) !important;
+  background-image: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.10)) !important;
+  border-color: rgba(251,146,60,.52) !important;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.9), 0 4px 12px rgba(251,146,60,.12) !important; }
+html.glass :is(div,section,form,label)[class*="rounded"][class*="border"]:is([class~="bg-purple-50"],[class~="bg-purple-100"]):not([class~="border-l-4"]):not([class~="border-dashed"]){ --t:192,132,252;
+  background-color: rgba(192,132,252,.17) !important;
+  background-image: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.10)) !important;
+  border-color: rgba(192,132,252,.52) !important;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.9), 0 4px 12px rgba(192,132,252,.12) !important; }
+html.glass :is(div,section,form,label)[class*="rounded"][class*="border"]:is([class~="bg-cyan-50"],[class~="bg-cyan-100"]):not([class~="border-l-4"]):not([class~="border-dashed"]){ --t:34,211,238;
+  background-color: rgba(34,211,238,.17) !important;
+  background-image: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.10)) !important;
+  border-color: rgba(34,211,238,.52) !important;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.9), 0 4px 12px rgba(34,211,238,.12) !important; }
+html.glass :is(div,section,form,label)[class*="rounded"][class*="border"]:is([class~="bg-green-50"],[class~="bg-green-100"]):not([class~="border-l-4"]):not([class~="border-dashed"]){ --t:74,222,128;
+  background-color: rgba(74,222,128,.17) !important;
+  background-image: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.10)) !important;
+  border-color: rgba(74,222,128,.52) !important;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.9), 0 4px 12px rgba(74,222,128,.12) !important; }
+html.glass :is(div,section,form,label)[class*="rounded"][class*="border"]:is([class~="bg-red-50"],[class~="bg-red-100"]):not([class~="border-l-4"]):not([class~="border-dashed"]){ --t:248,113,113;
+  background-color: rgba(248,113,113,.17) !important;
+  background-image: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.10)) !important;
+  border-color: rgba(248,113,113,.52) !important;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.9), 0 4px 12px rgba(248,113,113,.12) !important; }
+html.glass :is(div,section,form,label)[class*="rounded"][class*="border"]:is([class~="bg-lime-50"],[class~="bg-lime-100"]):not([class~="border-l-4"]):not([class~="border-dashed"]){ --t:163,230,53;
+  background-color: rgba(163,230,53,.17) !important;
+  background-image: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.10)) !important;
+  border-color: rgba(163,230,53,.52) !important;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.9), 0 4px 12px rgba(163,230,53,.12) !important; }
+html.glass :is(div,section,form,label)[class*="rounded"][class*="border"]:is([class~="bg-pink-50"],[class~="bg-pink-100"]):not([class~="border-l-4"]):not([class~="border-dashed"]){ --t:244,114,182;
+  background-color: rgba(244,114,182,.17) !important;
+  background-image: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.10)) !important;
+  border-color: rgba(244,114,182,.52) !important;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.9), 0 4px 12px rgba(244,114,182,.12) !important; }
+html.glass.dark :is(div,section,form,label)[class*="rounded"][class*="border"]:is([class*="bg-blue-"],[class*="bg-yellow-"],[class*="bg-emerald-"],[class*="bg-amber-"],[class*="bg-violet-"],[class*="bg-sky-"],[class*="bg-fuchsia-"],[class*="bg-rose-"],[class*="bg-indigo-"],[class*="bg-teal-"],[class*="bg-orange-"],[class*="bg-purple-"],[class*="bg-cyan-"],[class*="bg-green-"],[class*="bg-red-"],[class*="bg-lime-"],[class*="bg-pink-"]):not([class~="border-l-4"]){ background-image: none !important;
+  background-color: rgba(var(--t,100,116,139),.10) !important; border-color: rgba(var(--t,100,116,139),.36) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12) !important; }
+/* viền quá dày (4px, 2px) -> 1.5px cho thanh thoát */
+html.glass :is(div,section,form)[class~="rounded-2xl"][class~="border-4"],
+html.glass :is(div,section,form)[class~="rounded-2xl"][class~="border-2"],
+html.glass :is(div,section,form)[class~="rounded-xl"][class~="border-2"]{ border-width: 1.5px !important; }
+/* 2) Thẻ lớn cùng độ bo góc 22px; thanh tiêu đề trong thẻ bo theo */
+html.glass :is(div,section)[class~="bg-white"]:is([class~="rounded-2xl"],[class~="rounded-3xl"]){ border-radius: 22px !important; }
+html.glass [data-gb][class*="rounded-t-[15px]"], html.glass [data-gb][class*="rounded-t-[23px]"]{ border-radius: 21px 21px 0 0 !important; }
+/* 3) Tiêu đề trang cùng kiểu chữ */
+html.glass [data-pt]{ font-size: 1.65rem !important; line-height: 1.2 !important; font-weight: 800 !important; letter-spacing: -.01em !important; color: #0f172a !important; text-shadow: 0 1px 0 rgba(255,255,255,.85); }
+html.glass.dark [data-pt]{ color: #ffffff !important; text-shadow: none; }
+@media (max-width: 767px){ html.glass [data-pt]{ font-size: 1.35rem !important; } }
+/* 4) Thẻ sản phẩm ở Bán hàng: viền rõ hơn ở giao diện sáng */
+html.glass:not(.dark) div[id^="product-card-"]{
+  border: 1.5px solid rgba(var(--g),.60) !important;
+  box-shadow: 0 6px 16px rgba(var(--g),.22), 0 0 0 1px rgba(255,255,255,.75), inset 0 1.5px 0 rgba(255,255,255,.95), inset 0 -10px 20px rgba(var(--g),.08) !important;
+}
+html.glass:not(.dark) div[id^="product-card-"]:hover{
+  border-color: rgba(var(--g),.85) !important;
+  box-shadow: 0 12px 24px rgba(var(--g),.32), 0 0 0 1px rgba(255,255,255,.85), inset 0 1.5px 0 rgba(255,255,255,.95), inset 0 -10px 20px rgba(var(--g),.10) !important;
+}
+/* 5) Thanh cuộn mảnh, trong mờ */
+html.glass *{ scrollbar-width: thin; scrollbar-color: rgba(100,116,139,.45) transparent; }
+html.glass.dark *{ scrollbar-color: rgba(255,255,255,.28) transparent; }
+
+/* ===== Danh sách xổ xuống (gợi ý khách hàng, chọn...) phải ĐẶC để đọc rõ tên ===== */
+html.glass :is(div,ul)[class~="absolute"]:is([class~="bg-white"],[class~="bg-gray-50"],[class~="bg-slate-50"],[class~="bg-gray-100"]){
+  background-color: #fbfcff !important; background-image: none !important;
+  border: 1px solid rgba(71,85,105,.30) !important; border-radius: 14px !important;
+  box-shadow: 0 14px 30px rgba(30,41,90,.22) !important;
+}
+html.glass.dark :is(div,ul)[class~="absolute"]:is([class~="dark:bg-slate-900"],[class~="dark:bg-slate-950"],[class~="dark:bg-slate-800"]){
+  background-color: #121a2e !important; border-color: rgba(255,255,255,.16) !important; box-shadow: 0 14px 30px rgba(0,0,0,.55) !important;
+}
+html.glass .choices__list--dropdown, html.glass .choices__list[aria-expanded]{ background-color: #fbfcff !important; }
+html.glass.dark .choices__list--dropdown, html.glass.dark .choices__list[aria-expanded]{ background-color: #121a2e !important; }
+
+/* ===== CHẾ ĐỘ TỐI: mọi thẻ nền trắng (bg-white) phải là kính TỐI (app đã ép .dark .bg-white tối + chữ sáng) ===== */
+html.glass.dark :is(div,section,aside,header,nav,main)[class~="bg-white"]{
+  background-color: rgba(20,27,48,.66) !important;
+  border-color: rgba(255,255,255,.10) !important;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.12) !important;
+}
+html.glass.dark :is(div,section,tr,thead,tbody)[class~="bg-slate-50"][class*="dark:bg-"],
+html.glass.dark :is(div,section,tr,thead,tbody)[class~="bg-gray-50"][class*="dark:bg-"],
+html.glass.dark :is(div,section,thead)[class~="bg-slate-100"][class*="dark:bg-"]{ background-color: rgba(255,255,255,.05) !important; }
+/* cửa sổ tự làm trên lớp phủ + danh sách xổ xuống: bản TỐI cho mọi thẻ bg-white */
+html.glass.dark div[class~="fixed"][class*="inset-0"] div[class~="bg-white"]{ background-color: #121a2e !important; border-color: rgba(255,255,255,.12) !important; box-shadow: 0 10px 30px rgba(0,0,0,.55) !important; }
+html.glass.dark :is(div,ul)[class~="absolute"]:is([class~="bg-white"],[class~="bg-gray-50"],[class~="bg-slate-50"],[class~="bg-gray-100"]){
+  background-color: #121a2e !important; border-color: rgba(255,255,255,.16) !important; box-shadow: 0 14px 30px rgba(0,0,0,.55) !important; }
 </style>
 </head>
 <body class="bg-gray-100 dark:bg-slate-950 flex h-screen transition-colors duration-300">
@@ -2370,7 +2540,7 @@ document.addEventListener('DOMContentLoaded', function () {
     
     <div class="flex items-center justify-between gap-3 pb-2 border-b border-slate-200 dark:border-slate-900">
         <div class="min-w-0 shrink-0">
-            <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:drop-shadow-[0_2px_4px_rgba(255,255,255,0.1)]">BẢNG ĐIỀU KHIỂN</h2>
+            <h2 data-pt class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:drop-shadow-[0_2px_4px_rgba(255,255,255,0.1)]">BẢNG ĐIỀU KHIỂN</h2>
             <p class="text-slate-500 dark:text-slate-400 text-sm">Tổng quan tình hình kinh doanh</p>
         </div>
         <div id="dashboard-expiry-alert" onclick="openDashboardExpiryAlertModal()" class="min-w-0 flex-1 mx-2 md:mx-4 hidden cursor-pointer" title="Bấm để xem danh sách sản phẩm hết hạn và sắp hết hạn">
@@ -2593,7 +2763,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <!-- NHẬP KHO ------>
 <div id="page-import" class="hidden space-y-4 px-2 md:px-6 pb-24 lg:pb-4">
-    <h2 class="text-xl font-bold text-gray-800 dark:text-white">NHẬP KHO</h2>
+    <h2 data-pt class="text-xl font-bold text-gray-800 dark:text-white">NHẬP KHO</h2>
     <div id="firestore-read-status-import" class="hidden rounded-xl border-2 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 px-3 py-2.5 text-amber-800 dark:text-amber-200 text-xs md:text-sm font-bold shadow-sm">Chưa đồng bộ do hết read</div>
 
     <!-- Thanh giỏ hàng nổi - chỉ điện thoại, giống hệt kiểu ở trang Bán Hàng -->
@@ -3070,7 +3240,7 @@ document.addEventListener('DOMContentLoaded', function () {
         
 <!-- PHẦN 3: BÁN HÀNG -->
 <div id="page-sell" class="p-2 md:p-6 pb-24 lg:pb-6 space-y-4 w-full">
-    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">BÁN HÀNG / XUẤT HOÁ ĐƠN</h2>
+    <h2 data-pt class="text-2xl font-bold text-gray-800 dark:text-white">BÁN HÀNG / XUẤT HOÁ ĐƠN</h2>
     <div id="firestore-read-status-sell" class="hidden rounded-xl border-2 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 px-3 py-2.5 text-amber-800 dark:text-amber-200 text-xs md:text-sm font-bold shadow-sm">Chưa đồng bộ do hết read</div>
 
     <!-- THANH GIỎ HÀNG NỔI - CHỈ HIỆN TRÊN ĐIỆN THOẠI (ẩn từ lg trở lên). Trước đây trên
@@ -3758,7 +3928,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		<!-- PHẦN 6: BÁO CÁO -->
 <div id="page-report" class="hidden p-2 md:p-8 space-y-6 md:space-y-8 dark:bg-slate-950 min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-300">
     <div class="border-b pb-4 md:pb-6">
-        <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900">Trung Tâm Báo Cáo</h2>
+        <h2 data-pt class="text-2xl md:text-3xl font-extrabold text-slate-900">Trung Tâm Báo Cáo</h2>
         <p class="text-slate-500 mt-1 text-sm md:text-base">Xuất dữ liệu chi tiết phục vụ đối soát và quản lý kho</p>
     </div>
 
@@ -3988,7 +4158,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <button onclick="luuSanXuat()" class="shrink-0 bg-blue-600 dark:bg-blue-700 text-white px-3 py-3 rounded-xl font-bold text-xs border-b-[3px] border-blue-800 dark:border-blue-900 active:translate-y-[2px] active:border-b-[1px]">Lưu</button>
     </div>
   <div class="max-w-[98%] mx-auto">
-    <h3 class="mb-6 font-bold text-2xl text-gray-800 dark:text-white">THEO DÕI SẢN XUẤT</h3>
+    <h3 data-pt class="mb-6 font-bold text-2xl text-gray-800 dark:text-white">THEO DÕI SẢN XUẤT</h3>
 
     <!-- items-stretch giúp 2 khung tự động căng chiều cao bằng nhau -->
     <div class="flex flex-col-reverse lg:flex-row -mx-4 items-stretch">
@@ -4145,7 +4315,7 @@ document.addEventListener('DOMContentLoaded', function () {
     </div>
     <!-- Bỏ max-w-7xl để dùng toàn bộ màn hình -->
     <div class="w-full">
-        <h3 class="mb-6 font-bold text-2xl text-gray-800 px-2 md:px-0">QUẢN LÝ NGUYÊN LIỆU</h3>
+        <h3 data-pt class="mb-6 font-bold text-2xl text-gray-800 px-2 md:px-0">QUẢN LÝ NGUYÊN LIỆU</h3>
         
         <!-- Tab Menu -->
 		<div class="grid grid-cols-3 gap-2 md:gap-3 mb-6 bg-slate-200 dark:bg-slate-950 p-1.5 rounded-2xl border border-slate-300 dark:border-slate-900 shadow-[inset_0_2px_6px_rgba(0,0,0,0.15)] dark:shadow-[inset_0_4px_12px_rgba(0,0,0,0.8)] select-none">
@@ -4295,7 +4465,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <!-- LỊCH VÀ GHI CHÚ -->
 <div id="page-LichCongViec" class="page-content hidden p-2 md:p-6 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300">
     <div class="w-full">
-        <h3 class="mb-6 font-bold text-2xl text-gray-800 px-2 md:px-0">LỊCH GHI CHÚ & CHẤM CÔNG</h3>
+        <h3 data-pt class="mb-6 font-bold text-2xl text-gray-800 px-2 md:px-0">LỊCH GHI CHÚ & CHẤM CÔNG</h3>
 
         <!-- TAB ĐIỀU HƯỚNG: Chấm Công / Lịch & Ghi Chú (đổi thứ tự + đổi tab mặc định theo
              yêu cầu - "Chấm Công" giờ lên trước và là tab hiện sẵn khi vào trang, thay cho
@@ -4564,7 +4734,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <!-- ===================== NHẮN TIN NỘI BỘ (phòng chung + nhắn riêng từng người) ===================== -->
 <div id="page-chat" class="page-content hidden p-2 md:p-6 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300">
     <div class="w-full">
-        <h3 class="mb-6 font-bold text-2xl text-gray-800 dark:text-white px-2 md:px-0">NHẮN TIN NỘI BỘ</h3>
+        <h3 data-pt class="mb-6 font-bold text-2xl text-gray-800 dark:text-white px-2 md:px-0">NHẮN TIN NỘI BỘ</h3>
 
         <div class="flex flex-col md:flex-row gap-4 md:h-[74vh]">
             <!-- CỘT TRÁI: Phòng chung + danh sách nhân viên để nhắn riêng -->
@@ -4665,7 +4835,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pb-2 border-b border-slate-200 dark:border-slate-700">
-        <h2 class="text-2xl font-bold text-slate-800 dark:text-white">QUẢN LÝ NGƯỜI DÙNG & PHÂN QUYỀN</h2>
+        <h2 data-pt class="text-2xl font-bold text-slate-800 dark:text-white">QUẢN LÝ NGƯỜI DÙNG & PHÂN QUYỀN</h2>
         <button id="btn-add-user-header" onclick="openUserForm()" class="shrink-0 whitespace-nowrap bg-blue-600 dark:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-blue-800 dark:border-blue-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md flex items-center gap-2 justify-center">
             <i data-lucide="user-plus" class="w-4 h-4"></i> Thêm Người Dùng
         </button>
@@ -25587,7 +25757,8 @@ function xoaGioHangSX(idx) {
 async function luuSanXuat() {
     if (window.__productionSaveInProgress) return;
     window.__productionSaveInProgress = true;
-    const btn = document.querySelector('.btn-save') || document.querySelector('.btn-primary');
+    // Các nút LƯU SẢN XUẤT thật (PC + điện thoại). Trước đây tìm '.btn-save'/'.btn-primary' không tồn tại nên không khoá nút khi đang lưu.
+    const saveBtns = Array.from(document.querySelectorAll('button[onclick="luuSanXuat()"]'));
     // Bắt buộc phải thêm vào giỏ trước khi lưu
     if (sxCart.length === 0) {
         Swal.fire({ icon: 'warning', title: 'Giỏ hàng đang trống! Vui lòng bấm "THÊM VÀO GIỎ" trước khi lưu phiếu.', toast: true, position: 'top-end', timer: 2200, showConfirmButton: false });
@@ -25597,10 +25768,11 @@ async function luuSanXuat() {
     const soPhieu = document.getElementById('sxSoPhieu').value || "";
     const timestamp = new Date();
     try {
-        if (btn) {
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang lưu...';
-        }
+        saveBtns.forEach(b => {
+            b.dataset.oldHtml = b.innerHTML;
+            b.disabled = true;
+            b.textContent = 'Đang lưu...';
+        });
         // Lưu toàn bộ các dòng của cùng một phiếu bằng 1 batch để tránh trạng thái
         // lưu dở dang và giảm số lượt round-trip mạng khi phiếu có nhiều dòng.
         const productionBatch = db.batch();
@@ -25662,11 +25834,16 @@ async function luuSanXuat() {
         showAlert("Có lỗi: " + e.message);
     }
     finally {
-        if (btn) {
-            btn.disabled = false;
-            // Khôi phục lại đúng text của nút như bạn đã để trong HTML
-            btn.innerHTML = '<i class="fas fa-save me-2"></i> LƯU SẢN XUẤT';
-        }
+        // QUAN TRỌNG: trả cờ về false sau MỖI lần lưu (thành công hay lỗi). Trước đây cờ này bị bỏ quên ở trạng thái
+        // true nên từ lần lưu thứ 2 trở đi, bấm LƯU SẢN XUẤT không làm gì (return ngay ở đầu hàm) cho tới khi tải lại trang.
+        window.__productionSaveInProgress = false;
+        saveBtns.forEach(b => {
+            b.disabled = false;
+            if (b.dataset.oldHtml !== undefined) {
+                b.innerHTML = b.dataset.oldHtml;
+                delete b.dataset.oldHtml;
+            }
+        });
     }
 }
 // Gom các dòng sản xuất (có thể nhiều dòng cùng 1 số phiếu) thành từng nhóm theo số phiếu,
