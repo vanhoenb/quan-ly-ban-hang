@@ -1816,7 +1816,7 @@ html.glass button[class*="rounded"]:is(
   [class~="bg-stone-800"],
   [class~="bg-stone-900"]
 ){
-  border-radius: 9999px !important;
+  border-radius: 22px !important;
   border: 1px solid rgba(255,255,255,.55) !important;
   background-image: linear-gradient(180deg, rgba(255,255,255,.52) 0%, rgba(255,255,255,.13) 46%, rgba(255,255,255,0) 54%, rgba(255,255,255,.14) 100%) !important;
   box-shadow: inset 0 1.5px 0 rgba(255,255,255,.85), inset 0 -2px 6px rgba(255,255,255,.16), 0 5px 12px rgba(30,41,90,.20) !important;
@@ -1876,7 +1876,7 @@ html.glass.dark button[class*="rounded"]:is(
   [class~="bg-stone-900"]
 ){ background-color: rgba(255,255,255,.12) !important; border-color: rgba(255,255,255,.22) !important; }
 html.glass button[class*="bg-gradient-to-"]{
-  border-radius: 9999px !important;
+  border-radius: 22px !important;
   border: 1px solid rgba(255,255,255,.55) !important;
   background-image:
     linear-gradient(180deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,.14) 46%, rgba(255,255,255,0) 54%, rgba(255,255,255,.16) 100%),
@@ -1886,14 +1886,14 @@ html.glass button[class*="bg-gradient-to-"]{
 html.glass button:is([class~="bg-white"],[class~="bg-slate-100"],[class~="bg-gray-100"],[class~="bg-slate-50"],[class~="bg-gray-50"]){
   background-color: rgba(255,255,255,.66) !important;
   border: 1px solid rgba(255,255,255,.90) !important;
-  border-radius: 9999px !important;
+  border-radius: 22px !important;
   box-shadow: inset 0 1.5px 0 rgba(255,255,255,.95), 0 4px 10px rgba(30,41,90,.10) !important;
 }
 html.glass.dark button:is([class~="bg-white"],[class~="bg-slate-100"],[class~="bg-gray-100"],[class~="bg-slate-50"],[class~="bg-gray-50"]),
 html.glass.dark button:is([class~="dark:bg-slate-600"],[class~="dark:bg-slate-700"],[class~="dark:bg-slate-800"],[class~="dark:bg-slate-900"],[class~="dark:bg-gray-700"],[class~="dark:bg-gray-800"]){
   background-color: rgba(255,255,255,.10) !important;
   background-image: linear-gradient(180deg, rgba(255,255,255,.20) 0%, rgba(255,255,255,.04) 52%, rgba(255,255,255,0) 100%) !important;
-  border: 1px solid rgba(255,255,255,.20) !important; border-radius: 9999px !important;
+  border: 1px solid rgba(255,255,255,.20) !important; border-radius: 22px !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.26), 0 4px 10px rgba(0,0,0,.30) !important;
 }
 html.glass button[class*="bg-"]:active{ transform: scale(.97); }
@@ -1973,12 +1973,36 @@ html.glass.dark div[class~="h-8"][class~="rounded-lg"][class~="overflow-hidden"]
     linear-gradient(180deg, var(--tw-gradient-from), var(--tw-gradient-to)) !important;
   border-right: 1px solid rgba(255,255,255,.18) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.3) !important; }
 
-/* --- Thanh dưới điện thoại + menu "Khác" (kính khói; ĐÂY mới cần làm mờ vì nội dung cuộn phía sau) --- */
-html.glass #mobile-bottom-nav{ background-color: rgba(18,24,48,.88) !important;
+/* --- Thanh dưới điện thoại + menu "Khác": kính SÁNG (chế độ sáng) / kính khói (chế độ tối). Đây mới cần làm mờ vì nội dung cuộn phía sau --- */
+html.glass #mobile-bottom-nav{
   -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%);
-  border-top: 1px solid rgba(255,255,255,.22) !important; box-shadow: 0 -6px 20px rgba(20,30,80,.25), inset 0 1px 0 rgba(255,255,255,.25) !important; }
-html.glass #mobile-bottom-nav :is([class*="text-slate-500"],[class*="text-slate-400"],[class*="text-gray-500"],[class*="text-gray-400"]){ color: rgba(226,232,240,.88) !important; }
-html.glass #more-menu-list{ background-color: rgba(18,24,48,.80) !important; border: 1px solid rgba(255,255,255,.22) !important; border-radius: 22px !important; }
+}
+html.glass:not(.dark) #mobile-bottom-nav{ background-color: rgba(255,255,255,.88) !important; border-top: 1px solid rgba(255,255,255,.95) !important;
+  box-shadow: 0 -8px 24px rgba(40,50,140,.14), inset 0 1.5px 0 #fff !important; }
+html.glass.dark #mobile-bottom-nav{ background-color: rgba(18,24,48,.88) !important; border-top: 1px solid rgba(255,255,255,.22) !important;
+  box-shadow: 0 -6px 20px rgba(20,30,80,.25), inset 0 1px 0 rgba(255,255,255,.25) !important; }
+html.glass.dark #mobile-bottom-nav :is([class*="text-slate-500"],[class*="text-slate-400"],[class*="text-gray-500"],[class*="text-gray-400"]){ color: rgba(226,232,240,.88) !important; }
+html.glass:not(.dark) #more-menu-list{ background-color: rgba(255,255,255,.96) !important; border: 1px solid rgba(71,85,105,.22) !important; border-radius: 22px !important; box-shadow: 0 14px 34px rgba(30,41,90,.22) !important; }
+html.glass.dark #more-menu-list{ background-color: rgba(18,24,48,.92) !important; border: 1px solid rgba(255,255,255,.22) !important; border-radius: 22px !important; }
+/* thẻ trong thanh dưới & menu "Khác": bo tròn kiểu viên thuốc, bỏ cạnh đáy dày */
+html.glass :is(#mobile-bottom-nav .nav-btn, #more-menu-list button){ border-radius: 16px !important; }
+html.glass:not(.dark) #mobile-bottom-nav .nav-btn:not([class*="bg-"]){ border-bottom-width: 0 !important; }
+html.glass:not(.dark) :is(#mobile-bottom-nav,#more-menu-list) [class*="bg-emerald-950"]{ background: linear-gradient(180deg, rgba(255,255,255,.80), rgba(16,185,129,.20)) !important; color: #047857 !important; border: 1px solid rgba(16,185,129,.40) !important; box-shadow: inset 0 1px 0 #fff, 0 3px 8px rgba(16,185,129,.20) !important; }
+html.glass:not(.dark) :is(#mobile-bottom-nav,#more-menu-list) [class*="bg-rose-950"]{ background: linear-gradient(180deg, rgba(255,255,255,.80), rgba(244,63,94,.20)) !important; color: #be123c !important; border: 1px solid rgba(244,63,94,.40) !important; box-shadow: inset 0 1px 0 #fff, 0 3px 8px rgba(244,63,94,.20) !important; }
+html.glass:not(.dark) :is(#mobile-bottom-nav,#more-menu-list) [class*="bg-amber-950"]{ background: linear-gradient(180deg, rgba(255,255,255,.80), rgba(245,158,11,.20)) !important; color: #b45309 !important; border: 1px solid rgba(245,158,11,.40) !important; box-shadow: inset 0 1px 0 #fff, 0 3px 8px rgba(245,158,11,.20) !important; }
+html.glass:not(.dark) :is(#mobile-bottom-nav,#more-menu-list) [class*="bg-sky-950"]{ background: linear-gradient(180deg, rgba(255,255,255,.80), rgba(14,165,233,.20)) !important; color: #0369a1 !important; border: 1px solid rgba(14,165,233,.40) !important; box-shadow: inset 0 1px 0 #fff, 0 3px 8px rgba(14,165,233,.20) !important; }
+html.glass:not(.dark) :is(#mobile-bottom-nav,#more-menu-list) [class*="bg-indigo-950"]{ background: linear-gradient(180deg, rgba(255,255,255,.80), rgba(99,102,241,.20)) !important; color: #4338ca !important; border: 1px solid rgba(99,102,241,.40) !important; box-shadow: inset 0 1px 0 #fff, 0 3px 8px rgba(99,102,241,.20) !important; }
+html.glass:not(.dark) :is(#mobile-bottom-nav,#more-menu-list) [class*="bg-blue-950"]{ background: linear-gradient(180deg, rgba(255,255,255,.80), rgba(59,130,246,.20)) !important; color: #1d4ed8 !important; border: 1px solid rgba(59,130,246,.40) !important; box-shadow: inset 0 1px 0 #fff, 0 3px 8px rgba(59,130,246,.20) !important; }
+html.glass:not(.dark) :is(#mobile-bottom-nav,#more-menu-list) [class*="bg-purple-950"]{ background: linear-gradient(180deg, rgba(255,255,255,.80), rgba(168,85,247,.20)) !important; color: #7e22ce !important; border: 1px solid rgba(168,85,247,.40) !important; box-shadow: inset 0 1px 0 #fff, 0 3px 8px rgba(168,85,247,.20) !important; }
+html.glass:not(.dark) :is(#mobile-bottom-nav,#more-menu-list) [class*="bg-teal-950"]{ background: linear-gradient(180deg, rgba(255,255,255,.80), rgba(20,184,166,.20)) !important; color: #0f766e !important; border: 1px solid rgba(20,184,166,.40) !important; box-shadow: inset 0 1px 0 #fff, 0 3px 8px rgba(20,184,166,.20) !important; }
+html.glass:not(.dark) :is(#mobile-bottom-nav,#more-menu-list) [class*="bg-orange-950"]{ background: linear-gradient(180deg, rgba(255,255,255,.80), rgba(249,115,22,.20)) !important; color: #c2410c !important; border: 1px solid rgba(249,115,22,.40) !important; box-shadow: inset 0 1px 0 #fff, 0 3px 8px rgba(249,115,22,.20) !important; }
+html.glass:not(.dark) :is(#mobile-bottom-nav,#more-menu-list) [class*="bg-fuchsia-950"]{ background: linear-gradient(180deg, rgba(255,255,255,.80), rgba(217,70,239,.20)) !important; color: #a21caf !important; border: 1px solid rgba(217,70,239,.40) !important; box-shadow: inset 0 1px 0 #fff, 0 3px 8px rgba(217,70,239,.20) !important; }
+html.glass:not(.dark) :is(#mobile-bottom-nav,#more-menu-list) [class*="bg-lime-950"]{ background: linear-gradient(180deg, rgba(255,255,255,.80), rgba(132,204,22,.20)) !important; color: #4d7c0f !important; border: 1px solid rgba(132,204,22,.40) !important; box-shadow: inset 0 1px 0 #fff, 0 3px 8px rgba(132,204,22,.20) !important; }
+html.glass:not(.dark) :is(#mobile-bottom-nav,#more-menu-list) [class*="bg-cyan-950"]{ background: linear-gradient(180deg, rgba(255,255,255,.80), rgba(6,182,212,.20)) !important; color: #0e7490 !important; border: 1px solid rgba(6,182,212,.40) !important; box-shadow: inset 0 1px 0 #fff, 0 3px 8px rgba(6,182,212,.20) !important; }
+html.glass:not(.dark) :is(#mobile-bottom-nav,#more-menu-list) [class*="bg-slate-950"]{ background: linear-gradient(180deg, rgba(255,255,255,.80), rgba(100,116,139,.20)) !important; color: #334155 !important; border: 1px solid rgba(100,116,139,.40) !important; box-shadow: inset 0 1px 0 #fff, 0 3px 8px rgba(100,116,139,.20) !important; }
+html.glass:not(.dark) :is(#mobile-bottom-nav,#more-menu-list) [class*="bg-violet-950"]{ background: linear-gradient(180deg, rgba(255,255,255,.80), rgba(139,92,246,.20)) !important; color: #6d28d9 !important; border: 1px solid rgba(139,92,246,.40) !important; box-shadow: inset 0 1px 0 #fff, 0 3px 8px rgba(139,92,246,.20) !important; }
+html.glass:not(.dark) :is(#mobile-bottom-nav,#more-menu-list) [class*="bg-red-950"]{ background: linear-gradient(180deg, rgba(255,255,255,.80), rgba(239,68,68,.20)) !important; color: #b91c1c !important; border: 1px solid rgba(239,68,68,.40) !important; box-shadow: inset 0 1px 0 #fff, 0 3px 8px rgba(239,68,68,.20) !important; }
+html.glass:not(.dark) :is(#mobile-bottom-nav,#more-menu-list) [class*="bg-green-950"]{ background: linear-gradient(180deg, rgba(255,255,255,.80), rgba(34,197,94,.20)) !important; color: #15803d !important; border: 1px solid rgba(34,197,94,.40) !important; box-shadow: inset 0 1px 0 #fff, 0 3px 8px rgba(34,197,94,.20) !important; }
 
 /* --- Hộp thoại SweetAlert2 + ô chọn Choices.js --- */
 html.glass .swal2-popup{ background-color: rgba(255,255,255,.86) !important; border: 1px solid rgba(255,255,255,.9) !important; border-radius: 28px !important;
@@ -2208,6 +2232,66 @@ html.glass.dark :is(div,section,thead)[class~="bg-slate-100"][class*="dark:bg-"]
 html.glass.dark div[class~="fixed"][class*="inset-0"] div[class~="bg-white"]{ background-color: #121a2e !important; border-color: rgba(255,255,255,.12) !important; box-shadow: 0 10px 30px rgba(0,0,0,.55) !important; }
 html.glass.dark :is(div,ul)[class~="absolute"]:is([class~="bg-white"],[class~="bg-gray-50"],[class~="bg-slate-50"],[class~="bg-gray-100"]){
   background-color: #121a2e !important; border-color: rgba(255,255,255,.16) !important; box-shadow: 0 14px 30px rgba(0,0,0,.55) !important; }
+
+/* ===================== MÀN HÌNH ĐĂNG NHẬP ===================== */
+#login-screen{
+  overflow: hidden;
+  background:
+    radial-gradient(900px 620px at 12% 8%, rgba(59,130,246,.42), transparent 60%),
+    radial-gradient(800px 600px at 92% 12%, rgba(168,85,247,.34), transparent 60%),
+    radial-gradient(900px 700px at 72% 100%, rgba(20,184,166,.30), transparent 60%),
+    radial-gradient(700px 520px at 4% 96%, rgba(244,114,182,.22), transparent 60%),
+    #070b1f !important;
+}
+.lg-blob{ position:absolute; border-radius:50%; filter: blur(60px); opacity:.5; pointer-events:none; }
+.lg-b1{ width:340px; height:340px; left:-80px; top:-60px; background:#3b82f6; animation: lgFloat 14s ease-in-out infinite alternate; }
+.lg-b2{ width:300px; height:300px; right:-60px; bottom:-40px; background:#a855f7; animation: lgFloat 17s ease-in-out infinite alternate-reverse; }
+.lg-b3{ width:240px; height:240px; right:22%; top:-90px; background:#14b8a6; opacity:.32; animation: lgFloat 19s ease-in-out infinite alternate; }
+@keyframes lgFloat{ from{ transform: translate3d(0,0,0) scale(1); } to{ transform: translate3d(36px,28px,0) scale(1.12); } }
+@media (prefers-reduced-motion: reduce){ .lg-blob{ animation:none; } }
+.lg-card{
+  position: relative; width:100%; max-width:400px; padding:34px 30px 24px; border-radius:32px; color:#fff;
+  background: linear-gradient(160deg, rgba(255,255,255,.22), rgba(255,255,255,.07));
+  border: 1px solid rgba(255,255,255,.30);
+  box-shadow: 0 30px 80px rgba(0,0,0,.50), inset 0 1.5px 0 rgba(255,255,255,.50), inset 0 -1px 0 rgba(255,255,255,.08);
+  -webkit-backdrop-filter: blur(26px) saturate(170%); backdrop-filter: blur(26px) saturate(170%);
+}
+.lg-logo{ width:96px; height:96px; margin:0 auto; border-radius:28px; display:flex; align-items:center; justify-content:center;
+  background: linear-gradient(160deg,#3b82f6,#6d4df2); box-shadow: inset 0 1.5px 0 rgba(255,255,255,.7), 0 14px 30px rgba(59,130,246,.45); }
+.lg-logo .lg-lock{ width:40px; height:40px; color:#fff; }
+.lg-title{ margin:18px 0 0; text-align:center; font-size:30px; line-height:1.1; font-weight:800; letter-spacing:-.01em; color:#fff; }
+.lg-sub{ margin:6px 0 4px; text-align:center; font-size:14px; color:rgba(255,255,255,.68); }
+.lg-label{ display:block; margin-top:18px; font-size:11.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,.74); }
+.lg-field{ position:relative; margin-top:7px; }
+.lg-field > svg, .lg-field > i{ position:absolute; left:15px; top:50%; transform:translateY(-50%); width:18px; height:18px; color:rgba(255,255,255,.66); pointer-events:none; }
+html.glass #login-screen .lg-field input{
+  width:100%; padding:14px 46px 14px 44px; border-radius:16px !important; font-size:15px; color:#fff !important; outline:none;
+  background-color: rgba(255,255,255,.10) !important; border: 1.5px solid rgba(255,255,255,.28) !important;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,.22) !important;
+}
+html.glass #login-screen .lg-field input::placeholder{ color: rgba(255,255,255,.46) !important; }
+html.glass #login-screen .lg-field input:hover{ border-color: rgba(255,255,255,.45) !important; }
+html.glass #login-screen .lg-field input:focus{
+  border-color: rgba(147,197,253,.95) !important; background-color: rgba(255,255,255,.15) !important;
+  box-shadow: 0 0 0 4px rgba(96,165,250,.30), inset 0 2px 6px rgba(0,0,0,.22) !important;
+}
+#login-screen .lg-field input:-webkit-autofill{ -webkit-text-fill-color:#fff; -webkit-box-shadow: 0 0 0 1000px rgba(36,48,110,.95) inset !important; caret-color:#fff; }
+.lg-eye{ position:absolute; right:7px; top:50%; transform:translateY(-50%); width:36px; height:36px; border-radius:50%; border:0; background:transparent; color:rgba(255,255,255,.72); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+.lg-eye:hover{ background: rgba(255,255,255,.14); color:#fff; }
+.lg-eye svg, .lg-eye i{ width:18px; height:18px; }
+.lg-error{ margin-top:14px; padding:10px 13px; border-radius:14px; font-size:13px; font-weight:600; color:#ffe4e6; background:rgba(244,63,94,.20); border:1px solid rgba(251,113,133,.50); }
+.lg-btn{ width:100%; margin-top:22px; padding:14px 18px; border-radius:9999px; border:1px solid rgba(255,255,255,.50); color:#fff; font-size:15px; font-weight:800; letter-spacing:.03em; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:9px;
+  background-image: linear-gradient(180deg, rgba(255,255,255,.52) 0%, rgba(255,255,255,.12) 46%, rgba(255,255,255,0) 54%, rgba(255,255,255,.14) 100%), linear-gradient(90deg,#3b82f6,#7c5cf6);
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.85), inset 0 -2px 6px rgba(255,255,255,.14), 0 12px 28px rgba(59,130,246,.50);
+  text-shadow: 0 1px 2px rgba(0,0,0,.28); transition: transform .12s ease, filter .12s ease;
+}
+.lg-btn svg, .lg-btn i{ width:18px; height:18px; }
+.lg-btn:hover{ filter: brightness(1.08); }
+.lg-btn:active{ transform: scale(.98); }
+.lg-btn:disabled{ cursor:wait; }
+.lg-foot{ margin:18px 0 0; text-align:center; font-size:11.5px; color:rgba(255,255,255,.46); }
+@media (max-width: 480px){ .lg-card{ padding:28px 20px 20px; border-radius:28px; } .lg-title{ font-size:26px; } }
 </style>
 </head>
 <body class="bg-gray-100 dark:bg-slate-950 flex h-screen transition-colors duration-300">
@@ -2218,32 +2302,33 @@ html.glass.dark :is(div,ul)[class~="absolute"]:is([class~="bg-white"],[class~="b
 </div>
 
 
-  <!-- ===================== MÀN HÌNH ĐĂNG NHẬP ===================== -->
-  <div id="login-screen" class="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-950 p-4">
-    <div class="w-full max-w-sm bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-8 space-y-6">
-        <div class="text-center space-y-1">
-            <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-lg">
-                <i data-lucide="lock" class="w-7 h-7 text-white"></i>
-            </div>
-            <h1 class="text-xl font-bold text-slate-800 dark:text-white mt-3">POS Pro</h1>
-            <p class="text-sm text-slate-400">Đăng nhập để tiếp tục</p>
+  <!-- ===================== MÀN HÌNH ĐĂNG NHẬP (kính lỏng) ===================== -->
+  <div id="login-screen" class="fixed inset-0 z-[99999] flex items-center justify-center p-4">
+    <div class="lg-blob lg-b1"></div><div class="lg-blob lg-b2"></div><div class="lg-blob lg-b3"></div>
+    <div class="lg-card">
+        <div class="lg-logo">
+            <i data-lucide="lock" class="lg-lock"></i>
         </div>
-        <form id="login-form" onsubmit="return handleLogin(event)" class="space-y-4" autocomplete="off">
-            <div>
-                <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">Tên đăng nhập</label>
-                <input id="login-username" type="text" autocomplete="off" required
-                    class="mt-1 w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="admin">
+        <h1 class="lg-title">POS Pro</h1>
+        <p class="lg-sub">Quản lý kho &amp; bán hàng</p>
+        <form id="login-form" onsubmit="return handleLogin(event)" autocomplete="off">
+            <label class="lg-label" for="login-username">Tên đăng nhập</label>
+            <div class="lg-field">
+                <i data-lucide="user"></i>
+                <input id="login-username" type="text" autocomplete="off" required placeholder="Nhập tên đăng nhập">
             </div>
-            <div>
-                <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">Mật khẩu</label>
-                <input id="login-password" type="password" autocomplete="new-password" required
-                    class="mt-1 w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="••••••••">
+            <label class="lg-label" for="login-password">Mật khẩu</label>
+            <div class="lg-field">
+                <i data-lucide="lock-keyhole"></i>
+                <input id="login-password" type="password" autocomplete="new-password" required placeholder="Nhập mật khẩu">
+                <button type="button" class="lg-eye" id="login-eye" onclick="toggleLoginPassword()" title="Hiện / ẩn mật khẩu" tabindex="-1"><i data-lucide="eye"></i></button>
             </div>
-            <p id="login-error" class="hidden text-sm text-rose-500 font-medium"></p>
-            <button type="submit" id="login-submit-btn" class="w-full p-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold transition flex items-center justify-center gap-2">
-                <i data-lucide="log-in" class="w-4 h-4"></i> <span>Đăng nhập</span>
+            <p id="login-error" class="hidden lg-error"></p>
+            <button type="submit" id="login-submit-btn" class="lg-btn">
+                <i data-lucide="log-in"></i> <span>Đăng nhập</span>
             </button>
         </form>
+        <p class="lg-foot">Phiên bản v85 · Đăng nhập lại mỗi lần mở để bảo mật</p>
     </div>
   </div>
 
@@ -9203,6 +9288,19 @@ async function deleteUserAccount(username) {
     catch (e) {
         Swal.fire('Lỗi', 'Không thể xóa: ' + e.message, 'error');
     }
+}
+// --- MÀN HÌNH ĐĂNG NHẬP: hiện/ẩn mật khẩu ---
+function toggleLoginPassword() {
+    const input = document.getElementById('login-password');
+    const btn = document.getElementById('login-eye');
+    if (!input || !btn)
+        return;
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    btn.innerHTML = '<i data-lucide="' + (show ? 'eye-off' : 'eye') + '"></i>';
+    if (typeof lucide !== 'undefined')
+        lucide.createIcons();
+    input.focus();
 }
 // --- KHỞI ĐỘNG HỆ THỐNG ĐĂNG NHẬP ---
 async function initAuthSystem() {
