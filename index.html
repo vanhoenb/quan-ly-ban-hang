@@ -305,6 +305,16 @@
         color: #f1f5f9 !important;
     }
 
+    /* ===== NÚT ĐÓNG POPUP (X): luôn màu ĐỎ ở cả giao diện sáng và tối ===== */
+    .swal2-popup .swal2-close,
+    .dark .swal2-popup .swal2-close { color: #ef4444 !important; }
+    .swal2-popup .swal2-close:hover { color: #dc2626 !important; }
+    .dark .swal2-popup .swal2-close:hover { color: #f87171 !important; }
+    .x-close-red { color: #ef4444 !important; transition: background-color .15s, color .15s; }
+    .x-close-red:hover { color: #dc2626 !important; background-color: rgba(239,68,68,.14); }
+    .dark .x-close-red:hover { color: #f87171 !important; background-color: rgba(248,113,113,.18); }
+    .x-close-red i, .x-close-red svg { color: inherit !important; }
+
     /* ===== POPUP ĐỐI SOÁT / AUDIT - DARK MODE ĐỒNG NHẤT ===== */
     .dark .swal2-popup .bg-slate-50,
     .dark .swal2-popup .bg-slate-100,
@@ -1935,6 +1945,10 @@ html.glass [data-gb] :is(h2,h3,h4,h5,span,p,i,svg,b,label,a),
 html.glass [data-gb] button:not([class*="bg-"]){ color: inherit !important; text-shadow: none !important; }
 html.glass [data-gb="emerald"] button[class~="text-white"][class*="bg-white/"]{ color:#047857 !important; }
 html.glass.dark [data-gb="emerald"] button[class~="text-white"][class*="bg-white/"]{ color:#a7f3d0 !important; }
+/* Nút ghi (X đóng popup...) trong thanh tiêu đề: có class bg-white/xx nên không được kế thừa màu chữ ở trên,
+   làm chữ/biểu tượng trắng chìm vào nền nhạt ở giao diện sáng -> ép lấy màu chữ của thanh tiêu đề (mọi tông màu). */
+html.glass [data-gb] button[class~="text-white"][class*="bg-white/"]{ color: var(--bt) !important; }
+html.glass.dark [data-gb] button[class~="text-white"][class*="bg-white/"]{ color: var(--btd) !important; }
 
 /* --- 4 ô thống kê Trang Chủ --- */
 html.glass div[onclick^="showDashboardDetail("]{ --g: 59,130,246; }
@@ -2293,6 +2307,93 @@ html.glass #login-screen .lg-field input:focus{
 .lg-foot{ margin:18px 0 0; text-align:center; font-size:11.5px; color:rgba(255,255,255,.46); }
 @media (max-width: 480px){ .lg-card{ padding:28px 20px 20px; border-radius:28px; } .lg-title{ font-size:26px; } }
 </style>
+<style id="glass-clock-css">
+/* ===== ĐỒNG HỒ TRANG CHỦ - KÍNH LỎNG: khung kính bo tròn + vệt sáng cong, chữ/số nổi khối ===== */
+html.glass .glass-clock{
+  position:relative; border-radius:24px !important; border:1.5px solid rgba(255,255,255,.95) !important;
+  padding-top:5px !important; padding-bottom:5px !important; overflow:hidden;
+  background: linear-gradient(180deg, rgba(255,255,255,.80) 0%, rgba(235,241,255,.42) 100%) !important;
+  box-shadow: 0 12px 30px rgba(50,70,160,.18), 0 2px 6px rgba(50,70,160,.10),
+              inset 0 2px 0 rgba(255,255,255,1), inset 0 -3px 8px rgba(110,130,200,.20) !important;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+html.glass .glass-clock::before{ /* vệt phản chiếu cong nửa trên */
+  content:""; position:absolute; left:2px; right:2px; top:1px; height:52%; pointer-events:none;
+  border-radius:22px 22px 55% 55% / 22px 22px 18px 18px;
+  background: linear-gradient(180deg, rgba(255,255,255,.75) 0%, rgba(255,255,255,0) 100%);
+}
+html.glass .glass-clock > *{ position:relative; z-index:1; }
+html.glass .glass-clock:hover{ transform:translateY(-1px); box-shadow: 0 16px 36px rgba(50,70,160,.24), 0 3px 8px rgba(50,70,160,.12), inset 0 2px 0 #fff, inset 0 -3px 8px rgba(110,130,200,.22) !important; }
+html.glass .glass-clock .text-left{ padding-left:16px; border-left:2px solid rgba(100,116,139,.28); }
+
+/* Giờ: số chuyển màu ngọc lục bảo, viền sáng + bóng đổ => nổi khối */
+html.glass #home-clock-time{
+  font-variant-numeric: tabular-nums; letter-spacing:.03em; font-weight:900 !important;
+  background: linear-gradient(180deg,#34d399 0%,#059669 55%,#047857 100%);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent !important;
+  filter: drop-shadow(0 1px 0 rgba(255,255,255,.95)) drop-shadow(0 3px 4px rgba(4,120,87,.35));
+}
+html.glass #home-clock-time .gc-sec{ font-size:.58em; letter-spacing:0; margin-left:2px; }
+
+/* Thứ: viên thuốc xanh kính; Ngày: chữ đen đậm có viền sáng */
+html.glass #home-clock-date{ display:flex; align-items:center; gap:7px; }
+html.glass #home-clock-date .gc-wd{
+  display:inline-block; padding:2px 10px; border-radius:999px; font-weight:900; letter-spacing:.03em;
+  color:#fff !important; text-shadow:0 1px 2px rgba(15,40,120,.55);
+  background: linear-gradient(180deg,#60a5fa 0%,#2563eb 60%,#1d4ed8 100%);
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.65), inset 0 -1px 2px rgba(0,0,60,.30), 0 3px 8px rgba(37,99,235,.40);
+}
+html.glass #home-clock-date .gc-dt{
+  font-weight:900; font-variant-numeric:tabular-nums; letter-spacing:.04em; color:#0f172a !important;
+  text-shadow: 0 1px 0 rgba(255,255,255,.95), 0 2px 5px rgba(15,23,42,.22);
+}
+
+/* Âm lịch: nhãn ÂL vàng kim + chữ hổ phách đậm */
+html.glass #home-clock-lunar{ display:flex; align-items:center; gap:7px; margin-top:3px; font-weight:800 !important; }
+html.glass #home-clock-lunar .gc-al{
+  display:inline-block; padding:1px 8px; border-radius:999px; font-weight:900; font-size:.86em; letter-spacing:.04em;
+  color:#fff !important; text-shadow:0 1px 2px rgba(120,53,15,.55);
+  background: linear-gradient(180deg,#fbbf24 0%,#f59e0b 60%,#d97706 100%);
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.65), inset 0 -1px 2px rgba(120,53,15,.30), 0 3px 8px rgba(217,119,6,.38);
+}
+html.glass #home-clock-lunar .gc-ald{
+  color:#b45309 !important; font-weight:900; font-variant-numeric:tabular-nums;
+  text-shadow: 0 1px 0 rgba(255,255,255,.95), 0 2px 5px rgba(180,83,9,.28);
+}
+
+/* ---- Giao diện tối: kính khói + chữ phát sáng ---- */
+html.glass.dark .glass-clock{
+  border-color: rgba(255,255,255,.24) !important;
+  background: linear-gradient(180deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.04) 100%) !important;
+  box-shadow: 0 12px 32px rgba(0,0,0,.50), inset 0 1.5px 0 rgba(255,255,255,.34), inset 0 -3px 10px rgba(0,0,0,.40) !important;
+}
+html.glass.dark .glass-clock::before{ background: linear-gradient(180deg, rgba(255,255,255,.20) 0%, rgba(255,255,255,0) 100%); }
+html.glass.dark .glass-clock:hover{ box-shadow: 0 16px 38px rgba(0,0,0,.58), 0 0 22px rgba(52,211,153,.14), inset 0 1.5px 0 rgba(255,255,255,.40), inset 0 -3px 10px rgba(0,0,0,.40) !important; }
+html.glass.dark .glass-clock .text-left{ border-left-color: rgba(255,255,255,.22); }
+html.glass.dark #home-clock-time{
+  background: linear-gradient(180deg,#a7f3d0 0%,#34d399 55%,#10b981 100%);
+  -webkit-background-clip:text; background-clip:text;
+  filter: drop-shadow(0 0 8px rgba(52,211,153,.60)) drop-shadow(0 2px 3px rgba(0,0,0,.55));
+}
+html.glass.dark #home-clock-date .gc-wd{
+  background: linear-gradient(180deg,#60a5fa 0%,#3b82f6 60%,#2563eb 100%);
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.45), inset 0 -1px 2px rgba(0,0,60,.4), 0 0 14px rgba(96,165,250,.50);
+}
+html.glass.dark #home-clock-date .gc-dt{ color:#f8fafc !important; text-shadow: 0 0 10px rgba(255,255,255,.35), 0 2px 4px rgba(0,0,0,.65); }
+html.glass.dark #home-clock-lunar .gc-al{
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.45), inset 0 -1px 2px rgba(120,53,15,.4), 0 0 14px rgba(251,191,36,.45);
+}
+html.glass.dark #home-clock-lunar .gc-ald{ color:#fcd34d !important; text-shadow: 0 0 10px rgba(251,191,36,.55), 0 2px 4px rgba(0,0,0,.6); }
+
+@media (max-width:768px){
+  html.glass .glass-clock{ border-radius:20px !important; }
+  html.glass .glass-clock .text-left{ padding-left:10px; }
+  html.glass #home-clock-date, html.glass #home-clock-lunar{ gap:5px; }
+  html.glass #home-clock-date .gc-wd{ padding:1px 7px; }
+  html.glass #home-clock-lunar .gc-al{ padding:0 6px; }
+}
+</style>
+
 </head>
 <body class="bg-gray-100 dark:bg-slate-950 flex h-screen transition-colors duration-300">
 <div id="app-connectivity-status" aria-live="polite" style="position:fixed;right:12px;bottom:12px;z-index:99990;display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;font-size:12px;font-weight:800;background:#ecfdf5;color:#166534;border:1px solid #86efac;box-shadow:0 5px 20px rgba(0,0,0,.12);backdrop-filter:blur(8px);">
@@ -2636,7 +2737,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
             </div>
         </div>
-        <div onclick="openFullCalendarModal()" class="shrink-0 cursor-pointer rounded-xl bg-transparent border-0 px-3 py-0.5 md:px-4 md:py-0 transition-all min-w-[300px] md:min-w-[380px]">
+        <div id="home-clock-card" onclick="openFullCalendarModal()" title="Bấm để xem lịch tháng" class="glass-clock shrink-0 cursor-pointer rounded-xl bg-transparent border-0 px-3 py-0.5 md:px-4 md:py-0 transition-all min-w-[300px] md:min-w-[380px]">
             <div class="flex items-center justify-center min-h-[56px] md:min-h-[66px]">
                 <div class="flex items-center justify-center gap-4 md:gap-6 whitespace-nowrap">
                     <h3 id="home-clock-time" class="text-3xl md:text-5xl leading-none font-black text-emerald-600 dark:text-emerald-400">--:--:--</h3>
@@ -2709,7 +2810,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <p id="fullcal-subtitle" class="text-[11px] text-violet-500 dark:text-violet-400">--</p>
                 </div>
                 <button onclick="changeFullCalendarMonth(1)" class="w-8 h-8 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold hover:bg-violet-100 dark:hover:bg-slate-700">›</button>
-                <button onclick="closeFullCalendarModal()" class="ml-2 text-slate-400 hover:text-slate-700 dark:hover:text-white text-2xl leading-none">&times;</button>
+                <button onclick="closeFullCalendarModal()" class="x-close-red ml-2 rounded-lg px-1.5 text-2xl leading-none">&times;</button>
             </div>
             <div class="p-3 md:p-4">
                 <div class="grid grid-cols-7 gap-1 mb-1 text-center text-[11px] font-bold text-slate-400 dark:text-slate-500">
@@ -2800,7 +2901,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-4 md:p-6 text-slate-800 dark:text-slate-200">
             <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">
                 <h3 class="text-lg font-bold text-slate-900 dark:text-white" id="modal-title">Chi tiết phiếu</h3>
-                <button onclick="document.getElementById('order-detail-modal').classList.add('hidden')" class="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white font-bold text-xl">✕</button>
+                <button onclick="document.getElementById('order-detail-modal').classList.add('hidden')" class="x-close-red rounded-lg px-1.5 font-bold text-xl">✕</button>
             </div>
             <div id="modal-content" class="text-sm"></div>
             <div class="mt-6 text-center">
@@ -2815,7 +2916,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
             <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center dark:bg-slate-950/50">
                 <h3 id="modal-detail-title" class="font-black text-slate-900 dark:text-white">Chi tiết</h3>
-                <button onclick="document.getElementById('dashboard-detail-modal').classList.add('hidden')" class="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white text-xl font-bold">✕</button>
+                <button onclick="document.getElementById('dashboard-detail-modal').classList.add('hidden')" class="x-close-red rounded-lg px-1.5 text-xl font-bold">✕</button>
             </div>
             <div id="modal-detail-content" class="p-4 overflow-y-auto text-slate-800 dark:text-slate-200"></div>
         </div>
@@ -2826,7 +2927,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-lg p-6 max-h-[80vh] overflow-hidden flex flex-col text-slate-800 dark:text-slate-200">
             <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
                 <h3 id="modalDateTitle" class="font-black text-slate-900 dark:text-white text-lg">Chi tiết bán hàng</h3>
-                <button onclick="document.getElementById('salesDetailModal').classList.add('hidden')" class="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white text-xl font-bold">✕</button>
+                <button onclick="document.getElementById('salesDetailModal').classList.add('hidden')" class="x-close-red rounded-lg px-1.5 text-xl font-bold">✕</button>
             </div>
             <div class="overflow-y-auto flex-1">
                 <table class="w-full text-sm">
@@ -3052,7 +3153,7 @@ document.addEventListener('DOMContentLoaded', function () {
     <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[85vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-2 border-b dark:border-slate-700 pb-2">
             <h3 class="text-lg font-bold text-gray-800 dark:text-white">Chi tiết phiếu: <span id="modal-receipt-id"></span></h3>
-            <button onclick="document.getElementById('modal-receipt').classList.add('hidden')" class="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white font-bold text-xl">✕</button>
+            <button onclick="document.getElementById('modal-receipt').classList.add('hidden')" class="x-close-red rounded-lg px-1.5 font-bold text-xl">✕</button>
         </div>
         <div id="modal-receipt-datestatus-tag" class="hidden mb-3"></div>
         <table class="w-full border-collapse border border-gray-200 dark:border-slate-700 text-sm">
@@ -3166,7 +3267,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-5xl h-[96vh] md:h-[92vh] flex flex-col overflow-hidden">
             <div data-gb="orange" class="flex items-center justify-between p-3 md:p-4 border-b border-slate-200 dark:border-slate-700 bg-orange-500 dark:bg-orange-700 shrink-0">
                 <h3 id="hdn-modal-title" class="text-white font-bold text-sm md:text-lg flex items-center gap-2">📝 Tạo Hóa Đơn Bán Hàng Nháp</h3>
-                <button onclick="closeHoaDonNhapModal()" class="text-white hover:bg-white/20 rounded-lg p-1.5">
+                <button onclick="closeHoaDonNhapModal()" class="x-close-red hover:bg-red-500/15 rounded-lg p-1.5">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
@@ -3235,7 +3336,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <!-- Header -->
             <div data-gb="indigo" class="flex items-center justify-between p-3 md:p-4 border-b border-slate-200 dark:border-slate-700 bg-indigo-600 dark:bg-indigo-800 shrink-0">
                 <h3 id="bg-modal-title" class="text-white font-bold text-sm md:text-lg flex items-center gap-2">🧾 Tạo Báo Giá</h3>
-                <button onclick="closeBaoGiaModal()" class="text-white hover:bg-white/20 rounded-lg p-1.5">
+                <button onclick="closeBaoGiaModal()" class="x-close-red hover:bg-red-500/15 rounded-lg p-1.5">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
@@ -3296,7 +3397,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-3xl h-[92vh] md:h-[85vh] flex flex-col overflow-hidden">
             <div data-gb="slate" class="flex items-center justify-between p-3 md:p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-700 dark:bg-slate-800 shrink-0">
                 <h3 class="text-white font-bold text-sm md:text-lg flex items-center gap-2">📜 Báo Giá Đã Lưu</h3>
-                <button onclick="closeBaoGiaHistoryModal()" class="text-white hover:bg-white/20 rounded-lg p-1.5">
+                <button onclick="closeBaoGiaHistoryModal()" class="x-close-red hover:bg-red-500/15 rounded-lg p-1.5">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
@@ -3313,7 +3414,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-3xl h-[92vh] md:h-[85vh] flex flex-col overflow-hidden">
             <div data-gb="slate" class="flex items-center justify-between p-3 md:p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-700 dark:bg-slate-800 shrink-0">
                 <h3 class="text-white font-bold text-sm md:text-lg flex items-center gap-2">📜 Hóa Đơn Nháp Đã Lưu</h3>
-                <button onclick="closeHoaDonNhapHistoryModal()" class="text-white hover:bg-white/20 rounded-lg p-1.5"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <button onclick="closeHoaDonNhapHistoryModal()" class="x-close-red hover:bg-red-500/15 rounded-lg p-1.5"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <div class="p-2.5 md:p-4 border-b border-slate-200 dark:border-slate-700 shrink-0">
                 <input type="text" id="hdn-history-search" placeholder="🔍 Tìm theo tên khách hàng hoặc số bản nháp..." onkeyup="filterHoaDonNhapHistory()" class="w-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-xs md:text-sm dark:text-white">
@@ -4538,7 +4639,7 @@ document.addEventListener('DOMContentLoaded', function () {
      gì cả. Đặt độc lập ở đây thì dùng được từ bất kỳ trang nào. -->
 <div id="popup-ncc" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center p-4 z-50">
     <div class="bg-white dark:bg-slate-900 p-6 rounded-lg shadow-xl w-full max-w-sm relative">
-        <button onclick="document.getElementById('popup-ncc').classList.add('hidden')" class="absolute top-3 right-3 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 transition-colors" title="Đóng" aria-label="Đóng">
+        <button onclick="document.getElementById('popup-ncc').classList.add('hidden')" class="x-close-red absolute top-3 right-3 rounded-lg p-0.5" title="Đóng" aria-label="Đóng">
             <i data-lucide="x" class="w-5 h-5"></i>
         </button>
         <h3 id="popup-title" class="font-bold text-lg mb-4 text-center text-slate-800 dark:text-slate-100"></h3>
@@ -11732,6 +11833,15 @@ function addToCart() {
         document.getElementById('imp-name').focus();
     }, 300);
 }
+// Dựng chuỗi cột Ghi chú của báo cáo: "Tên KH (số lượng), Tên KH (số lượng)". Cùng 1 khách thì cộng dồn số lượng.
+function formatGhiChuVendors(events) {
+    const agg = new Map();
+    (events || []).forEach(e => {
+        if (!e || !e.vendor) return;
+        agg.set(e.vendor, (agg.get(e.vendor) || 0) + (Number(e.qty) || 0));
+    });
+    return Array.from(agg.entries()).map(([v, q]) => v + ' (' + cleanQty(q) + ')').join(', ');
+}
 // Lưu phiếu nhập kho vào Firebase
 async function saveImport() {
     if (window.__importSaveInProgress) return;
@@ -11757,8 +11867,8 @@ async function saveImport() {
     }
     const isExpired = (typeValue === 'Nhập đổi' && !isManualReturn && window.__impDateStatus === 'expired');
     const dateStatusValue = isManualReturn ? 'ok' : ((typeValue === 'Nhập đổi') ? window.__impDateStatus : null);
-    // Tên khách chỉ lưu khi là Đổi date / Hoàn trả; Nhập mới thì bỏ qua.
-    const vendorValue = (impTypeUi === 'Nhập mới') ? '' : (document.getElementById('imp-vendor').value || '').trim();
+    // Tên khách được lưu cho MỌI loại nhập (Nhập mới / Đổi date / Hoàn trả) để hiện ở cột Ghi chú báo cáo.
+    const vendorValue = (document.getElementById('imp-vendor').value || '').trim();
     if (btn) {
         btn.disabled = true;
         btn.innerText = 'Đang lưu...';
@@ -11964,16 +12074,8 @@ function toggleImpVendorBox() {
     if (!typeEl || !box)
         return;
     impVendorLoadNames(); // nạp sẵn danh sách KH (dùng chung cache với trang KH & Công Nợ)
-    if (typeEl.value === 'Nhập đổi' || typeEl.value === 'Hoàn trả') {
-        box.classList.add('imp-v-on');
-    }
-    else {
-        box.classList.remove('imp-v-on');
-        const v = document.getElementById('imp-vendor');
-        if (v)
-            v.value = '';
-        impVendorHide();
-    }
+    // Ô Khách hàng giờ hiện cho MỌI loại nhập (kể cả Nhập mới, cả trên điện thoại) và KHÔNG xoá tên đã gõ khi đổi loại.
+    box.classList.add('imp-v-on');
 }
 // ----- Danh sách khách hàng cho ô "Khách hàng" ở Nhập kho -----
 // TRƯỚC ĐÂY dùng <datalist> chỉ được nạp khi từng mở trang Bán hàng / KH & Công Nợ nên vào thẳng
@@ -12107,7 +12209,7 @@ function renderImpDateStatusButtons() {
 // "Nhập đổi" - để biết ngay phiếu đổi date này là của ai mang tới, giống bản mẫu. Phiếu
 // "Nhập mới" thì KHÔNG hiện tên KH (theo đúng yêu cầu, chỉ đổi date mới cần).
 function receiptTypeBadgeHtml(type, dateStatus, vendor, isReturn) {
-    const vendorHtml = ((type === 'Nhập đổi' || isReturn) && vendor)
+    const vendorHtml = (vendor)
         ? "<span class=\"text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate max-w-[140px]\">" + vendor + "</span>" : '';
     let tagHtml;
     if (isReturn) {
@@ -17192,7 +17294,7 @@ async function editInvoiceFromHistory(docId) {
             saleDateObj.getMonth() === now.getMonth() &&
             saleDateObj.getDate() === now.getDate();
         if (!isSameDay) {
-            Swal.fire('Không thể sửa', 'Chỉ có thể sửa phiếu được lập trong ngày hôm nay.', 'warning');
+            Swal.fire('Không thể sửa', 'Chỉ có thể sửa đầy đủ phiếu được lập trong ngày hôm nay. (Admin có thể dùng nút "Sửa thông tin / ghi chú" cho phiếu ngày cũ.)', 'warning');
             return;
         }
         // Bật "chế độ sửa" TRƯỚC khi chuyển trang - để case 'page-sell' trong showPage()
@@ -17253,6 +17355,129 @@ async function editInvoiceFromHistory(docId) {
     catch (e) {
         console.error(e);
         Swal.fire('Lỗi', 'Không tải được phiếu để sửa: ' + e.message, 'error');
+    }
+}
+// ===== ADMIN: SỬA THÔNG TIN / GHI CHÚ CỦA PHIẾU XUẤT NGÀY CŨ =====
+// Phiếu ngày hôm nay vẫn sửa đầy đủ như cũ (editInvoiceFromHistory). Với phiếu của NGÀY TRƯỚC, chỉ
+// tài khoản Admin được mở form này và CHỈ sửa: khách hàng, địa chỉ, SĐT, ghi chú chung, ghi chú từng
+// dòng. KHÔNG đụng tới sản phẩm / số lượng / giá / thuế / hình thức thanh toán => kho, NXT, doanh thu
+// không bị ảnh hưởng. Nếu phiếu là "Công nợ" mà đổi khách thì công nợ được chuyển từ khách cũ sang khách mới.
+async function adminEditPastInvoiceInfo(docId) {
+    const cu = (typeof getCurrentUser === 'function') ? getCurrentUser() : null;
+    if (!cu || cu.role !== 'admin') {
+        Swal.fire('Không có quyền', 'Chỉ tài khoản Admin mới được sửa thông tin phiếu của ngày cũ.', 'warning');
+        return;
+    }
+    try {
+        const saleRef = db.collection('sales').doc(docId);
+        const snap = await saleRef.get();
+        if (!snap.exists) {
+            Swal.fire('Lỗi', 'Không tìm thấy phiếu này.', 'error');
+            return;
+        }
+        const data = snap.data();
+        const items = Array.isArray(data.items) ? data.items : [];
+        const esc = (v) => (typeof escapeHtml === 'function') ? escapeHtml(v == null ? '' : String(v)) : String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        const inputCls = 'w-full p-2 border border-gray-300 rounded-lg text-sm';
+        const isDebt = data.paymentMethod === 'Công nợ';
+        const itemRowsHtml = items.map((it, idx) => (
+            '<tr><td class="p-2 border text-left">' + esc(it.name) + '</td>' +
+            '<td class="p-2 border text-center whitespace-nowrap">' + esc(it.qty) + ' ' + esc(it.unit || '') + '</td>' +
+            '<td class="p-2 border"><input type="text" class="adm-item-note ' + inputCls + '" data-idx="' + idx + '" value="' + esc(it.note || '') + '"></td></tr>'
+        )).join('');
+        const html =
+            '<div class="text-left space-y-2 text-sm">' +
+            '<div class="text-[12px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2">Phiếu của ngày cũ — chỉ sửa được thông tin &amp; ghi chú. Sản phẩm / số lượng / giá / hình thức thanh toán được giữ nguyên.</div>' +
+            '<label class="block text-xs font-bold text-gray-500 uppercase">Khách hàng</label>' +
+            '<input id="adm-customer" type="text" class="' + inputCls + '" value="' + esc(data.customer || '') + '">' +
+            (isDebt ? '<div class="text-[11px] text-red-600">Phiếu này là Công nợ: nếu đổi khách, công nợ sẽ được chuyển từ khách cũ sang khách mới (khách mới phải có sẵn trong danh sách KH &amp; Công Nợ).</div>' : '') +
+            '<div class="grid grid-cols-1 md:grid-cols-2 gap-2"><div><label class="block text-xs font-bold text-gray-500 uppercase">Địa chỉ</label>' +
+            '<input id="adm-address" type="text" class="' + inputCls + '" value="' + esc(data.address || '') + '"></div>' +
+            '<div><label class="block text-xs font-bold text-gray-500 uppercase">Số điện thoại</label>' +
+            '<input id="adm-phone" type="text" class="' + inputCls + '" value="' + esc(data.phone || '') + '"></div></div>' +
+            '<label class="block text-xs font-bold text-gray-500 uppercase">Ghi chú chung</label>' +
+            '<textarea id="adm-note" rows="2" class="' + inputCls + '">' + esc(data.note || '') + '</textarea>' +
+            (items.length ? '<label class="block text-xs font-bold text-gray-500 uppercase">Ghi chú từng sản phẩm</label>' +
+            '<div style="max-height:220px;overflow-y:auto"><table class="w-full text-sm border-collapse"><thead><tr class="bg-gray-100"><th class="p-2 border text-left">Sản phẩm</th><th class="p-2 border">SL</th><th class="p-2 border text-left">Ghi chú</th></tr></thead><tbody>' + itemRowsHtml + '</tbody></table></div>' : '') +
+            '</div>';
+        const res = await Swal.fire({
+            title: 'Sửa thông tin phiếu ' + esc(data.id || docId),
+            html: html,
+            width: '760px',
+            showCancelButton: true,
+            confirmButtonText: 'Lưu thay đổi',
+            cancelButtonText: 'Hủy',
+            focusConfirm: false,
+            preConfirm: () => {
+                const g = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
+                const itemNotes = {};
+                document.querySelectorAll('.adm-item-note').forEach(el => { itemNotes[el.getAttribute('data-idx')] = el.value; });
+                return { customer: g('adm-customer').trim(), address: g('adm-address').trim(), phone: g('adm-phone').trim(), note: g('adm-note'), itemNotes };
+            }
+        });
+        if (!res.isConfirmed || !res.value) return;
+        const v = res.value;
+        const oldCustomer = String(data.customer || '').trim();
+        const customerChanged = v.customer !== oldCustomer;
+        const update = {
+            customer: v.customer,
+            address: v.address,
+            phone: v.phone,
+            note: v.note,
+            lastInfoEditAt: firebase.firestore.FieldValue.serverTimestamp(),
+            lastInfoEditBy: cu.username || ''
+        };
+        // Chỉ ghi lại danh sách dòng khi có ghi chú dòng thay đổi; mọi trường khác của dòng giữ nguyên 100%.
+        let itemsChanged = false;
+        const newItems = items.map((it, idx) => {
+            const nv = (v.itemNotes[idx] != null) ? v.itemNotes[idx] : (it.note || '');
+            if (nv !== (it.note || '')) { itemsChanged = true; return { ...it, note: nv }; }
+            return it;
+        });
+        if (itemsChanged) update.items = newItems;
+        let moveDebt = false, oldCustRef = null, newCustRef = null;
+        const total = parseFloat(data.total) || 0;
+        if (isDebt && customerChanged) {
+            if (!v.customer) throw new Error('Phiếu Công nợ phải có tên khách hàng.');
+            const qNew = await db.collection('customers').where('name', '==', v.customer).limit(1).get();
+            if (qNew.empty) throw new Error('Không tìm thấy khách hàng "' + v.customer + '" để ghi công nợ. Hãy nhập đúng tên khách đã có trong danh sách KH & Công Nợ.');
+            newCustRef = qNew.docs[0].ref;
+            if (oldCustomer) {
+                const qOld = await db.collection('customers').where('name', '==', oldCustomer).limit(1).get();
+                if (qOld.empty) throw new Error('Không tìm thấy khách hàng cũ "' + oldCustomer + '" để hoàn tác công nợ.');
+                oldCustRef = qOld.docs[0].ref;
+            }
+            moveDebt = total > 0;
+        }
+        const batch = db.batch();
+        batch.update(saleRef, update);
+        if (moveDebt) {
+            if (oldCustRef && oldCustRef.path !== newCustRef.path)
+                batch.update(oldCustRef, { debt: firebase.firestore.FieldValue.increment(-total) });
+            if (!oldCustRef || oldCustRef.path !== newCustRef.path)
+                batch.update(newCustRef, { debt: firebase.firestore.FieldValue.increment(total) });
+        }
+        await batch.commit();
+        // Các phiếu Nhập đổi / Hoàn trả liên kết với hóa đơn này lấy tên KH làm "vendor" -> cập nhật theo để báo cáo khớp.
+        if (customerChanged) {
+            try {
+                const linked = await db.collection('receipts').where('fromSaleId', '==', data.id || docId).get();
+                if (!linked.empty) {
+                    const b2 = db.batch();
+                    linked.forEach(r => b2.update(r.ref, { vendor: v.customer || null }));
+                    await b2.commit();
+                }
+            } catch (e) { console.warn('Không cập nhật được tên KH ở phiếu nhập liên kết:', e); }
+        }
+        Swal.fire({ icon: 'success', title: 'Đã cập nhật thông tin phiếu ' + (data.id || docId), toast: true, position: 'top-end', timer: 1800, showConfirmButton: false });
+        if (typeof invalidateSalesSearchCache === 'function') invalidateSalesSearchCache();
+        if (typeof window.requestPostWriteSync === 'function') {
+            window.requestPostWriteSync(['sales', 'customers', 'receipts']).catch(e => console.warn('Đồng bộ nền sau sửa thông tin phiếu:', e));
+        }
+    }
+    catch (e) {
+        console.error(e);
+        Swal.fire('Lỗi', 'Không lưu được thông tin phiếu: ' + e.message, 'error');
     }
 }
 // Thoát chế độ sửa phiếu (do bấm "Hủy sửa", hoặc sau khi lưu cập nhật thành công)
@@ -19251,8 +19476,10 @@ async function viewInvoiceDetails(docId) {
             saleDateObj.getFullYear() === now.getFullYear() &&
             saleDateObj.getMonth() === now.getMonth() &&
             saleDateObj.getDate() === now.getDate();
+        const _curUserForEdit = (typeof getCurrentUser === 'function') ? getCurrentUser() : null;
+        const isAdminUser = !!(_curUserForEdit && _curUserForEdit.role === 'admin');
         const editButtonHtml = isSameDay
-            ? "<button onclick=\"Swal.close(); editInvoiceFromHistory('" + docId + "')\" class=\"bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5 mt-2 w-full\">\u270F\uFE0F S\u1EEDa phi\u1EBFu n\u00E0y</button>" : "<p class=\"text-center text-[11px] text-slate-400 dark:text-slate-500 italic mt-2\">Ch\u1EC9 c\u00F3 th\u1EC3 s\u1EEDa phi\u1EBFu \u0111\u01B0\u1EE3c l\u1EADp trong ng\u00E0y h\u00F4m nay</p>";
+            ? "<button onclick=\"Swal.close(); editInvoiceFromHistory('" + docId + "')\" class=\"bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5 mt-2 w-full\">\u270F\uFE0F S\u1EEDa phi\u1EBFu n\u00E0y</button>" : (isAdminUser ? "<button onclick=\"Swal.close(); adminEditPastInvoiceInfo('" + docId + "')\" class=\"bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5 mt-2 w-full\">✏️ Sửa thông tin / ghi chú (Admin)</button><p class=\"text-center text-[11px] text-slate-400 dark:text-slate-500 italic mt-1\">Phiếu của ngày cũ: Admin chỉ sửa được thông tin &amp; ghi chú, không sửa được sản phẩm / số lượng</p>" : "<p class=\"text-center text-[11px] text-slate-400 dark:text-slate-500 italic mt-2\">Ch\u1EC9 c\u00F3 th\u1EC3 s\u1EEDa phi\u1EBFu \u0111\u01B0\u1EE3c l\u1EADp trong ng\u00E0y h\u00F4m nay</p>");
         Swal.fire({
             title: "Chi ti\u1EBFt phi\u1EBFu: " + (data.id || docId) + "" + (data.hasReturns ? ' ↩️' : '') + "", // Dùng data.id theo tên field trong ảnh
             html: "\n                " + returnsHtml + "\n                <div class=\"text-left mb-4\">\n                    <p><b>Kh\u00E1ch h\u00E0ng:</b> " + customerName + "</p>\n                    <p><b>Ng\u00E0y xu\u1EA5t:</b> " + dateStr + "</p>\n                    <p><b>T\u1ED5ng c\u1ED9ng:</b> " + Number(total).toLocaleString() + " VN\u0110</p>\n                </div>\n                " + itemsHtml + "\n                <div class=\"grid grid-cols-2 gap-2 mt-4\">\n                    <button onclick=\"Swal.close(); reprintSale('" + docId + "')\" class=\"bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5\">\uD83D\uDDA8\uFE0F In l\u1EA1i</button>\n                    <button onclick=\"Swal.close(); shareSaleZalo('" + docId + "')\" class=\"bg-sky-500 hover:bg-sky-600 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5\">\uD83D\uDCAC Chia s\u1EBB Zalo</button>\n                </div>\n                " + editButtonHtml + "\n                <div class=\"grid grid-cols-2 gap-2 mt-2\">\n                    <button onclick=\"Swal.close(); openReturnModal('" + docId + "')\" class=\"bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5\">\u21A9\uFE0F Tr\u1EA3 h\u00E0ng</button>\n                    <button onclick=\"Swal.close(); deleteSale('" + docId + "')\" class=\"bg-red-600 hover:bg-red-700 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5\">\uD83D\uDDD1\uFE0F X\u00F3a phi\u1EBFu n\u00E0y</button>\n                </div>\n                <button onclick=\"Swal.close()\" class=\"bg-slate-600 hover:bg-slate-700 text-white py-2 rounded-xl text-sm font-bold w-full mt-2\">\u0110\u00F3ng</button>\n            ",
@@ -22600,8 +22827,14 @@ async function viewInventoryReport() {
                     }
                 }
                 else {
-                    if (wasAddedToStock)
+                    if (wasAddedToStock) {
                         inv.nhapMoi += qty;
+                        // Phiếu Nhập mới có ghi tên KH -> hiện vào cột Ghi chú.
+                        if (data.vendor) {
+                            inv.nhapDoiVendors.add(data.vendor);
+                            inv.ghiChuEvents.push({ vendor: String(data.vendor), qty: qty, type: 'nhập mới' });
+                        }
+                    }
                 }
             });
         });
@@ -22647,20 +22880,7 @@ async function viewInventoryReport() {
         const rawRows = [];
         let stt = 0;
         let anyGhiChu = false;
-        const makeGhiChu = (item) => {
-            const ev = item.ghiChuEvents || [];
-            if (!ev.length) return '';
-            const agg = new Map();
-            ev.forEach(e => {
-                const key = e.vendor + '|' + e.type;
-                agg.set(key, (agg.get(key) || 0) + (Number(e.qty) || 0));
-            });
-            const text = Array.from(agg.entries()).map(([key, q]) => {
-                const parts = key.split('|');
-                return parts[0] + ' ' + parts[1] + ' (' + cleanQty(q) + ')';
-            }).join('; ');
-            return text;
-        };
+        const makeGhiChu = (item) => formatGhiChuVendors(item.ghiChuEvents);
         sortedNames.forEach((name) => {
             const item = inventory[name];
             const currentStock = currentStockMap[name] || 0;
@@ -22758,8 +22978,14 @@ async function exportInventory() {
                     }
                 }
                 else {
-                    if (wasAddedToStock)
+                    if (wasAddedToStock) {
                         inv.nhapMoi += qty;
+                        // Phiếu Nhập mới có ghi tên KH -> hiện vào cột Ghi chú.
+                        if (data.vendor) {
+                            inv.nhapDoiVendors.add(data.vendor);
+                            inv.ghiChuEvents.push({ vendor: String(data.vendor), qty: qty, type: 'nhập mới' });
+                        }
+                    }
                 }
             });
         });
@@ -22866,7 +23092,7 @@ async function exportInventory() {
             });
             danhSach.forEach(({ name, tonDau, item, tonCuoi }) => {
                 stt += 1;
-                const ghiChu = (item.ghiChuEvents || []).length ? Array.from((() => { const m = new Map(); (item.ghiChuEvents || []).forEach(e => { const k = e.vendor + '|' + e.type; m.set(k, (m.get(k) || 0) + (Number(e.qty) || 0)); }); return m; })().entries()).map(([k,q]) => { const a=k.split('|'); return a[0] + ' ' + a[1] + ' (' + cleanQty(q) + ')'; }).join('; ') : '';
+                const ghiChu = formatGhiChuVendors(item.ghiChuEvents);
                 const rowValues = [stt, name, getProductUnit(name), cleanQty(tonDau), cleanQty(item.nhapMoi), cleanQty(item.nhapDoi), cleanQty(item.xuat), cleanQty(tonCuoi)];
                 if (anyGhiChu)
                     rowValues.push(ghiChu);
@@ -23208,7 +23434,7 @@ async function exportFullReport() {
         let orderList = []; // Mảng này sẽ lưu tên sản phẩm theo thứ tự xuất hiện lần đầu
         const initItem = (name) => {
             if (!inventory[name]) {
-                inventory[name] = { tonDau: 0, nhapMoi: 0, nhapDoi: 0, xuat: 0, nhapDoiVendors: new Set() };
+                inventory[name] = { tonDau: 0, nhapMoi: 0, nhapDoi: 0, xuat: 0, nhapDoiVendors: new Set(), ghiChuEvents: [] };
                 orderList.push(name); // Lưu lại tên sản phẩm ngay khi nó xuất hiện lần đầu
             }
         };
@@ -23243,13 +23469,20 @@ async function exportFullReport() {
                 else if (dDateStr >= fromVal && dDateStr <= toVal) {
                     if (d.type === 'Nhập mới') {
                         inventory[i.name].nhapMoi += qty;
+                        // Phiếu Nhập mới có ghi tên KH -> hiện vào cột Ghi chú.
+                        if (d.vendor) {
+                            inventory[i.name].nhapDoiVendors.add(d.vendor);
+                            inventory[i.name].ghiChuEvents.push({ vendor: String(d.vendor), qty: qty });
+                        }
                     }
                     else {
                         inventory[i.name].nhapDoi += qty;
                         // Ghi lại tên KH/đại lý mang hàng đổi date/hoàn trả tới - hiện vào cột
                         // "Ghi chú" (chỉ hiện cột này khi có ít nhất 1 dòng như vậy).
-                        if (d.vendor)
+                        if (d.vendor) {
                             inventory[i.name].nhapDoiVendors.add(d.vendor);
+                            inventory[i.name].ghiChuEvents.push({ vendor: String(d.vendor), qty: qty });
+                        }
                     }
                 }
             });
@@ -23556,7 +23789,7 @@ async function exportFullReport() {
             danhSach.forEach(({ name, item, tonCuoi }, viTri) => {
                 // Ghi chú = tên KH đổi date / hoàn trả của sản phẩm này - GIỐNG HỆT bản xem/in.
                 // (Trước đây đọc từ item.ghiChuEvents nhưng hàm này chỉ nạp nhapDoiVendors nên Excel luôn trống.)
-                const ghiChu = (item.nhapDoiVendors && item.nhapDoiVendors.size) ? Array.from(item.nhapDoiVendors).join(', ') : '';
+                const ghiChu = formatGhiChuVendors(item.ghiChuEvents);
                 const rowValues = [
                     formatDateToDDMMYYYY(toVal),
                     name,
@@ -23733,7 +23966,7 @@ async function viewFullReport() {
         let orderList = [];
         const initItem = (name) => {
             if (!inventory[name]) {
-                inventory[name] = { tonDau: 0, nhapMoi: 0, nhapDoi: 0, xuat: 0, nhapDoiVendors: new Set() };
+                inventory[name] = { tonDau: 0, nhapMoi: 0, nhapDoi: 0, xuat: 0, nhapDoiVendors: new Set(), ghiChuEvents: [] };
                 orderList.push(name);
             }
         };
@@ -23767,13 +24000,20 @@ async function viewFullReport() {
                 else if (dDateStr >= fromVal && dDateStr <= toVal) {
                     if (d.type === 'Nhập mới') {
                         inventory[i.name].nhapMoi += qty;
+                        // Phiếu Nhập mới có ghi tên KH -> hiện vào cột Ghi chú.
+                        if (d.vendor) {
+                            inventory[i.name].nhapDoiVendors.add(d.vendor);
+                            inventory[i.name].ghiChuEvents.push({ vendor: String(d.vendor), qty: qty });
+                        }
                     }
                     else {
                         inventory[i.name].nhapDoi += qty;
                         // Ghi lại tên KH/đại lý mang hàng đổi date/hoàn trả tới - để hiện vào
                         // cột "Ghi chú" (chỉ hiện cột này khi có ít nhất 1 dòng như vậy).
-                        if (d.vendor)
+                        if (d.vendor) {
                             inventory[i.name].nhapDoiVendors.add(d.vendor);
+                            inventory[i.name].ghiChuEvents.push({ vendor: String(d.vendor), qty: qty });
+                        }
                     }
                 }
             });
@@ -23955,7 +24195,7 @@ async function viewFullReport() {
                 return;
             nxtRowsHtml += "<tr><td colspan=\"" + nxtColCount + "\" style=\"" + td + "background:#fff9c4;font-weight:bold;\">" + tenNhom + "</td></tr>";
             danhSach.forEach(({ name, item, tonCuoi }) => {
-                const ghiChuCell = "<td style=\"" + tdWrap + "\">" + (item.nhapDoiVendors && item.nhapDoiVendors.size ? Array.from(item.nhapDoiVendors).join(', ') : '') + "</td>";
+                const ghiChuCell = "<td style=\"" + tdWrap + "\">" + formatGhiChuVendors(item.ghiChuEvents) + "</td>";
                 nxtRowsHtml += "<tr><td style=\"" + td + "text-align:center;white-space:nowrap;\">" + formatDateToDDMMYYYY(toVal) + "</td><td style=\"" + tdWrap + "\">" + name + "</td><td style=\"" + td + "text-align:center;\">" + getProductUnit(name) + "</td><td style=\"" + td + "text-align:center;font-weight:800;\">" + formatVal(item.tonDau) + "</td><td style=\"" + td + "text-align:center;font-weight:800;\">" + formatVal(item.nhapMoi) + "</td><td style=\"" + td + "text-align:center;font-weight:800;\">" + formatVal(item.nhapDoi) + "</td><td style=\"" + td + "text-align:center;font-weight:800;\">" + formatVal(item.xuat) + "</td><td style=\"" + td + "text-align:center;font-weight:800;\">" + formatVal(tonCuoi) + "</td>" + ghiChuCell + "</tr>";
             });
         });
@@ -28384,8 +28624,14 @@ function updateHomeClock() {
     const timeFmt = new Intl.DateTimeFormat('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'Asia/Ho_Chi_Minh' });
     let weekday = weekdayFmt.format(now);
     weekday = weekday.charAt(0).toUpperCase() + weekday.slice(1); // "thứ ba" -> "Thứ ba"
-    dateEl.innerText = weekday + ', ' + dateFmt.format(now);
-    timeEl.innerText = timeFmt.format(now);
+    // Thứ / ngày dựng thành các <span> riêng để tô kiểu kính nổi (chip thứ + ngày đậm); giây hiện nhỏ hơn giờ:phút.
+    dateEl.innerHTML = '<span class="gc-wd">' + weekday + '</span><span class="gc-dt">' + dateFmt.format(now) + '</span>';
+    const timeStr = timeFmt.format(now);
+    const tm = timeStr.match(/^(\d{1,2}:\d{2})(:\d{2})$/);
+    if (tm)
+        timeEl.innerHTML = tm[1] + '<span class="gc-sec">' + tm[2] + '</span>';
+    else
+        timeEl.innerText = timeStr;
     if (lunarEl) {
         // Lấy đúng ngày/tháng/năm theo giờ Việt Nam (không dùng getDate/getMonth của trình
         // duyệt vì có thể lệch múi giờ máy) để đưa vào thuật toán chuyển đổi.
@@ -28394,7 +28640,7 @@ function updateHomeClock() {
         const mm = parseInt(parts.find(p => p.type === 'month').value, 10);
         const yy = parseInt(parts.find(p => p.type === 'year').value, 10);
         const [lD, lM, lY, lLeap] = convertSolar2Lunar(dd, mm, yy, 7);
-        lunarEl.innerText = 'ÂL: ' + lD + '/' + lM + (lLeap ? ' (nhuận)' : '') + ' - ' + getCanChiYear(lY);
+        lunarEl.innerHTML = '<span class="gc-al">ÂL</span><span class="gc-ald">' + lD + '/' + lM + (lLeap ? ' (nhuận)' : '') + ' - ' + getCanChiYear(lY) + '</span>';
     }
 }
 updateHomeClock();
