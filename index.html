@@ -2393,6 +2393,262 @@ html.glass.dark #home-clock-lunar .gc-ald{ color:#fcd34d !important; text-shadow
   html.glass #home-clock-lunar .gc-al{ padding:0 6px; }
 }
 </style>
+<style id="glass-product-card-css">
+/* ===== THẺ SẢN PHẨM TRANG BÁN HÀNG - KÍNH LỎNG NỔI KHỐI =====
+   Bóng nhiều lớp (tiếp xúc + môi trường + quầng màu nhóm), vệt phản chiếu cong nửa trên,
+   viền sáng, ánh lướt qua khi rê chuột, nhấn xuống khi bấm. Màu theo nhóm lấy từ biến --g. */
+html.glass #product-grid{ padding: 10px 12px 24px !important; border-radius: 18px; }
+/* Vùng lưới trong suốt: lộ đúng màu nền trang (không dùng khay riêng) */
+html.glass #product-grid{ background: transparent !important; box-shadow: none !important; }
+
+html.glass:not(.dark) body div[id^="product-card-"]{
+  border: 1.5px solid rgba(var(--g),.55) !important;
+  background:
+    radial-gradient(130% 120% at 0% 0%, rgba(var(--g),.34), transparent 58%),
+    radial-gradient(90% 80% at 100% 100%, rgba(var(--g),.16), transparent 62%),
+    linear-gradient(165deg, rgba(255,255,255,.88) 0%, rgba(255,255,255,.46) 100%) !important;
+  box-shadow:
+    0 1px 1px rgba(20,30,80,.28),
+    0 4px 8px rgba(20,30,80,.22),
+    0 12px 20px -4px rgba(var(--g),.38),
+    0 0 0 1px rgba(255,255,255,.80),
+    inset 0 2px 0 rgba(255,255,255,1),
+    inset 0 -14px 22px rgba(var(--g),.16),
+    inset 0 0 0 1px rgba(255,255,255,.50) !important;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease !important;
+}
+html.glass:not(.dark) body div[id^="product-card-"]:hover{
+  border-color: rgba(var(--g),.90) !important;
+  box-shadow:
+    0 2px 2px rgba(20,30,80,.32),
+    0 8px 14px rgba(20,30,80,.28),
+    0 18px 28px -4px rgba(var(--g),.50),
+    0 0 0 1px rgba(255,255,255,.90),
+    inset 0 2px 0 rgba(255,255,255,1),
+    inset 0 -14px 24px rgba(var(--g),.20),
+    inset 0 0 0 1px rgba(255,255,255,.60) !important;
+}
+html.glass:not(.dark) body div[id^="product-card-"]:active{
+  box-shadow: 0 1px 2px rgba(var(--g),.30), 0 0 0 1px rgba(255,255,255,.80), inset 0 3px 8px rgba(var(--g),.22), inset 0 -4px 10px rgba(var(--g),.10) !important;
+}
+
+/* Vệt phản chiếu cong ở nửa trên thẻ */
+html.glass div[id^="product-card-"]::before{
+  content:""; position:absolute; left:1px; right:1px; top:1px; height:50%; pointer-events:none;
+  border-radius: 16px 16px 60% 60% / 16px 16px 26px 26px;
+  background: linear-gradient(180deg, rgba(255,255,255,.72) 0%, rgba(255,255,255,.18) 70%, rgba(255,255,255,0) 100%);
+}
+/* Ánh lướt (liquid sheen) khi rê chuột */
+html.glass div[id^="product-card-"]::after{
+  content:""; position:absolute; top:-10%; bottom:-10%; left:-45%; width:36%; pointer-events:none; opacity:0;
+  background: linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.55) 50%, rgba(255,255,255,0) 100%);
+  transform: skewX(-18deg) translateX(0);
+  transition: transform .7s ease, opacity .25s ease;
+}
+html.glass div[id^="product-card-"]:hover::after{ opacity:1; transform: skewX(-18deg) translateX(520%); }
+
+/* Chữ tên sản phẩm nổi nhẹ (như in nổi trên kính) */
+html.glass:not(.dark) div[id^="product-card-"] p{ text-shadow: 0 1px 0 rgba(255,255,255,.85); }
+html.glass.dark div[id^="product-card-"] p{ text-shadow: 0 1px 3px rgba(0,0,0,.55); }
+
+/* Giao diện tối: kính khói + quầng sáng màu nhóm + viền sáng */
+html.glass.dark body div[id^="product-card-"]{
+  border: 1px solid rgba(255,255,255,.20) !important;
+  background:
+    radial-gradient(130% 120% at 0% 0%, rgba(var(--g),.42), transparent 58%),
+    radial-gradient(90% 80% at 100% 100%, rgba(var(--g),.18), transparent 62%),
+    linear-gradient(165deg, rgba(255,255,255,.15) 0%, rgba(255,255,255,.04) 100%) !important;
+  box-shadow:
+    0 1px 1px rgba(0,0,0,.50),
+    0 8px 16px rgba(0,0,0,.45),
+    0 0 16px rgba(var(--g),.20),
+    inset 0 1.5px 0 rgba(255,255,255,.36),
+    inset 0 -12px 20px rgba(var(--g),.20),
+    inset 0 0 0 1px rgba(255,255,255,.05) !important;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease !important;
+}
+html.glass.dark body div[id^="product-card-"]:hover{
+  border-color: rgba(255,255,255,.34) !important;
+  box-shadow:
+    0 2px 2px rgba(0,0,0,.55),
+    0 14px 26px rgba(0,0,0,.55),
+    0 0 26px rgba(var(--g),.38),
+    inset 0 1.5px 0 rgba(255,255,255,.46),
+    inset 0 -12px 22px rgba(var(--g),.26),
+    inset 0 0 0 1px rgba(255,255,255,.08) !important;
+}
+html.glass.dark body div[id^="product-card-"]:active{
+  box-shadow: 0 1px 2px rgba(0,0,0,.6), 0 0 12px rgba(var(--g),.25), inset 0 3px 8px rgba(0,0,0,.45), inset 0 -4px 10px rgba(var(--g),.14) !important;
+}
+html.glass.dark div[id^="product-card-"]::before{ background: linear-gradient(180deg, rgba(255,255,255,.22) 0%, rgba(255,255,255,.05) 70%, rgba(255,255,255,0) 100%); }
+html.glass.dark div[id^="product-card-"]::after{ background: linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.28) 50%, rgba(255,255,255,0) 100%); }
+
+/* Thẻ HẾT HÀNG: phẳng, không nổi (đang bị khoá bấm) */
+html.glass body div[id^="product-card-"][class~="opacity-70"]{
+  box-shadow: 0 2px 5px rgba(15,23,42,.10), inset 0 1px 0 rgba(255,255,255,.7) !important;
+}
+html.glass div[id^="product-card-"][class~="opacity-70"]::before, html.glass div[id^="product-card-"][class~="opacity-70"]::after{ display:none; }
+
+@media (max-width: 767px){
+  html.glass #product-grid{ padding: 6px 6px 16px !important; }
+  html.glass div[id^="product-card-"]::before{ border-radius: 12px 12px 55% 55% / 12px 12px 14px 14px; }
+}
+@media (prefers-reduced-motion: reduce){
+  html.glass div[id^="product-card-"]::after{ display:none; }
+}
+</style>
+<style id="glass-sell-page-css">
+/* ===== TRANG BÁN HÀNG: khung trong suốt cùng màu nền trang + GIỎ HÀNG kính nổi ===== */
+
+/* Các khung (danh sách SP, đơn chờ, khách hàng, giỏ hàng, thanh toán): nền gần như trong suốt = cùng màu nền xung quanh,
+   chỉ giữ viền mảnh + bóng nhẹ để nhận ra ranh giới. */
+html.glass:not(.dark) :is(#sell-panel-products, #sell-panel-held, #sell-panel-customer, #sell-cart-container, #sell-panel-pay){
+  background: rgba(255,255,255,.10) !important;
+  background-image: none !important;
+  box-shadow: 0 8px 22px rgba(50,70,160,.10), inset 0 1.5px 0 rgba(255,255,255,.95) !important;
+}
+
+/* ---- Giỏ hàng: bảng tách dòng, mỗi dòng là một dải kính nổi ---- */
+html.glass #sell-cart-container table{ border-collapse: separate !important; border-spacing: 0 7px; }
+html.glass #sell-cart-container thead{ background: transparent !important; border: 0 !important; }
+html.glass:not(.dark) #sell-cart-container thead th{
+  background: linear-gradient(180deg, rgba(255,255,255,.96) 0%, rgba(226,233,248,.94) 100%) !important;
+  color: #334155 !important; font-weight: 800; border: 0 !important; padding: 8px 6px !important;
+  box-shadow: 0 3px 8px rgba(50,70,160,.14), inset 0 1.5px 0 #fff !important;
+}
+html.glass.dark #sell-cart-container thead th{
+  background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06)) !important;
+  color: #e2e8f0 !important; font-weight: 800; border: 0 !important; padding: 8px 6px !important;
+  box-shadow: 0 3px 8px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.22) !important;
+}
+html.glass #sell-cart-container thead th:first-child{ border-radius: 12px 0 0 12px; }
+html.glass #sell-cart-container thead th:last-child{ border-radius: 0 12px 12px 0; }
+
+html.glass #sell-cart-body tr{
+  background: transparent !important; border: 0 !important; box-shadow: none !important;
+  --rc: 96,165,250;
+}
+html.glass #sell-cart-body tr[class~="border-emerald-400"]{ --rc: 52,211,153; }
+html.glass #sell-cart-body tr[class~="border-amber-400"]{ --rc: 251,191,36; }
+html.glass #sell-cart-body tr[class~="border-rose-400"]{ --rc: 251,113,133; }
+html.glass #sell-cart-body tr[class~="border-violet-400"]{ --rc: 167,139,250; }
+html.glass #sell-cart-body tr[class~="border-cyan-400"]{ --rc: 34,211,238; }
+
+html.glass:not(.dark) #sell-cart-body tr td{
+  border: 0 !important; padding-top: 7px; padding-bottom: 7px;
+  background: linear-gradient(180deg, rgba(255,255,255,.95) 0%, rgba(255,255,255,.68) 100%) !important;
+  box-shadow: 0 5px 9px -4px rgba(20,30,80,.22), inset 0 1.5px 0 #fff, inset 0 -7px 10px -5px rgba(var(--rc),.18) !important;
+  transition: background .15s, box-shadow .15s;
+}
+html.glass #sell-cart-body tr td:first-child{ border-radius: 14px 0 0 14px; border-left: 4px solid rgb(var(--rc)) !important; }
+html.glass #sell-cart-body tr td:last-child{ border-radius: 0 14px 14px 0; }
+html.glass #sell-cart-body tr td[colspan]{ border-radius: 14px; border-left: 0 !important; }
+html.glass:not(.dark) #sell-cart-body tr:hover td{
+  background: linear-gradient(180deg, #fff 0%, rgba(255,255,255,.86) 100%) !important;
+  box-shadow: 0 8px 13px -4px rgba(20,30,80,.30), inset 0 1.5px 0 #fff, inset 0 -7px 10px -5px rgba(var(--rc),.24) !important;
+}
+/* dòng đặc biệt: Đổi date (vàng), hết hạn (đỏ), ship (xanh lơ) */
+html.glass:not(.dark) #sell-cart-body tr[class~="bg-amber-50"] td{ background: linear-gradient(180deg, rgba(254,243,199,.98), rgba(254,243,199,.74)) !important; }
+html.glass:not(.dark) #sell-cart-body tr[class~="bg-red-50"] td{ background: linear-gradient(180deg, rgba(254,226,226,.98), rgba(254,226,226,.74)) !important; }
+html.glass:not(.dark) #sell-cart-body tr[class~="bg-sky-50"] td{ background: linear-gradient(180deg, rgba(224,242,254,.98), rgba(224,242,254,.74)) !important; }
+
+/* Giao diện tối */
+html.glass.dark #sell-cart-body tr td{
+  border: 0 !important; padding-top: 7px; padding-bottom: 7px;
+  background: linear-gradient(180deg, rgba(255,255,255,.13) 0%, rgba(255,255,255,.04) 100%) !important;
+  box-shadow: 0 5px 10px -4px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.22), inset 0 -7px 10px -5px rgba(var(--rc),.26) !important;
+}
+html.glass.dark #sell-cart-body tr:hover td{
+  background: linear-gradient(180deg, rgba(59,130,246,.34), rgba(59,130,246,.16)) !important; color: #fff !important;
+}
+html.glass.dark #sell-cart-body tr[class~="bg-amber-50"] td, html.glass.dark #sell-cart-body tr[class~="bg-amber-500/10"] td{ background: linear-gradient(180deg, rgba(245,158,11,.30), rgba(245,158,11,.12)) !important; }
+</style>
+<style id="glass-list-pages-css">
+/* ===== CÁC TRANG DANH SÁCH (Nhập kho, Kho hàng, KH & Công nợ, Danh mục SP, Lịch sử HĐ) =====
+   Khung chứa danh sách trong suốt = cùng màu nền trang; mỗi phiếu/dòng là một THẺ KÍNH NỔI KHỐI. */
+
+/* 1) Khung (bg-white + bo 2xl) có chứa thẻ dòng -> nền gần như trong suốt, giữ viền mảnh + bóng nhẹ */
+html.glass:not(.dark) :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu)
+  div[class~="bg-white"]:is([class*="rounded-xl"], [class*="rounded-2xl"]):has(div[class~="border-l-4"][class~="border-r-4"]){
+  background-color: rgba(255,255,255,.10) !important;
+  box-shadow: 0 8px 22px rgba(50,70,160,.10), inset 0 1.5px 0 rgba(255,255,255,.95) !important;
+}
+
+/* 2) Hàng tiêu đề cố định của bảng: đậm hơn để không lộ các thẻ cuộn bên dưới */
+html.glass:not(.dark) :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu) thead[class~="sticky"]{
+  background-color: rgba(233,238,248,.97) !important;
+  box-shadow: 0 5px 10px -5px rgba(50,70,160,.25) !important;
+}
+
+/* 2b) Bỏ đường kẻ ngang giữa các dòng (divide-y): mỗi dòng đã là một thẻ nổi riêng */
+html.glass body :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu) tbody[class*="divide-"] > tr{
+  border-top-width: 0 !important; border-bottom-width: 0 !important;
+}
+
+/* 3) Thẻ dòng: bóng nhiều lớp + mặt kính bóng. Giữ nguyên màu viền trái/phải (inline) và màu nền cảnh báo (đỏ/vàng...). */
+html.glass:not(.dark) body :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu)
+  div[class~="border-l-4"][class~="border-r-4"][class*="rounded"]{
+  box-shadow:
+    0 1px 1px rgba(20,30,80,.22),
+    0 5px 10px -2px rgba(20,30,80,.15),
+    0 14px 22px -8px rgba(50,70,160,.26),
+    inset 0 2px 0 #fff,
+    inset 0 -9px 14px -7px rgba(70,90,170,.12) !important;
+  border-top-color: rgba(255,255,255,.95) !important;
+  border-bottom-color: rgba(120,135,190,.22) !important;
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease !important;
+}
+html.glass:not(.dark) body :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu)
+  div[class~="border-l-4"][class~="border-r-4"][class~="bg-white"][class*="rounded"]{
+  background-color: transparent !important;
+  background-image: linear-gradient(180deg, rgba(255,255,255,.98) 0%, rgba(255,255,255,.84) 50%, rgba(255,255,255,.70) 100%) !important;
+}
+html.glass:not(.dark) body :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu)
+  div[class~="border-l-4"][class~="border-r-4"][class*="rounded"]:hover{
+  box-shadow:
+    0 2px 2px rgba(20,30,80,.26),
+    0 9px 15px -3px rgba(20,30,80,.20),
+    0 20px 30px -8px rgba(50,70,160,.36),
+    inset 0 2px 0 #fff,
+    inset 0 -9px 14px -7px rgba(70,90,170,.18) !important;
+}
+html.glass:not(.dark) body :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu)
+  div[class~="border-l-4"][class~="border-r-4"][class*="rounded"]:active{
+  box-shadow: 0 1px 2px rgba(20,30,80,.30), inset 0 3px 8px rgba(50,70,160,.20) !important;
+}
+
+/* Giao diện tối */
+html.glass.dark body :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu)
+  div[class~="border-l-4"][class~="border-r-4"][class*="rounded"]{
+  box-shadow:
+    0 1px 1px rgba(0,0,0,.55),
+    0 7px 14px -3px rgba(0,0,0,.55),
+    inset 0 1.5px 0 rgba(255,255,255,.22),
+    inset 0 -9px 14px -7px rgba(120,140,255,.16) !important;
+  transition: transform .18s ease, box-shadow .18s ease !important;
+}
+html.glass.dark body :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu)
+  div[class~="border-l-4"][class~="border-r-4"][class*="rounded"]:hover{
+  box-shadow:
+    0 2px 2px rgba(0,0,0,.6),
+    0 12px 22px -4px rgba(0,0,0,.6),
+    0 0 18px rgba(96,165,250,.16),
+    inset 0 1.5px 0 rgba(255,255,255,.30),
+    inset 0 -9px 14px -7px rgba(120,140,255,.22) !important;
+}
+
+/* ---- Thẻ PN (Nhập kho - Danh sách phiếu nhập): thấp còn khoảng 2/3 ---- */
+html.glass #list-receipts-left > tr > td{ padding: 4px 8px !important; }
+html.glass #list-receipts-left div[class~="border-l-4"][class~="border-r-4"]{ padding-top: 7px !important; padding-bottom: 7px !important; }
+html.glass #list-receipts-left button{ padding: 3px 10px !important; min-height: 0 !important; line-height: 1.25 !important; font-size: 10.5px !important; }
+@media (min-width: 768px){
+  /* nhãn loại nhập + tên KH nằm cùng 1 hàng thay vì xếp chồng 2 tầng (làm thẻ cao lên) */
+  html.glass #list-receipts-left div[class*="md:w-[40%]"]{ flex-direction: row !important; flex-wrap: wrap; align-items: center; gap: 3px 6px !important; }
+}
+</style>
+
+
+
 
 </head>
 <body class="bg-gray-100 dark:bg-slate-950 flex h-screen transition-colors duration-300">
@@ -3053,7 +3309,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             <div id="firestore-read-status-import-inline" class="hidden mt-1 rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 px-2 py-1.5 text-[10px] md:text-xs font-bold text-amber-800 dark:text-amber-200">Chưa đồng bộ do hết read</div>
                         </div>
                         <!-- Khách hàng: PC luôn hiện (2/3 hàng); điện thoại chỉ hiện khi chọn Đổi date / Hoàn trả -->
-                        <div id="imp-vendor-box" class="md:col-span-2 relative" style="z-index:100000;">
+                        <div id="imp-vendor-box" class="md:col-span-2 relative" style="z-index:40;">
                             <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Khách hàng (Chọn hoặc nhập)</label>
                             <input type="text" id="imp-vendor" autocomplete="off" class="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-950 text-gray-800 dark:text-white" placeholder="Bấm để chọn khách hàng hoặc gõ tên..." onfocus="impVendorFilter(this.value)" onblur="impVendorHide()" onclick="impVendorFilter(this.value)" oninput="impVendorFilter(this.value)" onkeydown="if(event.key==='Enter'){impVendorHide();} handleEnter(event, 'imp-name')">
                             <div id="imp-vendor-dropdown" class="hidden absolute left-0 right-0 mt-1 max-h-60 overflow-y-auto bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl shadow-lg" style="z-index:2147483000;"></div>
@@ -3454,7 +3710,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
    <div class="flex flex-col lg:flex-row gap-4 w-full">
    <div class="lg:w-1/2 w-full space-y-4 h-auto md:h-[850px]">
-    <div class="bg-white dark:bg-slate-900 p-2 md:p-4 rounded-2xl border-4 border-red-500 shadow-sm h-full">
+    <div id="sell-panel-products" class="bg-white dark:bg-slate-900 p-2 md:p-4 rounded-2xl border-4 border-red-500 shadow-sm h-full">
             
             <div class="flex gap-2 mb-4">
                 <div class="flex-1 bg-yellow-50 dark:bg-slate-950 p-2 rounded-xl border border-yellow-200 dark:border-slate-700 flex items-center gap-1">
@@ -3514,11 +3770,11 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
 
             <!-- HÓA ĐƠN CHỜ: cho phép tạm giữ đơn đang bán để phục vụ khách khác, rồi quay lại sau -->
-            <div class="bg-white dark:bg-slate-900 rounded-2xl border-2 border-blue-200 dark:border-slate-700 p-2 shadow-sm">
+            <div id="sell-panel-held" class="bg-white dark:bg-slate-900 rounded-2xl border-2 border-blue-200 dark:border-slate-700 p-2 shadow-sm">
                 <div id="held-orders-bar" class="flex items-center gap-2 overflow-x-auto pb-0.5"></div>
             </div>
 
-            <div class="bg-blue-100 dark:bg-slate-900 p-2 md:p-4 rounded-2xl border-4 border-blue-400 shadow-sm space-y-3">
+            <div id="sell-panel-customer" class="bg-blue-100 dark:bg-slate-900 p-2 md:p-4 rounded-2xl border-4 border-blue-400 shadow-sm space-y-3">
                 <div class="relative flex gap-2">
                     <input type="text" id="sell-receipt" class="w-1/4 border border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-xs dark:text-white" placeholder="Số phiếu" readonly>
                     <div id="firestore-read-status-sell-inline" class="hidden absolute left-2 right-2 top-full mt-1 z-20 rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 px-2 py-1.5 text-[10px] md:text-xs font-bold text-amber-800 dark:text-amber-200 shadow-sm">Chưa đồng bộ do hết read</div>
@@ -3583,7 +3839,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 </table>
             </div>
 
-            <div class="bg-blue-100 dark:bg-slate-900 p-2 md:p-4 rounded-2xl border-4 border-blue-400">
+            <div id="sell-panel-pay" class="bg-blue-100 dark:bg-slate-900 p-2 md:p-4 rounded-2xl border-4 border-blue-400">
                 <div class="flex justify-between items-center mb-4">
                     <span class="text-red-600 dark:text-red-400">Tổng thanh toán:</span>
                     <span id="cart-total-display" class="text-xl font-black text-red-500">0 đ</span>
@@ -10766,13 +11022,28 @@ function getSellPageCategoryTier(name) {
     // Tier 2: Quả Bùi Kỳ Lão
     if (/b[ùu]i\s*k[ỳy]\s*(n[ãa]o|l[ãa]o)|qu[ảa]\s*b[ùu]i/i.test(s))
         return 2;
+    // Các sản phẩm KHÁC mà danh mục nhóm (xepNhomSanPham - dùng chung cho màu thẻ, Kho hàng, báo cáo)
+    // xếp vào "THỊT CHƯNG MẮM TÉP" (VD: Mắm bếp - không có chữ TCMT nhưng vẫn thuộc nhóm này) cũng phải
+    // nằm Ở NHÓM TCMT trên lưới bán hàng, không được rơi xuống "các mặt hàng khác" (tier 3).
+    // Mắm Tép Riu Đỏ / Nguyên Chất đã được tách ở tier 1 phía trên nên không bị lẫn vào đây.
+    if (typeof xepNhomSanPham === 'function' && xepNhomSanPham(name) === 'THỊT CHƯNG MẮM TÉP')
+        return 0;
     return 3; // Các mặt hàng khác
+}
+// Trong nhóm TCMT: TCMT/Khay nhôm "chính hiệu" (tier 0 theo từ khoá) đứng trước, các SP thuộc nhóm theo
+// danh mục (VD: Mắm bếp) đứng liền sau - để không xen lẫn vào giữa các cỡ TCMT theo số gram.
+function isCoreTcmtForSellPage(name) {
+    const s = (name || '').toString().toLowerCase();
+    return s.includes('tcmt') || (s.includes('khay nh') && !s.includes('bùi') && !s.includes('quả'));
 }
 function compareProductsForSellPage(nameA, nameB) {
     const ta = getSellPageCategoryTier(nameA), tb = getSellPageCategoryTier(nameB);
     if (ta !== tb)
         return ta - tb; // theo đúng thứ tự nhóm: TCMT -> Mắm -> Bùi Kỳ Lão -> Khác
     if (ta === 0) { // Trong nhóm TCMT: khối lượng giảm dần (450g -> 275g -> 180g -> 150g -> ...)
+        const ca = isCoreTcmtForSellPage(nameA) ? 0 : 1, cb = isCoreTcmtForSellPage(nameB) ? 0 : 1;
+        if (ca !== cb)
+            return ca - cb; // TCMT/khay nhôm trước, Mắm bếp... sau
         const wa = getProductWeightForSort(nameA), wb = getProductWeightForSort(nameB);
         if (wa !== wb)
             return wb - wa;
