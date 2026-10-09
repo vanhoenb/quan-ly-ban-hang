@@ -2637,15 +2637,64 @@ html.glass.dark body :is(#page-import, #page-inventory, #page-customers, #page-p
     inset 0 -9px 14px -7px rgba(120,140,255,.22) !important;
 }
 
-/* ---- Thẻ PN (Nhập kho - Danh sách phiếu nhập): thấp còn khoảng 2/3 ---- */
-html.glass #list-receipts-left > tr > td{ padding: 4px 8px !important; }
-html.glass #list-receipts-left div[class~="border-l-4"][class~="border-r-4"]{ padding-top: 7px !important; padding-bottom: 7px !important; }
-html.glass #list-receipts-left button{ padding: 3px 10px !important; min-height: 0 !important; line-height: 1.25 !important; font-size: 10.5px !important; }
 @media (min-width: 768px){
   /* nhãn loại nhập + tên KH nằm cùng 1 hàng thay vì xếp chồng 2 tầng (làm thẻ cao lên) */
   html.glass #list-receipts-left div[class*="md:w-[40%]"]{ flex-direction: row !important; flex-wrap: wrap; align-items: center; gap: 3px 6px !important; }
 }
+
+/* ===== KHUNG CHUẨN: mọi khung form/lọc từng tô màu riêng (vàng, xanh...) về cùng 1 kiểu trong suốt như nền trang ===== */
+html.glass:not(.dark) :is(#panel-import-filter, #panel-import-form, #panel-history-filter, #panel-sx-form, #panel-nl-form){
+  background-color: rgba(255,255,255,.10) !important;
+  background-image: none !important;
+  border-color: rgba(255,255,255,.85) !important;
+  box-shadow: 0 8px 22px rgba(50,70,160,.10), inset 0 1.5px 0 rgba(255,255,255,.95) !important;
+}
+
+/* ===== THẺ DÒNG CHUẨN (mọi trang danh sách): cao tối thiểu 40px, khoảng cách giữa các thẻ 8px ===== */
+html.glass :is(#page-import, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu)
+  tbody > tr > td:has(> div[class~="border-l-4"][class~="border-r-4"]){
+  padding: 4px 8px !important;
+}
+html.glass :is(#page-import, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu)
+  div[class~="border-l-4"][class~="border-r-4"][class*="rounded"]{
+  min-height: 40px; box-sizing: border-box;
+  padding-top: 7px !important; padding-bottom: 7px !important;
+}
+/* nút bên trong thẻ: gọn để không làm thẻ cao hơn chuẩn */
+html.glass :is(#page-import, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu)
+  div[class~="border-l-4"][class~="border-r-4"] button{
+  padding: 3px 10px !important; min-height: 0 !important; line-height: 1.25 !important; font-size: 10.5px !important;
+}
+/* Kho hàng: thẻ sản phẩm có 2 dòng chữ + ô nhập lô nên cao theo nội dung, nhưng cùng chuẩn tối thiểu và cùng khoảng cách 8px */
+html.glass #page-inventory div[class~="border-l-4"][class~="border-r-4"][class*="rounded"]{
+  min-height: 40px; box-sizing: border-box; margin-bottom: 8px !important;
+}
 </style>
+<style id="glass-input-height-css">
+/* ===== CHIỀU CAO THỐNG NHẤT CHO Ô NHẬP LIỆU (mọi trang) =====
+   Tất cả ô nhập dạng form (tên KH, tên SP, SL, giá, tìm kiếm, tháng, từ ngày/đến ngày, ô chọn...) cao đúng 44px.
+   KHÔNG áp cho: checkbox/radio/file/ẩn, ô nhỏ trong bảng & giỏ hàng (p-1, p-1.5, py-1...), ô nhập lô NSX/HSD, ô đăng nhập. */
+html.glass :is(input, select):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]):not([type="color"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="image"]):not([id^="login-"]):not(#barcode-scanner-sell):not([data-lot-field]):not([class~="p-0"]):not([class~="p-1"]):not([class~="p-1.5"]):not([class~="py-1"]):not([class~="py-1.5"]):not([class~="py-0.5"]),
+html.glass .swal2-input,
+html.glass .swal2-select{
+  height: 44px !important;
+  min-height: 44px !important;
+  box-sizing: border-box !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Ô quét mã (Bán hàng): cả "viên thuốc" SCAN cao 44px bằng các ô xung quanh; ô trắng bên trong thấp hơn một chút để nằm gọn */
+html.glass div:has(> #barcode-scanner-sell){
+  box-sizing: border-box !important; min-height: 44px !important;
+  padding-top: 3px !important; padding-bottom: 3px !important;
+}
+html.glass #barcode-scanner-sell{
+  height: 34px !important; min-height: 0 !important; box-sizing: border-box !important;
+  padding-top: 0 !important; padding-bottom: 0 !important;
+}
+</style>
+
 
 
 
@@ -3234,7 +3283,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <div class="flex flex-col gap-4 mb-4 border-b dark:border-slate-700 pb-4">
                     <h3 data-gb="emerald" class="-mx-4 md:-mx-6 -mt-4 md:-mt-6 px-4 md:px-6 py-3 rounded-t-[15px] bg-emerald-600 dark:bg-emerald-700 text-white font-black text-base md:text-lg whitespace-nowrap">📋 DANH SÁCH PHIẾU NHẬP</h3>
 
-                    <div class="grid grid-cols-3 gap-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-100 dark:border-slate-700 w-full">
+                    <div id="panel-import-filter" class="grid grid-cols-3 gap-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-100 dark:border-slate-700 w-full">
                         <div>
                             <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase">Tháng</label>
                             <input type="month" id="filter-month" onchange="handleReceiptMonthChange()" class="w-full p-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-white rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
@@ -3286,7 +3335,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         <!-- CỘT NHẬP THÔNG TIN (1/2 chiều rộng trên PC) -->
         <div class="w-full lg:w-1/2 px-4 mb-6">
-            <div class="bg-yellow-50 dark:bg-slate-900 p-5 rounded-xl border border-yellow-200 dark:border-slate-700 shadow-lg flex flex-col h-full">
+            <div id="panel-import-form" class="bg-yellow-50 dark:bg-slate-900 p-5 rounded-xl border border-yellow-200 dark:border-slate-700 shadow-lg flex flex-col h-full">
                 <div class="flex-1 flex flex-col min-h-0">
                     <div class="bg-yellow-100/60 dark:bg-slate-950 p-2 rounded-xl mb-4 border border-yellow-200 dark:border-slate-700">
                         <div class="flex gap-2 items-center">
@@ -4208,7 +4257,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <div id="page-customers" class="space-y-6 p-2 md:p-6 hidden">
     <h2 data-gb="violet" class="px-4 py-3 rounded-2xl bg-violet-600 dark:bg-violet-700 text-white font-black text-lg md:text-xl shadow-lg">👥 DS ĐẠI LÝ &amp; CÔNG NỢ</h2>
     
-    <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 grid grid-cols-1 md:grid-cols-5 gap-4">
+    <div id="panel-history-filter" class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 grid grid-cols-1 md:grid-cols-5 gap-4">
         <input type="text" id="cust-name" placeholder="Tên đại lý" class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none w-full dark:text-white">
         <input type="text" id="cust-address" placeholder="Địa chỉ" class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none w-full dark:text-white">
         <input type="text" id="cust-phone" placeholder="Số điện thoại" class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none w-full dark:text-white">
@@ -4652,7 +4701,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       <!-- Cột Nhập thông tin (1/3 chiều rộng, kéo dài chiều cao cho cân đối bằng khung bên trái) -->
       <div class="w-full lg:w-1/3 px-4 mb-6">
-        <div class="bg-blue-50 dark:bg-slate-900 border border-blue-200 dark:border-slate-700 shadow-lg p-5 rounded-xl flex flex-col h-full justify-between">
+        <div id="panel-sx-form" class="bg-blue-50 dark:bg-slate-900 border border-blue-200 dark:border-slate-700 shadow-lg p-5 rounded-xl flex flex-col h-full justify-between">
           <div>
             <div class="mb-3">
               <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Số phiếu hiện tại</label>
@@ -4853,7 +4902,7 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
         
         <!-- Nhập liệu: order-1 (nằm trên trên đt) -->
-        <div class="col-span-12 lg:col-span-3 bg-blue-50 dark:bg-slate-900 p-4 md:p-5 rounded-xl border-2 border-blue-200 dark:border-slate-700 shadow-md">
+        <div id="panel-nl-form" class="col-span-12 lg:col-span-3 bg-blue-50 dark:bg-slate-900 p-4 md:p-5 rounded-xl border-2 border-blue-200 dark:border-slate-700 shadow-md">
             <h4 class="font-bold mb-4 text-white dark:text-blue-400 text-sm flex items-center">📝 NHẬP HÀNG MỚI</h4>
             <div class="grid grid-cols-1 gap-2 mb-4">
                 <input id="in-so-phieu" placeholder="Số phiếu" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
