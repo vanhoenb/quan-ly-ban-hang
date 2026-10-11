@@ -3,6 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+// ===== ĐỒNG HỒ VIỆT NAM TOÀN PHẦN MỀM =====
+// Mọi ngày/giờ trong phần mềm (báo cáo, lọc ngày, "hôm nay", số phiếu, hiển thị...) tính theo GIỜ VIỆT NAM (UTC+7),
+// dù máy tính/điện thoại đang đặt múi giờ nào. Nếu máy ĐÃ đặt giờ Việt Nam (hoặc UTC+7 quanh năm) thì đoạn này
+// KHÔNG làm gì cả. Nếu máy đặt múi giờ khác: các hàm giờ-địa-phương của Date (getHours, getDate, setHours,
+// new Date(năm, tháng, ngày...), new Date("2026-10-09T00:00:00"), toLocale...String, Intl.DateTimeFormat) được
+// chuyển sang giờ Việt Nam. Thời điểm tuyệt đối (getTime, Date.now, chuỗi có Z/+07:00) giữ nguyên.
+(function () {
+    'use strict';
+    var VN_OFF_MIN = 420;
+    var VN_TZ = 'Asia/Ho_Chi_Minh';
+    var OD = Date;
+    var P = OD.prototype;
+    var nativeTzo = P.getTimezoneOffset;
+    try {
+        var jan = new OD(2026, 0, 1, 12), jul = new OD(2026, 6, 1, 12);
+        if (nativeTzo.call(jan) === -VN_OFF_MIN && nativeTzo.call(jul) === -VN_OFF_MIN) {
+            window.__VN_TIME_SHIM__ = false;
+            return; // máy đã ở UTC+7 -> không can thiệp
+        }
+    } catch (e) { /* nếu không kiểm tra được thì vẫn bật lớp chuyển đổi */ }
+
+    var OFF = VN_OFF_MIN * 60000;
+    var getTime = P.getTime, setTime = P.setTime;
+
+    // ---- Getters theo giờ VN ----
+    ['FullYear', 'Month', 'Date', 'Day', 'Hours', 'Minutes', 'Seconds', 'Milliseconds'].forEach(function (n) {
+        var u = P['getUTC' + n];
+        P['get' + n] = function () {
+            var t = getTime.call(this);
+            return t !== t ? NaN : u.call(new OD(t + OFF));
+        };
+    });
+    P.getYear = function () { return this.getFullYear() - 1900; };
+    P.getTimezoneOffset = function () { return getTime.call(this) !== getTime.call(this) ? NaN : -VN_OFF_MIN; };
+
+    // ---- Setters theo giờ VN ----
+    ['FullYear', 'Month', 'Date', 'Hours', 'Minutes', 'Seconds', 'Milliseconds'].forEach(function (n) {
+        var us = P['setUTC' + n];
+        P['set' + n] = function () {
+            var t = getTime.call(this);
+            if (t !== t && n !== 'FullYear') return NaN;
+            var s = new OD(t !== t ? 0 : t + OFF);
+            var r = us.apply(s, arguments);
+            if (r !== r) { setTime.call(this, NaN); return NaN; }
+            var nt = r - OFF;
+            setTime.call(this, nt);
+            return nt;
+        };
+    });
+
+    // ---- Chuỗi hiển thị ----
+    var DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    var MONS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    function pad(n, w) { n = String(n); while (n.length < w) n = '0' + n; return n; }
+    P.toDateString = function () {
+        var t = getTime.call(this); if (t !== t) return 'Invalid Date';
+        var s = new OD(t + OFF);
+        return DAYS[s.getUTCDay()] + ' ' + MONS[s.getUTCMonth()] + ' ' + pad(s.getUTCDate(), 2) + ' ' + pad(s.getUTCFullYear(), 4);
+    };
+    P.toTimeString = function () {
+        var t = getTime.call(this); if (t !== t) return 'Invalid Date';
+        var s = new OD(t + OFF);
+        return pad(s.getUTCHours(), 2) + ':' + pad(s.getUTCMinutes(), 2) + ':' + pad(s.getUTCSeconds(), 2) + ' GMT+0700 (Indochina Time)';
+    };
+    P.toString = function () {
+        var t = getTime.call(this); if (t !== t) return 'Invalid Date';
+        return this.toDateString() + ' ' + this.toTimeString();
+    };
+    function withTz(opts) {
+        if (opts && typeof opts === 'object' && opts.timeZone !== undefined) return opts;
+        var o = {};
+        if (opts && typeof opts === 'object') { for (var k in opts) { if (Object.prototype.hasOwnProperty.call(opts, k)) o[k] = opts[k]; } }
+        o.timeZone = VN_TZ;
+        return o;
+    }
+    ['toLocaleString', 'toLocaleDateString', 'toLocaleTimeString'].forEach(function (n) {
+        var o = P[n];
+        P[n] = function (l, opts) { return o.call(this, l, withTz(opts)); };
+    });
+
+    // ---- Intl.DateTimeFormat mặc định múi giờ VN ----
+    try {
+        var ODTF = Intl.DateTimeFormat;
+        Intl.DateTimeFormat = new Proxy(ODTF, {
+            construct: function (t, args, nt) { return Reflect.construct(t, [args[0], withTz(args[1])], nt); },
+            apply: function (t, thisArg, args) { return t.call(thisArg, args[0], withTz(args[1])); }
+        });
+    } catch (e) { /* bỏ qua */ }
+
+    // ---- Chuỗi ngày-giờ KHÔNG có múi giờ: hiểu là giờ Việt Nam ----
+    function parseVN(str) {
+        var t = OD.parse(str);
+        if (t !== t || typeof str !== 'string') return t;
+        var s = str.trim();
+        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return t; // ISO chỉ ngày: chuẩn quy định là UTC, giữ nguyên
+        if (/(?:Z|[+-]\d{2}:?\d{2}|\bGMT\b|\bUTC\b|\bUT\b)\s*(?:\([^)]*\))?\s*$/i.test(s)) return t; // đã có múi giờ rõ ràng
+        var sysEastMin = -nativeTzo.call(new OD(t)); // phút lệch của MÁY so với UTC
+        return t + (sysEastMin - VN_OFF_MIN) * 60000;
+    }
+
+    // ---- Hàm tạo Date: new Date(năm, tháng, ...) và new Date("chuỗi") theo giờ VN ----
+    var DateProxy = new Proxy(OD, {
+        construct: function (target, args, newTarget) {
+            if (args.length >= 2) {
+                var y = +args[0], m = +args[1];
+                var d = args.length > 2 ? +args[2] : 1;
+                var h = args.length > 3 ? +args[3] : 0;
+                var mi = args.length > 4 ? +args[4] : 0;
+                var sec = args.length > 5 ? +args[5] : 0;
+                var ms = args.length > 6 ? +args[6] : 0;
+                return Reflect.construct(target, [OD.UTC(y, m, d, h, mi, sec, ms) - OFF], newTarget);
+            }
+            if (args.length === 1 && typeof args[0] === 'string') {
+                return Reflect.construct(target, [parseVN(args[0])], newTarget);
+            }
+            return Reflect.construct(target, args, newTarget);
+        },
+        apply: function () { return P.toString.call(new OD()); },
+        get: function (t, p) { return p === 'parse' ? parseVN : Reflect.get(t, p, t); }
+    });
+    window.Date = DateProxy;
+    window.__VN_TIME_SHIM__ = true;
+})();
+    </script>
     <title>POS Pro - Hệ thống quản lý v85</title>
 	<link rel="manifest" href="manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
@@ -2392,6 +2517,52 @@ html.glass.dark #home-clock-lunar .gc-ald{ color:#fcd34d !important; text-shadow
   html.glass #home-clock-date .gc-wd{ padding:1px 7px; }
   html.glass #home-clock-lunar .gc-al{ padding:0 6px; }
 }
+
+/* ---- Thời tiết (cạnh đồng hồ): icon + nhiệt độ nổi khối, ↑↓ cao/thấp, độ ẩm, khả năng mưa ---- */
+html.glass .gc-weather{ display:flex; align-items:center; gap:9px; padding-left:16px; border-left:2px solid rgba(100,116,139,.28); }
+html.glass .gc-weather .gc-w-ico{ font-size:34px; line-height:1; filter: drop-shadow(0 3px 4px rgba(50,70,160,.30)); }
+html.glass .gc-w-main{ display:flex; flex-direction:column; align-items:flex-start; line-height:1.05; }
+html.glass .gc-w-temp{
+  font-size:28px; font-weight:900; font-variant-numeric:tabular-nums; letter-spacing:.01em;
+  background: linear-gradient(180deg,#fb923c 0%,#ea580c 100%);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent;
+  filter: drop-shadow(0 1px 0 rgba(255,255,255,.95)) drop-shadow(0 3px 4px rgba(234,88,12,.30));
+}
+html.glass .gc-w-desc{ font-size:11px; font-weight:800; color:#334155; text-shadow:0 1px 0 rgba(255,255,255,.9); margin-top:2px; }
+html.glass .gc-w-sub{ display:flex; flex-direction:column; gap:4px; font-size:11px; font-weight:800; color:#475569; font-variant-numeric:tabular-nums; text-shadow:0 1px 0 rgba(255,255,255,.9); }
+html.glass .gc-w-sub > div{ display:flex; gap:8px; }
+html.glass .gc-w-hi{ color:#dc2626; }
+html.glass .gc-w-lo{ color:#2563eb; }
+html.glass .gc-weather.gc-w-stale{ opacity:.6; }
+html.glass.dark .gc-weather{ border-left-color: rgba(255,255,255,.22); }
+html.glass.dark .gc-weather .gc-w-ico{ filter: drop-shadow(0 0 8px rgba(251,191,36,.45)) drop-shadow(0 2px 3px rgba(0,0,0,.5)); }
+html.glass.dark .gc-w-temp{
+  background: linear-gradient(180deg,#fde68a 0%,#fb923c 100%);
+  -webkit-background-clip:text; background-clip:text;
+  filter: drop-shadow(0 0 8px rgba(251,146,60,.55)) drop-shadow(0 2px 3px rgba(0,0,0,.55));
+}
+html.glass.dark .gc-w-desc{ color:#e2e8f0; text-shadow:0 1px 3px rgba(0,0,0,.6); }
+html.glass.dark .gc-w-sub{ color:#cbd5e1; text-shadow:0 1px 3px rgba(0,0,0,.6); }
+html.glass.dark .gc-w-hi{ color:#f87171; }
+html.glass.dark .gc-w-lo{ color:#60a5fa; }
+@media (max-width:768px){
+  html.glass .gc-weather{ padding-left:10px; gap:5px; }
+  html.glass .gc-weather .gc-w-ico{ font-size:24px; }
+  html.glass .gc-w-temp{ font-size:20px; }
+  html.glass .gc-w-desc, html.glass .gc-w-sub{ display:none; }
+}
+@media (max-width:639px){
+  html.glass .gc-weather{ display:none; } /* điện thoại rất hẹp: ẩn thời tiết để khung đồng hồ không bị tràn */
+}
+
+/* Bảng dự báo thời tiết: nút Làm mới xanh trời nổi khối, chữ trắng rõ ở cả sáng/tối */
+html.glass #modal-home-weather .gw-refresh{
+  background: linear-gradient(180deg,#38bdf8 0%,#0284c7 100%) !important;
+  color:#fff !important; border:1px solid rgba(255,255,255,.65) !important;
+  text-shadow: 0 1px 2px rgba(0,60,120,.55);
+  box-shadow: 0 3px 8px rgba(2,132,199,.38), inset 0 1.5px 0 rgba(255,255,255,.55) !important;
+}
+html.glass #modal-home-weather .gw-refresh:hover{ filter: brightness(1.08); }
 </style>
 <style id="glass-product-card-css">
 /* ===== THẺ SẢN PHẨM TRANG BÁN HÀNG - KÍNH LỎNG NỔI KHỐI =====
@@ -2568,25 +2739,25 @@ html.glass.dark #sell-cart-body tr[class~="bg-amber-50"] td, html.glass.dark #se
    Khung chứa danh sách trong suốt = cùng màu nền trang; mỗi phiếu/dòng là một THẺ KÍNH NỔI KHỐI. */
 
 /* 1) Khung (bg-white + bo 2xl) có chứa thẻ dòng -> nền gần như trong suốt, giữ viền mảnh + bóng nhẹ */
-html.glass:not(.dark) :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu)
+html.glass:not(.dark) :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu, #page-home)
   div[class~="bg-white"]:is([class*="rounded-xl"], [class*="rounded-2xl"]):has(div[class~="border-l-4"][class~="border-r-4"]){
   background-color: rgba(255,255,255,.10) !important;
   box-shadow: 0 8px 22px rgba(50,70,160,.10), inset 0 1.5px 0 rgba(255,255,255,.95) !important;
 }
 
 /* 2) Hàng tiêu đề cố định của bảng: đậm hơn để không lộ các thẻ cuộn bên dưới */
-html.glass:not(.dark) :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu) thead[class~="sticky"]{
+html.glass:not(.dark) :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu, #page-home) thead[class~="sticky"]{
   background-color: rgba(233,238,248,.97) !important;
   box-shadow: 0 5px 10px -5px rgba(50,70,160,.25) !important;
 }
 
 /* 2b) Bỏ đường kẻ ngang giữa các dòng (divide-y): mỗi dòng đã là một thẻ nổi riêng */
-html.glass body :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu) tbody[class*="divide-"] > tr{
+html.glass body :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu, #page-home) tbody[class*="divide-"] > tr{
   border-top-width: 0 !important; border-bottom-width: 0 !important;
 }
 
 /* 3) Thẻ dòng: bóng nhiều lớp + mặt kính bóng. Giữ nguyên màu viền trái/phải (inline) và màu nền cảnh báo (đỏ/vàng...). */
-html.glass:not(.dark) body :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu)
+html.glass:not(.dark) body :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu, #page-home)
   div[class~="border-l-4"][class~="border-r-4"][class*="rounded"]{
   box-shadow:
     0 1px 1px rgba(20,30,80,.22),
@@ -2598,12 +2769,12 @@ html.glass:not(.dark) body :is(#page-import, #page-inventory, #page-customers, #
   border-bottom-color: rgba(120,135,190,.22) !important;
   transition: transform .18s ease, box-shadow .18s ease, background .18s ease !important;
 }
-html.glass:not(.dark) body :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu)
+html.glass:not(.dark) body :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu, #page-home)
   div[class~="border-l-4"][class~="border-r-4"][class~="bg-white"][class*="rounded"]{
   background-color: transparent !important;
   background-image: linear-gradient(180deg, rgba(255,255,255,.98) 0%, rgba(255,255,255,.84) 50%, rgba(255,255,255,.70) 100%) !important;
 }
-html.glass:not(.dark) body :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu)
+html.glass:not(.dark) body :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu, #page-home)
   div[class~="border-l-4"][class~="border-r-4"][class*="rounded"]:hover{
   box-shadow:
     0 2px 2px rgba(20,30,80,.26),
@@ -2612,13 +2783,13 @@ html.glass:not(.dark) body :is(#page-import, #page-inventory, #page-customers, #
     inset 0 2px 0 #fff,
     inset 0 -9px 14px -7px rgba(70,90,170,.18) !important;
 }
-html.glass:not(.dark) body :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu)
+html.glass:not(.dark) body :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu, #page-home)
   div[class~="border-l-4"][class~="border-r-4"][class*="rounded"]:active{
   box-shadow: 0 1px 2px rgba(20,30,80,.30), inset 0 3px 8px rgba(50,70,160,.20) !important;
 }
 
 /* Giao diện tối */
-html.glass.dark body :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu)
+html.glass.dark body :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu, #page-home)
   div[class~="border-l-4"][class~="border-r-4"][class*="rounded"]{
   box-shadow:
     0 1px 1px rgba(0,0,0,.55),
@@ -2627,7 +2798,7 @@ html.glass.dark body :is(#page-import, #page-inventory, #page-customers, #page-p
     inset 0 -9px 14px -7px rgba(120,140,255,.16) !important;
   transition: transform .18s ease, box-shadow .18s ease !important;
 }
-html.glass.dark body :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu)
+html.glass.dark body :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu, #page-home)
   div[class~="border-l-4"][class~="border-r-4"][class*="rounded"]:hover{
   box-shadow:
     0 2px 2px rgba(0,0,0,.6),
@@ -2651,23 +2822,65 @@ html.glass:not(.dark) :is(#panel-import-filter, #panel-import-form, #panel-histo
 }
 
 /* ===== THẺ DÒNG CHUẨN (mọi trang danh sách): cao tối thiểu 40px, khoảng cách giữa các thẻ 8px ===== */
-html.glass :is(#page-import, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu)
+html.glass :is(#page-import, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu, #page-home)
   tbody > tr > td:has(> div[class~="border-l-4"][class~="border-r-4"]){
   padding: 4px 8px !important;
 }
-html.glass :is(#page-import, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu)
+html.glass :is(#page-import, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu, #page-home)
   div[class~="border-l-4"][class~="border-r-4"][class*="rounded"]{
   min-height: 40px; box-sizing: border-box;
   padding-top: 7px !important; padding-bottom: 7px !important;
 }
 /* nút bên trong thẻ: gọn để không làm thẻ cao hơn chuẩn */
-html.glass :is(#page-import, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu)
+html.glass :is(#page-import, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu, #page-home)
   div[class~="border-l-4"][class~="border-r-4"] button{
   padding: 3px 10px !important; min-height: 0 !important; line-height: 1.25 !important; font-size: 10.5px !important;
 }
 /* Kho hàng: thẻ sản phẩm có 2 dòng chữ + ô nhập lô nên cao theo nội dung, nhưng cùng chuẩn tối thiểu và cùng khoảng cách 8px */
 html.glass #page-inventory div[class~="border-l-4"][class~="border-r-4"][class*="rounded"]{
   min-height: 40px; box-sizing: border-box; margin-bottom: 8px !important;
+}
+
+/* ===== TRANG CHỦ ===== */
+/* 6 khung lớn (tồn kho, cấp hàng đại lý, 4 biểu đồ): nền trong suốt cùng màu nền trang, giống các trang khác */
+html.glass:not(.dark) #page-home div[class~="bg-white"][class~="rounded-3xl"]{
+  background-color: rgba(255,255,255,.10) !important;
+  background-image: none !important;
+  box-shadow: 0 8px 22px rgba(50,70,160,.10), inset 0 1.5px 0 rgba(255,255,255,.95) !important;
+}
+/* Khoảng cách chuẩn 8px giữa các thẻ trong danh sách đơn hàng / khách nợ */
+html.glass #customer-orders-table > div,
+html.glass #home-debt-customers-list > div{ margin-bottom: 8px !important; }
+html.glass #home-inventory-list > div{ margin-bottom: 8px; }
+/* Thẻ sản phẩm trong "Chi tiết tồn kho": mặt kính nổi khối như các thẻ phiếu */
+html.glass:not(.dark) body #home-inventory-list div[class~="mb-2"][class~="bg-white"][class~="rounded-xl"]{
+  background-color: transparent !important;
+  background-image: linear-gradient(180deg, rgba(255,255,255,.98) 0%, rgba(255,255,255,.84) 50%, rgba(255,255,255,.70) 100%) !important;
+  border-top-color: rgba(255,255,255,.95) !important;
+  border-bottom-color: rgba(120,135,190,.22) !important;
+  box-shadow:
+    0 1px 1px rgba(20,30,80,.22),
+    0 5px 10px -2px rgba(20,30,80,.15),
+    0 14px 22px -8px rgba(50,70,160,.26),
+    inset 0 2px 0 #fff,
+    inset 0 -9px 14px -7px rgba(70,90,170,.12) !important;
+  transition: transform .18s ease, box-shadow .18s ease !important;
+}
+html.glass:not(.dark) body #home-inventory-list div[class~="mb-2"][class~="bg-white"][class~="rounded-xl"]:hover{
+  transform: translateY(-1px);
+  box-shadow:
+    0 2px 2px rgba(20,30,80,.26),
+    0 9px 15px -3px rgba(20,30,80,.20),
+    0 20px 30px -8px rgba(50,70,160,.36),
+    inset 0 2px 0 #fff,
+    inset 0 -9px 14px -7px rgba(70,90,170,.18) !important;
+}
+html.glass.dark body #home-inventory-list div[class~="mb-2"][class~="rounded-xl"]{
+  box-shadow:
+    0 1px 1px rgba(0,0,0,.55),
+    0 7px 14px -3px rgba(0,0,0,.55),
+    inset 0 1.5px 0 rgba(255,255,255,.22),
+    inset 0 -9px 14px -7px rgba(120,140,255,.16) !important;
 }
 </style>
 <style id="glass-input-height-css">
@@ -3050,6 +3263,11 @@ document.addEventListener('DOMContentLoaded', function () {
                         <p id="home-clock-date" class="text-[12px] md:text-sm font-extrabold uppercase tracking-wide text-slate-700 dark:text-slate-200">--</p>
                         <p id="home-clock-lunar" class="text-[12px] md:text-sm leading-tight font-bold text-amber-600 dark:text-amber-400">--</p>
                     </div>
+                <div id="home-weather" class="gc-weather" title="Thời tiết Ninh Bình - bấm để xem dự báo cả tuần" onclick="event.stopPropagation(); openHomeWeatherModal()">
+                    <span id="hw-icon" class="gc-w-ico">⛅</span>
+                    <div class="gc-w-main"><span id="hw-temp" class="gc-w-temp">--°</span><span id="hw-desc" class="gc-w-desc">Đang tải…</span></div>
+                    <div class="gc-w-sub"><div id="hw-line1"><span class="gc-w-hi">↑--°</span><span class="gc-w-lo">↓--°</span></div><div id="hw-line2"><span>💧--%</span><span>🌧--%</span></div></div>
+                </div>
                 </div>
             </div>
         </div>
@@ -3129,7 +3347,24 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
     </div>
 
-    <!-- BỐ CỤC 1 TRANG DUY NHẤT (đã bỏ 3 tab NXT KHO/DOANH THU/TOP SP, gộp lại xếp cùng lúc
+    <!-- BẢNG DỰ BÁO THỜI TIẾT CẢ TUẦN (mở khi bấm vào khối thời tiết cạnh đồng hồ) -->
+  <div id="modal-home-weather" class="hidden fixed inset-0 bg-black/60 z-[9995] flex items-center justify-center p-2 md:p-4" onclick="if (event.target === this) closeHomeWeatherModal()">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div class="flex items-center justify-between gap-3 p-4 border-b border-slate-200 dark:border-slate-700 bg-sky-50 dark:bg-sky-950/30">
+        <div class="min-w-0">
+          <h3 class="text-lg font-bold text-slate-800 dark:text-white">🌤️ Dự báo thời tiết cả tuần</h3>
+          <p id="hwm-sub" class="text-[11px] text-sky-600 dark:text-sky-400 truncate">Ninh Bình</p>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button onclick="homeWeatherManualRefresh()" class="gw-refresh px-3 py-1.5 rounded-lg text-xs font-bold">🔄 Làm mới</button>
+          <button onclick="closeHomeWeatherModal()" class="x-close-red rounded-lg px-1.5 text-2xl leading-none">&times;</button>
+        </div>
+      </div>
+      <div id="hwm-body" class="p-3 md:p-4 overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <!-- BỐ CỤC 1 TRANG DUY NHẤT (đã bỏ 3 tab NXT KHO/DOANH THU/TOP SP, gộp lại xếp cùng lúc
          trên 1 trang) - CHI TIẾT TỒN KHO chiếm khối to nhất (2/3 bề ngang trên màn hình
          lớn), các khối còn lại xếp cân đối xung quanh - không thêm bớt nội dung gì, chỉ sắp
          xếp lại đúng các khối đã có sẵn ở 3 tab cũ. -->
@@ -7536,6 +7771,14 @@ function __coerceDateVN(value) {
 }
 function formatDateTimeVN(value, options = {}) { const d=__coerceDateVN(value); if(!d)return ''; return d.toLocaleString('vi-VN',{timeZone:APP_TIME_ZONE,...options}); }
 function formatDateOnlyVN(value) { const d=__coerceDateVN(value); if(!d)return ''; return d.toLocaleDateString('vi-VN',{timeZone:APP_TIME_ZONE}); }
+// Chuỗi ngày "YYYY-MM-DD" (lấy từ ô chọn ngày) -> 00:00 GIỜ VIỆT NAM của ngày đó.
+// LƯU Ý: new Date("2026-10-09") theo chuẩn JavaScript là nửa đêm UTC = 07:00 sáng giờ VN, nên nếu dùng làm mốc "từ ngày"
+// thì báo cáo/bộ lọc sẽ BỎ SÓT các phiếu lập từ 00:00 đến 06:59 sáng của chính ngày đó. Luôn dùng hàm này cho mốc ngày.
+function parseDateOnlyVN(v) {
+    if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v.trim()))
+        return new Date(v.trim() + 'T00:00:00');
+    return new Date(v);
+}
 function formatISODateVN(value) {
     const p = getVNDateParts(value);
     return p ? (p.year + '-' + p.month + '-' + p.day) : '';
@@ -9559,12 +9802,12 @@ function filterActivityLog() {
     if (moduleVal)
         filtered = filtered.filter(l => l.module === moduleVal);
     if (fromVal) {
-        const fromDate = new Date(fromVal);
+        const fromDate = parseDateOnlyVN(fromVal);
         fromDate.setHours(0, 0, 0, 0);
         filtered = filtered.filter(l => l.dateObj && l.dateObj >= fromDate);
     }
     if (toVal) {
-        const toDate = new Date(toVal);
+        const toDate = parseDateOnlyVN(toVal);
         toDate.setHours(23, 59, 59, 999);
         filtered = filtered.filter(l => l.dateObj && l.dateObj <= toDate);
     }
@@ -11495,7 +11738,7 @@ function updateRevenueChart(filteredSales) {
     filteredSales.forEach(order => {
         const d = toReportDate(order.date);
         if (!d) return;
-        const dateStr = d.toISOString().split('T')[0];
+        const dateStr = formatISODateVN(d);
         dailyData[dateStr] = (dailyData[dateStr] || 0) + getSaleReportFinancials(order).productRevenue;
     });
     const allSortedDates = Object.keys(dailyData).sort();
@@ -11552,7 +11795,7 @@ function updateRevenueChart(filteredSales) {
                     let totalGoods = 0, totalTax = 0, totalRevenue = 0;
                     filteredSales.forEach(order => {
                         const d = toReportDate(order.date);
-                        if (d && d.toISOString().split('T')[0] === selectedDate) {
+                        if (d && formatISODateVN(d) === selectedDate) {
                             const fin = getSaleReportFinancials(order);
                             totalTax += fin.tax;
                             totalRevenue += fin.productRevenue;
@@ -12895,8 +13138,8 @@ async function filterReceipts() {
         // KHÔNG CÓ TỪ KHÓA: lọc theo khoảng ngày trong phạm vi tháng đang tải (window.allReceipts)
         if (summaryBox)
             summaryBox.classList.add('hidden');
-        const fromDate = fromVal ? new Date(fromVal) : new Date(0);
-        const toDate = toVal ? new Date(toVal) : new Date(3000, 0, 1);
+        const fromDate = fromVal ? parseDateOnlyVN(fromVal) : new Date(0);
+        const toDate = toVal ? parseDateOnlyVN(toVal) : new Date(3000, 0, 1);
         matched = (window.allReceipts || [])
             .filter(r => {
             const d = r.date?.toDate ? r.date.toDate() : null;
@@ -12941,7 +13184,7 @@ function setDateRangeForMonth(monthValue) {
     let lastDay;
     if (monthValue === currentYearMonth) {
         // Nếu là tháng hiện tại, lấy ngày hôm nay (YYYY-MM-DD)
-        lastDay = now.toISOString().split('T')[0];
+        lastDay = getTodayVNISO();
     }
     else {
         // Nếu là tháng cũ, lấy ngày cuối cùng của tháng đó
@@ -21304,7 +21547,7 @@ async function exportInvoiceToExcel() {
         const dateObj = sale.date?.toDate ? sale.date.toDate() : null;
         if (!dateObj)
             return false;
-        const rowDateISO = dateObj.toISOString().split('T')[0];
+        const rowDateISO = formatISODateVN(dateObj);
         const rowMonth = rowDateISO.substring(0, 7);
         if (filterMonth && rowMonth !== filterMonth)
             return false;
@@ -22200,8 +22443,8 @@ async function editCustomer(id) {
 const showLoading = () => Swal.fire({ title: 'Đang xử lý...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
 // Hàm chung để lấy dữ liệu theo khoảng thời gian
 async function getDocsByDate(collectionName, from, to) {
-    const startDate = new Date(from);
-    const endDate = new Date(to);
+    const startDate = parseDateOnlyVN(from);
+    const endDate = parseDateOnlyVN(to);
     endDate.setHours(23, 59, 59, 999);
     return await db.collection(collectionName)
         .where('date', '>=', startDate)
@@ -22491,7 +22734,7 @@ function printReportDirect(title, bodyHtml) {
                 scrollY: 0
             });
             const link = document.createElement('a');
-            const stamp = new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-');
+            const stamp = new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString().slice(0, 19).replace(/[T:]/g, '-'); // giờ VN
             link.download = 'BaoCao-' + stamp + '.png';
             link.href = canvas.toDataURL('image/png');
             link.click();
@@ -23096,9 +23339,9 @@ async function viewInventoryReport() {
         return Swal.fire({ icon: 'warning', title: 'Thông báo', text: 'Vui lòng chọn ngày!' });
     showLoading();
     try {
-        const fromDate = new Date(from);
+        const fromDate = parseDateOnlyVN(from);
         fromDate.setHours(0, 0, 0, 0);
-        const toDate = new Date(to);
+        const toDate = parseDateOnlyVN(to);
         toDate.setHours(23, 59, 59, 999);
         const now = new Date();
         const isCurrentPeriod = toDate >= now;
@@ -23240,9 +23483,9 @@ async function exportInventory() {
         return Swal.fire({ icon: 'warning', title: 'Thông báo', text: 'Vui lòng chọn ngày!' });
     showLoading();
     try {
-        const fromDate = new Date(from);
+        const fromDate = parseDateOnlyVN(from);
         fromDate.setHours(0, 0, 0, 0);
-        const toDate = new Date(to);
+        const toDate = parseDateOnlyVN(to);
         toDate.setHours(23, 59, 59, 999);
         // --- TỐI ƯU QUAN TRỌNG (giống hệt cách tính NXT ở Trang Chủ) ---
         // TRƯỚC ĐÂY: đọc TOÀN BỘ collection 'receipts' và 'sales' không giới hạn ngày dù
@@ -23740,8 +23983,8 @@ async function exportFullReport() {
     };
     showLoading();
     try {
-        const fromDate = new Date(fromVal);
-        const toDate = new Date(toVal);
+        const fromDate = parseDateOnlyVN(fromVal);
+        const toDate = parseDateOnlyVN(toVal);
         toDate.setHours(23, 59, 59, 999);
         // ĐỌC DỮ LIỆU TỪ NGÀY ĐẦU TIÊN ĐẾN HẾT NGÀY KẾT THÚC
         // Cách này đảm bảo tính đúng NXT mà vẫn nhẹ hơn nhiều so với việc không có điều kiện gì
@@ -23758,7 +24001,7 @@ async function exportFullReport() {
                 orderList.push(name); // Lưu lại tên sản phẩm ngay khi nó xuất hiện lần đầu
             }
         };
-        const fromDateObj = new Date(fromVal);
+        const fromDateObj = parseDateOnlyVN(fromVal);
         // Lưu ý: receiptsSnap nên được sắp xếp theo ngày từ trước nếu bạn muốn thứ tự chính xác
         receiptsSnap.forEach(doc => {
             const d = doc.data();
@@ -23766,7 +24009,7 @@ async function exportFullReport() {
                 return;
             const dDateObj = toReportDate(d.date);
             if (!dDateObj) return;
-            const dDateStr = dDateObj.toISOString().split('T')[0];
+            const dDateStr = formatISODateVN(dDateObj);
             d.items?.forEach(i => {
                 initItem(i.name);
                 // QUAN TRỌNG (sửa lỗi phiếu GỘP bị bỏ sót): phiếu "Nhập đổi - Hết hạn" (thuần,
@@ -23814,7 +24057,7 @@ async function exportFullReport() {
                 return;
             const dDateObj = toReportDate(d.date);
             if (!dDateObj) return;
-            const dDateStr = dDateObj.toISOString().split('T')[0];
+            const dDateStr = formatISODateVN(dDateObj);
             // Lấy vatRate của hóa đơn (nếu không có thì mặc định là 0)
             const vatRate = parseFloat(d.vatRate || 0);
             const itemsArr = d.items || [];
@@ -23909,7 +24152,7 @@ async function exportFullReport() {
         productionDocsSorted.forEach(doc => {
             const d = doc.data();
             const dDate = toReportDate(d.timestamp) || new Date(0);
-            const dDateStr = dDate.toISOString().split('T')[0];
+            const dDateStr = formatISODateVN(dDate);
             if (dDateStr <= toVal) {
                 totalMeChuaNauLuyKe += parseFloat(d.meChuaNau || 0);
                 totalMeChoDongLuyKe += parseFloat(d.meChuaDong || 0);
@@ -24274,8 +24517,8 @@ async function viewFullReport() {
     };
     showLoading();
     try {
-        const fromDate = new Date(fromVal);
-        const toDate = new Date(toVal);
+        const fromDate = parseDateOnlyVN(fromVal);
+        const toDate = parseDateOnlyVN(toVal);
         toDate.setHours(23, 59, 59, 999);
         const [salesSnap, receiptsSnap, prodSnap] = await Promise.all([
             db.collection('sales').where('date', '<=', toDate).get(),
@@ -24290,14 +24533,14 @@ async function viewFullReport() {
                 orderList.push(name);
             }
         };
-        const fromDateObj = new Date(fromVal);
+        const fromDateObj = parseDateOnlyVN(fromVal);
         receiptsSnap.forEach(doc => {
             const d = doc.data();
             if (!d.date)
                 return;
             const dDateObj = toReportDate(d.date);
             if (!dDateObj) return;
-            const dDateStr = dDateObj.toISOString().split('T')[0];
+            const dDateStr = formatISODateVN(dDateObj);
             d.items?.forEach(i => {
                 initItem(i.name);
                 // QUAN TRỌNG (sửa lỗi phiếu GỘP bị bỏ sót): phiếu "Nhập đổi - Hết hạn" (thuần,
@@ -24345,7 +24588,7 @@ async function viewFullReport() {
                 return;
             const dDateObj = toReportDate(d.date);
             if (!dDateObj) return;
-            const dDateStr = dDateObj.toISOString().split('T')[0];
+            const dDateStr = formatISODateVN(dDateObj);
             const vatRate = parseFloat(d.vatRate || 0);
             const itemsArr = d.items || [];
             // Chỉ hiện tổng hoá đơn trong Ghi chú khi hoá đơn có từ 2 dòng SP trở lên.
@@ -24426,7 +24669,7 @@ async function viewFullReport() {
         productionDocsSorted.forEach(doc => {
             const d = doc.data();
             const dDate = toReportDate(d.timestamp) || new Date(0);
-            const dDateStr = dDate.toISOString().split('T')[0];
+            const dDateStr = formatISODateVN(dDate);
             if (dDateStr <= toVal) {
                 totalMeChuaNauLuyKe += parseFloat(d.meChuaNau || 0);
                 totalMeChoDongLuyKe += parseFloat(d.meChuaDong || 0);
@@ -24566,8 +24809,8 @@ window.addEventListener('DOMContentLoaded', () => {
 // dùng field "timestamp" (không phải "date" như các collection khác) nên không dùng lại
 // được getDocsByDate() chung, phải tự truy vấn riêng. =====
 async function getMaterialPurchaseRows(from, to) {
-    const fromDate = new Date(from);
-    const toDate = new Date(to);
+    const fromDate = parseDateOnlyVN(from);
+    const toDate = parseDateOnlyVN(to);
     toDate.setHours(23, 59, 59, 999);
     const snap = await db.collection('material_imports')
         .where('timestamp', '>=', fromDate)
@@ -24736,8 +24979,8 @@ async function populateDebtReportFilters() {
     }
 }
 async function calcCustomerDebtData(from, to) {
-    const fromDate = new Date(from);
-    const toDate = new Date(to);
+    const fromDate = parseDateOnlyVN(from);
+    const toDate = parseDateOnlyVN(to);
     toDate.setHours(23, 59, 59, 999);
     if (fromDate > toDate) throw new Error('Từ ngày không được lớn hơn Đến ngày.');
     const [salesSnap, historySnap, openSnap, returnsSnap] = await Promise.all([
@@ -25021,7 +25264,7 @@ async function getProductionViewRows(dates) {
         // 2 lượt nhập cùng SP khác buổi trong cùng ngày không bị gộp nhầm thành 1 dòng theo
         // buổi của lượt nhập đầu tiên.
         const ca = dt.getHours() < 12 ? 'Sáng' : 'Chiều';
-        const k = dt.toISOString().slice(0, 10) + '_' + d.tenSP + '_' + ca; if (!g[k])
+        const k = formatISODateVN(dt) + '_' + d.tenSP + '_' + ca; if (!g[k])
         g[k] = { tenSP: d.tenSP, sl: 0, dvt: d.dvt || '', ca: ca, date: dt }; g[k].sl += Number(d.sl || 0); });
     return Object.values(g).sort((a, b) => a.date - b.date);
 }
@@ -25326,7 +25569,7 @@ async function exportExcelQuyen2() {
             if (d.timestamp && d.tenSP && d.tenSP.trim() !== '') {
                 const dDate = d.timestamp.seconds ? new Date(d.timestamp.seconds * 1000) : new Date(d.timestamp);
                 if (dDate >= fromDate && dDate <= toDate) {
-                    const dateStr = dDate.toISOString().split('T')[0]; // Định dạng YYYY-MM-DD
+                    const dateStr = formatISODateVN(dDate); // Định dạng YYYY-MM-DD
                     const key = "" + dateStr + "_" + d.tenSP + "";
                     if (!groups[key]) {
                         groups[key] = {
@@ -25441,7 +25684,7 @@ async function exportExcelQuyen3() {
                 const dateObj = d.timestamp.toDate();
                 // --- THÊM ĐIỀU KIỆN LỌC NGÀY Ở ĐÂY ---
                 if (dateObj >= fromDate && dateObj <= toDate) {
-                    const dateStr = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD
+                    const dateStr = formatISODateVN(dateObj); // YYYY-MM-DD
                     const key = "" + dateStr + "_" + d.tenSP + "";
                     if (!groups[key]) {
                         groups[key] = {
@@ -25620,7 +25863,7 @@ async function loadProductionGroupsView(dates) {
             dt = new Date(d.timestamp);
         if (!dt || isNaN(dt.getTime()) || dt < fromDate || dt > toDate)
             return;
-        const dateStr = dt.toISOString().slice(0, 10);
+        const dateStr = formatISODateVN(dt);
         // SỬA LỖI: trước đây key nhóm chỉ theo "ngày + tên SP" nên 2 lượt nhập CÙNG 1 SP
         // trong CÙNG 1 ngày (vd sáng nhập 1 lần, chiều nhập 1 lần - chiều có ghi tồn đầu lấy
         // từ lượt sáng) bị GỘP LUÔN thành 1 dòng duy nhất, và dòng gộp đó giữ nhãn buổi (ca)
@@ -25662,7 +25905,7 @@ async function exportExcelLuuMau() {
                 const dateObj = d.timestamp.toDate();
                 // --- THÊM ĐIỀU KIỆN LỌC NGÀY ---
                 if (dateObj >= fromDate && dateObj <= toDate) {
-                    const dateStr = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD
+                    const dateStr = formatISODateVN(dateObj); // YYYY-MM-DD
                     const key = "" + dateStr + "_" + d.tenSP + "";
                     if (!groups[key]) {
                         groups[key] = {
@@ -25744,8 +25987,8 @@ async function exportExcelLuuMau() {
 // xen dòng "Thanh toán" vào giữa bảng), bên dưới bảng là 4 dòng tổng hợp gọn (Nợ đầu kỳ /
 // Phát sinh trong kỳ / Đã trả trong kỳ / Nợ cuối kỳ) - KHÔNG kẻ bảng cho phần tổng hợp này.
 async function calcSupplierDebtData(from, to) {
-    const fromDate = new Date(from);
-    const toDate = new Date(to);
+    const fromDate = parseDateOnlyVN(from);
+    const toDate = parseDateOnlyVN(to);
     toDate.setHours(23, 59, 59, 999);
     if (fromDate > toDate) throw new Error('Từ ngày không được lớn hơn Đến ngày.');
     const [importsSnap, paymentsSnap, openSnap, materialsSnap] = await Promise.all([
@@ -28501,10 +28744,10 @@ window.runStockReportReconciliation = async function () {
         const auditDateKey = x => {
             const raw=x?.date||x?.ngay||x?.createdAt||x?.created_at||''; if(!raw)return '';
             try{
-                if(typeof raw==='string'){const m=raw.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);if(m)return m[1]+'-'+String(m[2]).padStart(2,'0')+'-'+String(m[3]).padStart(2,'0');const d=new Date(raw);if(!isNaN(d))return d.toISOString().slice(0,10);}
-                if(raw?.toDate){const d=raw.toDate();if(!isNaN(d))return d.toISOString().slice(0,10);}
-                if(raw instanceof Date&&!isNaN(raw))return raw.toISOString().slice(0,10);
-                if(raw?.seconds){const d=new Date(raw.seconds*1000);if(!isNaN(d))return d.toISOString().slice(0,10);}
+                if(typeof raw==='string'){const m=raw.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);if(m)return m[1]+'-'+String(m[2]).padStart(2,'0')+'-'+String(m[3]).padStart(2,'0');const d=new Date(raw);if(!isNaN(d))return formatISODateVN(d);}
+                if(raw?.toDate){const d=raw.toDate();if(!isNaN(d))return formatISODateVN(d);}
+                if(raw instanceof Date&&!isNaN(raw))return formatISODateVN(raw);
+                if(raw?.seconds){const d=new Date(raw.seconds*1000);if(!isNaN(d))return formatISODateVN(d);}
             }catch(e){} return String(raw);
         };
         receiptsSnap.forEach(d=>{
@@ -28965,6 +29208,203 @@ function updateHomeClock() {
 }
 updateHomeClock();
 setInterval(updateHomeClock, 1000);
+// ===== THỜI TIẾT TRÊN KHUNG ĐỒNG HỒ TRANG CHỦ =====
+// Nguồn: Open-Meteo (miễn phí, không cần khoá API). Muốn đổi địa điểm: sửa tên + toạ độ ở đây.
+const HOME_WEATHER_LOCATION = { name: 'Ninh Bình', lat: 20.2506, lon: 105.9745 };
+const HOME_WEATHER_CACHE_KEY = 'homeWeatherCacheV2'; // V2: có dự báo 7 ngày
+const HOME_WEATHER_REFRESH_MS = 15 * 60 * 1000;
+
+// Mã thời tiết WMO -> mô tả tiếng Việt + biểu tượng (ngày / đêm)
+function homeWeatherInfo(code, isDay) {
+    const day = isDay !== 0;
+    if (code === 0) return { t: 'Trời quang', i: day ? '☀️' : '🌙' };
+    if (code === 1) return { t: 'Ít mây', i: day ? '🌤️' : '🌙' };
+    if (code === 2) return { t: 'Mây rải rác', i: day ? '⛅' : '☁️' };
+    if (code === 3) return { t: 'Nhiều mây', i: '☁️' };
+    if (code === 45 || code === 48) return { t: 'Sương mù', i: '🌫️' };
+    if (code >= 51 && code <= 57) return { t: 'Mưa phùn', i: '🌦️' };
+    if (code === 61 || code === 80) return { t: 'Mưa nhỏ', i: '🌦️' };
+    if (code === 63 || code === 81) return { t: 'Mưa vừa', i: '🌧️' };
+    if (code === 65 || code === 82 || code === 66 || code === 67) return { t: 'Mưa to', i: '🌧️' };
+    if (code >= 71 && code <= 77 || code === 85 || code === 86) return { t: 'Lạnh giá', i: '❄️' };
+    if (code === 95) return { t: 'Có dông', i: '⛈️' };
+    if (code === 96 || code === 99) return { t: 'Dông, mưa đá', i: '⛈️' };
+    return { t: 'Không rõ', i: '🌡️' };
+}
+
+function homeWeatherRender(data, stale) {
+    const cur = data && data.current;
+    if (!cur) return;
+    window.__homeWeatherData = data;
+    window.__homeWeatherStale = !!stale;
+    const daily = data.daily || {};
+    const info = homeWeatherInfo(cur.weather_code, cur.is_day);
+    const set = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+    const r0 = (v) => (v === undefined || v === null || isNaN(v)) ? '--' : Math.round(v);
+    set('hw-icon', info.i);
+    set('hw-temp', r0(cur.temperature_2m) + '°');
+    set('hw-desc', info.t);
+    const hi = daily.temperature_2m_max ? r0(daily.temperature_2m_max[0]) : '--';
+    const lo = daily.temperature_2m_min ? r0(daily.temperature_2m_min[0]) : '--';
+    const rain = daily.precipitation_probability_max ? r0(daily.precipitation_probability_max[0]) : '--';
+    set('hw-line1', '<span class="gc-w-hi">↑' + hi + '°</span><span class="gc-w-lo">↓' + lo + '°</span>');
+    set('hw-line2', '<span>💧' + r0(cur.relative_humidity_2m) + '%</span><span>🌧' + rain + '%</span>');
+    const box = document.getElementById('home-weather');
+    if (box) {
+        box.classList.toggle('gc-w-stale', !!stale);
+        box.title = HOME_WEATHER_LOCATION.name + ': ' + info.t + ', ' + r0(cur.temperature_2m) + '° (cảm giác ' + r0(cur.apparent_temperature) + '°)'
+            + ' · Độ ẩm ' + r0(cur.relative_humidity_2m) + '% · Gió ' + r0(cur.wind_speed_10m) + ' km/h · Khả năng mưa hôm nay ' + rain + '%'
+            + (stale ? ' (dữ liệu cũ - đang không lấy được thời tiết mới)' : '') + ' — bấm để xem dự báo cả tuần';
+    }
+    if (typeof homeWeatherRenderModal === 'function') homeWeatherRenderModal();
+}
+
+async function refreshHomeWeather(force) {
+    if (!document.getElementById('home-weather')) return;
+    let cached = null;
+    try { cached = JSON.parse(localStorage.getItem(HOME_WEATHER_CACHE_KEY) || 'null'); } catch (e) { cached = null; }
+    if (!force && cached && cached.d && (Date.now() - cached.t) < HOME_WEATHER_REFRESH_MS) {
+        window.__homeWeatherAt = cached.t;
+        homeWeatherRender(cached.d, false);
+        return;
+    }
+    const L = HOME_WEATHER_LOCATION;
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + L.lat + '&longitude=' + L.lon
+        + '&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day'
+        + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,wind_speed_10m_max'
+        + '&timezone=Asia%2FBangkok&forecast_days=7';
+    const ctl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    const timer = setTimeout(() => { if (ctl) ctl.abort(); }, 8000);
+    try {
+        const res = await fetch(url, ctl ? { signal: ctl.signal } : undefined);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        if (!data || !data.current) throw new Error('Dữ liệu thời tiết trống');
+        try { localStorage.setItem(HOME_WEATHER_CACHE_KEY, JSON.stringify({ t: Date.now(), d: data })); } catch (e) { /* bỏ qua */ }
+        window.__homeWeatherAt = Date.now();
+        homeWeatherRender(data, false);
+    }
+    catch (err) {
+        console.warn('Không lấy được thời tiết:', err);
+        if (cached && cached.d) {
+            window.__homeWeatherAt = cached.t;
+            homeWeatherRender(cached.d, true); // hiện dữ liệu lần trước, làm mờ nhẹ để biết là cũ
+        }
+        else {
+            const d = document.getElementById('hw-desc');
+            if (d) d.textContent = 'Chưa có dữ liệu';
+        }
+    }
+    finally {
+        clearTimeout(timer);
+    }
+}
+refreshHomeWeather(false);
+setInterval(() => refreshHomeWeather(false), HOME_WEATHER_REFRESH_MS);
+window.addEventListener('online', () => refreshHomeWeather(true));
+
+// ===== BẢNG DỰ BÁO THỜI TIẾT CẢ TUẦN (bấm vào khối thời tiết cạnh đồng hồ) =====
+function homeWeatherDayAccent(code) {
+    if (code === 0 || code === 1) return '#f59e0b'; // nắng
+    if (code === 45 || code === 48) return '#94a3b8'; // sương
+    if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return '#3b82f6'; // mưa
+    if (code >= 95) return '#7c3aed'; // dông
+    return '#64748b'; // mây
+}
+function homeWeatherRenderModal() {
+    const modal = document.getElementById('modal-home-weather');
+    if (!modal || modal.classList.contains('hidden'))
+        return;
+    const body = document.getElementById('hwm-body');
+    const sub = document.getElementById('hwm-sub');
+    if (!body)
+        return;
+    const data = window.__homeWeatherData;
+    if (!data || !data.current) {
+        body.innerHTML = '<div class="p-6 text-center text-sm text-slate-500 dark:text-slate-400">Chưa có dữ liệu thời tiết. Kiểm tra kết nối mạng rồi bấm "Làm mới".</div>';
+        if (sub) sub.textContent = HOME_WEATHER_LOCATION.name;
+        return;
+    }
+    const r0 = (v) => (v === undefined || v === null || isNaN(v)) ? '--' : Math.round(v);
+    const cur = data.current;
+    const daily = data.daily || {};
+    const days = daily.time || [];
+    const info = homeWeatherInfo(cur.weather_code, cur.is_day);
+    if (sub) {
+        const at = window.__homeWeatherAt ? new Date(window.__homeWeatherAt) : null;
+        const atTxt = at ? at.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Ho_Chi_Minh' }) + ' ' + at.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', timeZone: 'Asia/Ho_Chi_Minh' }) : '--';
+        sub.textContent = HOME_WEATHER_LOCATION.name + ' · cập nhật ' + atTxt + (window.__homeWeatherStale ? ' (dữ liệu cũ - chưa lấy được bản mới)' : '');
+    }
+    const hi0 = daily.temperature_2m_max ? r0(daily.temperature_2m_max[0]) : '--';
+    const lo0 = daily.temperature_2m_min ? r0(daily.temperature_2m_min[0]) : '--';
+    let html = '<div class="flex items-center gap-4 rounded-2xl p-3 md:p-4 mb-4 border border-slate-200 dark:border-slate-700 bg-sky-50 dark:bg-slate-800/60">'
+        + '<div style="font-size:48px;line-height:1">' + info.i + '</div>'
+        + '<div><div class="font-black text-orange-500 dark:text-orange-400" style="font-size:40px;line-height:1">' + r0(cur.temperature_2m) + '°</div>'
+        + '<div class="text-xs font-bold text-slate-700 dark:text-slate-200 mt-1">' + info.t + '</div></div>'
+        + '<div class="grid grid-cols-2 gap-x-5 gap-y-1 text-[11px] font-bold text-slate-600 dark:text-slate-300 text-right" style="margin-left:auto">'
+        + '<span>Cảm giác: ' + r0(cur.apparent_temperature) + '°</span><span>Độ ẩm: ' + r0(cur.relative_humidity_2m) + '%</span>'
+        + '<span>Gió: ' + r0(cur.wind_speed_10m) + ' km/h</span><span><span class="text-red-600 dark:text-red-400">↑' + hi0 + '°</span> <span class="text-blue-600 dark:text-blue-400">↓' + lo0 + '°</span></span>'
+        + '</div></div>';
+    if (!days.length) {
+        html += '<div class="p-4 text-center text-sm text-slate-500 dark:text-slate-400">Chưa có dự báo các ngày tới. Bấm "Làm mới".</div>';
+    }
+    else {
+        const names = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
+        const todayStr = new Intl.DateTimeFormat('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date());
+        const tmrw = new Date(new Date(todayStr + 'T12:00:00').getTime() + 86400000);
+        const tmrwStr = tmrw.getFullYear() + '-' + String(tmrw.getMonth() + 1).padStart(2, '0') + '-' + String(tmrw.getDate()).padStart(2, '0');
+        html += '<div class="text-[11px] font-black uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Dự báo ' + days.length + ' ngày tới</div><div class="space-y-2">';
+        days.forEach((t, i) => {
+            const d = new Date(t + 'T12:00:00');
+            const label = t === todayStr ? 'Hôm nay' : (t === tmrwStr ? 'Ngày mai' : '');
+            const code = daily.weather_code ? daily.weather_code[i] : 3;
+            const di = homeWeatherInfo(code, 1);
+            const acc = homeWeatherDayAccent(code);
+            const hi = daily.temperature_2m_max ? r0(daily.temperature_2m_max[i]) : '--';
+            const lo = daily.temperature_2m_min ? r0(daily.temperature_2m_min[i]) : '--';
+            const pr = daily.precipitation_probability_max ? r0(daily.precipitation_probability_max[i]) : '--';
+            const mm = daily.precipitation_sum ? daily.precipitation_sum[i] : null;
+            const mmTxt = (mm === null || mm === undefined || isNaN(mm)) ? '' : (' · ' + (Math.round(mm * 10) / 10) + ' mm');
+            const wind = daily.wind_speed_10m_max ? r0(daily.wind_speed_10m_max[i]) : '--';
+            const dd = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+            html += '<div class="flex items-center gap-2 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg px-3 py-2 shadow-sm" style="border-left-color:' + acc + ' !important; border-right-color:' + acc + ' !important;">'
+                + '<div class="w-[24%] leading-tight" style="white-space:nowrap"><div class="text-[12px] font-black text-slate-800 dark:text-slate-100">' + names[d.getDay()] + '</div>'
+                + '<div class="text-[10px] font-bold text-slate-500 dark:text-slate-400">' + dd + (label ? ' · <span class="text-sky-600 dark:text-sky-400">' + label + '</span>' : '') + '</div></div>'
+                + '<div class="w-9 text-center" style="font-size:24px;line-height:1;flex:none">' + di.i + '</div>'
+                + '<div class="w-[19%] text-[11px] font-bold text-slate-700 dark:text-slate-200" style="white-space:nowrap">' + di.t + '</div>'
+                + '<div class="w-[17%] text-[12px] font-black tabular-nums text-center" style="white-space:nowrap"><span class="text-red-600 dark:text-red-400">↑' + hi + '°</span> <span class="text-blue-600 dark:text-blue-400">↓' + lo + '°</span></div>'
+                + '<div class="flex-1 text-[11px] font-bold text-slate-600 dark:text-slate-300 text-right tabular-nums" style="white-space:nowrap">🌧 ' + pr + '%' + mmTxt + '</div>'
+                + '<div class="w-[12%] text-[11px] font-bold text-slate-600 dark:text-slate-300 text-right tabular-nums" style="white-space:nowrap">🌬 ' + wind + '</div>'
+                + '</div>';
+        });
+        html += '</div><div class="text-[10px] text-slate-400 dark:text-slate-500 mt-3 text-center">🌧 khả năng mưa · lượng mưa (mm) · 🌬 gió mạnh nhất (km/h) · nguồn: Open-Meteo</div>';
+    }
+    body.innerHTML = html;
+}
+async function openHomeWeatherModal() {
+    const m = document.getElementById('modal-home-weather');
+    if (!m)
+        return;
+    m.classList.remove('hidden');
+    homeWeatherRenderModal();
+    const d = window.__homeWeatherData;
+    if (!d || !d.daily || !d.daily.time || d.daily.time.length < 3)
+        await refreshHomeWeather(true);
+}
+function closeHomeWeatherModal() {
+    const m = document.getElementById('modal-home-weather');
+    if (m)
+        m.classList.add('hidden');
+}
+async function homeWeatherManualRefresh() {
+    const sub = document.getElementById('hwm-sub');
+    if (sub)
+        sub.textContent = 'Đang cập nhật…';
+    await refreshHomeWeather(true);
+    homeWeatherRenderModal();
+}
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeHomeWeatherModal(); });
+
 // Cảnh báo HSD được cập nhật ngay sau khi dữ liệu tồn kho + NSX/HSD khởi tạo xong ở cuối file.
 // Vẫn refresh định kỳ 30 giây để phản ánh bán/nhập từ máy khác.
 setInterval(updateDashboardExpiryAlert, 30000);
