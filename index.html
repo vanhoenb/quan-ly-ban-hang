@@ -4865,6 +4865,52 @@ document.addEventListener('DOMContentLoaded', function () {
                 </button>
             </div>
 		</div>
+
+    <!-- Khối 3 Sổ Nhật Ký (Tiếp nhận nguyên liệu / Sản xuất / Xuất hàng) -->
+    <div class="md:col-span-2 bg-white p-4 md:p-6 rounded-2xl border border-amber-200 shadow-sm hover:shadow-lg transition-all">
+        <h3 class="font-bold text-sm md:text-lg text-slate-800 mb-4 text-center">Sổ Nhật Ký (3 Sổ)</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+                <div class="font-bold text-xs md:text-sm text-slate-700 mb-2 text-center">📥 Tiếp Nhận Nguyên Liệu</div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="viewNhatKyNguyenLieu()"
+                    class="w-full bg-slate-600 dark:bg-slate-700 text-white py-3 rounded-xl font-bold text-xs transition-all duration-75 border-b-[4px] border-slate-800 dark:border-slate-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+                    👁 Xem
+                    </button>
+                    <button onclick="exportExcelNhatKyNguyenLieu()"
+                    class="w-full bg-green-700 dark:bg-green-800 text-white py-3 rounded-xl font-bold text-xs transition-all duration-75 border-b-[4px] border-green-900 dark:border-green-950 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+                    ⬇ Excel
+                    </button>
+                </div>
+            </div>
+            <div>
+                <div class="font-bold text-xs md:text-sm text-slate-700 mb-2 text-center">🏭 Sản Xuất</div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="viewNhatKySanXuat()"
+                    class="w-full bg-slate-600 dark:bg-slate-700 text-white py-3 rounded-xl font-bold text-xs transition-all duration-75 border-b-[4px] border-slate-800 dark:border-slate-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+                    👁 Xem
+                    </button>
+                    <button onclick="exportExcelNhatKySanXuat()"
+                    class="w-full bg-green-700 dark:bg-green-800 text-white py-3 rounded-xl font-bold text-xs transition-all duration-75 border-b-[4px] border-green-900 dark:border-green-950 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+                    ⬇ Excel
+                    </button>
+                </div>
+            </div>
+            <div>
+                <div class="font-bold text-xs md:text-sm text-slate-700 mb-2 text-center">📤 Xuất Hàng</div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="viewNhatKyXuatHang()"
+                    class="w-full bg-slate-600 dark:bg-slate-700 text-white py-3 rounded-xl font-bold text-xs transition-all duration-75 border-b-[4px] border-slate-800 dark:border-slate-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+                    👁 Xem
+                    </button>
+                    <button onclick="exportExcelNhatKyXuatHang()"
+                    class="w-full bg-green-700 dark:bg-green-800 text-white py-3 rounded-xl font-bold text-xs transition-all duration-75 border-b-[4px] border-green-900 dark:border-green-950 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-md">
+                    ⬇ Excel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 	</div>
 </div>
 
@@ -4885,6 +4931,12 @@ document.addEventListener('DOMContentLoaded', function () {
     </div>
   <div class="max-w-[98%] mx-auto">
     <h3 data-pt class="mb-6 font-bold text-2xl text-gray-800 dark:text-white">THEO DÕI SẢN XUẤT</h3>
+    <!-- Thanh chuyển tab: Phiếu sản xuất | Công đoạn -->
+    <div class="grid grid-cols-2 gap-2 md:gap-3 mb-6 bg-slate-200 dark:bg-slate-950 p-1.5 rounded-2xl border border-slate-300 dark:border-slate-900 select-none">
+        <button id="sx-tabbtn-phieu" onclick="sxOpenTab('phieu')" class="py-2.5 px-1 text-[11px] md:text-sm font-black rounded-xl transition-all duration-150 bg-gradient-to-b from-orange-500 to-orange-600 text-white border-b-[4px] border-orange-700 uppercase tracking-wider">📋 PHIẾU SẢN XUẤT</button>
+        <button id="sx-tabbtn-congdoan" onclick="sxOpenTab('congdoan')" class="py-2.5 px-1 text-[11px] md:text-sm font-bold rounded-xl transition-all duration-150 bg-slate-100/80 dark:bg-slate-900/40 text-slate-500 dark:text-slate-400 border-b-[4px] border-transparent uppercase tracking-wider">⏱ CÔNG ĐOẠN</button>
+    </div>
+    <div id="sx-pane-phieu">
 
     <!-- items-stretch giúp 2 khung tự động căng chiều cao bằng nhau -->
     <div class="flex flex-col-reverse lg:flex-row -mx-4 items-stretch">
@@ -5021,6 +5073,133 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
       </div>
     </div>
+    </div>
+    <!-- ===== TAB CÔNG ĐOẠN: bảng giống mẫu sổ, bấm vào ô để chọn; bấm LƯU mới ghi; Sổ nhật ký sản xuất đọc từ đây ===== -->
+    <style>
+      #sx-pane-congdoan .sx-grid td, #sx-pane-congdoan .sx-grid th { vertical-align: top; }
+      #sx-pane-congdoan .sx-empty { display: inline-flex; align-items: center; gap: 4px; color: #94a3b8; font-weight: 700; font-size: 12px; transition: color .15s; }
+      #sx-pane-congdoan .sx-grid tbody td.sx-c:hover .sx-empty { color: #ea580c; }
+      #sx-pane-congdoan .sx-grid td.sx-c { transition: background .12s; }
+      #sx-pane-congdoan .sx-grid td.sx-c:hover { background: rgba(249, 115, 22, .12); }
+      @media (min-width: 768px) { #sx-pane-congdoan .sx-grid { table-layout: fixed; min-width: 920px; } }
+      @media (max-width: 767px) {
+        #sx-pane-congdoan .sx-grid thead { display: none; }
+        #sx-pane-congdoan .sx-grid, #sx-pane-congdoan .sx-grid tbody, #sx-pane-congdoan .sx-grid tr, #sx-pane-congdoan .sx-grid td { display: block; width: 100% !important; }
+        #sx-pane-congdoan .sx-grid tr { position: relative; margin: 0 0 12px; padding: 6px 4px; border: 1px solid #e2e8f0; border-radius: 18px; background: rgba(255,255,255,.7); }
+        #sx-pane-congdoan .sx-grid td { border: none !important; padding: 6px 12px !important; }
+        #sx-pane-congdoan .sx-grid td::before { content: attr(data-label); display: block; margin-bottom: 2px; font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: #94a3b8; }
+        #sx-pane-congdoan .sx-grid td.sx-no { padding-bottom: 0 !important; }
+        #sx-pane-congdoan .sx-grid td.sx-del { position: absolute; top: 4px; right: 6px; width: auto !important; padding: 2px 6px !important; }
+        #sx-pane-congdoan .sx-grid td.sx-del::before, #sx-pane-congdoan .sx-grid td.sx-no::before { display: none; }
+      }
+    </style>
+    <div id="sx-pane-congdoan" class="hidden">
+      <!-- Tiêu đề + chọn ngày -->
+      <div data-gb="orange" class="relative mb-4 rounded-3xl p-5 md:p-6 shadow-lg">
+        <div class="relative flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-white/60 flex items-center justify-center shrink-0"><svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+            <div>
+              <div class="text-lg md:text-2xl font-black leading-tight">Nhật ký công đoạn sản xuất</div>
+              <div class="mt-2 flex flex-wrap items-center gap-1 text-[11px] md:text-xs font-semibold">
+                <span class="inline-flex items-center gap-1.5 rounded-full pl-1 pr-2.5 py-0.5 bg-white/45"><b class="w-4 h-4 rounded-full bg-white/90 text-[10px] font-black flex items-center justify-center">1</b>Công đoạn</span>
+                <svg class="w-3 h-3 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+                <span class="inline-flex items-center gap-1.5 rounded-full pl-1 pr-2.5 py-0.5 bg-white/45"><b class="w-4 h-4 rounded-full bg-white/90 text-[10px] font-black flex items-center justify-center">2</b>Giờ</span>
+                <svg class="w-3 h-3 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+                <span class="inline-flex items-center gap-1.5 rounded-full pl-1 pr-2.5 py-0.5 bg-white/45"><b class="w-4 h-4 rounded-full bg-white/90 text-[10px] font-black flex items-center justify-center">3</b>Nguyên liệu &amp; Kg</span>
+                <svg class="w-3 h-3 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+                <span class="inline-flex items-center gap-1.5 rounded-full pl-1 pr-2.5 py-0.5 bg-white/45"><b class="w-4 h-4 rounded-full bg-white/90 text-[10px] font-black flex items-center justify-center">4</b>Người làm</span>
+                <svg class="w-3 h-3 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+                <span class="inline-flex items-center gap-1.5 rounded-full pl-1 pr-2.5 py-0.5 bg-white/75"><b class="w-4 h-4 rounded-full bg-white/90 text-[10px] font-black flex items-center justify-center">5</b>Bấm LƯU</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 bg-white/50 rounded-2xl p-1.5">
+            <button onclick="sxShiftDate(-1)" class="w-9 h-9 rounded-xl hover:bg-white/70 flex items-center justify-center" title="Ngày trước"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+            <input type="date" id="sxcd-date" onchange="sxGuardedLoad(this.value, false)" class="h-9 rounded-xl px-3 bg-white text-slate-800 font-bold outline-none">
+            <button onclick="sxShiftDate(1)" class="w-9 h-9 rounded-xl hover:bg-white/70 flex items-center justify-center" title="Ngày sau"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+            <button onclick="sxCdToday()" class="h-9 px-3 ml-1 rounded-xl bg-white text-orange-600 font-black text-xs">Hôm nay</button>
+          </div>
+        </div>
+        <div id="sxcd-mode" class="hidden relative mt-3 inline-block px-3 py-1 rounded-lg bg-white/95 text-blue-700 text-xs font-bold"></div>
+      </div>
+      <!-- Thêm nhanh + sản phẩm trong ngày -->
+      <div class="mb-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-3 md:p-4 grid gap-3 lg:grid-cols-[1fr_auto] items-center">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-[11px] font-black uppercase tracking-wide text-slate-400 mr-1">Thêm nhanh</span>
+          <span id="sxcd-quick" class="flex flex-wrap gap-2"></span>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <label for="sxcd-daysp" class="text-[11px] font-black uppercase tracking-wide text-slate-400 whitespace-nowrap">Sản phẩm trong ngày</label>
+          <input id="sxcd-daysp" list="sxcd-daysp-list" oninput="sxMarkDirty(true);sxRenderDayChips()" placeholder="Chọn bên dưới hoặc gõ tên (không bắt buộc)" class="w-full lg:w-72 h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-400">
+          <datalist id="sxcd-daysp-list"></datalist>
+          <span id="sxcd-daysp-chips" class="flex flex-wrap gap-1.5 w-full lg:justify-end"></span>
+        </div>
+      </div>
+      <!-- Bảng nhập -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-lg">
+        <div class="overflow-x-auto rounded-t-2xl">
+          <table class="sx-grid w-full text-left border-collapse text-xs md:text-sm">
+            <colgroup><col style="width:4%"><col style="width:14%"><col style="width:14%"><col style="width:25%"><col style="width:17%"><col style="width:14%"><col style="width:10%"><col style="width:4%"></colgroup>
+            <thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-300 text-[11px] uppercase tracking-wide">
+              <tr>
+                <th class="px-3 py-3 text-center font-black">#</th>
+                <th class="px-3 py-3 font-black">Công đoạn SX</th>
+                <th class="px-3 py-3 font-black">Thời gian<div class="normal-case font-medium opacity-70 tracking-normal">Từ giờ → đến giờ</div></th>
+                <th class="px-3 py-3 font-black">Nguyên liệu<div class="normal-case font-medium opacity-70 tracking-normal">Tên · Số Kg</div></th>
+                <th class="px-3 py-3 font-black">Vị trí &amp; người thực hiện</th>
+                <th class="px-3 py-3 font-black">Thông số kiểm soát</th>
+                <th class="px-3 py-3 font-black">Kết quả</th>
+                <th class="px-3 py-3"></th>
+              </tr>
+            </thead>
+            <tbody id="sxcd-body" class="text-slate-800 dark:text-slate-100"></tbody>
+          </table>
+        </div>
+        <!-- Thanh lưu luôn nằm ở đáy màn hình -->
+        <div class="sticky bottom-0 z-10 flex flex-wrap items-center justify-between gap-3 px-4 py-3 rounded-b-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t border-slate-200 dark:border-slate-700">
+          <div class="flex items-center gap-2">
+            <span id="sxcd-dirty" class="px-3 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-700">✓ Chưa có thay đổi</span>
+            <span id="sxcd-count" class="text-xs text-slate-500 dark:text-slate-400"></span>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="sxAddGridRow()" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-700 dark:text-slate-200 font-bold text-sm"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Thêm dòng</button>
+            <button onclick="sxToggleSaved()" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-700 dark:text-slate-200 font-bold text-sm"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg> Danh sách đã lưu</button>
+            <button onclick="sxPrintCurrentDate()" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-sm" title="Mở Sổ nhật ký sản xuất của ngày đang chọn để in"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> In sổ ngày này</button>
+            <button onclick="sxSaveAll()" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-sm shadow-md shadow-blue-500/30 active:scale-95 transition"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg> LƯU</button>
+          </div>
+        </div>
+      </div>
+      <!-- Danh mục công đoạn -->
+      <div class="mt-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow p-4 md:p-5 rounded-2xl">
+        <h4 class="font-black mb-1 text-slate-700 dark:text-slate-200 text-sm">Danh mục công đoạn</h4>
+        <div class="text-[11px] text-slate-500 dark:text-slate-400 mb-3">Bút chì: sửa mẫu in sẵn (nguyên liệu, người làm, kết quả) · mũi tên: đổi thứ tự · dấu X: xóa khỏi danh mục</div>
+        <div id="sxcd-stage-chips" class="flex flex-wrap gap-2 mb-3"></div>
+        <div class="flex gap-2 max-w-md">
+          <input type="text" id="sxcd-new-stage" placeholder="Tên công đoạn mới" class="flex-1 h-10 px-3 border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-emerald-400">
+          <button onclick="sxAddStage()" class="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Thêm</button>
+        </div>
+      </div>
+      <!-- Danh sách đã lưu -->
+      <div id="sxcd-saved-panel" class="hidden mt-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow p-4 md:p-5 rounded-2xl">
+        <div class="flex items-center justify-between mb-3">
+          <h4 class="font-black text-slate-700 dark:text-slate-200 text-sm">Danh sách công đoạn đã lưu</h4>
+          <button onclick="sxToggleSaved()" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg> Đóng</button>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <span class="text-xs font-bold text-slate-500">Từ</span><input type="date" id="sxsv-from" class="h-10 px-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 rounded-xl text-slate-800 dark:text-white">
+          <span class="text-xs font-bold text-slate-500">Đến</span><input type="date" id="sxsv-to" class="h-10 px-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 rounded-xl text-slate-800 dark:text-white">
+          <button onclick="sxLoadSaved()" class="h-10 px-4 rounded-xl bg-slate-700 hover:bg-slate-800 text-white text-xs font-bold">Xem</button>
+          <button onclick="sxPrintSavedRange()" class="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> In sổ cả khoảng này</button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs md:text-sm">
+            <thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-300 uppercase text-[10px] md:text-xs"><tr><th class="p-2">Ngày</th><th class="p-2">Công đoạn đã lưu</th><th class="p-2">Sản phẩm</th><th class="p-2 text-right">Thao tác</th></tr></thead>
+            <tbody id="sxsv-body" class="text-slate-700 dark:text-slate-200 divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -5145,6 +5324,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 <div class="grid grid-cols-2 gap-2">
                     <input id="in-so-hd" placeholder="Số HĐ" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
                     <input id="in-ngay-hd" type="date" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="text-[11px] font-bold text-slate-500 dark:text-slate-400">Giờ nhận hàng (không bắt buộc - bỏ trống thì Sổ nhật ký ghi 06:00)</label>
+                    <div id="in-gio-nhan-box"></div>
                 </div>
             </div>
             <div class="grid grid-cols-1 gap-2 mb-4">
@@ -23000,7 +23183,7 @@ if (!window.__exportClickGuardInstalled) {
         if (!btn) return;
         const oc = btn.getAttribute('onclick') || '';
         const m = oc.match(/^\s*([A-Za-z_$][\w$]*)\s*\(\s*\)\s*;?\s*$/);
-        if (!m || !/export(?:ToExcel|InvoiceToExcel|FullReport|Sales|DebtReport|SupplierDebtReport|Inventory|ExpiredGoodsReport|ReturnsReport|MaterialPurchaseReport|ExcelQuyen|ExcelLuuMau|ChamCongExcel)/i.test(m[1])) return;
+        if (!m || !/export(?:ToExcel|InvoiceToExcel|FullReport|Sales|DebtReport|SupplierDebtReport|Inventory|ExpiredGoodsReport|ReturnsReport|MaterialPurchaseReport|ExcelQuyen|ExcelLuuMau|ExcelNhatKy|ChamCongExcel)/i.test(m[1])) return;
         ev.preventDefault();
         ev.stopImmediatePropagation();
         if (btn.dataset.quickExportLock === '1') return;
@@ -25251,6 +25434,1246 @@ async function saveExcelFile(workbook, filename) {
         showAlert("Lỗi lưu file: " + e.message);
     }
 }
+// ===================================================================================
+// TAB CÔNG ĐOẠN (trang Sản xuất): nhập giờ + nguyên liệu + người làm của từng công đoạn.
+// Dữ liệu lưu ở collection 'production_steps' (mỗi dòng 1 công đoạn) và danh mục công đoạn
+// ở 'production_stages' (tự thêm/xóa/đổi thứ tự). Sổ nhật ký sản xuất đọc từ 2 nơi này.
+// ===================================================================================
+const SX_DEFAULT_STAGES = ['Rửa NL', 'Xay NL', 'Nấu', 'Đóng gói', 'Hấp tiệt trùng'];
+// Nguyên liệu mẫu in sẵn khi chọn công đoạn (chỉ còn điền số Kg). Sửa được từng công đoạn bằng nút ✎ ở Danh mục.
+const SX_TPL_THIT = 'Thịt nạc vai : …… Kg\nMỡ lá : …… Kg\nMỡ khổ : …… Kg';
+const SX_DEFAULT_TEMPLATES = {
+    'Rửa NL': SX_TPL_THIT,
+    'Xay NL': SX_TPL_THIT,
+    'Nấu': SX_TPL_THIT + '\nHành ta : …… Kg\nMắm nêm : ……\nRiu đỏ : ……',
+    'Đóng gói': 'Thịt chưng mắm tép',
+    'Hấp tiệt trùng': ''
+};
+const SX_NL_DONG_GOI = 'Thịt chưng mắm tép';
+// Kết quả in sẵn khi chọn công đoạn (Nấu: thành phẩm ra được bao nhiêu Kg)
+const SX_DEFAULT_KETQUA = {
+    'Nấu': 'Thịt chưng mắm tép : …… Kg'
+};
+// Vị trí & người thực hiện in sẵn khi chọn công đoạn (sửa từng công đoạn bằng nút ✎ ở Danh mục).
+const SX_DEFAULT_NGUOI = {
+    'Rửa NL': 'Khu rửa / Nguyễn Thị Hoa',
+    'Xay NL': 'Khu rửa / Nguyễn Thị Hoa',
+    'Nấu': 'Khu bếp / Nguyễn Thị Hoa',
+    'Đóng gói': 'Đóng gói SX / Nguyễn Văn Hoè',
+    'Hấp tiệt trùng': 'Khu hấp tiệt trùng / Nguyễn Văn Hoè'
+};
+window.__sxStages = [];
+window.__sxEditingStepId = null;
+// Sản phẩm trong ngày (in lên "Tên sản phẩm" của sổ): bấm chọn nhanh hoặc gõ tên khác
+const SX_DAY_PRODUCTS = ['Thịt chưng mắm tép', 'Mắm tép riu đỏ', 'Quả bùi Kỳ Lão'];
+function sxRenderDayChips() {
+    const box = document.getElementById('sxcd-daysp-chips');
+    if (!box) return;
+    const cur = ((document.getElementById('sxcd-daysp') || {}).value || '').trim();
+    box.innerHTML = SX_DAY_PRODUCTS.map((n, k) => '<button type="button" onclick="sxPickDayProduct(' + k + ')" class="px-3 py-1.5 rounded-full border text-xs font-black transition active:scale-95 ' + (n === cur ? 'bg-orange-100 text-orange-800 border-orange-400' : 'bg-slate-100 text-slate-600 border-slate-300 hover:bg-orange-50') + '">' + escapeHtml(n) + '</button>').join('');
+}
+function sxPickDayProduct(k) {
+    const el = document.getElementById('sxcd-daysp');
+    if (!el) return;
+    el.value = (el.value.trim() === SX_DAY_PRODUCTS[k]) ? '' : SX_DAY_PRODUCTS[k];   // bấm lại lần nữa để bỏ chọn
+    sxMarkDirty(true);
+    sxRenderDayChips();
+}
+function sxTodayVN() { return formatISODateVN(new Date()); }
+function sxOpenTab(t) {
+    const isCd = t === 'congdoan';
+    document.getElementById('sx-pane-phieu')?.classList.toggle('hidden', isCd);
+    document.getElementById('sx-pane-congdoan')?.classList.toggle('hidden', !isCd);
+    const on = 'py-2.5 px-1 text-[11px] md:text-sm font-black rounded-xl transition-all duration-150 bg-gradient-to-b from-orange-500 to-orange-600 text-white border-b-[4px] border-orange-700 uppercase tracking-wider';
+    const off = 'py-2.5 px-1 text-[11px] md:text-sm font-bold rounded-xl transition-all duration-150 bg-slate-100/80 dark:bg-slate-900/40 text-slate-500 dark:text-slate-400 border-b-[4px] border-transparent uppercase tracking-wider';
+    const bp = document.getElementById('sx-tabbtn-phieu'), bc = document.getElementById('sx-tabbtn-congdoan');
+    if (bp) bp.className = isCd ? off : on;
+    if (bc) bc.className = isCd ? on : off;
+    if (isCd) sxInitCongDoan();
+}
+async function sxLoadStages() {
+    const snap = await db.collection('production_stages').get();
+    let list = [], hasMeta = false, hasRename = false;
+    snap.forEach(d => {
+        if (d.id === 'meta_hap') { hasMeta = true; return; }        // dòng đánh dấu, không phải công đoạn
+        if (d.id === 'meta_rename') { hasRename = true; return; }
+        list.push({ id: d.id, ...d.data() });
+    });
+    const mk = (n, i) => ({ name: n, order: i, nlMau: SX_DEFAULT_TEMPLATES[n] || '', nguoiMau: SX_DEFAULT_NGUOI[n] || '', ketQuaMau: SX_DEFAULT_KETQUA[n] || '' });
+    if (!list.length) {
+        // Tạo danh mục mặc định (id cố định nên 2 máy mở cùng lúc cũng không bị nhân đôi)
+        const batch = db.batch();
+        SX_DEFAULT_STAGES.forEach((n, i) => {
+            const id = 'seed_' + (i + 1);
+            batch.set(db.collection('production_stages').doc(id), mk(n, i + 1));
+            list.push({ id, ...mk(n, i + 1) });
+        });
+        batch.set(db.collection('production_stages').doc('meta_hap'), { done: true });
+        batch.set(db.collection('production_stages').doc('meta_rename'), { done: true });
+        try { await batch.commit(); } catch (e) { console.warn('Không tạo được danh mục công đoạn mặc định:', e); }
+        return (window.__sxStages = list);
+    }
+    if (!hasMeta) {
+        // Thêm công đoạn "Hấp tiệt trùng" đúng 1 lần (xóa đi sẽ không tự hiện lại)
+        try {
+            if (!list.some(x => sxNorm(x.name) === 'hấp tiệt trùng')) {
+                const order = list.reduce((m, x) => Math.max(m, x.order || 0), 0) + 1;
+                await db.collection('production_stages').doc('seed_6').set(mk('Hấp tiệt trùng', order));
+                list.push({ id: 'seed_6', ...mk('Hấp tiệt trùng', order) });
+            }
+            await db.collection('production_stages').doc('meta_hap').set({ done: true });
+        } catch (e) { console.warn('Không thêm được công đoạn Hấp tiệt trùng:', e); }
+    }
+    if (!hasRename) {
+        // Đổi tên 1 lần: Rửa thịt -> Rửa NL, Xay thịt -> Xay NL (kể cả các dòng đã nhập); bỏ công đoạn Xay hành
+        try {
+            const renames = { 'rửa thịt': 'Rửa NL', 'xay thịt': 'Xay NL' };
+            for (const st of list.slice()) {
+                const key = sxNorm(st.name);
+                if (renames[key]) {
+                    const oldName = st.name;
+                    await db.collection('production_stages').doc(st.id).update({ name: renames[key] });
+                    st.name = renames[key];
+                    const ss = await db.collection('production_steps').where('stage', '==', oldName).get();
+                    const ups = [];
+                    ss.forEach(d => ups.push(db.collection('production_steps').doc(d.id).update({ stage: renames[key] })));
+                    await Promise.all(ups);
+                } else if (key === 'xay hành') {
+                    await db.collection('production_stages').doc(st.id).delete();
+                    list.splice(list.indexOf(st), 1);
+                }
+            }
+            await db.collection('production_stages').doc('meta_rename').set({ done: true });
+        } catch (e) { console.warn('Không đổi tên được công đoạn:', e); }
+    }
+    list.sort((a, b) => (a.order || 0) - (b.order || 0));
+    window.__sxStages = list;
+    return list;
+}
+async function sxInitCongDoan() {
+    try {
+        const d = document.getElementById('sxcd-date');
+        if (d && !d.value) d.value = sxTodayVN();
+        // Danh sách sản phẩm: lấy từ ô chọn sản phẩm của phiếu sản xuất
+        const src = document.getElementById('sxTenSP');
+        window.__sxProducts = src ? Array.from(src.options).map(o => o.value).filter(v => v && v.trim()) : [];
+        const dl = document.getElementById('sxcd-daysp-list');
+        if (dl) dl.innerHTML = SX_DAY_PRODUCTS.map(v => '<option value="' + escapeHtml(v) + '"></option>').join('');
+        sxRenderDayChips();
+        await sxLoadStages();
+        sxRenderStageUI();
+        if (!window.__sxDirty) await sxLoadGrid(false);   // đang có thay đổi chưa lưu thì giữ nguyên bảng
+        sxInitSavedDefaults();
+        if (!window.__sxUnloadHooked) {
+            window.__sxUnloadHooked = true;
+            window.addEventListener('beforeunload', e => { if (window.__sxDirty) { e.preventDefault(); e.returnValue = ''; } });
+        }
+    } catch (e) {
+        console.error(e);
+        showAlert('Lỗi tải tab Công đoạn: ' + e.message);
+    }
+}
+function sxRenderStageUI() {
+    sxRenderQuick();
+    const sel = document.getElementById('sxcd-stage');
+    if (sel) {
+        const cur = sel.value;
+        sel.innerHTML = window.__sxStages.map(s => '<option value="' + escapeHtml(s.name) + '">' + escapeHtml(s.name) + '</option>').join('');
+        if (cur) sel.value = cur;
+    }
+    const chips = document.getElementById('sxcd-stage-chips');
+    if (chips) {
+        const n = window.__sxStages.length;
+        const ib = 'w-6 h-6 inline-flex items-center justify-center rounded-full hover:bg-black/10';
+        chips.innerHTML = window.__sxStages.map((s, i) =>
+            '<span class="inline-flex items-center gap-0.5 rounded-full border pl-3 pr-1 py-1 text-xs font-black ' + sxTone(s.name).badge + '">'
+            + escapeHtml(s.name)
+            + '<span class="inline-flex items-center ml-1.5 pl-1.5 border-l border-black/10">'
+            + (i > 0 ? '<button onclick="sxMoveStage(\'' + s.id + '\',-1)" class="' + ib + '" title="Lên trước">' + sxIcon('chevL', 'w-3.5 h-3.5') + '</button>' : '')
+            + (i < n - 1 ? '<button onclick="sxMoveStage(\'' + s.id + '\',1)" class="' + ib + '" title="Xuống sau">' + sxIcon('chevR', 'w-3.5 h-3.5') + '</button>' : '')
+            + '<button onclick="sxEditStageTpl(\'' + s.id + '\')" class="' + ib + '" title="Sửa mẫu in sẵn">' + sxIcon('pencil', 'w-3.5 h-3.5') + '</button>'
+            + '<button onclick="sxDelStage(\'' + s.id + '\')" class="' + ib + ' text-red-600" title="Xóa khỏi danh mục">' + sxIcon('x', 'w-3.5 h-3.5') + '</button></span></span>').join('');
+    }
+}
+async function sxAddStage() {
+    const inp = document.getElementById('sxcd-new-stage');
+    const name = (inp.value || '').trim();
+    if (!name) return;
+    if (window.__sxStages.some(s => s.name.toLowerCase() === name.toLowerCase())) return showAlert('Công đoạn này đã có trong danh mục!');
+    const order = (window.__sxStages.reduce((m, s) => Math.max(m, s.order || 0), 0)) + 1;
+    try {
+        await db.collection('production_stages').add({ name, order });
+        inp.value = '';
+        await sxLoadStages();
+        sxRenderStageUI();
+    } catch (e) { showAlert('Lỗi thêm công đoạn: ' + e.message); }
+}
+async function sxDelStage(id) {
+    const s = window.__sxStages.find(x => x.id === id);
+    if (!s) return;
+    const r = await Swal.fire({ icon: 'warning', title: 'Xóa công đoạn "' + s.name + '" khỏi danh mục?', text: 'Các dòng đã nhập trước đó vẫn giữ nguyên.', showCancelButton: true, confirmButtonText: 'Xóa', cancelButtonText: 'Hủy' });
+    if (!r.isConfirmed) return;
+    try {
+        await db.collection('production_stages').doc(id).delete();
+        await sxLoadStages();
+        sxRenderStageUI();
+    } catch (e) { showAlert('Lỗi xóa công đoạn: ' + e.message); }
+}
+async function sxMoveStage(id, dir) {
+    const list = window.__sxStages;
+    const i = list.findIndex(x => x.id === id), j = i + dir;
+    if (i < 0 || j < 0 || j >= list.length) return;
+    try {
+        const batch = db.batch();
+        // Ghi lại thứ tự theo vị trí mới cho toàn bộ danh mục (tránh trùng số thứ tự)
+        const arr = list.slice();
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+        arr.forEach((s, k) => batch.update(db.collection('production_stages').doc(s.id), { order: k + 1 }));
+        await batch.commit();
+        await sxLoadStages();
+        sxRenderStageUI();
+    } catch (e) { showAlert('Lỗi đổi thứ tự: ' + e.message); }
+}
+// Mẫu in sẵn của công đoạn. Chưa có hoặc để rỗng -> dùng mẫu mặc định; muốn để trống hẳn thì lưu 1 dấu cách.
+function sxStageField(name, field) {
+    const defs = { nlMau: SX_DEFAULT_TEMPLATES, nguoiMau: SX_DEFAULT_NGUOI, ketQuaMau: SX_DEFAULT_KETQUA }[field] || {};
+    const st = (window.__sxStages || []).find(x => x.name === name);
+    const v = st ? st[field] : undefined;
+    if (v === ' ') return '';
+    if (v === undefined || v === null || v === '') return defs[name] || '';
+    return v;
+}
+function sxStageTemplate(name) { return sxStageField(name, 'nlMau'); }
+async function sxEditStageTpl(id) {
+    const st = window.__sxStages.find(x => x.id === id);
+    if (!st) return;
+    const r = await Swal.fire({
+        title: 'Mẫu in sẵn: ' + st.name,
+        html: '<div class="text-left"><label class="text-xs font-bold">Nguyên liệu (mỗi nguyên liệu 1 dòng)</label>'
+            + '<textarea id="sxtpl-nl" class="swal2-textarea !m-0 !w-full" rows="4">' + escapeHtml(sxStageField(st.name, 'nlMau')) + '</textarea>'
+            + '<label class="text-xs font-bold mt-2 block">Vị trí &amp; người thực hiện</label>'
+            + '<input id="sxtpl-nguoi" class="swal2-input !m-0 !w-full" value="' + escapeHtml(sxStageField(st.name, 'nguoiMau')) + '">'
+            + '<label class="text-xs font-bold mt-2 block">Kết quả</label>'
+            + '<input id="sxtpl-kq" class="swal2-input !m-0 !w-full" value="' + escapeHtml(sxStageField(st.name, 'ketQuaMau')) + '"></div>',
+        showCancelButton: true,
+        confirmButtonText: 'Lưu',
+        cancelButtonText: 'Hủy',
+        preConfirm: () => {
+            const v = x => { const t = document.getElementById(x).value; return t.trim() ? t.trim() : ' '; };   // ' ' = cố ý để trống
+            return { nlMau: v('sxtpl-nl'), nguoiMau: v('sxtpl-nguoi'), ketQuaMau: v('sxtpl-kq') };
+        }
+    });
+    if (!r.isConfirmed) return;
+    try {
+        await db.collection('production_stages').doc(id).update(r.value);
+        await sxLoadStages();
+        sxRenderStageUI();
+    } catch (e) { showAlert('Lỗi lưu mẫu: ' + e.message); }
+}
+// ===================================================================================
+// BẢNG CÔNG ĐOẠN (giống mẫu sổ). Bấm vào ô để chọn, mỗi lần chọn tự lưu 1 dòng vào 'production_steps':
+//  - Công đoạn: chọn từ Danh mục công đoạn (tự điền sẵn người, nguyên liệu, kết quả mẫu)
+//  - Thời gian: chọn giờ bắt đầu - kết thúc
+//  - Nguyên liệu: tích từ Danh mục nguyên liệu (trang Nguyên liệu) + nhập số Kg
+//  - Vị trí & người: chọn từ danh sách hoặc gõ
+//  - Thông số kiểm soát: công đoạn Đóng gói -> chọn sản phẩm, Kết quả tự tính số hũ + Kg
+// ===================================================================================
+window.__sxRows = [];
+window.__sxProducts = [];
+const SX_GRID_MIN_ROWS = 4;
+function sxNorm(x) { return String(x || '').trim().toLowerCase().replace(/\s+/g, ' '); }
+function sxIsPack(stage) { return sxNorm(stage) === 'đóng gói'; }
+function sxH(v) { return escapeHtml(v == null ? '' : v).replace(/\n/g, '<br>'); }
+function sxBlankRow(stt) { return { id: null, stt, stage: '', gioBD: '', gioKT: '', nguyenLieu: '', nguoi: '', thongSo: '', ketQua: '', tenSP: '' }; }
+function sxToast(msg, icon) { Swal.fire({ icon: icon || 'info', title: msg, toast: true, position: 'top-end', timer: 2200, showConfirmButton: false }); }
+function sxCdToday() { return sxGuardedLoad(sxTodayVN(), false); }
+// Mỗi lần bấm LƯU tạo 1 "phiếu" (cùng phieuId). editSaved=false: bảng trống để nhập phiếu mới;
+// editSaved=true + phieuKey: mở đúng phiếu đó để xem/sửa (các phiếu khác trong ngày không bị lẫn vào)
+function sxCreatedMs(x) { return (x && x.createdAt && x.createdAt.toMillis) ? x.createdAt.toMillis() : 0; }
+function sxPhieuKey(x) { return x.phieuId || ('t' + sxCreatedMs(x)); }   // phiếu cũ chưa có phieuId: gom theo lần lưu (cùng giờ tạo)
+async function sxLoadGrid(editSaved, phieuKey) {
+    const dateEl = document.getElementById('sxcd-date');
+    const date = (dateEl && dateEl.value) || sxTodayVN();
+    window.__sxDate = date;
+    const body = document.getElementById('sxcd-body');
+    if (!body) return;
+    body.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-gray-400">Đang tải...</td></tr>';
+    try {
+        const rows = [];
+        if (editSaved && phieuKey) {
+            const snap = await db.collection('production_steps').where('date', '==', date).get();
+            snap.forEach(doc => {
+                const x = doc.data();
+                if (sxPhieuKey(x) !== phieuKey) return;
+                rows.push({
+                    id: doc.id, stt: Number(x.stt) || 0, createdMs: sxCreatedMs(x),
+                    stage: x.stage || '', gioBD: x.gioBD || '', gioKT: x.gioKT || '', nguyenLieu: x.nguyenLieu || '',
+                    nguoi: x.nguoi || '', thongSo: x.thongSo || '', ketQua: x.ketQua || '', tenSP: x.tenSP || ''
+                });
+            });
+            rows.sort((a, b) => ((a.stt || 9999) - (b.stt || 9999)) || (a.createdMs - b.createdMs));
+        }
+        let max = rows.reduce((m, r) => Math.max(m, r.stt || 0), 0);
+        rows.forEach(r => { if (!r.stt) r.stt = ++max; });
+        const list = rows;
+        while (list.length < SX_GRID_MIN_ROWS) list.push(sxBlankRow(++max));
+        window.__sxRows = list;
+        window.__sxDeleted = [];
+        window.__sxPhieuId = rows.length ? phieuKey : null;   // null = phiếu mới (lưu sẽ tạo phieuId mới)
+        const dsp = document.getElementById('sxcd-daysp');
+        if (dsp) { const f = rows.length ? rows.find(r => r.tenSP && !sxIsPack(r.stage)) : null; dsp.value = f ? f.tenSP : ''; }
+        sxRenderDayChips();
+        sxMarkDirty(false);
+        const mode = document.getElementById('sxcd-mode');
+        if (mode) { mode.textContent = rows.length ? 'Đang sửa phiếu đã lưu ngày ' + formatDateToDDMMYYYY(date) : ''; mode.classList.toggle('hidden', !rows.length); }
+        sxRenderGrid();
+    } catch (e) {
+        console.error(e);
+        body.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-red-500">Lỗi tải dữ liệu: ' + escapeHtml(e.message) + '</td></tr>';
+    }
+}
+// ---- Giao diện bảng: màu theo công đoạn, hiển thị nguyên liệu dạng dòng, thanh trạng thái ----
+// ---- Biểu tượng (SVG nét mảnh, dùng chung màu chữ) ----
+const SX_ICONS = {
+    chevL: '<path d="M15 18l-6-6 6-6"/>',
+    chevR: '<path d="M9 18l6-6-6-6"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    x: '<path d="M18 6L6 18M6 6l12 12"/>',
+    pencil: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    save: '<path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/>',
+    printer: '<path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',
+    list: '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+    edit: '<path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>'
+};
+function sxIcon(name, cls) {
+    return '<svg class="' + (cls || 'w-4 h-4') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (SX_ICONS[name] || '') + '</svg>';
+}
+const SX_TONES = {
+    sky: { badge: 'bg-sky-100 text-sky-800 border-sky-300 dark:bg-sky-900/40 dark:text-sky-200 dark:border-sky-700', bar: 'border-l-sky-500' },
+    violet: { badge: 'bg-violet-100 text-violet-800 border-violet-300 dark:bg-violet-900/40 dark:text-violet-200 dark:border-violet-700', bar: 'border-l-violet-500' },
+    orange: { badge: 'bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-900/40 dark:text-orange-200 dark:border-orange-700', bar: 'border-l-orange-500' },
+    emerald: { badge: 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-900/40 dark:text-emerald-200 dark:border-emerald-700', bar: 'border-l-emerald-500' },
+    rose: { badge: 'bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-900/40 dark:text-rose-200 dark:border-rose-700', bar: 'border-l-rose-500' },
+    slate: { badge: 'bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600', bar: 'border-l-slate-400' }
+};
+function sxTone(name) {
+    const n = sxNorm(name);
+    if (n.startsWith('rửa')) return SX_TONES.sky;
+    if (n.startsWith('xay')) return SX_TONES.violet;
+    if (n === 'nấu') return SX_TONES.orange;
+    if (n === 'đóng gói') return SX_TONES.emerald;
+    if (n.startsWith('hấp')) return SX_TONES.rose;
+    return SX_TONES.slate;
+}
+// Nguyên liệu: mỗi dòng "tên ........ số Kg"; chỗ chưa điền Kg (……) tô vàng để dễ thấy
+function sxNLHtml(text) {
+    const lines = String(text || '').split('\n').map(x => x.trim()).filter(Boolean);
+    return lines.map(line => {
+        const m = line.match(/^(.*?)\s*:\s*(.*)$/);
+        if (!m) return '<div class="py-0.5">' + escapeHtml(line) + '</div>';
+        const miss = m[2].indexOf('…') >= 0 || !m[2].trim();
+        return '<div class="flex justify-between gap-3 py-0.5 border-b border-dashed border-slate-200 dark:border-slate-700 last:border-0"><span>' + escapeHtml(m[1]) + '</span><span class="font-bold whitespace-nowrap ' + (miss ? 'text-amber-600 dark:text-amber-400' : '') + '">' + escapeHtml(m[2]) + '</span></div>';
+    }).join('');
+}
+function sxMarkDirty(v) {
+    window.__sxDirty = v !== false;
+    const b = document.getElementById('sxcd-dirty');
+    if (b) {
+        b.textContent = window.__sxDirty ? '● Chưa lưu' : '✓ Chưa có thay đổi';
+        b.className = 'px-3 py-1 rounded-lg text-xs font-bold ' + (window.__sxDirty ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700');
+    }
+}
+function sxRenderGrid() {
+    const body = document.getElementById('sxcd-body');
+    if (!body) return;
+    const empty = '<span class="sx-empty">' + sxIcon('plus', 'w-4 h-4') + '<span class="md:hidden">chọn</span></span>';
+    const cell = (i, f, label, html, extra) => '<td data-label="' + label + '" onclick="sxCell(' + i + ',\'' + f + '\')" class="sx-c cursor-pointer px-3 py-3 border-t border-slate-200 dark:border-slate-800 ' + (extra || '') + '" style="min-height:56px">' + (html || empty) + '</td>';
+    body.innerHTML = window.__sxRows.map((r, i) => {
+        const tone = sxTone(r.stage);
+        const time = (r.gioBD || r.gioKT)
+            ? '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 font-bold whitespace-nowrap">' + sxIcon('clock', 'w-3.5 h-3.5 text-slate-400') + escapeHtml(r.gioBD || '…') + ' → ' + escapeHtml(r.gioKT || '…') + '</span>' : '';
+        const badge = r.stage ? '<span class="inline-block px-3 py-1 rounded-full border font-black ' + tone.badge + '">' + escapeHtml(r.stage) + '</span>' : '';
+        const kq = r.ketQua ? '<span class="font-bold ' + (r.ketQua.indexOf('…') >= 0 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-700 dark:text-emerald-300') + '">' + sxH(r.ketQua) + '</span>' : '';
+        return '<tr>'
+            + '<td data-label="Dòng" class="sx-no px-3 py-3 border-t border-slate-200 dark:border-slate-800 text-center text-slate-400 font-black">' + (i + 1) + '</td>'
+            + cell(i, 'stage', 'Công đoạn SX', badge, 'border-l-4 ' + tone.bar)
+            + cell(i, 'time', 'Thời gian', time)
+            + cell(i, 'nl', 'Nguyên liệu (Tên, Số Kg)', sxNLHtml(r.nguyenLieu))
+            + cell(i, 'nguoi', 'Vị trí & người thực hiện', sxH(r.nguoi))
+            + cell(i, 'thongso', 'Thông số kiểm soát', sxH(r.thongSo))
+            + cell(i, 'ketqua', 'Kết quả', kq)
+            + '<td class="sx-del px-1 py-3 border-t border-slate-100 dark:border-slate-800 text-center"><button onclick="sxDelRow(' + i + ')" class="w-8 h-8 inline-flex items-center justify-center rounded-lg text-slate-300 hover:text-red-600 hover:bg-red-50" title="Xóa dòng">' + sxIcon('x', 'w-4 h-4') + '</button></td>'
+            + '</tr>';
+    }).join('');
+    const cnt = document.getElementById('sxcd-count');
+    if (cnt) { const n = window.__sxRows.filter(r => r.stage).length; cnt.textContent = n ? n + ' công đoạn đang nhập' : 'Bấm vào ô để bắt đầu nhập'; }
+}
+// Thêm nhanh 1 dòng đã chọn sẵn công đoạn (điền luôn mẫu nguyên liệu, người làm, kết quả của công đoạn đó)
+function sxRenderQuick() {
+    const box = document.getElementById('sxcd-quick');
+    if (!box) return;
+    box.innerHTML = window.__sxStages.map((s, k) => '<button onclick="sxAddStageRow(' + k + ')" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border text-xs font-black hover:opacity-80 active:scale-95 transition ' + sxTone(s.name).badge + '">' + sxIcon('plus', 'w-3.5 h-3.5') + escapeHtml(s.name) + '</button>').join('');
+}
+function sxAddStageRow(k) {
+    const st = window.__sxStages[k];
+    if (!st) return;
+    let row = window.__sxRows.find(r => !r.stage && !r.id);
+    if (!row) {
+        const max = window.__sxRows.reduce((m, r) => Math.max(m, r.stt || 0), 0);
+        row = sxBlankRow(max + 1);
+        window.__sxRows.push(row);
+    }
+    sxSetStage(row, st.name);
+    sxMarkDirty(true);
+    sxRenderGrid();
+}
+async function sxShiftDate(delta) {
+    const el = document.getElementById('sxcd-date');
+    const cur = el.value || sxTodayVN();
+    const d = new Date(cur + 'T12:00:00+07:00');
+    d.setDate(d.getDate() + delta);
+    await sxGuardedLoad(formatISODateVN(d), false);
+}
+function sxAddGridRow() {
+    const max = window.__sxRows.reduce((m, r) => Math.max(m, r.stt || 0), 0);
+    window.__sxRows.push(sxBlankRow(max + 1));
+    sxMarkDirty(true);
+    sxRenderGrid();
+}
+async function sxDelRow(i) {
+    const row = window.__sxRows[i];
+    if (!row) return;
+    if (row.id || row.stage) {
+        const r = await Swal.fire({ icon: 'warning', title: 'Xóa dòng này?', text: 'Bấm LƯU để áp dụng.', showCancelButton: true, confirmButtonText: 'Xóa', cancelButtonText: 'Hủy' });
+        if (!r.isConfirmed) return;
+    }
+    if (row.id) window.__sxDeleted.push(row.id);   // chỉ xóa khỏi dữ liệu khi bấm LƯU
+    window.__sxRows.splice(i, 1);
+    sxMarkDirty(true);
+    sxRenderGrid();
+}
+// ---- Lưu: mọi thay đổi trong bảng chỉ nằm tạm trên màn hình cho đến khi bấm LƯU ----
+window.__sxDirty = false;
+window.__sxDeleted = [];
+async function sxSaveAll() {
+    const date = window.__sxDate || sxTodayVN();
+    try {
+        Swal.fire({ title: 'Đang lưu...', allowOutsideClick: false, showConfirmButton: false, didOpen: () => Swal.showLoading() });
+        const coll = db.collection('production_steps');
+        const batch = db.batch();
+        const pid = window.__sxPhieuId || coll.doc().id;   // phiếu mới -> phieuId mới; đang sửa phiếu cũ -> giữ nguyên
+        window.__sxDeleted.forEach(id => batch.delete(coll.doc(id)));
+        const ts = firebase.firestore.FieldValue.serverTimestamp();
+        const created = [];
+        let n = 0;
+        const daySP = ((document.getElementById('sxcd-daysp') || {}).value || '').trim();
+        window.__sxRows.forEach((r, i) => {
+            if (!r.stage) {
+                if (r.id) { batch.delete(coll.doc(r.id)); created.push([r, null]); }   // dòng đã lưu nhưng nay không còn công đoạn
+                return;
+            }
+            const data = { date, phieuId: pid, stt: r.stt, tenSP: r.tenSP || daySP, stage: r.stage, gioBD: r.gioBD || '', gioKT: r.gioKT || '', nguyenLieu: r.nguyenLieu || '', nguoi: r.nguoi || '', thongSo: r.thongSo || '', ketQua: r.ketQua || '', updatedAt: ts };
+            const ref = r.id ? coll.doc(r.id) : coll.doc();
+            if (!r.id) data.createdAt = ts;
+            batch.set(ref, data, { merge: true });
+            if (!r.id) created.push([r, ref.id]);
+            n++;
+        });
+        await batch.commit();
+        created.forEach(([r, id]) => { r.id = id; });
+        window.__sxDeleted = [];
+        sxMarkDirty(false);
+        Swal.close();
+        sxToast('Đã lưu ' + n + ' công đoạn ngày ' + formatDateToDDMMYYYY(date) + ' - bấm 📋 Danh sách đã lưu để xem', 'success');
+        await sxLoadGrid(false);   // lưu xong trả bảng về trống (mặc định) để nhập tiếp
+        const sp = document.getElementById('sxcd-saved-panel');
+        if (sp && !sp.classList.contains('hidden')) sxLoadSaved();   // đang mở danh sách thì cập nhật luôn
+    } catch (e) {
+        Swal.close();
+        console.error(e);
+        showAlert('Lỗi lưu công đoạn: ' + e.message);
+    }
+}
+async function sxGuardedLoad(date, editSaved, phieuKey) {
+    if (window.__sxDirty) {
+        const r = await Swal.fire({ icon: 'warning', title: 'Bạn chưa lưu thay đổi', text: 'Bỏ thay đổi và tiếp tục?', showCancelButton: true, confirmButtonText: 'Bỏ thay đổi', cancelButtonText: 'Ở lại' });
+        if (!r.isConfirmed) { document.getElementById('sxcd-date').value = window.__sxDate; return false; }
+    }
+    document.getElementById('sxcd-date').value = date || sxTodayVN();
+    await sxLoadGrid(!!editSaved, phieuKey);
+    return true;
+}
+// ---- Danh sách đã lưu (nằm dưới Danh mục công đoạn) ----
+function sxInitSavedDefaults() {
+    const to = document.getElementById('sxsv-to'), from = document.getElementById('sxsv-from');
+    if (to && !to.value) to.value = sxTodayVN();
+    if (from && !from.value) from.value = formatISODateVN(new Date(Date.now() - 30 * 86400000));
+}
+function sxToggleSaved() {   // nút "📋 Danh sách đã lưu": bấm để mở (và tải lại), bấm lần nữa hoặc ✕ Đóng để ẩn
+    const panel = document.getElementById('sxcd-saved-panel');
+    if (!panel) return;
+    if (!panel.classList.contains('hidden')) { panel.classList.add('hidden'); return; }
+    panel.classList.remove('hidden');
+    sxInitSavedDefaults();
+    sxLoadSaved();
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+async function sxLoadSaved() {
+    const from = document.getElementById('sxsv-from').value, to = document.getElementById('sxsv-to').value;
+    const body = document.getElementById('sxsv-body');
+    if (!from || !to) return showAlert('Chọn Từ ngày và Đến ngày!');
+    body.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-400">Đang tải...</td></tr>';
+    try {
+        const snap = await db.collection('production_steps').where('date', '>=', from).where('date', '<=', to).get();
+        const days = new Map();   // ngày -> (phiếu -> các dòng)
+        snap.forEach(doc => {
+            const x = doc.data();
+            if (!x.date) return;
+            const key = sxPhieuKey(x);
+            if (!days.has(x.date)) days.set(x.date, new Map());
+            const m = days.get(x.date);
+            if (!m.has(key)) m.set(key, []);
+            m.get(key).push({ id: doc.id, ...x });
+        });
+        const dates = Array.from(days.keys()).sort().reverse();
+        if (!dates.length) {
+            body.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-400">Chưa có phiếu công đoạn nào được lưu trong khoảng này</td></tr>';
+            return;
+        }
+        const bb = 'inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-xs font-bold ';
+        body.innerHTML = dates.map(d => {
+            const phieus = Array.from(days.get(d).entries()).map(([key, rows]) => {
+                rows.sort((a, b) => (Number(a.stt) || 999) - (Number(b.stt) || 999));
+                const bd = rows.map(r => r.gioBD).filter(Boolean).sort()[0] || '';
+                return { key, rows, bd, cms: Math.min(...rows.map(sxCreatedMs)) };
+            }).sort((a, b) => (a.bd || '99').localeCompare(b.bd || '99') || (a.cms - b.cms));
+            return phieus.map((ph, k) => {
+                const stages = ph.rows.map(r => '<span class="inline-flex items-center gap-1 m-0.5 px-2.5 py-1 rounded-full border text-xs font-bold ' + sxTone(r.stage).badge + '">' + escapeHtml(r.stage || '') + (nkStepTime(r) ? ' <span class="font-normal opacity-80">' + escapeHtml(nkStepTime(r).replace('Từ ', '').replace(' đến ', '–')) + '</span>' : '') + '</span>').join('');
+                const sps = Array.from(new Set(ph.rows.map(r => r.tenSP).filter(Boolean))).map(escapeHtml).join('<br>');
+                const ca = ph.bd ? (parseInt(ph.bd.slice(0, 2), 10) < 12 ? 'Sáng' : 'Chiều') : '';
+                const arg = '\'' + d + '\',\'' + ph.key + '\'';
+                return '<tr><td class="p-2 whitespace-nowrap align-top"><div class="font-bold">' + formatDateToDDMMYYYY(d) + '</div><div class="text-xs font-semibold text-slate-500">Phiếu ' + (k + 1) + (ca ? ' · ' + ca : '') + '</div></td>'
+                    + '<td class="p-2 align-top">' + stages + '</td><td class="p-2 align-top">' + (sps || '<span class="text-slate-300">—</span>') + '</td>'
+                    + '<td class="p-2 text-right whitespace-nowrap align-top">'
+                    + '<button onclick="sxOpenSavedDay(' + arg + ')" class="' + bb + 'border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700">' + sxIcon('edit', 'w-3.5 h-3.5') + 'Mở để sửa</button> '
+                    + '<button onclick="sxPrintDay(' + arg + ')" class="' + bb + 'border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700">' + sxIcon('printer', 'w-3.5 h-3.5') + 'In sổ</button> '
+                    + '<button onclick="sxDeleteSavedDay(' + arg + ')" class="' + bb + 'border-red-200 bg-red-50 hover:bg-red-100 text-red-700">' + sxIcon('x', 'w-3.5 h-3.5') + 'Xóa phiếu</button></td></tr>';
+            }).join('');
+        }).join('');
+    } catch (e) {
+        console.error(e);
+        body.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-red-500">Lỗi tải: ' + escapeHtml(e.message) + '</td></tr>';
+    }
+}
+async function sxOpenSavedDay(date, phieuKey) {
+    if (await sxGuardedLoad(date, true, phieuKey)) document.getElementById('sxcd-date').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+// ---- In nhanh Sổ nhật ký sản xuất ngay tại tab Công đoạn (trang Báo cáo vẫn dùng như cũ) ----
+async function sxQuickPrint(from, to, phieuKey) {
+    if (window.__sxDirty) {
+        const r = await Swal.fire({ icon: 'warning', title: 'Có thay đổi chưa lưu', text: 'Sổ chỉ in phần đã lưu. Vẫn mở sổ?', showCancelButton: true, confirmButtonText: 'Mở sổ', cancelButtonText: 'Quay lại' });
+        if (!r.isConfirmed) return;
+    }
+    await nkView(NK_SX_CFG, d => nkBuildSanXuat(d, { phieuKey }), { from, to });
+}
+function sxPrintDay(date, phieuKey) { return sxQuickPrint(date, date, phieuKey); }
+function sxPrintCurrentDate() {
+    const d = (document.getElementById('sxcd-date') || {}).value || sxTodayVN();
+    return sxQuickPrint(d, d);
+}
+function sxPrintSavedRange() {
+    const f = document.getElementById('sxsv-from').value, t = document.getElementById('sxsv-to').value;
+    if (!f || !t) return showAlert('Chọn Từ ngày và Đến ngày!');
+    return sxQuickPrint(f, t);
+}
+async function sxDeleteSavedDay(date, phieuKey) {
+    const r = await Swal.fire({ icon: 'warning', title: 'Xóa phiếu công đoạn này (ngày ' + formatDateToDDMMYYYY(date) + ')?', text: 'Không khôi phục được.', showCancelButton: true, confirmButtonText: 'Xóa', cancelButtonText: 'Hủy' });
+    if (!r.isConfirmed) return;
+    try {
+        const snap = await db.collection('production_steps').where('date', '==', date).get();
+        const batch = db.batch();
+        snap.forEach(doc => { if (sxPhieuKey(doc.data()) === phieuKey) batch.delete(doc.ref || db.collection('production_steps').doc(doc.id)); });
+        await batch.commit();
+        if (window.__sxPhieuId === phieuKey) { sxMarkDirty(false); await sxLoadGrid(false); }
+        sxLoadSaved();
+    } catch (e) { showAlert('Lỗi xóa: ' + e.message); }
+}
+async function sxCell(i, field) {
+    const row = window.__sxRows[i];
+    if (!row) return;
+    if (field !== 'stage' && !row.stage) return sxToast('Hãy chọn Công đoạn ở cột đầu trước', 'info');
+    try {
+        if (field === 'stage') await sxPickStage(row);
+        else if (field === 'time') await sxPickTime(row);
+        else if (field === 'nl') await sxPickNL(row);
+        else if (field === 'nguoi') await sxPickNguoi(row);
+        else if (field === 'thongso') await sxPickThongSo(row);
+        else if (field === 'ketqua') await sxPickKetQua(row);
+    } catch (e) {
+        console.error(e);
+        showAlert('Lỗi: ' + e.message);
+    }
+    sxRenderGrid();
+}
+// Danh sách chọn 1 mục (bấm là chọn luôn) + ô gõ nội dung khác. Trả về chuỗi, hoặc null nếu hủy.
+function sxPickList(title, options, current, placeholder) {
+    return new Promise(resolve => {
+        let chosen = null;
+        const btn = (o, i) => '<button type="button" data-v="' + i + '" style="display:block;width:100%;text-align:left;padding:10px;margin:4px 0;border:1px solid #cbd5e1;border-radius:10px;color:#0f172a;'
+            + (o === current ? 'background:#fed7aa;font-weight:bold;' : 'background:#f8fafc;') + '">' + escapeHtml(o) + '</button>';
+        Swal.fire({
+            title,
+            html: '<div id="sxpl" style="max-height:48vh;overflow:auto;text-align:left">' + (options.length ? options.map(btn).join('') : '<div style="color:#64748b;font-size:13px">Chưa có danh sách, hãy gõ bên dưới.</div>') + '</div>'
+                + '<input id="sxpl-custom" class="swal2-input" placeholder="' + escapeHtml(placeholder || 'Hoặc gõ nội dung khác') + '" value="' + (options.includes(current) ? '' : escapeHtml(current || '')) + '">',
+            showCancelButton: true,
+            confirmButtonText: 'Dùng nội dung đã gõ',
+            cancelButtonText: 'Hủy',
+            didOpen: popup => {
+                popup.querySelectorAll('#sxpl button').forEach(b => b.addEventListener('click', () => { chosen = options[+b.dataset.v]; Swal.clickConfirm(); }));
+            },
+            preConfirm: () => (chosen !== null ? chosen : document.getElementById('sxpl-custom').value.trim())
+        }).then(r => resolve(r.isConfirmed ? r.value : null));
+    });
+}
+function sxIsKind(stage, kind) {
+    const n = sxNorm(stage);
+    return kind === 'rua' ? (n === 'rửa nl' || n === 'rửa thịt') : (n === 'xay nl' || n === 'xay thịt');
+}
+// Ghép dòng Rửa NL thứ k với dòng Xay NL thứ k (nếu chỉ có 1 dòng bên kia thì ghép với dòng đó)
+function sxPartner(row, kind) {
+    const other = kind === 'rua' ? 'xay' : 'rua';
+    const mine = window.__sxRows.filter(r => sxIsKind(r.stage, kind === 'rua' ? 'rua' : 'xay'));
+    const theirs = window.__sxRows.filter(r => sxIsKind(r.stage, other));
+    const k = mine.indexOf(row);
+    return theirs[k] || (theirs.length === 1 ? theirs[0] : null);
+}
+// Rửa NL nhập nguyên liệu + Kg -> Xay NL tự có đúng nguyên liệu và Kg đó (chỉ khi dòng Xay đang trống / đang là mẫu / giống bản Rửa cũ)
+async function sxSyncXayFromRua(rua, oldVal) {
+    const xay = sxPartner(rua, 'rua');
+    if (!xay || !xay.stage) return;
+    const cur = (xay.nguyenLieu || '').trim();
+    if (!cur || cur === (oldVal || '').trim() || cur === sxStageField(xay.stage, 'nlMau').trim()) {
+        xay.nguyenLieu = rua.nguyenLieu;
+        sxMarkDirty(true);
+    }
+}
+// Đặt công đoạn cho 1 dòng và điền sẵn mẫu của công đoạn đó (nếu ô đang trống hoặc đang là mẫu của công đoạn cũ)
+function sxSetStage(row, nw) {
+    const old = row.stage;
+    if (old === nw) return;
+    row.stage = nw;
+    [['nguyenLieu', 'nlMau'], ['nguoi', 'nguoiMau'], ['ketQua', 'ketQuaMau']].forEach(([f, mau]) => {
+        const cur = row[f] || '';
+        if (!cur.trim() || (old && cur === sxStageField(old, mau))) row[f] = sxStageField(nw, mau);
+    });
+    if (sxIsKind(nw, 'xay')) {   // chọn Xay NL: lấy sẵn nguyên liệu + Kg đã nhập ở Rửa NL
+        const rua = sxPartner(row, 'xay');
+        const cur = (row.nguyenLieu || '').trim();
+        if (rua && (rua.nguyenLieu || '').trim() && (!cur || cur === sxStageField(nw, 'nlMau').trim())) row.nguyenLieu = rua.nguyenLieu;
+    }
+    if (sxIsPack(old) && !sxIsPack(nw)) { row.tenSP = ''; if (/^Đóng\s+(hũ|túi|khay|kg)\b/i.test(row.thongSo)) row.thongSo = ''; }
+}
+async function sxPickStage(row) {
+    const opts = {};
+    window.__sxStages.forEach(s => { opts[s.name] = s.name; });
+    const r = await Swal.fire({
+        title: 'Chọn công đoạn', input: 'radio', inputOptions: opts, inputValue: row.stage || '',
+        showCancelButton: true, confirmButtonText: 'Chọn', cancelButtonText: 'Hủy',
+        inputValidator: v => (v ? undefined : 'Hãy chọn 1 công đoạn')
+    });
+    if (!r.isConfirmed || r.value === row.stage) return;
+    sxSetStage(row, r.value);
+    sxMarkDirty(true);
+}
+async function sxPickTime(row) {
+    const lab = 'font-weight:bold;font-size:13px;display:block;margin:10px 0 4px;text-align:left';
+    const nowBtn = id => ' <button type="button" id="' + id + '" style="margin-left:8px;padding:6px 10px;border-radius:10px;background:#e2e8f0;color:#0f172a;font-size:12px;font-weight:bold">Bây giờ</button>';
+    const r = await Swal.fire({
+        title: 'Thời gian (24H, giờ Việt Nam)',
+        html: '<label style="' + lab + '">Từ giờ</label><div style="text-align:left">' + nkHM24Html('sxt-a', row.gioBD) + nowBtn('sxt-na') + '</div>'
+            + '<label style="' + lab + '">Đến giờ</label><div style="text-align:left">' + nkHM24Html('sxt-b', row.gioKT) + nowBtn('sxt-nb') + '</div>',
+        showCancelButton: true, confirmButtonText: 'Lưu', cancelButtonText: 'Hủy',
+        showDenyButton: true, denyButtonText: 'Xóa giờ',
+        didOpen: () => {
+            document.getElementById('sxt-na').addEventListener('click', () => nkSetHM('sxt-a', nkTimeVN(new Date())));
+            document.getElementById('sxt-nb').addEventListener('click', () => nkSetHM('sxt-b', nkTimeVN(new Date())));
+        },
+        preConfirm: () => ({ a: nkGetHM('sxt-a'), b: nkGetHM('sxt-b') })
+    });
+    if (r.isDenied) { row.gioBD = ''; row.gioKT = ''; }
+    else if (r.isConfirmed) { row.gioBD = r.value.a || ''; row.gioKT = r.value.b || ''; }
+    else return;
+    sxMarkDirty(true);
+}
+async function sxGetMats() {
+    if (window.__sxMats && Date.now() - (window.__sxMatsAt || 0) < 60000) return window.__sxMats;
+    const snap = await db.collection('materials_list').get();
+    const list = [];
+    snap.forEach(d => { const m = d.data(); if (m.name) list.push({ name: String(m.name).trim(), unit: m.unit || 'Kg' }); });
+    list.sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+    window.__sxMats = list;
+    window.__sxMatsAt = Date.now();
+    return list;
+}
+// "Thịt nạc vai : 28 Kg" -> { name, kg, unit }
+function sxParseNLLine(line) {
+    const m = String(line).match(/^(.*?)\s*:\s*(.*)$/);
+    const name = (m ? m[1] : String(line)).trim();
+    const rest = m ? m[2] : '';
+    const kg = (rest.match(/\d+(?:[.,]\d+)?/) || [''])[0];
+    const unit = rest.replace(/[\d.,…]+/g, '').trim();
+    return { name, kg, unit };
+}
+async function sxPickNL(row) {
+    const mats = await sxGetMats();
+    // Dòng đang có trong ô; nếu ô trống thì tích sẵn theo mẫu của công đoạn
+    const srcText = (row.nguyenLieu || '').trim() ? row.nguyenLieu : sxStageField(row.stage, 'nlMau');
+    const cur = srcText.split('\n').map(x => x.trim()).filter(Boolean).map(sxParseNLLine);
+    const items = mats.map(m => ({ name: m.name, unit: m.unit, checked: false, kg: '' }));
+    cur.forEach(c => {
+        const f = items.find(it => sxNorm(it.name) === sxNorm(c.name));
+        if (f) { f.checked = true; f.kg = c.kg; if (c.unit) f.unit = c.unit; }
+        else items.push({ name: c.name, unit: c.unit || 'Kg', checked: true, kg: c.kg });   // có trong ô nhưng chưa có trong danh mục
+    });
+    const rowsHtml = items.map((it, k) =>
+        '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #e5e7eb;text-align:left">'
+        + '<input type="checkbox" class="sxnl-chk" data-k="' + k + '"' + (it.checked ? ' checked' : '') + ' style="width:18px;height:18px">'
+        + '<span style="flex:1;font-size:14px">' + escapeHtml(it.name) + '</span>'
+        + '<input type="number" step="any" min="0" class="sxnl-kg" data-k="' + k + '" value="' + escapeHtml(it.kg) + '" placeholder="Kg" style="width:84px;padding:4px;border:1px solid #cbd5e1;border-radius:8px;color:#0f172a">'
+        + '<span style="width:34px;font-size:12px;color:#64748b">' + escapeHtml(it.unit) + '</span></label>').join('');
+    const r = await Swal.fire({
+        title: 'Nguyên liệu: ' + row.stage,
+        html: '<div style="max-height:46vh;overflow:auto">' + (rowsHtml || '<div style="color:#64748b;font-size:13px">Danh mục nguyên liệu đang trống.</div>') + '</div>'
+            + '<input id="sxnl-extra" class="swal2-input" style="width:100%;margin:10px 0 0" placeholder="Nguyên liệu khác (VD: Mắm nêm : 2 Kg)">',
+        showCancelButton: true, confirmButtonText: 'Lưu', cancelButtonText: 'Hủy',
+        width: 560,
+        didOpen: popup => {
+            // Gõ số Kg thì tự tích; xóa số Kg thì giữ nguyên trạng thái tích
+            popup.querySelectorAll('.sxnl-kg').forEach(inp => inp.addEventListener('input', () => {
+                if (inp.value !== '') popup.querySelector('.sxnl-chk[data-k="' + inp.dataset.k + '"]').checked = true;
+            }));
+        },
+        preConfirm: () => {
+            const lines = [];
+            document.querySelectorAll('.sxnl-chk').forEach(chk => {
+                if (!chk.checked) return;
+                const k = +chk.dataset.k, kgEl = document.querySelector('.sxnl-kg[data-k="' + k + '"]');
+                const kg = kgEl ? kgEl.value.trim() : '';
+                lines.push(items[k].name + ' : ' + (kg || '……') + ' ' + items[k].unit);
+            });
+            const extra = document.getElementById('sxnl-extra').value.trim();
+            if (extra) lines.push(extra);
+            return lines.join('\n');
+        }
+    });
+    if (!r.isConfirmed) return;
+    const oldNL = row.nguyenLieu;
+    row.nguyenLieu = r.value;
+    sxMarkDirty(true);
+    if (sxIsKind(row.stage, 'rua')) await sxSyncXayFromRua(row, oldNL);
+}
+async function sxPickNguoi(row) {
+    const set = new Set();
+    Object.values(SX_DEFAULT_NGUOI).forEach(v => set.add(v));
+    window.__sxStages.forEach(s => { const v = sxStageField(s.name, 'nguoiMau'); if (v) set.add(v); });
+    window.__sxRows.forEach(r => { if (r.nguoi) set.add(r.nguoi); });
+    const v = await sxPickList('Vị trí & người thực hiện', Array.from(set), row.nguoi, 'Hoặc gõ: Khu ... / Họ tên');
+    if (v === null) return;
+    row.nguoi = v;
+    sxMarkDirty(true);
+}
+// Kết quả đóng gói: số hũ (từ phiếu sản xuất cùng ngày, và cùng ca Sáng/Chiều nếu biết) và số Kg theo khối lượng hũ trong tên sản phẩm
+async function sxCalcPack(date, ten, ca) {
+    const f = new Date(date + 'T00:00:00+07:00'), t = new Date(date + 'T23:59:59.999+07:00');
+    const snap = await db.collection('production').where('timestamp', '>=', f).where('timestamp', '<=', t).get();
+    let sl = 0, dvt = '';
+    snap.forEach(d => {
+        const x = d.data();
+        if (String(x.tenSP || '').trim() !== ten) return;
+        if (ca) { const dt = toReportDate(x.timestamp); if (dt && nkCa(dt) !== ca) return; }
+        sl += Number(x.sl) || 0; dvt = dvt || x.dvt || '';
+    });
+    return sl ? nkPackResult(ten, dvt, sl) : '';
+}
+function sxCurrentCa() {   // ca của phiếu đang nhập: theo giờ bắt đầu sớm nhất trong bảng
+    const bd = (window.__sxRows || []).map(r => r.gioBD).filter(Boolean).sort()[0];
+    return bd ? (parseInt(bd.slice(0, 2), 10) < 12 ? 'Sáng' : 'Chiều') : '';
+}
+async function sxPickThongSo(row) {
+    if (sxIsPack(row.stage)) {
+        const opts = (window.__sxProducts || []).map(n => 'Đóng ' + nkPackUnit(n) + ' ' + n);
+        const v = await sxPickList('Đóng sản phẩm nào? (hũ / túi)', opts, row.thongSo, 'Hoặc gõ: Đóng hũ ... / Đóng túi ...');
+        if (v === null) return;
+        row.thongSo = v;
+        row.tenSP = v.replace(/^Đóng\s+(hũ|túi|khay|kg)\s+/i, '').trim();
+        if (row.tenSP) {
+            const calc = await sxCalcPack(window.__sxDate, row.tenSP, sxCurrentCa());
+            if (calc) row.ketQua = calc;
+            else sxToast('Chưa có phiếu đóng gói sản phẩm này (cùng ca) - hãy tự điền Kết quả', 'info');
+        }
+        sxMarkDirty(true);
+        return;
+    }
+    const r = await Swal.fire({ title: 'Thông số kiểm soát', input: 'text', inputValue: row.thongSo || '', showCancelButton: true, confirmButtonText: 'Lưu', cancelButtonText: 'Hủy' });
+    if (!r.isConfirmed) return;
+    row.thongSo = (r.value || '').trim();
+    sxMarkDirty(true);
+}
+async function sxPickKetQua(row) {
+    let def = row.ketQua || '';
+    if (!def.trim()) {
+        if (sxIsPack(row.stage) && row.tenSP) def = await sxCalcPack(window.__sxDate, row.tenSP, sxCurrentCa());
+        if (!def) def = sxStageField(row.stage, 'ketQuaMau');
+    }
+    const r = await Swal.fire({
+        title: 'Kết quả', input: 'text', inputValue: def, showCancelButton: true, confirmButtonText: 'Lưu', cancelButtonText: 'Hủy',
+        inputPlaceholder: 'VD: Thịt chưng mắm tép : 6 Kg'
+    });
+    if (!r.isConfirmed) return;
+    row.ketQua = (r.value || '').trim();
+    sxMarkDirty(true);
+}
+// ---- Chọn giờ dạng 24H (ô giờ của trình duyệt hay hiện SA/CH theo máy nên dùng ô gõ + ô chọn giờ/phút) ----
+// Gõ nhanh được: 630, 0630, 6:30, 6h30, 6.30, 1430 ... -> 'HH:MM'. Trả '' nếu không hợp lệ.
+function nkParseHM(str) {
+    const t = String(str || '').trim().toLowerCase();
+    if (!t) return '';
+    let h, m;
+    const parts = t.split(/[^0-9]+/).filter(Boolean);
+    if (parts.length >= 2) { h = parts[0]; m = parts[1]; }
+    else if (parts.length === 1) {
+        const d = parts[0];
+        if (d.length <= 2) { h = d; m = '0'; }
+        else if (d.length === 3) { h = d.slice(0, 1); m = d.slice(1); }
+        else if (d.length === 4) { h = d.slice(0, 2); m = d.slice(2); }
+        else return '';
+    } else return '';
+    h = parseInt(h, 10); m = parseInt(m, 10);
+    if (isNaN(h) || isNaN(m) || h > 23 || m > 59) return '';
+    return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+}
+function nkHM24Html(id, hhmm, onchangeJs) {
+    const p = String(hhmm || '').split(':');
+    const h = p[0] || '', m = p[1] || '';
+    const st = 'padding:8px;border:1px solid #cbd5e1;border-radius:10px;color:#0f172a;background:#fff;font-size:15px';
+    const cb = onchangeJs ? ';' + onchangeJs : '';
+    let hs = '<option value="">--</option>', ms = '<option value="">--</option>';
+    for (let i = 0; i < 24; i++) { const v = String(i).padStart(2, '0'); hs += '<option value="' + v + '"' + (v === h ? ' selected' : '') + '>' + v + '</option>'; }
+    for (let i = 0; i < 60; i++) { const v = String(i).padStart(2, '0'); ms += '<option value="' + v + '"' + (v === m ? ' selected' : '') + '>' + v + '</option>'; }
+    return '<input type="text" id="' + id + '-x" inputmode="numeric" maxlength="5" placeholder="gõ 0630" value="' + (h ? h + ':' + (m || '00') : '') + '" style="' + st + ';width:96px;text-align:center" onchange="nkHMTyped(\'' + id + '\')' + cb + '"> '
+        + '<select id="' + id + '-h" style="' + st + '" onchange="nkHMPicked(\'' + id + '\')' + cb + '">' + hs + '</select> <b>:</b> '
+        + '<select id="' + id + '-m" style="' + st + '" onchange="nkHMPicked(\'' + id + '\')' + cb + '">' + ms + '</select>';
+}
+function nkHMTyped(id) {   // gõ xong -> chuẩn hóa và cập nhật 2 ô chọn
+    const t = document.getElementById(id + '-x');
+    const hm = nkParseHM(t.value);
+    nkSetHM(id, hm);
+    t.value = hm;
+}
+function nkHMPicked(id) {  // chọn bằng ô giờ/phút -> cập nhật ô gõ
+    const h = (document.getElementById(id + '-h') || {}).value || '', m = (document.getElementById(id + '-m') || {}).value || '';
+    const t = document.getElementById(id + '-x');
+    if (t) t.value = h ? h + ':' + (m || '00') : '';
+}
+function nkGetHM(id) {
+    const t = document.getElementById(id + '-x');
+    if (t && t.value.trim()) { const hm = nkParseHM(t.value); if (hm) return hm; }   // ưu tiên chữ vừa gõ (kể cả khi chưa rời ô)
+    const h = (document.getElementById(id + '-h') || {}).value || '', m = (document.getElementById(id + '-m') || {}).value || '';
+    return h ? h + ':' + (m || '00') : '';
+}
+function nkSetHM(id, hhmm) {
+    const p = String(hhmm || '').split(':');
+    const h = document.getElementById(id + '-h'), m = document.getElementById(id + '-m'), t = document.getElementById(id + '-x');
+    if (h) h.value = p[0] || '';
+    if (m) m.value = p[1] || '';
+    if (t) t.value = p[0] ? p[0] + ':' + (p[1] || '00') : '';
+}
+// Ô "Giờ nhận hàng" của phiếu nhập nguyên liệu: ngày + giờ 24H (giờ Việt Nam). Ô ẩn <base> giữ giá trị 'YYYY-MM-DDTHH:MM'
+function nkGioNhanHtml(base, value) {
+    const v = value || '';
+    return '<input type="hidden" id="' + base + '" value="' + escapeHtml(v) + '">'
+        + '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><input type="date" id="' + base + '-d" value="' + escapeHtml(v.slice(0, 10)) + '" onchange="nkSyncGioNhan(\'' + base + '\')" style="flex:1;min-width:140px;padding:8px;border:1px solid #cbd5e1;border-radius:10px;color:#0f172a;background:#fff;font-size:15px">'
+        + nkHM24Html(base + '-t', v.slice(11, 16), "nkSyncGioNhan('" + base + "')") + '</div>';
+}
+function nkSyncGioNhan(base) {
+    const d = (document.getElementById(base + '-d') || {}).value || '', hm = nkGetHM(base + '-t');
+    let v = '';
+    if (d || hm) v = (d || formatISODateVN(new Date())) + 'T' + (hm || '06:00');
+    const hidden = document.getElementById(base);
+    if (hidden) hidden.value = v;
+}
+function nkResetGioNhan(base) {
+    const d = document.getElementById(base + '-d'); if (d) d.value = '';
+    nkSetHM(base + '-t', '');
+    const hidden = document.getElementById(base); if (hidden) hidden.value = '';
+}
+(function () {
+    const init = () => { const b = document.getElementById('in-gio-nhan-box'); if (b) b.innerHTML = nkGioNhanHtml('in-gio-nhan', ''); };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+// ---- Giờ nhận hàng (phiếu nhập nguyên liệu): nhập 'YYYY-MM-DDTHH:MM' theo GIỜ VIỆT NAM ----
+function nkFromVNInput(v) {
+    if (!v) return null;
+    const d = new Date(v.length === 16 ? v + ':00+07:00' : v + '+07:00');
+    return isNaN(d.getTime()) ? null : d;
+}
+function nkToVNInput(value) {
+    const d = toReportDate(value);
+    if (!d) return '';
+    const p = {};
+    new Intl.DateTimeFormat('en-CA', { timeZone: APP_TIME_ZONE, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(d).forEach(x => { p[x.type] = x.value; });
+    return p.year + '-' + p.month + '-' + p.day + 'T' + p.hour + ':' + p.minute;
+}
+
+// ===================================================================================
+// SỔ NHẬT KÝ (theo mẫu Word): 1) Tiếp nhận nguyên liệu  2) Sản xuất  3) Xuất hàng
+// - Tiếp nhận nguyên liệu: lấy từ collection 'material_imports' (trang Nhập nguyên liệu)
+// - Sản xuất: lấy từ collection 'production' (trang Sản xuất - hiện chỉ có công đoạn Đóng gói,
+//   các công đoạn còn lại in sẵn dòng trống để ghi tay)
+// - Xuất hàng: lấy từ collection 'sales' (trang Bán hàng), bỏ dòng "Tiền ship"
+// Dữ liệu không có trong phần mềm (phương tiện, mã lô, tình trạng, người thực hiện...) để TRỐNG ghi tay.
+// Mọi giờ/ngày tính theo giờ Việt Nam (APP_TIME_ZONE).
+// ===================================================================================
+function nkEsc(v) { return escapeHtml(v == null ? '' : v).replace(/\n/g, '<br>'); }
+function nkTimeVN(d) { return d ? d.toLocaleTimeString('vi-VN', { timeZone: APP_TIME_ZONE, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }) : ''; }
+function nkHourVN(d) {
+    const p = new Intl.DateTimeFormat('en-GB', { timeZone: APP_TIME_ZONE, hour: '2-digit', hourCycle: 'h23' }).formatToParts(d).find(x => x.type === 'hour');
+    return p ? (parseInt(p.value, 10) % 24) : d.getHours();
+}
+function nkCa(d) { return nkHourVN(d) < 12 ? 'Sáng' : 'Chiều'; }
+function nkNum(n) { return (Number(n) || 0).toLocaleString('vi-VN', { maximumFractionDigits: 2 }); }
+function nkNoData() { Swal.fire({ icon: 'info', title: 'Không có dữ liệu', text: 'Không có dữ liệu trong khoảng ngày đã chọn.' }); }
+function nkRange(dates) {
+    const f = parseDateOnlyVN(dates.from), t = parseDateOnlyVN(dates.to);
+    t.setHours(23, 59, 59, 999);
+    return { f, t };
+}
+function nkBlankLine() { return '………………………………………'; }
+// Thông tin cố định in sẵn trên các sổ (muốn đổi thì sửa ở đây)
+const NK_NGUOI_NHAN = 'Nguyễn Thị Hoa';
+const NK_XE_NHAN = 'Ô tô : 35A 8587';
+const NK_TINH_TRANG = 'Tươi , dính tay';
+const NK_GIO_NHAN_MAC_DINH = '06:00';   // dùng khi phiếu nhập KHÔNG chọn "Giờ nhận hàng"
+const NK_NOI_XUAT = 'Kho Hợp tác xã sản xuất kinh doanh nông sản Thanh Nguyễn';
+const NK_THU_KHO = 'Nguyễn Văn Hoè';
+const NK_XE_XUAT = 'Xe máy : 35N1: 6283';
+function nkCaLabel(ca) { return ca === 'Sáng' ? 'Sáng ( 06:00 đến 11:30 )' : ca; }
+
+// ---------- 1. TIẾP NHẬN NGUYÊN LIỆU ----------
+async function nkBuildNguyenLieu(dates) {
+    const { f, t } = nkRange(dates);
+    const [snap, supSnap, matSnap] = await Promise.all([
+        db.collection('material_imports').where('timestamp', '>=', f).where('timestamp', '<=', t).get(),
+        db.collection('suppliers').get(),
+        db.collection('materials_list').get()
+    ]);
+    const supMap = new Map();
+    supSnap.forEach(doc => { const s = doc.data(); if (s.name) supMap.set(s.name, s.address || ''); });
+    const unitMap = new Map();
+    matSnap.forEach(doc => { const m = doc.data(); if (m.name) unitMap.set(String(m.name).trim().toLowerCase(), m.unit || ''); });
+    const receipts = new Map();
+    snap.forEach(doc => {
+        const d = doc.data();
+        const dt = toReportDate(d.timestamp);
+        const name = String(d.tenNL || '').trim();
+        // "Thịt ăn" không phải hàng nhập từ nhà cung cấp - bỏ qua giống Sổ Kiểm Thực Quyển 1.
+        if (!dt || !name || name.toLowerCase() === 'thịt ăn') return;
+        const key = (d.soPhieu || doc.id) + '|' + (d.ncc || '');
+        // Phiếu nhập máy sau thường lưu giờ lúc nhập, không phải giờ nhận thật. Chỉ khi phiếu có chọn
+        // "Giờ nhận hàng" (gioNhanTay) mới dùng giờ đó; còn lại ghi giờ mặc định cùng ngày.
+        const effDt = d.gioNhanTay === true ? dt : new Date(formatISODateVN(dt) + 'T' + NK_GIO_NHAN_MAC_DINH + ':00+07:00');
+        if (!receipts.has(key)) receipts.set(key, { dt: effDt, soPhieu: d.soPhieu || '', ncc: d.ncc || '', address: supMap.get(d.ncc) || '', soHd: d.soHd || '', items: [] });
+        const unit = unitMap.get(name.toLowerCase()) || 'kg';
+        receipts.get(key).items.push({ name, sl: Number(d.sl) || 0, unit });
+    });
+    const groups = new Map();
+    Array.from(receipts.values()).sort((a, b) => a.dt - b.dt).forEach(r => {
+        const iso = formatISODateVN(r.dt), ca = nkCa(r.dt), key = iso + '|' + ca;
+        if (!groups.has(key)) groups.set(key, { iso, ca, list: [] });
+        groups.get(key).list.push(r);
+    });
+    return Array.from(groups.values()).map(g => ({
+        header: [
+            'Ngày làm việc: ' + formatDateToDDMMYYYY(g.iso) + ' - Ca: ' + nkCaLabel(g.ca),
+            'Nơi nhận hàng: Kho Nguyên liệu - Hợp tác xã sản xuất kinh doanh nông sản Thanh Nguyễn, Địa chỉ: Số 09, ngách 8/456, Đường Xuân Thành, Tổ dân phố Ninh Nhất 2, Phường Hoa Lư, Tỉnh Ninh Bình',
+            'Người phụ trách nhận hàng: ' + NK_NGUOI_NHAN + ' - Ký tên: ' + nkBlankLine()
+        ],
+        headers: ['STT', 'GIỜ NHẬN & PHƯƠNG TIỆN', 'NHÀ CUNG CẤP', 'TÊN SẢN PHẨM & MÃ LÔ NHẬN', 'SỐ LƯỢNG', 'TÌNH TRẠNG', 'CHỨNG TỪ KÈM THEO'],
+        rows: g.list.map((r, i) => [
+            i + 1,
+            nkTimeVN(r.dt) + '\n' + NK_XE_NHAN,
+            r.ncc + (r.address ? '\n' + r.address : ''),
+            r.items.map(x => x.name).join('\n'),
+            r.items.map(x => nkNum(x.sl) + ' ' + x.unit).join('\n'),
+            NK_TINH_TRANG,
+            r.soHd ? ('Hóa đơn số ' + r.soHd) : ''
+        ])
+    }));
+}
+const NK_NL_CFG = { title: 'SỔ NHẬT KÝ TIẾP NHẬN NGUYÊN LIỆU', sheet: 'Tiếp nhận nguyên liệu', file: 'So_nhat_ky_tiep_nhan_nguyen_lieu',
+    pct: [5, 12, 27, 24, 12, 10, 10], xl: [6, 16, 40, 34, 16, 16, 20], aligns: ['center', 'center', 'left', 'left', 'center', 'center', 'left'], rowH: 40 };
+
+// ---------- 2. SẢN XUẤT ----------
+// Đơn vị đóng gói của sản phẩm: Mắm bếp, các loại Zip, tên có "túi" -> túi; còn lại lấy ĐVT trong danh mục sản phẩm, mặc định hũ
+function nkPackUnit(ten, dvt) {
+    if (/zip|mắm bếp|túi/i.test(String(ten || ''))) return 'túi';
+    const p = (window.allProductCache || []).find(x => String(x.name || '').trim() === String(ten || '').trim());
+    const u = (p && p.unit) || dvt || '';
+    return u ? String(u).toLowerCase() : 'hũ';
+}
+function nkPackWeight(ten) {
+    const m = String(ten || '').match(/(\d+(?:[.,]\d+)?)\s*g\b/i);
+    return m ? parseFloat(m[1].replace(',', '.')) : 0;
+}
+// "26 hũ 275g = 7,15 Kg" hoặc "40 túi 180g = 7,2 Kg" (khối lượng lấy từ tên sản phẩm, VD "TCMT 275g TT Lăng")
+function nkPackResult(ten, dvt, sl) {
+    const w = nkPackWeight(ten), u = nkPackUnit(ten, dvt);
+    return w ? nkNum(sl) + ' ' + u + ' ' + nkNum(w) + 'g = ' + nkNum(sl * w / 1000) + ' Kg' : nkNum(sl) + ' ' + u;
+}
+function nkStepTime(s) {
+    const a = s.gioBD || '', b = s.gioKT || '';
+    if (a && b) return 'Từ ' + a + ' đến ' + b;
+    if (a) return 'Từ ' + a;
+    if (b) return 'Đến ' + b;
+    return '';
+}
+// Mỗi phiếu công đoạn (mỗi lần lưu) là 1 trang sổ riêng: sáng 1 phiếu, chiều 1 phiếu thì ra 2 trang.
+// opts.phieuKey: chỉ lấy đúng 1 phiếu (dùng cho nút In sổ của từng phiếu).
+async function nkBuildSanXuat(dates, opts) {
+    opts = opts || {};
+    const { f, t } = nkRange(dates);
+    const [snap, stepSnap, stages] = await Promise.all([
+        db.collection('production').where('timestamp', '>=', f).where('timestamp', '<=', t).get(),
+        db.collection('production_steps').where('date', '>=', dates.from).where('date', '<=', dates.to).get(),
+        sxLoadStages()
+    ]);
+    const norm = x => String(x || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    const isPack = name => norm(name) === 'đóng gói';
+    const canon = x => { const n = norm(x); return n === 'rửa thịt' ? 'rửa nl' : (n === 'xay thịt' ? 'xay nl' : n); };
+    const stageNames = stages.map(s => s.name);
+    const caOfBD = bd => (bd ? (parseInt(bd.slice(0, 2), 10) < 12 ? 'Sáng' : 'Chiều') : '');
+    // 1. Phiếu = các dòng công đoạn cùng phieuId
+    const groups = new Map();
+    stepSnap.forEach(doc => {
+        const s = doc.data();
+        if (!s.date) return;
+        const pkey = sxPhieuKey(s);
+        const key = s.date + '|' + pkey;
+        if (!groups.has(key)) groups.set(key, { iso: s.date, pkey, ten: '', dvt: '', sl: 0, first: null, prod: false, steps: [], cms: 0 });
+        groups.get(key).steps.push(s);
+    });
+    groups.forEach(g => {
+        const cnt = new Map();
+        g.steps.forEach(s => { const n = String(s.tenSP || '').trim(); if (n) cnt.set(n, (cnt.get(n) || 0) + 1); });
+        let best = '', bc = 0;
+        cnt.forEach((c, n) => { if (c > bc) { best = n; bc = c; } });
+        g.ten = best;   // tên sản phẩm của phiếu (các dòng chưa gắn sản phẩm dùng chung tên này)
+        g.cms = Math.min(...g.steps.map(sxCreatedMs));
+    });
+    const bdOf = g => g.steps.map(s => s.gioBD).filter(Boolean).sort()[0] || '';
+    // 2. Phiếu sản xuất (đóng gói) gộp theo ngày + sản phẩm + ca, gắn vào phiếu công đoạn khớp
+    const prods = new Map();
+    snap.forEach(doc => {
+        const d = doc.data();
+        const dt = toReportDate(d.timestamp);
+        const ten = String(d.tenSP || '').trim();
+        if (!dt || !ten) return;
+        const iso = formatISODateVN(dt), ca = nkCa(dt), key = iso + '|' + ten + '|' + ca;
+        if (!prods.has(key)) prods.set(key, { iso, ten, ca, dvt: d.dvt || '', sl: 0, first: dt });
+        const o = prods.get(key);
+        o.sl += Number(d.sl) || 0;
+        if (dt < o.first) o.first = dt;
+    });
+    prods.forEach(p => {
+        const cands = Array.from(groups.values()).filter(g => g.iso === p.iso && g.ten === p.ten && !g.prod);
+        const hasPack = g => g.steps.some(s => isPack(s.stage));
+        const target = cands.find(g => caOfBD(bdOf(g)) === p.ca && hasPack(g)) || cands.find(g => caOfBD(bdOf(g)) === p.ca) || cands.find(hasPack) || null;
+        // Phiếu sản xuất (đóng gói) KHÔNG tự tạo thêm trang sổ: chỉ dùng để điền số hũ/túi cho dòng Đóng gói của phiếu công đoạn khớp
+        if (target) { target.prod = true; target.dvt = p.dvt; target.sl = p.sl; target.first = p.first; }
+    });
+    let list = Array.from(groups.values());
+    if (opts.phieuKey) list = list.filter(g => g.pkey === opts.phieuKey);
+    list.sort((a, b) => a.iso.localeCompare(b.iso) || (bdOf(a) || '99').localeCompare(bdOf(b) || '99') || (a.cms - b.cms) || a.ten.localeCompare(b.ten));
+    return list.map(g => {
+        const ca = caOfBD(bdOf(g)) || (g.first ? nkCa(g.first) : '');
+        const caText = nkCaLabel(ca);
+        const packSpec = g.ten ? 'Đóng ' + nkPackUnit(g.ten, g.dvt) + ' ' + g.ten : 'Đóng ' + nkPackUnit('', g.dvt);
+        const packResult = g.prod ? nkPackResult(g.ten, g.dvt, g.sl) : '';
+        const stepsOf = name => g.steps.filter(s => canon(s.stage) === canon(name)).sort((a, b) => String(a.gioBD || '').localeCompare(String(b.gioBD || '')));
+        const rows = [];
+        const rowFromStep = s => {
+            const pk = isPack(s.stage);
+            return [
+                s.stage || '',
+                nkStepTime(s),
+                s.nguyenLieu || (pk ? SX_NL_DONG_GOI : ''),
+                s.nguoi || (pk ? SX_DEFAULT_NGUOI['Đóng gói'] : ''),
+                s.thongSo || (pk ? packSpec : ''),
+                s.ketQua || (pk ? packResult : '')
+            ];
+        };
+        stageNames.forEach(name => {
+            const ss = stepsOf(name);
+            ss.forEach(s => rows.push(rowFromStep(s)));   // công đoạn chưa nhập thì không in dòng nào
+        });
+        // Công đoạn đã nhập nhưng không còn trong danh mục (đã xóa/đổi tên) vẫn được in ra
+        g.steps.filter(s => !stageNames.some(n => canon(n) === canon(s.stage)))
+            .sort((a, b) => String(a.gioBD || '').localeCompare(String(b.gioBD || '')))
+            .forEach(s => rows.push(rowFromStep(s)));
+        return {
+            header: [
+                { label: 'Tên sản phẩm: ', value: g.ten, editable: true },
+                'Ngày sản xuất: ' + formatDateToDDMMYYYY(g.iso) + ' ; Ca làm việc: ' + caText,
+                'Mã lô (Ghi lên bao bì): ' + nkBlankLine() + '      Người phụ trách: ' + nkBlankLine()
+            ],
+            headers: ['Công đoạn SX', 'Thời gian (Từ mấy giờ - Đến mấy giờ)', 'Nguyên liệu (Tên, Mã lô, Số Kg)', 'Vị trí & người thực hiện', 'Thông số kiểm soát', 'Kết quả'],
+            rows
+        };
+    });
+}
+const NK_SX_CFG = { title: 'SỔ NHẬT KÝ SẢN XUẤT', sheet: 'Sản xuất', file: 'So_nhat_ky_san_xuat',
+    pct: [14, 17, 27, 20, 14, 8], xl: [18, 24, 36, 28, 22, 16], aligns: ['left', 'center', 'left', 'left', 'center', 'center'], rowH: 48 };
+
+// ---------- 3. XUẤT HÀNG ----------
+async function nkBuildXuatHang(dates) {
+    const snap = await getDocsByDate('sales', dates.from, dates.to);
+    const sales = [];
+    snap.forEach(doc => {
+        const s = doc.data();
+        const dt = toReportDate(s.date);
+        const items = (s.items || []).filter(i => !i.isShipping && (Number(i.qty) || 0) !== 0);
+        if (!dt || !items.length) return;
+        sales.push({ dt, s, items });
+    });
+    sales.sort((a, b) => a.dt - b.dt);
+    const groups = new Map();
+    sales.forEach(x => {
+        const iso = formatISODateVN(x.dt);
+        if (!groups.has(iso)) groups.set(iso, []);
+        groups.get(iso).push(x);
+    });
+    return Array.from(groups.entries()).map(([iso, list]) => ({
+        header: [
+            'Ngày xuất hàng: ' + formatDateToDDMMYYYY(iso),
+            'Nơi xuất hàng (địa điểm giao nhận): ' + NK_NOI_XUAT,
+            'Thủ kho (người xuất): ' + NK_THU_KHO + ' - Ký tên: ' + nkBlankLine()
+        ],
+        headers: ['STT', 'GIỜ XUẤT & PHƯƠNG TIỆN', 'KHÁCH HÀNG & ĐỊA CHỈ NHẬN', 'TÊN SẢN PHẨM & MÃ LÔ XUẤT', 'SỐ LƯỢNG', 'CHỨNG TỪ KÈM THEO'],
+        rows: list.map((x, i) => [
+            i + 1,
+            nkTimeVN(x.dt) + '\n' + NK_XE_XUAT,
+            (x.s.customer || 'Khách lẻ') + (x.s.address ? '\n' + x.s.address : ''),
+            x.items.map(it => (it.name || '') + (it.dateSwap ? ' (đổi date)' : '')).join('\n'),
+            x.items.map(it => nkNum(it.qty) + (it.unit ? ' ' + it.unit : '')).join('\n'),
+            x.s.id ? ('Phiếu ' + x.s.id) : ''
+        ])
+    }));
+}
+const NK_XH_CFG = { title: 'SỔ NHẬT KÝ XUẤT HÀNG', sheet: 'Xuất hàng', file: 'So_nhat_ky_xuat_hang',
+    pct: [5, 14, 29, 28, 13, 11], xl: [6, 18, 40, 38, 18, 20], aligns: ['center', 'center', 'left', 'left', 'center', 'left'], rowH: 40 };
+
+// ---------- DÙNG CHUNG: HTML xem/in + Excel ----------
+// Dòng tiêu đề có thể là chuỗi hoặc { label, value, editable }. Dòng editable cho gõ trực tiếp ngay trên bản xem (in/lưu ảnh lấy đúng chữ đã gõ)
+function nkHeaderText(h) { return typeof h === 'string' ? h : (h.label + (h.value || nkBlankLine())); }
+function nkHeaderHtml(h) {
+    if (typeof h === 'string') return nkEsc(h);
+    if (!h.editable) return nkEsc(nkHeaderText(h));
+    const sel = "if(this.textContent.indexOf('…')>-1){var r=document.createRange();r.selectNodeContents(this);var s=window.getSelection();s.removeAllRanges();s.addRange(r);}";
+    return nkEsc(h.label) + '<span contenteditable="true" spellcheck="false" title="Bấm vào để gõ" onfocus="' + sel + '" style="display:inline-block;min-width:280px;padding:0 6px;border-bottom:1px dashed #94a3b8;outline:none">' + nkEsc(h.value || nkBlankLine()) + '</span>';
+}
+function nkPagesHtml(cfg, pages) {
+    const css = '<style>@page{size:A4 landscape;margin:12mm;}</style>';
+    return css + pages.map((p, pi) => {
+        const head = '<h2 style="text-align:center;font-size:26px;margin:0 0 12px;">' + nkEsc(cfg.title) + '</h2>'
+            + p.header.map(h => '<p style="margin:5px 0;font-size:18px;line-height:1.35;">' + nkHeaderHtml(h) + '</p>').join('');
+        const colgroup = '<colgroup>' + cfg.pct.map(w => '<col style="width:' + w + '%">').join('') + '</colgroup>';
+        const thead = '<thead><tr>' + p.headers.map(h => '<th style="background:#f1f5f9;text-align:center;font-size:14px;">' + nkEsc(h) + '</th>').join('') + '</tr></thead>';
+        const tbody = '<tbody>' + p.rows.map(r => '<tr>' + r.map((c, i) => '<td style="text-align:' + (cfg.aligns[i] || 'left') + ';font-size:14px;height:' + cfg.rowH + 'px;">' + nkEsc(c) + '</td>').join('') + '</tr>').join('') + '</tbody>';
+        return '<div style="font-family:Arial,sans-serif;color:#111;margin-bottom:28px;' + (pi < pages.length - 1 ? 'page-break-after:always;' : '') + '">' + head + '<table style="margin-top:8px;">' + colgroup + thead + tbody + '</table></div>';
+    }).join('');
+}
+async function nkView(cfg, builder, datesOverride) {
+    const dates = datesOverride || getDates();
+    if (!dates) return;
+    showLoading();
+    try {
+        const pages = await builder(dates);
+        Swal.close();
+        if (!pages.length) return nkNoData();
+        printReportDirect(cfg.title, nkPagesHtml(cfg, pages));
+    }
+    catch (e) {
+        Swal.close();
+        console.error(e);
+        showAlert('Lỗi xem ' + cfg.title.toLowerCase() + ': ' + e.message);
+    }
+}
+async function nkExport(cfg, builder) {
+    const dates = getDates();
+    if (!dates) return;
+    showLoading();
+    try {
+        const pages = await builder(dates);
+        if (!pages.length) { Swal.close(); return nkNoData(); }
+        const wb = new ExcelJS.Workbook();
+        const ws = wb.addWorksheet(cfg.sheet, { pageSetup: { orientation: 'landscape', paperSize: 9, fitToPage: true, fitToWidth: 1, fitToHeight: 0, margins: { left: 0.4, right: 0.4, top: 0.5, bottom: 0.5, header: 0.2, footer: 0.2 } } });
+        const n = cfg.xl.length;
+        cfg.xl.forEach((w, i) => { ws.getColumn(i + 1).width = w; });
+        const border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+        pages.forEach((p, pi) => {
+            if (pi > 0) ws.getRow(ws.rowCount).addPageBreak();
+            const tr = ws.addRow([cfg.title]);
+            ws.mergeCells(tr.number, 1, tr.number, n);
+            tr.font = { size: 18, bold: true };
+            tr.alignment = { horizontal: 'center', vertical: 'middle' };
+            tr.height = 26;
+            p.header.forEach(h => {
+                const ht = nkHeaderText(h);
+                const r = ws.addRow([ht]);
+                ws.mergeCells(r.number, 1, r.number, n);
+                r.font = { size: 14 };
+                r.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
+                r.height = ht.length > 100 ? 42 : 24;
+            });
+            ws.addRow([]);
+            const hr = ws.addRow(p.headers);
+            hr.height = 34;
+            hr.eachCell(c => {
+                c.font = { bold: true, size: 12 };
+                c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2E8F0' } };
+                c.border = border;
+                c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+            });
+            p.rows.forEach(rw => {
+                const r = ws.addRow(rw.map(v => (v == null ? '' : v)));
+                const lines = Math.max(1, ...rw.map(v => String(v == null ? '' : v).split('\n').length));
+                r.height = Math.max(cfg.rowH * 0.75, lines * 17 + 6);
+                for (let c = 1; c <= n; c++) {
+                    const cell = r.getCell(c);
+                    cell.border = border;
+                    cell.font = { size: 12 };
+                    cell.alignment = { horizontal: cfg.aligns[c - 1] || 'left', vertical: 'middle', wrapText: true };
+                }
+            });
+            ws.addRow([]);
+        });
+        Swal.close();
+        await saveExcelFile(wb, cfg.file + '_' + dates.from + '_' + dates.to);
+    }
+    catch (e) {
+        Swal.close();
+        console.error(e);
+        showAlert('Lỗi xuất Excel ' + cfg.title.toLowerCase() + ': ' + e.message);
+    }
+}
+function viewNhatKyNguyenLieu() { return nkView(NK_NL_CFG, nkBuildNguyenLieu); }
+function viewNhatKySanXuat() { return nkView(NK_SX_CFG, nkBuildSanXuat); }
+function viewNhatKyXuatHang() { return nkView(NK_XH_CFG, nkBuildXuatHang); }
+function exportExcelNhatKyNguyenLieu() { return nkExport(NK_NL_CFG, nkBuildNguyenLieu); }
+function exportExcelNhatKySanXuat() { return nkExport(NK_SX_CFG, nkBuildSanXuat); }
+function exportExcelNhatKyXuatHang() { return nkExport(NK_XH_CFG, nkBuildXuatHang); }
+
 //================== 1. XUẤT QUYỂN 1 =====================
 function healthDateLabel(d) { return "T\u1EEB " + formatDateToDDMMYYYY(d.from) + " \u0111\u1EBFn " + formatDateToDDMMYYYY(d.to) + ""; }
 async function getProductionViewRows(dates) {
@@ -27999,13 +29422,16 @@ async function saveFullInvoice() {
     const nccId = nccDoc.id;
     const totalInvoice = cartNL.reduce((sum, item) => sum + item.thanhTien, 0);
     // TẠO TIMESTAMP CHUNG CHO CẢ PHIẾU (để filterNhapKho lọc đúng)
-    const now = new Date();
+    // Giờ nhận hàng: nếu người dùng chọn thì dùng đúng giờ đó (nhập máy sau vẫn vào đúng ngày/giờ nhận)
+    const gioNhanInput = document.getElementById('in-gio-nhan');
+    const gioNhanTay = !!(gioNhanInput && nkFromVNInput(gioNhanInput.value));
+    const now = (gioNhanInput && nkFromVNInput(gioNhanInput.value)) || new Date();
     // 2-3. Lưu toàn bộ phiếu + cập nhật công nợ trong MỘT batch để tránh trạng thái chỉ lưu được một phần dòng.
     if (cartNL.length + 1 > 500) throw new Error('Phiếu có quá nhiều dòng, không thể lưu trong một lần.');
     const batch = db.batch();
     cartNL.forEach(item => {
         const rowRef = db.collection('material_imports').doc();
-        batch.set(rowRef, { soPhieu: soPhieu, ncc: nccName, nccId: nccId, soHd: document.getElementById('in-so-hd').value, ngayHd: document.getElementById('in-ngay-hd').value, tenNL: item.nl, sl: item.sl, donGia: item.gia, thanhTien: item.thanhTien, timestamp: now, syncStatus: 'synced', syncPending: false, syncMode: 'normal', syncAt: firebase.firestore.FieldValue.serverTimestamp() });
+        batch.set(rowRef, { soPhieu: soPhieu, ncc: nccName, nccId: nccId, soHd: document.getElementById('in-so-hd').value, ngayHd: document.getElementById('in-ngay-hd').value, tenNL: item.nl, sl: item.sl, donGia: item.gia, thanhTien: item.thanhTien, timestamp: now, gioNhanTay: gioNhanTay, syncStatus: 'synced', syncPending: false, syncMode: 'normal', syncAt: firebase.firestore.FieldValue.serverTimestamp() });
     });
     batch.update(nccDoc.ref, { debt: firebase.firestore.FieldValue.increment(totalInvoice) });
     await batch.commit();
@@ -28014,6 +29440,7 @@ async function saveFullInvoice() {
     document.getElementById('gio-hang-nl').innerHTML = '';
     document.getElementById('in-so-hd').value = '';
     document.getElementById('in-ngay-hd').value = '';
+    nkResetGioNhan('in-gio-nhan');
     document.getElementById('sel-ncc-nhap').value = 'Chọn NCC';
     // TRƯỚC ĐÂY dùng showAlert() - hộp thoại chặn trang gây "giật/rung" trên điện thoại.
     // Đổi sang toast góc màn hình, không chặn code chạy tiếp bên dưới.
@@ -28201,6 +29628,10 @@ async function editImportReceipt(soPhieu) {
         '</div>' +
         '</div>' +
         '<div>' +
+        '<label class="text-xs font-bold text-slate-500">Giờ nhận hàng</label>' +
+        nkGioNhanHtml('edit-imp-gionhan', firstItem.gioNhanTay ? nkToVNInput(firstItem.timestamp) : '') +
+        '</div>' +
+        '<div>' +
         '<label class="text-xs font-bold text-slate-500">Danh sách nguyên liệu</label>' +
         '<div id="edit-imp-rows" class="mt-1 space-y-1.5 max-h-[35vh] overflow-y-auto pr-1"></div>' +
         '<button type="button" onclick="addEditImportRow()" class="mt-2 w-full bg-emerald-600 hover:bg-emerald-700 text-white py-1.5 rounded-lg text-xs font-bold">+ Thêm dòng nguyên liệu</button>' +
@@ -28231,7 +29662,8 @@ async function editImportReceipt(soPhieu) {
                 Swal.showValidationMessage('Vui lòng chọn nhà cung cấp!');
                 return false;
             }
-            return { nccName, soHd, ngayHd, rows };
+            const gioNhan = (document.getElementById('edit-imp-gionhan') || {}).value || '';
+            return { nccName, soHd, ngayHd, gioNhan, rows };
         }
     }).then(async (result) => {
         if (!result.isConfirmed)
@@ -28293,7 +29725,8 @@ async function saveEditedImportReceipt(soPhieu, oldData, newData) {
     try {
         const oldTotal = oldData.items.reduce((s, it) => s + (parseFloat(it.thanhTien) || 0), 0);
         const oldNccId = oldData.items[0]?.nccId || null;
-        const originalTimestamp = oldData.items[0]?.timestamp || new Date();
+        const originalTimestamp = nkFromVNInput(newData.gioNhan) || oldData.items[0]?.timestamp || new Date();
+        const gioNhanTayNew = !!nkFromVNInput(newData.gioNhan) || !!oldData.items[0]?.gioNhanTay;
         // Tìm ID của NCC MỚI (có thể là NCC cũ nếu không đổi, hoặc NCC khác nếu vừa đổi)
         const nccSnap = await db.collection('suppliers').where('name', '==', newData.nccName).get();
         if (nccSnap.empty) {
@@ -28317,7 +29750,7 @@ async function saveEditedImportReceipt(soPhieu, oldData, newData) {
         }
         newData.rows.forEach(row => {
             const rowRef = db.collection('material_imports').doc();
-            batch.set(rowRef, { soPhieu, ncc: newData.nccName, nccId: newNccId, soHd: newData.soHd, ngayHd: newData.ngayHd, tenNL: row.tenNL, sl: row.sl, donGia: row.donGia, thanhTien: row.sl * row.donGia, timestamp: originalTimestamp, syncStatus: 'synced', syncPending: false, syncMode: 'normal', syncAt: firebase.firestore.FieldValue.serverTimestamp() });
+            batch.set(rowRef, { soPhieu, ncc: newData.nccName, nccId: newNccId, soHd: newData.soHd, ngayHd: newData.ngayHd, tenNL: row.tenNL, sl: row.sl, donGia: row.donGia, thanhTien: row.sl * row.donGia, timestamp: originalTimestamp, gioNhanTay: gioNhanTayNew, syncStatus: 'synced', syncPending: false, syncMode: 'normal', syncAt: firebase.firestore.FieldValue.serverTimestamp() });
         });
         await batch.commit();
         Swal.close();
