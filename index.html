@@ -3873,7 +3873,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <option value="Công nợ">Công nợ</option>
                 </select>
                 <input type="text" id="hdn-note" placeholder="Ghi chú đơn hàng..." class="col-span-2 md:col-span-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2.5 rounded-xl text-xs md:text-sm dark:text-white">
-                <select id="hdn-price-type" class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2.5 rounded-xl text-xs md:text-sm dark:text-white" onchange="renderHoaDonNhapProducts()">
+                <select id="hdn-price-type" class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2.5 rounded-xl text-xs md:text-sm dark:text-white" onchange="updateHdnSugToggle(); renderHoaDonNhapProducts()">
                     <option value="retail">Bán Lẻ</option>
                     <option value="wholesale">Bán Sỉ</option>
                 </select>
@@ -3883,6 +3883,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     <option value="8">VAT 8%</option>
                     <option value="10">VAT 10%</option>
                 </select>
+                <!-- Chỉ hiện khi chọn Bán Sỉ: tích để HIỆN cột "Giá bán đề xuất" trên hóa đơn nháp, bỏ tích để ẨN -->
+                <label id="hdn-sug-wrap" style="display:none" class="col-span-2 md:col-span-3 items-center gap-2 text-xs md:text-sm font-bold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
+                    <input type="checkbox" id="hdn-show-sug" checked class="w-4 h-4 rounded"> Hiện cột "Giá bán đề xuất" trên hóa đơn (khi chọn giá sỉ)
+                </label>
             </div>
             <div class="p-2.5 md:p-4 border-b border-slate-200 dark:border-slate-700 shrink-0">
                 <div class="flex flex-col md:flex-row gap-2">
@@ -6070,7 +6074,7 @@ const db = firebase.firestore();
                     err.__friendlyReadMsgApplied = true;
                     err.message = 'Hệ thống đang tạm hết lượt đọc dữ liệu (Firestore READ) hoặc mất mạng. ' +
                         'Thao tác này cần đọc dữ liệu trước khi ghi nên CHƯA được thực hiện (không mất dữ liệu cũ). ' +
-                        'Vui lòng thử lại sau ít phút, khi banner "Chưa đồng bộ do hết read" ở đầu trang biến mất.';
+                        'Vui lòng thử lại sau ít phút, khi READ có lại.';
                 }
             }
         } catch (_) { /* không để lỗi trong khâu giám sát làm hỏng luồng chính */ }
@@ -6128,6 +6132,88 @@ window.firestoreCachedGet = async function(key, producer, ttlMs = 3000) {
         throw err;
     }
 };
+// ================= V20: DANH SÁCH / BÁO CÁO VẪN HIỆN KHI HẾT READ =================
+// Khi READ hết: đọc từ bộ nhớ đệm của trình duyệt (source:'cache' - KHÔNG gọi máy chủ nên không đốt thêm READ),
+// bộ nhớ đệm đã gồm cả các phiếu vừa ghi. Hóa đơn bán lưu tạm trên máy (hàng đợi IndexedDB) được gộp vào
+// danh sách, ô doanh thu và NXT để số liệu cập nhật ngay.
+window.__dget = async function (ref, opts) {
+    const source = opts && opts.source;
+    if (window.__firestoreReadUnavailable) return ref.get({ source: 'cache' });
+    try {
+        return await (source ? ref.get({ source }) : ref.get());
+    } catch (err) {
+        if (typeof isFirestoreReadBlockedError === 'function' && isFirestoreReadBlockedError(err)) return ref.get({ source: 'cache' });
+        throw err;
+    }
+};
+window.__listGet = function (key, producer, ttl) {
+    // READ hết: bỏ qua cache TTL (có thể cũ, thiếu phiếu mới lưu) và đọc thẳng cache Firestore của máy.
+    if (window.__firestoreReadUnavailable) return Promise.resolve().then(producer);
+    return firestoreCachedGet(key, producer, ttl);
+};
+window.__localQueueRecords = async function () {
+    try {
+        if (typeof localSaleQueueGetAll === 'function') {
+            const all = await localSaleQueueGetAll();
+            return (Array.isArray(all) ? all : []).filter(r => r && r.saleData && r.docId);
+        }
+    } catch (e) { console.warn('Không đọc được hàng đợi hóa đơn tạm:', e); }
+    return [];
+};
+window.__mergeLocalSales = async function (snap, from, to) {
+    if (!snap) return snap;
+    const recs = await window.__localQueueRecords();
+    if (!recs.length) return snap;
+    const have = new Set(Array.from(snap.docs).map(d => d.id));
+    const extra = [];
+    recs.forEach(r => {
+        if (have.has(r.docId)) return;
+        const ms = Date.parse(r.saleData.localDate || r.saleData.date) || Number(r.createdAt) || Date.now();
+        const dt = new Date(ms);
+        if ((from && dt < from) || (to && dt > to)) return;
+        const obj = { ...r.saleData, date: firebase.firestore.Timestamp.fromDate(dt), localOnly: true, syncPending: true };
+        extra.push({ id: r.docId, exists: true, ref: db.collection('sales').doc(r.docId), metadata: { fromCache: true, hasPendingWrites: true }, data: () => obj, get: f => obj[f] });
+    });
+    if (!extra.length) return snap;
+    const tms = d => { const x = d.data() && d.data().date; return x && x.toDate ? x.toDate().getTime() : 0; };
+    const docs = extra.concat(Array.from(snap.docs)).sort((a, b) => tms(b) - tms(a));
+    return { docs, size: docs.length, empty: false, metadata: snap.metadata, forEach: fn => docs.forEach(fn) };
+};
+// Tồn kho chưa trừ trong stock_counters do hóa đơn bán còn nằm trong hàng đợi trên máy.
+window.__pendingLocalStockDelta = async function () {
+    const delta = {};
+    const recs = await window.__localQueueRecords();
+    recs.forEach(r => {
+        Object.keys(r.qtyByName || {}).forEach(n => { delta[n] = (delta[n] || 0) - (Number(r.qtyByName[n]) || 0); });
+        (r.itemsToSave || []).forEach(i => {
+            if (!i || !i.dateSwap || i.dateSwapStatus === 'expired' || !i.name) return;
+            delta[i.name] = (delta[i.name] || 0) + (Number(i.qty) || 0);
+        });
+    });
+    return delta;
+};
+// Sau khi ghi phiếu lúc READ hết: làm mới Trang Chủ (doanh thu + NXT) và danh sách đang mở từ cache máy.
+window.__refreshFromCacheAfterWrite = function (domains) {
+    try {
+        const list = Array.isArray(domains) ? domains : [domains];
+        if (list.includes('sales')) window.__salesSearchCache = null;
+        if (list.includes('receipts')) { window.__allReceiptsFullLoaded = false; window.__allReceiptsFull = null; }
+        if (list.includes('production') && typeof invalidateProductionDocsCache === 'function') invalidateProductionDocsCache();
+        const page = window.__activePage || '';
+        const run = fn => { try { Promise.resolve().then(fn).catch(e => console.warn('Làm mới từ cache lỗi:', e)); } catch (e) {} };
+        if (!page || page === 'page-home') {
+            if (typeof refreshDashboardData === 'function') run(() => refreshDashboardData(false));
+            if (typeof refreshInventory === 'function') run(() => refreshInventory(false));
+        } else {
+            window.__reportsStale = true;
+            if (page === 'page-import' && typeof loadReceipts === 'function') run(() => loadReceipts({ silent: true }));
+            else if (page === 'page-history' && typeof loadSalesList === 'function') run(() => loadSalesList());
+            else if (page === 'page-SanXuat') run(() => (typeof filterSanXuat === 'function' ? filterSanXuat() : (typeof loadInitSX === 'function' ? loadInitSX() : null)));
+            else if (page === 'page-NguyenLieu' && typeof filterNhapKho === 'function') run(() => filterNhapKho({ silent: true }));
+        }
+    } catch (e) { console.warn(e); }
+};
+
 window.clearFirestoreReadCache = function(prefix = '') {
     if (!prefix) { window.__firestoreReadCache.clear(); return; }
     for (const key of window.__firestoreReadCache.keys()) {
@@ -10029,37 +10115,37 @@ async function loadDashboard(filter = 'default', options = {}) {
     const fmtYMD = (d) => "" + d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0') + "-" + String(d.getDate()).padStart(2, '0') + "";
     const startDateStr = fmtYMD(startDate);
     const endDateStr = fmtYMD(endDate);
-    const [salesSnap, suppliersSnap, customersSnap, materialImportsPeriodSnap, allSupplierPaymentsSnap, allCustomerPaymentsSnap, allReturnsSnap] = await Promise.all([
-        db.collection('sales')
+    const [salesSnapRaw, suppliersSnap, customersSnap, materialImportsPeriodSnap, allSupplierPaymentsSnap, allCustomerPaymentsSnap, allReturnsSnap] = await Promise.all([
+        window.__dget(db.collection('sales')
             .where('date', '>=', queryStartDate)
             .where('date', '<=', endDate)
             // SAU KHI LƯU/SỬA/XÓA PHIẾU, dashboard phải đọc dữ liệu MỚI NHẤT từ server.
             // source:'default' có thể trả snapshot cache cũ của Firestore, khiến tổng doanh thu
             // chỉ đổi sau F5 (khi app khởi tạo/đọc lại dữ liệu).
-            .get({ source: forceServer ? 'server' : 'default' }),
-        forceServer ? db.collection('suppliers').get({ source: 'server' }) : firestoreCachedGet('dashboard:suppliers', () => db.collection('suppliers').get({ source: 'default' }), 30000),
-        forceServer ? db.collection('customers').get({ source: 'server' }) : firestoreCachedGet('dashboard:customers', () => db.collection('customers').get({ source: 'default' }), 30000),
+            , { source: forceServer ? 'server' : 'default' }),
+        forceServer ? window.__dget(db.collection('suppliers'), { source: 'server' }) : window.__listGet('dashboard:suppliers', () => window.__dget(db.collection('suppliers'), { source: 'default' }), 30000),
+        forceServer ? window.__dget(db.collection('customers'), { source: 'server' }) : window.__listGet('dashboard:customers', () => window.__dget(db.collection('customers'), { source: 'default' }), 30000),
         // Nợ NCC PHÁT SINH trong đúng kỳ đang chọn (mỗi lần nhập nguyên liệu ghi 1 dòng ở đây)
-        db.collection('material_imports')
+        window.__dget(db.collection('material_imports')
             .where('timestamp', '>=', startDate)
-            .where('timestamp', '<=', endDate)
-            .get({ source: forceServer ? 'server' : 'default' }).catch(() => ({ docs: [] })),
+            .where('timestamp', '<=', endDate), { source: forceServer ? 'server' : 'default' }).catch(() => ({ docs: [] })),
         // Lấy TOÀN BỘ lịch sử trả nợ NCC (không lọc theo kỳ) - dùng để vừa tính số ĐÃ TRẢ
         // TRONG KỲ, vừa tính tổng ĐÃ TRẢ LUỸ KẾ của từng NCC để hiển thị trong popup.
-        forceServer ? db.collection('payments').get({ source: 'server' }).catch(() => ({ docs: [] })) : firestoreCachedGet('dashboard:payments', () => db.collection('payments').get({ source: 'default' }).catch(() => ({ docs: [] })), 30000),
+        forceServer ? window.__dget(db.collection('payments'), { source: 'server' }).catch(() => ({ docs: [] })) : window.__listGet('dashboard:payments', () => window.__dget(db.collection('payments'), { source: 'default' }).catch(() => ({ docs: [] })), 30000),
         // Tương tự, lấy TOÀN BỘ lịch sử trả nợ của khách hàng.
-        forceServer ? db.collection('debt_history').get({ source: 'server' }).catch(() => ({ docs: [] })) : firestoreCachedGet('dashboard:debt_history', () => db.collection('debt_history').get({ source: 'default' }).catch(() => ({ docs: [] })), 30000),
+        forceServer ? window.__dget(db.collection('debt_history'), { source: 'server' }).catch(() => ({ docs: [] })) : window.__listGet('dashboard:debt_history', () => window.__dget(db.collection('debt_history'), { source: 'default' }).catch(() => ({ docs: [] })), 30000),
         // Hàng hoàn trả - lấy CÙNG KHOẢNG với 'sales' ở trên (queryStartDate, ~4-5 tháng gần
         // nhất) - dùng để: (a) trừ vào "Doanh thu" của kỳ đang chọn, (b) trừ vào badge so
         // sánh "doanh thu tháng này/tháng trước" bên dưới, (c) cộng vào "đã trả trong kỳ" của
         // breakdown công nợ khách (hàng hoàn trả trừ công nợ có tác dụng y hệt 1 lần trả
         // tiền) - LUÔN tính theo NGÀY TRẢ HÀNG (KHÔNG PHẢI ngày bán gốc - xem processReturn),
         // không đụng doanh thu/báo cáo của ngày bán gốc.
-        db.collection('returns')
+        window.__dget(db.collection('returns')
             .where('date', '>=', queryStartDate)
-            .where('date', '<=', endDate)
-            .get({ source: forceServer ? 'server' : 'default' }).catch(() => ({ docs: [] }))
+            .where('date', '<=', endDate), { source: forceServer ? 'server' : 'default' }).catch(() => ({ docs: [] }))
     ]);
+    // V20: gộp hóa đơn bán đang lưu tạm trên máy (hết READ) để ô doanh thu cập nhật ngay.
+    const salesSnap = await window.__mergeLocalSales(salesSnapRaw, queryStartDate, endDate);
     const allReturns = allReturnsSnap.docs.map(doc => doc.data());
     // Nếu đã có 1 lệnh gọi loadDashboard() MỚI HƠN bắt đầu trong lúc đang chờ dữ liệu ở trên,
     // bỏ qua toàn bộ phần xử lý/hiển thị bên dưới của lệnh gọi CŨ này - tránh ghi đè kết quả
@@ -10091,6 +10177,8 @@ async function loadDashboard(filter = 'default', options = {}) {
     customersSnap.forEach(doc => {
         totalDebt += (Number(doc.data().debt) || 0);
     });
+    // V20: hóa đơn Công nợ còn lưu tạm trên máy chưa nằm trong công nợ khách ở máy chủ.
+    salesSnap.docs.forEach(d => { const x = d.data() || {}; if (x.localOnly === true && x.paymentMethod === 'Công nợ') totalDebt += (Number(x.total) || 0); });
     const productSalesMap = {};
     const productRevenueMap = {};
     filteredSales.forEach(order => {
@@ -11095,10 +11183,11 @@ async function renderInventoryList(filter = 'today', options = {}) {
     const gapFrom = new Date(endDate);
     gapFrom.setSeconds(gapFrom.getSeconds() + 1);
     const fetchRange = async (from, to) => {
-        const [rSnap, sSnap] = await Promise.all([
-            db.collection('receipts').where('date', '>=', from).where('date', '<=', to).get({ source: forceServer ? 'server' : 'default' }),
-            db.collection('sales').where('date', '>=', from).where('date', '<=', to).get({ source: forceServer ? 'server' : 'default' })
+        const [rSnap, sSnapRaw] = await Promise.all([
+            window.__dget(db.collection('receipts').where('date', '>=', from).where('date', '<=', to), { source: forceServer ? 'server' : 'default' }),
+            window.__dget(db.collection('sales').where('date', '>=', from).where('date', '<=', to), { source: forceServer ? 'server' : 'default' })
         ]);
+        const sSnap = await window.__mergeLocalSales(sSnapRaw, from, to);
         const list = [];
         rSnap.forEach(doc => list.push({ ...doc.data(), typeDoc: 'receipt', d: getDocDate(doc.data().date) }));
         sSnap.forEach(doc => list.push({ ...doc.data(), typeDoc: 'sale', d: getDocDate(doc.data().date) }));
@@ -11108,13 +11197,15 @@ async function renderInventoryList(filter = 'today', options = {}) {
     const gapTransactions = isCurrentPeriod ? [] : await fetchRange(gapFrom, now);
     // Tồn kho THỰC TẾ hiện tại - đọc từ bộ đếm 'stock_counters' (rất nhẹ, không phụ
     // thuộc số lượng lịch sử giao dịch).
-    const currentStockSnap = await db.collection('stock_counters').get({ source: forceServer ? 'server' : 'default' });
+    const currentStockSnap = await window.__dget(db.collection('stock_counters'), { source: forceServer ? 'server' : 'default' });
     const currentStockMap = {};
     currentStockSnap.forEach(doc => {
         const d = doc.data();
         if (d && d.name)
             currentStockMap[d.name] = parseFloat(d.qty || 0);
     });
+    // V20: trừ tồn của hóa đơn bán còn lưu tạm trên máy (chưa ghi vào stock_counters).
+    try { const __ld = await window.__pendingLocalStockDelta(); Object.keys(__ld).forEach(n => { currentStockMap[n] = (currentStockMap[n] || 0) + __ld[n]; }); } catch (e) { }
     const ensureItem = (name) => {
         if (!inventoryMap.has(name))
             inventoryMap.set(name, { tonDau: 0, nhap: 0, change: 0, out: 0, gapNet: 0 });
@@ -12315,8 +12406,12 @@ function syncStatusBadgeHtml(data) {
         d.localOnly === true || d.dateSwapSyncNeeded === true;
     const err = String(d.syncError || d.syncReason || d.dateSwapSyncError || d.errorMessage || d.lastSyncError || '').trim();
     if (pending || err) {
-        const title = err || 'Chưa đồng bộ do hết read';
-        return '<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400 text-[12px] font-black leading-none cursor-help" title="' + String(title).replace(/"/g, '&quot;') + '">!</span>';
+        // V20: dấu tích màu cam - rê chuột vào để xem chi tiết.
+        const readRelated = !err || /read/i.test(err);
+        const title = readRelated
+            ? 'Phiếu hết read chưa được đồng bộ. Khi nào có lại read, phiếu sẽ tự động đồng bộ.'
+            : 'Phiếu chưa được đồng bộ. Chi tiết: ' + err + '. Hệ thống sẽ tự động đồng bộ lại khi có thể.';
+        return '<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400 text-[12px] font-black leading-none cursor-help" title="' + String(title).replace(/"/g, '&quot;') + '">✓</span>';
     }
     return '<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100 text-green-600 dark:bg-green-500/15 dark:text-green-400 text-[12px] font-black leading-none cursor-help" title="Đã được đồng bộ">✓</span>';
 }
@@ -12373,11 +12468,10 @@ async function loadReceipts(options = {}) {
         // nhiều thao tác UI xảy ra sát nhau. Cache sẽ bị vô hiệu hóa ngay sau khi có
         // ghi receipts nên không làm chậm dữ liệu mới.
         const receiptMonthCacheKey = 'receipts:month:' + targetMonth;
-        const snapshot = await firestoreCachedGet(receiptMonthCacheKey, () => db.collection('receipts')
+        const snapshot = await window.__listGet(receiptMonthCacheKey, () => window.__dget(db.collection('receipts')
             .where('date', '>=', monthStart)
             .where('date', '<=', monthEnd)
-            .orderBy('date', 'desc')
-            .get(), 10000);
+            .orderBy('date', 'desc')), 10000);
         if (__myReceiptsToken !== window.__receiptsLoadToken) return;
         window.allReceipts = [];
         const total = snapshot.docs.length;
@@ -12428,7 +12522,7 @@ async function ensureAllReceiptsFullLoaded() {
     if (window.__allReceiptsFullLoaded) {
         return window.allReceiptsFull;
     }
-    const snapshot = await db.collection('receipts').orderBy('date', 'desc').get();
+    const snapshot = await window.__dget(db.collection('receipts').orderBy('date', 'desc'));
     window.allReceiptsFull = [];
     snapshot.docs.forEach(doc => {
         const data = doc.data();
@@ -13336,7 +13430,7 @@ async function updateProductDropdowns() {
         snapshot.forEach(doc => {
             const p = { id: doc.id, ...doc.data() };
             window.allProducts.push(p);
-            optionsHtml += "<option value=\"" + p.name + "\">" + p.name + "</option>";
+            optionsHtml += "<option value=\"" + escapeHtml(p.name == null ? '' : p.name) + "\">" + escapeHtml(p.name == null ? '' : p.name) + "</option>";
         });
         const dropdownIds = ['imp-name', 'sell-name'];
         dropdownIds.forEach(id => {
@@ -13499,7 +13593,7 @@ window.viewReceipt = async function (docId) {
             const safeNsx = item.ngaySX || '';
             const safeHsd = item.hsd || '';
             const safeHanThang = (item.hanThang != null && item.hanThang !== '') ? item.hanThang : '';
-            body.innerHTML += "\n                <tr class=\"border-b dark:border-slate-700\">\n                    <td class=\"p-2\">" + item.name + "" + itemTag + "</td>\n                    <td class=\"p-2 text-center\">" + (item.unit || '') + "</td>\n                    <td class=\"p-2 text-center\"><input type=\"number\" id=\"edit-qty-" + index + "\" value=\"" + safeQty + "\" class=\"w-16 mx-auto block text-center border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 p-1 rounded\"></td>\n                    <td class=\"p-2 text-center\"><input type=\"number\" id=\"edit-price-" + index + "\" value=\"" + safePrice + "\" class=\"w-20 mx-auto block text-center border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 p-1 rounded\"></td>\n                    <td class=\"p-2 text-center\"><input type=\"date\" id=\"edit-nsx-" + index + "\" value=\"" + safeNsx + "\" onchange=\"autoCalcEditHsd(" + index + ")\" class=\"w-32 mx-auto block text-center border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 p-1 rounded\"></td>\n                    <td class=\"p-2 text-center\"><input type=\"date\" id=\"edit-hsd-" + index + "\" value=\"" + safeHsd + "\" class=\"w-32 mx-auto block text-center border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 p-1 rounded\"></td>\n                    <td class=\"p-2 text-center\"><input type=\"number\" min=\"0.1\" step=\"0.1\" id=\"edit-hanthang-" + index + "\" value=\"" + safeHanThang + "\" onchange=\"autoCalcEditHsd(" + index + ")\" placeholder=\"tháng\" class=\"w-20 mx-auto block text-center border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 p-1 rounded\"></td>\n                </tr>\n            ";
+            body.innerHTML += "\n                <tr class=\"border-b dark:border-slate-700\">\n                    <td class=\"p-2\">" + escapeHtml(item.name == null ? '' : item.name) + "" + itemTag + "</td>\n                    <td class=\"p-2 text-center\">" + (item.unit || '') + "</td>\n                    <td class=\"p-2 text-center\"><input type=\"number\" id=\"edit-qty-" + index + "\" value=\"" + safeQty + "\" class=\"w-16 mx-auto block text-center border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 p-1 rounded\"></td>\n                    <td class=\"p-2 text-center\"><input type=\"number\" id=\"edit-price-" + index + "\" value=\"" + safePrice + "\" class=\"w-20 mx-auto block text-center border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 p-1 rounded\"></td>\n                    <td class=\"p-2 text-center\"><input type=\"date\" id=\"edit-nsx-" + index + "\" value=\"" + safeNsx + "\" onchange=\"autoCalcEditHsd(" + index + ")\" class=\"w-32 mx-auto block text-center border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 p-1 rounded\"></td>\n                    <td class=\"p-2 text-center\"><input type=\"date\" id=\"edit-hsd-" + index + "\" value=\"" + safeHsd + "\" class=\"w-32 mx-auto block text-center border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 p-1 rounded\"></td>\n                    <td class=\"p-2 text-center\"><input type=\"number\" min=\"0.1\" step=\"0.1\" id=\"edit-hanthang-" + index + "\" value=\"" + safeHanThang + "\" onchange=\"autoCalcEditHsd(" + index + ")\" placeholder=\"tháng\" class=\"w-20 mx-auto block text-center border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 p-1 rounded\"></td>\n                </tr>\n            ";
         });
     }
     else {
@@ -13798,6 +13892,8 @@ function openHoaDonNhapModal(prefill) {
     document.getElementById('hdn-payment').value = prefill ? (prefill.paymentMethod || 'Tiền mặt') : 'Tiền mặt';
     document.getElementById('hdn-note').value = prefill ? (prefill.note || '') : '';
     document.getElementById('hdn-price-type').value = prefill ? (prefill.priceType || 'retail') : 'retail';
+    { const sg = document.getElementById('hdn-show-sug'); if (sg) sg.checked = !prefill || prefill.showSuggested !== false; }
+    updateHdnSugToggle();
     document.getElementById('hdn-vat').value = String(prefill ? (prefill.vatRate || 0) : 0);
     document.getElementById('hdn-search').value = '';
     const title = document.getElementById('hdn-modal-title');
@@ -13934,6 +14030,16 @@ function calcHoaDonNhapPreview() {
     if (c) c.innerText = count;
     if (t) t.innerText = total.toLocaleString('vi-VN') + ' đ';
 }
+function updateHdnSugToggle() {
+    const w = document.getElementById('hdn-sug-wrap');
+    const t = (document.getElementById('hdn-price-type') || {}).value;
+    if (w) w.style.display = (t === 'wholesale') ? 'flex' : 'none';
+}
+function getHdnShowSuggested() {
+    const t = (document.getElementById('hdn-price-type') || {}).value;
+    const sg = document.getElementById('hdn-show-sug');
+    return t === 'wholesale' ? !(sg && !sg.checked) : true;
+}
 function collectHoaDonNhapItems() {
     const source = getHoaDonNhapSource();
     const priceType = (document.getElementById('hdn-price-type') || {}).value || 'retail';
@@ -13976,7 +14082,8 @@ async function saveHoaDonNhap(action) {
     showLoading();
     try {
         let maHoaDonNhap;
-        const payload = { customer, address, phone, invoiceDate, paymentMethod, note, priceType, vatRate, items, total, draft: true, noDate: !invoiceDate, updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
+        const showSuggested = getHdnShowSuggested();
+        const payload = { customer, address, phone, invoiceDate, paymentMethod, note, priceType, showSuggested, vatRate, items, total, draft: true, noDate: !invoiceDate, updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
         if (isEditing) {
             maHoaDonNhap = window.__editingHoaDonNhapMa || '';
             await db.collection('sale_invoice_drafts').doc(window.__editingHoaDonNhapId).update(payload);
@@ -13986,7 +14093,7 @@ async function saveHoaDonNhap(action) {
         }
         Swal.close();
         showAlert(isEditing ? 'Đã cập nhật hóa đơn nháp!' : 'Đã lưu hóa đơn nháp!');
-        const printData = { receiptId: maHoaDonNhap, customer, address, phone, note, items, vatRate, dateObj: invoiceDate ? parseHoaDonNhapDate(invoiceDate) : null, isDraft: true, priceType };
+        const printData = { receiptId: maHoaDonNhap, customer, address, phone, note, items, vatRate, dateObj: invoiceDate ? parseHoaDonNhapDate(invoiceDate) : null, isDraft: true, priceType, showSuggested };
         if (action === 'print') renderHoaDonTemplate(printData, 'print');
         else if (action === 'share') renderHoaDonTemplate(printData, 'share');
         closeHoaDonNhapModal();
@@ -14035,12 +14142,12 @@ function editSavedHoaDonNhap(id) {
 function reprintSavedHoaDonNhap(id) {
     const q=window.__hoaDonNhapHistoryCache.find(x=>x.id===id); if(!q)return;
     const dateObj=q.noDate ? null : (q.invoiceDate ? parseHoaDonNhapDate(q.invoiceDate) : (q.date&&typeof q.date.toDate==='function'?q.date.toDate():new Date()));
-    renderHoaDonTemplate({receiptId:q.maHoaDonNhap,customer:q.customer,address:q.address,phone:q.phone,note:q.note,items:q.items||[],vatRate:q.vatRate||0,dateObj,isDraft:true,priceType:q.priceType||''},'print');
+    renderHoaDonTemplate({receiptId:q.maHoaDonNhap,customer:q.customer,address:q.address,phone:q.phone,note:q.note,items:q.items||[],vatRate:q.vatRate||0,dateObj,isDraft:true,priceType:q.priceType||'',showSuggested:q.showSuggested},'print');
 }
 function shareSavedHoaDonNhap(id) {
     const q=window.__hoaDonNhapHistoryCache.find(x=>x.id===id); if(!q)return;
     const dateObj=q.noDate ? null : (q.invoiceDate ? parseHoaDonNhapDate(q.invoiceDate) : (q.date&&typeof q.date.toDate==='function'?q.date.toDate():new Date()));
-    renderHoaDonTemplate({receiptId:q.maHoaDonNhap,customer:q.customer,address:q.address,phone:q.phone,note:q.note,items:q.items||[],vatRate:q.vatRate||0,dateObj,isDraft:true,priceType:q.priceType||''},'share');
+    renderHoaDonTemplate({receiptId:q.maHoaDonNhap,customer:q.customer,address:q.address,phone:q.phone,note:q.note,items:q.items||[],vatRate:q.vatRate||0,dateObj,isDraft:true,priceType:q.priceType||'',showSuggested:q.showSuggested},'share');
 }
 async function deleteSavedHoaDonNhap(id) {
     if (typeof canUserDelete==='function' && !canUserDelete()) { Swal.fire({icon:'warning',title:'Không có quyền',text:'Bạn không có quyền xóa dữ liệu. Vui lòng liên hệ Admin.'}); return; }
@@ -14120,7 +14227,7 @@ function openBaoGiaModal(prefill) {
             const prefillQty = window.bgQtyMap[item.name];
             const qtyValueAttr = (prefillQty !== undefined && prefillQty !== 0) ? prefillQty : '';
             const safeName = item.name.replace(/'/g, "\\'");
-            inner += "\n                <div class=\"flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2 md:p-1.5 shadow-[0_4px_6px_-2px_rgba(0,0,0,0.2)] mb-1.5 last:mb-0\" style=\"border-left-color:#818cf8 !important; border-right-color:#818cf8 !important;\" data-bg-name=\"" + item.name + "\">\n                    <div class=\"md:px-1 md:w-[7%] flex items-center justify-center\">\n                        <input type=\"checkbox\" class=\"bg-product-check w-4 h-4 md:w-5 md:h-5 accent-indigo-600 cursor-pointer\" " + (window.bgSelectedMap[item.name] ? 'checked' : '') + " aria-label=\"Chọn sản phẩm\" onchange=\"toggleBaoGiaSelected('" + safeName + "', this.checked)\">\n                    </div>\n                    <div class=\"md:px-2 md:w-[29%] text-left\">\n                        <div class=\"font-bold text-[13px] text-slate-800 dark:text-slate-100 leading-tight\">" + item.name + "</div>\n                    </div>\n                    <div class=\"flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700\">\n                        <span class=\"text-[11px] text-slate-400 md:hidden\">\u0110VT: <b class=\"text-slate-600 dark:text-slate-300\">" + (item.unit || '') + "</b></span>\n                        <span class=\"hidden md:block md:px-1 md:w-[8%] md:text-center text-[12px] text-slate-600 dark:text-slate-400\">" + (item.unit || '') + "</span>\n                    </div>\n                    <div class=\"flex items-center gap-3 md:contents\">\n                        <div class=\"flex-1 md:px-1 md:w-[18%] flex items-center gap-1\">\n                            <span class=\"text-[10px] text-slate-400 md:hidden\">S\u1EC9:</span>\n                            <input type=\"text\" value=\"" + wholesale.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "\" \n                                   class=\"w-full text-center text-[12px] text-slate-600 dark:text-slate-300 bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 focus:border-blue-500 outline-none\"\n                                   oninput=\"updateBaoGiaPrice('" + safeName + "', this.value, 'wholesale')\">\n                        </div>\n                        <div class=\"flex-1 md:px-1 md:w-[18%] flex items-center gap-1\">\n                            <span class=\"text-[10px] text-slate-400 md:hidden\">L\u1EBB:</span>\n                            <input type=\"text\" value=\"" + retail.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "\" \n                                   class=\"w-full text-center text-[12px] text-slate-600 dark:text-slate-300 bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 focus:border-blue-500 outline-none\"\n                                   oninput=\"updateBaoGiaPrice('" + safeName + "', this.value, 'retail')\">\n                        </div>\n                    </div>\n                    <div class=\"md:px-1 md:w-[24%]\">\n                        <input type=\"number\" min=\"0\" step=\"any\" placeholder=\"SL b\u00E1o gi\u00E1\" value=\"" + qtyValueAttr + "\"\n                               class=\"no-spinner w-full text-center bg-yellow-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg p-1.5 focus:ring-2 focus:ring-blue-500 outline-none text-[12px] font-bold\"\n                               oninput=\"updateBaoGiaQty('" + safeName + "', this.value)\">\n                    </div>\n                </div>";
+            inner += "\n                <div class=\"flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2 md:p-1.5 shadow-[0_4px_6px_-2px_rgba(0,0,0,0.2)] mb-1.5 last:mb-0\" style=\"border-left-color:#818cf8 !important; border-right-color:#818cf8 !important;\" data-bg-name=\"" + escapeHtml(item.name == null ? '' : item.name) + "\">\n                    <div class=\"md:px-1 md:w-[7%] flex items-center justify-center\">\n                        <input type=\"checkbox\" class=\"bg-product-check w-4 h-4 md:w-5 md:h-5 accent-indigo-600 cursor-pointer\" " + (window.bgSelectedMap[item.name] ? 'checked' : '') + " aria-label=\"Chọn sản phẩm\" onchange=\"toggleBaoGiaSelected('" + safeName + "', this.checked)\">\n                    </div>\n                    <div class=\"md:px-2 md:w-[29%] text-left\">\n                        <div class=\"font-bold text-[13px] text-slate-800 dark:text-slate-100 leading-tight\">" + escapeHtml(item.name == null ? '' : item.name) + "</div>\n                    </div>\n                    <div class=\"flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700\">\n                        <span class=\"text-[11px] text-slate-400 md:hidden\">\u0110VT: <b class=\"text-slate-600 dark:text-slate-300\">" + (item.unit || '') + "</b></span>\n                        <span class=\"hidden md:block md:px-1 md:w-[8%] md:text-center text-[12px] text-slate-600 dark:text-slate-400\">" + (item.unit || '') + "</span>\n                    </div>\n                    <div class=\"flex items-center gap-3 md:contents\">\n                        <div class=\"flex-1 md:px-1 md:w-[18%] flex items-center gap-1\">\n                            <span class=\"text-[10px] text-slate-400 md:hidden\">S\u1EC9:</span>\n                            <input type=\"text\" value=\"" + wholesale.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "\" \n                                   class=\"w-full text-center text-[12px] text-slate-600 dark:text-slate-300 bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 focus:border-blue-500 outline-none\"\n                                   oninput=\"updateBaoGiaPrice('" + safeName + "', this.value, 'wholesale')\">\n                        </div>\n                        <div class=\"flex-1 md:px-1 md:w-[18%] flex items-center gap-1\">\n                            <span class=\"text-[10px] text-slate-400 md:hidden\">L\u1EBB:</span>\n                            <input type=\"text\" value=\"" + retail.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "\" \n                                   class=\"w-full text-center text-[12px] text-slate-600 dark:text-slate-300 bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 focus:border-blue-500 outline-none\"\n                                   oninput=\"updateBaoGiaPrice('" + safeName + "', this.value, 'retail')\">\n                        </div>\n                    </div>\n                    <div class=\"md:px-1 md:w-[24%]\">\n                        <input type=\"number\" min=\"0\" step=\"any\" placeholder=\"SL b\u00E1o gi\u00E1\" value=\"" + qtyValueAttr + "\"\n                               class=\"no-spinner w-full text-center bg-yellow-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg p-1.5 focus:ring-2 focus:ring-blue-500 outline-none text-[12px] font-bold\"\n                               oninput=\"updateBaoGiaQty('" + safeName + "', this.value)\">\n                    </div>\n                </div>";
         });
         groupParts.push("<tr data-bg-group=\"" + tenNhom + "\"><td colspan=\"6\" class=\"py-1.5 px-1\"><div class=\"rounded-2xl border-2 " + getNhomBlockBorder(tenNhom) + " " + getNhomBlockBg(tenNhom) + " p-2.5 md:p-3\">" + inner + "</div></td></tr>");
     });
@@ -14380,7 +14487,7 @@ function populateBaoGiaPrintArea({ maBaoGia, customer, address, phone, priceType
             const suggestedDisplay = priceType === 'wholesale'
                 ? Number(i.suggestedRetail || 0).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE })
                 : '';
-            rowsHtml += "<tr>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + stt++ + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:left;\">" + i.name + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + i.unit + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + qtyDisplay + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + Number(i.wholesale).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + suggestedDisplay + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;font-weight:bold;\">" + subTotalDisplay + "</div></td>\n            </tr>";
+            rowsHtml += "<tr>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + stt++ + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:left;\">" + escapeHtml(i.name == null ? '' : i.name) + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + i.unit + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + qtyDisplay + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + Number(i.wholesale).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + suggestedDisplay + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;font-weight:bold;\">" + subTotalDisplay + "</div></td>\n            </tr>";
         });
     });
     const elItems = document.getElementById('bg-print-items');
@@ -14919,7 +15026,7 @@ function renderSellCart() {
                     ? 'bg-amber-50 dark:bg-amber-500/10'
                     : (index % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50 dark:bg-slate-800/70');
         const c = accentColors[index % accentColors.length];
-        return "\n    <tr class=\"" + rowBg + " border-b-2 border-gray-200 dark:border-slate-700 " + c.l + " border-l-4 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors\">\n        <td class=\"p-2 w-[120px] md:w-1/4\">\n            <div class=\"w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-left font-bold break-words text-[11px] p-1.5\">" + (i.isShipping ? '🚚 ' : '') + "" + i.name + "</div>" + "\n        </td>\n        \n        <td class=\"p-2 w-[60px] md:w-[50px]\">" +
+        return "\n    <tr class=\"" + rowBg + " border-b-2 border-gray-200 dark:border-slate-700 " + c.l + " border-l-4 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors\">\n        <td class=\"p-2 w-[120px] md:w-1/4\">\n            <div class=\"w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-left font-bold break-words text-[11px] p-1.5\">" + (i.isShipping ? '🚚 ' : '') + "" + escapeHtml(i.name == null ? '' : i.name) + "</div>" + "\n        </td>\n        \n        <td class=\"p-2 w-[60px] md:w-[50px]\">" +
             (i.isShipping
                 ? "<div class=\"w-full text-center text-[10px] font-bold text-gray-400 p-1.5\">-</div>" : "<input type=\"number\" value=\"" + i.qty + "\" step=\"any\" class=\"w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-center font-bold text-xs p-1.5 focus:ring-2 focus:ring-blue-400 outline-none\" \n                   onchange=\"updateCartItem(" + index + ", 'qty', this.value)\">") + "\n        </td>\n        \n        <td class=\"p-2 w-[90px] md:w-[70px]\">" +
             (i.dateSwap
@@ -15901,7 +16008,7 @@ function renderProductGrid() {
         // thay vì chỉ có 2 trạng thái còn/hết như trước.
         const isLowStock = !isOutOfStock && realStock <= 10;
         const b = THEME_BY_NHOM[xepNhomSanPham(p.name)] || THEME_BY_NHOM['KHÁC'];
-        return "\n            <div id=\"product-card-" + idName + "\" data-badge-class=\"" + b.badge + "\" data-out-of-stock=\"" + isBaseOutOfStock + "\"\n                 onclick=\"" + (isOutOfStock ? "showAlert('H\u1EBFt h\u00E0ng!')" : "quickAdd('" + safeName + "')") + "\"\n                 class=\"group relative bg-gradient-to-b " + b.top + " p-1.5 md:p-4 rounded-lg md:rounded-2xl border border-white/60 dark:border-slate-700 ring-1 " + b.ring + "\n                        " + b.shadow + " flex flex-col justify-between cursor-pointer h-16 md:h-28 overflow-hidden\n                        transition-all duration-200 ease-out\n                        hover:-translate-y-1.5 hover:shadow-[0_10px_0_0_rgba(0,0,0,0.15),0_16px_22px_-6px_rgba(0,0,0,0.3)]\n                        active:translate-y-[3px] active:shadow-none\n                        " + (isOutOfStock ? 'grayscale opacity-70' : '') + "\">\n\n                <!-- V\u1EC7t s\u00E1ng b\u00F3ng \u1EDF g\u00F3c tr\u00EAn \u0111\u1EC3 t\u1EA1o c\u1EA3m gi\u00E1c n\u1ED5i kh\u1ED1i/glossy -->\n                <div class=\"pointer-events-none absolute -top-6 -left-6 w-20 h-20 bg-white/50 dark:bg-white/10 rounded-full blur-xl\"></div>\n\n                <div class=\"relative flex justify-between items-start gap-1 md:gap-3\">\n                    <p class=\"font-black " + b.nameText + " text-[9px] md:text-sm leading-tight line-clamp-2 uppercase tracking-tight\" title=\"" + p.name + "\">\n                        " + p.name + "\n                    </p>\n                    <button onclick=\"quickAdd('" + safeName + "', {shiftKey: true}); event.stopPropagation();\"\n                            class=\"flex-shrink-0 w-5 h-5 md:w-9 md:h-9 flex items-center justify-center bg-gradient-to-b " + b.btn + " text-white rounded-full\n                                   shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),inset_0_-2px_3px_rgba(0,0,0,0.2),0_3px_6px_rgba(0,0,0,0.25)]\n                                   hover:brightness-110 hover:scale-105 active:scale-90 transition-all text-[10px] md:text-lg font-black\"\n                            title=\"Th\u00EAm d\u00F2ng m\u1EDBi\">\n                        +\n                    </button>\n                </div>\n\n                <div class=\"relative flex items-center gap-1 md:gap-1.5 mt-0.5 md:mt-1\">\n                    <span class=\"text-[7px] md:text-[9px] uppercase font-black " + (isOutOfStock ? 'text-red-600 dark:text-red-400' : (isLowStock ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400')) + "\">T\u1ED3n</span>\n                    <span id=\"stock-display-" + idName + "\" class=\"font-black rounded-full border md:border-2 shadow-sm " + (isOutOfStock ? 'text-[7px] md:text-[9px] px-1 md:px-1.5 py-0 md:py-0.5 bg-red-100 border-red-400 text-red-700 dark:bg-red-500/15 dark:border-red-500/50 dark:text-red-300' : (isLowStock ? 'text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-amber-100 border-amber-400 text-amber-800 dark:bg-amber-500/15 dark:border-amber-500/50 dark:text-amber-300' : "text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-emerald-100 border-emerald-400 text-emerald-800 dark:bg-emerald-500/15 dark:border-emerald-500/50 dark:text-emerald-300 border-white/70 dark:border-slate-900/40")) + "\">\n                        " + (isOutOfStock ? 'HẾT' : (p.unit ? "" + realStock + " " + p.unit + "" : realStock)) + "\n                    </span>\n                </div>\n            </div>\n        ";
+        return "\n            <div id=\"product-card-" + idName + "\" data-badge-class=\"" + b.badge + "\" data-out-of-stock=\"" + isBaseOutOfStock + "\"\n                 onclick=\"" + (isOutOfStock ? "showAlert('H\u1EBFt h\u00E0ng!')" : "quickAdd('" + safeName + "')") + "\"\n                 class=\"group relative bg-gradient-to-b " + b.top + " p-1.5 md:p-4 rounded-lg md:rounded-2xl border border-white/60 dark:border-slate-700 ring-1 " + b.ring + "\n                        " + b.shadow + " flex flex-col justify-between cursor-pointer h-16 md:h-28 overflow-hidden\n                        transition-all duration-200 ease-out\n                        hover:-translate-y-1.5 hover:shadow-[0_10px_0_0_rgba(0,0,0,0.15),0_16px_22px_-6px_rgba(0,0,0,0.3)]\n                        active:translate-y-[3px] active:shadow-none\n                        " + (isOutOfStock ? 'grayscale opacity-70' : '') + "\">\n\n                <!-- V\u1EC7t s\u00E1ng b\u00F3ng \u1EDF g\u00F3c tr\u00EAn \u0111\u1EC3 t\u1EA1o c\u1EA3m gi\u00E1c n\u1ED5i kh\u1ED1i/glossy -->\n                <div class=\"pointer-events-none absolute -top-6 -left-6 w-20 h-20 bg-white/50 dark:bg-white/10 rounded-full blur-xl\"></div>\n\n                <div class=\"relative flex justify-between items-start gap-1 md:gap-3\">\n                    <p class=\"font-black " + b.nameText + " text-[9px] md:text-sm leading-tight line-clamp-2 uppercase tracking-tight\" title=\"" + escapeHtml(p.name == null ? '' : p.name) + "\">\n                        " + escapeHtml(p.name == null ? '' : p.name) + "\n                    </p>\n                    <button onclick=\"quickAdd('" + safeName + "', {shiftKey: true}); event.stopPropagation();\"\n                            class=\"flex-shrink-0 w-5 h-5 md:w-9 md:h-9 flex items-center justify-center bg-gradient-to-b " + b.btn + " text-white rounded-full\n                                   shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),inset_0_-2px_3px_rgba(0,0,0,0.2),0_3px_6px_rgba(0,0,0,0.25)]\n                                   hover:brightness-110 hover:scale-105 active:scale-90 transition-all text-[10px] md:text-lg font-black\"\n                            title=\"Th\u00EAm d\u00F2ng m\u1EDBi\">\n                        +\n                    </button>\n                </div>\n\n                <div class=\"relative flex items-center gap-1 md:gap-1.5 mt-0.5 md:mt-1\">\n                    <span class=\"text-[7px] md:text-[9px] uppercase font-black " + (isOutOfStock ? 'text-red-600 dark:text-red-400' : (isLowStock ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400')) + "\">T\u1ED3n</span>\n                    <span id=\"stock-display-" + idName + "\" class=\"font-black rounded-full border md:border-2 shadow-sm " + (isOutOfStock ? 'text-[7px] md:text-[9px] px-1 md:px-1.5 py-0 md:py-0.5 bg-red-100 border-red-400 text-red-700 dark:bg-red-500/15 dark:border-red-500/50 dark:text-red-300' : (isLowStock ? 'text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-amber-100 border-amber-400 text-amber-800 dark:bg-amber-500/15 dark:border-amber-500/50 dark:text-amber-300' : "text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-emerald-100 border-emerald-400 text-emerald-800 dark:bg-emerald-500/15 dark:border-emerald-500/50 dark:text-emerald-300 border-white/70 dark:border-slate-900/40")) + "\">\n                        " + (isOutOfStock ? 'HẾT' : (p.unit ? "" + realStock + " " + p.unit + "" : realStock)) + "\n                    </span>\n                </div>\n            </div>\n        ";
     });
     grid.innerHTML = cardsHtml.join('');
     // Dựng lại lưới xong thì áp dụng lại đúng từ khóa đang gõ trong ô tìm kiếm (nếu có) -
@@ -17006,7 +17113,7 @@ function buildGroupedInvoiceItemsHtml(items, renderRow, colSpan = 9) {
     });
     return html;
 }
-function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items, vatRate, dateObj, isDraft = false, priceType = '' }, action = 'print') {
+function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items, vatRate, dateObj, isDraft = false, priceType = '', showSuggested = true }, action = 'print') {
     const blankDate = (dateObj === null);
     // Hóa đơn nháp chỉ tích chọn SP, KHÔNG nhập số lượng nào: in dạng gọn - ẩn cột Thuế%/Tiền thuế (cột
     // Thành tiền rộng ra), ẩn dòng Thành tiền trước thuế + Tiền thuế GTGT, để trống Số phiếu.
@@ -17083,7 +17190,7 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
         // 1) Bán Sỉ: thêm cột "Giá bán đề xuất" sau Đơn giá (Bán Lẻ thì không có cột này).
         // 2) Dòng Đổi date của hóa đơn nháp: bỏ Đơn giá / Giá đề xuất / Thành tiền (để trống).
         // 3) Chỉ tích chọn, không nhập SL: ẩn cột Thuế% + Tiền thuế.
-        const showSug = !!isDraft && priceType === 'wholesale';
+        const showSug = !!isDraft && priceType === 'wholesale' && showSuggested !== false;
         const prodSrc = (window.allProductCache && window.allProductCache.length) ? window.allProductCache : (window.allProducts || []);
         const sugMap = {};
         normalItems.forEach(i => {
@@ -18791,6 +18898,8 @@ async function saveSaleLocalOnlyWhenReadUnavailable({ saleRef, saleData, itemsTo
     if(record.paymentMethod==='Công nợ' && record.customer && record.grandTotal>0 && Array.isArray(window.allCustomersData)){
         const n=record.customer.toLowerCase(); const c=window.allCustomersData.find(x=>String(x?.name||'').trim().toLowerCase()===n); if(c)c.debt=Number(c.debt||0)+record.grandTotal;
     }
+    // V20: hóa đơn vừa lưu tạm -> cập nhật ngay doanh thu + NXT Trang Chủ (không gọi máy chủ).
+    if (typeof window.__refreshFromCacheAfterWrite === 'function') window.__refreshFromCacheAfterWrite(['sales', 'stock']);
     return record;
 }
 async function syncOneLocalOnlySaleToFirestore(record) {
@@ -19862,7 +19971,7 @@ async function loadSalesList() {
                 docs = cache.docs;
             } else {
                 if (!cache.promise) {
-                    cache.promise = db.collection('sales').orderBy('date', 'desc').get().then(snap => {
+                    cache.promise = window.__dget(db.collection('sales').orderBy('date', 'desc')).then(snap => {
                         cache.docs = snap.docs;
                         cache.loadedAt = Date.now();
                         cache.promise = null;
@@ -19875,6 +19984,7 @@ async function loadSalesList() {
                 docs = await cache.promise;
             }
             snapshot = { docs, forEach: fn => docs.forEach(fn) };
+            snapshot = await window.__mergeLocalSales(snapshot, null, null);
         }
         else {
             // TỐI ƯU QUAN TRỌNG: trước đây luôn đọc TOÀN BỘ lịch sử hóa đơn rồi mới lọc
@@ -19897,11 +20007,11 @@ async function loadSalesList() {
                 queryFrom.setDate(queryFrom.getDate() - 7);
             }
             const rangeKey = 'sales:range:' + queryFrom.getTime() + ':' + queryTo.getTime();
-            snapshot = await firestoreCachedGet(rangeKey, () => db.collection('sales')
+            snapshot = await window.__listGet(rangeKey, () => window.__dget(db.collection('sales')
                 .where('date', '>=', queryFrom)
                 .where('date', '<=', queryTo)
-                .orderBy('date', 'desc')
-                .get(), 5000);
+                .orderBy('date', 'desc')), 5000);
+            snapshot = await window.__mergeLocalSales(snapshot, queryFrom, queryTo);
         }
         window.allSales = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         window.__saleDataCache = window.__saleDataCache || {};
@@ -21456,6 +21566,8 @@ window.requestPostWriteSync = function(domains = [], options = {}) {
         if (typeof scheduleReadFallbackRecovery === 'function') scheduleReadFallbackRecovery();
         if (typeof recomputeCurrentStock === 'function') recomputeCurrentStock();
         if (typeof renderProductGrid === 'function' && (list.includes('stock') || list.includes('receipts') || list.includes('sales'))) renderProductGrid();
+        // V20: vẫn cập nhật Trang Chủ + danh sách phiếu ngay từ cache máy (không gọi máy chủ).
+        if (typeof window.__refreshFromCacheAfterWrite === 'function') window.__refreshFromCacheAfterWrite(list);
         return Promise.resolve(false);
     }
     const isRemoteSync = !!options.remote;
@@ -28092,9 +28204,8 @@ async function loadInitSX() {
         const listBody = document.getElementById('list-sanxuat');
         if (!listBody)
             return;
-        const snapshot = await db.collection('production')
-            .orderBy('timestamp', 'desc')
-            .get();
+        const snapshot = await window.__dget(db.collection('production')
+            .orderBy('timestamp', 'desc'));
         const htmlRows = groupAndRenderSX(snapshot.docs);
         listBody.innerHTML = htmlRows || "<tr><td colspan='8' class='text-center'>Chưa có dữ liệu sản xuất</td></tr>";
         if (typeof lucide !== 'undefined')
@@ -28114,7 +28225,7 @@ window.__allProductionDocsCache = null;
 async function ensureAllProductionDocsLoaded() {
     if (window.__allProductionDocsCache)
         return window.__allProductionDocsCache;
-    const snapshot = await db.collection('production').orderBy('timestamp', 'desc').get();
+    const snapshot = await window.__dget(db.collection('production').orderBy('timestamp', 'desc'));
     window.__allProductionDocsCache = snapshot.docs;
     return window.__allProductionDocsCache;
 }
@@ -28256,11 +28367,10 @@ async function filterSanXuat() {
     try {
         // Truy vấn dữ liệu theo thời gian
         const cacheKey = 'production:range:' + startVal + ':' + endVal;
-        const snapshot = await firestoreCachedGet(cacheKey, () => db.collection('production')
+        const snapshot = await window.__listGet(cacheKey, () => window.__dget(db.collection('production')
             .where('timestamp', '>=', startDate)
             .where('timestamp', '<=', endDate)
-            .orderBy('timestamp', 'desc')
-            .get(), 5000);
+            .orderBy('timestamp', 'desc')), 5000);
         const htmlRows = groupAndRenderSX(snapshot.docs);
         // Chỉ cập nhật bảng một lần duy nhất khi đã có dữ liệu mới
         listBody.innerHTML = htmlRows || "<tr><td colspan='8' class='text-center'>Không có dữ liệu trong khoảng này</td></tr>";
@@ -29213,15 +29323,14 @@ async function filterNhapKho(options = {}) {
     if (!options.silent) listBody.innerHTML = skeletonRows(5, 5);
     try {
         // PHƯƠNG ÁN 1: Thử truy vấn có Index
-        let snapshot = await db.collection('material_imports')
+        let snapshot = await window.__dget(db.collection('material_imports')
             .where('timestamp', '>=', startDate)
             .where('timestamp', '<=', endDate)
-            .orderBy('timestamp', 'desc')
-            .get();
+            .orderBy('timestamp', 'desc'));
         // PHƯƠNG ÁN 2 (Dự phòng): Nếu snapshot rỗng do thiếu Index, lấy toàn bộ và lọc thủ công
         if (snapshot.empty) {
             console.warn("Không tìm thấy dữ liệu qua Index, đang thử lọc thủ công...");
-            snapshot = await db.collection('material_imports').get();
+            snapshot = await window.__dget(db.collection('material_imports'));
         }
         const grouped = {};
         snapshot.forEach(doc => {
@@ -30903,33 +31012,12 @@ html.glass.dark #page-import .choices.is-focused .choices__inner,html.glass.dark
 
 <script id="pos-safety-net">
 /* ===== NHẮC SAO LƯU + SỔ GHI LỖI (v8) =====
-   1) Quá 7 ngày chưa sao lưu (hoặc chưa sao lưu lần nào trên máy này) thì hiện thông báo nhỏ, chỉ với tài khoản admin, mỗi lần mở phần mềm tối đa 1 lần.
-      Mốc sao lưu lưu theo từng trình duyệt/máy (localStorage), không lưu lên Firestore -> không tốn lượt đọc/ghi.
+   1) (Đã gỡ thông báo nhắc sao lưu.) Vẫn ghi mốc sao lưu gần nhất vào localStorage mỗi khi sao lưu xong.
    2) Mọi lỗi JS chưa bắt được sẽ được ghi vào window.__errLog (tối đa 30 dòng gần nhất), KHÔNG hiện cho nhân viên. Khi cần dò lỗi: bấm F12 > Console > gõ copy(JSON.stringify(window.__errLog)) rồi dán cho người hỗ trợ. */
 (function () {
     'use strict';
     var KEY = 'pos_last_backup_at';
     window.__markBackupDone = function () { try { localStorage.setItem(KEY, String(Date.now())); } catch (e) {} };
-    function nag() {
-        try {
-            var u = (typeof getCurrentUser === 'function') ? getCurrentUser() : null;
-            if (!u || u.role !== 'admin' || typeof Swal === 'undefined') return;
-            if (sessionStorage.getItem('pos_backup_nag')) return;
-            var last = Number(localStorage.getItem(KEY) || 0);
-            var days = last ? Math.floor((Date.now() - last) / 86400000) : null;
-            if (last && days < 7) return;
-            sessionStorage.setItem('pos_backup_nag', '1');
-            Swal.fire({ toast: true, position: 'top-end', icon: 'info',
-                title: last ? ('Đã ' + days + ' ngày chưa sao lưu dữ liệu') : 'Chưa có bản sao lưu nào trên máy này',
-                text: 'Vào mục Sao lưu dữ liệu (Quản lý) để tải file về.', showConfirmButton: false, timer: 9000, timerProgressBar: true });
-        } catch (e) {}
-    }
-    var tries = 0, iv = setInterval(function () {
-        tries++;
-        var u = null; try { u = (typeof getCurrentUser === 'function') ? getCurrentUser() : null; } catch (e) {}
-        if (u) { clearInterval(iv); setTimeout(nag, 4000); }
-        else if (tries > 600) clearInterval(iv);
-    }, 2000);
     window.__errLog = window.__errLog || [];
     function logErr(kind, msg, where) {
         try {
@@ -31011,3 +31099,546 @@ html.glass.dark #page-import .choices.is-focused .choices__inner,html.glass.dark
     });
 })();
 </script>
+
+<style id="sell-ux-css">
+/* ===== BÁN HÀNG - GÓI 1 (v12) =====
+   1) Màn hình lớn (>=1024px): khung trái/phải + lưới sản phẩm co theo chiều cao cửa sổ, KHÔNG còn cuộn cả trang -> tiêu đề không bị cắt,
+      khối Tổng thanh toán + LƯU & IN luôn nằm sát đáy màn hình (giỏ hàng tự co, cuộn bên trong). Dưới 1024px giữ nguyên như cũ.
+   2) Chip "Trực tuyến" thu nhỏ, đưa sát góc để không che nút.
+   3) Nút gạt Bán Lẻ / Bán Sỉ (thay ô chọn nhỏ), Sỉ có viền cam ở khung khách + khung thanh toán. Ô chọn gốc #global-price-type vẫn còn (ẩn), mọi hàm cũ dùng nguyên. */
+@media (min-width:1024px){
+  #page-sell > div[class*="lg:flex-row"] > div{height:max(560px,calc(100vh - 135px))!important}
+  #page-sell #product-grid{height:max(440px,calc(100vh - 255px))!important}
+}
+#app-connectivity-status{bottom:4px!important;right:8px!important;padding:2px 8px!important;font-size:10px!important;gap:5px!important;opacity:.85}
+#price-seg{display:flex;gap:2px;padding:2px;border-radius:12px;background:rgba(100,116,139,.20);align-self:stretch}
+#price-seg button{flex:1;border-radius:10px;font-size:12px;font-weight:800;padding:6px 4px;color:#475569;background:transparent;transition:background .15s,color .15s}
+html.dark #price-seg button{color:#cbd5e1}
+#price-seg button.on[data-v="retail"]{background:#2563eb;color:#fff}
+#price-seg button.on[data-v="wholesale"]{background:#d97706;color:#fff}
+#page-sell[data-ptype="wholesale"] :is(#sell-panel-customer,#sell-panel-pay){border-color:#f59e0b!important}
+</style>
+<script id="sell-ux-js">
+(function () {
+    'use strict';
+    var sel = document.getElementById('global-price-type');
+    if (!sel || document.getElementById('price-seg')) return;
+    var seg = document.createElement('div');
+    seg.id = 'price-seg'; seg.className = 'w-1/3';
+    seg.innerHTML = '<button type="button" data-v="retail">Bán Lẻ</button><button type="button" data-v="wholesale">Bán Sỉ</button>';
+    sel.parentNode.insertBefore(seg, sel);
+    sel.style.display = 'none';
+    var page = document.getElementById('page-sell');
+    function sync() {
+        var v = sel.value === 'wholesale' ? 'wholesale' : 'retail';
+        if (seg.getAttribute('data-v') === v) return;
+        seg.setAttribute('data-v', v);
+        if (page) page.setAttribute('data-ptype', v);
+        [].forEach.call(seg.children, function (b) { b.classList.toggle('on', b.getAttribute('data-v') === v); });
+    }
+    seg.addEventListener('click', function (e) {
+        var b = e.target.closest ? e.target.closest('button') : null;
+        if (!b) return;
+        var v = b.getAttribute('data-v');
+        if (sel.value === v) return;
+        sel.value = v;
+        sel.dispatchEvent(new Event('change', { bubbles: true }));
+        sync();
+    });
+    sync();
+    setInterval(sync, 300); /* theo dõi khi phần mềm tự đổi giá (mở đơn chờ, chọn khách sỉ...) */
+})();
+</script>
+
+<style id="sell-ux-css-2">
+/* ===== GÓI 1B (v13) =====
+   1) Nút "Thêm vào giỏ" + "Lưu" ở Nhập kho / Sản xuất / Nhập nguyên liệu được GHIM sát đáy màn hình (chỉ PC, >=1024px) - không bị đẩy xuống khi form dài hay giỏ dài.
+   2) Bán hàng: tiêu đề bảng giỏ hàng đặc (không lộ dòng sản phẩm xuyên qua), không còn khoảng hở phía trên.
+   3) Bán hàng: gọn khung khách + khung thanh toán để giỏ hàng thấy được nhiều dòng hơn (Địa chỉ/SĐT thu vào nút bấm, tự mở khi có dữ liệu). */
+@media (min-width:1024px){
+  #page-import div:has(> #add-btn){position:sticky;bottom:8px;z-index:30;padding:6px;border-radius:16px;background:rgba(241,245,249,.88);backdrop-filter:blur(6px)}
+  html.dark #page-import div:has(> #add-btn){background:rgba(15,23,42,.88)}
+  #page-SanXuat button[onclick*="themSanPhamVaoGioSX"]{position:sticky;bottom:76px;z-index:30}
+  #page-SanXuat div:has(> button[onclick*="luuSanXuat"]){position:sticky;bottom:6px;z-index:30}
+  #page-NguyenLieu button[onclick*="addNguyenLieuToCart"]{position:sticky;bottom:70px;z-index:30}
+  #page-NguyenLieu button[onclick*="saveFullInvoice"]{position:sticky;bottom:8px;z-index:30}
+}
+/* tiêu đề bảng dính (sticky) phải ĐẶC ở mọi trang */
+html.glass :is(main,.swal2-popup,#popup-ncc,[id^="modal-"]) table:not([border]) thead[class*="sticky"] :is(th,td){background-color:#eef2f7}
+html.glass.dark :is(main,.swal2-popup,#popup-ncc,[id^="modal-"]) table:not([border]) thead[class*="sticky"] :is(th,td){background-color:#1e293b}
+thead[class*="sticky"]{z-index:10}
+/* giỏ hàng bán hàng */
+html.glass #sell-cart-container{padding-top:0!important}
+html.glass #sell-cart-container thead{top:0!important;z-index:10}
+html.glass:not(.dark) #sell-cart-container thead th{background:linear-gradient(180deg,#ffffff 0%,#e2e9f8 100%)!important;box-shadow:0 -10px 0 0 #fbfcff,0 3px 8px rgba(50,70,160,.14),inset 0 1.5px 0 #fff!important}
+html.glass.dark #sell-cart-container thead th{background:linear-gradient(180deg,#334155,#1e293b)!important;box-shadow:0 -10px 0 0 #0f172a,0 3px 8px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.22)!important}
+/* gọn khung khách + thanh toán */
+#sell-panel-customer{padding:8px 10px!important}
+#sell-panel-customer.space-y-3 > :not([hidden]) ~ :not([hidden]){margin-top:6px!important}
+#sell-panel-pay{padding:8px 12px!important}
+#sell-panel-pay > div:first-child{margin-bottom:6px!important}
+#cust-extra-toggle{display:block;margin-left:auto;font-size:11px;font-weight:800;color:#2563eb;background:transparent;padding:0 4px;cursor:pointer}
+html.dark #cust-extra-toggle{color:#93c5fd}
+</style>
+<script id="sell-ux-js-2">
+(function () {
+    'use strict';
+    var addr = document.getElementById('sell-address'), phone = document.getElementById('sell-phone'), rcpt = document.getElementById('sell-receipt');
+    if (!addr || !phone || !rcpt || document.getElementById('cust-extra-toggle')) return;
+    var row1 = rcpt.parentElement, row2 = addr.parentElement;
+    var btn = document.createElement('button');
+    btn.type = 'button'; btn.id = 'cust-extra-toggle';
+    row2.parentNode.insertBefore(btn, row2);
+    var forced = null, wasFilled = false;
+    function visibleNow() { return row2.style.display !== 'none'; }
+    function sync() {
+        var filled = !!((addr.value || '').trim() || (phone.value || '').trim());
+        if (wasFilled && !filled) forced = null; /* sang đơn mới / xoá hết thì trở về tự động */
+        wasFilled = filled;
+        var show = forced === null ? filled : forced;
+        row2.style.display = show ? '' : 'none';
+        btn.textContent = show ? '－ Ẩn địa chỉ / SĐT' : '＋ Địa chỉ / SĐT';
+    }
+    btn.addEventListener('click', function () { forced = !visibleNow(); sync(); });
+    sync();
+    setInterval(sync, 300); /* tự mở khi chọn khách có sẵn địa chỉ/SĐT */
+})();
+</script>
+
+<style id="sell-ux-css-3">
+/* ===== GÓI 2 (v14): THANH LỌC NHÓM HÀNG + "GẦN ĐÂY" + CHẾ ĐỘ THẺ GỌN 4 CỘT (trang Bán hàng) ===== */
+#grp-bar{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;overflow-x:auto;padding:2px 4px 8px;scrollbar-width:none}
+#grp-bar::-webkit-scrollbar{display:none}
+.grp-chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:999px;font-size:12px;font-weight:800;line-height:1;color:var(--c,#475569);background:rgba(255,255,255,.75);border:1.5px solid var(--c,#94a3b8);cursor:pointer;white-space:nowrap;transition:background .12s,color .12s}
+.grp-chip b{font-size:10px;font-weight:800;opacity:.75}
+.grp-chip.on{background:var(--c,#475569);color:#fff}
+html.dark .grp-chip{background:rgba(255,255,255,.06)}
+html.dark .grp-chip.on{background:var(--c,#475569);color:#fff}
+#grp-density{margin-left:auto;--c:#64748b}
+#product-grid > div.grp-hidden{display:none!important}
+#product-grid.grid-compact{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important}
+#product-grid.grid-compact > div{height:88px!important;padding:8px 10px!important}
+#product-grid.grid-compact > div p{font-size:11px!important;line-height:1.15!important}
+@media (min-width:1024px){
+  #page-sell #product-grid{height:max(400px,calc(100vh - 295px))!important}
+}
+</style>
+<script id="sell-ux-js-3">
+(function () {
+    'use strict';
+    var grid = document.getElementById('product-grid');
+    if (!grid || document.getElementById('grp-bar')) return;
+    var LABEL = { 'THỊT CHƯNG MẮM TÉP': 'TCMT', 'MẮM TÉP RIU ĐỎ': 'Mắm tép', 'QUẢ BÙI KỲ LÃO': 'Quả bùi', 'CƠM CHÁY': 'Cơm cháy', 'TRÀ HOA VÀNG': 'Trà hoa vàng', 'RUỐC CÁ': 'Ruốc cá', 'BÁNH DỨA': 'Bánh dứa', 'CÁC LOẠI HỘP TÚI': 'Hộp túi', 'KHÁC': 'Khác' };
+    var COLOR = { 'THỊT CHƯNG MẮM TÉP': '#c026d3', 'MẮM TÉP RIU ĐỎ': '#e11d48', 'QUẢ BÙI KỲ LÃO': '#059669', 'CƠM CHÁY': '#d97706', 'TRÀ HOA VÀNG': '#ca8a04', 'RUỐC CÁ': '#0891b2', 'BÁNH DỨA': '#4f46e5', 'CÁC LOẠI HỘP TÚI': '#65a30d', 'KHÁC': '#6b7280' };
+    var ORDER = Object.keys(LABEL), DENS_KEY = 'pos_grid_compact';
+    var current = 'ALL';
+    try { current = sessionStorage.getItem('pos_grp') || 'ALL'; } catch (e) {}
+    var bar = document.createElement('div'); bar.id = 'grp-bar';
+    grid.parentNode.insertBefore(bar, grid);
+    function nameOf(c) { var p = c.querySelector('p'); return p ? ((p.getAttribute('title') || p.textContent || '') + '').trim() : ''; }
+    function groupOf(n) { try { return (typeof xepNhomSanPham === 'function') ? xepNhomSanPham(n) : 'KHÁC'; } catch (e) { return 'KHÁC'; } }
+    function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+    function setDensity(on) { grid.classList.toggle('grid-compact', !!on); try { localStorage.setItem(DENS_KEY, on ? '1' : '0'); } catch (e) {} }
+    try { setDensity(localStorage.getItem(DENS_KEY) === '1'); } catch (e) {}
+    var lastSig = '';
+    function refresh() {
+        var cards = grid.children, counts = {}, total = 0, info = [], i, c, n, g;
+        for (i = 0; i < cards.length; i++) {
+            c = cards[i]; if (c.nodeType !== 1) continue;
+            n = nameOf(c); g = groupOf(n);
+            info.push([c, g]); counts[g] = (counts[g] || 0) + 1; total++;
+        }
+        if (current !== 'ALL' && !counts[current]) current = 'ALL';
+        info.forEach(function (x) { x[0].classList.toggle('grp-hidden', current !== 'ALL' && x[1] !== current); });
+        var compact = grid.classList.contains('grid-compact');
+        var sig = current + '|' + total + '|' + JSON.stringify(counts) + '|' + compact;
+        if (sig === lastSig) return;
+        lastSig = sig;
+        var keys = ORDER.filter(function (k) { return counts[k]; }).concat(Object.keys(counts).filter(function (k) { return ORDER.indexOf(k) < 0; }));
+        var h = '<button type="button" class="grp-chip' + (current === 'ALL' ? ' on' : '') + '" data-g="ALL"><span class="t">Tất cả</span><b>' + total + '</b></button>';
+        keys.forEach(function (k) {
+            h += '<button type="button" class="grp-chip' + (current === k ? ' on' : '') + '" style="--c:' + (COLOR[k] || '#6b7280') + '" data-g="' + esc(k) + '"><span class="t">' + esc(LABEL[k] || k) + '</span><b>' + counts[k] + '</b></button>';
+        });
+        h += '<button type="button" id="grp-density" class="grp-chip' + (compact ? ' on' : '') + '" data-g="__density" title="Đổi kích cỡ thẻ sản phẩm"><span class="ic">' + (compact ? '▤' : '▦') + '</span><span class="t">' + (compact ? 'Thẻ to' : 'Thẻ gọn') + '</span></button>';
+        bar.innerHTML = h;
+    }
+    var timer = null;
+    function schedule() { if (timer) return; timer = setTimeout(function () { timer = null; try { refresh(); } catch (e) {} }, 40); }
+    bar.addEventListener('click', function (e) {
+        var b = e.target.closest ? e.target.closest('.grp-chip') : null; if (!b) return;
+        var g = b.getAttribute('data-g');
+        if (g === '__density') { setDensity(!grid.classList.contains('grid-compact')); lastSig = ''; refresh(); return; }
+        current = g; try { sessionStorage.setItem('pos_grp', g); } catch (e2) {}
+        lastSig = ''; refresh(); grid.scrollTop = 0;
+    });
+    new MutationObserver(schedule).observe(grid, { childList: true });
+    refresh();
+})();
+</script>
+
+<style id="sell-ux-css-4">
+/* ===== v15: thanh nhóm hàng tự xuống dòng (thấy đủ mọi nút, kể cả "Hộp túi", "Khác", "Thẻ gọn") + lưới tự lấp đầy phần còn lại của khung, không cần tính chiều cao cố định ===== */
+#grp-bar{flex-wrap:wrap;overflow:visible;row-gap:6px}
+.grp-chip{padding:5px 10px}
+@media (min-width:1024px){
+  #page-sell #sell-panel-products{display:flex;flex-direction:column}
+  #page-sell #product-grid{flex:1 1 0;min-height:0;height:auto!important}
+}
+</style>
+
+<style id="sell-ux-css-5">
+/* ===== v16: bỏ "Gần đây"; thanh nhóm hàng xếp lưới đều (5 nút mỗi hàng, cùng độ rộng) + nút Thẻ gọn/to là khối riêng bên phải ===== */
+#grp-bar{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;overflow:visible;padding:2px 2px 8px;align-items:stretch}
+@media (min-width:1024px){
+  #grp-bar{grid-template-columns:repeat(5,minmax(0,1fr)) 78px}
+  #grp-bar #grp-density{grid-column:6;grid-row:1 / span 2}
+}
+#grp-bar .grp-chip{display:flex;align-items:center;justify-content:center;gap:5px;min-width:0;padding:7px 6px;border-radius:12px;font-size:12px;font-weight:800;line-height:1.1}
+#grp-bar .grp-chip .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+#grp-bar .grp-chip b{flex:0 0 auto;font-size:10px;padding:1px 5px;border-radius:999px;background:rgba(100,116,139,.16);opacity:1}
+#grp-bar .grp-chip.on b{background:rgba(255,255,255,.28)}
+#grp-bar #grp-density{flex-direction:column;gap:3px;font-size:11px;border-style:dashed}
+#grp-bar #grp-density .ic{font-size:18px;line-height:1}
+#grp-bar #grp-density.on{border-style:solid}
+</style>
+
+<style id="imp-tabs-css">
+/* ===== v17: TRANG NHẬP KHO CÓ 2 TAB =====
+   Tab "Nhập kho": bên trái là lưới thẻ sản phẩm (lọc nhóm + tìm tên, bấm thẻ = chọn sản phẩm vào form), bên phải là form + giỏ + nút ghim (như Bán hàng).
+   Tab "Danh sách phiếu nhập": danh sách phiếu rộng toàn trang. Dưới 1024px (điện thoại) tab Nhập kho chỉ hiện form như cũ. */
+#imp-tabs{display:flex;gap:8px;margin:2px 0 6px;flex-wrap:wrap}
+#imp-tabs button{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:14px;font-weight:800;font-size:14px;color:#475569;background:rgba(255,255,255,.75);border:1.5px solid rgba(148,163,184,.55);cursor:pointer;transition:background .12s,color .12s}
+#imp-tabs button.on{background:linear-gradient(180deg,#fb923c,#ea580c);color:#fff;border-color:#c2410c;box-shadow:0 4px 12px rgba(234,88,12,.35)}
+#imp-tabs b{font-size:11px;padding:1px 7px;border-radius:999px;background:rgba(100,116,139,.2)}
+#imp-tabs button.on b{background:rgba(255,255,255,.3)}
+#imp-tabs b:empty{display:none}
+html.dark #imp-tabs button{color:#cbd5e1;background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14)}
+html.dark #imp-tabs button.on{color:#fff}
+/* hiển thị theo tab */
+#page-import.imp-tab-nhap > div[class*="flex-col-reverse"] > div:first-child > div:not(#imp-picker){display:none!important}
+#page-import.imp-tab-ds #imp-picker{display:none!important}
+#page-import.imp-tab-ds > div[class*="flex-col-reverse"] > div:first-child{width:100%!important}
+#page-import.imp-tab-ds > div[class*="flex-col-reverse"] > div:last-child{display:none!important}
+#page-import.imp-tab-ds #mobile-cart-bar-import{display:none!important}
+@media (max-width:1023px){
+  #page-import.imp-tab-nhap > div[class*="flex-col-reverse"] > div:first-child{display:none!important}
+}
+@media (min-width:1024px){
+  #page-import.imp-tab-nhap > div[class*="flex-col-reverse"]{height:max(560px,calc(100vh - 200px))}
+}
+/* khung chọn sản phẩm */
+#imp-picker{display:none;flex-direction:column;gap:8px;height:100%;min-height:0;box-sizing:border-box;background:#fff;border:3px solid #f59e0b;border-radius:20px;padding:12px;box-shadow:0 6px 20px rgba(40,50,140,.10)}
+html.dark #imp-picker{background:#0f172a;border-color:#b45309}
+#page-import.imp-tab-nhap #imp-picker{display:flex}
+#imp-pk-search{width:100%;box-sizing:border-box;padding:9px 12px;border-radius:12px;border:1.5px solid #cbd5e1;background:#f8fafc;font-size:13px;color:#1e293b}
+html.dark #imp-pk-search{background:#0f172a;border-color:#334155;color:#f8fafc}
+#imp-grp-bar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+#imp-grp-bar .grp-chip{display:flex;align-items:center;justify-content:center;gap:5px;min-width:0;padding:7px 6px;border-radius:12px;font-size:12px;font-weight:800;line-height:1.1}
+#imp-grp-bar .grp-chip .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+#imp-grp-bar .grp-chip b{flex:0 0 auto;font-size:10px;padding:1px 5px;border-radius:999px;background:rgba(100,116,139,.16)}
+#imp-grp-bar .grp-chip.on b{background:rgba(255,255,255,.28)}
+#imp-grid{flex:1 1 0;min-height:0;overflow-y:auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-content:start;padding:2px}
+.imp-card{position:relative;text-align:left;display:flex;flex-direction:column;justify-content:space-between;gap:4px;min-height:74px;padding:8px 10px;border-radius:14px;border:1.5px solid var(--c,#6b7280);background:color-mix(in srgb,var(--c,#6b7280) 9%,#fff);color:#1e293b;cursor:pointer;transition:transform .12s,box-shadow .12s}
+.imp-card:hover{transform:translateY(-2px);box-shadow:0 8px 16px -6px color-mix(in srgb,var(--c,#6b7280) 55%,transparent)}
+.imp-card .n{font-size:12px;font-weight:800;line-height:1.2;color:inherit;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;padding-right:24px}
+.imp-card .s{font-size:11px;font-weight:700;opacity:.8}
+.imp-card .p{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:var(--c,#6b7280);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;line-height:1}
+.imp-card.sel{background:var(--c,#6b7280);color:#fff}
+.imp-card.sel .p{background:#fff;color:var(--c,#6b7280)}
+html.dark .imp-card{background:color-mix(in srgb,var(--c,#6b7280) 14%,#0f172a);color:#e2e8f0}
+html.dark .imp-card.sel{background:var(--c,#6b7280);color:#fff}
+.imp-card.imp-hidden{display:none!important}
+</style>
+<script id="imp-tabs-js">
+(function () {
+    'use strict';
+    var page = document.getElementById('page-import');
+    if (!page || document.getElementById('imp-tabs')) return;
+    var h2 = page.querySelector('h2');
+    var wrap = null, i, kids = page.children;
+    for (i = 0; i < kids.length; i++) { if ((kids[i].className || '').indexOf('flex-col-reverse') >= 0 && kids[i].tagName === 'DIV' && kids[i].id !== 'mobile-cart-bar-import') { wrap = kids[i]; break; } }
+    if (!h2 || !wrap || wrap.children.length < 2) return;
+    var leftCol = wrap.children[0];
+
+    /* ---- thanh tab ---- */
+    var tabs = document.createElement('div'); tabs.id = 'imp-tabs';
+    tabs.innerHTML = '<button type="button" data-t="nhap">📥 Nhập kho</button><button type="button" data-t="ds">📋 Danh sách phiếu nhập <b id="imp-tab-count"></b></button>';
+    h2.parentNode.insertBefore(tabs, h2.nextSibling);
+    function setTab(t) {
+        if (t !== 'ds') t = 'nhap';
+        page.classList.toggle('imp-tab-nhap', t === 'nhap');
+        page.classList.toggle('imp-tab-ds', t === 'ds');
+        [].forEach.call(tabs.children, function (b) { b.classList.toggle('on', b.getAttribute('data-t') === t); });
+        try { sessionStorage.setItem('pos_imp_tab', t); } catch (e) {}
+    }
+    tabs.addEventListener('click', function (e) { var b = e.target.closest ? e.target.closest('button') : null; if (b) setTab(b.getAttribute('data-t')); });
+    var start = 'nhap'; try { start = sessionStorage.getItem('pos_imp_tab') || 'nhap'; } catch (e) {}
+    setTab(start);
+    var tb = document.getElementById('list-receipts-left');
+    function cnt() { var n = tb ? tb.querySelectorAll('tr').length : 0; var el = document.getElementById('imp-tab-count'); if (el) el.textContent = n ? n : ''; }
+    if (tb) { new MutationObserver(cnt).observe(tb, { childList: true }); cnt(); }
+
+    /* ---- khung chọn sản phẩm ---- */
+    var LABEL = { 'THỊT CHƯNG MẮM TÉP': 'TCMT', 'MẮM TÉP RIU ĐỎ': 'Mắm tép', 'QUẢ BÙI KỲ LÃO': 'Quả bùi', 'CƠM CHÁY': 'Cơm cháy', 'TRÀ HOA VÀNG': 'Trà hoa vàng', 'RUỐC CÁ': 'Ruốc cá', 'BÁNH DỨA': 'Bánh dứa', 'CÁC LOẠI HỘP TÚI': 'Hộp túi', 'KHÁC': 'Khác' };
+    var COLOR = { 'THỊT CHƯNG MẮM TÉP': '#c026d3', 'MẮM TÉP RIU ĐỎ': '#e11d48', 'QUẢ BÙI KỲ LÃO': '#059669', 'CƠM CHÁY': '#d97706', 'TRÀ HOA VÀNG': '#ca8a04', 'RUỐC CÁ': '#0891b2', 'BÁNH DỨA': '#4f46e5', 'CÁC LOẠI HỘP TÚI': '#65a30d', 'KHÁC': '#6b7280' };
+    var ORDER = Object.keys(LABEL), current = 'ALL';
+    var pk = document.createElement('div'); pk.id = 'imp-picker';
+    pk.innerHTML = '<input id="imp-pk-search" type="text" placeholder="🔍 Tìm sản phẩm..." autocomplete="off"><div id="imp-grp-bar"></div><div id="imp-grid"></div>';
+    leftCol.insertBefore(pk, leftCol.firstChild);
+    var search = pk.querySelector('#imp-pk-search'), bar = pk.querySelector('#imp-grp-bar'), grid = pk.querySelector('#imp-grid');
+    function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+    function groupOf(n) { try { return (typeof xepNhomSanPham === 'function') ? xepNhomSanPham(n) : 'KHÁC'; } catch (e) { return 'KHÁC'; } }
+    function stockText(p) {
+        try { if (typeof getCachedStockQty !== 'function') return ''; var q = getCachedStockQty(p.name); if (q == null) return ''; return q + (p.unit ? ' ' + p.unit : ''); } catch (e) { return ''; }
+    }
+    var sig = '';
+    function build() {
+        var list = (window.allProducts || []).filter(function (p) { return p && p.name; });
+        var s = list.length + '|' + (list[0] ? list[0].name : '') + '|' + (list.length ? list[list.length - 1].name : '');
+        if (s === sig) return; sig = s;
+        var items = list.map(function (p, k) { return { p: p, g: groupOf(p.name), k: k }; });
+        items.sort(function (a, b) { var x = ORDER.indexOf(a.g), y = ORDER.indexOf(b.g); x = x < 0 ? 99 : x; y = y < 0 ? 99 : y; return x - y || a.k - b.k; });
+        grid.innerHTML = items.map(function (it) {
+            return '<button type="button" class="imp-card" style="--c:' + (COLOR[it.g] || '#6b7280') + '" data-name="' + esc(it.p.name) + '" data-g="' + esc(it.g) + '"><span class="n">' + esc(it.p.name) + '</span><span class="s">' + esc(stockText(it.p)) + '</span><span class="p">＋</span></button>';
+        }).join('');
+        var counts = {}; items.forEach(function (it) { counts[it.g] = (counts[it.g] || 0) + 1; });
+        if (current !== 'ALL' && !counts[current]) current = 'ALL';
+        var keys = ORDER.filter(function (k) { return counts[k]; }).concat(Object.keys(counts).filter(function (k) { return ORDER.indexOf(k) < 0; }));
+        var h = '<button type="button" class="grp-chip" data-g="ALL"><span class="t">Tất cả</span><b>' + items.length + '</b></button>';
+        keys.forEach(function (k) { h += '<button type="button" class="grp-chip" style="--c:' + (COLOR[k] || '#6b7280') + '" data-g="' + esc(k) + '"><span class="t">' + esc(LABEL[k] || k) + '</span><b>' + counts[k] + '</b></button>'; });
+        bar.innerHTML = h; applyFilter(); markSel();
+    }
+    function applyFilter() {
+        var q = (search.value || '').toLowerCase().trim();
+        [].forEach.call(grid.children, function (c) {
+            var ok = (current === 'ALL' || c.getAttribute('data-g') === current) && (!q || c.getAttribute('data-name').toLowerCase().indexOf(q) >= 0);
+            c.classList.toggle('imp-hidden', !ok);
+        });
+        [].forEach.call(bar.children, function (b) { b.classList.toggle('on', b.getAttribute('data-g') === current); });
+    }
+    function markSel() {
+        var inCart = {}; try { if (typeof cart !== 'undefined') cart.forEach(function (i) { inCart[i.name] = 1; }); } catch (e) {}
+        [].forEach.call(grid.children, function (c) { c.classList.toggle('sel', !!inCart[c.getAttribute('data-name')]); });
+    }
+    function refreshStock() {
+        var map = {}; (window.allProducts || []).forEach(function (p) { if (p && p.name) map[p.name] = p; });
+        [].forEach.call(grid.children, function (c) { var p = map[c.getAttribute('data-name')]; var s = c.querySelector('.s'); if (p && s) { var t = stockText(p); if (s.textContent !== t) s.textContent = t; } });
+    }
+    function pick(name) {
+        var sel = document.getElementById('imp-name'); if (!sel) return;
+        var ch = window.choicesInstances && window.choicesInstances['imp-name'];
+        if (ch) { ch.removeActiveItems(); ch.setChoiceByValue(name); } else { sel.value = name; }
+        sel.dispatchEvent(new Event('change', { bubbles: true }));
+        var q = document.getElementById('imp-qty'); if (q) { q.focus(); if (q.select) q.select(); }
+        markSel();
+    }
+    grid.addEventListener('click', function (e) { var c = e.target.closest ? e.target.closest('.imp-card') : null; if (c) (window.__impAddCard || pick)(c.getAttribute('data-name')); });
+    bar.addEventListener('click', function (e) { var b = e.target.closest ? e.target.closest('.grp-chip') : null; if (!b) return; current = b.getAttribute('data-g'); applyFilter(); grid.scrollTop = 0; });
+    search.addEventListener('input', applyFilter);
+    var sel0 = document.getElementById('imp-name'); if (sel0) sel0.addEventListener('change', markSel);
+    var tick = 0;
+    setInterval(function () {
+        if (page.classList.contains('hidden')) return;
+        build(); markSel();
+        if (++tick % 5 === 0) refreshStock();
+    }, 800);
+    build();
+})();
+</script>
+
+<style id="imp-cart-css">
+/* ===== v18: thẻ kính lỏng (như Bán hàng) + giỏ nhập kho sửa trực tiếp + gọn form nhập tay ===== */
+.imp-card{border-radius:18px;min-height:96px;padding:10px 12px;border:1.5px solid color-mix(in srgb,var(--c,#6b7280) 55%,#fff);background:linear-gradient(160deg,color-mix(in srgb,var(--c,#6b7280) 16%,#fff) 0%,color-mix(in srgb,var(--c,#6b7280) 6%,#fff) 58%,rgba(255,255,255,.8) 100%);box-shadow:0 6px 16px -6px color-mix(in srgb,var(--c,#6b7280) 45%,transparent),inset 0 1.5px 0 rgba(255,255,255,.95),inset 0 -10px 16px -12px color-mix(in srgb,var(--c,#6b7280) 40%,transparent)}
+.imp-card:hover{transform:translateY(-2px);box-shadow:0 12px 22px -8px color-mix(in srgb,var(--c,#6b7280) 55%,transparent),inset 0 1.5px 0 #fff}
+.imp-card .n{font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.01em;color:color-mix(in srgb,var(--c,#6b7280) 82%,#000)}
+.imp-card .s{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;padding:3px 10px 3px 8px;border-radius:999px;font-size:12px;font-weight:900;color:color-mix(in srgb,var(--c,#6b7280) 80%,#000);background:rgba(255,255,255,.8);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c,#6b7280) 28%,#fff);opacity:1}
+.imp-card .s::before{content:"TỒN";font-size:9px;font-weight:900;opacity:.7}
+.imp-card .s:empty{display:none}
+.imp-card .p{width:30px;height:30px;top:8px;right:8px;font-size:18px;background:linear-gradient(180deg,color-mix(in srgb,var(--c,#6b7280) 65%,#fff),var(--c,#6b7280));box-shadow:0 4px 10px color-mix(in srgb,var(--c,#6b7280) 55%,transparent),inset 0 1px 0 rgba(255,255,255,.6)}
+.imp-card .n{padding-right:34px}
+.imp-card.sel{color:inherit;background:linear-gradient(160deg,color-mix(in srgb,var(--c,#6b7280) 34%,#fff),color-mix(in srgb,var(--c,#6b7280) 14%,#fff));box-shadow:0 0 0 3px color-mix(in srgb,var(--c,#6b7280) 55%,transparent),0 8px 18px -8px color-mix(in srgb,var(--c,#6b7280) 60%,transparent)}
+.imp-card.sel .p{background:linear-gradient(180deg,#34d399,#059669);color:#fff}
+.imp-card.sel .p::after{content:""}
+html.dark .imp-card{background:linear-gradient(160deg,color-mix(in srgb,var(--c,#6b7280) 26%,#0f172a),color-mix(in srgb,var(--c,#6b7280) 10%,#0f172a));border-color:color-mix(in srgb,var(--c,#6b7280) 60%,#0f172a);box-shadow:0 6px 16px -6px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.12)}
+html.dark .imp-card .n{color:color-mix(in srgb,var(--c,#6b7280) 55%,#fff)}
+html.dark .imp-card .s{background:rgba(255,255,255,.08);color:#e2e8f0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}
+html.dark .imp-card.sel{background:linear-gradient(160deg,color-mix(in srgb,var(--c,#6b7280) 45%,#0f172a),color-mix(in srgb,var(--c,#6b7280) 22%,#0f172a))}
+/* giỏ nhập kho sửa trực tiếp */
+#cart-box table.imp-ct{width:100%;border-collapse:separate;border-spacing:0 4px;font-size:13px}
+#cart-box table.imp-ct th{padding:6px 6px;font-size:11px;text-transform:uppercase;text-align:center}
+#cart-box table.imp-ct td{padding:4px 5px;vertical-align:middle}
+.imp-ci{width:100%;box-sizing:border-box;padding:6px 8px;border:1.5px solid #cbd5e1;border-radius:9px;background:#fff;font-size:13px;color:#1e293b;text-align:center}
+.imp-ci.q{font-weight:900;color:#2563eb}
+.imp-ci.q0{border-color:#ef4444;background:#fef2f2}
+.imp-ci.d{font-size:11px;padding:6px 4px}
+html.dark .imp-ci{background:#0f172a;border-color:#334155;color:#f8fafc}
+html.dark .imp-ci.q{color:#93c5fd}
+html.dark .imp-ci.q0{border-color:#ef4444;background:#3f1d1d}
+.imp-cn{font-weight:800;color:#1e293b}
+html.dark .imp-cn{color:#f1f5f9}
+.imp-cn small{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:rgba(100,116,139,.18);font-size:10px;font-weight:800}
+#imp-manual-toggle{display:none}
+@media (min-width:1024px){
+  #page-import.imp-tab-nhap #cart-box{max-height:none!important;min-height:160px;overflow:auto}
+  #page-import.imp-tab-nhap #imp-manual-toggle{display:block;width:100%;text-align:left;margin:0 0 8px;padding:7px 12px;border-radius:12px;border:1.5px dashed #94a3b8;font-size:12px;font-weight:800;color:#475569;background:rgba(255,255,255,.55);cursor:pointer}
+  html.dark #page-import.imp-tab-nhap #imp-manual-toggle{color:#cbd5e1;background:rgba(255,255,255,.05);border-color:#475569}
+  #page-import.imp-tab-nhap.imp-manual-off .imp-manual{display:none!important}
+  #page-import.imp-tab-nhap.imp-manual-off #add-btn{display:none!important}
+  #page-import.imp-tab-nhap.imp-manual-off div:has(> #add-btn){grid-template-columns:1fr}
+}
+</style>
+<style id="imp-v21-css">
+/* v21: (1) Danh sách phiếu nhập: Tháng / Từ ngày / Đến ngày / Tìm kiếm cùng 1 dòng.
+        (2) Tab Nhập kho cao hơn (lấp phần trống phía dưới); nút Thêm vào giỏ / Lưu nhập kho luôn cố định ở đáy khung. */
+@media (min-width:768px){
+  #page-import.imp-tab-ds #panel-import-filter{grid-template-columns:minmax(140px,1fr) minmax(140px,1fr) minmax(140px,1fr) minmax(220px,1.8fr);align-items:end}
+  #page-import.imp-tab-ds #panel-import-filter > div.col-span-3{grid-column:auto!important}
+}
+@media (min-width:1024px){
+  #page-import.imp-tab-nhap > div[class*="flex-col-reverse"]{height:max(560px,calc(100vh - 150px))}
+  #page-import.imp-tab-nhap #panel-import-form > div.flex-1{overflow-y:auto;min-height:0}
+  #page-import.imp-tab-nhap #panel-import-form > div:not(.flex-1){flex-shrink:0}
+}
+</style>
+<style id="fit-heights-css">
+/* v23: các trang danh sách cùng chiều cao = vừa khít màn hình (tính tự động bằng script bên dưới) */
+@media (min-width:1024px){ #page-import{padding-bottom:24px!important} }
+</style>
+<script id="fit-heights-js">
+(function () {
+    'use strict';
+    if (window.__fitHeightsV23) return; window.__fitHeightsV23 = true;
+    var $ = function (id) { return document.getElementById(id); };
+    function vis(el) { return !!el && el.offsetParent !== null && el.offsetHeight > 0; }
+    // Co/giãn vùng cuộn W để TỔNG chiều cao trang P đúng bằng phần màn hình còn trống (không còn khoảng thừa, không phải kéo cả trang).
+    function fit(P, W, min) {
+        if (!vis(P) || !vis(W)) return;
+        var sc = $('app-scroll-container'); if (!sc) return;
+        var cs = getComputedStyle(P.parentElement);
+        var pad = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+        var diff = (sc.clientHeight - pad) - P.offsetHeight;
+        if (Math.abs(diff) < 2) return;
+        var h = Math.max(min || 220, W.offsetHeight + diff);
+        W.style.maxHeight = 'none';
+        W.style.height = h + 'px';
+    }
+    function up(el, sel) { return el ? el.closest(sel) : null; }
+    // Cho vùng cuộn W giãn/co đến sát đáy khung (card) chứa nó.
+    function fillCard(W) {
+        if (!vis(W)) return;
+        var card = W.closest('.h-full, [class*="col-span-8"]'); if (!card || !vis(card)) return;
+        var cs = getComputedStyle(card);
+        var below = card.getBoundingClientRect().bottom - W.getBoundingClientRect().bottom -
+            (parseFloat(cs.paddingBottom) || 0) - (parseFloat(cs.borderBottomWidth) || 0);
+        if (Math.abs(below) < 2) return;
+        W.style.maxHeight = 'none';
+        W.style.height = Math.max(160, W.offsetHeight + below) + 'px';
+    }
+    function tick() {
+        if (window.innerWidth < 1024) return;
+        var el;
+        el = $('kho-table'); fit($('page-inventory'), el && el.parentElement);
+        el = $('invoiceTable'); fit($('page-history'), el && el.parentElement);
+        el = $('customer-list-body'); fit($('page-customers'), up(el, 'div'));
+        var pm = $('page-products-manage'); fit(pm, pm && pm.querySelector(':scope > div.overflow-y-auto'));
+        // Sản xuất / Nguyên liệu: cột form bên phải quyết định chiều cao -> co/giãn ô giỏ hàng của form cho vừa màn hình,
+        // rồi cho bảng danh sách bên trái lấp đầy khung (không còn khoảng trống).
+        fit($('page-SanXuat'), $('sx-cart-list'), 70);
+        fillCard(up($('list-sanxuat'), 'div.overflow-y-auto'));
+        fit($('page-NguyenLieu'), $('gio-hang-nl'), 70);
+        fillCard(up($('body-phieu'), 'div.overflow-y-auto'));
+        var pi = $('page-import');
+        if (vis(pi)) {
+            var cont = pi.querySelector(':scope > div[class*="flex-col-reverse"]');
+            if (pi.classList.contains('imp-tab-nhap')) fit(pi, cont, 520);
+            else {
+                if (cont && cont.style.height) cont.style.height = '';
+                fit(pi, up($('list-receipts-left'), 'div.overflow-y-auto'));
+            }
+        }
+    }
+    setInterval(tick, 600);
+    window.addEventListener('resize', function () { setTimeout(tick, 60); });
+    setTimeout(tick, 300);
+})();
+</script>
+<script id="imp-cart-js">
+(function () {
+    'use strict';
+    var page = document.getElementById('page-import');
+    if (!page || typeof renderCart !== 'function' || window.__impCartV18) return;
+    window.__impCartV18 = true;
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+    function dmy(s) { var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ''); return m ? m[3] + '/' + m[2] + '/' + m[1] : ''; }
+    /* ---- giỏ nhập kho: sửa SL / giá / NSX / HSD ngay trong dòng ---- */
+    window.renderCart = function () {
+        var box = document.getElementById('cart-box');
+        var mc = document.getElementById('mobile-cart-count-import'); if (mc) mc.innerText = cart.length;
+        if (!box) return;
+        if (!cart.length) { box.innerHTML = '<p class="text-gray-400 text-center py-4 italic">Chưa có sản phẩm trong phiếu — bấm thẻ sản phẩm bên trái để thêm</p>'; return; }
+        var h = '<table class="imp-ct"><thead class="sticky top-0 bg-slate-100 text-slate-700"><tr><th style="text-align:left">Sản phẩm</th><th style="width:118px">NSX</th><th style="width:118px">HSD</th><th style="width:78px">SL</th><th style="width:92px">Giá lẻ</th><th style="width:92px">Giá sỉ</th><th style="width:34px"></th></tr></thead><tbody>';
+        cart.forEach(function (it, i) {
+            var q = parseFloat(it.qty) || 0;
+            h += '<tr class="odd:bg-white even:bg-slate-50"><td class="imp-cn">' + esc(it.name) + (it.unit ? '<small>' + esc(it.unit) + '</small>' : '') + '</td>' +
+                '<td><input type="date" class="imp-ci d" value="' + esc(it.ngaySX || '') + '" onchange="__impCart(' + i + ',\'ngaySX\',this.value)"></td>' +
+                '<td><input type="date" class="imp-ci d" value="' + esc(it.hsd || '') + '" onchange="__impCart(' + i + ',\'hsd\',this.value)"></td>' +
+                '<td><input type="number" min="0" step="any" inputmode="decimal" id="imp-cq-' + i + '" class="imp-ci q' + (q > 0 ? '' : ' q0') + '" value="' + (q > 0 ? q : '') + '" placeholder="SL" oninput="__impCart(' + i + ',\'qty\',this.value,this)" onfocus="this.select()" onkeydown="if(event.key===\'Enter\'){__impNext()}"></td>' +
+                '<td><input type="number" min="0" class="imp-ci" value="' + esc(it.retail || '') + '" oninput="__impCart(' + i + ',\'retail\',this.value)"></td>' +
+                '<td><input type="number" min="0" class="imp-ci" value="' + esc(it.wholesale || '') + '" oninput="__impCart(' + i + ',\'wholesale\',this.value)"></td>' +
+                '<td style="text-align:center"><button type="button" onclick="removeFromCart(' + i + ')" title="Xóa" style="color:#ef4444;font-weight:900;font-size:16px;padding:2px 6px">✕</button></td></tr>';
+        });
+        box.innerHTML = h + '</tbody></table>';
+    };
+    window.__impCart = function (i, f, v, el) {
+        var it = cart[i]; if (!it) return;
+        if (f === 'qty') { it.qty = parseFloat(v) || 0; if (el) el.classList.toggle('q0', !(it.qty > 0)); }
+        else if (f === 'ngaySX' || f === 'hsd') it[f] = v || null;
+        else it[f] = v;
+    };
+    window.__impNext = function () { var s = document.getElementById('imp-pk-search'); if (s) { s.focus(); s.select(); } };
+    /* ---- bấm thẻ => vào giỏ, con trỏ nhảy vào ô SL của dòng đó ---- */
+    window.__impAddCard = function (name) {
+        var idx = -1, k;
+        for (k = 0; k < cart.length; k++) { if (cart[k].name === name) { idx = k; break; } }
+        if (idx < 0) {
+            var p = null; try { p = (typeof getProductByNameFast === 'function') ? getProductByNameFast(name) : null; } catch (e) {}
+            var u = document.getElementById('imp-unit');
+            cart.push({ name: name, unit: (p && p.unit) || (u ? u.value : ''), qty: 0, retail: (p && p.retail) || '', wholesale: (p && p.wholesale) || '', ngaySX: null, hsd: null, hanThang: null });
+            idx = cart.length - 1; renderCart();
+        }
+        var q = document.getElementById('imp-cq-' + idx);
+        if (q) { q.focus(); q.select(); try { q.scrollIntoView({ block: 'nearest' }); } catch (e) {} }
+    };
+    /* ---- chặn lưu khi còn dòng chưa có số lượng ---- */
+    if (typeof saveImport === 'function') {
+        var _save = window.saveImport;
+        window.saveImport = function () {
+            var bad = -1; for (var k = 0; k < cart.length; k++) { if (!(parseFloat(cart[k].qty) > 0)) { bad = k; break; } }
+            if (bad >= 0) {
+                Swal.fire({ icon: 'warning', title: 'Chưa nhập số lượng', text: 'Sản phẩm "' + cart[bad].name + '" chưa có số lượng. Nhập số lượng hoặc bấm ✕ để bỏ khỏi phiếu.' }).then(function () { var q = document.getElementById('imp-cq-' + bad); if (q) q.focus(); });
+                return;
+            }
+            return _save.apply(this, arguments);
+        };
+    }
+    /* ---- gọn form nhập tay (mặc định ẩn trên PC) ---- */
+    var nameBlock = document.getElementById('imp-name') && document.getElementById('imp-name').closest('.mb-3');
+    var g1 = document.getElementById('imp-unit') && document.getElementById('imp-unit').closest('.grid');
+    var g2 = document.getElementById('imp-nsx') && document.getElementById('imp-nsx').closest('.grid');
+    if (nameBlock && g1 && g2) {
+        [nameBlock, g1, g2].forEach(function (e) { e.classList.add('imp-manual'); });
+        var btn = document.createElement('button'); btn.type = 'button'; btn.id = 'imp-manual-toggle';
+        nameBlock.parentNode.insertBefore(btn, nameBlock);
+        function sync() { var off = page.classList.contains('imp-manual-off'); btn.textContent = off ? '✍️ Nhập tay theo form cũ  ▸' : '▾ Ẩn form nhập tay'; }
+        page.classList.add('imp-manual-off'); sync();
+        btn.addEventListener('click', function () { page.classList.toggle('imp-manual-off'); sync(); });
+    }
+    renderCart();
+})();
+</script>
+
+<style id="read-alert-css">
+/* v20: KHÔNG còn thông báo "hết read" ở Trang chủ / Nhập kho / Bán hàng / nút đỏ góc dưới.
+   Phiếu chưa đồng bộ được đánh dấu bằng dấu tích màu cam ngay trên từng phiếu (rê chuột để xem chi tiết). */
+#firestore-read-status-import,#firestore-read-status-import-inline,#firestore-read-status-sell,#firestore-read-status-sell-inline{display:none!important}
+</style>
