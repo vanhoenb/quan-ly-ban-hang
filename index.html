@@ -3590,12 +3590,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 <!-- Chỉ còn 1 bảng danh sách phiếu nhập duy nhất (trước đây 2 bảng cạnh nhau,
                      giờ cột này hẹp lại còn 1/3 nên gộp thành 1 cột dài duy nhất cho dễ đọc) -->
-                <div class="flex items-center justify-between gap-2 mb-2">
-                    <label class="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 select-none cursor-pointer">
-                        <input type="checkbox" id="receipt-check-all" onchange="toggleAllReceiptCheck(this)" class="w-4 h-4 rounded"> Chọn tất cả
-                    </label>
-                    <button onclick="printSelectedReceipts()" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white whitespace-nowrap">🖨 In phiếu đã chọn</button>
-                </div>
                 <!-- Chỉ hiện khi đang tìm theo sản phẩm: tóm tắt nhanh "tìm thấy bao nhiêu
                      phiếu, tổng nhập bao nhiêu" - đúng câu hỏi người dùng hay cần trả lời
                      ("SP A nhập vào những ngày nào, bao nhiêu lần") mà không cần mở từng phiếu. -->
@@ -3603,7 +3597,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <div class="overflow-x-auto overflow-y-auto max-h-[50vh] border border-blue-100 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 custom-scrollbar flex-grow">
                     <table class="w-full text-sm">
                         <thead class="sticky top-0 z-10 bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-slate-700 text-gray-800 dark:text-gray-200 shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
-                            <tr><th class="py-3 px-2 text-center w-[6%]"></th><th class="py-3 px-2 text-center w-[14%]">Số phiếu</th><th class="py-3 px-2 text-center w-[14%]">Ngày nhập</th><th class="py-3 px-2 text-left w-[40%]">Loại nhập</th><th class="py-3 px-2 text-center w-[10%]">Số SP</th><th class="py-3 px-2 text-center w-[16%]"></th></tr>
+                            <tr><th class="py-3 px-2 text-center w-[12%]">Số phiếu</th><th class="py-3 px-2 text-center w-[14%]">Ngày nhập</th><th class="py-3 px-2 text-left w-[26%]">Loại nhập</th><th class="py-3 px-2 text-left w-[30%]">Sản phẩm (SL)</th><th class="py-3 px-2 text-center w-[12%]"></th><th class="w-[6%]"></th></tr>
                         </thead>
                         <tbody id="list-receipts-left" class="text-gray-800 dark:text-gray-300"></tbody>
                     </table>
@@ -4020,7 +4014,6 @@ document.addEventListener('DOMContentLoaded', function () {
             <div id="hdn-history-list" class="flex-1 overflow-y-auto p-2.5 md:p-4 space-y-2"></div>
         </div>
     </div>
-</div>
         
 <!-- PHẦN 3: BÁN HÀNG -->
 <div id="page-sell" class="p-2 md:p-6 pb-24 lg:pb-6 space-y-4 w-full">
@@ -5700,7 +5693,6 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
         </div>
     </div>
-</div>
 
 <div id="page-user-management" class="hidden space-y-6 p-2 md:p-6">
     <!-- 4 KHỐI BẢO TRÌ HỆ THỐNG - gộp chung 1 hàng, thu gọn tối đa (chỉ còn tiêu đề ngắn +
@@ -10808,7 +10800,7 @@ function renderDebtCustomers(customersSnap) {
     customersSnap.forEach(doc => {
         const customer = doc.data();
         const debt = Number(customer.debt) || 0;
-        if (debt > 0) {
+        if (debt >= 0.5) {
             rows.push({ id: doc.id, name: customer.name || 'Khách hàng', phone: customer.phone, debt, paid: Number(paidMap[doc.id]) || 0 });
         }
     });
@@ -11982,6 +11974,17 @@ function addToCart() {
         Swal.fire({ icon: 'warning', title: 'Thiếu thông tin', text: 'Vui lòng chọn sản phẩm và nhập số lượng lớn hơn 0!' });
         return;
     }
+    // Cùng 1 sản phẩm đã có trong giỏ: hỏi lại để tránh thêm trùng nhầm (nhập lô khác HSD thì vẫn thêm được).
+    if (cart.some(c => c && c.name === item.name) && !window.__impDupConfirmed) {
+        Swal.fire({
+            icon: 'question', title: 'Sản phẩm đã có trong giỏ',
+            text: '"' + item.name + '" đã có trong giỏ nhập. Vẫn thêm thành dòng mới?',
+            showCancelButton: true, confirmButtonText: 'Vẫn thêm', cancelButtonText: 'Không'
+        }).then(r => {
+            if (r.isConfirmed) { window.__impDupConfirmed = true; try { addToCart(); } finally { window.__impDupConfirmed = false; } }
+        });
+        return;
+    }
     cart.push(item);
     // Gọi hàm render để cập nhật bảng
     renderCart();
@@ -12036,6 +12039,24 @@ async function saveImport() {
         Swal.fire('Thiếu thông tin', 'Vui lòng chọn tình trạng hàng đổi date: Còn hạn hay Hết hạn.', 'warning');
         window.__importSaveInProgress = false;
         return;
+    }
+    // Xem lại trước khi lưu (có thể tắt bằng ô "Không hỏi lại") - bắt lỗi gõ nhầm số lượng trước khi tồn kho bị cộng.
+    let __impConfirmOff = false;
+    try { __impConfirmOff = localStorage.getItem('imp_confirm_off') === '1'; } catch (_) { }
+    if (!__impConfirmOff) {
+        const __esc = v => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+        const __sumQty = cart.reduce((t, i) => t + (parseFloat(i.qty) || 0), 0);
+        const __rows = cart.slice(0, 12).map(i => '<tr><td style="text-align:left;padding:2px 6px">' + __esc(i.name) + '</td><td style="text-align:right;padding:2px 6px;font-weight:700">' + (parseFloat(i.qty) || 0) + ' ' + __esc(i.unit || '') + '</td></tr>').join('');
+        const __more = cart.length > 12 ? '<div style="font-size:12px;margin-top:4px">... và ' + (cart.length - 12) + ' dòng nữa</div>' : '';
+        const __res = await Swal.fire({
+            icon: 'question',
+            title: 'Lưu phiếu ' + __esc(receiptNum) + '?',
+            html: '<div style="font-size:13px;margin-bottom:6px">' + __esc(impTypeUi) + ' - <b>' + cart.length + ' dòng</b>, tổng SL <b>' + __sumQty + '</b></div><table style="width:100%;font-size:13px">' + __rows + '</table>' + __more,
+            input: 'checkbox', inputPlaceholder: 'Không hỏi lại lần sau',
+            showCancelButton: true, confirmButtonText: 'Lưu phiếu', cancelButtonText: 'Kiểm tra lại'
+        });
+        if (!__res.isConfirmed) { window.__importSaveInProgress = false; return; }
+        if (__res.value) { try { localStorage.setItem('imp_confirm_off', '1'); } catch (_) { } }
     }
     const isExpired = (typeValue === 'Nhập đổi' && !isManualReturn && window.__impDateStatus === 'expired');
     const dateStatusValue = isManualReturn ? 'ok' : ((typeValue === 'Nhập đổi') ? window.__impDateStatus : null);
@@ -12429,11 +12450,15 @@ function buildReceiptRowHtml(docId, displayId, dateStr, itemCount, type, dateSta
     // Phiếu Hoàn trả nhập tay (manualReturn) hiện nhãn "Hoàn trả" như phiếu Trả hàng, nhưng vẫn xoá/sửa được bình thường.
     if (!isReturn && syncData && syncData.manualReturn === true)
         isReturn = true;
+    // Cột Sản phẩm: "SP A (3), SP B (10)" - số trong ngoặc là số lượng của dòng đó.
+    const __rcItems = (syncData && Array.isArray(syncData.items)) ? syncData.items : (((window.allReceipts || []).find(x => x && x.docId === docId) || {}).items || []);
+    const __rcEsc = v => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const __rcText = __rcItems.map(it => __rcEsc(it.name || '') + ' (' + (Number((parseFloat(it.qty) || 0).toFixed(3))) + ')').join(', ');
     // matchQtyLabel: chỉ có giá trị khi đang TÌM THEO SẢN PHẨM - hiện nổi bật đúng số
     // lượng của SP đang tìm trong PHIẾU NÀY, để không phải mở từng phiếu ra xem mới biết.
     const matchHtml = matchQtyLabel
         ? "<span class=\"inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400 whitespace-nowrap\">\uD83D\uDD0E " + matchQtyLabel + "</span>" : '';
-    return "\n\t\t\t\t<tr class=\"hover:bg-transparent transition-colors\">\n\t\t\t\t\t<td colspan=\"6\" class=\"p-2\">\n\t\t\t\t\t\t<div class=\"flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-3 md:p-3 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] transition-all hover:-translate-y-0.5\" style=\"border-left-color:#10b981 !important; border-right-color:#10b981 !important;\">\n\t\t\t\t\t\t\t<div class=\"flex items-center gap-2 md:contents\">\n\t\t\t\t\t\t\t\t<span class=\"shrink-0 md:w-[6%] md:text-center md:px-2\" onclick=\"event.stopPropagation()\">\n\t\t\t\t\t\t\t\t\t<input type=\"checkbox\" class=\"receipt-check w-4 h-4 rounded\" data-doc-id=\"" + docId + "\">\n\t\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t\t<span class=\"text-[12px] md:text-[11px] font-bold text-slate-700 dark:text-slate-300 md:w-[14%] truncate md:px-2 md:text-center\">" + displayId + "</span>\n\t\t\t\t\t\t\t\t" + syncStatusBadgeHtml(syncData) + "\n\t\t\t\t\t\t\t\t<span class=\"text-[11px] font-bold text-slate-700 dark:text-slate-400 md:w-[14%] md:text-center md:px-2\">" + dateStr + "</span>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t<div class=\"flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700\">\n\t\t\t\t\t\t\t\t<div class=\"md:w-[40%] md:px-2 flex flex-col gap-1\">" + receiptTypeBadgeHtml(type, dateStatus, vendor, isReturn) + "" + matchHtml + "</div>\n\t\t\t\t\t\t\t\t<div class=\"flex items-center gap-3 md:contents\">\n\t\t\t\t\t\t\t\t\t<span class=\"text-[11px] text-slate-500 dark:text-slate-400 md:w-[10%] md:text-center md:px-2\">" + itemCount + " SP</span>\n\t\t\t\t\t\t\t\t\t<span class=\"md:w-[16%] md:text-center md:px-2\">\n\t\t\t\t\t\t\t\t\t\t<button onclick=\"viewReceipt('" + docId + "')\" class=\"px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-slate-800 dark:bg-slate-700 text-white hover:bg-slate-900 dark:hover:bg-slate-600 transition-colors whitespace-nowrap\">\uD83D\uDC41 Xem</button>\n\t\t\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</td>\n\t\t\t\t</tr>\n\t\t\t";
+    return "\n\t\t\t\t<tr class=\"hover:bg-transparent transition-colors\">\n\t\t\t\t\t<td colspan=\"6\" class=\"p-2\">\n\t\t\t\t\t\t<div class=\"flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-3 md:p-3 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] transition-all hover:-translate-y-0.5\" style=\"border-left-color:#10b981 !important; border-right-color:#10b981 !important;\">\n\t\t\t\t\t\t\t<div class=\"flex items-center gap-2 md:contents\">\n\t\t\t\t\t\t\t\t<span class=\"text-[12px] md:text-[11px] font-bold text-slate-700 dark:text-slate-300 md:w-[12%] truncate md:px-2 md:text-center\">" + displayId + "</span>\n\t\t\t\t\t\t\t\t" + syncStatusBadgeHtml(syncData) + "\n\t\t\t\t\t\t\t\t<span class=\"text-[11px] font-bold text-slate-700 dark:text-slate-400 md:w-[14%] md:text-center md:px-2\">" + dateStr + "</span>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t<div class=\"flex items-center justify-between pt-1.5 mt-0.5 md:pt-0 md:mt-0 md:contents border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700\">\n\t\t\t\t\t\t\t\t<div class=\"md:w-[26%] md:px-2 flex flex-col gap-1\">" + receiptTypeBadgeHtml(type, dateStatus, vendor, isReturn) + "" + matchHtml + "</div>\n\t\t\t\t\t\t\t\t<div class=\"flex items-center gap-3 md:contents\">\n\t\t\t\t\t\t\t\t\t<span class=\"text-[11px] text-slate-600 dark:text-slate-300 md:w-[30%] md:px-2\" style=\"text-align:left;line-height:1.35\" title=\"" + __rcText + "\">" + (__rcText || (itemCount + " SP")) + "</span>\n\t\t\t\t\t\t\t\t\t<span class=\"md:w-[12%] md:px-2\" style=\"text-align:right\">\n\t\t\t\t\t\t\t\t\t\t<button onclick=\"viewReceipt('" + docId + "')\" class=\"px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-slate-800 dark:bg-slate-700 text-white hover:bg-slate-900 dark:hover:bg-slate-600 transition-colors whitespace-nowrap\">\uD83D\uDC41 Xem</button>\n\t\t\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t\t\t<span class=\"md:w-[6%]\"></span>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</td>\n\t\t\t\t</tr>\n\t\t\t";
 }
 window.__receiptsLoadToken = window.__receiptsLoadToken || 0;
 async function loadReceipts(options = {}) {
@@ -21994,20 +22019,45 @@ async function addCustomer() {
 }
 // Ghi nhận khách hàng trả nợ (thanh toán công nợ)
 async function payDebt(id, currentDebt, customerName) {
+    const curDebt = Number(currentDebt) || 0;
+    const fmtMoney = v => (Number(v) || 0).toLocaleString('vi-VN');
     const { value: formValues } = await Swal.fire({
         title: 'Ghi nhận trả nợ: ' + customerName,
-        html: '<label class="text-sm font-bold block text-left mb-1">Số tiền trả:</label>' +
-            '<input id="swal-amount" type="number" class="w-full p-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded mb-3" placeholder="Số tiền...">' +
+        html: '<div class="flex items-center justify-between gap-2 mb-2 text-sm"><span>Nợ hiện tại: <b>' + fmtMoney(curDebt) + ' đ</b></span><button type="button" id="swal-pay-all" style="padding:4px 10px;border-radius:8px;font-size:12px;font-weight:700;background:#059669;color:#fff">Trả hết</button></div>' +
+            '<label class="text-sm font-bold block text-left mb-1">Số tiền trả:</label>' +
+            '<input id="swal-amount" type="number" class="w-full p-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded mb-3" placeholder="Số tiền..." min="0" inputmode="numeric">' +
+            '<div id="swal-amount-preview" style="font-size:12px;text-align:left;font-weight:700;margin:-8px 0 12px;min-height:16px"></div>' +
             '<label class="text-sm font-bold block text-left mb-1">Ngày trả:</label>' +
             '<input id="swal-date" type="date" class="w-full p-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded mb-3" value="' + getTodayVNISO() + '">' +
             '<label class="text-sm font-bold block text-left mb-1">Ghi chú:</label>' +
             '<input id="swal-note" type="text" class="w-full p-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded" placeholder="Ghi chú (nếu có)...">',
         focusConfirm: false, confirmButtonText: 'Xác nhận', showCancelButton: true, cancelButtonText: 'Hủy',
-        preConfirm: () => ({ amount: document.getElementById('swal-amount').value, date: document.getElementById('swal-date').value, note: document.getElementById('swal-note').value })
+        didOpen: () => {
+            const inp = document.getElementById('swal-amount'), pv = document.getElementById('swal-amount-preview'), all = document.getElementById('swal-pay-all');
+            if (!inp || !pv) return;
+            const upd = () => {
+                const v = parseFloat(inp.value);
+                if (!isFinite(v) || v <= 0) { pv.textContent = ''; return; }
+                const over = v > curDebt + 1;
+                pv.textContent = '= ' + fmtMoney(v) + ' đ' + (over ? ' (vượt nợ hiện tại)' : (v === curDebt ? ' (trả hết)' : ' - còn nợ ' + fmtMoney(curDebt - v) + ' đ'));
+                pv.style.color = over ? '#dc2626' : '#475569';
+            };
+            inp.addEventListener('input', upd);
+            if (all) all.addEventListener('click', () => { inp.value = curDebt; upd(); inp.focus(); });
+            inp.focus();
+        },
+        preConfirm: () => {
+            const raw = document.getElementById('swal-amount').value, v = parseFloat(raw);
+            if (!raw || !isFinite(v) || v <= 0) { Swal.showValidationMessage('Vui lòng nhập số tiền trả hợp lệ (lớn hơn 0).'); return false; }
+            if (v > curDebt + 1) { Swal.showValidationMessage('Số tiền trả vượt quá nợ hiện tại (' + fmtMoney(curDebt) + ' đ).'); return false; }
+            return { amount: raw, date: document.getElementById('swal-date').value, note: document.getElementById('swal-note').value };
+        }
     });
     if (formValues && formValues.amount) {
         const payAmount = parseFloat(formValues.amount);
         if (!isFinite(payAmount) || payAmount <= 0) return;
+        if (window.__custPaymentInProgress) return;
+        window.__custPaymentInProgress = true;
         try {
             const custRef = db.collection('customers').doc(id);
             const paymentRef = db.collection('debt_history').doc();
@@ -22015,13 +22065,14 @@ async function payDebt(id, currentDebt, customerName) {
                 const custSnap = await tx.get(custRef);
                 if (!custSnap.exists) throw new Error('Không tìm thấy khách hàng.');
                 const current = Number(custSnap.data().debt) || 0;
-                if (payAmount > current + 0.000001) throw new Error('Số tiền trả vượt quá công nợ hiện tại.');
+                if (payAmount > current + 1) throw new Error('Số tiền trả vượt quá công nợ hiện tại.');
                 tx.update(custRef, { debt: firebase.firestore.FieldValue.increment(-payAmount) });
                 tx.set(paymentRef, { customerId: id, customerName, amount: payAmount, date: formValues.date, note: formValues.note, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
             });
             await window.requestPostWriteSync(['customers', 'debt_history', 'payments']);
             Swal.fire('Thành công!', 'Đã cập nhật nợ cho khách hàng.', 'success');
         } catch (error) { Swal.fire('Lỗi!', error.message, 'error'); }
+        finally { window.__custPaymentInProgress = false; }
     }
 }
 // Hàm hiển thị danh sách các lần trả nợ
@@ -22617,13 +22668,7 @@ function renderPhieuNhapKhoTemplate(receipt) {
         document.getElementById('nk-total-word').innerText = docSo(grandTotal);
     triggerPrint('print-mode-nhapkho');
 }
-// ===== IN PHIẾU NHẬP KHO (1 phiếu từ modal chi tiết, hoặc nhiều phiếu đã tick chọn ở
-// danh sách) - phiếu đơn lẻ dùng mẫu letterhead riêng (renderPhieuNhapKhoTemplate); nhiều
-// phiếu cùng lúc thì dùng lại khung "xem trước & in" của Báo cáo (openReportPreviewWindow)
-// để liệt kê gọn nhiều phiếu trong 1 bảng, khỏi phải lặp lại logo cho từng phiếu. =====
-function toggleAllReceiptCheck(master) {
-    document.querySelectorAll('.receipt-check').forEach(cb => { cb.checked = master.checked; });
-}
+// ===== IN PHIẾU NHẬP KHO (1 phiếu từ modal chi tiết) - dùng mẫu letterhead renderPhieuNhapKhoTemplate =====
 function receiptTypeLabelPlain(type, dateStatus, isReturn) {
     if (isReturn)
         return 'Hoàn trả';
@@ -22645,39 +22690,8 @@ function printReceiptsById(docIds) {
         Swal.fire('Lỗi', 'Không tìm thấy dữ liệu phiếu để in - hãy tải lại danh sách rồi thử lại.', 'error');
         return;
     }
-    // Đúng 1 phiếu: in theo mẫu letterhead đầy đủ (có logo + tên công ty).
-    if (list.length === 1) {
-        renderPhieuNhapKhoTemplate(list[0]);
-        return;
-    }
-    // Nhiều phiếu: giữ nguyên bảng liệt kê gọn như trước.
-    const headers = ['Số phiếu', 'Ngày nhập', 'Loại nhập', 'Khách / Đại lý', 'Sản phẩm', 'ĐVT', 'SL'];
-    const rows = [];
-    list.forEach(r => {
-        const rDate = toReportDate(r.date);
-        const dateStr = rDate ? rDate.toLocaleDateString('vi-VN', { timeZone: APP_TIME_ZONE }) : '---';
-        const typeLabel = receiptTypeLabelPlain(r.type, r.dateStatus, r.isReturn || r.manualReturn);
-        (r.items || []).forEach((it, idx) => {
-            rows.push([
-                idx === 0 ? r.displayId : '',
-                idx === 0 ? dateStr : '',
-                idx === 0 ? typeLabel : '',
-                idx === 0 ? (r.vendor || '') : '',
-                it.name || '',
-                it.unit || '',
-                it.qty
-            ]);
-        });
-    });
-    openReportPreviewWindow('PHIẾU NHẬP KHO (nhiều phiếu)', "In " + list.length + " phi\u1EBFu \u2014 " + new Date().toLocaleDateString('vi-VN', { timeZone: APP_TIME_ZONE }) + "", headers, rows, null, ['left', 'left', 'left', 'left', 'left', 'center', 'right']);
-}
-function printSelectedReceipts() {
-    const checked = Array.from(document.querySelectorAll('.receipt-check:checked')).map(el => el.dataset.docId);
-    if (!checked.length) {
-        Swal.fire({ icon: 'info', title: 'Chưa chọn phiếu nào', text: 'Tick chọn ít nhất 1 phiếu ở danh sách để in.' });
-        return;
-    }
-    printReceiptsById(checked);
+    // In theo mẫu letterhead đầy đủ (có logo + tên công ty).
+    renderPhieuNhapKhoTemplate(list[0]);
 }
 // "👁 Xem" cho BC Bán Hàng - lấy đúng dữ liệu như hàm exportSales() nhưng hiển thị
 // ngay trên màn hình thay vì tải file Excel.
@@ -24777,6 +24791,14 @@ async function calcCustomerDebtData(from, to) {
     historySnap.forEach(doc => allNames.add(doc.data().customerName));
     allNames.forEach(name => { if (name)
         reportData[name] = { lines: [], pays: [], openingBalance: 0 }; });
+    // Nợ đầu kỳ nhập tay (nút "Nợ đầu kỳ" ở trang Công nợ) đã được cộng vào công nợ hiện tại của KH,
+    // nên BC Công nợ phải cộng nó vào Nợ đầu kỳ - trước đây chỉ lấy tên KH mà bỏ quên số tiền,
+    // khiến báo cáo thấp hơn công nợ thật đúng bằng khoản nợ đầu kỳ này.
+    openSnap.forEach(doc => {
+        const od = doc.data() || {};
+        if (od.customerName && reportData[od.customerName])
+            reportData[od.customerName].openingBalance += parseFloat(od.amount || 0) || 0;
+    });
     salesSnap.forEach(doc => {
         const d = doc.data();
         if (d.paymentMethod !== 'Công nợ' || !reportData[d.customer])
@@ -28696,7 +28718,7 @@ async function paySupplierDebt(docId, nccName) {
             const supplierSnap = await tx.get(supplierRef);
             if (!supplierSnap.exists) throw new Error('Không tìm thấy nhà cung cấp.');
             const currentDebt = Number(supplierSnap.data().debt) || 0;
-            if (amount > currentDebt + 0.000001) throw new Error('Số tiền trả vượt quá công nợ nhà cung cấp hiện tại.');
+            if (amount > currentDebt + 1) throw new Error('Số tiền trả vượt quá công nợ nhà cung cấp hiện tại.');
             tx.set(paymentRef, { supplierId: docId, supplierName: nccName, amount, date: new Date(), createdAt: firebase.firestore.FieldValue.serverTimestamp() });
             tx.update(supplierRef, { debt: firebase.firestore.FieldValue.increment(-amount) });
         });
@@ -31788,4 +31810,63 @@ html.dark .imp-cn{color:#f1f5f9}
 #bc-date-card > .grid > div{display:flex;align-items:center;gap:10px;padding:6px 12px!important}
 #bc-date-card > .grid > div > label{margin:0!important;white-space:nowrap}
 #bc-date-card > .grid > div > input{flex:1 1 0;min-width:0;padding-top:6px!important;padding-bottom:6px!important}
+</style>
+
+
+<style id="v32-css">
+/* v32: điện thoại - chấm "Trực tuyến / Đã đồng bộ" bị kéo dài dọc màn hình vì có cả top lẫn bottom.
+   Ép bottom:auto + height:auto để chấm chỉ còn là 1 chấm nhỏ ở góc trên bên phải. */
+@media (max-width:600px){
+  html body #app-connectivity-status{top:6px!important;right:6px!important;bottom:auto!important;left:auto!important;height:auto!important;width:auto!important;max-height:26px!important}
+}
+</style>
+
+<script id="v34-input-guards">
+/* v34: (1) lăn chuột khi đang đứng trong ô số KHÔNG làm đổi giá trị (tránh vô tình sửa SL/giá/tiền khi cuộn trang);
+        (2) bấm vào ô số thì bôi đen sẵn để gõ đè luôn, khỏi phải xoá số 0 / số cũ. */
+(function () {
+    'use strict';
+    if (window.__v34Guards) return; window.__v34Guards = true;
+    document.addEventListener('wheel', function (e) {
+        var t = document.activeElement;
+        if (t && t.tagName === 'INPUT' && t.type === 'number' && t === e.target) t.blur();
+    }, { passive: true });
+    document.addEventListener('focusin', function (e) {
+        var t = e.target;
+        if (t && t.tagName === 'INPUT' && t.type === 'number' && !t.readOnly && !t.disabled) {
+            setTimeout(function () { try { t.select(); } catch (_) { } }, 0);
+        }
+    });
+})();
+</script>
+
+<style id="v38-ui-css">
+/* v38: nâng cấp giao diện Nhập kho + Bán hàng (chỉ CSS, không đổi chức năng) */
+/* ---------- NHẬP KHO ---------- */
+#page-import #imp-picker{border:1px solid rgba(251,146,60,.5)!important;border-radius:22px!important;box-shadow:0 14px 34px -18px rgba(249,115,22,.5);background:linear-gradient(180deg,#ffffff,#fffaf4)!important}
+html.dark #page-import #imp-picker{background:rgba(15,23,42,.55)!important}
+#imp-pk-search{height:46px;border-radius:14px!important;font-size:14px;padding-left:14px;border:1.5px solid rgba(251,146,60,.35)!important;transition:box-shadow .15s,border-color .15s}
+#imp-pk-search:focus{border-color:#f97316!important;box-shadow:0 0 0 4px rgba(249,115,22,.15)!important;outline:none}
+#panel-import-form{border-radius:22px!important;box-shadow:0 14px 34px -18px rgba(30,41,59,.35)}
+#panel-import-form label{letter-spacing:.04em}
+#panel-import-form input:not([type=checkbox]),#panel-import-form select{border-radius:12px!important;transition:box-shadow .15s,border-color .15s}
+#panel-import-form input:focus,#panel-import-form select:focus{border-color:#3b82f6!important;box-shadow:0 0 0 4px rgba(59,130,246,.14)!important;outline:none}
+#imp-type-btn-new,#imp-type-btn-swap,#imp-type-btn-return{border-width:1.5px!important;font-size:12.5px;letter-spacing:.02em;box-shadow:0 2px 6px -3px rgba(15,23,42,.25)}
+#cart-box{border-radius:16px!important}
+#cart-box:empty::before{content:"🧾 Chưa có sản phẩm - bấm vào thẻ sản phẩm bên trái để thêm";display:block;text-align:center;color:#94a3b8;font-size:13px;font-weight:600;padding:40px 16px}
+#save-import-btn{font-size:16px;font-weight:800;letter-spacing:.03em;padding-top:14px;padding-bottom:14px;box-shadow:0 10px 22px -10px rgba(37,99,235,.7)}
+#add-btn{font-weight:800;letter-spacing:.02em}
+/* ---------- BÁN HÀNG ---------- */
+#sell-panel-products{border-width:1px!important;border-radius:22px!important;box-shadow:0 14px 34px -18px rgba(30,41,59,.35)}
+#sell-panel-customer,#sell-panel-pay{border-width:1px!important;border-radius:20px!important;background:rgba(255,255,255,.72)!important;box-shadow:0 10px 26px -16px rgba(30,41,59,.35)}
+html.dark #sell-panel-customer,html.dark #sell-panel-pay{background:rgba(15,23,42,.6)!important}
+#sell-cart-container{border-radius:20px!important;position:relative}
+#sell-cart-container:not(:has(#sell-cart-body tr))::after{content:"🛒 Giỏ hàng trống - bấm sản phẩm hoặc quét mã để thêm";position:absolute;left:0;right:0;top:46%;text-align:center;color:#94a3b8;font-size:14px;font-weight:600;pointer-events:none}
+#sell-customer,#sell-receipt,#sell-note-global,#payment-method,#global-price-type,#global-vat{border-radius:12px!important;transition:box-shadow .15s,border-color .15s}
+#sell-customer:focus,#sell-note-global:focus,#sell-receipt:focus{border-color:#3b82f6!important;box-shadow:0 0 0 4px rgba(59,130,246,.14)!important;outline:none}
+#cart-total-display{font-size:30px!important;line-height:1.1;letter-spacing:-.01em}
+#sell-panel-pay .text-xl,#sell-panel-pay .text-lg{letter-spacing:.01em}
+#btn-save-print{font-size:19px;font-weight:800;letter-spacing:.03em;box-shadow:0 12px 24px -12px rgba(22,163,74,.75)}
+#btn-print-type-hoadon,#btn-print-type-xuatkho{border-radius:14px!important;font-weight:700}
+#sell-panel-held:has(#held-orders-bar:empty){display:none}
 </style>
