@@ -17147,6 +17147,8 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
     // Hóa đơn nháp chỉ tích chọn SP, KHÔNG nhập số lượng nào: in dạng gọn - ẩn cột Thuế%/Tiền thuế (cột
     // Thành tiền rộng ra), ẩn dòng Thành tiền trước thuế + Tiền thuế GTGT, để trống Số phiếu.
     const noQtyMode = !!isDraft && (items || []).length > 0 && (items || []).filter(i => !i.dateSwap).every(i => !(Number(i.qty) > 0));
+    // Hóa đơn nháp: chỉ khi CHỌN thuế (>0%) mới hiện cột Thuế/Tiền thuế + 2 dòng Thành tiền trước thuế/Tiền thuế GTGT; thuế = 0 thì ẩn hết.
+    const taxHidden = noQtyMode || (!!isDraft && !(Number(vatRate) > 0));
     const d = dateObj || new Date();
     const NB = '\u00A0';
     const formattedDate = blankDate ? '' : d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -17233,7 +17235,7 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
             if (headRow) {
                 headRow.querySelectorAll('[data-sug]').forEach(e => e.remove());
                 const ths = Array.from(headRow.children);
-                ths.forEach((th, idx) => { th.style.display = (noQtyMode && (showSug ? (idx === 6 || idx === 7) : (idx === 6 || idx === 7))) ? 'none' : ''; });
+                ths.forEach((th, idx) => { th.style.display = (taxHidden && (showSug ? (idx === 6 || idx === 7) : (idx === 6 || idx === 7))) ? 'none' : ''; });
                 if (showSug && ths[4]) {
                     const th = ths[4].cloneNode(true);
                     th.setAttribute('data-sug', '1');
@@ -17242,7 +17244,7 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
                     ths[4].after(th);
                 }
                 // Sau khi chèn cột: Thuế% / Tiền thuế dịch sang vị trí 7,8 khi có cột đề xuất
-                if (noQtyMode) {
+                if (taxHidden) {
                     const all = Array.from(headRow.children);
                     all.forEach((th, idx) => { th.style.display = (showSug ? (idx === 7 || idx === 8) : (idx === 6 || idx === 7)) ? 'none' : ''; });
                 }
@@ -17250,10 +17252,10 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
             // Độ rộng cột (chỉ hóa đơn nháp): Giá bán đề xuất gọn lại, Thành tiền rộng hơn
             if (headRow) {
                 const W = !isDraft ? null : (showSug
-                    ? (noQtyMode
+                    ? (taxHidden
                         ? { 'STT': 5, 'Tên hàng': 33, 'ĐVT': 7, 'SL': 7, 'Đơn giá': 12, 'Giá bán đề xuất': 10, 'Thành tiền': 16, 'Ghi chú': 10 }
                         : { 'STT': 4, 'Tên hàng': 27, 'ĐVT': 6, 'SL': 6, 'Đơn giá': 10, 'Giá bán đề xuất': 9, 'Thành tiền': 14, 'Thuế%': 6, 'Tiền thuế': 9, 'Ghi chú': 9 })
-                    : (noQtyMode
+                    : (taxHidden
                         ? { 'STT': 5, 'Tên hàng': 36, 'ĐVT': 8, 'SL': 8, 'Đơn giá': 14, 'Thành tiền': 17, 'Ghi chú': 12 }
                         : null));
                 printTable.style.tableLayout = W ? 'fixed' : '';
@@ -17268,7 +17270,7 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
                 if (!cells.length) return;
                 if (cells[0].colSpan >= 9) {
                     if (cells[0].textContent.indexOf('\uD83D\uDD04') >= 0) inSwap = true;
-                    cells[0].colSpan = 9 + (showSug ? 1 : 0) - (noQtyMode ? 2 : 0);
+                    cells[0].colSpan = 9 + (showSug ? 1 : 0) - (taxHidden ? 2 : 0);
                     return;
                 }
                 if (isDraft && inSwap) {
@@ -17285,7 +17287,7 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
                     dv.textContent = v > 0 ? v.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) : '';
                     cells[4].after(td);
                 }
-                if (noQtyMode) {
+                if (taxHidden) {
                     const all = Array.from(tr.children);
                     all.forEach((c, idx) => { if (showSug ? (idx === 7 || idx === 8) : (idx === 6 || idx === 7)) c.style.display = 'none'; });
                 }
@@ -17293,10 +17295,10 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
         }
         ['print-subtotal', 'print-tax-total'].forEach(id => {
             const el = document.getElementById(id);
-            if (el && el.parentElement) el.parentElement.style.display = noQtyMode ? 'none' : 'flex';
+            if (el && el.parentElement) el.parentElement.style.display = taxHidden ? 'none' : 'flex';
         });
         const totalBox = document.getElementById('print-total');
-        if (totalBox && totalBox.parentElement) totalBox.parentElement.style.marginTop = noQtyMode ? '0' : '8px';
+        if (totalBox && totalBox.parentElement) totalBox.parentElement.style.marginTop = taxHidden ? '0' : '8px';
         subTotalAll = taxableSubTotal + shippingSubTotal;
         window.__lastPrintTaxableSubTotal = taxableSubTotal; // dùng để tính taxTotalAll bên dưới, không tính thuế trên phần ship
     }
@@ -26198,7 +26200,7 @@ async function nkBuildNguyenLieu(dates) {
             r.items.map(x => x.name).join('\n'),
             r.items.map(x => nkNum(x.sl) + ' ' + x.unit).join('\n'),
             NK_TINH_TRANG,
-            r.soHd ? ('Hóa đơn số ' + r.soHd) : ''
+            'Phiếu giao hàng' + (r.soHd ? ('\n' + 'Hóa đơn số ' + r.soHd) : '')
         ])
     }));
 }
@@ -31869,4 +31871,89 @@ html.dark #sell-panel-customer,html.dark #sell-panel-pay{background:rgba(15,23,4
 #btn-save-print{font-size:19px;font-weight:800;letter-spacing:.03em;box-shadow:0 12px 24px -12px rgba(22,163,74,.75)}
 #btn-print-type-hoadon,#btn-print-type-xuatkho{border-radius:14px!important;font-weight:700}
 #sell-panel-held:has(#held-orders-bar:empty){display:none}
+</style>
+
+<style id="v42-card-css">
+/* v43 (nhạt hơn): thẻ sản phẩm Nhập kho + Bán hàng - Giao diện SÁNG: kính màu mờ nhẹ (kiểu C); giao diện TỐI: kính tối viền phát sáng (kiểu D) */
+/* ================= BÁN HÀNG - SÁNG ================= */
+html.glass:not(.dark) body div[id^="product-card-"]{
+  border-radius:24px !important;
+  border:1px solid rgba(255,255,255,.9) !important;
+  background:
+    linear-gradient(155deg,rgba(var(--g),.17) 0%,rgba(var(--g),.05) 60%,rgba(var(--g),.10) 100%),
+    linear-gradient(#ffffff,#ffffff) !important;
+  box-shadow:
+    0 10px 20px -12px rgba(var(--g),.42),
+    inset 0 2px 1px rgba(255,255,255,.98),
+    inset 0 -8px 14px rgba(var(--g),.09) !important;
+  -webkit-backdrop-filter:none !important;backdrop-filter:none !important;
+}
+html.glass:not(.dark) body div[id^="product-card-"]:hover{
+  box-shadow:0 14px 24px -12px rgba(var(--g),.55),inset 0 2px 1px #fff,inset 0 -8px 16px rgba(var(--g),.13) !important;
+}
+html.glass div[id^="product-card-"]::before,html.glass div[id^="product-card-"]::after{display:none !important}
+div[id^="product-card-"] > div.blur-xl{display:none !important}
+html.glass:not(.dark) div[id^="product-card-"] p{color:color-mix(in srgb, rgb(var(--g)) 75%, #000) !important;text-shadow:none !important}
+html.glass:not(.dark) div[id^="product-card-"] button{
+  background:rgba(255,255,255,.62) !important;color:rgb(var(--g)) !important;
+  box-shadow:inset 0 1px 2px #fff,0 2px 6px -2px rgba(var(--g),.7) !important;
+}
+/* ================= BÁN HÀNG - TỐI ================= */
+html.glass.dark body div[id^="product-card-"]{
+  border-radius:24px !important;
+  border:1.5px solid rgb(var(--g)) !important;
+  background:linear-gradient(160deg,#1e293b,#0f172a) !important;
+  box-shadow:0 0 0 3px rgba(var(--g),.22),0 10px 22px -8px rgba(0,0,0,.55),inset 0 1.5px 1px rgba(255,255,255,.25) !important;
+}
+html.glass.dark div[id^="product-card-"] p{color:color-mix(in srgb, rgb(var(--g)) 55%, #fff) !important;text-shadow:none !important}
+html.glass.dark div[id^="product-card-"] button{
+  background:rgb(var(--g)) !important;color:#fff !important;
+  box-shadow:0 0 12px rgba(var(--g),.9),inset 0 1px 2px rgba(255,255,255,.6) !important;
+}
+/* ================= NHẬP KHO - SÁNG ================= */
+.imp-card{
+  border-radius:24px !important;
+  border:1px solid rgba(255,255,255,.9) !important;
+  background:linear-gradient(155deg,color-mix(in srgb,var(--c,#6b7280) 17%,#fff) 0%,color-mix(in srgb,var(--c,#6b7280) 5%,#fff) 60%,color-mix(in srgb,var(--c,#6b7280) 10%,#fff) 100%) !important;
+  box-shadow:0 10px 20px -12px color-mix(in srgb,var(--c,#6b7280) 42%,transparent),inset 0 2px 1px rgba(255,255,255,.98),inset 0 -8px 14px color-mix(in srgb,var(--c,#6b7280) 9%,transparent) !important;
+  overflow:hidden;
+}
+.imp-card::before{display:none !important}
+.imp-card:hover{box-shadow:0 14px 24px -12px color-mix(in srgb,var(--c,#6b7280) 55%,transparent),inset 0 2px 1px #fff,inset 0 -8px 16px color-mix(in srgb,var(--c,#6b7280) 13%,transparent) !important}
+.imp-card .n{color:color-mix(in srgb,var(--c,#6b7280) 75%,#000) !important}
+.imp-card .p{background:rgba(255,255,255,.62) !important;color:var(--c,#6b7280) !important;box-shadow:inset 0 1px 2px #fff,0 2px 6px -2px color-mix(in srgb,var(--c,#6b7280) 70%,transparent) !important}
+.imp-card .s{background:rgba(255,255,255,.82) !important;color:#475569 !important;box-shadow:none !important}
+.imp-card.sel{
+  background:linear-gradient(155deg,color-mix(in srgb,var(--c,#6b7280) 34%,#fff),color-mix(in srgb,var(--c,#6b7280) 16%,#fff)) !important;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--c,#6b7280) 45%,transparent),0 12px 22px -10px color-mix(in srgb,var(--c,#6b7280) 80%,transparent),inset 0 2px 1px #fff !important;
+}
+.imp-card.sel .p{background:linear-gradient(180deg,#34d399,#059669) !important;color:#fff !important}
+/* ================= NHẬP KHO - TỐI ================= */
+html.dark .imp-card{
+  border:1.5px solid var(--c,#6b7280) !important;
+  background:linear-gradient(160deg,#1e293b,#0f172a) !important;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--c,#6b7280) 22%,transparent),0 10px 22px -8px rgba(0,0,0,.55),inset 0 1.5px 1px rgba(255,255,255,.25) !important;
+}
+html.dark .imp-card .n{color:color-mix(in srgb,var(--c,#6b7280) 55%,#fff) !important}
+html.dark .imp-card .p{background:var(--c,#6b7280) !important;color:#fff !important;box-shadow:0 0 12px var(--c,#6b7280),inset 0 1px 2px rgba(255,255,255,.6) !important}
+html.dark .imp-card .s{background:rgba(255,255,255,.12) !important;color:#e2e8f0 !important}
+html.dark .imp-card.sel{background:linear-gradient(160deg,color-mix(in srgb,var(--c,#6b7280) 40%,#0f172a),color-mix(in srgb,var(--c,#6b7280) 18%,#0f172a)) !important}
+</style>
+
+<style id="v44-hover-glow">
+/* v44: rê chuột vào thẻ sản phẩm -> viền phát sáng theo màu nhóm (Bán hàng + Nhập kho giống nhau) */
+html.glass:not(.dark) body div[id^="product-card-"]:hover{
+  border-color:rgb(var(--g)) !important;
+  box-shadow:0 0 0 1.5px rgb(var(--g)),0 0 18px 2px rgba(var(--g),.55),0 14px 24px -12px rgba(var(--g),.55),inset 0 2px 1px #fff,inset 0 -8px 16px rgba(var(--g),.12) !important;
+}
+html.glass.dark body div[id^="product-card-"]:hover{
+  box-shadow:0 0 0 1.5px rgb(var(--g)),0 0 24px 4px rgba(var(--g),.65),0 10px 22px -8px rgba(0,0,0,.55),inset 0 1.5px 1px rgba(255,255,255,.25) !important;
+}
+.imp-card:hover{
+  border-color:var(--c,#6b7280) !important;
+  box-shadow:0 0 0 1.5px var(--c,#6b7280),0 0 18px 2px color-mix(in srgb,var(--c,#6b7280) 55%,transparent),0 14px 24px -12px color-mix(in srgb,var(--c,#6b7280) 55%,transparent),inset 0 2px 1px #fff,inset 0 -8px 16px color-mix(in srgb,var(--c,#6b7280) 12%,transparent) !important;
+}
+html.dark .imp-card:hover{
+  box-shadow:0 0 0 1.5px var(--c,#6b7280),0 0 24px 4px color-mix(in srgb,var(--c,#6b7280) 65%,transparent),0 10px 22px -8px rgba(0,0,0,.55),inset 0 1.5px 1px rgba(255,255,255,.25) !important;
+}
 </style>
