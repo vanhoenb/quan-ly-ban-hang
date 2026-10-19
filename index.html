@@ -32010,3 +32010,71 @@ html.dark #cart-box .imp-hsd-ico{background:rgba(30,41,59,.85)}
 #imp-grid{padding:14px 14px 18px !important}
 #product-grid{padding:14px 14px 18px !important}
 </style>
+
+<style id="v52-unify">
+/* v52: lớp giao diện chung cho toàn phần mềm (đồng nhất tiêu đề, ô nhập, nút, thanh cuộn, bảng, hộp thoại) */
+/* 1. Tiêu đề trang: cùng cỡ chữ, cùng độ đậm */
+html body [id^="page-"] > h2:first-of-type,
+html body #page-import h2,
+html.dark #page-import h2,
+html.dark [id^="page-"] h2[data-pt],
+html.dark body #page-import h2,
+html body h2[data-pt]{font-size:26.4px !important;font-weight:800 !important;letter-spacing:-.01em}
+/* 2. Trang Lịch & Chấm công đang lẫn phông chữ có chân (Times New Roman) -> dùng cùng phông với cả phần mềm */
+html body #page-LichCongViec, html body #page-LichCongViec *:not(i):not(.fa):not([class*="icon"]){font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif,"Apple Color Emoji","Segoe UI Emoji" !important}
+/* 3. Ô nhập / chọn: cùng bo góc, cùng vòng sáng khi bấm vào */
+html body [id^="page-"] input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=color]),
+html body [id^="page-"] select,
+html body [id^="page-"] textarea{border-radius:12px;transition:box-shadow .15s,border-color .15s}
+html body [id^="page-"] input:not([type=checkbox]):not([type=radio]):not([type=range]):focus,
+html body [id^="page-"] select:focus,
+html body [id^="page-"] textarea:focus{border-color:#3b82f6 !important;box-shadow:0 0 0 4px rgba(59,130,246,.15) !important;outline:none}
+/* 4. Nút bấm: cùng hiệu ứng rê chuột / nhấn */
+html body [id^="page-"] button{transition:transform .12s,box-shadow .15s,filter .15s}
+html body [id^="page-"] button:not(:disabled):hover{filter:brightness(1.05)}
+html body [id^="page-"] button:not(:disabled):active{transform:translateY(1px);filter:brightness(.97)}
+/* 5. Thanh cuộn mảnh, bo tròn, đồng nhất */
+html.glass ::-webkit-scrollbar{width:8px;height:8px}
+html.glass ::-webkit-scrollbar-track{background:transparent}
+html.glass ::-webkit-scrollbar-thumb{background:rgba(100,116,139,.45);border-radius:999px}
+html.glass ::-webkit-scrollbar-thumb:hover{background:rgba(71,85,105,.7)}
+/* 6. Bảng: dòng sáng nhẹ khi rê chuột */
+html body [id^="page-"] tbody tr{transition:box-shadow .12s}
+html body [id^="page-"] tbody tr:hover{box-shadow:inset 0 0 0 9999px rgba(59,130,246,.05)}
+/* 7. Hộp thoại (SweetAlert): cùng bo góc với phần còn lại */
+.swal2-popup{border-radius:22px !important}
+.swal2-styled.swal2-confirm,.swal2-styled.swal2-cancel,.swal2-styled.swal2-deny{border-radius:12px !important;font-weight:700}
+</style>
+
+<style id="v53-imp-panel">
+/* v53: khung chứa thẻ sản phẩm ở Nhập kho dùng cùng nền kính trong như khung ở Bán hàng để các thẻ nổi lên */
+html body #page-import #imp-picker{
+  background:rgba(255,255,255,.10) !important;
+  border:1px solid rgba(255,255,255,.80) !important;
+  box-shadow:0 8px 22px rgba(50,70,160,.10),inset 0 1.5px 0 rgba(255,255,255,.95) !important;
+  border-radius:22px !important;
+}
+html.dark body #page-import #imp-picker{
+  background:rgb(30,41,59) !important;
+  border:1px solid rgb(51,65,85) !important;
+  box-shadow:0 6px 20px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.12) !important;
+}
+</style>
+
+<style id="v54-report-btn">
+/* v54: Trung tâm báo cáo - mọi nút Xem / Excel cùng cỡ nhỏ gọn như các nút của Sổ kiểm thực (3 bước) */
+html body #page-report button.w-full{
+  padding-top:8px !important;padding-bottom:8px !important;
+  font-size:12px !important;line-height:1.25 !important;
+}
+html body #page-report button.w-full{border-radius:22px !important}
+</style>
+
+<style id="v55-inv-btn">
+/* v55: Kho hàng - 5 nút (Tạo HĐ nháp, HĐ nháp đã lưu, Xuất Excel, Tạo báo giá, Báo giá đã lưu) nhỏ gọn bằng các nút ở Trung tâm báo cáo */
+html body #inv-top-grid button{
+  padding-top:8px !important;padding-bottom:8px !important;
+  font-size:12px !important;line-height:1.25 !important;
+  border-radius:22px !important;min-height:0 !important;height:auto !important;
+}
+</style>
