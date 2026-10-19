@@ -7405,7 +7405,7 @@ function formatDateOnlyVN(value) { const d=__coerceDateVN(value); if(!d)return '
 // thì báo cáo/bộ lọc sẽ BỎ SÓT các phiếu lập từ 00:00 đến 06:59 sáng của chính ngày đó. Luôn dùng hàm này cho mốc ngày.
 function parseDateOnlyVN(v) {
     if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v.trim()))
-        return new Date(v.trim() + 'T00:00:00');
+        return new Date(v.trim() + 'T00:00:00+07:00');   // 00:00 giờ Việt Nam
     return new Date(v);
 }
 function formatISODateVN(value) {
@@ -9437,7 +9437,7 @@ function filterActivityLog() {
     }
     if (toVal) {
         const toDate = parseDateOnlyVN(toVal);
-        toDate.setHours(23, 59, 59, 999);
+        toDate.setTime(toDate.getTime() + 86399999);
         filtered = filtered.filter(l => l.dateObj && l.dateObj <= toDate);
     }
     renderActivityLog(filtered);
@@ -10067,10 +10067,10 @@ async function loadDashboard(filter = 'default', options = {}) {
     let startDate = new Date();
     let endDate = new Date();
     if (typeof filter === 'object' && filter !== null) {
-        startDate = new Date(filter.from);
+        startDate = parseDateOnlyVN(filter.from);
         startDate.setHours(0, 0, 0, 0);
-        endDate = new Date(filter.to);
-        endDate.setHours(23, 59, 59, 999);
+        endDate = parseDateOnlyVN(filter.to);
+        endDate.setTime(endDate.getTime() + 86399999);
     }
     else if (filter === 'default') {
         startDate = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -11126,16 +11126,16 @@ async function renderInventoryList(filter = 'today', options = {}) {
     let startDate = new Date();
     let endDate = new Date();
     if (typeof filter === 'object' && filter !== null) {
-        startDate = new Date(filter.from);
+        startDate = parseDateOnlyVN(filter.from);
         startDate.setHours(0, 0, 0, 0);
-        endDate = new Date(filter.to);
+        endDate = parseDateOnlyVN(filter.to);
         // QUAN TRỌNG: input ngày dạng "YYYY-MM-DD" bị trình duyệt hiểu là 00:00 giờ UTC,
         // mà UTC lệch 7 tiếng so với giờ Việt Nam -> nếu không chỉnh về cuối ngày, mốc
         // "đến ngày" sẽ chỉ tính tới 7 GIỜ SÁNG (giờ VN) của ngày đó, cắt mất toàn bộ
         // giao dịch phát sinh sau 7h sáng - đây chính là lý do "hôm nay có nhập/xuất mà
         // NXT không hiện". Đặt về cuối ngày (23:59:59) theo giờ máy đang chạy (giờ VN)
         // để lấy đủ trọn ngày.
-        endDate.setHours(23, 59, 59, 999);
+        endDate.setTime(endDate.getTime() + 86399999);
     }
     else if (filter === 'today') {
         startDate.setHours(0, 0, 0, 0);
@@ -20029,8 +20029,8 @@ async function loadSalesList() {
                 queryTo = new Date(y, m, 0, 23, 59, 59);
             }
             else if (dateFrom || dateTo) {
-                queryFrom = dateFrom ? new Date(dateFrom + 'T00:00:00') : new Date(2000, 0, 1);
-                queryTo = dateTo ? new Date(dateTo + 'T23:59:59') : new Date();
+                queryFrom = dateFrom ? new Date(dateFrom + 'T00:00:00+07:00') : new Date(2000, 0, 1);
+                queryTo = dateTo ? new Date(dateTo + 'T23:59:59.999+07:00') : new Date();
             }
             else {
                 queryTo = new Date();
@@ -22279,7 +22279,7 @@ const showLoading = () => Swal.fire({ title: 'Đang xử lý...', allowOutsideCl
 async function getDocsByDate(collectionName, from, to) {
     const startDate = parseDateOnlyVN(from);
     const endDate = parseDateOnlyVN(to);
-    endDate.setHours(23, 59, 59, 999);
+    endDate.setTime(endDate.getTime() + 86399999);
     return await db.collection(collectionName)
         .where('date', '>=', startDate)
         .where('date', '<=', endDate)
@@ -23139,7 +23139,7 @@ async function viewInventoryReport() {
         const fromDate = parseDateOnlyVN(from);
         fromDate.setHours(0, 0, 0, 0);
         const toDate = parseDateOnlyVN(to);
-        toDate.setHours(23, 59, 59, 999);
+        toDate.setTime(toDate.getTime() + 86399999);
         const now = new Date();
         const isCurrentPeriod = toDate >= now;
         const gapFrom = new Date(toDate);
@@ -23283,7 +23283,7 @@ async function exportInventory() {
         const fromDate = parseDateOnlyVN(from);
         fromDate.setHours(0, 0, 0, 0);
         const toDate = parseDateOnlyVN(to);
-        toDate.setHours(23, 59, 59, 999);
+        toDate.setTime(toDate.getTime() + 86399999);
         // --- TỐI ƯU QUAN TRỌNG (giống hệt cách tính NXT ở Trang Chủ) ---
         // TRƯỚC ĐÂY: đọc TOÀN BỘ collection 'receipts' và 'sales' không giới hạn ngày dù
         // chỉ xem báo cáo 1 tháng - càng nhiều lịch sử càng tốn quota, và sẽ XUẤT BÁO CÁO
@@ -23782,7 +23782,7 @@ async function exportFullReport() {
     try {
         const fromDate = parseDateOnlyVN(fromVal);
         const toDate = parseDateOnlyVN(toVal);
-        toDate.setHours(23, 59, 59, 999);
+        toDate.setTime(toDate.getTime() + 86399999);
         // ĐỌC DỮ LIỆU TỪ NGÀY ĐẦU TIÊN ĐẾN HẾT NGÀY KẾT THÚC
         // Cách này đảm bảo tính đúng NXT mà vẫn nhẹ hơn nhiều so với việc không có điều kiện gì
         const [salesSnap, receiptsSnap, prodSnap] = await Promise.all([
@@ -24316,7 +24316,7 @@ async function viewFullReport() {
     try {
         const fromDate = parseDateOnlyVN(fromVal);
         const toDate = parseDateOnlyVN(toVal);
-        toDate.setHours(23, 59, 59, 999);
+        toDate.setTime(toDate.getTime() + 86399999);
         const [salesSnap, receiptsSnap, prodSnap] = await Promise.all([
             db.collection('sales').where('date', '<=', toDate).get(),
             db.collection('receipts').where('date', '<=', toDate).get(),
@@ -24608,7 +24608,7 @@ window.addEventListener('DOMContentLoaded', () => {
 async function getMaterialPurchaseRows(from, to) {
     const fromDate = parseDateOnlyVN(from);
     const toDate = parseDateOnlyVN(to);
-    toDate.setHours(23, 59, 59, 999);
+    toDate.setTime(toDate.getTime() + 86399999);
     const snap = await db.collection('material_imports')
         .where('timestamp', '>=', fromDate)
         .where('timestamp', '<=', toDate)
@@ -24778,7 +24778,7 @@ async function populateDebtReportFilters() {
 async function calcCustomerDebtData(from, to) {
     const fromDate = parseDateOnlyVN(from);
     const toDate = parseDateOnlyVN(to);
-    toDate.setHours(23, 59, 59, 999);
+    toDate.setTime(toDate.getTime() + 86399999);
     if (fromDate > toDate) throw new Error('Từ ngày không được lớn hơn Đến ngày.');
     const [salesSnap, historySnap, openSnap, returnsSnap] = await Promise.all([
         db.collection('sales').where('date', '<=', toDate).get(),
@@ -26138,7 +26138,7 @@ function nkNum(n) { return (Number(n) || 0).toLocaleString('vi-VN', { maximumFra
 function nkNoData() { Swal.fire({ icon: 'info', title: 'Không có dữ liệu', text: 'Không có dữ liệu trong khoảng ngày đã chọn.' }); }
 function nkRange(dates) {
     const f = parseDateOnlyVN(dates.from), t = parseDateOnlyVN(dates.to);
-    t.setHours(23, 59, 59, 999);
+    t.setTime(t.getTime() + 86399999);
     return { f, t };
 }
 function nkBlankLine() { return '………………………………………'; }
@@ -26470,8 +26470,8 @@ function exportExcelNhatKyXuatHang() { return nkExport(NK_XH_CFG, nkBuildXuatHan
 //================== 1. XUẤT QUYỂN 1 =====================
 function healthDateLabel(d) { return "T\u1EEB " + formatDateToDDMMYYYY(d.from) + " \u0111\u1EBFn " + formatDateToDDMMYYYY(d.to) + ""; }
 async function getProductionViewRows(dates) {
-    const f = new Date(dates.from), t = new Date(dates.to);
-    t.setHours(23, 59, 59, 999);
+    const f = parseDateOnlyVN(dates.from), t = parseDateOnlyVN(dates.to);
+    t.setTime(t.getTime() + 86399999);
     const snap = await db.collection('production').get(), g = {};
     snap.forEach(doc => { const d = doc.data(); if (!d.timestamp || !d.tenSP || !String(d.tenSP).trim())
         return; const dt = d.timestamp.toDate ? d.timestamp.toDate() : (d.timestamp.seconds ? new Date(d.timestamp.seconds * 1000) : new Date(d.timestamp)); if (dt < f || dt > t)
@@ -26574,9 +26574,9 @@ async function exportExcelQuyen1() {
     if (!dates)
         return;
     try {
-        const fromDate = new Date(dates.from);
-        const toDate = new Date(dates.to);
-        toDate.setHours(23, 59, 59, 999);
+        const fromDate = parseDateOnlyVN(dates.from);
+        const toDate = parseDateOnlyVN(dates.to);
+        toDate.setTime(toDate.getTime() + 86399999);
         const snap = await db.collection('material_imports').get();
         const suppliersSnap = await db.collection('suppliers').get();
         const supplierMap = new Map();
@@ -26683,7 +26683,7 @@ async function exportExcelQuyen1() {
         }
         // ---------- TIÊU ĐỀ CHÍNH: KHÔNG KẺ KHUNG ----------
         mergeAndSetNoBorder(1, 1, 1, 4, 'Người kiểm tra: Nguyễn Văn Hoè', { horizontal: 'left', font: { name: 'Times New Roman', size: 12 } });
-        mergeAndSetNoBorder(2, 1, 2, 4, "Th\u1EDDi gian ki\u1EC3m tra: ng\u00E0y " + String(new Date(dates.from).getDate()).padStart(2, '0') + " th\u00E1ng " + String(new Date(dates.from).getMonth() + 1).padStart(2, '0') + " n\u0103m " + new Date(dates.from).getFullYear() + "", { horizontal: 'left', font: { name: 'Times New Roman', size: 12 } });
+        mergeAndSetNoBorder(2, 1, 2, 4, "Th\u1EDDi gian ki\u1EC3m tra: ng\u00E0y " + String(parseDateOnlyVN(dates.from).getDate()).padStart(2, '0') + " th\u00E1ng " + String(parseDateOnlyVN(dates.from).getMonth() + 1).padStart(2, '0') + " n\u0103m " + parseDateOnlyVN(dates.from).getFullYear() + "", { horizontal: 'left', font: { name: 'Times New Roman', size: 12 } });
         mergeAndSetNoBorder(3, 1, 3, 4, 'Địa điểm kiểm tra: Tại xưởng sản xuất', { horizontal: 'left', font: { name: 'Times New Roman', size: 12 } });
         mergeAndSetNoBorder(1, 8, 2, 15, 'Mẫu số 1: Kiểm tra trước khi chế biến thức ăn\n(Bước 1)', { horizontal: 'center', font: { name: 'Times New Roman', size: 15, bold: true } });
         sheet.getRow(1).height = 24;
@@ -26748,7 +26748,7 @@ async function exportExcelQuyen1() {
         sheet.getRow(top).height = 96;
         sheet.getRow(bottom).height = 52;
         sheet.getRow(numberRow).height = 24;
-        const defaultDate = new Date(dates.from).toLocaleDateString('vi-VN', { timeZone: APP_TIME_ZONE });
+        const defaultDate = parseDateOnlyVN(dates.from).toLocaleDateString('vi-VN', { timeZone: APP_TIME_ZONE });
         dataII.forEach((d, i) => {
             const displayDate = d.timestamp?.toDate ? d.timestamp.toDate().toLocaleDateString('vi-VN', { timeZone: APP_TIME_ZONE }) : defaultDate;
             const row = sheet.addRow([i + 1, d.tenNL || '', d.csSX || '', d.address || '', displayDate, d.sl || '', d.ncc || '', d.nguoigiao || '', d.address || '', '', '', '', 'Đạt', '', '']);
@@ -26774,9 +26774,9 @@ async function exportExcelQuyen2() {
     if (!dates)
         return;
     try {
-        const fromDate = new Date(dates.from);
-        const toDate = new Date(dates.to);
-        toDate.setHours(23, 59, 59, 999);
+        const fromDate = parseDateOnlyVN(dates.from);
+        const toDate = parseDateOnlyVN(dates.to);
+        toDate.setTime(toDate.getTime() + 86399999);
         const snap = await db.collection('production').get();
         // --- BƯỚC XỬ LÝ DỮ LIỆU: NHÓM THEO NGÀY & TÊN SP ---
         const groups = {};
@@ -26804,7 +26804,7 @@ async function exportExcelQuyen2() {
         const workbook = new ExcelJS.Workbook();
         const sheet = workbook.addWorksheet('Quyen 2');
         // --- 1. TIÊU ĐỀ CHÍNH (Dòng 1-4) ---
-        const d = new Date(dates.from);
+        const d = parseDateOnlyVN(dates.from);
         const day = String(d.getDate()).padStart(2, '0');
         const month = String(d.getMonth() + 1).padStart(2, '0');
         const year = d.getFullYear();
@@ -26887,9 +26887,9 @@ async function exportExcelQuyen3() {
     if (!dates)
         return;
     // --- LẤY THỜI GIAN BẮT ĐẦU VÀ KẾT THÚC ---
-    const fromDate = new Date(dates.from);
-    const toDate = new Date(dates.to);
-    toDate.setHours(23, 59, 59, 999); // Lấy đến cuối ngày kết thúc
+    const fromDate = parseDateOnlyVN(dates.from);
+    const toDate = parseDateOnlyVN(dates.to);
+    toDate.setTime(toDate.getTime() + 86399999); // Lấy đến cuối ngày kết thúc
     try {
         const snap = await db.collection('production').get();
         // --- BƯỚC GỘP DỮ LIỆU ---
@@ -26999,13 +26999,13 @@ async function exportExcelQuyen3() {
 // Dùng chung hộp thoại Xem báo cáo của hệ thống, có nút In + Lưu ảnh.
 // Dữ liệu và cách lọc ngày được giữ đồng nhất với các nút Xuất Excel tương ứng.
 function getHealthReportDateLabel(dates) {
-    const d = new Date(dates.from);
+    const d = parseDateOnlyVN(dates.from);
     return "T\u1EEB ng\u00E0y " + formatDateToDDMMYYYY(dates.from) + " \u0111\u1EBFn ng\u00E0y " + formatDateToDDMMYYYY(dates.to) + "";
 }
 async function loadKiemThucQuyen1ViewData(dates) {
-    const fromDate = new Date(dates.from);
-    const toDate = new Date(dates.to);
-    toDate.setHours(23, 59, 59, 999);
+    const fromDate = parseDateOnlyVN(dates.from);
+    const toDate = parseDateOnlyVN(dates.to);
+    toDate.setTime(toDate.getTime() + 86399999);
     const [snap, suppliersSnap] = await Promise.all([
         db.collection('material_imports').get(),
         db.collection('suppliers').get()
@@ -27062,8 +27062,8 @@ function q1RowsView(data) {
 }
 // Các hàm xem Quyển 1/2/3 và Sổ Lưu Mẫu chỉ giữ 1 phiên bản duy nhất ở phía trên;
 async function loadProductionGroupsView(dates) {
-    const fromDate = new Date(dates.from + 'T00:00:00');
-    const toDate = new Date(dates.to + 'T23:59:59.999');
+    const fromDate = parseDateOnlyVN(dates.from);
+    const toDate = new Date(parseDateOnlyVN(dates.to).getTime() + 86399999);
     const snap = await db.collection('production').get();
     const groups = {};
     snap.forEach(doc => {
@@ -27108,9 +27108,9 @@ async function exportExcelLuuMau() {
     if (!dates)
         return;
     // --- LẤY THỜI GIAN LỌC ---
-    const fromDate = new Date(dates.from);
-    const toDate = new Date(dates.to);
-    toDate.setHours(23, 59, 59, 999);
+    const fromDate = parseDateOnlyVN(dates.from);
+    const toDate = parseDateOnlyVN(dates.to);
+    toDate.setTime(toDate.getTime() + 86399999);
     try {
         const snap = await db.collection('production').get();
         // --- BƯỚC GỘP DỮ LIỆU ---
@@ -27139,7 +27139,7 @@ async function exportExcelLuuMau() {
         const workbook = new ExcelJS.Workbook();
         const sheet = workbook.addWorksheet('Luu Mau');
         // Bố cục tiêu đề
-        const d = new Date(dates.from);
+        const d = parseDateOnlyVN(dates.from);
         const day = String(d.getDate()).padStart(2, '0');
         const month = String(d.getMonth() + 1).padStart(2, '0');
         const year = d.getFullYear();
@@ -27205,7 +27205,7 @@ async function exportExcelLuuMau() {
 async function calcSupplierDebtData(from, to) {
     const fromDate = parseDateOnlyVN(from);
     const toDate = parseDateOnlyVN(to);
-    toDate.setHours(23, 59, 59, 999);
+    toDate.setTime(toDate.getTime() + 86399999);
     if (fromDate > toDate) throw new Error('Từ ngày không được lớn hơn Đến ngày.');
     const [importsSnap, paymentsSnap, openSnap, materialsSnap] = await Promise.all([
         db.collection('material_imports').get(),
@@ -28388,8 +28388,8 @@ async function filterSanXuat() {
     if (!startVal || !endVal)
         return;
     // Chuyển string date thành mốc thời gian
-    const startDate = new Date(startVal + "T00:00:00");
-    const endDate = new Date(endVal + "T23:59:59");
+    const startDate = new Date(startVal + "T00:00:00+07:00");
+    const endDate = new Date(endVal + "T23:59:59.999+07:00");
     const listBody = document.getElementById('list-sanxuat');
     // BỎ DÒNG "Đang tải..." ĐI ĐỂ KHÔNG BỊ NHÁY KHUNG
     try {
@@ -29344,8 +29344,8 @@ async function filterNhapKho(options = {}) {
         console.log("Chưa chọn đủ ngày để lọc.");
         return;
     }
-    const startDate = new Date(startEl.value + "T00:00:00");
-    const endDate = new Date(endEl.value + "T23:59:59");
+    const startDate = new Date(startEl.value + "T00:00:00+07:00");
+    const endDate = new Date(endEl.value + "T23:59:59.999+07:00");
     // CHỈ hiện skeleton khi không phải làm mới ngầm sau lưu/sửa/xóa (options.silent) -
     // tránh màn hình "nháy" 1 cái ngay sau khi Lưu/Sửa/Xóa phiếu nhập nguyên liệu.
     if (!options.silent) listBody.innerHTML = skeletonRows(5, 5);
@@ -31599,29 +31599,46 @@ html.dark .imp-cn{color:#f1f5f9}
     function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
     function dmy(s) { var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ''); return m ? m[3] + '/' + m[2] + '/' + m[1] : ''; }
     /* ---- giỏ nhập kho: sửa SL / giá / NSX / HSD ngay trong dòng ---- */
+    try { window.__impShowHsd = localStorage.getItem('imp_show_hsd') === '1'; } catch (e) { window.__impShowHsd = false; }
+    window.__impToggleHsd = function () {
+        window.__impShowHsd = !window.__impShowHsd;
+        try { localStorage.setItem('imp_show_hsd', window.__impShowHsd ? '1' : '0'); } catch (e) { }
+        window.renderCart();
+    };
     window.renderCart = function () {
         var box = document.getElementById('cart-box');
         var mc = document.getElementById('mobile-cart-count-import'); if (mc) mc.innerText = cart.length;
         if (!box) return;
         if (!cart.length) { box.innerHTML = '<p class="text-gray-400 text-center py-4 italic">Chưa có sản phẩm trong phiếu — bấm thẻ sản phẩm bên trái để thêm</p>'; return; }
-        var h = '<table class="imp-ct"><thead class="sticky top-0 bg-slate-100 text-slate-700"><tr><th style="text-align:left">Sản phẩm</th><th style="width:118px">NSX</th><th style="width:118px">HSD</th><th style="width:78px">SL</th><th style="width:92px">Giá lẻ</th><th style="width:92px">Giá sỉ</th><th style="width:34px"></th></tr></thead><tbody>';
+        var nHsd = cart.filter(function (x) { return x && (x.ngaySX || x.hsd || x.hanThang); }).length;
+        var h = '<table class="imp-ct' + (window.__impShowHsd ? '' : ' hide-hsd') + '"><thead class="sticky top-0 bg-slate-100 text-slate-700"><tr><th style="text-align:left">Sản phẩm</th><th style="width:92px">SL</th><th style="width:84px">Giá sỉ</th><th style="width:84px">Giá lẻ</th><th class="c-hsd" style="width:106px">NSX</th><th class="c-hsd" style="width:66px" title="Hạn dùng tính bằng tháng (VD 12, 24) - nhập NSX + số tháng thì HSD tự tính">Tháng</th><th class="c-hsd" style="width:106px">HSD</th><th style="width:44px;text-align:center;padding:0"><button type="button" class="imp-hsd-ico' + (window.__impShowHsd ? ' on' : '') + '" onclick="__impToggleHsd()" title="' + (window.__impShowHsd ? 'Ẩn' : 'Mở nhập') + ' NSX / Tháng / HSD' + (nHsd && !window.__impShowHsd ? ' (' + nHsd + ' dòng đã nhập)' : '') + '">📅' + (nHsd && !window.__impShowHsd ? '<i></i>' : '') + '</button></th></tr></thead><tbody>';
         cart.forEach(function (it, i) {
             var q = parseFloat(it.qty) || 0;
             h += '<tr class="odd:bg-white even:bg-slate-50"><td class="imp-cn">' + esc(it.name) + (it.unit ? '<small>' + esc(it.unit) + '</small>' : '') + '</td>' +
-                '<td><input type="date" class="imp-ci d" value="' + esc(it.ngaySX || '') + '" onchange="__impCart(' + i + ',\'ngaySX\',this.value)"></td>' +
-                '<td><input type="date" class="imp-ci d" value="' + esc(it.hsd || '') + '" onchange="__impCart(' + i + ',\'hsd\',this.value)"></td>' +
                 '<td><input type="number" min="0" step="any" inputmode="decimal" id="imp-cq-' + i + '" class="imp-ci q' + (q > 0 ? '' : ' q0') + '" value="' + (q > 0 ? q : '') + '" placeholder="SL" oninput="__impCart(' + i + ',\'qty\',this.value,this)" onfocus="this.select()" onkeydown="if(event.key===\'Enter\'){__impNext()}"></td>' +
-                '<td><input type="number" min="0" class="imp-ci" value="' + esc(it.retail || '') + '" oninput="__impCart(' + i + ',\'retail\',this.value)"></td>' +
                 '<td><input type="number" min="0" class="imp-ci" value="' + esc(it.wholesale || '') + '" oninput="__impCart(' + i + ',\'wholesale\',this.value)"></td>' +
+                '<td><input type="number" min="0" class="imp-ci" value="' + esc(it.retail || '') + '" oninput="__impCart(' + i + ',\'retail\',this.value)"></td>' +
+                '<td class="c-hsd"><input type="date" class="imp-ci d" value="' + esc(it.ngaySX || '') + '" onchange="__impCart(' + i + ',\'ngaySX\',this.value)"></td>' +
+                '<td class="c-hsd"><input type="number" min="0" step="any" inputmode="decimal" list="imp-months-list" id="imp-cm-' + i + '" class="imp-ci" style="text-align:center;padding-left:2px;padding-right:2px" placeholder="tháng" value="' + esc(it.hanThang || '') + '" oninput="__impCart(' + i + ',\'hanThang\',this.value)" onfocus="this.select()"></td>' +
+                '<td class="c-hsd"><input type="date" id="imp-ch-' + i + '" class="imp-ci d" value="' + esc(it.hsd || '') + '" onchange="__impCart(' + i + ',\'hsd\',this.value)"></td>' +
                 '<td style="text-align:center"><button type="button" onclick="removeFromCart(' + i + ')" title="Xóa" style="color:#ef4444;font-weight:900;font-size:16px;padding:2px 6px">✕</button></td></tr>';
         });
-        box.innerHTML = h + '</tbody></table>';
+        box.innerHTML = h + '</tbody></table><datalist id="imp-months-list"><option value="6"><option value="12"><option value="18"><option value="24"><option value="36"></datalist>';
     };
     window.__impCart = function (i, f, v, el) {
         var it = cart[i]; if (!it) return;
         if (f === 'qty') { it.qty = parseFloat(v) || 0; if (el) el.classList.toggle('q0', !(it.qty > 0)); }
-        else if (f === 'ngaySX' || f === 'hsd') it[f] = v || null;
+        else if (f === 'ngaySX' || f === 'hsd') { it[f] = v || null; if (f === 'ngaySX') window.__impCalcHsd(i); }
+        else if (f === 'hanThang') { var mm = parseFloat(v); it.hanThang = (isFinite(mm) && mm > 0) ? mm : null; window.__impCalcHsd(i); }
         else it[f] = v;
+    };
+    /* HSD = NSX + số tháng (nếu có đủ cả hai); NSX trống hoặc tháng trống thì giữ nguyên HSD đang có */
+    window.__impCalcHsd = function (i) {
+        var it = cart[i]; if (!it || !it.ngaySX || !(Number(it.hanThang) > 0)) return;
+        if (typeof addMonthsLocal !== 'function' || typeof formatDateInputLocal !== 'function') return;
+        var n = new Date(it.ngaySX + 'T00:00:00'); if (isNaN(n.getTime())) return;
+        it.hsd = formatDateInputLocal(addMonthsLocal(n, Number(it.hanThang)));
+        var h = document.getElementById('imp-ch-' + i); if (h) h.value = it.hsd;
     };
     window.__impNext = function () { var s = document.getElementById('imp-pk-search'); if (s) { s.focus(); s.select(); } };
     /* ---- bấm thẻ => vào giỏ, con trỏ nhảy vào ô SL của dòng đó ---- */
@@ -31956,4 +31973,40 @@ html.glass.dark body div[id^="product-card-"]:hover{
 html.dark .imp-card:hover{
   box-shadow:0 0 0 1.5px var(--c,#6b7280),0 0 24px 4px color-mix(in srgb,var(--c,#6b7280) 65%,transparent),0 10px 22px -8px rgba(0,0,0,.55),inset 0 1.5px 1px rgba(255,255,255,.25) !important;
 }
+</style>
+
+<style id="v47-imp-cart-css">
+/* v47: cột Tên sản phẩm trong giỏ nhập không bị bóp hẹp khi có thêm cột Tháng (tràn thì cuộn ngang) */
+#cart-box .imp-ct .imp-cn{min-width:108px}
+#cart-box .imp-ct input.imp-ci.q{min-width:84px;font-size:16px;font-weight:800;text-align:center}
+#cart-box .imp-ct.hide-hsd input.imp-ci.q{min-width:100px}
+#cart-box .imp-ct.hide-hsd input.imp-ci:not(.d):not(.q):not([id^="imp-cm-"]){min-width:112px}
+#cart-box .imp-ct input[id^="imp-cm-"]{min-width:56px}
+#cart-box .imp-ct input.imp-ci:not(.d):not(.q):not([id^="imp-cm-"]){min-width:88px}
+#cart-box .imp-ct th{padding-left:4px;padding-right:4px}
+</style>
+
+<style id="v49-hsd-toggle">
+/* v49: giỏ nhập kho - mặc định ẩn 3 cột NSX / Tháng / HSD, bấm nút để mở nhập */
+#cart-box .imp-ct.hide-hsd .c-hsd{display:none}
+#cart-box .imp-hsd-bar{display:flex;justify-content:flex-end;margin:0 0 6px}
+#cart-box .imp-hsd-bar button{font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;border:1px solid rgba(100,116,139,.35);background:rgba(255,255,255,.7);color:#334155;cursor:pointer;transition:box-shadow .15s}
+#cart-box .imp-hsd-bar button:hover{box-shadow:0 0 0 3px rgba(59,130,246,.18);border-color:#3b82f6}
+#cart-box .imp-hsd-bar button b{color:#047857}
+html.dark #cart-box .imp-hsd-bar button{background:rgba(30,41,59,.8);color:#e2e8f0}
+</style>
+
+<style id="v50-hsd-icon">
+/* v50: nút ẩn/hiện NSX-HSD thu thành 1 biểu tượng nhỏ ở hàng tiêu đề giỏ (không chiếm thêm 1 dòng) */
+#cart-box .imp-hsd-ico{position:relative;width:32px;height:30px;border-radius:10px;border:1px solid rgba(100,116,139,.35);background:rgba(255,255,255,.8);cursor:pointer;font-size:15px;line-height:1;transition:box-shadow .15s}
+#cart-box .imp-hsd-ico:hover{box-shadow:0 0 0 3px rgba(59,130,246,.2);border-color:#3b82f6}
+#cart-box .imp-hsd-ico.on{background:#3b82f6;border-color:#2563eb;box-shadow:0 0 0 3px rgba(59,130,246,.22)}
+#cart-box .imp-hsd-ico i{position:absolute;top:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#10b981;border:1.5px solid #fff}
+html.dark #cart-box .imp-hsd-ico{background:rgba(30,41,59,.85)}
+</style>
+
+<style id="v51-grid-pad">
+/* v51: chừa lề trong khung cuộn để hàng thẻ trên cùng / mép trái-phải không bị cắt mất viền phát sáng khi rê chuột */
+#imp-grid{padding:14px 14px 18px !important}
+#product-grid{padding:14px 14px 18px !important}
 </style>
