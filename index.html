@@ -31717,7 +31717,7 @@ html.dark .imp-cn{color:#f1f5f9}
         // rồi cho bảng danh sách bên trái lấp đầy khung (không còn khoảng trống).
         /* v25: chiều cao giỏ SX do CSS #panel-sx-form quyết định */
         fillCard(up($('list-sanxuat'), 'div.overflow-y-auto'));
-        fit($('page-NguyenLieu'), $('gio-hang-nl'), 70);
+        /* v64: chiều cao giỏ Nguyên liệu do CSS #panel-nl-form quyết định */
         fillCard(up($('body-phieu'), 'div.overflow-y-auto'));
         var pi = $('page-import');
         if (vis(pi)) {
@@ -31850,6 +31850,12 @@ html.dark .imp-cn{color:#f1f5f9}
   #panel-sx-form > div:nth-child(2){flex:1 1 0;display:flex;flex-direction:column;min-height:0}
   #panel-sx-form #sx-cart-list{flex:1 1 0;height:auto!important;min-height:90px;overflow-y:auto}
   #panel-sx-form > div:nth-child(3){flex:0 0 auto}
+}
+/* v64: Nguyên liệu - giỏ hàng giãn lấp chỗ trống, nút Thêm vào giỏ + Lưu phiếu nằm sát đáy khung (làm giống trang Sản xuất) */
+@media (min-width:1024px){
+  #panel-nl-form{display:flex;flex-direction:column;height:calc(100vh - 190px)!important;min-height:620px;box-sizing:border-box}
+  #panel-nl-form > *{flex:0 0 auto}
+  #panel-nl-form #gio-hang-nl{flex:1 1 0;height:auto!important;max-height:none!important;min-height:120px;overflow-y:auto}
 }
 /* v25: Kho hàng - dãy bấm theo nhóm hàng (giống Nhập kho / Bán hàng) */
 #inv-grp-bar{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:4px}
