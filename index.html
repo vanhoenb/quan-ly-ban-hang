@@ -3858,58 +3858,66 @@ document.addEventListener('DOMContentLoaded', function () {
     <!-- Chỉ lưu chứng từ nháp để xem/in lại; KHÔNG trừ tồn kho, KHÔNG ghi công nợ, KHÔNG ghi doanh thu/lợi nhuận. -->
     <div id="modal-hoadon-nhap" class="hidden fixed inset-0 z-[9999] bg-black bg-opacity-60 flex items-center justify-center p-1 md:p-6">
         <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-5xl h-[96vh] md:h-[92vh] flex flex-col overflow-hidden">
-            <div data-gb="orange" class="flex items-center justify-between p-3 md:p-4 border-b border-slate-200 dark:border-slate-700 bg-orange-500 dark:bg-orange-700 shrink-0">
+            <div data-gb="orange" class="flex items-center justify-between px-3 py-2 border-b border-slate-200 dark:border-slate-700 bg-orange-500 dark:bg-orange-700 shrink-0">
                 <h3 id="hdn-modal-title" class="text-white font-bold text-sm md:text-lg flex items-center gap-2">📝 Tạo Hóa Đơn Bán Hàng Nháp</h3>
                 <button onclick="closeHoaDonNhapModal()" class="x-close-red hover:bg-red-500/15 rounded-lg p-1.5">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
-            <div class="p-2.5 md:p-4 border-b border-slate-200 dark:border-slate-700 grid grid-cols-2 md:grid-cols-4 gap-2 bg-slate-50 dark:bg-slate-950 shrink-0">
-                <input type="text" id="hdn-customer" placeholder="Tên khách hàng" class="col-span-2 md:col-span-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2.5 rounded-xl text-xs md:text-sm dark:text-white">
-                <input type="text" id="hdn-address" placeholder="Địa chỉ" class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2.5 rounded-xl text-xs md:text-sm dark:text-white">
-                <input type="text" id="hdn-phone" placeholder="SĐT" class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2.5 rounded-xl text-xs md:text-sm dark:text-white">
-                <div class="relative">
-                    <label for="hdn-invoice-date" class="absolute -top-2 left-2 px-1 bg-slate-50 dark:bg-slate-950 text-[10px] font-bold text-slate-500">Ngày hóa đơn</label>
-                    <button type="button" onclick="document.getElementById('hdn-invoice-date').value=''" title="Để trống ngày (in ra không có ngày)" class="absolute -top-2 px-1 bg-slate-50 dark:bg-slate-950 text-[10px] font-bold text-red-500" style="right:8px">✕ Để trống</button>
-                    <input type="date" id="hdn-invoice-date" class="w-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2.5 rounded-xl text-xs md:text-sm dark:text-white">
+            <div class="p-2 border-b border-slate-200 dark:border-slate-700 flex flex-col gap-1.5 bg-slate-50 dark:bg-slate-950 shrink-0">
+                <!-- Hàng 1: Khách hàng (5) / Địa chỉ (4) / SĐT (3) - lưới 12 cột, thẳng cột với hàng 2 -->
+                <div class="grid grid-cols-3 md:grid-cols-12 gap-1.5">
+                    <input type="text" id="hdn-customer" placeholder="Tên khách hàng" class="col-span-3 md:col-span-5 w-full min-w-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-2 py-1.5 text-xs dark:text-white">
+                    <input type="text" id="hdn-address" placeholder="Địa chỉ" class="col-span-2 md:col-span-4 w-full min-w-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-2 py-1.5 text-xs dark:text-white">
+                    <input type="text" id="hdn-phone" placeholder="SĐT" class="col-span-1 md:col-span-3 w-full min-w-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-2 py-1.5 text-xs dark:text-white">
                 </div>
-                <select id="hdn-payment" class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2.5 rounded-xl text-xs md:text-sm dark:text-white">
-                    <option value="Tiền mặt">Tiền mặt</option>
-                    <option value="CK">CK</option>
-                    <option value="Công nợ">Công nợ</option>
-                </select>
-                <input type="text" id="hdn-note" placeholder="Ghi chú đơn hàng..." class="col-span-2 md:col-span-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2.5 rounded-xl text-xs md:text-sm dark:text-white">
-                <select id="hdn-price-type" class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2.5 rounded-xl text-xs md:text-sm dark:text-white" onchange="updateHdnSugToggle(); renderHoaDonNhapProducts()">
-                    <option value="retail">Bán Lẻ</option>
-                    <option value="wholesale">Bán Sỉ</option>
-                </select>
-                <select id="hdn-vat" class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2.5 rounded-xl text-xs md:text-sm dark:text-white" onchange="calcHoaDonNhapPreview()">
-                    <option value="0">VAT 0%</option>
-                    <option value="5">VAT 5%</option>
-                    <option value="8">VAT 8%</option>
-                    <option value="10">VAT 10%</option>
-                </select>
-                <!-- Chỉ hiện khi chọn Bán Sỉ: tích để HIỆN cột "Giá bán đề xuất" trên hóa đơn nháp, bỏ tích để ẨN -->
-                <label id="hdn-sug-wrap" style="display:none" class="col-span-2 md:col-span-3 items-center gap-2 text-xs md:text-sm font-bold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
-                    <input type="checkbox" id="hdn-show-sug" checked class="w-4 h-4 rounded"> Hiện cột "Giá bán đề xuất" trên hóa đơn (khi chọn giá sỉ)
-                </label>
+                <!-- Hàng 2: Ngày (3) / Hình thức TT (2) / Loại bán (2) / VAT (2) / Ghi chú đơn (3) - cùng lưới 12 cột -->
+                <div class="grid grid-cols-3 md:grid-cols-12 gap-1.5 items-center">
+                    <div class="col-span-3 md:col-span-3 flex items-center gap-1 min-w-0" title="Ngày hóa đơn">
+                        <input type="date" id="hdn-invoice-date" class="flex-1 w-full min-w-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-2 py-1.5 text-xs dark:text-white">
+                        <button type="button" onclick="document.getElementById('hdn-invoice-date').value=''" title="Để trống ngày (in ra không có ngày)" class="shrink-0 text-red-500 font-black text-xs px-1.5 py-1.5 rounded-lg border border-red-200 bg-white dark:bg-slate-900">✕</button>
+                    </div>
+                    <select id="hdn-payment" title="Hình thức thanh toán" class="col-span-1 md:col-span-2 w-full min-w-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-2 py-1.5 text-xs dark:text-white">
+                        <option value="Tiền mặt">Tiền mặt</option>
+                        <option value="CK">CK</option>
+                        <option value="Công nợ">Công nợ</option>
+                    </select>
+                    <select id="hdn-price-type" title="Loại bán" class="col-span-1 md:col-span-2 w-full min-w-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-2 py-1.5 text-xs dark:text-white" onchange="updateHdnSugToggle(); renderHoaDonNhapProducts()">
+                        <option value="retail">Bán Lẻ</option>
+                        <option value="wholesale">Bán Sỉ</option>
+                    </select>
+                    <select id="hdn-vat" title="VAT" class="col-span-1 md:col-span-2 w-full min-w-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-2 py-1.5 text-xs dark:text-white" onchange="calcHoaDonNhapPreview()">
+                        <option value="0">VAT 0%</option>
+                        <option value="5">VAT 5%</option>
+                        <option value="8">VAT 8%</option>
+                        <option value="10">VAT 10%</option>
+                    </select>
+                    <input type="text" id="hdn-note" placeholder="Ghi chú đơn hàng..." class="col-span-3 md:col-span-3 w-full min-w-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-2 py-1.5 text-xs dark:text-white">
+                    <!-- Chỉ hiện khi chọn Bán Sỉ: tích để HIỆN cột "Giá bán đề xuất" trên hóa đơn nháp -->
+                    <label id="hdn-sug-wrap" style="display:none" class="col-span-3 md:col-span-12 items-center gap-1 text-[11px] font-bold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
+                        <input type="checkbox" id="hdn-show-sug" checked class="w-3.5 h-3.5 rounded"> Hiện cột "Giá bán đề xuất" trên hóa đơn (khi chọn giá sỉ)
+                    </label>
+                </div>
             </div>
-            <div class="p-2.5 md:p-4 border-b border-slate-200 dark:border-slate-700 shrink-0">
-                <div class="flex flex-col md:flex-row gap-2">
-                    <input type="text" id="hdn-search" placeholder="🔍 Tìm tên sản phẩm..." onkeyup="filterHoaDonNhapModal()" class="flex-1 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-xs md:text-sm dark:text-white">
-                    <button type="button" onclick="hdnSwapAllSelected(true)" title="Thêm tất cả SP đã tích vào nhóm Đổi date (hiện ở dưới hóa đơn, không đơn giá)" class="px-3 py-2.5 rounded-xl text-xs md:text-sm font-bold border border-rose-300 text-rose-600 bg-white dark:bg-slate-950">🔄 Đổi date tất cả SP đã tích</button>
-                    <button type="button" onclick="hdnSwapAllSelected(false)" title="Bỏ hết SP khỏi nhóm Đổi date" class="px-3 py-2.5 rounded-xl text-xs md:text-sm font-bold border border-slate-300 text-slate-600 bg-white dark:bg-slate-950">Bỏ hết Đổi date</button>
+            <div class="p-2 border-b border-slate-200 dark:border-slate-700 shrink-0 flex flex-col gap-1.5">
+                <div class="flex flex-col md:flex-row gap-1.5">
+                    <input type="text" id="hdn-search" placeholder="🔍 Tìm tên sản phẩm..." onkeyup="filterHoaDonNhapModal()" class="flex-1 min-w-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 px-2 py-1.5 rounded-lg text-xs dark:text-white">
+                    <button type="button" onclick="hdnSwapAllSelected(true)" title="Thêm tất cả SP đã tích vào nhóm Đổi date (hiện ở dưới hóa đơn, không đơn giá)" class="px-2.5 py-1.5 rounded-lg text-xs font-bold border border-rose-300 text-rose-600 bg-white dark:bg-slate-950">🔄 Đổi date tất cả SP đã tích</button>
+                    <button type="button" onclick="hdnSwapAllSelected(false)" title="Bỏ hết SP khỏi nhóm Đổi date" class="px-2.5 py-1.5 rounded-lg text-xs font-bold border border-slate-300 text-slate-600 bg-white dark:bg-slate-950">Bỏ hết Đổi date</button>
                 </div>
+                <!-- Thanh bấm theo nhóm hàng (giống trang Kho hàng) -->
+                <div id="hdn-grp-bar"></div>
             </div>
             <div class="flex-1 overflow-y-auto p-2.5 md:p-4">
                 <table class="min-w-full text-left text-[11px] md:text-sm border-collapse">
                     <thead class="sticky top-0 bg-slate-100 dark:bg-slate-800 z-10 border-b border-slate-200 dark:border-slate-700">
                         <tr class="text-slate-600 dark:text-slate-400 uppercase text-[10px] md:text-[11px] tracking-wider">
-                            <th class="p-2 md:p-3 w-[34%]">Tên SP</th>
-                            <th class="p-2 md:p-3 w-[10%] text-center">ĐVT</th>
-                            <th class="p-2 md:p-3 w-[20%] text-center">Đơn giá</th>
-                            <th class="p-2 md:p-3 w-[16%] text-center">Số lượng</th>
-                            <th class="p-2 md:p-3 w-[20%] text-right">Thành tiền</th>
+                            <th class="p-2 md:p-3 w-[33%]">Tên SP</th>
+                            <th class="p-2 md:p-3 w-[8%] text-center">ĐVT</th>
+                            <th class="p-2 md:p-3 w-[17%] text-center">Đơn giá (sửa được)</th>
+                            <th class="p-2 md:p-3 w-[8%] text-center">Số lượng</th>
+                            <th class="p-2 md:p-3 w-[17%] text-right">Thành tiền</th>
+                            <th class="p-2 md:p-3 w-[17%] text-center">Ghi chú</th>
                         </tr>
                     </thead>
                     <tbody id="hdn-product-list" class="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300"></tbody>
@@ -3918,6 +3926,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="p-2.5 md:p-4 border-t border-slate-200 dark:border-slate-700 flex flex-col md:flex-row items-center justify-between gap-2 bg-slate-50 dark:bg-slate-950 shrink-0">
                 <div class="text-xs md:text-sm w-full md:w-auto text-center md:text-left">
                     Đã chọn: <b id="hdn-count-selected">0</b> SP — Tạm tính: <b id="hdn-preview-total" class="text-red-500">0 đ</b>
+                    <div id="hdn-price-note" style="font-size:11px;font-weight:700;color:#ea580c;margin-top:2px"></div>
                 </div>
                 <div class="flex flex-wrap gap-2 w-full md:w-auto justify-center md:justify-end">
                     <button onclick="closeHoaDonNhapModal()" class="flex-1 md:flex-none px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200">Đóng</button>
@@ -3957,6 +3966,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     <option value="wholesale">Tính thành tiền theo: Giá sỉ</option>
                     <option value="retail">Tính thành tiền theo: Giá lẻ</option>
                 </select>
+            </div>
+
+            <!-- Thanh bấm theo nhóm hàng (giống trang Kho hàng / HĐ nháp) -->
+            <div class="p-2 border-b border-slate-200 dark:border-slate-700 shrink-0">
+                <div id="bg-grp-bar"></div>
             </div>
 
             <!-- Danh sách sản phẩm (cuộn riêng) -->
@@ -13883,6 +13897,29 @@ window.hdnSelectedMap = window.hdnSelectedMap || {};
 window.hdnSwapMap = window.hdnSwapMap || {};
 window.hdnSwapQtyMap = window.hdnSwapQtyMap || {};
 window.hdnPriceOverride = window.hdnPriceOverride || {};
+window.hdnNoteMap = window.hdnNoteMap || {};
+window.hdnGroupFilter = window.hdnGroupFilter || 'ALL';
+const HDN_GRP_LABEL = { 'THỊT CHƯNG MẮM TÉP': 'TCMT', 'MẮM TÉP RIU ĐỎ': 'Mắm tép', 'QUẢ BÙI KỲ LÃO': 'Quả bùi', 'CƠM CHÁY': 'Cơm cháy', 'TRÀ HOA VÀNG': 'Trà hoa vàng', 'RUỐC CÁ': 'Ruốc cá', 'BÁNH DỨA': 'Bánh dứa', 'CÁC LOẠI HỘP TÚI': 'Hộp túi', 'KHÁC': 'Khác' };
+const HDN_GRP_COLOR = { 'THỊT CHƯNG MẮM TÉP': '#c026d3', 'MẮM TÉP RIU ĐỎ': '#e11d48', 'QUẢ BÙI KỲ LÃO': '#059669', 'CƠM CHÁY': '#d97706', 'TRÀ HOA VÀNG': '#ca8a04', 'RUỐC CÁ': '#0891b2', 'BÁNH DỨA': '#4f46e5', 'CÁC LOẠI HỘP TÚI': '#65a30d', 'KHÁC': '#6b7280' };
+// Bấm nhóm nào hiện nhóm đó (số lượng/giá/ghi chú đã gõ vẫn được giữ trong bộ nhớ khi đổi nhóm)
+function setHdnGroupFilter(g) {
+    window.hdnGroupFilter = g || 'ALL';
+    renderHoaDonNhapProducts();
+    const sc = document.querySelector('#modal-hoadon-nhap .overflow-y-auto'); if (sc) sc.scrollTop = 0;
+}
+function renderHdnGroupBar(groups, names) {
+    const bar = document.getElementById('hdn-grp-bar'); if (!bar) return;
+    let total = 0;
+    const keys = names.filter(n => (groups.get(n) || []).length);
+    keys.forEach(n => total += groups.get(n).length);
+    if (window.hdnGroupFilter !== 'ALL' && keys.indexOf(window.hdnGroupFilter) < 0) window.hdnGroupFilter = 'ALL';
+    let h = '<button type="button" class="hg-chip' + (window.hdnGroupFilter === 'ALL' ? ' on' : '') + '" data-g="ALL">Tất cả <b>' + total + '</b></button>';
+    keys.forEach(k => {
+        h += '<button type="button" class="hg-chip' + (window.hdnGroupFilter === k ? ' on' : '') + '" style="--c:' + (HDN_GRP_COLOR[k] || '#6b7280') + '" data-g="' + k + '">' + (HDN_GRP_LABEL[k] || k) + ' <b>' + groups.get(k).length + '</b></button>';
+    });
+    bar.innerHTML = h;
+    bar.onclick = function (e) { const b = e.target.closest ? e.target.closest('.hg-chip') : null; if (b) setHdnGroupFilter(b.getAttribute('data-g')); };
+}
 
 function getHoaDonNhapSource() {
     return (window.allProductCache && window.allProductCache.length) ? window.allProductCache : (window.allProducts || []);
@@ -13911,7 +13948,10 @@ function openHoaDonNhapModal(prefill) {
     window.hdnSwapMap = {};
     window.hdnSwapQtyMap = {};
     window.hdnPriceOverride = {};
+    window.hdnNoteMap = {};
+    window.hdnGroupFilter = 'ALL';
     (prefill && prefill.items || []).forEach(i => {
+        if (i.note && (!i.dateSwap || !window.hdnNoteMap[i.name])) window.hdnNoteMap[i.name] = String(i.note);
         // Mỗi SP có thể có 2 dòng đã lưu: 1 dòng bán thường + 1 dòng Đổi date (dateSwap)
         if (i.dateSwap) {
             window.hdnSwapMap[i.name] = true;
@@ -13973,7 +14013,8 @@ function renderHoaDonNhapProducts() {
     order.concat(Array.from(groups.keys()).filter(g => !order.includes(g))).forEach(groupName => {
         const arr = groups.get(groupName) || [];
         if (!arr.length) return;
-        html += '<tr data-hdn-group="' + groupName + '"><td colspan="5" class="py-1.5 px-1"><div class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-2.5 md:p-3">';
+        if (window.hdnGroupFilter !== 'ALL' && groupName !== window.hdnGroupFilter) return;
+        html += '<tr data-hdn-group="' + groupName + '"><td colspan="6" class="py-1.5 px-1"><div class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-2.5 md:p-3">';
         html += '<div class="font-bold text-xs md:text-sm uppercase text-slate-600 dark:text-slate-300 mb-1.5">' + groupName + '</div>';
         arr.sort((a,b)=> (typeof compareProductDisplayOrder === 'function' ? compareProductDisplayOrder(a.name||'',b.name||'') : String(a.name||'').localeCompare(String(b.name||''),'vi')));
         arr.forEach(item => {
@@ -13984,15 +14025,19 @@ function renderHoaDonNhapProducts() {
             html += '<div data-hdn-name="' + String(item.name || '').replace(/"/g,'&quot;') + '" class="grid grid-cols-12 gap-1.5 items-center bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2 mb-1 last:mb-0">' +
                 '<div class="col-span-12 md:col-span-4 font-bold text-[12px] md:text-[13px] text-slate-800 dark:text-slate-100 flex items-center gap-2"><input type="checkbox" class="hdn-product-check w-4 h-4 md:w-5 md:h-5 cursor-pointer shrink-0" style="accent-color:#f97316" ' + (window.hdnSelectedMap[item.name] ? 'checked' : '') + ' aria-label="Chọn sản phẩm" onchange="toggleHoaDonNhapSelected(\'' + safeName + '\', this.checked)"><span>' + (item.name || '') + '</span><label class="flex items-center gap-1 text-[10px] font-bold cursor-pointer shrink-0" style="margin-left:auto;color:#e11d48"><input type="checkbox" class="hdn-swap-check w-3.5 h-3.5 cursor-pointer" style="accent-color:#e11d48" ' + (window.hdnSwapMap[item.name] ? 'checked' : '') + ' onchange="toggleHoaDonNhapSwap(\'' + safeName + '\', this.checked)">Đổi date</label><input type="number" min="0" step="any" value="' + (window.hdnSwapQtyMap[item.name] || '') + '" placeholder="SL đổi" title="Số lượng đổi date (có thể để trống)" class="hdn-swap-qty text-center border rounded-lg p-1 text-[11px] font-bold bg-white dark:bg-slate-950 dark:text-white shrink-0" style="width:64px;border-color:#fda4af" oninput="updateHoaDonNhapSwapQty(\'' + safeName + '\', this.value)"></div>' +
                 '<div class="col-span-3 md:col-span-1 text-center text-[11px] text-slate-500">' + (item.unit || '') + '</div>' +
-                '<div class="col-span-5 md:col-span-3"><input type="text" value="' + price.toLocaleString('vi-VN') + '" class="w-full text-center border border-slate-200 dark:border-slate-700 rounded-lg p-1.5 text-[12px] bg-white dark:bg-slate-900 dark:text-white" oninput="updateHoaDonNhapPrice(\'' + safeName + '\', this.value, \'' + priceType + '\')"></div>' +
-                '<div class="col-span-4 md:col-span-2"><input type="number" min="0" step="any" value="' + (qty || '') + '" placeholder="SL" class="w-full text-center border border-slate-200 dark:border-slate-700 rounded-lg p-1.5 text-[12px] font-bold bg-yellow-50 dark:bg-slate-950 dark:text-white" oninput="updateHoaDonNhapQty(\'' + safeName + '\', this.value)"></div>' +
-                '<div class="col-span-12 md:col-span-2 text-right font-bold text-[12px] text-red-500">' + line.toLocaleString('vi-VN') + ' đ</div>' +
+                '<div class="col-span-5 md:col-span-2"><input type="text" inputmode="decimal" value="' + price.toLocaleString('vi-VN') + '" title="Có thể sửa đơn giá (gõ 0 nếu muốn tặng/không tính tiền)" class="hdn-price-input w-full text-center border border-slate-200 dark:border-slate-700 rounded-lg p-1.5 text-[12px] bg-white dark:bg-slate-900 dark:text-white" onfocus="this.select()" oninput="updateHoaDonNhapPrice(\'' + safeName + '\', this.value, \'' + priceType + '\')" onblur="this.value=(parseHoaDonNhapPriceInput(this.value)).toLocaleString(\'vi-VN\')"></div>' +
+                '<div class="col-span-4 md:col-span-1"><input type="number" min="0" step="any" value="' + (qty || '') + '" placeholder="SL" class="w-full text-center border border-slate-200 dark:border-slate-700 rounded-lg p-1.5 text-[12px] font-bold bg-yellow-50 dark:bg-slate-950 dark:text-white" oninput="updateHoaDonNhapQty(\'' + safeName + '\', this.value)"></div>' +
+                '<div class="hdn-line-total col-span-12 md:col-span-2 text-right font-bold text-[12px] text-red-500">' + line.toLocaleString('vi-VN') + ' đ</div>' +
+                '<div class="col-span-12 md:col-span-2"><input type="text" value="' + String(window.hdnNoteMap[item.name] || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;') + '" placeholder="Ghi chú SP..." class="hdn-note-input w-full border border-slate-200 dark:border-slate-700 rounded-lg p-1.5 text-[12px] bg-white dark:bg-slate-900 dark:text-white" oninput="updateHoaDonNhapNote(\'' + safeName + '\', this.value)"></div>' +
                 '</div>';
         });
         html += '</div></td></tr>';
     });
+    const allNames = order.concat(Array.from(groups.keys()).filter(g => !order.includes(g)));
+    renderHdnGroupBar(groups, allNames);
     const tbody = document.getElementById('hdn-product-list');
     if (tbody) tbody.innerHTML = html;
+    filterHoaDonNhapModal();
     calcHoaDonNhapPreview();
 }
 function filterHoaDonNhapModal() {
@@ -14007,9 +14052,39 @@ function filterHoaDonNhapModal() {
         group.style.display = any ? '' : 'none';
     });
 }
+// Đọc số từ ô đơn giá (chấp nhận 1.500 / 1500 / 1.500,5; ô trống = 0)
+function parseHoaDonNhapPriceInput(value) {
+    const t = String(value == null ? '' : value).trim().replace(/[^0-9.,]/g, '');
+    if (!t) return 0;
+    const n = parseFloat(t.replace(/\./g, '').replace(',', '.'));
+    return isNaN(n) ? 0 : n;
+}
+// Cập nhật lại số tiền của đúng dòng SP đang sửa (không dựng lại cả bảng để khỏi mất con trỏ)
+function hdnRefreshLineTotal(name) {
+    const source = getHoaDonNhapSource();
+    const priceType = (document.getElementById('hdn-price-type') || {}).value || 'retail';
+    const item = source.find(x => x.name === name); if (!item) return;
+    const line = Number(window.hdnQtyMap[name] || 0) * getHoaDonNhapPrice(item, priceType);
+    document.querySelectorAll('#hdn-product-list [data-hdn-name]').forEach(el => {
+        if (el.getAttribute('data-hdn-name') !== name) return;
+        const t = el.querySelector('.hdn-line-total'); if (t) t.innerText = line.toLocaleString('vi-VN') + ' đ';
+    });
+}
+// Sửa tay đơn giá của 1 SP (áp dụng cho loại giá đang chọn: Lẻ hoặc Sỉ). Gõ 0 thì lưu/in đúng 0.
+function updateHoaDonNhapPrice(name, value, type) {
+    if (!window.hdnPriceOverride[name]) window.hdnPriceOverride[name] = {};
+    window.hdnPriceOverride[name][type] = parseHoaDonNhapPriceInput(value);
+    hdnRefreshLineTotal(name);
+    calcHoaDonNhapPreview();
+}
+// Ghi chú riêng cho từng SP (in ở cột Ghi chú của hóa đơn)
+function updateHoaDonNhapNote(name, value) {
+    window.hdnNoteMap[name] = String(value || '');
+}
 function updateHoaDonNhapQty(name, value) {
     const qty = parseFloat(value);
     window.hdnQtyMap[name] = isNaN(qty) ? 0 : qty;
+    hdnRefreshLineTotal(name);
     // Nhập SL > 0 thì tự tích chọn SP (như cũ vẫn tạo được hóa đơn chỉ bằng cách nhập số lượng).
     if (!isNaN(qty) && qty > 0 && !window.hdnSelectedMap[name]) {
         window.hdnSelectedMap[name] = true;
@@ -14074,6 +14149,8 @@ function calcHoaDonNhapPreview() {
     const total = subtotal + subtotal * vatRate / 100;
     const c = document.getElementById('hdn-count-selected');
     const t = document.getElementById('hdn-preview-total');
+    const pn = document.getElementById('hdn-price-note');
+    if (pn) pn.innerText = '💡 Tính thành tiền theo ' + (priceType === 'wholesale' ? 'giá sỉ' : 'giá lẻ');
     if (c) c.innerText = count;
     if (t) t.innerText = total.toLocaleString('vi-VN') + ' đ';
 }
@@ -14094,7 +14171,9 @@ function collectHoaDonNhapItems() {
         name: item.name, unit: item.unit || '', qty: qty,
         price: getHoaDonNhapPrice(item, priceType),
         retail: getHoaDonNhapPrice(item, 'retail'), wholesale: getHoaDonNhapPrice(item, 'wholesale'),
-        selected: true, dateSwap: swap, suggestedRetail: Number(item.suggestedRetail || 0), note: ''
+        selected: true, dateSwap: swap, suggestedRetail: Number(item.suggestedRetail || 0),
+        // Ghi chú in ở dòng bán thường; nếu SP chỉ nằm ở nhóm Đổi date thì in ở dòng Đổi date
+        note: (!swap || !window.hdnSelectedMap[item.name]) ? String(window.hdnNoteMap[item.name] || '').trim() : ''
     });
     const normal = source.filter(item => !!window.hdnSelectedMap[item.name]).map(item => mk(item, Number(window.hdnQtyMap[item.name] || 0), false));
     const swap = source.filter(item => !!window.hdnSwapMap[item.name]).map(item => mk(item, Number(window.hdnSwapQtyMap[item.name] || 0), true));
@@ -14281,6 +14360,8 @@ function openBaoGiaModal(prefill) {
     const tbody = document.getElementById('bg-product-list');
     if (tbody)
         tbody.innerHTML = groupParts.join('');
+    window.bgGroupFilter = 'ALL';
+    renderBgGroupBar(nhomMap, thuTuNhom);
     // Thông tin khách hàng + loại giá + tìm kiếm: điền sẵn nếu đang SỬA, ngược lại reset trắng.
     document.getElementById('bg-customer').value = prefill ? (prefill.customer || '') : '';
     document.getElementById('bg-address').value = prefill ? (prefill.address || '') : '';
@@ -14325,8 +14406,29 @@ function filterBaoGiaModal() {
             if (match)
                 anyVisible = true;
         });
-        groupRow.style.display = anyVisible ? '' : 'none';
+        const gOk = (window.bgGroupFilter || 'ALL') === 'ALL' || groupRow.getAttribute('data-bg-group') === window.bgGroupFilter;
+        groupRow.style.display = (anyVisible && gOk) ? '' : 'none';
     });
+}
+window.bgGroupFilter = window.bgGroupFilter || 'ALL';
+// Thanh nhóm hàng của Báo giá: bấm nhóm nào hiện nhóm đó (số lượng/giá đã gõ vẫn giữ nguyên vì chỉ ẩn/hiện)
+function renderBgGroupBar(nhomMap, names) {
+    const bar = document.getElementById('bg-grp-bar'); if (!bar) return;
+    const keys = names.filter(n => (nhomMap.get(n) || []).length);
+    let total = 0; keys.forEach(n => total += nhomMap.get(n).length);
+    if (window.bgGroupFilter !== 'ALL' && keys.indexOf(window.bgGroupFilter) < 0) window.bgGroupFilter = 'ALL';
+    let h = '<button type="button" class="hg-chip" data-g="ALL">Tất cả <b>' + total + '</b></button>';
+    keys.forEach(k => {
+        h += '<button type="button" class="hg-chip" style="--c:' + (HDN_GRP_COLOR[k] || '#6b7280') + '" data-g="' + k + '">' + (HDN_GRP_LABEL[k] || k) + ' <b>' + nhomMap.get(k).length + '</b></button>';
+    });
+    bar.innerHTML = h;
+    const paint = () => [].forEach.call(bar.children, b => b.classList.toggle('on', b.getAttribute('data-g') === window.bgGroupFilter));
+    bar.onclick = function (e) {
+        const b = e.target.closest ? e.target.closest('.hg-chip') : null; if (!b) return;
+        window.bgGroupFilter = b.getAttribute('data-g'); paint(); filterBaoGiaModal();
+        const sc = document.querySelector('#modal-baogia .overflow-y-auto'); if (sc) sc.scrollTop = 0;
+    };
+    paint();
 }
 function updateBaoGiaQty(name, value) {
     const qty = parseFloat(value);
@@ -17200,6 +17302,8 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
         const listItems = items || [];
         // Hàm kiểm tra ghi chú có chứa "date" hoặc "đate" không
         const isDateNote = (noteText) => {
+            if (isDraft)
+                return false; // Hóa đơn nháp: nhóm Đổi date chỉ theo ô tích, ghi chú tự do không làm đổi giá
             if (!noteText)
                 return false;
             const lower = noteText.toLowerCase();
@@ -31817,6 +31921,28 @@ html.dark .imp-cn{color:#f1f5f9}
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
 </script>
+
+<style id="hdn-grp-css">
+/* Tailwind ở file này là bản biên dịch sẵn: 2 class dưới chưa có nên khai báo tay */
+@media (min-width:768px){.md\:col-span-5{grid-column:span 5/span 5}.md\:col-span-12{grid-column:span 12/span 12}}
+:is(#hdn-grp-bar,#bg-grp-bar){display:flex;gap:4px;overflow-x:auto}
+:is(#hdn-grp-bar,#bg-grp-bar):empty{display:none}
+:is(#hdn-grp-bar,#bg-grp-bar) .hg-chip{flex:1 0 auto;display:flex;align-items:center;justify-content:center;gap:4px;padding:5px 9px;border-radius:9px;font-size:11px;font-weight:800;line-height:1.1;white-space:nowrap;border:1.5px solid var(--c,#6b7280);color:var(--c,#6b7280);background:transparent}
+:is(#hdn-grp-bar,#bg-grp-bar) .hg-chip b{font-size:10px;padding:1px 5px;border-radius:999px;background:rgba(100,116,139,.16)}
+:is(#hdn-grp-bar,#bg-grp-bar) .hg-chip.on{background:var(--c,#6b7280);color:#fff}
+:is(#hdn-grp-bar,#bg-grp-bar) .hg-chip.on b{background:rgba(255,255,255,.28)}
+/* Popup Tạo Báo Giá: nền ĐẶC (không trong mờ) để nhìn rõ chữ và ô nhập */
+html.glass #modal-baogia > div{background-color:#fbfcff !important;background-image:none !important;border:1px solid rgba(71,85,105,.25) !important}
+html.glass #modal-baogia > div > div:not([data-gb]){background-color:#f4f6fb !important;background-image:none !important}
+html.glass #modal-baogia > div > div.overflow-y-auto{background-color:#fbfcff !important}
+html.glass #modal-baogia [data-gb]{background-color:#e0e7ff !important;background-image:none !important}
+html.glass #modal-baogia thead{background-color:#e8ecf6 !important}
+html.glass.dark #modal-baogia > div{background-color:#121a2e !important;border-color:rgba(255,255,255,.15) !important}
+html.glass.dark #modal-baogia > div > div:not([data-gb]){background-color:#0f1626 !important}
+html.glass.dark #modal-baogia > div > div.overflow-y-auto{background-color:#121a2e !important}
+html.glass.dark #modal-baogia [data-gb]{background-color:#312e81 !important}
+html.glass.dark #modal-baogia thead{background-color:#1b2540 !important}
+</style>
 
 <style id="v26-history-css">
 /* v26: Lịch sử hoá đơn - Tìm kiếm, Tháng, Từ ngày, Đến ngày, Hình thức TT, Trạng thái, nút Xuất cùng 1 hàng */
