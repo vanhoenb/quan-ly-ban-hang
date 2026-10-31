@@ -330,31 +330,31 @@
   #app-connectivity-status #app-sync-text { display: none !important; }
 
   /* Header dashboard không ép chiều rộng 300px trên điện thoại. */
-  #page-home > div:first-child {
+  #home-sticky-top > div:first-child {
     flex-wrap: wrap !important;
     align-items: center !important;
     gap: 5px !important;
   }
-  #page-home > div:first-child > div:first-child {
+  #home-sticky-top > div:first-child > div:first-child {
     flex: 1 1 100% !important;
     min-width: 0 !important;
   }
-  #page-home > div:first-child > #dashboard-expiry-alert {
+  #home-sticky-top > div:first-child > #dashboard-expiry-alert {
     order: 3 !important;
     flex: 1 1 100% !important;
     margin-left: 0 !important; margin-right: 0 !important;
   }
-  #page-home > div:first-child > div:last-child {
+  #home-sticky-top > div:first-child > div:last-child {
     order: 2 !important;
     flex: 1 1 100% !important;
     min-width: 0 !important;
     width: 100% !important;
     padding-left: 0 !important; padding-right: 0 !important;
   }
-  #page-home > div:first-child > div:last-child > div {
+  #home-sticky-top > div:first-child > div:last-child > div {
     min-height: 48px !important;
   }
-  #page-home > div:first-child > div:last-child > div > div {
+  #home-sticky-top > div:first-child > div:last-child > div > div {
     width: 100% !important;
     gap: 10px !important;
     white-space: normal !important;
@@ -370,6 +370,17 @@
   .swal2-popup { max-width: calc(100vw - 16px) !important; }
   .swal2-html-container { overflow-x: hidden !important; }
 }
+
+  /* Trang chủ (PC): cố định tiêu đề + 4 ô thống kê, chỉ phần bên dưới cuộn */
+  @media (min-width: 768px) {
+    #home-sticky-top {
+      position: sticky; top: 0; z-index: 30;
+      margin: -44px -48px 0 -48px; padding: 44px 48px 12px 48px;
+      background: rgba(243,244,246,0.92);
+      -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    }
+    html.dark #home-sticky-top, .dark #home-sticky-top { background: rgba(2,6,23,0.92); }
+  }
 </style>
 
     <style>
@@ -3289,6 +3300,8 @@ document.addEventListener('DOMContentLoaded', function () {
 	<!-- Trang chủ -->
 <div id="page-home" class="p-2 md:p-8 space-y-6 md:space-y-8 dark:bg-slate-950 min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-300">
     
+    <!-- KHỐI CỐ ĐỊNH (PC): tiêu đề + đồng hồ + 4 ô thống kê luôn nằm trên cùng, chỉ phần bên dưới cuộn. -->
+    <div id="home-sticky-top" class="space-y-6 md:space-y-8">
     <div class="flex items-center justify-between gap-3 pb-2 border-b border-slate-200 dark:border-slate-900">
         <div class="min-w-0 shrink-0">
             <h2 data-pt class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:drop-shadow-[0_2px_4px_rgba(255,255,255,0.1)]">BẢNG ĐIỀU KHIỂN</h2>
@@ -3367,6 +3380,7 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
 
     </div>
+    </div><!-- /home-sticky-top -->
 
     <!-- MODAL LỊCH THÁNG ĐẦY ĐỦ - mở khi bấm vào ô đồng hồ ở trên. Hiện đủ các ngày trong
          tháng đang xem (mặc định = tháng hiện tại), có nút lùi/tiến tháng, mỗi ô ngày hiện
@@ -5421,6 +5435,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     <input id="in-sl" type="number" placeholder="SL" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
                     <input id="in-gia" type="number" placeholder="Đơn giá" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
+                <input id="in-tinh-trang" list="in-tinh-trang-list" title="Không bắt buộc - bỏ trống thì cột Tình trạng trong Sổ nhật ký để trống" placeholder="Tình trạng (không bắt buộc)" class="w-full border border-blue-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                <datalist id="in-tinh-trang-list"><option value="Tươi , dính tay"></option><option value="Đông lạnh"></option><option value="Khô"></option><option value="Tươi"></option><option value="Mới, nguyên bao"></option></datalist>
             </div>
             <div id="gio-hang-nl" class="my-2 border dark:border-slate-700 p-2 text-xs bg-gray-50 dark:bg-slate-950 dark:text-white rounded h-[250px] overflow-y-auto border-blue-100"></div>
             <!-- CHỈ hiện trên PC - trên điện thoại đã có thanh giỏ hàng nổi #mobile-cart-bar-nl
@@ -25208,18 +25224,22 @@ async function saveExcelFile(workbook, filename) {
 const SX_DEFAULT_STAGES = ['Rửa NL', 'Xay NL', 'Nấu', 'Đóng gói', 'Hấp tiệt trùng'];
 // Nguyên liệu mẫu in sẵn khi chọn công đoạn (chỉ còn điền số Kg). Sửa được từng công đoạn bằng nút ✎ ở Danh mục.
 const SX_TPL_THIT = 'Thịt nạc vai : …… Kg\nMỡ lá : …… Kg\nMỡ khổ : …… Kg';
+// Công thức 1 MẺ Nấu (1 buổi sáng thường nấu 2 mẻ = 2 dòng Nấu, dùng nút nhân đôi dòng). Sửa bằng nút ✎ ở Danh mục.
+const SX_TPL_NAU = 'Thịt nạc vai : 7 Kg\nMỡ lá : 0.75 Kg\nMỡ khổ : 0.75 Kg\nHành ta : 0.25 Kg\nMắm nêm : 1 Kg\nRiu đỏ : 0.3 Kg';
+const SX_OLD_NAU_TPL = SX_TPL_THIT + '\nHành ta : …… Kg\nMắm nêm : ……\nRiu đỏ : ……';   // mẫu cũ (chỉ để đổi sang mẫu mới 1 lần)
 const SX_DEFAULT_TEMPLATES = {
     'Rửa NL': SX_TPL_THIT,
     'Xay NL': SX_TPL_THIT,
-    'Nấu': SX_TPL_THIT + '\nHành ta : …… Kg\nMắm nêm : ……\nRiu đỏ : ……',
+    'Nấu': SX_TPL_NAU,
     'Đóng gói': 'Thịt chưng mắm tép',
     'Hấp tiệt trùng': ''
 };
 const SX_NL_DONG_GOI = 'Thịt chưng mắm tép';
 // Kết quả in sẵn khi chọn công đoạn (Nấu: thành phẩm ra được bao nhiêu Kg)
 const SX_DEFAULT_KETQUA = {
-    'Nấu': 'Thịt chưng mắm tép : …… Kg'
+    'Nấu': 'Thịt chưng mắm tép : 6 Kg'   // 1 mẻ ra 6 Kg - chọn số mẻ ở ô Nguyên liệu thì tự nhân
 };
+const SX_OLD_NAU_KQ = 'Thịt chưng mắm tép : …… Kg';
 // Vị trí & người thực hiện in sẵn khi chọn công đoạn (sửa từng công đoạn bằng nút ✎ ở Danh mục).
 const SX_DEFAULT_NGUOI = {
     'Rửa NL': 'Khu rửa / Nguyễn Thị Hoa',
@@ -25316,6 +25336,18 @@ async function sxLoadStages() {
             }
             await db.collection('production_stages').doc('meta_rename').set({ done: true });
         } catch (e) { console.warn('Không đổi tên được công đoạn:', e); }
+    }
+    // Nấu: đổi sang mẫu 1 mẻ (7 Kg thịt...) nếu danh mục còn giữ mẫu cũ chưa ai sửa; bỏ liên kết lấy số từ Xay
+    for (const st of list) {
+        if (sxNorm(st.name) !== 'nấu') continue;
+        const up = {};
+        if (String(st.nlMau || '').trim() === SX_OLD_NAU_TPL.trim()) up.nlMau = SX_TPL_NAU;
+        if (st.ctTu === 'Xay NL') up.ctTu = ' ';
+        if (String(st.ketQuaMau || '').trim() === SX_OLD_NAU_KQ) up.ketQuaMau = SX_DEFAULT_KETQUA['Nấu'];
+        if (Object.keys(up).length) {
+            try { await db.collection('production_stages').doc(st.id).update(up); Object.assign(st, up); }
+            catch (e) { console.warn('Không cập nhật được mẫu Nấu:', e); }
+        }
     }
     list.sort((a, b) => (a.order || 0) - (b.order || 0));
     window.__sxStages = list;
@@ -25448,19 +25480,37 @@ async function sxEditStageTpl(id) {
     const st = window.__sxStages.find(x => x.id === id);
     if (!st) return;
     const r = await Swal.fire({
-        title: 'Mẫu in sẵn: ' + st.name,
+        title: 'Mẫu & công thức: ' + st.name,
         html: '<div class="text-left"><label class="text-xs font-bold">Nguyên liệu (mỗi nguyên liệu 1 dòng)</label>'
             + '<textarea id="sxtpl-nl" class="swal2-textarea !m-0 !w-full" rows="4">' + escapeHtml(sxStageField(st.name, 'nlMau')) + '</textarea>'
             + '<label class="text-xs font-bold mt-2 block">Vị trí &amp; người thực hiện</label>'
             + '<input id="sxtpl-nguoi" class="swal2-input !m-0 !w-full" value="' + escapeHtml(sxStageField(st.name, 'nguoiMau')) + '">'
             + '<label class="text-xs font-bold mt-2 block">Kết quả</label>'
-            + '<input id="sxtpl-kq" class="swal2-input !m-0 !w-full" value="' + escapeHtml(sxStageField(st.name, 'ketQuaMau')) + '"></div>',
+            + '<input id="sxtpl-kq" class="swal2-input !m-0 !w-full" value="' + escapeHtml(sxStageField(st.name, 'ketQuaMau')) + '">'
+            + (function () {
+                const f = sxStageFormula(st.name);
+                const opts = '<option value="">— Không lấy từ công đoạn nào —</option>' + window.__sxStages.filter(x => x.name !== st.name).map(x => '<option value="' + escapeHtml(x.name) + '"' + (x.name === f.tu ? ' selected' : '') + '>' + escapeHtml(x.name) + '</option>').join('');
+                const val = x => (x && x !== ' ') ? escapeHtml(x) : '';
+                return '<div style="margin-top:12px;padding:10px;border:2px dashed #f59e0b;border-radius:12px;background:#fffbeb">'
+                    + '<div class="text-xs font-black" style="color:#b45309">⚡ CÔNG THỨC TỰ TÍNH</div>'
+                    + '<label class="text-xs font-bold mt-2 block">Lấy nguyên liệu + số Kg từ công đoạn</label>'
+                    + '<select id="sxtpl-ctTu" class="swal2-select !m-0 !w-full">' + opts + '</select>'
+                    + '<label class="text-xs font-bold mt-2 block">Hệ số nhân số Kg lấy được (để trống = 1, tức bấy nhiêu)</label>'
+                    + '<input id="sxtpl-ctHe" type="number" step="any" min="0" class="swal2-input !m-0 !w-full" value="' + val(st.ctHeSo) + '">'
+                    + '<label class="text-xs font-bold mt-2 block">Nguyên liệu thêm theo tỉ lệ trên mỗi 1 Kg nguyên liệu nguồn (mỗi dòng 1 loại)</label>'
+                    + '<textarea id="sxtpl-ctThem" class="swal2-textarea !m-0 !w-full" rows="3" placeholder="VD: Hành ta : 0.05 Kg">' + val(st.ctThem) + '</textarea>'
+                    + '<label class="text-xs font-bold mt-2 block">Kết quả = tổng Kg nguồn x hệ số này (VD 0.85; để trống = tự điền tay)</label>'
+                    + '<input id="sxtpl-ctKq" type="number" step="any" min="0" class="swal2-input !m-0 !w-full" value="' + val(st.ctKetQua) + '">'
+                    + '</div>';
+            })() + '</div>',
         showCancelButton: true,
         confirmButtonText: 'Lưu',
         cancelButtonText: 'Hủy',
         preConfirm: () => {
             const v = x => { const t = document.getElementById(x).value; return t.trim() ? t.trim() : ' '; };   // ' ' = cố ý để trống
-            return { nlMau: v('sxtpl-nl'), nguoiMau: v('sxtpl-nguoi'), ketQuaMau: v('sxtpl-kq') };
+            const g = x => ((document.getElementById(x) || {}).value || '').trim();
+            return { nlMau: v('sxtpl-nl'), nguoiMau: v('sxtpl-nguoi'), ketQuaMau: v('sxtpl-kq'),
+                ctTu: g('sxtpl-ctTu') || ' ', ctHeSo: g('sxtpl-ctHe') || ' ', ctThem: g('sxtpl-ctThem') || ' ', ctKetQua: g('sxtpl-ctKq') || ' ' };
         }
     });
     if (!r.isConfirmed) return;
@@ -25484,7 +25534,7 @@ const SX_GRID_MIN_ROWS = 4;
 function sxNorm(x) { return String(x || '').trim().toLowerCase().replace(/\s+/g, ' '); }
 function sxIsPack(stage) { return sxNorm(stage) === 'đóng gói'; }
 function sxH(v) { return escapeHtml(v == null ? '' : v).replace(/\n/g, '<br>'); }
-function sxBlankRow(stt) { return { id: null, stt, stage: '', gioBD: '', gioKT: '', nguyenLieu: '', nguoi: '', thongSo: '', ketQua: '', tenSP: '' }; }
+function sxBlankRow(stt) { return { id: null, stt, stage: '', gioBD: '', gioKT: '', nguyenLieu: '', nguoi: '', thongSo: '', ketQua: '', tenSP: '', soMe: '' }; }
 function sxToast(msg, icon) { Swal.fire({ icon: icon || 'info', title: msg, toast: true, position: 'top-end', timer: 2200, showConfirmButton: false }); }
 function sxCdToday() { return sxGuardedLoad(sxTodayVN(), false); }
 // Mỗi lần bấm LƯU tạo 1 "phiếu" (cùng phieuId). editSaved=false: bảng trống để nhập phiếu mới;
@@ -25510,7 +25560,7 @@ async function sxLoadGrid(editSaved, phieuKey) {
                 rows.push({
                     id: doc.id, stt: Number(x.stt) || 0, createdMs: sxCreatedMs(x),
                     stage: x.stage || '', gioBD: x.gioBD || '', gioKT: x.gioKT || '', nguyenLieu: x.nguyenLieu || '',
-                    nguoi: x.nguoi || '', thongSo: x.thongSo || '', ketQua: x.ketQua || '', tenSP: x.tenSP || ''
+                    nguoi: x.nguoi || '', thongSo: x.thongSo || '', ketQua: x.ketQua || '', tenSP: x.tenSP || '', soMe: x.soMe || ''
                 });
             }
         });
@@ -25585,7 +25635,7 @@ function sxNLHtml(text) {
 // "Chưa lưu" chỉ hiện khi nội dung bảng THỰC SỰ khác với lúc mở/lưu gần nhất.
 // Nhập rồi xóa đi (hoặc chọn lại về như cũ) thì quay về "Chưa có thay đổi", không còn hỏi lưu.
 function sxSerialize() {
-    const rows = (window.__sxRows || []).filter(r => r.stage).map(r => [r.stage, r.gioBD, r.gioKT, r.nguyenLieu, r.nguoi, r.thongSo, r.ketQua, r.tenSP]);
+    const rows = (window.__sxRows || []).filter(r => r.stage).map(r => [r.stage, r.gioBD, r.gioKT, r.nguyenLieu, r.nguoi, r.thongSo, r.ketQua, r.tenSP, r.soMe || '']);
     const dsp = ((document.getElementById('sxcd-daysp') || {}).value || '').trim();
     return JSON.stringify([rows, dsp, (window.__sxDeleted || []).length]);
 }
@@ -25613,7 +25663,7 @@ function sxRenderGrid() {
             + '<td data-label="Dòng" class="sx-no px-3 py-3 border-t border-slate-200 dark:border-slate-800 text-center text-slate-400 font-black">' + (i + 1) + '</td>'
             + cell(i, 'stage', 'Công đoạn SX', badge, 'border-l-4 ' + tone.bar)
             + cell(i, 'time', 'Thời gian', time)
-            + cell(i, 'nl', 'Nguyên liệu (Tên, Số Kg)', sxNLHtml(r.nguyenLieu))
+            + cell(i, 'nl', 'Nguyên liệu (Tên, Số Kg)', (r.soMe ? '<div class="inline-block mb-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-black">🍲 ' + escapeHtml(r.soMe) + ' mẻ</div>' : '') + sxNLHtml(r.nguyenLieu))
             + cell(i, 'nguoi', 'Vị trí & người thực hiện', sxH(r.nguoi))
             + cell(i, 'thongso', 'Thông số kiểm soát', sxH(r.thongSo))
             + cell(i, 'ketqua', 'Kết quả', kq)
@@ -25647,8 +25697,8 @@ function sxDupRow(i) {
     const r = window.__sxRows[i];
     if (!r || !r.stage) return sxToast('Hãy chọn công đoạn cho dòng này trước', 'info');
     const c = sxBlankRow(0);
-    c.stage = r.stage; c.nguyenLieu = r.nguyenLieu; c.nguoi = r.nguoi; c.thongSo = r.thongSo; c.tenSP = r.tenSP;
-    c.ketQua = sxStageField(r.stage, 'ketQuaMau');   // giờ và kết quả để trống cho mẻ mới
+    c.stage = r.stage; c.nguyenLieu = r.nguyenLieu; c.nguoi = r.nguoi; c.thongSo = r.thongSo; c.tenSP = r.tenSP; c.soMe = r.soMe || '';
+    c.ketQua = r.soMe ? sxScaleKQ(sxStageField(r.stage, 'ketQuaMau'), r.soMe) : sxStageField(r.stage, 'ketQuaMau');   // giờ để trống cho mẻ mới; kết quả theo số mẻ
     window.__sxRows.splice(i + 1, 0, c);
     sxMarkDirty(true);
     sxRenderGrid();
@@ -25770,7 +25820,7 @@ async function sxSaveAll() {
                 return;
             }
             r.stt = ++sttN;   // số thứ tự theo đúng thứ tự trong bảng (kể cả dòng nhân đôi / chèn thêm)
-            const data = { date, phieuId: pid, stt: r.stt, tenSP: r.tenSP || daySP, stage: r.stage, gioBD: r.gioBD || '', gioKT: r.gioKT || '', nguyenLieu: r.nguyenLieu || '', nguoi: r.nguoi || '', thongSo: r.thongSo || '', ketQua: r.ketQua || '', updatedAt: ts };
+            const data = { date, phieuId: pid, stt: r.stt, tenSP: (sxIsPack(r.stage) ? (r.tenSP || daySP) : (daySP || r.tenSP)), stage: r.stage, gioBD: r.gioBD || '', gioKT: r.gioKT || '', nguyenLieu: r.nguyenLieu || '', nguoi: r.nguoi || '', thongSo: r.thongSo || '', ketQua: r.ketQua || '', soMe: r.soMe || '', updatedAt: ts };
             const ref = r.id ? coll.doc(r.id) : coll.doc();
             if (!r.id) data.createdAt = ts;
             batch.set(ref, data, { merge: true });
@@ -25847,7 +25897,7 @@ async function sxLoadSaved() {
             }).sort((a, b) => (a.bd || '99').localeCompare(b.bd || '99') || (a.cms - b.cms));
             return phieus.map((ph, k) => {
                 const stages = ph.rows.map(r => '<span class="inline-flex items-center gap-1 m-0.5 px-2.5 py-1 rounded-full border text-xs font-bold ' + sxTone(r.stage).badge + '">' + escapeHtml(r.stage || '') + (nkStepTime(r) ? ' <span class="font-normal opacity-80">' + escapeHtml(nkStepTime(r).replace('Từ ', '').replace(' đến ', '–')) + '</span>' : '') + '</span>').join('');
-                const sps = Array.from(new Set(ph.rows.map(r => r.tenSP).filter(Boolean))).map(escapeHtml).join('<br>');
+                const sps = Array.from(new Set(ph.rows.reduce((a, r) => a.concat(sxIsPack(r.stage) && sxPackLines(r.thongSo).length ? sxPackLines(r.thongSo).map(sxPackName) : [r.tenSP]), []).filter(Boolean))).map(escapeHtml).join('<br>');
                 const ca = ph.bd ? (parseInt(ph.bd.slice(0, 2), 10) < 12 ? 'Sáng' : 'Chiều') : '';
                 const arg = '\'' + d + '\',\'' + ph.key + '\'';
                 return '<tr><td class="p-2 whitespace-nowrap align-top"><div class="font-bold">' + formatDateToDDMMYYYY(d) + '</div><div class="text-xs font-semibold text-slate-500">Phiếu ' + (k + 1) + (ca ? ' · ' + ca : '') + '</div></td>'
@@ -25964,10 +26014,106 @@ async function sxSyncXayFromRua(rua, oldVal) {
         sxMarkDirty(true);
     }
 }
+// ===================================================================================
+// CÔNG THỨC TỰ TÍNH GIỮA CÁC CÔNG ĐOẠN: Rửa bao nhiêu -> Xay bấy nhiêu -> Nấu bấy nhiêu.
+// Mỗi công đoạn có thể: (1) lấy nguyên liệu + Kg từ 1 công đoạn khác (nhân hệ số),
+// (2) thêm nguyên liệu theo tỉ lệ trên mỗi 1 Kg nguyên liệu nguồn (VD Hành ta : 0.05 Kg),
+// (3) tự tính Kết quả = tổng Kg nguồn x hệ số. Cài ở nút ✎ trong Danh mục công đoạn.
+// Chỉ tự điền khi ô đang trống / đang là mẫu / đang là số do công thức tính trước đó -
+// ô bạn đã tự sửa tay thì KHÔNG bị ghi đè.
+// ===================================================================================
+const SX_DEFAULT_FORMULA = { 'Xay NL': { tu: 'Rửa NL' } };   // Nấu có công thức riêng (mẫu 1 mẻ), không lấy số từ Xay
+// Kết quả mẫu của 1 mẻ (VD "Thịt chưng mắm tép : 6 Kg") nhân với số mẻ -> "... : 12 Kg"
+function sxScaleKQ(tpl, n) {
+    tpl = String(tpl || '');
+    const m = tpl.match(/\d+(?:[.,]\d+)?/);
+    n = parseFloat(String(n).replace(',', '.'));
+    if (!m || !(n > 0)) return tpl;
+    return tpl.replace(m[0], String(Math.round(sxKgNum(m[0]) * n * 100) / 100));
+}
+function sxFmtKg(v) { return String(Math.round(v * 100) / 100).replace('.', ','); }
+function sxKgNum(v) { return parseFloat(String(v).replace(',', '.')); }
+function sxStageFormula(name) {
+    const st = (window.__sxStages || []).find(x => x.name === name) || {};
+    const d = SX_DEFAULT_FORMULA[name] || {};
+    let tu = st.ctTu;
+    tu = (tu === undefined || tu === null || tu === '') ? (d.tu || '') : (tu === ' ' ? '' : tu);
+    const num = v => { const n = sxKgNum(v == null ? '' : v); return isFinite(n) && n > 0 ? n : 0; };
+    return { tu, he: num(st.ctHeSo) || 1, them: String(st.ctThem || '').trim(), kq: num(st.ctKetQua) };
+}
+function sxSameStage(a, b) {
+    if (sxNorm(a) === sxNorm(b)) return true;
+    return (sxIsKind(a, 'rua') && sxIsKind(b, 'rua')) || (sxIsKind(a, 'xay') && sxIsKind(b, 'xay'));
+}
+// Dòng nguồn của 1 dòng: dòng thứ k của công đoạn này lấy từ dòng thứ k của công đoạn nguồn (hoặc dòng duy nhất)
+function sxFormulaSource(row) {
+    const f = sxStageFormula(row.stage);
+    if (!f.tu) return null;
+    const rows = window.__sxRows || [];
+    const cands = rows.filter(r => r !== row && r.stage && sxSameStage(r.stage, f.tu));
+    const mine = rows.filter(r => r.stage && sxSameStage(r.stage, row.stage));
+    const k = mine.indexOf(row);
+    return cands[k] || (cands.length === 1 ? cands[0] : null);
+}
+// Từ chữ nguyên liệu của công đoạn nguồn -> { text, base }, hoặc null nếu nguồn chưa có số Kg nào
+function sxFormulaNL(stage, srcText, tpl) {
+    const f = sxStageFormula(stage);
+    if (!f.tu) return null;
+    const src = sxPackLines(srcText).map(sxParseNLLine).filter(x => x.name && x.kg !== '' && isFinite(sxKgNum(x.kg)));
+    if (!src.length) return null;
+    const out = [], names = new Set();
+    let base = 0;
+    src.forEach(x => {
+        const v = sxKgNum(x.kg) * f.he, u = x.unit || 'Kg';
+        if (/^kg$/i.test(u)) base += v;
+        out.push(x.name + ' : ' + (f.he === 1 ? x.kg : sxFmtKg(v)) + ' ' + u);
+        names.add(sxNorm(x.name));
+    });
+    sxPackLines(f.them).map(sxParseNLLine).forEach(x => {
+        const k = sxKgNum(x.kg);
+        if (!x.name || !isFinite(k)) return;
+        out.push(x.name + ' : ' + sxFmtKg(k * base) + ' ' + (x.unit || 'Kg'));
+        names.add(sxNorm(x.name));
+    });
+    // Giữ lại các dòng của mẫu mà công thức chưa tính (VD Mắm nêm : …… để tự điền)
+    sxPackLines(tpl).forEach(l => { if (!names.has(sxNorm(sxParseNLLine(l).name))) out.push(l); });
+    return { text: out.join('\n'), base };
+}
+function sxFormulaKQ(stage, base) {
+    const f = sxStageFormula(stage);
+    if (!(f.kq > 0) || !(base > 0)) return '';
+    const tpl = sxStageField(stage, 'ketQuaMau');
+    return /…+/.test(tpl) ? tpl.replace(/…+/, sxFmtKg(base * f.kq)) : tpl;
+}
+// Khi 1 dòng đổi nguyên liệu: các dòng lấy công thức từ nó tự cập nhật (và dây chuyền Rửa -> Xay -> Nấu)
+function sxCascade(src, oldText, depth) {
+    depth = depth || 0;
+    if (depth > 6) return;
+    (window.__sxRows || []).forEach(t => {
+        if (t === src || !t.stage || sxFormulaSource(t) !== src) return;
+        const tpl = sxStageField(t.stage, 'nlMau');
+        const res = sxFormulaNL(t.stage, src.nguyenLieu, tpl);
+        if (!res) return;
+        const cur = (t.nguyenLieu || '').trim();
+        const old = oldText != null ? sxFormulaNL(t.stage, oldText, tpl) : null;
+        if (!cur || cur === tpl.trim() || cur === (t.__auto || '').trim() || (old && cur === old.text.trim())) {
+            const prev = t.nguyenLieu || '';
+            t.nguyenLieu = res.text; t.__auto = res.text;
+            const kq = sxFormulaKQ(t.stage, res.base);
+            if (kq) {
+                const ck = (t.ketQua || '').trim();
+                if (!ck || ck === sxStageField(t.stage, 'ketQuaMau').trim() || ck === (t.__autoKQ || '').trim()) { t.ketQua = kq; t.__autoKQ = kq; }
+            }
+            sxCascade(t, prev, depth + 1);
+        }
+    });
+    sxMarkDirty(true);
+}
 // Đặt công đoạn cho 1 dòng và điền sẵn mẫu của công đoạn đó (nếu ô đang trống hoặc đang là mẫu của công đoạn cũ)
 function sxSetStage(row, nw) {
     const old = row.stage;
     if (old === nw) return;
+    if (sxNorm(nw) !== 'nấu') row.soMe = '';
     row.stage = nw;
     [['nguyenLieu', 'nlMau'], ['nguoi', 'nguoiMau'], ['ketQua', 'ketQuaMau']].forEach(([f, mau]) => {
         const cur = row[f] || '';
@@ -25977,6 +26123,18 @@ function sxSetStage(row, nw) {
         const rua = sxPartner(row, 'xay');
         const cur = (row.nguyenLieu || '').trim();
         if (rua && (rua.nguyenLieu || '').trim() && (!cur || cur === sxStageField(nw, 'nlMau').trim())) row.nguyenLieu = rua.nguyenLieu;
+    }
+    if (!sxIsKind(nw, 'xay')) {   // công đoạn có công thức (VD Nấu): lấy sẵn nguyên liệu từ công đoạn nguồn
+        const fsrc = sxFormulaSource(row);
+        if (fsrc) {
+            const tpl = sxStageField(nw, 'nlMau');
+            const res = sxFormulaNL(nw, fsrc.nguyenLieu, tpl);
+            if (res && (!(row.nguyenLieu || '').trim() || row.nguyenLieu.trim() === tpl.trim())) {
+                row.nguyenLieu = res.text; row.__auto = res.text;
+                const kq = sxFormulaKQ(nw, res.base);
+                if (kq) { row.ketQua = kq; row.__autoKQ = kq; }
+            }
+        }
     }
     if (sxIsPack(old) && !sxIsPack(nw)) { row.tenSP = ''; if (/^Đóng\s+(hũ|túi|khay|kg)\b/i.test(row.thongSo)) row.thongSo = ''; }
 }
@@ -26062,20 +26220,53 @@ async function sxPickNL(row) {
         if (f) { f.checked = true; f.kg = c.kg; if (c.unit) f.unit = c.unit; }
         else items.push({ name: c.name, unit: c.unit || 'Kg', checked: true, kg: c.kg });   // có trong ô nhưng chưa có trong danh mục
     });
+    // Công đoạn Nấu: chọn SỐ MẺ (1-20 hoặc tự nhập) -> tự nhân công thức 1 mẻ (mẫu của công đoạn) ra số Kg từng nguyên liệu
+    const isNau = sxNorm(row.stage) === 'nấu';
+    const baseLines = isNau ? sxPackLines(sxStageField(row.stage, 'nlMau')).map(sxParseNLLine).filter(x => x.name && x.kg !== '' && isFinite(sxKgNum(x.kg))) : [];
+    baseLines.forEach(b => { if (!items.some(it => sxNorm(it.name) === sxNorm(b.name))) items.push({ name: b.name, unit: b.unit || 'Kg', checked: false, kg: '' }); });
+    let meSel = row.soMe ? String(row.soMe) : '';
+    const meChip = 'padding:6px 0;min-width:40px;border:1px solid #cbd5e1;border-radius:10px;font-weight:800;font-size:14px;color:#0f172a;background:#f8fafc;cursor:pointer';
+    const meHtml = (isNau && baseLines.length)
+        ? '<div style="text-align:left;margin-bottom:10px;padding:8px;border:2px dashed #f59e0b;border-radius:12px;background:#fffbeb">'
+            + '<div style="font-weight:900;font-size:13px;color:#b45309">🍲 SỐ MẺ NẤU <span style="font-weight:600;color:#64748b">(1 mẻ = ' + escapeHtml(baseLines.map(b => b.name + ' ' + b.kg + ' ' + (b.unit || 'Kg')).join(', ')) + ')</span></div>'
+            + '<div id="sxme-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">' + Array.from({ length: 20 }, (_, i) => '<button type="button" class="sxme-chip" data-n="' + (i + 1) + '" style="' + meChip + '">' + (i + 1) + '</button>').join('') + '</div>'
+            + '<input id="sxme-n" type="number" min="0" step="any" placeholder="Hoặc tự nhập số mẻ (VD 2.5)" style="width:100%;margin-top:8px;padding:8px;border:1px solid #cbd5e1;border-radius:10px;color:#0f172a">'
+            + '<div id="sxme-info" style="margin-top:6px;font-size:12px;font-weight:700;color:#475569"></div></div>'
+        : '';
     const rowsHtml = items.map((it, k) =>
         '<label class="sxnl-row" data-n="' + escapeHtml(it.name.toLowerCase()) + '" style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #e5e7eb;text-align:left">'
         + '<input type="checkbox" class="sxnl-chk" data-k="' + k + '"' + (it.checked ? ' checked' : '') + ' style="width:18px;height:18px">'
         + '<span style="flex:1;font-size:14px">' + escapeHtml(it.name) + '</span>'
-        + '<input type="number" step="any" min="0" class="sxnl-kg" data-k="' + k + '" value="' + escapeHtml(it.kg) + '" placeholder="Kg" style="width:84px;padding:4px;border:1px solid #cbd5e1;border-radius:8px;color:#0f172a">'
+        + '<input type="number" step="any" min="0" class="sxnl-kg" data-k="' + k + '" value="' + escapeHtml(String(it.kg).replace(',', '.')) + '" placeholder="Kg" style="width:84px;padding:4px;border:1px solid #cbd5e1;border-radius:8px;color:#0f172a">'
         + '<span style="width:34px;font-size:12px;color:#64748b">' + escapeHtml(it.unit) + '</span></label>').join('');
     const r = await Swal.fire({
         title: 'Nguyên liệu: ' + row.stage,
-        html: '<input id="sxnl-q" class="swal2-input" style="width:100%;margin:0 0 8px" placeholder="Tìm nguyên liệu...">'
+        html: meHtml + '<input id="sxnl-q" class="swal2-input" style="width:100%;margin:0 0 8px" placeholder="Tìm nguyên liệu...">'
             + '<div style="max-height:44vh;overflow:auto">' + (rowsHtml || '<div style="color:#64748b;font-size:13px">Danh mục nguyên liệu đang trống.</div>') + '</div>'
             + '<input id="sxnl-extra" class="swal2-input" style="width:100%;margin:10px 0 0" placeholder="Nguyên liệu khác (VD: Mắm nêm : 2 Kg)">',
         showCancelButton: true, confirmButtonText: 'Lưu', cancelButtonText: 'Hủy',
         width: 560,
         didOpen: popup => {
+            // Số mẻ: bấm số hoặc gõ số -> nhân công thức 1 mẻ vào ô Kg của từng nguyên liệu
+            const applyMe = n => {
+                n = parseFloat(String(n).replace(',', '.'));
+                if (!(n > 0)) return;
+                meSel = String(n);
+                baseLines.forEach(b => {
+                    const k = items.findIndex(it => sxNorm(it.name) === sxNorm(b.name));
+                    if (k < 0) return;
+                    const kg = popup.querySelector('.sxnl-kg[data-k="' + k + '"]'), chk = popup.querySelector('.sxnl-chk[data-k="' + k + '"]');
+                    if (kg) kg.value = String(Math.round(sxKgNum(b.kg) * n * 100) / 100);
+                    if (chk) chk.checked = true;
+                });
+                popup.querySelectorAll('.sxme-chip').forEach(c => { const on = parseFloat(c.dataset.n) === n; c.style.background = on ? '#f59e0b' : '#f8fafc'; c.style.color = on ? '#fff' : '#0f172a'; });
+                const inf = popup.querySelector('#sxme-info');
+                if (inf) inf.textContent = 'Đã tính cho ' + n + ' mẻ' + (sxStageField(row.stage, 'ketQuaMau') ? ' (Kết quả: ' + sxScaleKQ(sxStageField(row.stage, 'ketQuaMau'), n) + ')' : '') + ' - kiểm tra lại rồi bấm Lưu';
+            };
+            popup.querySelectorAll('.sxme-chip').forEach(c => c.addEventListener('click', () => { const t = popup.querySelector('#sxme-n'); if (t) t.value = ''; applyMe(c.dataset.n); }));
+            const meIn = popup.querySelector('#sxme-n');
+            if (meIn) meIn.addEventListener('input', () => applyMe(meIn.value));
+            if (meSel) popup.querySelectorAll('.sxme-chip').forEach(c => { if (parseFloat(c.dataset.n) === parseFloat(meSel)) { c.style.background = '#f59e0b'; c.style.color = '#fff'; } });
             // Ô tìm kiếm: chỉ ẩn/hiện dòng (dòng đã tích vẫn được lưu dù đang bị ẩn)
             const q = popup.querySelector('#sxnl-q');
             if (q) q.addEventListener('input', () => {
@@ -26103,7 +26294,18 @@ async function sxPickNL(row) {
     if (!r.isConfirmed) return;
     const oldNL = row.nguyenLieu;
     row.nguyenLieu = r.value;
+    if (isNau && meSel) {
+        const tplKQ = sxStageField(row.stage, 'ketQuaMau');
+        const ck = (row.ketQua || '').trim();
+        const prevScaled = row.soMe ? sxScaleKQ(tplKQ, row.soMe).trim() : '';
+        // Chỉ tự điền Kết quả khi đang trống / đang là mẫu / là số tính từ lần chọn mẻ trước (số bạn đã gõ tay thì giữ nguyên)
+        if (tplKQ && (!ck || ck === tplKQ.trim() || ck.indexOf('…') >= 0 || ck === prevScaled || ck === (row.__autoKQ || '').trim())) {
+            row.ketQua = sxScaleKQ(tplKQ, meSel); row.__autoKQ = row.ketQua;
+        }
+        row.soMe = String(meSel);
+    }
     sxMarkDirty(true);
+    sxCascade(row, oldNL);
     if (sxIsKind(row.stage, 'rua')) await sxSyncXayFromRua(row, oldNL);
 }
 async function sxPickNguoi(row) {
@@ -26133,17 +26335,73 @@ function sxCurrentCa() {   // ca của phiếu đang nhập: theo giờ bắt đ
     const bd = (window.__sxRows || []).map(r => r.gioBD).filter(Boolean).sort()[0];
     return bd ? (parseInt(bd.slice(0, 2), 10) < 12 ? 'Sáng' : 'Chiều') : '';
 }
+// Đóng gói: tách các dòng "Đóng hũ A\nĐóng túi B" thành danh sách / tên sản phẩm
+function sxPackLines(v) { return String(v || '').split('\n').map(x => x.trim()).filter(Boolean); }
+function sxPackName(line) { return String(line || '').replace(/^Đóng\s+(hũ|túi|khay|kg)\s+/i, '').trim(); }
+function sxPackNames(row) {
+    const n = sxPackLines(row.thongSo).map(sxPackName).filter(Boolean);
+    return n.length ? n : (row.tenSP ? [row.tenSP] : []);
+}
+// Kết quả của 1 hay nhiều sản phẩm đóng gói: mỗi sản phẩm 1 dòng, thẳng hàng với cột Thông số kiểm soát.
+// Sản phẩm chưa có phiếu đóng gói thì dòng đó để "…" cho bạn tự điền.
+async function sxCalcPackMulti(names) {
+    const out = []; let missing = 0;
+    for (const n of names) {
+        const calc = await sxCalcPack(window.__sxDate, n, sxCurrentCa());
+        if (calc) out.push(calc); else { out.push('…'); missing++; }
+    }
+    return { text: out.join('\n'), missing, all: names.length };
+}
+// Chọn NHIỀU sản phẩm (tích chọn) + ô gõ thêm (mỗi dòng 1 nội dung). Trả về mảng dòng, hoặc null nếu hủy.
+function sxPickMultiPack(title, options, currentLines, placeholder) {
+    return new Promise(resolve => {
+        const cur = new Set(currentLines);
+        const item = (o, i) => '<label class="sxmp-item" data-t="' + escapeHtml(o.toLowerCase()) + '" style="display:flex;align-items:center;gap:10px;padding:10px;margin:4px 0;border:1px solid #cbd5e1;border-radius:10px;color:#0f172a;cursor:pointer;background:' + (cur.has(o) ? '#fed7aa' : '#f8fafc') + '">'
+            + '<input type="checkbox" data-v="' + i + '" ' + (cur.has(o) ? 'checked' : '') + ' style="width:18px;height:18px;flex:none"><span style="text-align:left">' + escapeHtml(o) + '</span></label>';
+        const extra = currentLines.filter(x => !options.includes(x)).join('\n');
+        Swal.fire({
+            title,
+            html: '<input id="sxmp-search" class="swal2-input" placeholder="Tìm sản phẩm..." style="margin:0 0 8px;width:100%">'
+                + '<div id="sxmp" style="max-height:42vh;overflow:auto;text-align:left">' + (options.length ? options.map(item).join('') : '<div style="color:#64748b;font-size:13px">Chưa có danh sách, hãy gõ bên dưới.</div>') + '</div>'
+                + '<div id="sxmp-count" style="text-align:left;font-size:12px;font-weight:700;color:#475569;margin:6px 0 0"></div>'
+                + '<textarea id="sxmp-custom" class="swal2-textarea" placeholder="' + escapeHtml(placeholder || 'Hoặc gõ nội dung khác (mỗi dòng 1 sản phẩm)') + '" style="margin:8px 0 0;width:100%;min-height:64px">' + escapeHtml(extra) + '</textarea>',
+            showCancelButton: true,
+            confirmButtonText: 'Xong',
+            cancelButtonText: 'Hủy',
+            width: 560,
+            didOpen: popup => {
+                const upd = () => {
+                    const n = popup.querySelectorAll('#sxmp input:checked').length;
+                    popup.querySelector('#sxmp-count').textContent = n ? ('Đã chọn ' + n + ' sản phẩm') : 'Chưa chọn sản phẩm nào';
+                    popup.querySelectorAll('#sxmp .sxmp-item').forEach(l => { l.style.background = l.querySelector('input').checked ? '#fed7aa' : '#f8fafc'; });
+                };
+                popup.querySelectorAll('#sxmp input').forEach(c => c.addEventListener('change', upd));
+                popup.querySelector('#sxmp-search').addEventListener('input', e => {
+                    const q = e.target.value.trim().toLowerCase();
+                    popup.querySelectorAll('#sxmp .sxmp-item').forEach(l => { l.style.display = (!q || l.dataset.t.indexOf(q) >= 0) ? 'flex' : 'none'; });
+                });
+                upd();
+            },
+            preConfirm: () => {
+                const picked = Array.from(document.querySelectorAll('#sxmp input:checked')).map(c => options[+c.dataset.v]);
+                const typed = (document.getElementById('sxmp-custom').value || '').split('\n').map(x => x.trim()).filter(Boolean);
+                return picked.concat(typed.filter(x => !picked.includes(x)));
+            }
+        }).then(r => resolve(r.isConfirmed ? r.value : null));
+    });
+}
 async function sxPickThongSo(row) {
     if (sxIsPack(row.stage)) {
         const opts = (window.__sxProducts || []).map(n => 'Đóng ' + nkPackUnit(n) + ' ' + n);
-        const v = await sxPickList('Đóng sản phẩm nào? (hũ / túi)', opts, row.thongSo, 'Hoặc gõ: Đóng hũ ... / Đóng túi ...');
-        if (v === null) return;
-        row.thongSo = v;
-        row.tenSP = v.replace(/^Đóng\s+(hũ|túi|khay|kg)\s+/i, '').trim();
-        if (row.tenSP) {
-            const calc = await sxCalcPack(window.__sxDate, row.tenSP, sxCurrentCa());
-            if (calc) row.ketQua = calc;
-            else sxToast('Chưa có phiếu đóng gói sản phẩm này (cùng ca) - hãy tự điền Kết quả', 'info');
+        const lines = await sxPickMultiPack('Đóng những sản phẩm nào? (tích chọn nhiều)', opts, sxPackLines(row.thongSo), 'Hoặc gõ: Đóng hũ ... / Đóng túi ... (mỗi dòng 1 sản phẩm)');
+        if (lines === null) return;
+        const names = lines.map(sxPackName).filter(Boolean);
+        row.thongSo = lines.join('\n');
+        row.tenSP = names[0] || '';
+        if (names.length) {
+            const rs = await sxCalcPackMulti(names);
+            if (rs.missing < rs.all) row.ketQua = rs.text;   // có ít nhất 1 sản phẩm tính được thì điền (dòng nào chưa có phiếu để …)
+            else sxToast('Chưa có phiếu đóng gói các sản phẩm này (cùng ca) - hãy tự điền Kết quả', 'info');
         }
         sxMarkDirty(true);
         return;
@@ -26156,15 +26414,15 @@ async function sxPickThongSo(row) {
 async function sxPickKetQua(row) {
     let def = row.ketQua || '';
     if (!def.trim()) {
-        if (sxIsPack(row.stage) && row.tenSP) def = await sxCalcPack(window.__sxDate, row.tenSP, sxCurrentCa());
+        if (sxIsPack(row.stage) && sxPackNames(row).length) { const rs = await sxCalcPackMulti(sxPackNames(row)); def = rs.missing < rs.all ? rs.text : ''; }
         if (!def) def = sxStageField(row.stage, 'ketQuaMau');
     }
     const r = await Swal.fire({
-        title: 'Kết quả', input: 'text', inputValue: def, showCancelButton: true, confirmButtonText: 'Lưu', cancelButtonText: 'Hủy',
-        inputPlaceholder: 'VD: Thịt chưng mắm tép : 6 Kg'
+        title: 'Kết quả', input: sxIsPack(row.stage) ? 'textarea' : 'text', inputValue: def, showCancelButton: true, confirmButtonText: 'Lưu', cancelButtonText: 'Hủy',
+        inputPlaceholder: sxIsPack(row.stage) ? 'Mỗi sản phẩm 1 dòng, thẳng hàng với cột Thông số kiểm soát' : 'VD: Thịt chưng mắm tép : 6 Kg'
     });
     if (!r.isConfirmed) return;
-    row.ketQua = (r.value || '').trim();
+    row.ketQua = (r.value || '').split('\n').map(x => x.trim()).join('\n').trim();
     sxMarkDirty(true);
 }
 // ---- Chọn giờ dạng 24H (ô giờ của trình duyệt hay hiện SA/CH theo máy nên dùng ô gõ + ô chọn giờ/phút) ----
@@ -26322,7 +26580,7 @@ async function nkBuildNguyenLieu(dates) {
         if (!receipts.has(key)) receipts.set(key, { dt: effDt, phuongTien: d.phuongTien || '', soPhieu: d.soPhieu || '', ncc: d.ncc || '', address: supMap.get(d.ncc) || '', soHd: d.soHd || '', items: [] });
         if (d.phuongTien && !receipts.get(key).phuongTien) receipts.get(key).phuongTien = d.phuongTien;
         const unit = unitMap.get(name.toLowerCase()) || 'kg';
-        receipts.get(key).items.push({ name, sl: Number(d.sl) || 0, unit });
+        receipts.get(key).items.push({ name, sl: Number(d.sl) || 0, unit, tinhTrang: String(d.tinhTrang || '').trim() });
     });
     const groups = new Map();
     Array.from(receipts.values()).sort((a, b) => a.dt - b.dt).forEach(r => {
@@ -26343,7 +26601,7 @@ async function nkBuildNguyenLieu(dates) {
             r.ncc + (r.address ? '\n' + r.address : ''),
             r.items.map(x => x.name).join('\n'),
             r.items.map(x => nkNum(x.sl) + ' ' + x.unit).join('\n'),
-            NK_TINH_TRANG,
+            (r.items.some(x => x.tinhTrang) ? r.items.map(x => x.tinhTrang).join('\n') : ''),
             'Phiếu giao hàng' + (r.soHd ? ('\n' + 'Hóa đơn số ' + r.soHd) : '')
         ])
     }));
@@ -26405,7 +26663,10 @@ async function nkBuildSanXuat(dates, opts) {
         g.steps.forEach(s => { const n = String(s.tenSP || '').trim(); if (n) cnt.set(n, (cnt.get(n) || 0) + 1); });
         let best = '', bc = 0;
         cnt.forEach((c, n) => { if (c > bc) { best = n; bc = c; } });
-        g.ten = best;   // tên sản phẩm của phiếu (các dòng chưa gắn sản phẩm dùng chung tên này)
+        // Tên sản phẩm của phiếu = sản phẩm trong ngày (các công đoạn KHÔNG phải Đóng gói); sản phẩm Đóng gói tách riêng (packTen)
+        const mostOf = arr => { const m = new Map(); arr.forEach(s => { const n = String(s.tenSP || '').trim(); if (n) m.set(n, (m.get(n) || 0) + 1); }); let b = '', c0 = 0; m.forEach((c, n) => { if (c > c0) { b = n; c0 = c; } }); return b; };
+        g.ten = mostOf(g.steps.filter(s => !isPack(s.stage))) || best;
+        g.packTen = mostOf(g.steps.filter(s => isPack(s.stage))) || g.ten;
         g.cms = Math.min(...g.steps.map(sxCreatedMs));
     });
     const bdOf = g => g.steps.map(s => s.gioBD).filter(Boolean).sort()[0] || '';
@@ -26423,7 +26684,7 @@ async function nkBuildSanXuat(dates, opts) {
         if (dt < o.first) o.first = dt;
     });
     prods.forEach(p => {
-        const cands = Array.from(groups.values()).filter(g => g.iso === p.iso && g.ten === p.ten && !g.prod);
+        const cands = Array.from(groups.values()).filter(g => g.iso === p.iso && (g.ten === p.ten || g.packTen === p.ten) && !g.prod);
         const hasPack = g => g.steps.some(s => isPack(s.stage));
         const target = cands.find(g => caOfBD(bdOf(g)) === p.ca && hasPack(g)) || cands.find(g => caOfBD(bdOf(g)) === p.ca) || cands.find(hasPack) || null;
         // Phiếu sản xuất (đóng gói) KHÔNG tự tạo thêm trang sổ: chỉ dùng để điền số hũ/túi cho dòng Đóng gói của phiếu công đoạn khớp
@@ -26435,8 +26696,8 @@ async function nkBuildSanXuat(dates, opts) {
     return list.map(g => {
         const ca = caOfBD(bdOf(g)) || (g.first ? nkCa(g.first) : '');
         const caText = nkCaLabel(ca);
-        const packSpec = g.ten ? 'Đóng ' + nkPackUnit(g.ten, g.dvt) + ' ' + g.ten : 'Đóng ' + nkPackUnit('', g.dvt);
-        const packResult = g.prod ? nkPackResult(g.ten, g.dvt, g.sl) : '';
+        const packSpec = g.packTen ? 'Đóng ' + nkPackUnit(g.packTen, g.dvt) + ' ' + g.packTen : 'Đóng ' + nkPackUnit('', g.dvt);
+        const packResult = g.prod ? nkPackResult(g.packTen, g.dvt, g.sl) : '';
         const stepsOf = name => g.steps.filter(s => canon(s.stage) === canon(name)).sort((a, b) => String(a.gioBD || '').localeCompare(String(b.gioBD || '')));
         const rows = [];
         const rowFromStep = s => {
@@ -29344,10 +29605,12 @@ function addNguyenLieuToCart() {
             Swal.fire({ icon: 'warning', title: 'Vui lòng chọn NL, nhập SL và Giá!', toast: true, position: 'top-end', timer: 2200, showConfirmButton: false });
             return;
         }
-        cartNL.push({ nl, sl, gia, thanhTien: sl * gia });
+        const ttEl = document.getElementById('in-tinh-trang');
+        cartNL.push({ nl, sl, gia, thanhTien: sl * gia, tinhTrang: ((ttEl && ttEl.value) || '').trim() });
         renderCartNL();
         slEl.value = '';
         giaEl.value = '';
+        if (ttEl) ttEl.value = '';
         selEl.value = 'Chọn NL';
     }
     catch (err) {
@@ -29365,7 +29628,7 @@ function renderCartNL() {
     const mobileCountNl = document.getElementById('mobile-cart-count-nl');
     if (mobileCountNl)
         mobileCountNl.innerText = cartNL.length;
-    gioHangDiv.innerHTML = cartNL.map((item, index) => "\n        <div class=\"flex justify-between items-center p-2 border-b\">\n            <span>" + item.nl + " | " + item.sl + " | " + item.thanhTien.toLocaleString() + " \u0111</span>\n            <button onclick=\"xoaNguyenLieu(" + index + ")\" class=\"text-red-500 hover:text-red-700 transition-colors ml-2\">\n                <svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-5 w-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\">\n                    <path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16\" />\n                </svg>\n            </button>\n        </div>\n    ").join('');
+    gioHangDiv.innerHTML = cartNL.map((item, index) => "\n        <div class=\"flex justify-between items-center p-2 border-b\">\n            <span>" + item.nl + " | " + item.sl + " | " + item.thanhTien.toLocaleString() + " \u0111" + (item.tinhTrang ? " | <i>" + escapeHtml(item.tinhTrang) + "</i>" : "") + "</span>\n            <button onclick=\"xoaNguyenLieu(" + index + ")\" class=\"text-red-500 hover:text-red-700 transition-colors ml-2\">\n                <svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-5 w-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\">\n                    <path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16\" />\n                </svg>\n            </button>\n        </div>\n    ").join('');
 }
 // 3. Hàm xóa riêng
 function xoaNguyenLieu(index) {
@@ -29413,7 +29676,7 @@ async function saveFullInvoice() {
     const batch = db.batch();
     cartNL.forEach(item => {
         const rowRef = db.collection('material_imports').doc();
-        batch.set(rowRef, { soPhieu: soPhieu, ncc: nccName, nccId: nccId, soHd: document.getElementById('in-so-hd').value, ngayHd: document.getElementById('in-ngay-hd').value, tenNL: item.nl, sl: item.sl, donGia: item.gia, thanhTien: item.thanhTien, timestamp: now, gioNhanTay: gioNhanTay, phuongTien: ((document.getElementById('in-phuong-tien') || {}).value || '').trim(), syncStatus: 'synced', syncPending: false, syncMode: 'normal', syncAt: firebase.firestore.FieldValue.serverTimestamp() });
+        batch.set(rowRef, { soPhieu: soPhieu, ncc: nccName, nccId: nccId, soHd: document.getElementById('in-so-hd').value, ngayHd: document.getElementById('in-ngay-hd').value, tenNL: item.nl, sl: item.sl, donGia: item.gia, thanhTien: item.thanhTien, tinhTrang: item.tinhTrang || '', timestamp: now, gioNhanTay: gioNhanTay, phuongTien: ((document.getElementById('in-phuong-tien') || {}).value || '').trim(), syncStatus: 'synced', syncPending: false, syncMode: 'normal', syncAt: firebase.firestore.FieldValue.serverTimestamp() });
     });
     batch.update(nccDoc.ref, { debt: firebase.firestore.FieldValue.increment(totalInvoice) });
     await batch.commit();
@@ -29581,7 +29844,8 @@ async function editImportReceipt(soPhieu) {
     window.__editImportRows = p.items.map(it => ({
         tenNL: it.tenNL || '',
         sl: parseFloat(it.sl) || 0,
-        donGia: parseFloat(it.donGia) || 0
+        donGia: parseFloat(it.donGia) || 0,
+        tinhTrang: it.tinhTrang || ''
     }));
     const firstItem = p.items[0] || {};
     let nccOptionsHtml = '';
@@ -29627,7 +29891,7 @@ async function editImportReceipt(soPhieu) {
     Swal.fire({
         title: 'Sửa phiếu nhập NL: ' + soPhieu,
         html: html,
-        width: '480px',
+        width: '560px',
         showCancelButton: true,
         confirmButtonText: '💾 Lưu thay đổi',
         cancelButtonText: 'Hủy',
@@ -29677,6 +29941,7 @@ function renderEditImportRows() {
             '</select>' +
             '<input type="number" value="' + r.sl + '" placeholder="SL" onchange="updateEditImportRow(' + idx + ', \'sl\', this.value)" class="w-16 p-1.5 text-xs border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 dark:text-white rounded-lg text-center">' +
             '<input type="number" value="' + r.donGia + '" placeholder="Đơn giá" onchange="updateEditImportRow(' + idx + ', \'donGia\', this.value)" class="w-24 p-1.5 text-xs border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 dark:text-white rounded-lg text-right">' +
+            '<input type="text" list="in-tinh-trang-list" value="' + escapeHtml(r.tinhTrang || '') + '" placeholder="Tình trạng" title="Bỏ trống = để trống trong sổ" onchange="updateEditImportRow(' + idx + ', \'tinhTrang\', this.value)" class="w-24 p-1.5 text-xs border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 dark:text-white rounded-lg">' +
             '<button type="button" onclick="removeEditImportRow(' + idx + ')" class="w-7 h-7 shrink-0 flex items-center justify-center rounded-lg bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400 font-bold">✕</button>' +
             '</div>';
     });
@@ -29685,7 +29950,7 @@ function renderEditImportRows() {
 }
 function addEditImportRow() {
     const nlOptions = window.__editImportNlOptions || [];
-    window.__editImportRows.push({ tenNL: nlOptions[0] || '', sl: 1, donGia: 0 });
+    window.__editImportRows.push({ tenNL: nlOptions[0] || '', sl: 1, donGia: 0, tinhTrang: '' });
     renderEditImportRows();
 }
 function removeEditImportRow(idx) {
@@ -29737,7 +30002,7 @@ async function saveEditedImportReceipt(soPhieu, oldData, newData) {
         }
         newData.rows.forEach(row => {
             const rowRef = db.collection('material_imports').doc();
-            batch.set(rowRef, { soPhieu, ncc: newData.nccName, nccId: newNccId, soHd: newData.soHd, ngayHd: newData.ngayHd, tenNL: row.tenNL, sl: row.sl, donGia: row.donGia, thanhTien: row.sl * row.donGia, timestamp: originalTimestamp, gioNhanTay: gioNhanTayNew, phuongTien: newData.phuongTien || '', syncStatus: 'synced', syncPending: false, syncMode: 'normal', syncAt: firebase.firestore.FieldValue.serverTimestamp() });
+            batch.set(rowRef, { soPhieu, ncc: newData.nccName, nccId: newNccId, soHd: newData.soHd, ngayHd: newData.ngayHd, tenNL: row.tenNL, sl: row.sl, donGia: row.donGia, thanhTien: row.sl * row.donGia, tinhTrang: row.tinhTrang || '', timestamp: originalTimestamp, gioNhanTay: gioNhanTayNew, phuongTien: newData.phuongTien || '', syncStatus: 'synced', syncPending: false, syncMode: 'normal', syncAt: firebase.firestore.FieldValue.serverTimestamp() });
         });
         await batch.commit();
         Swal.close();
