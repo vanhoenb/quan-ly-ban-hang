@@ -1814,6 +1814,51 @@ html.dark .cc-box { border-color:#64748b; }
 #chamcong-attendance-body td.cursor-pointer:hover .cc-box { box-shadow:0 0 0 2px #60a5fa; filter:brightness(.97); }
 #chamcong-attendance-body td.cursor-pointer:active .cc-box { transform:scale(.94); }
 </style>
+<style id="sell-modern-ui">
+/* ===== BÁN HÀNG: NÂNG CẤP GIAO DIỆN (chỉ thêm hiển thị, không đổi cách bán) ===== */
+/* Chip giá trên thẻ sản phẩm */
+.sell-price { margin-left:auto; flex-shrink:0; white-space:nowrap; font-weight:900; font-size:11px; line-height:1; padding:4px 9px; border-radius:999px;
+  background:rgba(255,255,255,.9); color:#be123c; border:1px solid rgba(190,18,60,.28); box-shadow:0 1px 3px rgba(0,0,0,.1); letter-spacing:.01em; }
+.sell-price.is-ws { background:#fffbeb; color:#b45309; border-color:rgba(180,83,9,.4); }
+html.dark .sell-price { background:rgba(15,23,42,.75); color:#fda4af; border-color:rgba(253,164,175,.35); }
+html.dark .sell-price.is-ws { color:#fcd34d; border-color:rgba(252,211,77,.4); }
+@media (max-width:767px) { .sell-price { display:none; } }
+/* Giỏ hàng: dòng dễ nhìn hơn, trạng thái trống đẹp hơn */
+#sell-cart-body tr:hover td { background-color:rgba(59,130,246,.07); }
+#sell-cart-body td[colspan] { padding:44px 12px !important; color:#94a3b8 !important; font-style:normal !important; font-weight:700; font-size:13px; }
+#sell-cart-body td[colspan]::before { content:"🛒"; display:block; font-size:38px; margin-bottom:8px; opacity:.55; filter:grayscale(.2); }
+/* Tổng thanh toán: to, rõ */
+/* Khung thanh toán: 2 ô cạnh nhau - Chiết khấu (trái) | Tổng thanh toán (phải, nổi bật) */
+.sell-sum-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.3fr); gap:10px; margin-bottom:10px; }
+.sell-disc-card, .sell-total-card { border-radius:16px; padding:10px 14px; display:flex; flex-direction:column; justify-content:center; gap:6px; min-width:0; }
+.sell-disc-card { background:#fff; border:1.5px solid #cbd5e1; box-shadow:0 4px 12px -8px rgba(15,23,42,.35); }
+.sell-total-card { background:linear-gradient(135deg,#fff1f2,#ffe4e6); border:1.5px solid #fda4af; box-shadow:0 6px 16px -8px rgba(225,29,72,.45); align-items:flex-end; text-align:right; }
+.sell-card-title { font-size:11px; font-weight:900; letter-spacing:.07em; text-transform:uppercase; color:#64748b; }
+.sell-total-card .sell-card-title { color:#be123c; }
+.sell-disc-controls { display:flex; align-items:center; gap:8px; }
+#sell-disc-type { flex:0 0 auto; }
+#sell-disc-val { width:auto !important; flex:1 1 0; min-width:0; }
+#sell-disc-amount { font-size:14px; font-weight:900; color:#059669; min-height:18px; }
+#sell-disc-amount:empty::before { content:"Chưa giảm"; color:#94a3b8; font-weight:600; font-size:12px; }
+#sell-discount-row #cart-total-display { font-size:32px !important; line-height:1.05; letter-spacing:-.01em; font-weight:900 !important; color:#e11d48 !important; text-shadow:0 2px 0 rgba(225,29,72,.12); white-space:nowrap; }
+html.dark .sell-disc-card { background:#0f172a; border-color:#334155; }
+html.dark .sell-total-card { background:linear-gradient(135deg,#4c0519,#1e293b); border-color:#9f1239; }
+html.dark .sell-card-title { color:#94a3b8; } html.dark .sell-total-card .sell-card-title { color:#fda4af; }
+@media (max-width:640px) { .sell-sum-grid { grid-template-columns:1fr; } .sell-total-card { align-items:flex-start; text-align:left; } }
+
+/* Thu gọn 2 ô Chiết khấu / Tổng thanh toán: mỗi ô còn 1 hàng ngang (~1/3 chiều cao trước) */
+.sell-sum-grid { grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:8px; margin-bottom:8px; }
+.sell-disc-card, .sell-total-card { flex-direction:row; align-items:center; justify-content:flex-start; gap:8px; padding:5px 12px; min-height:0; border-radius:12px; flex-wrap:nowrap; }
+.sell-total-card { justify-content:space-between; text-align:left; align-items:center; }
+.sell-card-title { font-size:10px; white-space:nowrap; flex:0 0 auto; }
+.sell-disc-controls { flex:0 1 auto; gap:6px; }
+#sell-disc-type { height:30px; padding-top:0 !important; padding-bottom:0 !important; }
+#sell-disc-val { height:30px; width:72px !important; flex:0 0 auto; padding-top:0 !important; padding-bottom:0 !important; }
+#sell-disc-amount { margin-left:auto; min-height:0; font-size:13px; white-space:nowrap; }
+#sell-disc-amount:empty::before { font-size:11px; }
+#sell-discount-row #cart-total-display { font-size:24px !important; line-height:1.1; }
+@media (max-width:640px) { .sell-sum-grid { grid-template-columns:1fr; } .sell-total-card { align-items:center; } }
+</style>
 <style id="mobile-inventory-five-cols">
 /* Kho Hàng trên điện thoại: chỉ hiển thị Tên SP, ĐVT, SL, Giá sỉ, Giá lẻ, Giá bán đề xuất. PC giữ nguyên bố cục đầy đủ. */
 @media (max-width: 767px) {
@@ -4319,15 +4364,16 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
 
             <div id="sell-panel-pay" class="bg-blue-100 dark:bg-slate-900 p-2 md:p-4 rounded-2xl border-4 border-blue-400">
-                <div id="sell-discount-row" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px">
-                    <span style="font-weight:800;color:#475569">Chiết khấu:</span>
-                    <select id="sell-disc-type" onchange="__setSellDiscount()" style="border:1px solid #cbd5e1;border-radius:12px;padding:6px 8px;font-size:12px;font-weight:700;background:#fff;color:#0f172a"><option value="pct">%</option><option value="amt">đ</option></select>
-                    <input type="number" id="sell-disc-val" min="0" step="any" placeholder="0" oninput="__setSellDiscount()" onfocus="this.select()" style="width:96px;border:1px solid #cbd5e1;border-radius:12px;padding:6px 8px;font-size:13px;font-weight:800;text-align:right;background:#fff;color:#0f172a">
-                    <span id="sell-disc-amount" style="margin-left:auto;font-weight:800;color:#059669"></span>
-                </div>
-                <div class="flex justify-between items-center mb-4">
-                    <span class="text-red-600 dark:text-red-400">Tổng thanh toán:</span>
-                    <span id="cart-total-display" class="text-xl font-black text-red-500">0 đ</span>
+                <div id="sell-discount-row" class="sell-sum-grid">
+                    <div class="sell-disc-card">
+                        <div class="sell-card-title">Chiết khấu</div>
+                        <div class="sell-disc-controls"><select id="sell-disc-type" onchange="__setSellDiscount()" style="border:1px solid #cbd5e1;border-radius:12px;padding:6px 8px;font-size:12px;font-weight:700;background:#fff;color:#0f172a"><option value="pct">%</option><option value="amt">đ</option></select><input type="number" id="sell-disc-val" min="0" step="any" placeholder="0" oninput="__setSellDiscount()" onfocus="this.select()" style="width:96px;border:1px solid #cbd5e1;border-radius:12px;padding:6px 8px;font-size:13px;font-weight:800;text-align:right;background:#fff;color:#0f172a"></div>
+                        <span id="sell-disc-amount"></span>
+                    </div>
+                    <div class="sell-total-card">
+                        <div class="sell-card-title">Tổng thanh toán</div>
+                        <span id="cart-total-display" class="text-xl font-black text-red-500">0 đ</span>
+                    </div>
                 </div>
 
                 <!-- CHỌN LOẠI CHỨNG TỪ CẦN IN -->
@@ -16214,6 +16260,19 @@ function recomputeCurrentStock() {
     }
 }
 // ==========
+// Chip GIÁ trên mỗi thẻ sản phẩm: hiện giá lẻ hoặc giá sỉ theo ô "Bán Lẻ / Bán Sỉ" đang chọn
+function sellRefreshCardPrices() {
+    const sel = document.getElementById('global-price-type');
+    const ws = !!(sel && sel.value === 'wholesale');
+    document.querySelectorAll('#product-grid [data-pr]').forEach(c => {
+        const el = c.querySelector('.sell-price');
+        if (!el) return;
+        const v = Number(ws ? c.dataset.pw : c.dataset.pr) || 0;
+        el.textContent = v ? v.toLocaleString('vi-VN') + 'đ' : '—';
+        el.classList.toggle('is-ws', ws);
+    });
+}
+document.addEventListener('change', e => { if (e.target && e.target.id === 'global-price-type') sellRefreshCardPrices(); }, true);
 function renderProductGrid() {
     // Trong lúc Lưu & In, chỉ cập nhật badge tồn; không được rebuild cả lưới giữa chừng.
     // Đây là chốt cuối để snapshot realtime/refresh nền không thể làm SP đang còn hàng
@@ -16284,9 +16343,11 @@ function renderProductGrid() {
         // thay vì chỉ có 2 trạng thái còn/hết như trước.
         const isLowStock = !isOutOfStock && realStock <= 10;
         const b = THEME_BY_NHOM[xepNhomSanPham(p.name)] || THEME_BY_NHOM['KHÁC'];
-        return "\n            <div id=\"product-card-" + idName + "\" data-badge-class=\"" + b.badge + "\" data-out-of-stock=\"" + isBaseOutOfStock + "\"\n                 onclick=\"" + (isOutOfStock ? "showAlert('H\u1EBFt h\u00E0ng!')" : "quickAdd('" + safeName + "')") + "\"\n                 class=\"group relative bg-gradient-to-b " + b.top + " p-1.5 md:p-4 rounded-lg md:rounded-2xl border border-white/60 dark:border-slate-700 ring-1 " + b.ring + "\n                        " + b.shadow + " flex flex-col justify-between cursor-pointer h-16 md:h-28 overflow-hidden\n                        transition-all duration-200 ease-out\n                        hover:-translate-y-1.5 hover:shadow-[0_10px_0_0_rgba(0,0,0,0.15),0_16px_22px_-6px_rgba(0,0,0,0.3)]\n                        active:translate-y-[3px] active:shadow-none\n                        " + (isOutOfStock ? 'grayscale opacity-70' : '') + "\">\n\n                <!-- V\u1EC7t s\u00E1ng b\u00F3ng \u1EDF g\u00F3c tr\u00EAn \u0111\u1EC3 t\u1EA1o c\u1EA3m gi\u00E1c n\u1ED5i kh\u1ED1i/glossy -->\n                <div class=\"pointer-events-none absolute -top-6 -left-6 w-20 h-20 bg-white/50 dark:bg-white/10 rounded-full blur-xl\"></div>\n\n                <div class=\"relative flex justify-between items-start gap-1 md:gap-3\">\n                    <p class=\"font-black " + b.nameText + " text-[9px] md:text-sm leading-tight line-clamp-2 uppercase tracking-tight\" title=\"" + escapeHtml(p.name == null ? '' : p.name) + "\">\n                        " + escapeHtml(p.name == null ? '' : p.name) + "\n                    </p>\n                    <button onclick=\"quickAdd('" + safeName + "', {shiftKey: true}); event.stopPropagation();\"\n                            class=\"flex-shrink-0 w-5 h-5 md:w-9 md:h-9 flex items-center justify-center bg-gradient-to-b " + b.btn + " text-white rounded-full\n                                   shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),inset_0_-2px_3px_rgba(0,0,0,0.2),0_3px_6px_rgba(0,0,0,0.25)]\n                                   hover:brightness-110 hover:scale-105 active:scale-90 transition-all text-[10px] md:text-lg font-black\"\n                            title=\"Th\u00EAm d\u00F2ng m\u1EDBi\">\n                        +\n                    </button>\n                </div>\n\n                <div class=\"relative flex items-center gap-1 md:gap-1.5 mt-0.5 md:mt-1\">\n                    <span class=\"text-[7px] md:text-[9px] uppercase font-black " + (isOutOfStock ? 'text-red-600 dark:text-red-400' : (isLowStock ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400')) + "\">T\u1ED3n</span>\n                    <span id=\"stock-display-" + idName + "\" class=\"font-black rounded-full border md:border-2 shadow-sm " + (isOutOfStock ? 'text-[7px] md:text-[9px] px-1 md:px-1.5 py-0 md:py-0.5 bg-red-100 border-red-400 text-red-700 dark:bg-red-500/15 dark:border-red-500/50 dark:text-red-300' : (isLowStock ? 'text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-amber-100 border-amber-400 text-amber-800 dark:bg-amber-500/15 dark:border-amber-500/50 dark:text-amber-300' : "text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-emerald-100 border-emerald-400 text-emerald-800 dark:bg-emerald-500/15 dark:border-emerald-500/50 dark:text-emerald-300 border-white/70 dark:border-slate-900/40")) + "\">\n                        " + (isOutOfStock ? 'HẾT' : (p.unit ? "" + realStock + " " + p.unit + "" : realStock)) + "\n                    </span>\n                </div>\n            </div>\n        ";
+        return "\n            <div id=\"product-card-" + idName + "\" data-badge-class=\"" + b.badge + "\" data-out-of-stock=\"" + isBaseOutOfStock + "\" data-pr=\"" + (Number(p.retail) || 0) + "\" data-pw=\"" + (Number(p.wholesale) || 0) + "\"\n                 onclick=\"" + (isOutOfStock ? "showAlert('H\u1EBFt h\u00E0ng!')" : "quickAdd('" + safeName + "')") + "\"\n                 class=\"group relative bg-gradient-to-b " + b.top + " p-1.5 md:p-4 rounded-lg md:rounded-2xl border border-white/60 dark:border-slate-700 ring-1 " + b.ring + "\n                        " + b.shadow + " flex flex-col justify-between cursor-pointer h-16 md:h-28 overflow-hidden\n                        transition-all duration-200 ease-out\n                        hover:-translate-y-1.5 hover:shadow-[0_10px_0_0_rgba(0,0,0,0.15),0_16px_22px_-6px_rgba(0,0,0,0.3)]\n                        active:translate-y-[3px] active:shadow-none\n                        " + (isOutOfStock ? 'grayscale opacity-70' : '') + "\">\n\n                <!-- V\u1EC7t s\u00E1ng b\u00F3ng \u1EDF g\u00F3c tr\u00EAn \u0111\u1EC3 t\u1EA1o c\u1EA3m gi\u00E1c n\u1ED5i kh\u1ED1i/glossy -->\n                <div class=\"pointer-events-none absolute -top-6 -left-6 w-20 h-20 bg-white/50 dark:bg-white/10 rounded-full blur-xl\"></div>\n\n                <div class=\"relative flex justify-between items-start gap-1 md:gap-3\">\n                    <p class=\"font-black " + b.nameText + " text-[9px] md:text-sm leading-tight line-clamp-2 uppercase tracking-tight\" title=\"" + escapeHtml(p.name == null ? '' : p.name) + "\">\n                        " + escapeHtml(p.name == null ? '' : p.name) + "\n                    </p>\n                    <button onclick=\"quickAdd('" + safeName + "', {shiftKey: true}); event.stopPropagation();\"\n                            class=\"flex-shrink-0 w-5 h-5 md:w-9 md:h-9 flex items-center justify-center bg-gradient-to-b " + b.btn + " text-white rounded-full\n                                   shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),inset_0_-2px_3px_rgba(0,0,0,0.2),0_3px_6px_rgba(0,0,0,0.25)]\n                                   hover:brightness-110 hover:scale-105 active:scale-90 transition-all text-[10px] md:text-lg font-black\"\n                            title=\"Th\u00EAm d\u00F2ng m\u1EDBi\">\n                        +\n                    </button>\n                </div>\n\n                <div class=\"relative flex items-center gap-1 md:gap-1.5 mt-0.5 md:mt-1\">\n                    <span class=\"text-[7px] md:text-[9px] uppercase font-black " + (isOutOfStock ? 'text-red-600 dark:text-red-400' : (isLowStock ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400')) + "\">T\u1ED3n</span>\n                    <span id=\"stock-display-" + idName + "\" class=\"font-black rounded-full border md:border-2 shadow-sm " + (isOutOfStock ? 'text-[7px] md:text-[9px] px-1 md:px-1.5 py-0 md:py-0.5 bg-red-100 border-red-400 text-red-700 dark:bg-red-500/15 dark:border-red-500/50 dark:text-red-300' : (isLowStock ? 'text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-amber-100 border-amber-400 text-amber-800 dark:bg-amber-500/15 dark:border-amber-500/50 dark:text-amber-300' : "text-[10px] md:text-sm px-1.5 md:px-2.5 py-0.5 md:py-1 bg-emerald-100 border-emerald-400 text-emerald-800 dark:bg-emerald-500/15 dark:border-emerald-500/50 dark:text-emerald-300 border-white/70 dark:border-slate-900/40")) + "\">\n                        " + (isOutOfStock ? 'HẾT' : (p.unit ? "" + realStock + " " + p.unit + "" : realStock)) + "\n                    </span>\n                    <span class='sell-price'></span>\n                </div>\n            </div>\n        ";
     });
     grid.innerHTML = cardsHtml.join('');
+    if (typeof sellRefreshCardPrices === 'function')
+        sellRefreshCardPrices();
     // Dựng lại lưới xong thì áp dụng lại đúng từ khóa đang gõ trong ô tìm kiếm (nếu có) -
     // tránh trường hợp người dùng đang lọc dở mà lưới bị vẽ lại từ đầu, hiện lại TOÀN BỘ
     // sản phẩm thay vì đúng những sản phẩm khớp tìm kiếm.
@@ -16866,6 +16927,7 @@ function updateCartTotalDisplay() {
 }
 // Lưu ý: Hãy gọi hàm này bên trong hàm renderSellCart() của bạn
 function applyGlobalPrice() {
+    try { sellRefreshCardPrices(); } catch (e) { }
     const type = document.getElementById('global-price-type').value;
     sellCart.forEach(item => {
         // Tìm lại sản phẩm trong cache để lấy đúng giá
