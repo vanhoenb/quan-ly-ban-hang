@@ -1858,6 +1858,72 @@ html.dark .sell-card-title { color:#94a3b8; } html.dark .sell-total-card .sell-c
 #sell-disc-amount:empty::before { font-size:11px; }
 #sell-discount-row #cart-total-display { font-size:24px !important; line-height:1.1; }
 @media (max-width:640px) { .sell-sum-grid { grid-template-columns:1fr; } .sell-total-card { align-items:center; } }
+
+/* 4 nút: LƯU & IN chiếm 1/2 bên trái; chọn phiếu in + chia sẻ ở 1/2 bên phải */
+.sell-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:stretch; }
+#btn-save-print.sell-act-save { width:100%; min-height:92px; font-size:26px; line-height:1.15; letter-spacing:.02em; display:flex; align-items:center; justify-content:center; text-align:center; }
+.sell-act-right { display:flex; flex-direction:column; gap:8px; min-width:0; }
+.sell-act-docs { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.sell-act-docs button { padding:10px 6px !important; font-size:13px !important; white-space:nowrap; min-width:0; }
+.sell-act-share { flex:1 1 auto; min-height:42px; font-size:14px; }
+@media (max-width:640px) { .sell-actions { grid-template-columns:1fr; } #btn-save-print.sell-act-save { min-height:64px; font-size:22px; } }
+
+/* Tiêu đề cột giỏ hàng: 1 thanh liền, hai đầu bo tròn đầy đủ (bỏ bóng đổ phía trên + kẻ dọc dày gây khuyết góc) */
+#sell-cart-container table thead tr th { border-right-width:0 !important; border-radius:0 !important;
+  box-shadow:0 3px 8px rgba(50,70,160,.16), inset 0 1.5px 0 rgba(255,255,255,.9) !important; }
+#sell-cart-container table thead tr th:first-child { border-radius:12px 0 0 12px !important; }
+#sell-cart-container table thead tr th:last-child { border-radius:0 12px 12px 0 !important; }
+#sell-cart-container table thead tr th + th { border-left:1px solid rgba(148,163,184,.35) !important; }
+html.dark #sell-cart-container table thead tr th { box-shadow:0 3px 8px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.2) !important; }
+
+/* SỬA DỨT ĐIỂM tiêu đề cột giỏ hàng: nâng độ ưu tiên hơn quy tắc kính (html.glass...) để gỡ dải bóng #fbfcff phía trên gây "khuyết" 2 đầu */
+html.glass:not(.dark) #sell-cart-container table thead tr th { box-shadow:0 3px 6px rgba(50,70,160,.14), inset 0 1.5px 0 #ffffff !important; }
+html.glass.dark #sell-cart-container table thead tr th { box-shadow:0 3px 6px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.22) !important; }
+html.glass #sell-cart-container table thead tr th:first-child { border-top-left-radius:12px !important; border-bottom-left-radius:12px !important; }
+html.glass #sell-cart-container table thead tr th:last-child { border-top-right-radius:12px !important; border-bottom-right-radius:12px !important; }
+html.glass #sell-cart-container table thead tr th { border-top:0 !important; border-bottom:0 !important; border-right-width:0 !important; }
+</style>
+<style id="import-cart-sync-ui">
+/* ===== GIỎ NHẬP KHO: đồng bộ giao diện với GIỎ BÁN HÀNG (tiêu đề liền bo tròn 2 đầu, mỗi sản phẩm là 1 thẻ nổi có vạch màu nhóm) ===== */
+#cart-box table.imp-ct { border-collapse:separate !important; border-spacing:0 7px; }
+#cart-box table.imp-ct thead.imp-thead { background:transparent !important; border:0 !important; }
+#cart-box table.imp-ct thead.imp-thead th { position:sticky; top:0; z-index:5; border:0 !important; padding:8px 6px !important; font-weight:800; color:#334155 !important;
+  background:linear-gradient(180deg,rgba(255,255,255,.97) 0%,rgba(226,233,248,.95) 100%) !important;
+  box-shadow:0 3px 6px rgba(50,70,160,.14), inset 0 1.5px 0 #fff !important; border-radius:0 !important; }
+#cart-box table.imp-ct thead.imp-thead th:first-child { border-radius:12px 0 0 12px !important; }
+#cart-box table.imp-ct thead.imp-thead th:last-child { border-radius:0 12px 12px 0 !important; }
+#cart-box table.imp-ct thead.imp-thead th + th { border-left:1px solid rgba(148,163,184,.3) !important; }
+#cart-box table.imp-ct tr.imp-row { background:transparent !important; border:0 !important; box-shadow:none !important; --rc:#60a5fa; }
+#cart-box table.imp-ct tr.imp-row td { border:0 !important; padding:7px 5px; transition:background .15s, box-shadow .15s;
+  background:linear-gradient(180deg,rgba(255,255,255,.96) 0%,rgba(255,255,255,.7) 100%) !important;
+  box-shadow:0 5px 9px -4px rgba(20,30,80,.22), inset 0 1.5px 0 #fff, inset 0 -7px 10px -5px color-mix(in srgb,var(--rc) 20%,transparent) !important; }
+#cart-box table.imp-ct tr.imp-row td:first-child { border-radius:14px 0 0 14px; border-left:4px solid var(--rc) !important; padding-left:10px; }
+#cart-box table.imp-ct tr.imp-row td:last-child { border-radius:0 14px 14px 0; }
+#cart-box table.imp-ct tr.imp-row:hover td { background:linear-gradient(180deg,#fff 0%,rgba(255,255,255,.88) 100%) !important;
+  box-shadow:0 8px 13px -4px rgba(20,30,80,.3), inset 0 1.5px 0 #fff, inset 0 -7px 10px -5px color-mix(in srgb,var(--rc) 26%,transparent) !important; }
+#cart-box .imp-ci { border-radius:14px; height:34px; box-shadow:0 1px 2px rgba(15,23,42,.06); }
+#cart-box .imp-ci:focus { outline:none; border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.22); }
+#cart-box .imp-ci.d { border-radius:12px; }
+/* Nút xóa tròn như giỏ Bán Hàng */
+#cart-box .imp-x { width:30px; height:30px; border-radius:999px; display:inline-flex; align-items:center; justify-content:center; padding:0 !important;
+  background:#fff; color:#ef4444; font-weight:900; font-size:14px; border:1px solid rgba(239,68,68,.3); box-shadow:0 2px 5px rgba(239,68,68,.18); transition:background .12s, transform .12s; }
+#cart-box .imp-x:hover { background:#fee2e2; transform:scale(1.08); }
+/* Chế độ tối */
+html.dark #cart-box table.imp-ct thead.imp-thead th { color:#e2e8f0 !important; background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.06)) !important; box-shadow:0 3px 6px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.22) !important; }
+html.dark #cart-box table.imp-ct tr.imp-row td { background:linear-gradient(180deg,rgba(255,255,255,.13) 0%,rgba(255,255,255,.04) 100%) !important;
+  box-shadow:0 5px 10px -4px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.22), inset 0 -7px 10px -5px color-mix(in srgb,var(--rc) 26%,transparent) !important; }
+html.dark #cart-box table.imp-ct tr.imp-row:hover td { background:linear-gradient(180deg,rgba(59,130,246,.34),rgba(59,130,246,.16)) !important; }
+html.dark #cart-box .imp-x { background:#1e293b; border-color:rgba(248,113,113,.4); color:#fca5a5; }
+
+/* Dòng giỏ thấp lại, bằng chiều cao dòng giỏ Bán Hàng (~42px) */
+#cart-box table.imp-ct { border-spacing:0 5px; }
+html #cart-box table.imp-ct tr.imp-row td { padding-top:5px; padding-bottom:5px; }
+html #cart-box table.imp-ct tr.imp-row input.imp-ci { height:30px; padding:2px 8px; font-size:13px; border-radius:12px; }
+html #cart-box table.imp-ct tr.imp-row input.imp-ci.q { font-size:14px; min-width:76px; }
+html #cart-box table.imp-ct tr.imp-row input.imp-ci.d { font-size:11px; padding:2px 4px; }
+html #cart-box table.imp-ct tr.imp-row .imp-cn { font-size:13px; line-height:1.2; }
+html #cart-box table.imp-ct tr.imp-row .imp-x { width:26px; height:26px; font-size:13px; }
+html #cart-box table.imp-ct thead.imp-thead th { padding-top:6px !important; padding-bottom:6px !important; }
 </style>
 <style id="mobile-inventory-five-cols">
 /* Kho Hàng trên điện thoại: chỉ hiển thị Tên SP, ĐVT, SL, Giá sỉ, Giá lẻ, Giá bán đề xuất. PC giữ nguyên bố cục đầy đủ. */
@@ -4376,31 +4442,29 @@ document.addEventListener('DOMContentLoaded', function () {
                     </div>
                 </div>
 
-                <!-- CHỌN LOẠI CHỨNG TỪ CẦN IN -->
-                <div class="mb-3">
-                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">Chọn chứng từ cần in</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button type="button" id="btn-print-type-hoadon" onclick="selectPrintDocType('hoadon')"
-                            class="flex items-center justify-center gap-2 p-2.5 rounded-xl border-2 text-sm font-bold transition-colors bg-blue-600 text-white border-blue-700">
-                            <i data-lucide="receipt" class="w-4 h-4"></i> Hóa Đơn
-                        </button>
-                        <button type="button" id="btn-print-type-xuatkho" onclick="selectPrintDocType('xuatkho')"
-                            class="flex items-center justify-center gap-2 p-2.5 rounded-xl border-2 text-sm font-bold transition-colors bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-amber-500">
-                            <i data-lucide="package" class="w-4 h-4"></i> Phiếu Xuất Kho
+                <!-- 4 NÚT: LƯU & IN to (nửa trái) | chọn phiếu in + chia sẻ (nửa phải) -->
+                <input type="hidden" id="print-doc-type-value" value="hoadon">
+                <div class="sell-actions">
+                    <button id="btn-save-print" onclick="saveAndPrint()" title="Lưu và in (F1)"
+                        class="sell-act-save bg-green-600 dark:bg-green-700 text-white rounded-xl font-bold transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-lg">
+                        LƯU & IN (F1)
+                    </button>
+                    <div class="sell-act-right">
+                        <div class="sell-act-docs">
+                            <button type="button" id="btn-print-type-hoadon" onclick="selectPrintDocType('hoadon')" title="In Hóa Đơn"
+                                class="flex items-center justify-center gap-2 p-2.5 rounded-xl border-2 text-sm font-bold transition-colors bg-blue-600 text-white border-blue-700">
+                                <i data-lucide="receipt" class="w-4 h-4"></i> Hóa Đơn
+                            </button>
+                            <button type="button" id="btn-print-type-xuatkho" onclick="selectPrintDocType('xuatkho')" title="In Phiếu Xuất Kho"
+                                class="flex items-center justify-center gap-2 p-2.5 rounded-xl border-2 text-sm font-bold transition-colors bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-amber-500">
+                                <i data-lucide="package" class="w-4 h-4"></i> Phiếu Xuất Kho
+                            </button>
+                        </div>
+                        <button type="button" onclick="shareLastInvoiceToZalo()" title="Chia sẻ hóa đơn vừa lưu qua Zalo"
+                            class="sell-act-share bg-sky-500 dark:bg-sky-600 text-white rounded-xl font-bold transition-all duration-75 border-b-[4px] border-sky-700 dark:border-sky-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-lg flex items-center justify-center gap-2">
+                            <i data-lucide="share-2" class="w-5 h-5"></i> Chia sẻ Zalo
                         </button>
                     </div>
-                    <input type="hidden" id="print-doc-type-value" value="hoadon">
-                </div>
-
-                <div class="flex gap-2">
-                    <button id="btn-save-print" onclick="saveAndPrint()" 
-						class="flex-1 bg-green-600 dark:bg-green-700 text-white py-4 rounded-xl font-bold text-lg transition-all duration-75 border-b-[4px] border-green-800 dark:border-green-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-lg">
-						LƯU & IN (F1)
-					</button>
-                    <button type="button" onclick="shareLastInvoiceToZalo()" title="Chia sẻ hóa đơn vừa lưu qua Zalo"
-                        class="shrink-0 bg-sky-500 dark:bg-sky-600 text-white px-4 rounded-xl font-bold transition-all duration-75 border-b-[4px] border-sky-700 dark:border-sky-900 hover:-translate-y-1 active:translate-y-[2px] active:border-b-[2px] shadow-lg flex items-center gap-2">
-                        <i data-lucide="share-2" class="w-5 h-5"></i>
-                    </button>
                 </div>
             </div>
         </div>
@@ -7702,9 +7766,10 @@ function renderParttimeTable() {
         '<th class="' + thBase + ' min-w-[50px]">Tổng giờ</th>' +
         '<th class="' + thBase + ' min-w-[45px]">Đơn giá/giờ</th>' +
         '<th class="' + thBase + ' min-w-[70px]">Thành tiền</th>' +
+        '<th class="' + thBase + ' min-w-[110px]">Ghi chú</th>' +
         '<th class="' + thBase + ' w-14"></th>' +
         '</tr>';
-    const PT_COLSPAN = 8;
+    const PT_COLSPAN = 9;
     const list = window.chamCongState.parttime || [];
     const tdBase = 'border border-slate-300 dark:border-slate-700';
     const weekdayLabels = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
@@ -7829,7 +7894,7 @@ function renderParttimeTable() {
                 '<td class="' + tdBase + ' p-1 text-center">' + stt + '</td>' +
                 '<td class="' + tdBase + ' p-1 font-bold">' +
                 '<input type="text" value="' + escapeHtml(e.name || '') + '" placeholder="Nhập tên..." class="w-full min-w-[100px] text-[11px] bg-transparent outline-none focus:bg-blue-50 dark:focus:bg-slate-800 dark:text-white" onchange="updateParttimeField(' + idx + ', \'name\', this.value)">' +
-                dupWarningDiv + '<input type="text" value="' + escapeHtml(e.note || '') + '" placeholder="Ghi chú" class="w-full text-[9px] text-slate-400 bg-transparent outline-none" onchange="updateParttimeField(' + idx + ', \'note\', this.value)">' +
+                dupWarningDiv +
                 '</td>' +
                 morningCell +
                 afternoonCell +
@@ -7838,6 +7903,9 @@ function renderParttimeTable() {
                 '<input type="number" value="' + rate + '" class="w-full text-center text-[11px] bg-transparent outline-none dark:text-white focus:bg-blue-50 dark:focus:bg-slate-800" onchange="updateParttimeField(' + idx + ', \'rate\', this.value)">' +
                 '</td>' +
                 '<td class="' + tdBase + ' p-1 text-right font-bold dark:text-white">' + '' + '</td>' +
+                '<td class="' + tdBase + ' p-1">' +
+                '<input type="text" value="' + escapeHtml(e.note || '') + '" placeholder="Ghi chú..." class="w-full text-[11px] bg-transparent outline-none focus:bg-blue-50 dark:focus:bg-slate-800 dark:text-white" onchange="updateParttimeField(' + idx + ', \'note\', this.value)">' +
+                '</td>' +
                 '<td class="' + tdBase + ' p-1 text-center whitespace-nowrap">' +
                 '<button onclick="promptChangeParttimeDate(' + idx + ')" title="Đổi ngày riêng cho dòng này" class="text-slate-400 hover:text-blue-500 mr-1"><i data-lucide="calendar" class="w-3.5 h-3.5"></i></button>' +
                 '<button onclick="removeParttimeEntry(' + idx + ')" title="Xóa dòng này" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>' +
@@ -32192,23 +32260,29 @@ html.dark .imp-cn{color:#f1f5f9}
         try { localStorage.setItem('imp_show_hsd', window.__impShowHsd ? '1' : '0'); } catch (e) { }
         window.renderCart();
     };
+    // Màu vạch trái của dòng = màu nhóm sản phẩm (lấy từ thẻ sản phẩm tương ứng ở bên trái), giống giỏ Bán Hàng
+    function rowColor(name) {
+        var col = '';
+        document.querySelectorAll('.imp-card').forEach(function (c) { if (!col && c.getAttribute('data-name') === name) col = (c.style.getPropertyValue('--c') || '').trim(); });
+        return col || '#60a5fa';
+    }
     window.renderCart = function () {
         var box = document.getElementById('cart-box');
         var mc = document.getElementById('mobile-cart-count-import'); if (mc) mc.innerText = cart.length;
         if (!box) return;
         if (!cart.length) { box.innerHTML = '<p class="text-gray-400 text-center py-4 italic">Chưa có sản phẩm trong phiếu — bấm thẻ sản phẩm bên trái để thêm</p>'; return; }
         var nHsd = cart.filter(function (x) { return x && (x.ngaySX || x.hsd || x.hanThang); }).length;
-        var h = '<table class="imp-ct' + (window.__impShowHsd ? '' : ' hide-hsd') + '"><thead class="sticky top-0 bg-slate-100 text-slate-700"><tr><th style="text-align:left">Sản phẩm</th><th style="width:92px">SL</th><th style="width:84px">Giá sỉ</th><th style="width:84px">Giá lẻ</th><th class="c-hsd" style="width:106px">NSX</th><th class="c-hsd" style="width:66px" title="Hạn dùng tính bằng tháng (VD 12, 24) - nhập NSX + số tháng thì HSD tự tính">Tháng</th><th class="c-hsd" style="width:106px">HSD</th><th style="width:44px;text-align:center;padding:0"><button type="button" class="imp-hsd-ico' + (window.__impShowHsd ? ' on' : '') + '" onclick="__impToggleHsd()" title="' + (window.__impShowHsd ? 'Ẩn' : 'Mở nhập') + ' NSX / Tháng / HSD' + (nHsd && !window.__impShowHsd ? ' (' + nHsd + ' dòng đã nhập)' : '') + '">📅' + (nHsd && !window.__impShowHsd ? '<i></i>' : '') + '</button></th></tr></thead><tbody>';
+        var h = '<table class="imp-ct' + (window.__impShowHsd ? '' : ' hide-hsd') + '"><thead class="imp-thead"><tr><th style="text-align:left">Sản phẩm</th><th style="width:92px">SL</th><th style="width:84px">Giá sỉ</th><th style="width:84px">Giá lẻ</th><th class="c-hsd" style="width:106px">NSX</th><th class="c-hsd" style="width:66px" title="Hạn dùng tính bằng tháng (VD 12, 24) - nhập NSX + số tháng thì HSD tự tính">Tháng</th><th class="c-hsd" style="width:106px">HSD</th><th style="width:44px;text-align:center;padding:0"><button type="button" class="imp-hsd-ico' + (window.__impShowHsd ? ' on' : '') + '" onclick="__impToggleHsd()" title="' + (window.__impShowHsd ? 'Ẩn' : 'Mở nhập') + ' NSX / Tháng / HSD' + (nHsd && !window.__impShowHsd ? ' (' + nHsd + ' dòng đã nhập)' : '') + '">📅' + (nHsd && !window.__impShowHsd ? '<i></i>' : '') + '</button></th></tr></thead><tbody>';
         cart.forEach(function (it, i) {
             var q = parseFloat(it.qty) || 0;
-            h += '<tr class="odd:bg-white even:bg-slate-50"><td class="imp-cn">' + esc(it.name) + (it.unit ? '<small>' + esc(it.unit) + '</small>' : '') + '</td>' +
+            h += '<tr class="imp-row" style="--rc:' + rowColor(it.name) + '"><td class="imp-cn">' + esc(it.name) + (it.unit ? '<small>' + esc(it.unit) + '</small>' : '') + '</td>' +
                 '<td><input type="number" min="0" step="any" inputmode="decimal" id="imp-cq-' + i + '" class="imp-ci q' + (q > 0 ? '' : ' q0') + '" value="' + (q > 0 ? q : '') + '" placeholder="SL" oninput="__impCart(' + i + ',\'qty\',this.value,this)" onfocus="this.select()" onkeydown="if(event.key===\'Enter\'){__impNext()}"></td>' +
                 '<td><input type="number" min="0" class="imp-ci" value="' + esc(it.wholesale || '') + '" oninput="__impCart(' + i + ',\'wholesale\',this.value)"></td>' +
                 '<td><input type="number" min="0" class="imp-ci" value="' + esc(it.retail || '') + '" oninput="__impCart(' + i + ',\'retail\',this.value)"></td>' +
                 '<td class="c-hsd"><input type="date" class="imp-ci d" value="' + esc(it.ngaySX || '') + '" onchange="__impCart(' + i + ',\'ngaySX\',this.value)"></td>' +
                 '<td class="c-hsd"><input type="number" min="0" step="any" inputmode="decimal" list="imp-months-list" id="imp-cm-' + i + '" class="imp-ci" style="text-align:center;padding-left:2px;padding-right:2px" placeholder="tháng" value="' + esc(it.hanThang || '') + '" oninput="__impCart(' + i + ',\'hanThang\',this.value)" onfocus="this.select()"></td>' +
                 '<td class="c-hsd"><input type="date" id="imp-ch-' + i + '" class="imp-ci d" value="' + esc(it.hsd || '') + '" onchange="__impCart(' + i + ',\'hsd\',this.value)"></td>' +
-                '<td style="text-align:center"><button type="button" onclick="removeFromCart(' + i + ')" title="Xóa" style="color:#ef4444;font-weight:900;font-size:16px;padding:2px 6px">✕</button></td></tr>';
+                '<td style="text-align:center"><button type="button" class="imp-x" onclick="removeFromCart(' + i + ')" title="Xóa">✕</button></td></tr>';
         });
         box.innerHTML = h + '</tbody></table><datalist id="imp-months-list"><option value="6"><option value="12"><option value="18"><option value="24"><option value="36"></datalist>';
     };
