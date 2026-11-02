@@ -1925,6 +1925,162 @@ html #cart-box table.imp-ct tr.imp-row .imp-cn { font-size:13px; line-height:1.2
 html #cart-box table.imp-ct tr.imp-row .imp-x { width:26px; height:26px; font-size:13px; }
 html #cart-box table.imp-ct thead.imp-thead th { padding-top:6px !important; padding-bottom:6px !important; }
 </style>
+<style id="home-inv-ui">
+/* ===== TRANG CHỦ - CHI TIẾT TỒN KHO: dạng bảng gọn, xem được nhiều sản phẩm hơn ===== */
+#home-inventory-list .inv-hc, #home-inventory-list .inv-row { display:grid; grid-template-columns:minmax(0,1fr) 56px 56px 56px 72px; align-items:center; column-gap:6px; }
+#home-inventory-list .inv-cols { display:block; }
+#home-inventory-list .inv-hc2 { display:none; }
+#home-inventory-list .inv-head { position:sticky; top:0; z-index:6; padding:6px 20px; margin-bottom:6px; font-size:10px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; color:#64748b;
+  background:#fff; border-bottom:2px solid #e2e8f0; border-radius:10px 10px 0 0; }
+#home-inventory-list .inv-hc span:nth-child(n+2) { text-align:right; }
+#home-inventory-list .inv-hc .h-dau { color:#2563eb; } #home-inventory-list .inv-hc .h-nhap { color:#d97706; } #home-inventory-list .inv-hc .h-xuat { color:#e11d48; } #home-inventory-list .inv-hc .h-cuoi { color:#059669; padding-right:8px; }
+#home-inventory-list .inv-row { padding:5px 10px 6px; margin-bottom:3px; border-radius:10px; background:#fff; border:1px solid #e2e8f0; transition:background .12s, border-color .12s, box-shadow .12s; }
+#home-inventory-list .inv-row:hover { background:#f0f9ff; border-color:#93c5fd; box-shadow:0 3px 8px -4px rgba(37,99,235,.35); }
+#home-inventory-list .inv-row.low { background:#fff1f2; border-color:#fda4af; }
+#home-inventory-list .inv-name { font-size:12px; font-weight:800; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#home-inventory-list .inv-warn { margin-left:6px; font-size:10px; font-weight:900; color:#e11d48; }
+#home-inventory-list .inv-num { text-align:right; font-size:12.5px; font-weight:800; font-variant-numeric:tabular-nums; color:#94a3b8; }
+#home-inventory-list .inv-num.c-dau { color:#2563eb; } #home-inventory-list .inv-num.c-nhap { color:#d97706; } #home-inventory-list .inv-num.c-xuat { color:#e11d48; }
+#home-inventory-list .inv-end { display:inline-block; min-width:46px; padding:2px 9px; border-radius:999px; background:#d1fae5; color:#047857; font-weight:900; text-align:center; }
+#home-inventory-list .inv-end.low { background:#e11d48; color:#fff; animation:invPulse 1.6s ease-in-out infinite; }
+@keyframes invPulse { 50% { opacity:.72; } }
+#home-inventory-list .inv-bar { grid-column:1 / -1; display:flex; height:3px; margin-top:4px; border-radius:99px; overflow:hidden; background:#e2e8f0; }
+#home-inventory-list .inv-bar i { display:block; height:100%; }
+#home-inventory-list .inv-bar .b-dau { background:#60a5fa; } #home-inventory-list .inv-bar .b-nhap { background:#fbbf24; } #home-inventory-list .inv-bar .b-xuat { background:#fb7185; }
+#home-inventory-list .inv-bar .b-cuoi { background:#34d399; } #home-inventory-list .inv-bar .b-cuoi.low { background:#e11d48; }
+html.dark #home-inventory-list .inv-head { background:#0f172a; border-bottom-color:#334155; color:#94a3b8; }
+html.dark #home-inventory-list .inv-row { background:rgba(15,23,42,.75); border-color:#334155; }
+html.dark #home-inventory-list .inv-row:hover { background:#172554; border-color:#3b82f6; }
+html.dark #home-inventory-list .inv-row.low { background:#4c0519; border-color:#be123c; }
+html.dark #home-inventory-list .inv-name { color:#f1f5f9; }
+html.dark #home-inventory-list .inv-end { background:#064e3b; color:#6ee7b7; }
+html.dark #home-inventory-list .inv-end.low { background:#e11d48; color:#fff; }
+html.dark #home-inventory-list .inv-bar { background:#1e293b; }
+/* Màn hình rộng (>=1600px): chia 2 cột sản phẩm, xem gấp đôi số sản phẩm */
+@media (min-width:1600px) {
+  #home-inventory-list .inv-head { display:grid; grid-template-columns:1fr 1fr; column-gap:28px; }
+  #home-inventory-list .inv-hc2 { display:grid; }
+  #home-inventory-list .inv-cols { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:3px 8px; }
+  #home-inventory-list .inv-cols .inv-row { margin-bottom:0; }
+  #home-inventory-list .inv-hc, #home-inventory-list .inv-cols .inv-row { grid-template-columns:minmax(0,1fr) 44px 44px 44px 62px; column-gap:4px; }
+  #home-inventory-list .inv-warn { display:none; }
+  #home-inventory-list .inv-num, #home-inventory-list .inv-hc span { font-size:12px; }
+}
+@media (max-width:640px) { #home-inventory-list .inv-hc, #home-inventory-list .inv-row { grid-template-columns:minmax(0,1fr) 44px 44px 44px 60px; column-gap:4px; } #home-inventory-list .inv-head { padding:6px 12px; } #home-inventory-list .inv-warn { display:none; } }
+
+
+/* Kẻ rõ từng thẻ sản phẩm và từng ô số */
+#home-inventory-list .inv-row { border:1.5px solid #94a3b8; box-shadow:0 1px 2px rgba(15,23,42,.08); }
+#home-inventory-list .inv-row.low { border-color:#e11d48; }
+#home-inventory-list .inv-num { box-sizing:border-box; text-align:center; padding:3px 4px; min-height:26px; display:flex; align-items:center; justify-content:center; border:1.5px solid #cbd5e1; border-radius:8px; background:#f8fafc; }
+#home-inventory-list .inv-num.c-dau { border-color:#93c5fd; background:#eff6ff; }
+#home-inventory-list .inv-num.c-nhap { border-color:#fcd34d; background:#fffbeb; }
+#home-inventory-list .inv-num.c-xuat { border-color:#fda4af; background:#fff1f2; }
+#home-inventory-list .inv-num.c-cuoi { border-color:#6ee7b7; background:#ecfdf5; }
+#home-inventory-list .inv-row.low .inv-num.c-cuoi { border-color:#fb7185; background:#ffe4e6; }
+#home-inventory-list .inv-hc span:nth-child(n+2) { text-align:center; box-sizing:border-box; padding:2px 0; border:1.5px solid #cbd5e1; border-radius:8px; background:#f1f5f9; padding-right:0 !important; }
+#home-inventory-list .inv-hc .h-dau { border-color:#93c5fd; background:#dbeafe; } #home-inventory-list .inv-hc .h-nhap { border-color:#fcd34d; background:#fef3c7; }
+#home-inventory-list .inv-hc .h-xuat { border-color:#fda4af; background:#ffe4e6; } #home-inventory-list .inv-hc .h-cuoi { border-color:#6ee7b7; background:#d1fae5; }
+html.dark #home-inventory-list .inv-row { border-color:#64748b; }
+html.dark #home-inventory-list .inv-row.low { border-color:#fb7185; }
+html.dark #home-inventory-list .inv-num { border-color:#475569; background:rgba(30,41,59,.7); }
+html.dark #home-inventory-list .inv-num.c-dau { border-color:#2563eb; background:rgba(30,58,138,.35); }
+html.dark #home-inventory-list .inv-num.c-nhap { border-color:#d97706; background:rgba(120,53,15,.35); }
+html.dark #home-inventory-list .inv-num.c-xuat { border-color:#e11d48; background:rgba(136,19,55,.35); }
+html.dark #home-inventory-list .inv-num.c-cuoi { border-color:#10b981; background:rgba(6,78,59,.4); }
+html.dark #home-inventory-list .inv-hc span:nth-child(n+2) { background:#1e293b; border-color:#475569; }
+</style>
+<style id="home-orders-ui">
+/* ===== TRANG CHỦ - THỜI GIAN CẤP HÀNG ĐẠI LÝ: cùng kiểu bảng gọn, kẻ viền từng ô như Chi tiết tồn kho (1 cột) ===== */
+.ord-head, #customer-orders-table .ord-row { display:grid; grid-template-columns:78px minmax(0,1fr) 88px 112px 80px; column-gap:5px; align-items:center; }
+.ord-head { padding:6px 23px 6px 15px; margin-bottom:6px; font-size:10px; font-weight:900; letter-spacing:.05em; text-transform:uppercase; color:#475569; }
+.ord-head span { box-sizing:border-box; text-align:center; padding:3px 0; border:1.5px solid #cbd5e1; border-radius:8px; background:#f1f5f9; white-space:nowrap; overflow:hidden; }
+.ord-head span.o-name { text-align:left; padding-left:10px; }
+#customer-orders-table { gap:4px !important; }
+html.glass #customer-orders-table > div.ord-row, html #customer-orders-table > div.ord-row { margin-bottom:0 !important; }
+#customer-orders-table .ord-row { padding:5px 10px; border:1.5px solid #94a3b8; border-left-width:5px; border-right-width:5px; border-radius:12px; cursor:pointer; background:#fff; box-shadow:0 1px 2px rgba(15,23,42,.08); transition:box-shadow .12s, transform .12s, background .12s; }
+#customer-orders-table .ord-row:hover { box-shadow:0 5px 12px -5px rgba(15,23,42,.4); transform:translateY(-1px); }
+#customer-orders-table .ord-row:active { transform:scale(.992); }
+#customer-orders-table .ord-row.lv-r { border-left-color:#f43f5e; border-right-color:#f43f5e; background:#fff1f2; }
+#customer-orders-table .ord-row.lv-a { border-left-color:#f59e0b; border-right-color:#f59e0b; background:#fffbeb; }
+#customer-orders-table .ord-row.lv-g { border-left-color:#10b981; border-right-color:#10b981; background:#ecfdf5; }
+#customer-orders-table .ord-c { box-sizing:border-box; min-height:28px; display:flex; align-items:center; justify-content:center; padding:2px 6px; border:1.5px solid #cbd5e1; border-radius:8px; background:#f8fafc;
+  font-size:12px; font-weight:800; font-variant-numeric:tabular-nums; color:#334155; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#customer-orders-table .ord-no { font-family:ui-monospace,monospace; font-size:11px; color:#64748b; }
+#customer-orders-table .ord-name { justify-content:flex-start; display:block; line-height:24px; color:#0f172a; font-weight:900; padding-left:10px; }
+#customer-orders-table .ord-date { color:#64748b; font-weight:700; font-size:11.5px; }
+#customer-orders-table .ord-tot { justify-content:flex-end; color:#1e293b; }
+#customer-orders-table .lv-r .ord-day { border-color:#fb7185; background:#ffe4e6; color:#be123c; font-weight:900; }
+#customer-orders-table .lv-a .ord-day { border-color:#fbbf24; background:#fef3c7; color:#b45309; font-weight:900; }
+#customer-orders-table .lv-g .ord-day { border-color:#34d399; background:#d1fae5; color:#047857; font-weight:900; }
+html.dark .ord-head { color:#94a3b8; }
+html.dark .ord-head span { background:#1e293b; border-color:#475569; }
+html.dark #customer-orders-table .ord-row { border-color:#64748b; background:rgba(15,23,42,.75); }
+html.dark #customer-orders-table .ord-row.lv-r { border-left-color:#f43f5e; border-right-color:#f43f5e; background:rgba(136,19,55,.25); }
+html.dark #customer-orders-table .ord-row.lv-a { border-left-color:#f59e0b; border-right-color:#f59e0b; background:rgba(120,53,15,.25); }
+html.dark #customer-orders-table .ord-row.lv-g { border-left-color:#10b981; border-right-color:#10b981; background:rgba(6,78,59,.25); }
+html.dark #customer-orders-table .ord-c { background:rgba(30,41,59,.75); border-color:#475569; color:#e2e8f0; }
+html.dark #customer-orders-table .ord-name { color:#f1f5f9; }
+html.dark #customer-orders-table .lv-r .ord-day { background:rgba(136,19,55,.5); border-color:#e11d48; color:#fda4af; }
+html.dark #customer-orders-table .lv-a .ord-day { background:rgba(120,53,15,.5); border-color:#d97706; color:#fcd34d; }
+html.dark #customer-orders-table .lv-g .ord-day { background:rgba(6,78,59,.5); border-color:#10b981; color:#6ee7b7; }
+@media (max-width:640px) { .ord-head, #customer-orders-table .ord-row { grid-template-columns:56px minmax(0,1fr) 68px 84px 56px; column-gap:3px; } .ord-head { padding:6px 15px 6px 11px; } #customer-orders-table .ord-c { font-size:10.5px; padding:2px 3px; } }
+</style>
+<style id="list-cards-sync-ui">
+/* ===== ĐỒNG BỘ 1 KIỂU THẺ cho mọi danh sách: Phiếu nhập/xuất, Danh mục SP, Khách hàng, NCC, Nguyên liệu, Lịch sử HĐ ===== */
+/* 1) Khung thẻ: viền rõ 1.5px (trên/dưới), vạch màu 5px hai bên (giữ màu riêng từng danh sách), bo 12px - giống thẻ Tồn kho / Cấp hàng đại lý */
+html.glass:not(.dark) body :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu, #page-home) div[class~="border-l-4"][class~="border-r-4"][class*="rounded"][class*="border"],
+html:not(.glass):not(.dark) body :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu, #page-home) div[class~="border-l-4"][class~="border-r-4"][class*="rounded"][class*="border"] {
+  border-top-width:1.5px !important; border-bottom-width:1.5px !important; border-left-width:5px !important; border-right-width:5px !important;
+  border-top-color:#94a3b8 !important; border-bottom-color:#94a3b8 !important; border-radius:12px !important;
+}
+html.dark body :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu, #page-home) div[class~="border-l-4"][class~="border-r-4"][class*="rounded"][class*="border"] {
+  border-top-width:1.5px !important; border-bottom-width:1.5px !important; border-left-width:5px !important; border-right-width:5px !important;
+  border-top-color:#64748b !important; border-bottom-color:#64748b !important; border-radius:12px !important;
+}
+html body :is(#page-import, #page-inventory, #page-customers, #page-products-manage, #page-history, #page-SanXuat, #page-NguyenLieu, #page-home) div[class~="border-l-4"][class~="border-r-4"]:hover { transform:translateY(-1px); }
+/* khoảng cách giữa các thẻ đồng đều */
+html body :is(#page-import, #page-customers, #page-products-manage, #page-history, #page-NguyenLieu) tbody > tr > td[colspan] { padding:3px 6px !important; }
+
+/* 2) Từng ô trong thẻ (màn hình rộng): hộp bo góc có viền, như các ô số ở Tồn kho */
+@media (min-width:768px) {
+  html body :is(#page-import, #page-customers, #page-products-manage, #page-history, #page-NguyenLieu) div[class~="border-l-4"][class~="border-r-4"] [class*="md:w-["]:not(button):not(input):not(select):not(textarea),
+  html body :is(#page-import, #page-customers, #page-products-manage, #page-history, #page-NguyenLieu) div[class~="border-l-4"][class~="border-r-4"] > [class^="w-["]:not(button):not(input):not(select),
+  html body :is(#page-import, #page-customers, #page-products-manage, #page-history, #page-NguyenLieu) div[class~="border-l-4"][class~="border-r-4"] > [class*=" w-["]:not(button):not(input):not(select) {
+    box-sizing:border-box; border:1.5px solid #cbd5e1; border-radius:8px; background-color:#f8fafc;
+    padding-top:4px; padding-bottom:4px; margin-right:4px; min-height:28px; line-height:1.3;
+  }
+  html body :is(#page-import, #page-customers, #page-products-manage, #page-history, #page-NguyenLieu) div[class~="border-l-4"][class~="border-r-4"] [class*="md:w-["]:last-child { margin-right:0; }
+  html.dark body :is(#page-import, #page-customers, #page-products-manage, #page-history, #page-NguyenLieu) div[class~="border-l-4"][class~="border-r-4"] [class*="md:w-["]:not(button):not(input):not(select):not(textarea),
+  html.dark body :is(#page-import, #page-customers, #page-products-manage, #page-history, #page-NguyenLieu) div[class~="border-l-4"][class~="border-r-4"] > [class^="w-["]:not(button):not(input):not(select),
+  html.dark body :is(#page-import, #page-customers, #page-products-manage, #page-history, #page-NguyenLieu) div[class~="border-l-4"][class~="border-r-4"] > [class*=" w-["]:not(button):not(input):not(select) { border-color:#475569; background-color:rgba(30,41,59,.75); }
+}
+
+/* 3) Thanh tiêu đề cột: 1 thanh liền, bo tròn 2 đầu - cùng kiểu giỏ hàng */
+html body table:has(> tbody:is(#list-receipts-left, #customer-list-body, #prod-manage-body, #sales-list-body, #body-ncc, #body-nl, #body-phieu)) { border-collapse:separate !important; border-spacing:0; }
+html body table:has(> tbody:is(#list-receipts-left, #customer-list-body, #prod-manage-body, #sales-list-body, #body-ncc, #body-nl, #body-phieu)) > thead { background:transparent !important; box-shadow:none !important; border:0 !important; }
+html body table:has(> tbody:is(#list-receipts-left, #customer-list-body, #prod-manage-body, #sales-list-body, #body-ncc, #body-nl, #body-phieu)) > thead th { background:linear-gradient(180deg,rgba(255,255,255,.97) 0%,rgba(226,233,248,.95) 100%) !important; color:#334155 !important; border:0 !important;
+  font-weight:800; padding-top:10px; padding-bottom:10px; box-shadow:0 3px 6px rgba(50,70,160,.14), inset 0 1.5px 0 #fff !important; border-radius:0; }
+html body table:has(> tbody:is(#list-receipts-left, #customer-list-body, #prod-manage-body, #sales-list-body, #body-ncc, #body-nl, #body-phieu)) > thead th:first-child { border-radius:12px 0 0 12px; }
+html body table:has(> tbody:is(#list-receipts-left, #customer-list-body, #prod-manage-body, #sales-list-body, #body-ncc, #body-nl, #body-phieu)) > thead th:last-child { border-radius:0 12px 12px 0; }
+html body table:has(> tbody:is(#list-receipts-left, #customer-list-body, #prod-manage-body, #sales-list-body, #body-ncc, #body-nl, #body-phieu)) > thead th + th { border-left:1px solid rgba(148,163,184,.3) !important; }
+html.dark body table:has(> tbody:is(#list-receipts-left, #customer-list-body, #prod-manage-body, #sales-list-body, #body-ncc, #body-nl, #body-phieu)) > thead th { background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.06)) !important; color:#e2e8f0 !important; box-shadow:0 3px 6px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.22) !important; }
+
+/* KHO HÀNG: các cột chữ (Cảnh báo, ĐVT, SL) cũng nằm trong ô có viền như các ô nhập NSX/HSD/Giá */
+@media (min-width:768px) {
+  html body #page-inventory .inventory-product-row > div:nth-child(5),
+  html body #page-inventory .inventory-product-row > div:nth-child(6),
+  html body #page-inventory .inventory-product-row > div:nth-child(7) {
+    box-sizing:border-box; display:flex; align-items:center; justify-content:center; min-height:34px; margin:0 4px; padding:2px 6px;
+    border:1.5px solid #cbd5e1; border-radius:12px; background-color:#fff; box-shadow:0 1px 2px rgba(15,23,42,.06);
+  }
+  html body #page-inventory .inventory-product-row > div:nth-child(5) { gap:4px; flex-wrap:wrap; }
+  html body #page-inventory .inventory-product-row > div:nth-child(7) { font-size:14px; font-weight:900; }
+  html.dark body #page-inventory .inventory-product-row > div:nth-child(5),
+  html.dark body #page-inventory .inventory-product-row > div:nth-child(6),
+  html.dark body #page-inventory .inventory-product-row > div:nth-child(7) { border-color:#475569; background-color:rgba(30,41,59,.75); }
+}
+</style>
 <style id="mobile-inventory-five-cols">
 /* Kho Hàng trên điện thoại: chỉ hiển thị Tên SP, ĐVT, SL, Giá sỉ, Giá lẻ, Giá bán đề xuất. PC giữ nguyên bố cục đầy đủ. */
 @media (max-width: 767px) {
@@ -3668,13 +3824,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         <div class="lg:col-span-2 bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-blue-100 dark:border-blue-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
             <h3 data-gb="rose" class="-mx-4 md:-mx-6 -mt-4 md:-mt-6 mb-4 px-4 md:px-6 py-3 rounded-t-[23px] bg-rose-600 dark:bg-rose-700 text-white font-black text-xs uppercase tracking-widest">🚚 THỜI GIAN CẤP HÀNG ĐẠI LÝ</h3>
-            <div class="flex items-center w-full px-2 mb-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">
-                <div class="w-[15%]">Số phiếu</div>
-                <div class="w-[30%]">Khách hàng</div>
-                <div class="w-[20%] text-center">Ngày tháng</div>
-                <div class="w-[20%] text-center">Tổng tiền</div>
-                <div class="w-[15%] text-center">Trạng thái</div>
-            </div>
+            <div class="ord-head"><span>Số phiếu</span><span class="o-name">Khách hàng</span><span>Ngày tháng</span><span>Tổng tiền</span><span>Trạng thái</span></div>
             <div id="customer-orders-table" class="overflow-y-auto custom-scrollbar h-[320px] md:h-[380px] pr-2">
                 <div class="animate-pulse h-12 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2"></div>
                 <div class="animate-pulse h-12 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2"></div>
@@ -10966,6 +11116,23 @@ function showDashboardDetail(type) {
     }
 }
 // HÀM RENDER PHIẾU XUẤT ĐẠI LÝ (ĐỒNG BỘ DUAL THEME - HOÀN HẢO BO GÓC 100%)
+// Dòng "Thời gian cấp hàng đại lý" kiểu gọn, có kẻ viền từng ô - đồng bộ với bảng Chi tiết tồn kho
+function ordRowHtml(order) {
+    var d = order.diffDays;
+    var lv = d >= 20 ? 'r' : (d >= 10 ? 'a' : 'g');
+    var esc = (typeof escapeHtml === 'function') ? escapeHtml : function (x) { return x; };
+    var dateStr = order.orderDate.toLocaleDateString('vi-VN', { timeZone: APP_TIME_ZONE });
+    var tot = Number(order.total || 0).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + 'đ';
+    var no = order.invoiceNumber || order.id.slice(-6);
+    var nm = esc(String(order.customer || ''));
+    return '<div class="ord-row lv-' + lv + '" onclick="viewOrderDetails(\'' + order.id + '\')" title="' + nm + '">'
+        + '<div class="ord-c ord-no">' + esc(String(no)) + '</div>'
+        + '<div class="ord-c ord-name">' + nm + '</div>'
+        + '<div class="ord-c ord-date">' + dateStr + '</div>'
+        + '<div class="ord-c ord-tot">' + tot + '</div>'
+        + '<div class="ord-c ord-day">' + d + ' ngày</div>'
+        + '</div>';
+}
 function renderCustomerOrders(allSales, customersSnap) {
     const container = document.getElementById('customer-orders-table');
     if (!container)
@@ -10992,23 +11159,7 @@ function renderCustomerOrders(allSales, customersSnap) {
         container.innerHTML = "<div class=\"p-4 text-center text-slate-500 text-xs\">Kh\u00F4ng c\u00F3 \u0111\u01A1n h\u00E0ng n\u00E0o.</div>";
         return;
     }
-    container.innerHTML = currentOrders.map(order => {
-        // Màu nền thẻ thích ứng động 2 giao diện Sáng/Tối (Chống lóa tuyệt đối)
-        // Giao diện Sáng dùng -100 thay vì -50/45 cũ vì -50/45 gần như trong suốt trên
-        // nền trắng, nhìn không thấy nền màu - -100 đậm vừa đủ để thấy rõ mà vẫn nhẹ nhàng.
-        let barBg = order.diffDays >= 20
-            ? 'bg-rose-100 dark:bg-rose-950/20 hover:bg-rose-200/80 dark:hover:bg-rose-950/30 text-rose-600 dark:text-rose-400'
-            : (order.diffDays >= 10
-                ? 'bg-amber-100 dark:bg-amber-950/20 hover:bg-amber-200/80 dark:hover:bg-amber-950/30 text-amber-600 dark:text-amber-400'
-                : 'bg-emerald-100 dark:bg-emerald-950/20 hover:bg-emerald-200/80 dark:hover:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400');
-        // MÀU VIỀN TRÁI/PHẢI (theo đúng kiểu đã dùng ở danh sách Nhập Kho NL: viền 4px 2
-        // bên, bo tròn theo góc thẻ - không dùng thanh nổi tách rời như trước nữa)
-        let accentColor = order.diffDays >= 20 ? '#f43f5e' : (order.diffDays >= 10 ? '#f59e0b' : '#10b981');
-        let dayTextColor = order.diffDays >= 20
-            ? 'text-rose-600 dark:text-rose-400 font-black'
-            : (order.diffDays >= 10 ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-emerald-600 dark:text-emerald-400 font-black');
-        return "\n        <div class=\"block w-full\">\n            <div onclick=\"viewOrderDetails('" + order.id + "')\" \n                 class=\"relative flex items-center " + barBg + " border border-slate-200/80 dark:border-slate-800/80 border-l-4 border-r-4 rounded-xl p-2 px-3 gap-2 shadow-sm dark:shadow-[0_4px_12px_rgba(0,0,0,0.3)] transition-all duration-200 cursor-pointer text-xs active:scale-[0.99]\" style=\"border-left-color:" + accentColor + " !important; border-right-color:" + accentColor + " !important;\">\n                \n                <!-- GI\u1EEE NGUY\u00CAN HO\u00C0N TO\u00C0N T\u1EA4T C\u1EA2 C\u00C1C C\u1ED8T V\u00C0 T\u1EF6 L\u1EC6 R\u1ED8NG % C\u1EE6A B\u1EA0N -->\n                <div class=\"w-[15%] pl-2 py-1 rounded text-[11px] font-mono font-bold text-slate-500 dark:text-slate-400 truncate\">\n                    " + (order.invoiceNumber || order.id.slice(-6)) + "\n                </div>\n                \n                <div class=\"w-[30%] px-1 py-1 rounded text-[11px] font-bold text-slate-800 dark:text-slate-100 truncate\">\n                    " + order.customer + "\n                </div>\n                \n                <div class=\"w-[20%] px-1 py-1 rounded text-[11px] font-semibold text-slate-500 dark:text-slate-400 text-right\">\n                    " + order.orderDate.toLocaleDateString('vi-VN', { timeZone: APP_TIME_ZONE }) + "\n                </div>\n                \n                <div class=\"w-[20%] px-1 py-1 rounded text-[11px] font-bold text-slate-700 dark:text-slate-200 text-right\">\n                    " + Number(order.total || 0).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "\u0111\n                </div>\n                \n                <div class=\"w-[15%] pr-2 py-1 rounded text-[11px] " + dayTextColor + " text-right\">\n                    " + order.diffDays + " ng\u00E0y\n                </div>\n            </div>\n        </div>\n        ";
-    }).join('');
+    container.innerHTML = currentOrders.map(ordRowHtml).join('');
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
     }
@@ -11380,6 +11531,19 @@ function toggleExpiryLots(name) {
         el.classList.toggle('hidden');
 }
 // ================ TỒN KHO (ĐỒNG BỘ DUAL THEME - 3D GLOSSY CHỐNG LÓA) ==============================
+// Dòng tồn kho gọn ở Trang chủ: tên SP + 4 số (Đầu / Nhập / Xuất / Cuối) + thanh tỉ lệ mảnh. ~30px/dòng nên xem được nhiều sản phẩm hơn.
+function homeInvRowHtml(name, dau, nhap, xuat, cuoi, low) {
+    var tot = Math.max(dau + nhap + xuat + cuoi, 1);
+    var pct = function (v) { return (v > 0 ? (v / tot * 100) : 0).toFixed(1) + '%'; };
+    var n = function (v) { return v ? v : '–'; };
+    var nm = (typeof escapeHtml === 'function') ? escapeHtml(name) : name;
+    return '<div class="inv-row' + (low ? ' low' : '') + '">'
+        + '<div class="inv-name" title="' + nm + '">' + nm + (low ? '<span class="inv-warn">⚠ Ít hàng</span>' : '') + '</div>'
+        + '<div class="inv-num c-dau">' + n(dau) + '</div><div class="inv-num c-nhap">' + n(nhap) + '</div><div class="inv-num c-xuat">' + n(xuat) + '</div>'
+        + '<div class="inv-num c-cuoi"><span class="inv-end' + (low ? ' low' : '') + '">' + cuoi + '</span></div>'
+        + '<div class="inv-bar"><i class="b-dau" style="width:' + pct(dau) + '"></i><i class="b-nhap" style="width:' + pct(nhap) + '"></i><i class="b-xuat" style="width:' + pct(xuat) + '"></i><i class="b-cuoi' + (low ? ' low' : '') + '" style="width:' + pct(cuoi) + '"></i></div>'
+        + '</div>';
+}
 async function renderInventoryList(filter = 'today', options = {}) {
     const forceServer = !!options.forceServer;
     const container = document.getElementById('home-inventory-list');
@@ -11570,24 +11734,13 @@ async function renderInventoryList(filter = 'today', options = {}) {
             // "viên thuốc" tách rời cạnh nhau) - vẫn giữ nguyên màu riêng từng mục, vẫn giữ
             // hiệu ứng tăng/giảm màu khi sắp hết hàng, và vẫn có ghi chú (nhãn: giá trị) ngay
             // trong từng đoạn của thanh, chỉ khác là giờ nối liền thành 1 khối duy nhất.
-            const segments = [
-                { val: tonDauClean, color: colorTonDau, label: 'T.Đầu' },
-                { val: totalNhap, color: colorNhap, label: 'Nhập' },
-                { val: outClean, color: colorXuat, label: 'Xuất' },
-                { val: tonCuoi, color: colorTonCuoi, label: 'T.Cuối', glow: isLowStock }
-            ];
-            const segmentsHtml = segments.map(seg => {
-                const growVal = seg.val > 0 ? seg.val : 0.001;
-                const glowClass = seg.glow ? 'ring-1 ring-rose-500/50 ring-inset shadow-[0_0_8px_rgba(244,63,94,0.5)] dark:shadow-[0_0_8px_rgba(244,63,94,0.6)] animate-pulse' : '';
-                return "\n            <div style=\"flex: " + growVal + " 1 0%; min-width: 44px;\" class=\"h-full " + seg.color + " " + glowClass + " shadow-[inset_0_2px_4px_rgba(255,255,255,0.35),inset_0_-2px_3px_rgba(0,0,0,0.25)] dark:shadow-[inset_0_2px_3px_rgba(255,255,255,0.15),inset_0_-3px_4px_rgba(0,0,0,0.5)] transition-all duration-500 border-r border-white/40 dark:border-black/40 last:border-r-0 flex items-center justify-center overflow-hidden\">\n                <span class=\"text-[9px] font-black text-slate-900 drop-shadow-[0_1px_1px_rgba(255,255,255,0.55)] dark:text-white dark:drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)] whitespace-nowrap px-0.5\">" + seg.label + ":&nbsp;<b>" + seg.val + "</b></span>\n            </div>";
-            }).join('');
-            groupRowsHtml += "\n        <div class=\"mb-2 bg-white dark:bg-slate-950/40 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-[0_4px_6px_rgba(0,0,0,0.2)] hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-150\">\n            <div class=\"text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5 truncate flex items-center gap-1\">\n                <span class=\"truncate\">" + name + "</span> " + (isLowStock ? '<span class="text-rose-500 animate-pulse text-[12px] shrink-0">⚠️ Ít hàng</span>' : '') + "\n            </div>\n            <div class=\"flex w-full h-8 bg-slate-200/85 dark:bg-slate-950 rounded-lg border " + tcBorderClass + " shadow-[inset_0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)] overflow-hidden\">\n                " + segmentsHtml + "\n            </div>\n        </div>";
+            groupRowsHtml += homeInvRowHtml(name, tonDauClean, totalNhap, outClean, tonCuoi, isLowStock);
         });
         if (groupHasVisibleRow) {
-            inventoryCardsHtml += "\n            <div class=\"rounded-2xl border-2 " + getNhomBlockBorder(tenNhom) + " " + getNhomBlockBg(tenNhom) + " p-2.5 mb-3\">\n                <div class=\"text-[10px] font-black !font-bold uppercase tracking-wide " + getNhomHeaderColor(tenNhom) + " border rounded-lg px-2.5 py-1 mb-2\">" + tenNhom + "</div>\n                " + groupRowsHtml + "\n            </div>";
+            inventoryCardsHtml += "\n            <div class=\"rounded-2xl border-2 " + getNhomBlockBorder(tenNhom) + " " + getNhomBlockBg(tenNhom) + " p-2 mb-2\">\n                <div class=\"text-[10px] font-black !font-bold uppercase tracking-wide " + getNhomHeaderColor(tenNhom) + " border rounded-lg px-2.5 py-0.5 mb-1.5\">" + tenNhom + "</div>\n                <div class='inv-cols'>" + groupRowsHtml + "</div>\n            </div>";
         }
     });
-    container.innerHTML = inventoryCardsHtml || '<p class="text-center py-6 text-xs text-slate-400 dark:text-slate-500">Không có dữ liệu tồn kho</p>';
+    container.innerHTML = (inventoryCardsHtml ? '<div class="inv-head"><div class="inv-hc"><span>Sản phẩm</span><span class="h-dau">Đầu</span><span class="h-nhap">Nhập</span><span class="h-xuat">Xuất</span><span class="h-cuoi">Cuối</span></div><div class="inv-hc inv-hc2"><span>Sản phẩm</span><span class="h-dau">Đầu</span><span class="h-nhap">Nhập</span><span class="h-xuat">Xuất</span><span class="h-cuoi">Cuối</span></div></div>' : '') + inventoryCardsHtml || '<p class="text-center py-6 text-xs text-slate-400 dark:text-slate-500">Không có dữ liệu tồn kho</p>';
 }
 //============================DOANH THU ====================
 // Hàm cập nhật Tài chính (Gọi khi thay đổi 2 ô input ngày)
