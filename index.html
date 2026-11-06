@@ -2356,6 +2356,14 @@ html.dark body #sx-pane-congdoan input.sxnl-kg.miss { background-color:rgba(120,
         return g;
       };
     }
+    function flatAxes(chart) {
+      try { chart.options.layout.padding = { top: 26, left: 6, right: 6, bottom: 0 }; } catch (e) { try { chart.options.layout = { padding: { top: 26, left: 6, right: 6, bottom: 0 } }; } catch (e2) { } }
+      try {
+        var sc = chart.options.scales, y = sc.y, x = sc.x;
+        if (y) { y.display = false; if (y.grid) y.grid.display = false; }
+        if (x) { x.border = { color: 'rgba(100,116,139,.55)', width: 1.5 }; if (x.ticks) { x.ticks.font = { weight: 'bold', size: 11 }; } }
+      } catch (e) { }
+    }
     function soft(chart) {
       try { var y = chart.options.scales.y; if (y && y.grid) y.grid.borderDash = [4, 4]; } catch (e) { }
       try { var y2 = chart.options.scales.y; if (y2 && y2.border) y2.border.dash = [4, 4]; } catch (e) { }
@@ -2366,13 +2374,15 @@ html.dark body #sx-pane-congdoan input.sxnl-kg.miss { background-color:rgba(120,
        try {
         var id = chart.canvas && chart.canvas.id, ds = chart.data.datasets;
         if (id === 'revenueChart') {
-          if (ds[0]) { ds[0].backgroundColor = grad('rgba(244,63,94,.95)', 'rgba(251,146,60,.35)'); ds[0].barPercentage = 0.5; ds[0].borderRadius = { topLeft: 12, topRight: 12, bottomLeft: 0, bottomRight: 0 }; }
-          if (ds[1]) { ds[1].fill = true; ds[1].backgroundColor = grad('rgba(37,99,235,.28)', 'rgba(37,99,235,0)'); ds[1].tension = 0.4; ds[1].borderWidth = 3;
-            ds[1].pointRadius = 5; ds[1].pointHoverRadius = 7; ds[1].pointBackgroundColor = '#fff'; ds[1].pointBorderColor = '#2563eb'; ds[1].pointBorderWidth = 2; }
-          soft(chart);
+          /* KIỂU PHẲNG (flat): cột xanh ngọc vuông, đường vàng có chấm, không lưới, không trục Y */
+          if (ds[0]) { ds[0].backgroundColor = '#0f9d9a'; ds[0].barPercentage = 0.5; ds[0].categoryPercentage = 0.7; ds[0].borderRadius = 0; }
+          if (ds[1]) { ds[1].fill = false; ds[1].borderColor = '#ffc000'; ds[1].borderWidth = 2.5; ds[1].tension = 0.35;
+            ds[1].pointRadius = 5; ds[1].pointHoverRadius = 5; ds[1].pointBackgroundColor = '#ffc000'; ds[1].pointBorderColor = '#ffffff'; ds[1].pointBorderWidth = 1.5; }
+          flatAxes(chart);
         } else if (id === 'monthlyRevenueChart') {
-          if (ds[0]) { ds[0].backgroundColor = grad('rgba(99,102,241,.95)', 'rgba(59,130,246,.3)'); ds[0].borderRadius = 10; ds[0].maxBarThickness = 40; }
-          soft(chart);
+          if (ds[0]) { ds[0].backgroundColor = '#0f9d9a'; ds[0].borderRadius = 0; ds[0].maxBarThickness = 34; }
+          if (ds[1]) { ds[1].borderRadius = 0; ds[1].maxBarThickness = 34; }
+          flatAxes(chart);
         } else if (id === 'topProductsChart') {
           /* Top SP: dùng kiểu thanh ngang riêng (xem updateTopProductsChart) */
         } else if (id === 'revenueShareChart') {
@@ -12308,8 +12318,8 @@ function updateRevenueChart(filteredSales) {
                     ctx.save();
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
-                    ctx.font = 'bold 10px Arial';
-                    ctx.fillStyle = checkDark() ? '#f8fafc' : '#0f172a';
+                    ctx.font = 'bold 12px Arial';
+                    ctx.fillStyle = checkDark() ? '#f8fafc' : '#1f2a44';
                     chart.getDatasetMeta(0).data.forEach((bar, index) => {
                         const val = data[index];
                         if (val > 0) {
@@ -12389,15 +12399,15 @@ function __drawMonthlyChart(monthlyData, allSales) {
     const datasets = [{
             label: 'Doanh thu',
             data: revenue,
-            backgroundColor: isDark ? '#60a5fa' : '#3b82f6',
-            borderRadius: 6
+            backgroundColor: '#0f9d9a',
+            borderRadius: 0
         }];
     if (profit) {
         datasets.push({
             label: 'Lợi nhuận',
             data: profit,
-            backgroundColor: (c) => (c.raw < 0 ? '#ef4444' : (isDark ? '#34d399' : '#10b981')),
-            borderRadius: 6
+            backgroundColor: (c) => (c.raw < 0 ? '#e5533d' : '#5b9bd5'),
+            borderRadius: 0
         });
     }
     const fmtTr = (v) => (v / 1000000).toFixed(1) + 'tr';
@@ -12448,7 +12458,7 @@ function __drawMonthlyChart(monthlyData, allSales) {
                 id: 'smoothTrendLines',
                 afterDatasetsDraw: (chart) => {
                     const c2 = chart.ctx;
-                    const lineCols = [isDark ? '#93c5fd' : '#1d4ed8', isDark ? '#6ee7b7' : '#047857'];
+                    const lineCols = ['#ffc000', '#7f7f7f'];
                     chart.data.datasets.forEach((ds, i) => {
                         const meta = chart.getDatasetMeta(i);
                         const pts = meta.data.map(b => ({ x: b.x, y: b.y }));
@@ -12456,7 +12466,7 @@ function __drawMonthlyChart(monthlyData, allSales) {
                         c2.save();
                         c2.strokeStyle = lineCols[i] || '#64748b';
                         c2.fillStyle = lineCols[i] || '#64748b';
-                        c2.lineWidth = 2.5; c2.lineJoin = 'round'; c2.lineCap = 'round';
+                        c2.lineWidth = 2; c2.lineJoin = 'round'; c2.lineCap = 'round';
                         if (pts.length > 1) {
                             c2.beginPath();
                             c2.moveTo(pts[0].x, pts[0].y);
@@ -12487,7 +12497,7 @@ function __drawMonthlyChart(monthlyData, allSales) {
                             const neg = v < 0;
                             c2.textBaseline = neg ? 'top' : 'bottom';
                             c2.fillStyle = labelColor;
-                            c2.font = 'bold 10px Arial';
+                            c2.font = 'bold 11px Arial';
                             c2.fillText(fmtTr(v), bar.x, neg ? bar.y + 4 : bar.y - 4);
                             // % so với tháng trước, chỉ ghi trên cột doanh thu
                             if (i === 0 && prevPct[index] != null) {
@@ -12816,7 +12826,7 @@ async function updateStockAlertCard() {
             let sev = 9, sortKey = 9999;
             if (qty <= 10) {
                 const s1 = qty <= 5 ? 0 : 1;
-                badges.push({ sev: s1, txt: 'Còn ' + (Math.round(qty * 100) / 100) + ' ' + (unitOf[name] || '') });
+                badges.push({ sev: s1, pct: Math.min(100, qty / 10 * 100), txt: 'Còn ' + (Math.round(qty * 100) / 100) + ' ' + (unitOf[name] || '') });
                 sev = Math.min(sev, s1); sortKey = Math.min(sortKey, qty);
             }
             try {
@@ -12833,32 +12843,86 @@ async function updateStockAlertCard() {
                 });
                 if (minDays !== null && minDays <= 90) {
                     const s2 = minDays <= 30 ? 0 : (minDays <= 60 ? 1 : 2);
-                    badges.push({ sev: s2, txt: minDays < 0 ? 'Quá hạn ' + (-minDays) + ' ngày' : 'HSD còn ' + minDays + ' ngày' });
+                    badges.push({ sev: s2, pct: Math.max(0, Math.min(100, minDays / 90 * 100)), txt: minDays < 0 ? 'Quá hạn ' + (-minDays) + ' ngày' : 'HSD còn ' + minDays + ' ngày' });
                     sev = Math.min(sev, s2); sortKey = Math.min(sortKey, minDays);
                 }
             } catch (e) { }
             if (badges.length) rows.push({ name: name, badges: badges, sev: sev, key: sortKey });
         });
         rows.sort((a, b) => (a.sev - b.sev) || (a.key - b.key));
-        const colors = [['#f43f5e', 'rgba(244,63,94,.10)', '#be123c'], ['#f59e0b', 'rgba(245,158,11,.12)', '#b45309'], ['#0ea5e9', 'rgba(14,165,233,.10)', '#0369a1']];
+        const sevCol = ['#e5533d', '#ffc000', '#0f9d9a'];
         const expCnt = rows.filter(r => r.badges.some(b => /HSD|Quá/.test(b.txt))).length;
         const lowCnt = rows.filter(r => r.badges.some(b => /^Còn \d/.test(b.txt) && !/HSD/.test(b.txt))).length;
         const chip = (t, c) => '<span style="background:' + c + '1f;color:' + c + ';border:1px solid ' + c + '55" class="px-2 py-0.5 rounded-full text-[10px] font-black whitespace-nowrap">' + t + '</span>';
-        let html = '<div class="flex flex-wrap gap-1.5 mb-2">' + chip('⏳ Hạn dùng: ' + expCnt, '#f59e0b') + chip('📉 Sắp hết: ' + lowCnt, '#f43f5e') + chip('⛔ Hết hàng: ' + outCount, '#64748b') + '</div>';
+        const head = '<div class="flex flex-wrap gap-1.5 mb-1" style="flex:none">' + chip('⏳ Hạn dùng: ' + expCnt, '#d99a00') + chip('📉 Sắp hết: ' + lowCnt, '#e5533d') + chip('⛔ Hết hàng: ' + outCount, '#64748b') + '</div>';
+        if (window.stockAlertChartInstance) { window.stockAlertChartInstance.destroy(); window.stockAlertChartInstance = null; }
+        box.className = 'h-full flex flex-col p-0';
         if (!rows.length) {
-            html += '<div class="text-center text-[12px] font-bold text-emerald-600 dark:text-emerald-400 py-6">✅ Kho ổn: không có hàng sắp hết hoặc sắp hết hạn</div>';
-        } else {
-            const MAX = 40;
-            rows.slice(0, MAX).forEach(r => {
-                const c = colors[r.sev] || colors[2];
-                html += '<div class="flex items-center justify-between gap-2 mb-1 px-2 py-1 rounded-lg" style="border-left:4px solid ' + c[0] + ';background:' + c[1] + '">' +
-                    '<span class="min-w-0 truncate font-bold text-[12px] text-slate-800 dark:text-slate-100" title="' + esc(r.name) + '">' + esc(r.name) + '</span>' +
-                    '<span class="shrink-0 flex gap-1">' + r.badges.map(b => { const cc = colors[b.sev] || colors[2]; return '<span class="px-1.5 py-0.5 rounded-md text-[10px] font-black whitespace-nowrap" style="color:' + cc[2] + ';border:1px solid ' + cc[0] + '66;background:#ffffffcc">' + esc(b.txt) + '</span>'; }).join('') + '</span></div>';
-            });
-            if (rows.length > MAX) html += '<div class="text-center text-[11px] text-slate-500 dark:text-slate-400 py-1">… và ' + (rows.length - MAX) + ' SP khác - bấm "Xem kho"</div>';
+            box.innerHTML = head + '<div class="text-center text-[12px] font-bold text-emerald-600 dark:text-emerald-400 py-6">✅ Kho ổn: không có hàng sắp hết hoặc sắp hết hạn</div>';
+            return;
         }
-        box.className = 'p-0';
-        box.innerHTML = html;
+        const MAXR = 8;
+        const shown = rows.slice(0, MAXR);
+        const more = rows.length - shown.length;
+        box.innerHTML = head + '<div style="flex:1 1 0;min-height:0;position:relative"><canvas id="stockAlertChart"></canvas></div>' +
+            '<div class="text-[10px] text-slate-500 dark:text-slate-400 text-center" style="flex:none;padding-top:2px">Thanh càng ngắn càng gấp' + (more > 0 ? ' · còn ' + more + ' SP khác, bấm "Xem kho"' : '') + '</div>';
+        const cv = document.getElementById('stockAlertChart');
+        if (!cv || !window.Chart) return;
+        const isDark = document.documentElement.classList.contains('dark');
+        const txtMain = isDark ? '#f8fafc' : '#1f2a44';
+        // mỗi SP lấy cảnh báo gấp nhất (nhãn phụ nếu có cảnh báo thứ hai)
+        const items = shown.map(r => {
+            const sorted = r.badges.slice().sort((x, y) => (x.sev - y.sev) || (x.pct - y.pct));
+            return { name: r.name, main: sorted[0], other: sorted[1] || null };
+        });
+        const cut = (t, n) => { t = String(t); return t.length > n ? t.slice(0, n - 1) + '…' : t; };
+        // tên SP xuống tối đa 2 dòng (giữ được phần cỡ như 350ml / 500ml)
+        const wrap2 = (t, n) => {
+            const words = String(t).split(/\s+/), lines = [''];
+            words.forEach(w => { const cur = lines[lines.length - 1]; if ((cur + ' ' + w).trim().length <= n || !cur) lines[lines.length - 1] = (cur + ' ' + w).trim(); else lines.push(w); });
+            if (lines.length > 2) { const rest = lines.slice(1).join(' '); return [lines[0], cut(rest, n)]; }
+            return lines.length === 1 ? lines[0] : lines;
+        };
+        window.stockAlertChartInstance = new Chart(cv.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: items.map(it => wrap2(it.name, 16)),
+                datasets: [{
+                        data: items.map(it => Math.max(6, it.main.pct)),
+                        backgroundColor: items.map(it => sevCol[it.main.sev] || sevCol[2]),
+                        borderRadius: 0, barPercentage: 0.62, categoryPercentage: 0.9
+                    }]
+            },
+            options: {
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false, events: [],
+                animation: { duration: 400 },
+                layout: { padding: { right: 84, left: 0, top: 2, bottom: 0 } },
+                plugins: { legend: { display: false }, tooltip: { enabled: false }, datalabels: { display: false } },
+                scales: {
+                    x: { display: false, min: 0, max: 100 },
+                    y: { grid: { display: false }, border: { color: 'rgba(100,116,139,.55)', width: 1.5 }, ticks: { color: txtMain, font: { size: 10, weight: 'bold' }, autoSkip: false, padding: 4 } }
+                }
+            },
+            plugins: [{
+                    id: 'alertValueText',
+                    afterDatasetsDraw: (chart) => {
+                        const c2 = chart.ctx, area = chart.chartArea;
+                        c2.save(); c2.textAlign = 'left';
+                        chart.getDatasetMeta(0).data.forEach((bar, i) => {
+                            const it = items[i];
+                            const x = area.right + 8;
+                            c2.textBaseline = it.other ? 'bottom' : 'middle';
+                            c2.font = 'bold 12px Arial'; c2.fillStyle = it.main.sev === 1 ? '#b57f00' : (sevCol[it.main.sev] || '#0f9d9a');
+                            c2.fillText(it.main.txt, x, it.other ? bar.y + 1 : bar.y);
+                            if (it.other) {
+                                c2.textBaseline = 'top'; c2.font = '10px Arial'; c2.fillStyle = isDark ? '#94a3b8' : '#64748b';
+                                c2.fillText(it.other.txt, x, bar.y + 2);
+                            }
+                        });
+                        c2.restore();
+                    }
+                }]
+        });
     } catch (e) {
         console.warn('Cảnh báo kho:', e);
         box.textContent = 'Không tải được cảnh báo kho.';
@@ -12895,7 +12959,7 @@ function updateRevenueShareChart(productRevenueMap) {
         labels.push('Khác');
         data.push(restTotal);
     }
-    const palette = ['#ef4444', '#f59e0b', '#10b981', '#0ea5e9', '#8b5cf6', '#ec4899', '#22c55e', '#eab308', '#94a3b8'];
+    const palette = ['#0f9d9a', '#555b5e', '#5b9bd5', '#d9b27c', '#ffc000', '#8fbf8f', '#7f7f7f', '#c5e0b4', '#94a3b8'];
     const grandTotal = data.reduce((p, q) => p + q, 0);
     const maxV = Math.max(...data, 0);
     const txtMain = isDark ? '#f8fafc' : '#0f172a';
@@ -12910,14 +12974,7 @@ function updateRevenueShareChart(productRevenueMap) {
             labels: labels,
             datasets: [{
                     data: data,
-                    backgroundColor: (c) => {
-                        const col = palette[c.dataIndex % palette.length];
-                        const a = c.chart.chartArea;
-                        if (!a) return col;
-                        const g = c.chart.ctx.createLinearGradient(a.left, a.top, a.right, a.bottom);
-                        g.addColorStop(0, col + 'bb'); g.addColorStop(1, col);
-                        return g;
-                    },
+                    backgroundColor: (c) => palette[c.dataIndex % palette.length],
                     borderColor: 'rgba(255,255,255,0)',
                     borderWidth: 0,
                     spacing: 3,
@@ -12929,7 +12986,7 @@ function updateRevenueShareChart(productRevenueMap) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            cutout: '72%',
+            cutout: '78%',
             animation: { duration: 500 },
             events: [],
             plugins: { legend: { display: false }, datalabels: { display: false }, tooltip: { enabled: false } }
@@ -12947,7 +13004,7 @@ function updateRevenueShareChart(productRevenueMap) {
                         c2.textAlign = 'center'; c2.textBaseline = 'middle';
                         c2.font = '12px sans-serif'; c2.fillStyle = txtSub;
                         c2.fillText(top.lb, arc.x, arc.y - 22);
-                        c2.font = 'bold ' + (W < 520 ? 22 : 30) + 'px sans-serif'; c2.fillStyle = top.color;
+                        c2.font = 'bold ' + (W < 520 ? 22 : 30) + 'px sans-serif'; c2.fillStyle = isDark ? '#f8fafc' : '#1f2a44';
                         c2.fillText(top.pct.toFixed(1) + '%', arc.x, arc.y + 4);
                         c2.font = '11px sans-serif'; c2.fillStyle = txtSub;
                         c2.fillText('T\u1ED5ng ' + (grandTotal / 1000000).toFixed(1) + 'tr', arc.x, arc.y + 28);
@@ -12976,9 +13033,7 @@ function updateRevenueShareChart(productRevenueMap) {
                         const by = y + rowH * 0.32 + 14;
                         c2.fillStyle = isDark ? 'rgba(148,163,184,.22)' : 'rgba(100,116,139,.16)';
                         rr(c2, x0, by, trackW, 8, 4); c2.fill();
-                        const g = c2.createLinearGradient(x0, 0, x0 + trackW, 0);
-                        g.addColorStop(0, r.color + '99'); g.addColorStop(1, r.color);
-                        c2.fillStyle = g;
+                        c2.fillStyle = r.color;
                         rr(c2, x0, by, Math.max(8, trackW * r.pct / 100), 8, 4); c2.fill();
                         y += rowH;
                     });
@@ -35048,4 +35103,35 @@ html:not(.dark) body #page-home #home-inventory-list .inv-row:not(#_a):not(#_b):
   box-shadow: 0 3px 7px -2px rgba(30,41,90,.30), 0 1px 0 rgba(255,255,255,.9) inset !important; margin-bottom: 6px !important;
 }
 html:not(.dark) body #page-home #home-inventory-list .inv-row.low:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e) { background: #fff1f2 !important; }
+</style>
+
+<style id="pm-v22-flat-heads">
+/* ===== (1) TIÊU ĐỀ CỘT các trang danh sách (Kho hàng, Lịch sử HĐ, KH & Công nợ, Danh mục SP, Sản xuất, Nguyên liệu, Người dùng) GIỐNG NHAU ===== */
+html:not(.dark) body :is(#page-inventory,#page-history,#page-customers,#page-products-manage,#page-SanXuat,#page-NguyenLieu,#page-user-management) table thead:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e) {
+  background: #dde3ee !important; background-image: none !important; box-shadow: none !important;
+  border-bottom: 1.5px solid rgba(100,116,139,.35) !important;
+}
+html:not(.dark) body :is(#page-inventory,#page-history,#page-customers,#page-products-manage,#page-SanXuat,#page-NguyenLieu,#page-user-management) table thead th:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e) {
+  background: transparent !important; background-image: none !important; box-shadow: none !important; border-radius: 0 !important;
+  border-top: 0 !important; border-bottom: 0 !important; border-left: 0 !important; border-right: 1px solid rgba(100,116,139,.25) !important;
+  padding: 10px 12px !important; font-size: 11px !important; font-weight: 800 !important; letter-spacing: .03em; text-transform: uppercase;
+  color: #475569 !important; line-height: 1.25; white-space: nowrap;
+}
+html:not(.dark) body :is(#page-inventory,#page-history,#page-customers,#page-products-manage,#page-SanXuat,#page-NguyenLieu,#page-user-management) table thead th:last-child:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e) { border-right: 0 !important; }
+/* cột cuối Kho hàng "GIÁ BÁN ĐỀ XUẤT": chữ nhỏ lại để không xuống 2 dòng làm cao hơn các trang khác */
+html:not(.dark) body #kho-table thead th:last-child:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e) { font-size: 9.5px !important; letter-spacing: 0; }
+/* danh sách phiếu đại lý (.ord-head) cùng kiểu */
+html:not(.dark) body .ord-head:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e) { background: #dde3ee !important; box-shadow: none !important; border-bottom: 1.5px solid rgba(100,116,139,.35) !important; }
+html:not(.dark) body .ord-head > *:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e) { background: transparent !important; box-shadow: none !important; border: 0 !important; font-size: 11px !important; font-weight: 800 !important; color: #475569 !important; }
+
+/* ===== (2) TRANG CHỦ: bỏ hiệu ứng nổi 3D, làm phẳng thẻ + bảng ===== */
+html:not(.dark) body #page-home .home-charts-grid > div:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e) { box-shadow: 0 1px 2px rgba(15,23,42,.08) !important; }
+html:not(.dark) body #page-home .home-charts-grid > div > :is(div,h3):first-child:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e) { box-shadow: none !important; border-bottom: 1px solid rgba(100,116,139,.25) !important; }
+html:not(.dark) body #page-home #home-inventory-list .inv-row:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e) { box-shadow: none !important; border-top-color: rgba(100,116,139,.45) !important; border-right-color: rgba(100,116,139,.45) !important; border-bottom-color: rgba(100,116,139,.45) !important; margin-bottom: 5px !important; }
+html:not(.dark) body #page-home #home-inventory-list .inv-head:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e) { box-shadow: none !important; }
+html:not(.dark) body #page-home #stock-alert-body > div:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e) { box-shadow: none !important; }
+</style>
+
+<style id="pm-v22-flat-cards">
+html:not(.dark) body #page-home .home-charts-grid > div:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h) { box-shadow: 0 1px 2px rgba(15,23,42,.08) !important; }
 </style>
