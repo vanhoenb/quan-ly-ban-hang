@@ -1904,6 +1904,48 @@ html #cart-box table.imp-ct tr.imp-row .imp-cn { font-size:13px; line-height:1.2
 html #cart-box table.imp-ct tr.imp-row .imp-x { width:26px; height:26px; font-size:13px; }
 html #cart-box table.imp-ct thead.imp-thead th { padding-top:6px !important; padding-bottom:6px !important; }
 </style>
+<style id="home-inv-card-css">
+/* Nút chuyển kiểu hiển thị Chi tiết tồn kho */
+#inv-view-switch{display:flex;border-radius:9px;overflow:hidden;border:1px solid rgba(255,255,255,.55)}
+#inv-view-switch button{padding:3px 9px;font-size:10px;font-weight:800;color:#fff;background:rgba(255,255,255,.16);line-height:1.4}
+#inv-view-switch button.on{background:#fff;color:#1d4ed8}
+/* Kiểu BIỂU ĐỒ: thanh ngang xếp chồng - phần màu = còn tồn cuối, phần sọc hồng = đã xuất; cùng một thang đo cho mọi sản phẩm */
+.inv-legend{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;margin:0 2px 8px;font-size:10px;font-weight:700;color:#64748b}
+.inv-legend span{display:inline-flex;align-items:center;gap:5px}
+.inv-legend i{display:inline-block;width:14px;height:8px;border-radius:3px}
+.inv-legend .lg-d{background:linear-gradient(180deg,#6aa0ff,#3b6fe0)}
+.inv-legend .lg-n{background:linear-gradient(180deg,#fcd34d,#f59e0b)}
+.inv-legend .lg-c{background:linear-gradient(180deg,#34d399,#059669)}
+.inv-legend .lg-x{background:linear-gradient(180deg,#fda4af,#f43f5e)}
+.inv-legend .lg-low{background:linear-gradient(180deg,#f87171,#dc2626)}
+.inv-legend .lg-note{margin-left:auto;font-weight:600;color:#94a3b8}
+#home-inventory-list .inv-cols.inv-bars{display:block !important}
+.inv-bars .inv-card{display:grid;grid-template-columns:minmax(120px,28%) 1fr;align-items:center;gap:12px;padding:5px 8px;border-radius:10px}
+.inv-bars .inv-card:nth-child(even){background:rgba(99,102,241,.06)}
+.inv-bars .inv-card:hover{background:rgba(59,130,246,.10)}
+.inv-bars .bc-name{font-size:12px;font-weight:800;line-height:1.2;color:#1e293b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.inv-bars .bc-line{display:flex;height:22px;gap:3px;min-width:0}
+.inv-bars .bc-line > i{display:flex;align-items:center;justify-content:center;flex-basis:0;min-width:34px;border-radius:6px;overflow:hidden}
+.inv-bars .bc-line > i b{font-size:12px;font-weight:900;color:#fff;line-height:1;text-shadow:0 1px 1px rgba(0,0,0,.30);white-space:nowrap}
+.inv-bars .bc-line > i{box-shadow:inset 0 1px 0 rgba(255,255,255,.40),0 1px 2px rgba(15,23,42,.14)}
+.inv-bars .bc-line > i:first-child{border-radius:11px 6px 6px 11px}
+.inv-bars .bc-line > i:last-child{border-radius:6px 11px 11px 6px}
+.inv-bars .s-d{background:linear-gradient(180deg,#6aa0ff,#3b6fe0)}
+.inv-bars .s-n{background:linear-gradient(180deg,#fde68a,#f5b01e)}
+.inv-bars .s-n b{color:#6b3a06 !important;text-shadow:0 1px 0 rgba(255,255,255,.45) !important}
+.inv-bars .s-x{background:linear-gradient(180deg,#fda4af,#f43f5e)}
+.inv-bars .s-c{background:linear-gradient(180deg,#3fd6a2,#059669)}
+.inv-bars .s-c b{font-size:13px !important}
+.inv-bars .inv-card.low .s-c{background:linear-gradient(180deg,#fb8a8a,#dc2626)}
+.inv-bars .s-zero{background:#e2e8f0 !important;min-width:34px !important}
+.inv-bars .s-zero b{color:#94a3b8 !important;text-shadow:none !important}
+html.dark .inv-bars .s-zero{background:#334155 !important}
+.inv-bars .inv-card.out .s-c{background:linear-gradient(180deg,#b6c0cf,#7b8798)}
+html.dark .inv-legend{color:#94a3b8}
+html.dark .inv-bars .inv-card:nth-child(even){background:rgba(148,163,184,.08)}
+html.dark .inv-bars .bc-name{color:#f1f5f9}
+@media (max-width:640px){.inv-bars .inv-card{grid-template-columns:minmax(84px,34%) 1fr;gap:6px}.inv-legend .lg-note{display:none}}
+</style>
 <style id="home-inv-ui">
 /* ===== TRANG CHỦ - CHI TIẾT TỒN KHO: dạng bảng gọn, xem được nhiều sản phẩm hơn ===== */
 #home-inventory-list .inv-hc, #home-inventory-list .inv-row { display:grid;  align-items:center; column-gap:6px; }
@@ -4089,7 +4131,8 @@ document.addEventListener('DOMContentLoaded', function () {
         <div id="inv-detail-card" class="lg:col-span-3 bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl border border-rose-100 dark:border-rose-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
             <div data-gb="blue" class="flex justify-between items-center -mx-4 md:-mx-6 -mt-4 md:-mt-6 mb-4 px-4 md:px-6 py-3 rounded-t-[23px] bg-blue-600 dark:bg-blue-700">
                 <h3 class="text-xs font-black text-white uppercase tracking-widest">📦 CHI TIẾT TỒN KHO</h3>
-                <div class="flex gap-2">
+                <div class="flex gap-2 items-center">
+                    <div id="inv-view-switch" title="Đổi cách hiển thị"><button type="button" data-v="table" onclick="setHomeInvView('table')">☰ Bảng</button><button type="button" data-v="chart" onclick="setHomeInvView('chart')">📊 Biểu đồ</button></div>
                     <input type="date" id="inv-from" onchange="refreshInventory()" class="text-[10px] bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500 transition-all">
                     <input type="date" id="inv-to" onchange="refreshInventory()" class="text-[10px] bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500 transition-all">
                 </div>
@@ -4184,7 +4227,7 @@ document.addEventListener('DOMContentLoaded', function () {
         decorateInv(list);
         var q = norm(($('stock-inv-search') || {}).value).trim();
         var low = !!($('stock-inv-low') || {}).checked;
-        var rows = list.querySelectorAll('.inv-row'), total = rows.length, shown = 0, lowN = 0;
+        var rows = list.querySelectorAll('.inv-row, .inv-card'), total = rows.length, shown = 0, lowN = 0;
         [].forEach.call(rows, function (r) {
             var isLow = r.classList.contains('low'); if (isLow) lowN++;
             var ok = (!q || norm(r.textContent).indexOf(q) > -1) && (!low || isLow);
@@ -4192,7 +4235,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (ok) shown++;
         });
         [].forEach.call(list.querySelectorAll('.inv-cols'), function (c) {
-            var any = [].some.call(c.querySelectorAll('.inv-row'), function (r) { return r.style.display !== 'none'; });
+            var any = [].some.call(c.querySelectorAll('.inv-row, .inv-card'), function (r) { return r.style.display !== 'none'; });
             if (c.parentElement) c.parentElement.style.display = any ? '' : 'none';
         });
         if (window.__pmApplyNxtGrp) window.__pmApplyNxtGrp();
@@ -4538,7 +4581,7 @@ document.addEventListener('DOMContentLoaded', function () {
           /* Hàng tiêu đề dùng CHÍNH XÁC cùng lưới và cùng lề (28px = lề ô + viền nhóm + viền thẻ) với các thẻ sản phẩm nên thẳng cột. */
           /* Chuyển bảng sang dạng khối để hàng tiêu đề (lưới) và các thẻ sản phẩm cùng rộng đúng 100% và cùng chia cột. */
           #kho-table.kho-hide-hsd, #kho-table.kho-hide-hsd thead, #kho-table.kho-hide-hsd tbody,
-          #kho-table.kho-hide-hsd tbody tr, #kho-table.kho-hide-hsd tbody td { display:block !important; width:100% !important; box-sizing:border-box; }
+          #kho-table.kho-hide-hsd tbody tr:not([style*="display: none"]):not([style*="display:none"]):not(.hidden), #kho-table.kho-hide-hsd tbody tr:not([style*="display: none"]):not([style*="display:none"]):not(.hidden) > td { display:block !important; width:100% !important; box-sizing:border-box; }
           #kho-table.kho-hide-hsd thead tr { display:grid !important; grid-template-columns:26% 27% 8% 8% 9% 9% 13%; padding:0 28px; }
           #kho-table.kho-hide-hsd thead th { width:auto !important; min-width:0; box-sizing:border-box; }
           #kho-table.kho-hide-hsd thead th:nth-child(1) { text-align:left; padding-left:8px !important; }
@@ -10992,36 +11035,9 @@ async function loadDashboard(filter = 'default', options = {}) {
             autoByName[r.customer] = (autoByName[r.customer] || 0) + (Number(r.total) || 0);
         });
         const startKey = debtMonthKey(startDate), endKey = debtMonthKey(endDate);
-        let sumNewRemaining = 0;
-        Object.keys(chargeByName).forEach(nm => {
-            const charges = chargeByName[nm];
-            const months = Object.keys(charges).sort();
-            const expl = explicitByName[nm] || {};
-            let auto = autoByName[nm] || 0;
-            let explTotal = 0;
-            Object.keys(expl).forEach(k => { explTotal += expl[k]; });
-            const T = debtByName[nm] || 0;
-            let Cw = 0;
-            months.forEach(k => { Cw += charges[k]; });
-            // "pre" = nợ trước các tháng có dữ liệu hóa đơn (nợ đầu kỳ + nợ cũ), suy ra từ: Nợ hiện tại = pre + phát sinh - tổng đã trả
-            const rem = { pre: Math.max(0, T - Cw + auto + explTotal) };
-            months.forEach(k => { rem[k] = charges[k]; });
-            Object.keys(expl).forEach(k => {
-                const target = (k in rem) ? k : ((months.length === 0 || k < months[0]) ? 'pre' : null);
-                if (target === null) { auto += expl[k]; return; }
-                const use = Math.min(expl[k], rem[target]);
-                rem[target] -= use;
-                auto += expl[k] - use;
-            });
-            ['pre'].concat(months).forEach(k => {
-                const use = Math.min(auto, rem[k]);
-                rem[k] -= use;
-                auto -= use;
-            });
-            let periodRem = 0;
-            months.forEach(k => { if (k >= startKey && k <= endKey) periodRem += rem[k]; });
-            sumNewRemaining += Math.max(0, Math.min(periodRem, T));
-        });
+        const custRes = computeNewDebtRemaining(chargeByName, explicitByName, autoByName, debtByName, startKey, endKey);
+        const sumNewRemaining = custRes.sum;
+        window.__newDebtRemainByCustomerName = custRes.byName;
         newDebtCustomerRemaining = sumNewRemaining;
         oldDebtCustomer = Math.max(0, totalDebt - sumNewRemaining);
     }
@@ -11059,6 +11075,41 @@ async function loadDashboard(filter = 'default', options = {}) {
     let newDebtNCCRemaining = totalDebtNCC - oldDebtNCC;
     if (newDebtNCCRemaining < 0)
         newDebtNCCRemaining = 0;
+    // Nợ NCC phát sinh trong kỳ còn phải trả: tính riêng từng NCC, khoản trả chọn tháng trừ đúng tháng đó,
+    // khoản trả "Tự động" trừ nợ cũ nhất trước (cùng cách tính với ô công nợ khách).
+    {
+        const debtByNcc = {}, nameByIdNcc = {};
+        (suppliersSnap.docs || []).forEach(doc => {
+            const x = doc.data() || {};
+            const nm = x.name || '';
+            nameByIdNcc[doc.id] = nm;
+            debtByNcc[nm] = (debtByNcc[nm] || 0) + (Number(x.debt) || 0);
+        });
+        const chargeByNcc = {};
+        materialImportsPeriodSnap.docs.forEach(doc => {
+            const d = doc.data() || {};
+            if (!d.ncc) return;
+            const mk = debtMonthKey(d.timestamp || d.date);
+            if (!mk) return;
+            const c = chargeByNcc[d.ncc] || (chargeByNcc[d.ncc] = {});
+            c[mk] = (c[mk] || 0) + (Number(d.thanhTien) || 0);
+        });
+        const explicitByNcc = {}, autoByNcc = {};
+        allSupplierPaymentsSnap.docs.forEach(doc => {
+            const d = doc.data() || {};
+            const nm = d.supplierName || nameByIdNcc[d.supplierId];
+            if (!nm) return;
+            const amt = Number(d.amount) || 0;
+            if (/^\d{4}-\d{2}$/.test(d.allocMonth || '')) {
+                const e = explicitByNcc[nm] || (explicitByNcc[nm] = {});
+                e[d.allocMonth] = (e[d.allocMonth] || 0) + amt;
+            } else autoByNcc[nm] = (autoByNcc[nm] || 0) + amt;
+        });
+        const nccRes = computeNewDebtRemaining(chargeByNcc, explicitByNcc, autoByNcc, debtByNcc, debtMonthKey(startDate), debtMonthKey(endDate));
+        newDebtNCCRemaining = nccRes.sum;
+        oldDebtNCC = Math.max(0, totalDebtNCC - nccRes.sum);
+        window.__newDebtRemainBySupplierName = nccRes.byName;
+    }
     // =======================================================================================
     // LỢI NHUẬN = Tổng doanh thu (trong kỳ) - Nợ NCC PHÁT SINH TRONG KỲ (không phải trừ tổng
     // nợ NCC luỹ kế từ trước tới giờ như trước đây - đó là lý do số Lợi Nhuận trước đây bị
@@ -11314,14 +11365,17 @@ function showDashboardDetail(type) {
                 '<div class="text-[11px] font-black text-rose-600 dark:text-rose-400">' + closingDebt.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + '</div>' +
                 '</div>' +
                 '</div>' +
+                (((window.__newDebtRemainByCustomerName || {})[name] || 0) > 0 ? '<div class="mt-1 text-[10px] font-bold text-amber-600 dark:text-amber-400 text-left">Nợ phát sinh kỳ này còn: ' + Number((window.__newDebtRemainByCustomerName || {})[name]).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + ' đ</div>' : '') +
                 '</div>';
         });
+        const custNewRemTotal = Object.values(window.__newDebtRemainByCustomerName || {}).reduce((a, b) => a + (Number(b) || 0), 0);
         // Ô TỔNG CỘNG CÔNG NỢ KHÁCH: NỀN MỜ ĐỎ/HỒNG DỊU CHỐNG CHÓI
         let html = '<div class="mb-4 p-3 bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200/50 dark:border-rose-900/30 rounded-xl">' +
             '<div class="flex justify-between items-center text-rose-900 dark:text-rose-400">' +
             '<span class="font-bold text-xs uppercase">Tổng nợ khách hàng (Số còn nợ)</span>' +
             '<span class="font-black text-sm text-rose-600 dark:text-rose-400">' + totalDebt.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + ' đ</span>' +
             '</div>' +
+            '<div class="flex justify-between items-center mt-1.5 pt-1.5 border-t border-rose-200/50 dark:border-rose-900/30"><span class="font-bold text-[11px] text-amber-700 dark:text-amber-400">Nợ phát sinh trong kỳ còn phải thu (số trên ô Trang Chủ)</span><span class="font-black text-sm text-amber-700 dark:text-amber-400">' + custNewRemTotal.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + ' đ</span></div>' +
             '<div class="text-[10px] text-rose-500/80 dark:text-rose-400/70 mt-0.5">' + debtorRows.length + ' khách đang nợ - sắp xếp nợ nhiều nhất lên đầu, bấm vào tên để xem chi tiết</div>' +
             '</div>' +
             '<div class="space-y-1 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">' +
@@ -11377,14 +11431,17 @@ function showDashboardDetail(type) {
                     '<div class="text-[11px] font-black text-rose-600 dark:text-rose-400">' + closingDebt.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + '</div>' +
                     '</div>' +
                     '</div>' +
+                    (((window.__newDebtRemainBySupplierName || {})[sup.name] || 0) > 0 ? '<div class="mt-1 text-[10px] font-bold text-amber-600 dark:text-amber-400 text-left">Nợ phát sinh kỳ này còn: ' + Number((window.__newDebtRemainBySupplierName || {})[sup.name]).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + ' đ</div>' : '') +
                     '</div>';
             });
+            const nccNewRemTotal = Object.values(window.__newDebtRemainBySupplierName || {}).reduce((a, b) => a + (Number(b) || 0), 0);
             // Ô TỔNG CỘNG CÔNG NỢ NCC: NỀN MỜ VÀNG/CAM ẤM DỊU CHỐNG CHÓI
             let html = '<div class="mb-4 p-3 bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/30 rounded-xl">' +
                 '<div class="flex justify-between items-center text-amber-900 dark:text-amber-400">' +
                 '<span class="font-bold text-xs uppercase">Tổng nợ nhà cung cấp (Số còn nợ)</span>' +
                 '<span class="font-black text-sm text-amber-600 dark:text-amber-400">' + totalNCCDebt.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + ' đ</span>' +
                 '</div>' +
+                '<div class="flex justify-between items-center mt-1.5 pt-1.5 border-t border-amber-200/50 dark:border-amber-900/30"><span class="font-bold text-[11px] text-orange-700 dark:text-orange-400">Nợ phát sinh trong kỳ còn phải trả (số trên ô Trang Chủ)</span><span class="font-black text-sm text-orange-700 dark:text-orange-400">' + nccNewRemTotal.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + ' đ</span></div>' +
                 '<div class="text-[10px] text-amber-600/80 dark:text-amber-400/70 mt-0.5">' + sortedSuppliers.length + ' NCC đang nợ - sắp xếp nợ nhiều nhất lên đầu, bấm vào tên để xem chi tiết</div>' +
                 '</div>' +
                 '<div class="space-y-1 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">' +
@@ -11782,6 +11839,48 @@ function getExpirySummaryByProduct(expiryLots, name) {
 
 // ================ TỒN KHO (ĐỒNG BỘ DUAL THEME - 3D GLOSSY CHỐNG LÓA) ==============================
 // Dòng tồn kho gọn ở Trang chủ: tên SP + 4 số (Đầu / Nhập / Xuất / Cuối) + thanh tỉ lệ mảnh. ~30px/dòng nên xem được nhiều sản phẩm hơn.
+// ===== CHI TIẾT TỒN KHO (Trang chủ): 2 kiểu hiển thị - "Bảng" (gọn, nhiều dòng) và "Thẻ" (mỗi sản phẩm 1 thẻ, có thanh còn lại) =====
+function getHomeInvView() { try { return localStorage.getItem('home_inv_view') === 'chart' ? 'chart' : 'table'; } catch (e) { return 'table'; } }
+var HOME_INV_COLOR = { 'THỊT CHƯNG MẮM TÉP': '#c026d3', 'MẮM TÉP RIU ĐỎ': '#e11d48', 'QUẢ BÙI KỲ LÃO': '#059669', 'CƠM CHÁY': '#d97706', 'TRÀ HOA VÀNG': '#ca8a04', 'RUỐC CÁ': '#0891b2', 'BÁNH DỨA': '#4f46e5', 'CÁC LOẠI HỘP TÚI': '#65a30d', 'KHÁC': '#6b7280' };
+function homeInvBarHtml(name, dau, nhap, xuat, cuoi, low, scaleMax, color) {
+    // MỘT DÒNG / sản phẩm: 1 thanh gồm 4 đoạn theo thứ tự [Đầu kỳ][+Nhập][−Xuất][Còn cuối], mỗi đoạn dài theo số lượng của nó và ghi rõ số.
+    var nm = (typeof escapeHtml === 'function') ? escapeHtml(name) : name;
+    var state = low ? (cuoi <= 0 ? 'low out' : 'low') : 'ok';
+    var seg = function (cls, v, lbl) { return '<i class="' + cls + (v > 0 ? '' : ' s-zero') + '" style="flex-grow:' + (v > 0 ? v : 0.001) + '"><b>' + (v > 0 ? lbl + v : '–') + '</b></i>'; };
+    var tip = nm + ' — Đầu kỳ ' + dau + ' · Nhập ' + nhap + ' · Xuất ' + xuat + ' · Tồn cuối ' + cuoi;
+    return '<div class="inv-card ' + state + '" title="' + tip + '">'
+        + '<div class="bc-name">' + nm + '</div>'
+        + '<div class="bc-line">' + seg('s-d', dau, '') + seg('s-n', nhap, '+') + seg('s-x', xuat, '−') + seg('s-c', cuoi, '') + '</div>'
+        + '</div>';
+}
+window.__renderHomeInv = function () {
+    var container = document.getElementById('home-inventory-list');
+    if (!container) return;
+    var groups = window.__homeInvGroups || [];
+    var mode = getHomeInvView();
+    var html = '';
+    groups.forEach(function (g) {
+        var rows = '';
+        var scaleMax = 1;
+        g.rows.forEach(function (r) { scaleMax = Math.max(scaleMax, r[1] + r[2], r[4]); });
+        var gcolor = HOME_INV_COLOR[String(g.ten).toUpperCase()] || '#10b981';
+        g.rows.forEach(function (r) { rows += (mode === 'chart') ? homeInvBarHtml(r[0], r[1], r[2], r[3], r[4], r[5], scaleMax, gcolor) : homeInvRowHtml(r[0], r[1], r[2], r[3], r[4], r[5]); });
+        html += "\n            <div class=\"rounded-2xl border-2 " + getNhomBlockBorder(g.ten) + " " + getNhomBlockBg(g.ten) + " p-2 mb-2\">\n                <div class=\"text-[10px] font-black !font-bold uppercase tracking-wide " + getNhomHeaderColor(g.ten) + " border rounded-lg px-2.5 py-0.5 mb-1.5\">" + g.ten + "</div>\n                <div class='inv-cols" + (mode === 'chart' ? ' inv-bars' : '') + "'>" + rows + "</div>\n            </div>";
+    });
+    var head = (html && mode === 'table') ? '<div class="inv-head"><div class="inv-hc"><span>Sản phẩm</span><span class="h-dau">Đầu</span><span class="h-nhap">Nhập</span><span class="h-xuat">Xuất</span><span class="h-cuoi">Cuối</span></div><div class="inv-hc inv-hc2"><span>Sản phẩm</span><span class="h-dau">Đầu</span><span class="h-nhap">Nhập</span><span class="h-xuat">Xuất</span><span class="h-cuoi">Cuối</span></div></div>' : '';
+    var legend = (html && mode === 'chart') ? '<div class="inv-legend"><span><i class="lg-d"></i>Đầu kỳ</span><span><i class="lg-n"></i>+Nhập</span><span><i class="lg-x"></i>−Xuất</span><span><i class="lg-c"></i>Còn cuối</span><span><i class="lg-low"></i>Sắp hết (&lt; 5)</span><span class="lg-note">Mỗi dòng: Đầu → +Nhập → −Xuất → Còn cuối</span></div>' : '';
+    container.innerHTML = html ? (head + legend + html) : '<p class="text-center py-6 text-xs text-slate-400 dark:text-slate-500">Không có dữ liệu tồn kho</p>';
+    container.classList.toggle('inv-view-chart', mode === 'chart');
+    window.__syncHomeInvSwitch();
+};
+window.__syncHomeInvSwitch = function () {
+    var mode = getHomeInvView();
+    [].forEach.call(document.querySelectorAll('#inv-view-switch button'), function (b) { b.classList.toggle('on', b.getAttribute('data-v') === mode); });
+};
+window.setHomeInvView = function (v) {
+    try { localStorage.setItem('home_inv_view', v === 'chart' ? 'chart' : 'table'); } catch (e) { }
+    window.__renderHomeInv();
+};
 function homeInvRowHtml(name, dau, nhap, xuat, cuoi, low) {
     // Chỉ VIỀN ô có màu; độ đậm của viền theo độ lớn của số. Nhập: viền đậm dần từ trái sang phải. Xuất: mờ dần từ trái sang phải.
     var mx = Math.max(dau, nhap, xuat, cuoi, 1);
@@ -11947,6 +12046,7 @@ async function renderInventoryList(filter = 'today', options = {}) {
         inv.tonDau = tonCuoiKy - inv.nhap - inv.change + inv.out;
     });
     let inventoryCardsHtml = '';
+    const homeInvGroupsData = [];
     // Gom theo nhóm sản phẩm (dùng chung NHOM_SP_DINH_NGHIA/xepNhomSanPham() + thứ tự hiển
     // thị THU_TU_HIEN_THI_NHOM - đúng như Phần II Báo Cáo Tổng Hợp) thay vì xếp thẳng 1 dãy
     // như trước - mỗi nhóm có 1 nhãn tiêu đề nhỏ, trong nhóm vẫn sắp theo khối lượng giảm
@@ -11963,6 +12063,7 @@ async function renderInventoryList(filter = 'today', options = {}) {
             return;
         let groupHasVisibleRow = false;
         let groupRowsHtml = '';
+        const groupRowsData = [];
         danhSachNhom.forEach(([name, item]) => {
             const tonCuoi = cleanQty(item.tonDau + item.nhap + item.change - item.out);
             const totalNhap = cleanQty(item.nhap + item.change);
@@ -11987,12 +12088,15 @@ async function renderInventoryList(filter = 'today', options = {}) {
             // hiệu ứng tăng/giảm màu khi sắp hết hàng, và vẫn có ghi chú (nhãn: giá trị) ngay
             // trong từng đoạn của thanh, chỉ khác là giờ nối liền thành 1 khối duy nhất.
             groupRowsHtml += homeInvRowHtml(name, tonDauClean, totalNhap, outClean, tonCuoi, isLowStock);
+            groupRowsData.push([name, tonDauClean, totalNhap, outClean, tonCuoi, isLowStock]);
         });
         if (groupHasVisibleRow) {
+            homeInvGroupsData.push({ ten: tenNhom, rows: groupRowsData });
             inventoryCardsHtml += "\n            <div class=\"rounded-2xl border-2 " + getNhomBlockBorder(tenNhom) + " " + getNhomBlockBg(tenNhom) + " p-2 mb-2\">\n                <div class=\"text-[10px] font-black !font-bold uppercase tracking-wide " + getNhomHeaderColor(tenNhom) + " border rounded-lg px-2.5 py-0.5 mb-1.5\">" + tenNhom + "</div>\n                <div class='inv-cols'>" + groupRowsHtml + "</div>\n            </div>";
         }
     });
-    container.innerHTML = (inventoryCardsHtml ? '<div class="inv-head"><div class="inv-hc"><span>Sản phẩm</span><span class="h-dau">Đầu</span><span class="h-nhap">Nhập</span><span class="h-xuat">Xuất</span><span class="h-cuoi">Cuối</span></div><div class="inv-hc inv-hc2"><span>Sản phẩm</span><span class="h-dau">Đầu</span><span class="h-nhap">Nhập</span><span class="h-xuat">Xuất</span><span class="h-cuoi">Cuối</span></div></div>' : '') + inventoryCardsHtml || '<p class="text-center py-6 text-xs text-slate-400 dark:text-slate-500">Không có dữ liệu tồn kho</p>';
+    window.__homeInvGroups = homeInvGroupsData;
+    window.__renderHomeInv();
 }
 //============================DOANH THU ====================
 // Hàm cập nhật Tài chính (Gọi khi thay đổi 2 ô input ngày)
@@ -23023,6 +23127,56 @@ async function getCustomerDebtMonths(customerName) {
         return Object.keys(m).sort().reverse().map(k => ({ key: k, amount: m[k] }));
     } catch (e) { console.warn('Không tải được các tháng có nợ:', e); return []; }
 }
+async function getSupplierDebtMonths(nccName) {
+    try {
+        const snap = await db.collection('material_imports').where('ncc', '==', nccName).limit(500).get();
+        const m = {};
+        snap.forEach(doc => {
+            const x = doc.data() || {};
+            const k = debtMonthKey(x.timestamp || x.date);
+            if (!k) return;
+            m[k] = (m[k] || 0) + (Number(x.thanhTien) || 0);
+        });
+        return Object.keys(m).sort().reverse().map(k => ({ key: k, amount: m[k] }));
+    } catch (e) { console.warn('Không tải được các tháng nhập hàng của NCC:', e); return []; }
+}
+// Tính "nợ phát sinh trong kỳ còn phải thu/trả" RIÊNG TỪNG đối tượng (khách/NCC) theo cách phân bổ tiền trả:
+// khoản trả chọn tháng trừ đúng tháng đó; khoản trả "Tự động" trừ nợ cũ nhất trước.
+function computeNewDebtRemaining(chargeByName, explicitByName, autoByName, debtByName, startKey, endKey) {
+    const byName = {};
+    let sum = 0;
+    Object.keys(chargeByName).forEach(nm => {
+        const charges = chargeByName[nm];
+        const months = Object.keys(charges).sort();
+        const expl = explicitByName[nm] || {};
+        let auto = autoByName[nm] || 0;
+        let explTotal = 0;
+        Object.keys(expl).forEach(k => { explTotal += expl[k]; });
+        const T = debtByName[nm] || 0;
+        let Cw = 0;
+        months.forEach(k => { Cw += charges[k]; });
+        const rem = { pre: Math.max(0, T - Cw + auto + explTotal) };
+        months.forEach(k => { rem[k] = charges[k]; });
+        Object.keys(expl).forEach(k => {
+            const target = (k in rem) ? k : ((months.length === 0 || k < months[0]) ? 'pre' : null);
+            if (target === null) { auto += expl[k]; return; }
+            const use = Math.min(expl[k], rem[target]);
+            rem[target] -= use;
+            auto += expl[k] - use;
+        });
+        ['pre'].concat(months).forEach(k => {
+            const use = Math.min(auto, rem[k]);
+            rem[k] -= use;
+            auto -= use;
+        });
+        let periodRem = 0;
+        months.forEach(k => { if (k >= startKey && k <= endKey) periodRem += rem[k]; });
+        const v = Math.max(0, Math.min(periodRem, T));
+        byName[nm] = v;
+        sum += v;
+    });
+    return { sum, byName };
+}
 function debtAllocSelectHtml(id, months, current) {
     const cls = 'w-full p-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded mb-3';
     let opts = '<option value="auto"' + ((!current || current === 'auto') ? ' selected' : '') + '>Tự động – trừ nợ cũ nhất trước</option>';
@@ -29855,9 +30009,13 @@ async function updateNCC(docId) {
     }
 }
 // Mở khung nhập liệu cho thao tác trả nợ
-function openPayModal(docId, nccName) {
-    // Lưu ý: Đã đổi payDebt thành paySupplierDebt ở dòng bên dưới
-    const content = "\n        <input type=\"number\" id=\"in-pay-modal\" class=\"border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white p-2 w-full mb-4 rounded\" placeholder=\"Nh\u1EADp s\u1ED1 ti\u1EC1n\">\n        <button onclick=\"paySupplierDebt('" + docId + "', '" + nccName + "')\" class=\"bg-blue-600 text-white w-full py-2 rounded-xl\">X\u00E1c nh\u1EADn tr\u1EA3 n\u1EE3</button>\n    ";
+async function openPayModal(docId, nccName) {
+    // Có thể chọn trả vào khoản nợ của tháng nào (mặc định: tự động trừ nợ cũ nhất trước).
+    const months = await getSupplierDebtMonths(nccName);
+    const jsName = String(nccName).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    const content = '\n        <input type="number" id="in-pay-modal" class="border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white p-2 w-full mb-4 rounded" placeholder="Nhập số tiền">\n        ' +
+        debtAllocSelectHtml('in-pay-alloc', months, 'auto') +
+        '\n        <button onclick="paySupplierDebt(\'' + docId + '\', \'' + jsName + '\')" class="bg-blue-600 text-white w-full py-2 rounded-xl">Xác nhận trả nợ</button>\n    ';
     showPopup("Trả nợ: " + nccName, content);
 }
 //======= XỬ LÝ TRẢ NỢ NHÀ CUNG CẤP =======
@@ -29867,6 +30025,7 @@ async function paySupplierDebt(docId, nccName) {
     const amount = parseFloat(inputElement ? inputElement.value : 0);
     if (!amount || amount <= 0)
         return showAlert("Vui lòng nhập số tiền hợp lệ!");
+    const allocMonthNcc = (document.getElementById('in-pay-alloc') || {}).value || 'auto';
     window.__supplierPaymentInProgress = true;
     try {
         // Ghi khoản trả NCC + giảm công nợ trong CÙNG transaction để không xảy ra
@@ -29878,7 +30037,7 @@ async function paySupplierDebt(docId, nccName) {
             if (!supplierSnap.exists) throw new Error('Không tìm thấy nhà cung cấp.');
             const currentDebt = Number(supplierSnap.data().debt) || 0;
             if (amount > currentDebt + 1) throw new Error('Số tiền trả vượt quá công nợ nhà cung cấp hiện tại.');
-            tx.set(paymentRef, { supplierId: docId, supplierName: nccName, amount, date: new Date(), createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+            tx.set(paymentRef, { supplierId: docId, supplierName: nccName, amount, allocMonth: allocMonthNcc, date: new Date(), createdAt: firebase.firestore.FieldValue.serverTimestamp() });
             tx.update(supplierRef, { debt: firebase.firestore.FieldValue.increment(-amount) });
         });
         document.getElementById('popup-ncc').classList.add('hidden');
@@ -30065,7 +30224,7 @@ async function openHistoryModal(nccName) {
         } else {
             html += '<div class="p-2">';
             paymentRows.forEach(d => {
-                html += '<div class="flex items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-700 py-2 text-sm"><span>📅 ' + dateNcc(d.date) + '</span><span class="font-bold text-emerald-600">' + moneyNcc(d.amount) + '</span><span class="flex items-center gap-2"><button type="button" onclick="editPaymentNCC(\'' + d.id.replace(/'/g, "\\'") + '\', \'' + safeName + '\')" title="Sửa số tiền / ngày" class="px-2 py-0.5 rounded-lg bg-blue-100 text-blue-700 font-bold hover:bg-blue-200">✏️ Sửa</button><button onclick="deletePaymentNCC(\'' + d.id.replace(/'/g, "\\'") + '\', \'' + safeName + '\', ' + d.amount + ')" title="Xóa" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></span></div>';
+                html += '<div class="flex items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-700 py-2 text-sm"><span>📅 ' + dateNcc(d.date) + '</span><span class="font-bold text-emerald-600">' + moneyNcc(d.amount) + ((d.allocMonth && d.allocMonth !== 'auto') ? ' <span class="text-[10px] font-bold text-indigo-600">[trừ nợ ' + debtMonthLabel(d.allocMonth) + ']</span>' : '') + '</span><span class="flex items-center gap-2"><button type="button" onclick="editPaymentNCC(\'' + d.id.replace(/'/g, "\\'") + '\', \'' + safeName + '\')" title="Sửa số tiền / ngày" class="px-2 py-0.5 rounded-lg bg-blue-100 text-blue-700 font-bold hover:bg-blue-200">✏️ Sửa</button><button onclick="deletePaymentNCC(\'' + d.id.replace(/'/g, "\\'") + '\', \'' + safeName + '\', ' + d.amount + ')" title="Xóa" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></span></div>';
             });
             html += '</div>';
         }
@@ -30155,17 +30314,19 @@ async function editPaymentNCC(payId, nccName) {
         if (!dt || Number.isNaN(dt.getTime())) dt = new Date();
         const dateISO = dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
         const inCls = 'w-full p-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded mb-3';
+        const editMonthsNcc = await getSupplierDebtMonths(nccName);
         const { value: fv } = await Swal.fire({
             title: 'Sửa khoản trả nợ NCC',
             html: '<div class="text-sm text-left mb-2">NCC: <b>' + escapeHtml(nccName) + '</b> — số tiền đang ghi: <b>' + fmt(oldAmount) + ' đ</b></div>' +
                 '<label class="text-sm font-bold block text-left mb-1">Số tiền trả (đúng):</label><input id="swal-ncc-amount" type="number" min="0" inputmode="numeric" class="' + inCls + '" value="' + oldAmount + '">' +
-                '<label class="text-sm font-bold block text-left mb-1">Ngày trả:</label><input id="swal-ncc-date" type="date" class="' + inCls + '" value="' + dateISO + '">',
+                '<label class="text-sm font-bold block text-left mb-1">Ngày trả:</label><input id="swal-ncc-date" type="date" class="' + inCls + '" value="' + dateISO + '">' +
+                debtAllocSelectHtml('swal-ncc-alloc', editMonthsNcc, p.allocMonth || 'auto'),
             focusConfirm: false, showCancelButton: true, confirmButtonText: 'Lưu thay đổi', cancelButtonText: 'Hủy',
             didOpen: () => { const i = document.getElementById('swal-ncc-amount'); if (i) { i.focus(); i.select(); } },
             preConfirm: () => {
                 const raw = document.getElementById('swal-ncc-amount').value, v = parseFloat(raw);
                 if (!raw || !isFinite(v) || v <= 0) { Swal.showValidationMessage('Số tiền phải lớn hơn 0. (Nếu muốn bỏ khoản này hãy dùng nút xoá.)'); return false; }
-                return { amount: v, date: document.getElementById('swal-ncc-date').value || dateISO };
+                return { amount: v, date: document.getElementById('swal-ncc-date').value || dateISO, allocMonth: (document.getElementById('swal-ncc-alloc') || {}).value || 'auto' };
             }
         });
         if (!fv) return;
@@ -30175,7 +30336,7 @@ async function editPaymentNCC(payId, nccName) {
         if (p.supplierId) supplierRefs = [db.collection('suppliers').doc(p.supplierId)];
         else {
             const sSnap = await db.collection('suppliers').where('name', '==', nccName).get();
-            supplierRefs = sSnap.docs.map(d => d.ref);
+            supplierRefs = sSnap.docs.slice(0, 1).map(d => d.ref);
         }
         if (!supplierRefs.length) throw new Error('Không tìm thấy thông tin NCC!');
         const payRef = db.collection('payments').doc(payId);
@@ -30188,7 +30349,7 @@ async function editPaymentNCC(payId, nccName) {
                 const curDebt = Number((sSnaps[0].data() || {}).debt) || 0;
                 if (delta > curDebt + 1) throw new Error('Số tiền mới vượt quá công nợ hiện tại của NCC (' + fmt(curDebt) + ' đ).');
             }
-            const update = { amount: fv.amount, editedAt: firebase.firestore.FieldValue.serverTimestamp() };
+            const update = { amount: fv.amount, allocMonth: fv.allocMonth, editedAt: firebase.firestore.FieldValue.serverTimestamp() };
             if (fv.date !== dateISO) update.date = new Date(fv.date + 'T12:00:00');
             tx.update(payRef, update);
             sSnaps.forEach((snap, i) => { if (snap.exists) tx.update(supplierRefs[i], { debt: firebase.firestore.FieldValue.increment(-delta) }); });
@@ -30215,20 +30376,29 @@ async function deletePaymentNCC(payId, nccName, amount) {
     if (!confirm("Xác nhận xóa lần trả nợ này?"))
         return;
     try {
-        // 1. Xóa bản ghi thanh toán
-        await db.collection('payments').doc(payId).delete();
-        // 2. Tìm tất cả các NCC có tên này (xử lý trường hợp trùng tên)
-        const snap = await db.collection('suppliers').where('name', '==', nccName).get();
-        if (snap.empty) {
+        // Xóa khoản trả và cộng lại nợ cho ĐÚNG NCC đã trả (theo mã NCC lưu trong khoản trả) trong 1 transaction.
+        // Khoản trả cũ không có mã NCC thì dùng NCC đầu tiên trùng tên (không cộng nhầm cho các NCC trùng tên khác).
+        const payRef = db.collection('payments').doc(payId);
+        const pSnap = await payRef.get();
+        if (!pSnap.exists) { showAlert("Khoản trả nợ này không còn tồn tại."); return; }
+        const pData = pSnap.data() || {};
+        const payAmount = Number(pData.amount) || Number(amount) || 0;
+        let supRef = null;
+        if (pData.supplierId) supRef = db.collection('suppliers').doc(pData.supplierId);
+        else {
+            const snap = await db.collection('suppliers').where('name', '==', nccName).get();
+            if (!snap.empty) supRef = snap.docs[0].ref;
+        }
+        if (!supRef) {
             showAlert("Không tìm thấy thông tin NCC!");
             return;
         }
-        // 3. Cập nhật nợ cho TẤT CẢ các bản ghi tìm thấy (nguyên tử, không đọc debt cũ trước)
-        for (const doc of snap.docs) {
-            await doc.ref.update({
-                debt: firebase.firestore.FieldValue.increment(amount)
-            });
-        }
+        await db.runTransaction(async tx => {
+            const sSnap = await tx.get(supRef);
+            if (!sSnap.exists) throw new Error('Không tìm thấy thông tin NCC!');
+            tx.update(supRef, { debt: firebase.firestore.FieldValue.increment(payAmount) });
+            tx.delete(payRef);
+        });
         // 4. Đóng popup và làm mới
         const popup = document.getElementById('popup-ncc');
         if (popup)
@@ -34366,7 +34536,7 @@ html.dark body #page-home #home-inventory-list .inv-row.low .inv-num.c-cuoi .inv
         if (!list || !bar) return;
         var blocks = [].filter.call(list.children, function (b) { return b.querySelector && b.querySelector('.inv-cols'); });
         var counts = {}, total = 0;
-        blocks.forEach(function (b) { var k = keyOf(b), n = b.querySelectorAll('.inv-row').length; counts[k] = (counts[k] || 0) + n; total += n; });
+        blocks.forEach(function (b) { var k = keyOf(b), n = b.querySelectorAll('.inv-row,.inv-card').length; counts[k] = (counts[k] || 0) + n; total += n; });
         if (window.__pmNxtGrp !== 'ALL' && !counts[window.__pmNxtGrp]) window.__pmNxtGrp = 'ALL';
         var cur = window.__pmNxtGrp;
         blocks.forEach(function (b) { b.style.display = (cur === 'ALL' || keyOf(b) === cur) ? '' : 'none'; });
