@@ -3715,6 +3715,9 @@ html.glass.dark .choices.is-open .choices__inner {
         </button>
         
         
+        <button onclick="showPage('page-stocktake'); toggleMoreMenu()" data-perm="page-inventory" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-teal-950/40 border-teal-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-teal-400 text-xs font-bold">
+            <i data-lucide="clipboard-check" class="w-4 h-4"></i> Kiểm Kê
+        </button>
         <button onclick="showPage('page-history'); toggleMoreMenu()" data-perm="page-history" class="w-full text-left p-2 pr-4 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform active:translate-y-[1px] border-b-[2.5px] bg-purple-950/40 border-purple-800 active:border-b-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.3)] text-purple-400 text-xs font-bold">
             <i data-lucide="history" class="w-4 h-4 drop-shadow-[0_1px_2px_rgba(168,85,247,0.4)]"></i> Lịch Sử HĐ
         </button>
@@ -3800,7 +3803,7 @@ html.glass.dark .choices.is-open .choices__inner {
 // Giờ chỉ đúng 1 tab đang mở được tô màu, còn lại chuyển xám trung tính - đúng kiểu
 // thanh điều hướng hiện đại (giống Zalo/Messenger). Nút "Khác" cũng tự sáng lên nếu
 // trang đang mở là 1 trong các trang nằm trong menu "Khác" (Kho Hàng, Lịch Sử HĐ...).
-const MOBILE_NAV_MORE_PAGES = ['page-inventory', 'page-history', 'page-customers', 'page-products-manage', 'page-SanXuat', 'page-NguyenLieu', 'page-LichCongViec', 'page-user-management'];
+const MOBILE_NAV_MORE_PAGES = ['page-inventory', 'page-stocktake', 'page-history', 'page-customers', 'page-products-manage', 'page-SanXuat', 'page-NguyenLieu', 'page-LichCongViec', 'page-user-management'];
 function updateMobileNavActive(pageId) {
     const mainTabs = ['page-home', 'page-sell', 'page-import', 'page-report'];
     const activeKey = mainTabs.includes(pageId) ? pageId : (MOBILE_NAV_MORE_PAGES.includes(pageId) ? 'more' : null);
@@ -3906,6 +3909,10 @@ document.addEventListener('DOMContentLoaded', function () {
         </button>
 
         
+
+        <button onclick="showPage('page-stocktake'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" data-perm="page-inventory" data-navbtn-pc="page-stocktake" data-active-classes="bg-gradient-to-b from-teal-500 to-teal-600 dark:from-teal-900/60 dark:to-teal-800/50 text-white dark:text-teal-400 border-b-[4px] border-teal-700 dark:border-teal-600 shadow-[0_4px_10px_rgba(0,0,0,0.35)] dark:shadow-[0_6px_15px_rgba(0,0,0,0.35)] font-black tracking-wide" data-inactive-classes="border-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] border-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60">
+            <i data-lucide="clipboard-check" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(20,184,166,0.4)]"></i> <span class="sidebar-text">Kiểm Kê</span>
+        </button>
 
         <button onclick="showPage('page-sell'); event.stopPropagation(); document.getElementById('sidebar').classList.remove('active')" data-perm="page-sell" data-navbtn-pc="page-sell" data-active-classes="bg-gradient-to-b from-rose-500 to-rose-600 dark:from-rose-900/60 dark:to-rose-800/50 text-white dark:text-rose-400 border-b-[4px] border-rose-700 dark:border-rose-600 shadow-[0_4px_10px_rgba(0,0,0,0.35)] dark:shadow-[0_6px_15px_rgba(0,0,0,0.35)] font-black tracking-wide" data-inactive-classes="border-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60" class="w-full text-left p-2 rounded-lg flex items-center gap-3 transition-all duration-150 transform hover:-translate-y-[2px] active:translate-y-[2px] border-b-[3px] border-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60">
             <i data-lucide="shopping-cart" class="w-6 h-6 drop-shadow-[0_2px_4px_rgba(244,63,94,0.4)]"></i> <span class="sidebar-text">Bán Hàng</span>
@@ -4565,7 +4572,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			</button>
             </div>
             <div class="col-span-1 md:col-span-2">
-                <button onclick="openKiemKeKho()" class="w-full text-white py-3 rounded-xl text-sm font-bold border-b-[4px] shadow-md" style="background:linear-gradient(180deg,#2dd4bf,#0d9488)">
+                <button onclick="showPage('page-stocktake')" class="w-full text-white py-3 rounded-xl text-sm font-bold border-b-[4px] shadow-md" style="background:linear-gradient(180deg,#2dd4bf,#0d9488)">
                     📋 Kiểm kê kho
                 </button>
             </div>
@@ -4806,6 +4813,54 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
     </div>
         
+<!-- TRANG KIỂM KÊ KHO (báo cáo kiểm kê: tên + tồn hệ thống từ Kho Hàng, nhập SL thực tế, chênh lệch, xuất Excel) -->
+<div id="page-stocktake" class="hidden space-y-4 p-2 md:p-6 w-full">
+    <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+            <h2 data-pt class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">KIỂM KÊ KHO</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400" id="st-sub">Đếm hàng thực tế rồi nhập vào cột "SL thực tế" – chênh lệch tự tính.</p>
+        </div>
+        <div class="st-actions">
+            <button type="button" class="st-btn gray" onclick="__stReload()" title="Lấy lại tồn hệ thống mới nhất">🔄 Lấy lại tồn</button>
+            <button type="button" class="st-btn gray" onclick="__stMatchAll()" title="Đặt SL thực tế = tồn hệ thống cho các dòng chưa đếm">≡ Khớp các dòng chưa đếm</button>
+            <button type="button" class="st-btn gray" onclick="__stClear()">🗑️ Xóa số đã nhập</button>
+            <button type="button" class="st-btn gray" onclick="__kkHistory()">📜 Lịch sử</button>
+            <button type="button" class="st-btn blue" onclick="__stExport()">📥 Xuất Excel</button>
+            <button type="button" class="st-btn green" id="st-save" onclick="__stSave()" title="Xem lại các dòng lệch rồi đặt tồn kho đúng bằng số thực tế">⚖️ Điều chỉnh tồn kho theo thực tế</button>
+        </div>
+    </div>
+    <div id="st-kpis" class="st-kpis"></div>
+    <div class="st-card">
+        <div class="st-tools">
+            <input id="st-search" class="st-in" placeholder="🔍 Tìm sản phẩm..." oninput="__stFilter()" autocomplete="off">
+            <div id="st-chips" class="st-chips"></div>
+            <div class="st-seg" id="st-seg">
+                <button type="button" data-v="all" class="on" onclick="__stView('all')">Tất cả</button>
+                <button type="button" data-v="todo" onclick="__stView('todo')">Chưa đếm</button>
+                <button type="button" data-v="done" onclick="__stView('done')">Đã đếm</button>
+                <button type="button" data-v="diff" onclick="__stView('diff')">Lệch</button>
+            </div>
+        </div>
+        <div class="st-tablewrap">
+            <table class="st-table">
+                <thead><tr>
+                    <th style="width:48px">STT</th>
+                    <th class="l">Tên sản phẩm</th>
+                    <th style="width:90px">Nhóm</th>
+                    <th style="width:70px">ĐVT</th>
+                    <th style="width:110px">Tồn hệ thống</th>
+                    <th style="width:140px">SL thực tế</th>
+                    <th style="width:130px">Chênh lệch</th>
+                    <th style="width:130px">Giá trị lệch</th>
+                    <th style="width:200px">Ghi chú</th>
+                </tr></thead>
+                <tbody id="st-body"></tbody>
+            </table>
+        </div>
+        <div class="st-foot"><span id="st-draftnote"></span><span>Giá trị lệch tính theo <b>giá sỉ</b> trong danh mục · Chênh lệch = Thực tế − Hệ thống (+ thừa, − thiếu)</span></div>
+    </div>
+</div>
+
 <!-- PHẦN 3: BÁN HÀNG -->
 <div id="page-sell" class="p-2 md:p-6 pb-24 lg:pb-6 space-y-4 w-full">
     <h2 data-pt class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">BÁN HÀNG / XUẤT HOÁ ĐƠN</h2>
@@ -4909,7 +4964,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         <input type="text" id="sell-customer" placeholder="Tên khách hàng" 
                            class="w-full border border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl text-xs dark:text-white" 
                            oninput="filterCustomerList(this.value)" 
-                           onclick="this.value=''; filterCustomerList('');"
+                           onclick="this.select(); filterCustomerList('');"
                            autocomplete="off">
                         <div id="dropdown-list" class="absolute z-[100] w-full bg-gray-50 dark:bg-slate-950 border border-gray-300 dark:border-slate-700 rounded-xl mt-1 shadow-lg max-h-48 overflow-y-auto hidden text-xs dark:text-white">
                         </div>
@@ -8028,7 +8083,7 @@ function updateSalaryComputedDOM() {
         totals.overtime += ot.amount; totals.hours += ot.hours;
         totals.bonus += bonus; totals.allowance += allowance;
         totals.bh += legal.bhDeduction; totals.deduction += legal.deduction; totals.advance += legal.advance; totals.net += legal.net;
-        const set = (cls,text) => { const el=tr.querySelector('.'+cls); if(el) el.textContent=text; };
+        const set = (cls,text) => { const el=tr.querySelector('.'+cls); if(el){ const b=el.querySelector('.cc-box'); (b||el).textContent=text; } };
         set('salary-base', formatSalaryMoney(base)+' đ');
         set('salary-ot-amount', formatSalaryMoney(ot.amount)+' đ');
         set('salary-gross', formatSalaryMoney(legal.gross)+' đ');
@@ -8042,7 +8097,7 @@ function updateSalaryComputedDOM() {
     setId('chamcong-tong-thuc-linh',formatSalaryMoney(totals.net)+' đ');
     const foot=document.getElementById('chamcong-salary-foot');
     if(foot){
-        const setTotal=(col,text)=>{const el=foot.querySelector('[data-total-col=\"'+col+'\"]');if(el)el.textContent=text;};
+        const setTotal=(col,text)=>{const el=foot.querySelector('[data-total-col=\"'+col+'\"]');if(el){const b=el.querySelector('.cc-box');(b||el).textContent=text;}};
         setTotal('4',formatGio(totals.days));
         setTotal('5','');
         setTotal('6',formatSalaryMoney(totals.salary)+' đ');
@@ -10368,7 +10423,7 @@ function showPage(pageId) {
                 Swal.fire({ icon: 'warning', title: 'Không có quyền', text: 'Chỉ Admin mới có thể truy cập trang này.' });
             return;
         }
-        if (_curUser.role !== 'admin' && pageId !== 'page-user-management' && !(_curUser.permissions || []).includes(pageId === 'page-stock' ? 'page-home' : pageId)) {
+        if (_curUser.role !== 'admin' && pageId !== 'page-user-management' && !(_curUser.permissions || []).includes(pageId === 'page-stock' ? 'page-home' : (pageId === 'page-stocktake' ? 'page-inventory' : pageId))) {
             if (pageId !== 'page-home' && typeof Swal !== 'undefined')
                 Swal.fire({ icon: 'warning', title: 'Không có quyền', text: 'Bạn không có quyền truy cập trang này. Vui lòng liên hệ Admin.' });
             return;
@@ -10466,6 +10521,9 @@ function showPage(pageId) {
                 loadDropdowns();
             if (typeof loadAllData === 'function')
                 loadAllData();
+            break;
+        case 'page-stocktake':
+            if (typeof window.__stOpen === 'function') window.__stOpen();
             break;
         case 'page-inventory':
             // TỰ ĐỘNG ĐIỀN NGÀY THÁNG KHI MỞ TRANG KHO
@@ -16503,10 +16561,11 @@ async function migrateStockCountersIfNeeded() {
 //     forceResyncStockCounters()
 // rồi bấm Enter, đợi thông báo "Đã sửa xong" rồi tải lại trang.
 // ============================================================
-window.forceResyncStockCounters = async function () {
-    console.log('Đang tính lại tồn kho chính xác từ lịch sử, vui lòng đợi...');
-    try {
-        let inventory = {};
+// SỔ SÁCH TỒN KHO: tính lại tồn của TẤT CẢ sản phẩm từ lịch sử phiếu nhập / hoá đơn bán / phiếu hoàn trả
+// (và cộng chênh lệch các phiếu kiểm kê nếu includeStocktakes = true). Dùng chung cho nút "Sửa tồn kho" (trang Quản Lý)
+// và cho "Điều chỉnh tồn kho theo số thực tế" ở trang Kiểm Kê - để hai nơi luôn cho CÙNG một kết quả.
+window.__ledgerStockMap = async function (includeStocktakes) {
+    let inventory = {};
         // QUAN TRỌNG: khi tính lại tồn kho từ đầu, phải tôn trọng ĐÚNG những gì đã xảy ra
         // lúc lưu phiếu - không được cộng/trừ MÙ QUÁNG toàn bộ items như trước:
         // - Phiếu nhập "Nhập đổi - Hết hạn" (huỷ) KHÔNG được cộng vào tồn (dòng nào tự có
@@ -16552,8 +16611,16 @@ window.forceResyncStockCounters = async function () {
                 inventory[item.name] = (inventory[item.name] || 0) + (parseFloat(item.qty) || 0);
             });
         });
-        // Kiểm kê kho (collection 'stocktakes'): cộng chênh lệch đã điều chỉnh để dựng lại KHÔNG làm mất số kiểm kê.
-        try { const __stSnap = await db.collection('stocktakes').get(); __stSnap.forEach(sd => { ((sd.data() || {}).items || []).forEach(it => { const dd = parseFloat(it.diff) || 0; if (dd) inventory[it.name] = (inventory[it.name] || 0) + dd; }); }); } catch (e) { console.warn('Không đọc được kiểm kê khi dựng lại tồn kho:', e); }
+    if (includeStocktakes) {
+        try { const __stSnap = await db.collection('stocktakes').get(); __stSnap.forEach(sd => { ((sd.data() || {}).items || []).forEach(it => { const dd = parseFloat(it.diff) || 0; if (dd) inventory[it.name] = (inventory[it.name] || 0) + dd; }); }); } catch (e) { console.warn('Không đọc được kiểm kê khi dựng lại tồn kho:', e); throw e; }
+    }
+    return inventory;
+};
+window.forceResyncStockCounters = async function () {
+    console.log('Đang tính lại tồn kho chính xác từ lịch sử, vui lòng đợi...');
+    try {
+        // Dựng lại tồn từ lịch sử + các phiếu kiểm kê (hàm dùng chung __ledgerStockMap)
+        let inventory = await window.__ledgerStockMap(true);
         const names = Object.keys(inventory);
         for (let i = 0; i < names.length; i += 400) {
             const batch = db.batch();
@@ -18648,9 +18715,13 @@ function isSellStateEmpty(state) {
 }
 // Tạm giữ đơn đang làm việc (nếu có nội dung) vào danh sách "Hóa đơn chờ"
 function holdCurrentOrder() {
+    // Đang ở chế độ SỬA PHIẾU ĐÃ LƯU: nội dung trên màn hình là của phiếu đó, KHÔNG được ghi đè vào đơn chờ nào.
+    if (window.__editingSaleId)
+        return null;
     const state = getCurrentSellState();
     if (isSellStateEmpty(state))
-        return; // Không có gì để giữ
+        return window.activeHeldOrderId || null; // Không có gì để giữ
+    let heldId = window.activeHeldOrderId;
     if (window.activeHeldOrderId) {
         // Đang sửa 1 đơn đã giữ trước đó -> cập nhật lại nội dung mới nhất
         const idx = window.heldOrders.findIndex(o => o.id === window.activeHeldOrderId);
@@ -18660,16 +18731,23 @@ function holdCurrentOrder() {
     }
     else {
         // Đơn hoàn toàn mới -> thêm vào danh sách chờ
+        heldId = 'HD' + Date.now();
         window.heldOrders.push({
-            id: 'HD' + Date.now(),
+            id: heldId,
             ...state
         });
     }
     saveHeldOrdersToStorage();
+    return heldId;
 }
 // Bắt đầu bán cho 1 khách MỚI: tự động tạm giữ đơn đang làm (nếu có), rồi làm mới khu vực bán hàng
 function startNewSellOrder() {
     holdCurrentOrder();
+    if (window.__editingSaleId) {
+        // Đang sửa 1 phiếu đã lưu mà bấm "Đơn mới": thoát chế độ sửa, bắt đầu đơn trống (không tự quay lại đơn cũ)
+        window.__preEditHeldId = null;
+        exitEditSaleMode();
+    }
     window.activeHeldOrderId = null;
     sellCart = [];
     ['sell-customer', 'sell-address', 'sell-phone', 'sell-note-global'].forEach(id => {
@@ -18703,6 +18781,11 @@ function switchToHeldOrder(id) {
     const target = window.heldOrders.find(o => o.id === id);
     if (!target)
         return;
+    if (window.__editingSaleId) {
+        // Đang sửa 1 phiếu đã lưu mà chuyển sang đơn chờ khác: thoát chế độ sửa trước
+        window.__preEditHeldId = null;
+        exitEditSaleMode();
+    }
     applySellState(target);
     window.activeHeldOrderId = id;
     renderHeldOrdersBar();
@@ -18797,6 +18880,12 @@ async function editInvoiceFromHistory(docId) {
         }
         // Bật "chế độ sửa" TRƯỚC khi chuyển trang - để case 'page-sell' trong showPage()
         // biết mà KHÔNG tự sinh số phiếu mới đè lên số phiếu gốc đang sửa.
+        // GIỮ LẠI đơn đang bán dở (nếu có) trước khi nạp phiếu cần sửa lên màn hình; sửa xong sẽ tự quay lại đơn đó.
+        if (!window.__editingSaleId) {
+            window.__preEditHeldId = holdCurrentOrder();
+        }
+        window.activeHeldOrderId = null; // màn hình giờ là phiếu đã lưu, không còn gắn với đơn chờ nào
+        if (typeof renderHeldOrdersBar === 'function') renderHeldOrdersBar();
         window.__editingSaleId = docId;
         window.__editingSaleOriginalItems = JSON.parse(JSON.stringify(data.items || []));
         window.__editingSaleOriginalTotal = Number(data.total) || 0;
@@ -19004,6 +19093,15 @@ function exitEditSaleMode() {
     const saveBtn = document.getElementById('btn-save-print');
     if (saveBtn)
         saveBtn.innerText = "LƯU & IN (F1)";
+    // Sửa xong / hủy sửa: quay lại ĐƠN ĐANG BÁN DỞ trước đó (nếu có) thay vì để màn hình trống.
+    const restoreId = window.__preEditHeldId;
+    window.__preEditHeldId = null;
+    if (restoreId && Array.isArray(window.heldOrders) && window.heldOrders.some(o => o.id === restoreId) && typeof switchToHeldOrder === 'function') {
+        switchToHeldOrder(restoreId);
+    }
+    else if (typeof renderHeldOrdersBar === 'function') {
+        renderHeldOrdersBar();
+    }
 }
 // Lưu lại phiếu ĐANG SỬA - ghi đè vào đúng phiếu cũ (window.__editingSaleId), chỉ cộng/trừ
 // kho theo đúng PHẦN CHÊNH LỆCH so với phiếu gốc (không trừ lại từ đầu), và đối soát lại
@@ -32610,6 +32708,516 @@ html body #imp-vendor-dropdown { z-index:2147483000 !important; }
     window.addEventListener('load', wrap);
 })();
 </script>
+<style id="pm-stocktake-css">
+#page-stocktake .st-actions{display:flex;flex-wrap:wrap;gap:8px}
+#page-stocktake .st-btn{padding:8px 14px;border-radius:12px;font-size:12.5px;font-weight:800;color:#fff;border-bottom:3px solid rgba(0,0,0,.25);box-shadow:0 2px 6px rgba(15,23,42,.2);transition:transform .12s,filter .12s;white-space:nowrap}
+#page-stocktake .st-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+#page-stocktake .st-btn.gray{background:linear-gradient(180deg,#64748b,#475569)}
+#page-stocktake .st-btn.blue{background:linear-gradient(180deg,#3b82f6,#1d4ed8)}
+#page-stocktake .st-btn.green{background:linear-gradient(180deg,#10b981,#047857)}
+#page-stocktake .st-btn:disabled{opacity:.6;cursor:wait}
+#page-stocktake .st-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+#page-stocktake .st-kpi{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:10px 14px;box-shadow:0 1px 3px rgba(15,23,42,.07)}
+#page-stocktake .st-kpi .k{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#64748b}
+#page-stocktake .st-kpi .v{font-size:22px;font-weight:900;line-height:1.2;color:#0f172a;font-variant-numeric:tabular-nums}
+#page-stocktake .st-kpi .s{font-size:11px;font-weight:700;color:#64748b}
+#page-stocktake .st-kpi.plus .v{color:#2563eb}
+#page-stocktake .st-kpi.minus .v{color:#dc2626}
+#page-stocktake .st-prog{height:6px;border-radius:99px;background:#e2e8f0;margin-top:5px;overflow:hidden}
+#page-stocktake .st-prog i{display:block;height:100%;background:linear-gradient(90deg,#34d399,#059669);border-radius:99px;transition:width .3s}
+#page-stocktake .st-card{background:#fff;border:1px solid #e2e8f0;border-radius:18px;box-shadow:0 4px 14px rgba(15,23,42,.08);overflow:hidden}
+#page-stocktake .st-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid #e2e8f0}
+#page-stocktake .st-in{min-width:220px;flex:1 1 220px;max-width:320px;padding:8px 12px;border:1.5px solid #cbd5e1;border-radius:12px;background:#fff;color:#0f172a;font-size:13px;font-weight:600}
+#page-stocktake .st-in:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+#page-stocktake .st-chips{display:flex;flex-wrap:wrap;gap:6px;flex:1 1 300px}
+#page-stocktake .st-chip{padding:4px 11px;border-radius:99px;font-size:11px;font-weight:800;border:1.5px solid var(--c,#94a3b8);color:var(--c,#475569);background:#fff}
+#page-stocktake .st-chip b{opacity:.7;margin-left:3px}
+#page-stocktake .st-chip.on{background:var(--c,#334155);color:#fff}
+#page-stocktake .st-seg{display:flex;border:1.5px solid #cbd5e1;border-radius:12px;overflow:hidden}
+#page-stocktake .st-seg button{padding:6px 12px;font-size:12px;font-weight:800;color:#475569;background:#fff}
+#page-stocktake .st-seg button.on{background:#0f172a;color:#fff}
+#page-stocktake .st-tablewrap{max-height:calc(100vh - 360px);min-height:260px;overflow:auto}
+#page-stocktake .st-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
+#page-stocktake .st-table th{position:sticky;top:0;z-index:2;height:34px;box-sizing:border-box;background:#0f172a;color:#fff;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:10px 8px;text-align:center;white-space:nowrap}
+#page-stocktake .st-table th.l{text-align:left}
+#page-stocktake .st-table td{padding:6px 8px;border-bottom:1px solid #eef2f7;text-align:center;vertical-align:middle;color:#0f172a}
+#page-stocktake .st-table td.l{text-align:left}
+#page-stocktake .st-table tr:hover td{background:#f8fafc}
+#page-stocktake .st-table tr.d-plus td{background:#eff6ff}
+#page-stocktake .st-table tr.d-minus td{background:#fef2f2}
+#page-stocktake .st-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px}
+#page-stocktake .st-name{font-weight:800}
+#page-stocktake .st-sys{font-weight:800;color:#475569;font-variant-numeric:tabular-nums}
+#page-stocktake .st-cnt{width:112px;text-align:center;padding:7px 8px;border:2px solid #94a3b8;border-radius:10px;font-size:15px;font-weight:900;color:#0f172a;background:#fff;font-variant-numeric:tabular-nums}
+#page-stocktake .st-cnt:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.2)}
+#page-stocktake .st-note{width:100%;padding:6px 9px;border:1px solid #cbd5e1;border-radius:9px;font-size:12px;background:#fff;color:#0f172a}
+#page-stocktake .st-diff{font-weight:900;font-variant-numeric:tabular-nums}
+#page-stocktake .st-diff.ok{color:#059669}
+#page-stocktake .st-diff.plus{color:#2563eb}
+#page-stocktake .st-diff.minus{color:#dc2626}
+#page-stocktake .st-diff.none{color:#94a3b8;font-weight:700}
+#page-stocktake .st-foot{display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:space-between;padding:8px 14px;font-size:11px;color:#64748b;background:#f8fafc;border-top:1px solid #e2e8f0}
+#page-stocktake .st-table tr.st-grp td{position:sticky;top:34px;z-index:1;padding:7px 12px;text-align:left;background:color-mix(in srgb,var(--c,#6b7280) 12%,#ffffff);border-left:5px solid var(--c,#6b7280);border-bottom:1px solid color-mix(in srgb,var(--c,#6b7280) 30%,#ffffff)}
+#page-stocktake .st-gname{font-size:12px;font-weight:900;letter-spacing:.05em;color:var(--c,#475569)}
+#page-stocktake .st-gmeta{margin-left:12px;font-size:11px;font-weight:700;color:#64748b}
+html.dark #page-stocktake .st-table tr.st-grp td{background:color-mix(in srgb,var(--c,#6b7280) 22%,#0f172a)}
+html.dark #page-stocktake .st-gmeta{color:#94a3b8}
+html.dark #page-stocktake .st-kpi, html.dark #page-stocktake .st-card{background:#0f172a;border-color:#1e293b}
+html.dark #page-stocktake .st-kpi .v{color:#f1f5f9}
+html.dark #page-stocktake .st-tools{border-color:#1e293b}
+html.dark #page-stocktake .st-in, html.dark #page-stocktake .st-note, html.dark #page-stocktake .st-cnt{background:#020617;color:#f1f5f9;border-color:#475569}
+html.dark #page-stocktake .st-chip{background:#0f172a}
+html.dark #page-stocktake .st-seg, html.dark #page-stocktake .st-seg button{background:#0f172a;color:#cbd5e1;border-color:#475569}
+html.dark #page-stocktake .st-seg button.on{background:#e2e8f0;color:#0f172a}
+html.dark #page-stocktake .st-table td{color:#e2e8f0;border-color:#1e293b}
+html.dark #page-stocktake .st-table tr:hover td{background:#111c33}
+html.dark #page-stocktake .st-table tr.d-plus td{background:rgba(37,99,235,.15)}
+html.dark #page-stocktake .st-table tr.d-minus td{background:rgba(220,38,38,.15)}
+html.dark #page-stocktake .st-sys{color:#94a3b8}
+html.dark #page-stocktake .st-foot{background:#0b1220;border-color:#1e293b;color:#94a3b8}
+@media (max-width:767px){#page-stocktake .st-tablewrap{max-height:calc(100vh - 300px)}#page-stocktake .st-in{max-width:none}#page-stocktake .st-table{min-width:760px}}
+</style>
+<script id="pm-stocktake-js">
+/* ===== TRANG KIỂM KÊ KHO =====
+   - Tên + tồn hệ thống lấy đúng như Kho Hàng; nhập "SL thực tế"; chênh lệch tự tính.
+   - Ô để trống = CHƯA ĐẾM (khác với nhập 0 = đếm thấy không còn gì).
+   - Tự lưu bản nháp trên máy (không mất số đã nhập khi lỡ đóng trang); xuất Excel có công thức; "Lưu & điều chỉnh" dùng đúng cơ chế kiểm kê sẵn có. */
+(function () {
+    'use strict';
+    var ST = { rows: [], group: 'ALL', q: '', view: 'all', loaded: false, loadedAt: null, busy: false };
+    var DRAFT_KEY = 'pm_stocktake_draft_v1';
+    // Nhóm, thứ tự nhóm, nhãn ngắn và màu: DÙNG ĐÚNG như trang Kho Hàng
+    var LABEL = { 'THỊT CHƯNG MẮM TÉP': 'TCMT', 'MẮM TÉP RIU ĐỎ': 'Mắm tép', 'QUẢ BÙI KỲ LÃO': 'Quả bùi', 'CƠM CHÁY': 'Cơm cháy', 'TRÀ HOA VÀNG': 'Trà hoa vàng', 'RUỐC CÁ': 'Ruốc cá', 'BÁNH DỨA': 'Bánh dứa', 'CÁC LOẠI HỘP TÚI': 'Hộp túi', 'KHÁC': 'Khác' };
+    var COLOR = { 'THỊT CHƯNG MẮM TÉP': '#c026d3', 'MẮM TÉP RIU ĐỎ': '#e11d48', 'QUẢ BÙI KỲ LÃO': '#059669', 'CƠM CHÁY': '#d97706', 'TRÀ HOA VÀNG': '#ca8a04', 'RUỐC CÁ': '#0891b2', 'BÁNH DỨA': '#4f46e5', 'CÁC LOẠI HỘP TÚI': '#65a30d', 'KHÁC': '#6b7280' };
+    function groupOrder() { return (typeof THU_TU_HIEN_THI_NHOM !== 'undefined' ? THU_TU_HIEN_THI_NHOM : []).concat(['KHÁC']); }
+    function groupOf(name) { return (typeof xepNhomSanPham === 'function') ? xepNhomSanPham(name) : A().groupOf(name); }
+    function gColor(g) { return COLOR[g] || '#6b7280'; }
+    function gLabel(g) { return LABEL[g] || g; }
+    var $ = function (id) { return document.getElementById(id); };
+    var A = function () { return window.__kkApi; };
+    var pad = function (n) { return String(n).padStart(2, '0'); };
+    var nowVN = function () { return new Date(Date.now() + 7 * 3600 * 1000); };
+
+    function isCounted(r) { return r.counted !== '' && r.counted != null && !isNaN(parseFloat(r.counted)); }
+    function diffOf(r) { return isCounted(r) ? A().r3(parseFloat(r.counted) - r.sys) : null; }
+
+    /* ---------- tải dữ liệu ---------- */
+    async function load() {
+        var api = A();
+        if (!api) return;
+        var getList = function () {
+            var base = (window.allProductCache && window.allProductCache.length) ? window.allProductCache : api.products();
+            var seen = {}, arr = [];
+            base.forEach(function (p) { if (p && p.name && !seen[p.name]) { seen[p.name] = 1; arr.push(p); } });
+            // Sắp xếp sản phẩm giống Kho Hàng (khối lượng giảm dần, Thuỷ tinh > Nhựa > khác); sort ổn định
+            if (typeof compareProductDisplayOrder === 'function') arr.sort(function (a, b) { return compareProductDisplayOrder(a.name, b.name); });
+            return arr;
+        };
+        var list = getList();
+        if (!list.length) { try { await updateProductDropdowns(); } catch (e) { } list = getList(); }
+        if (!list.length) { api.toast('info', 'Chưa có sản phẩm', 'Vui lòng đợi danh mục sản phẩm tải xong rồi thử lại.'); return; }
+        var pend = await api.getPending();
+        var order = groupOrder();
+        var rows = list.map(function (p) {
+            return { name: p.name, unit: p.unit || '', group: groupOf(p.name), sys: api.sysQty(p.name, pend), price: Number(p.wholesale) || 0, counted: '', note: '' };
+        });
+        // gom theo nhóm theo đúng thứ tự nhóm của Kho Hàng, giữ nguyên thứ tự sản phẩm trong nhóm
+        rows = rows.map(function (r, k) { r.__k = k; return r; });
+        rows.sort(function (a, b) {
+            var ga = order.indexOf(a.group), gb = order.indexOf(b.group);
+            if (ga < 0) ga = 999; if (gb < 0) gb = 999;
+            return ga !== gb ? ga - gb : a.__k - b.__k;
+        });
+        // khôi phục bản nháp (số đã nhập trước đó) theo tên sản phẩm
+        var restored = 0, draftTs = null;
+        try {
+            var d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null');
+            if (d && d.data) {
+                draftTs = d.ts;
+                rows.forEach(function (r) {
+                    var x = d.data[r.name];
+                    if (x) { if (x.c !== '' && x.c != null) { r.counted = x.c; restored++; } if (x.n) r.note = x.n; }
+                });
+            }
+        } catch (e) { }
+        ST.rows = rows; ST.loaded = true; ST.loadedAt = nowVN();
+        var dn = $('st-draftnote');
+        if (dn) dn.textContent = restored ? ('↺ Đã khôi phục ' + restored + ' số đã nhập từ bản nháp' + (draftTs ? ' lúc ' + new Date(draftTs).toLocaleTimeString('vi-VN') : '')) : '';
+    }
+    var draftTimer = null;
+    function saveDraft() {
+        clearTimeout(draftTimer);
+        draftTimer = setTimeout(function () {
+            try {
+                var data = {}, n = 0;
+                ST.rows.forEach(function (r) { if (isCounted(r) || r.note) { data[r.name] = { c: r.counted, n: r.note }; n++; } });
+                if (n) localStorage.setItem(DRAFT_KEY, JSON.stringify({ ts: Date.now(), data: data })); else localStorage.removeItem(DRAFT_KEY);
+            } catch (e) { }
+        }, 400);
+    }
+
+    /* ---------- hiển thị ---------- */
+    function diffHtml(r) {
+        var d = diffOf(r), fmt = A().fmt;
+        if (d === null) return '<span class="st-diff none">—</span>';
+        if (d === 0) return '<span class="st-diff ok">✓ Khớp</span>';
+        return '<span class="st-diff ' + (d > 0 ? 'plus' : 'minus') + '">' + (d > 0 ? '+' : '−') + fmt(Math.abs(d)) + (d > 0 ? ' thừa' : ' thiếu') + '</span>';
+    }
+    function valueHtml(r) {
+        var d = diffOf(r), fmt = A().fmt;
+        if (d === null || d === 0 || !r.price) return '<span class="st-diff none">' + (d === 0 ? '0' : '—') + '</span>';
+        var v = Math.round(d * r.price);
+        return '<span class="st-diff ' + (v > 0 ? 'plus' : 'minus') + '">' + (v > 0 ? '+' : '−') + fmt(Math.abs(v)) + '</span>';
+    }
+    function visible(r) {
+        if (ST.group !== 'ALL' && r.group !== ST.group) return false;
+        if (ST.q && r.name.toLowerCase().indexOf(ST.q) < 0) return false;
+        if (ST.view === 'todo') return !isCounted(r);
+        if (ST.view === 'done') return isCounted(r);
+        if (ST.view === 'diff') { var d = diffOf(r); return d !== null && d !== 0; }
+        return true;
+    }
+    function renderChips() {
+        var counts = {};
+        ST.rows.forEach(function (r) { counts[r.group] = (counts[r.group] || 0) + 1; });
+        var keys = groupOrder().filter(function (k) { return counts[k]; });
+        Object.keys(counts).forEach(function (k) { if (keys.indexOf(k) < 0) keys.push(k); });
+        var h = '<button type="button" class="st-chip' + (ST.group === 'ALL' ? ' on' : '') + '" onclick="__stGroup(\'ALL\')">Tất cả <b>' + ST.rows.length + '</b></button>';
+        keys.forEach(function (k) {
+            h += '<button type="button" class="st-chip' + (ST.group === k ? ' on' : '') + '" style="--c:' + gColor(k) + '" data-g="' + A().esc(k) + '" onclick="__stGroup(this.getAttribute(\'data-g\'))">' + A().esc(gLabel(k)) + ' <b>' + counts[k] + '</b></button>';
+        });
+        $('st-chips').innerHTML = h;
+    }
+    function renderBody() {
+        var api = A(), h = '', n = 0, lastG = null;
+        var stat = {};
+        ST.rows.forEach(function (r) {
+            var o = stat[r.group] || (stat[r.group] = { tot: 0, cnt: 0, dif: 0 });
+            o.tot++; var d = diffOf(r); if (d !== null) { o.cnt++; if (d !== 0) o.dif++; }
+        });
+        ST.rows.forEach(function (r, i) {
+            if (!visible(r)) return;
+            var c = gColor(r.group), d = diffOf(r);
+            if (r.group !== lastG) {
+                lastG = r.group; n = 0;
+                var o = stat[r.group];
+                h += '<tr class="st-grp"><td colspan="9" style="--c:' + c + '"><span class="st-gname">' + api.esc(r.group) + '</span>' +
+                     '<span class="st-gmeta">' + o.tot + ' sản phẩm · đã đếm ' + o.cnt + '/' + o.tot + (o.dif ? ' · <b style="color:#dc2626">' + o.dif + ' lệch</b>' : '') + '</span></td></tr>';
+            }
+            n++;
+            h += '<tr data-i="' + i + '" class="' + (d > 0 ? 'd-plus' : (d < 0 ? 'd-minus' : '')) + '">' +
+                '<td>' + n + '</td>' +
+                '<td class="l"><span class="st-dot" style="background:' + c + '"></span><span class="st-name" style="color:' + c + '">' + api.esc(r.name) + '</span></td>' +
+                '<td style="font-size:11px;font-weight:800;color:' + c + '">' + api.esc(gLabel(r.group)) + '</td>' +
+                '<td>' + api.esc(r.unit) + '</td>' +
+                '<td class="st-sys">' + api.fmt(r.sys) + '</td>' +
+                '<td><input type="number" step="any" inputmode="decimal" class="st-cnt" data-i="' + i + '" value="' + api.esc(r.counted) + '" placeholder="nhập" onfocus="this.select()" oninput="__stCount(' + i + ',this.value)" onkeydown="__stKey(event,this)"></td>' +
+                '<td id="st-d-' + i + '">' + diffHtml(r) + '</td>' +
+                '<td id="st-v-' + i + '">' + valueHtml(r) + '</td>' +
+                '<td><input type="text" class="st-note" value="' + api.esc(r.note) + '" placeholder="Ghi chú..." oninput="__stNote(' + i + ',this.value)"></td></tr>';
+        });
+        $('st-body').innerHTML = h || '<tr><td colspan="9" style="padding:28px;color:#94a3b8">Không có sản phẩm phù hợp</td></tr>';
+    }
+    function renderKpis() {
+        var api = A(), fmt = api.fmt, tot = ST.rows.length, cnt = 0, dif = 0, plus = 0, minus = 0, val = 0;
+        ST.rows.forEach(function (r) {
+            var d = diffOf(r); if (d === null) return;
+            cnt++;
+            if (d !== 0) { dif++; if (d > 0) plus += d; else minus += -d; val += d * r.price; }
+        });
+        var pct = tot ? Math.round(cnt / tot * 100) : 0;
+        var kpi = function (cls, k, v, s, extra) { return '<div class="st-kpi ' + cls + '"><div class="k">' + k + '</div><div class="v">' + v + '</div><div class="s">' + (s || '&nbsp;') + '</div>' + (extra || '') + '</div>'; };
+        $('st-kpis').innerHTML =
+            kpi('', 'Đã đếm', cnt + '<span style="font-size:13px;color:#94a3b8;font-weight:800"> / ' + tot + '</span>', pct + '% sản phẩm', '<div class="st-prog"><i style="width:' + pct + '%"></i></div>') +
+            kpi('', 'Sản phẩm lệch', fmt(dif), dif ? 'trên ' + cnt + ' sản phẩm đã đếm' : 'chưa có chênh lệch') +
+            kpi('plus', 'Tổng thừa', '+' + fmt(plus), 'đếm nhiều hơn sổ sách') +
+            kpi('minus', 'Tổng thiếu', '−' + fmt(minus), 'đếm ít hơn sổ sách') +
+            kpi(val > 0 ? 'plus' : (val < 0 ? 'minus' : ''), 'Giá trị chênh lệch', (val > 0 ? '+' : (val < 0 ? '−' : '')) + fmt(Math.round(Math.abs(val))) + ' đ', 'theo giá sỉ');
+    }
+    function renderAll() {
+        renderChips(); renderBody(); renderKpis();
+        var sub = $('st-sub');
+        if (sub && ST.loadedAt) sub.textContent = 'Tồn hệ thống tính đến ' + pad(ST.loadedAt.getUTCHours()) + ':' + pad(ST.loadedAt.getUTCMinutes()) + ' · đếm hàng thực tế rồi nhập vào cột "SL thực tế", chênh lệch tự tính.';
+        [].forEach.call(document.querySelectorAll('#st-seg button'), function (b) { b.classList.toggle('on', b.getAttribute('data-v') === ST.view); });
+    }
+
+    /* ---------- thao tác ---------- */
+    window.__stOpen = async function () { if (!ST.loaded) await load(); renderAll(); };
+    window.__stReload = async function () {
+        var has = ST.rows.some(isCounted);
+        if (has) {
+            var r = await Swal.fire({ icon: 'question', title: 'Lấy lại tồn hệ thống?', text: 'Số bạn đã nhập vẫn được giữ (theo tên sản phẩm), chỉ cột Tồn hệ thống được cập nhật.', showCancelButton: true, confirmButtonText: 'Lấy lại', cancelButtonText: 'Hủy' });
+            if (!r.isConfirmed) return;
+        }
+        saveDraft();
+        await new Promise(function (res) { setTimeout(res, 450); });
+        ST.loaded = false; await load(); renderAll();
+    };
+    window.__stGroup = function (g) { ST.group = g; renderChips(); renderBody(); };
+    window.__stFilter = function () { ST.q = ($('st-search').value || '').toLowerCase().trim(); renderBody(); };
+    window.__stView = function (v) { ST.view = v; renderAll(); };
+    window.__stCount = function (i, v) {
+        var r = ST.rows[i]; r.counted = v;
+        var d = $('st-d-' + i), val = $('st-v-' + i);
+        if (d) d.innerHTML = diffHtml(r);
+        if (val) val.innerHTML = valueHtml(r);
+        var tr = d && d.parentNode; if (tr) { var x = diffOf(r); tr.className = x > 0 ? 'd-plus' : (x < 0 ? 'd-minus' : ''); }
+        renderKpis(); saveDraft();
+    };
+    window.__stNote = function (i, v) { ST.rows[i].note = v; saveDraft(); };
+    window.__stKey = function (e, el) {
+        var dir = e.key === 'Enter' || e.key === 'ArrowDown' ? 1 : (e.key === 'ArrowUp' ? -1 : 0);
+        if (!dir) return;
+        e.preventDefault();
+        var all = [].slice.call(document.querySelectorAll('#st-body .st-cnt')), p = all.indexOf(el), nx = all[p + dir];
+        if (nx) nx.focus();
+    };
+    window.__stClear = async function () {
+        if (!ST.rows.some(function (r) { return isCounted(r) || r.note; })) return;
+        var r = await Swal.fire({ icon: 'warning', title: 'Xóa toàn bộ số đã nhập?', text: 'Các ô SL thực tế và ghi chú sẽ về trống (chưa đếm). Tồn kho không bị ảnh hưởng.', showCancelButton: true, confirmButtonText: 'Xóa', cancelButtonText: 'Hủy', confirmButtonColor: '#dc2626' });
+        if (!r.isConfirmed) return;
+        ST.rows.forEach(function (x) { x.counted = ''; x.note = ''; });
+        try { localStorage.removeItem(DRAFT_KEY); } catch (e) { }
+        renderAll();
+    };
+    window.__stMatchAll = async function () {
+        var todo = ST.rows.filter(function (r) { return visible(r) && !isCounted(r); });
+        if (!todo.length) return A().toast('info', 'Không có dòng nào chưa đếm', 'Trong bộ lọc hiện tại tất cả sản phẩm đã có số thực tế.');
+        var r = await Swal.fire({ icon: 'question', title: 'Khớp ' + todo.length + ' dòng chưa đếm?', text: 'Đặt SL thực tế = tồn hệ thống cho các dòng chưa đếm đang hiển thị (coi như đếm thấy đúng sổ sách). Chỉ dùng khi bạn đã kiểm đủ các dòng này.', showCancelButton: true, confirmButtonText: 'Khớp', cancelButtonText: 'Hủy' });
+        if (!r.isConfirmed) return;
+        todo.forEach(function (x) { x.counted = String(x.sys); });
+        saveDraft(); renderAll();
+    };
+
+    /* ---------- ĐIỀU CHỈNH TỒN KHO THEO SỐ THỰC TẾ ----------
+       Bước 1: lấy lại tồn hệ thống MỚI NHẤT cho các dòng đã đếm (nếu có bán/nhập trong lúc đếm thì chênh lệch được tính đúng).
+       Bước 2: hiện danh sách các dòng lệch để tick chọn (mặc định chọn hết) + lý do.
+       Bước 3: ghi phiếu kiểm kê và cộng/trừ tồn để tồn hệ thống = số thực tế (cùng cơ chế kiểm kê sẵn có, xem được ở Lịch sử). */
+    window.__stSave = async function () {
+        if (ST.busy) return;
+        var api = A(), fmt = api.fmt, esc = api.esc;
+        var counted = ST.rows.filter(isCounted);
+        if (!counted.length) return api.toast('info', 'Chưa có số đếm', 'Hãy nhập SL thực tế cho ít nhất 1 sản phẩm.');
+        ST.busy = true; var btn = $('st-save'); if (btn) btn.disabled = true;
+        try {
+            var pend = await api.getPending(), moved = 0;
+            counted.forEach(function (r) { var cur = api.sysQty(r.name, pend); if (Math.abs(cur - r.sys) > 0.0004) { moved++; r.sys = cur; } });
+            var diffs = counted.filter(function (r) { var d = diffOf(r); return d !== 0; });
+            var same = counted.length - diffs.length;
+            if (!diffs.length) {
+                var ok = await Swal.fire({ icon: 'success', title: 'Không có chênh lệch', html: 'Cả <b>' + counted.length + '</b> sản phẩm đã đếm đều khớp tồn hệ thống nên không cần điều chỉnh.<br>Bạn có muốn <b>ghi nhận phiếu kiểm kê</b> (không đổi tồn kho) không?', showCancelButton: true, confirmButtonText: 'Ghi nhận phiếu', cancelButtonText: 'Không' });
+                if (!ok.isConfirmed) { renderAll(); return; }
+            }
+            var plus = 0, minus = 0, val = 0;
+            diffs.forEach(function (r) { var d = diffOf(r); if (d > 0) plus += d; else minus += -d; val += d * r.price; });
+            var rowsHtml = diffs.map(function (r, k) {
+                var d = diffOf(r), col = d > 0 ? '#2563eb' : '#dc2626';
+                return '<tr><td style="text-align:center"><input type="checkbox" class="st-adj-chk" data-i="' + ST.rows.indexOf(r) + '" checked></td>' +
+                    '<td style="text-align:left;font-weight:700">' + esc(r.name) + ' <span style="color:#94a3b8;font-weight:600">(' + esc(r.unit) + ')</span></td>' +
+                    '<td style="text-align:right">' + fmt(r.sys) + '</td><td style="text-align:right;font-weight:800">' + fmt(parseFloat(r.counted)) + '</td>' +
+                    '<td style="text-align:right;font-weight:900;color:' + col + '">' + (d > 0 ? '+' : '−') + fmt(Math.abs(d)) + '</td></tr>';
+            }).join('');
+            var html =
+                '<div style="text-align:left;font-size:13px">' +
+                '<div style="margin-bottom:8px">Đã đếm <b>' + counted.length + '</b> SP · khớp <b style="color:#059669">' + same + '</b> · lệch <b style="color:#dc2626">' + diffs.length + '</b>' +
+                (diffs.length ? ' (<span style="color:#2563eb">+' + fmt(plus) + ' thừa</span> / <span style="color:#dc2626">−' + fmt(minus) + ' thiếu</span>, giá trị ' + (val >= 0 ? '+' : '−') + fmt(Math.round(Math.abs(val))) + ' đ)' : '') + '</div>' +
+                (moved ? '<div style="background:#fef3c7;color:#92400e;border-radius:8px;padding:6px 10px;margin-bottom:8px;font-size:12px">Có ' + moved + ' sản phẩm đã đổi tồn kể từ lúc bạn tải trang (do bán/nhập) – tồn hệ thống và chênh lệch đã được cập nhật lại.</div>' : '') +
+                (diffs.length ? '<div style="font-size:12px;color:#475569;margin-bottom:4px">Tick các dòng muốn <b>đặt tồn kho = số thực tế</b>. Dòng bỏ tick sẽ giữ nguyên tồn cũ.</div>' +
+                    '<div style="max-height:300px;overflow:auto;border:1px solid #cbd5e1;border-radius:10px"><table style="width:100%;border-collapse:collapse;font-size:12.5px"><thead><tr style="position:sticky;top:0;background:#0f172a;color:#fff"><th style="padding:6px;width:36px"><input type="checkbox" id="st-adj-all" checked></th><th style="padding:6px;text-align:left">Sản phẩm</th><th style="padding:6px;text-align:right">Hệ thống</th><th style="padding:6px;text-align:right">Thực tế</th><th style="padding:6px;text-align:right">Chênh lệch</th></tr></thead><tbody>' + rowsHtml + '</tbody></table></div>' : '') +
+                '<input id="st-adj-note" class="swal2-input" style="margin:10px 0 0;width:100%;font-size:13px" placeholder="Lý do / ghi chú (VD: kiểm kê cuối tháng 11)">' +
+                '</div>';
+            var res = await Swal.fire({
+                icon: 'question', title: diffs.length ? 'Điều chỉnh tồn kho theo số thực tế?' : 'Ghi nhận phiếu kiểm kê?',
+                html: html, width: 'min(720px, 96vw)', showCancelButton: true,
+                confirmButtonText: diffs.length ? 'Điều chỉnh tồn kho' : 'Ghi nhận', cancelButtonText: 'Quay lại kiểm tra', confirmButtonColor: '#059669',
+                didOpen: function (pop) {
+                    var all = pop.querySelector('#st-adj-all');
+                    if (all) all.addEventListener('change', function () { [].forEach.call(pop.querySelectorAll('.st-adj-chk'), function (c) { c.checked = all.checked; }); });
+                },
+                preConfirm: function () {
+                    var chk = [].slice.call(document.querySelectorAll('.st-adj-chk'));
+                    if (diffs.length && !chk.some(function (c) { return c.checked; })) { Swal.showValidationMessage('Hãy tick ít nhất 1 dòng để điều chỉnh.'); return false; }
+                    return { picked: chk.filter(function (c) { return c.checked; }).map(function (c) { return parseInt(c.getAttribute('data-i'), 10); }), note: (document.getElementById('st-adj-note').value || '').trim() };
+                }
+            });
+            if (!res.isConfirmed || !res.value) return;
+            var skip = {}; diffs.forEach(function (r) { skip[ST.rows.indexOf(r)] = true; });
+            res.value.picked.forEach(function (i) { delete skip[i]; });
+            // phiếu gồm: mọi dòng đã đếm trừ các dòng lệch mà người dùng bỏ tick
+            var toSave = counted.filter(function (r) { return !skip[ST.rows.indexOf(r)]; });
+            var noteTxt = res.value.note;
+            var noted = toSave.filter(function (r) { return r.note; }).length;
+            if (noted) noteTxt = (noteTxt ? noteTxt + ' · ' : '') + noted + ' dòng có ghi chú';
+            var t0 = Date.now();
+            await api.save(toSave, noteTxt, true);
+            if (window.__kkLastSaved && window.__kkLastSaved >= t0) {
+                try { localStorage.removeItem(DRAFT_KEY); } catch (e) { }
+                ST.loaded = false; await load(); renderAll();
+            }
+        } catch (e) {
+            console.error(e); api.toast('error', 'Không điều chỉnh được', (e && e.message) || String(e));
+        } finally { ST.busy = false; if (btn) btn.disabled = false; }
+    };
+
+    /* ---------- xuất Excel (ExcelJS) ---------- */
+    window.__stExport = async function () {
+        var api = A();
+        if (!ST.rows.length) return api.toast('info', 'Chưa có dữ liệu', 'Danh sách sản phẩm chưa tải xong.');
+        if (typeof ExcelJS === 'undefined') return api.toast('error', 'Thiếu thư viện Excel', 'Không tải được ExcelJS, kiểm tra kết nối mạng rồi thử lại.');
+        var rows = ST.rows.filter(function (r) { return ST.group === 'ALL' || r.group === ST.group; });
+        var wb = new ExcelJS.Workbook();
+        wb.creator = 'POS Pro'; wb.created = new Date();
+        wb.calcProperties = { fullCalcOnLoad: true };
+        var ws = wb.addWorksheet('Kiểm kê', { views: [{ state: 'frozen', ySplit: 5 }], pageSetup: { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0 } });
+        var thin = { style: 'thin', color: { argb: 'FFCBD5E1' } }, border = { top: thin, left: thin, bottom: thin, right: thin };
+        var d = nowVN(), dateStr = pad(d.getUTCDate()) + '/' + pad(d.getUTCMonth() + 1) + '/' + d.getUTCFullYear() + ' ' + pad(d.getUTCHours()) + ':' + pad(d.getUTCMinutes());
+        var user = ''; try { var u = getCurrentUser(); user = u ? (u.displayName || u.username || '') : ''; } catch (e) { }
+        ws.mergeCells('A1:J1'); ws.getCell('A1').value = 'BIÊN BẢN KIỂM KÊ KHO';
+        ws.getCell('A1').font = { name: 'Arial', size: 16, bold: true, color: { argb: 'FF0F172A' } }; ws.getCell('A1').alignment = { horizontal: 'center', vertical: 'middle' }; ws.getRow(1).height = 28;
+        ws.mergeCells('A2:J2'); ws.getCell('A2').value = 'Thời điểm lập: ' + dateStr + (user ? '   |   Người lập: ' + user : '') + (ST.group !== 'ALL' ? '   |   Nhóm: ' + gLabel(ST.group) : '   |   Tất cả sản phẩm');
+        ws.getCell('A2').alignment = { horizontal: 'center' }; ws.getCell('A2').font = { name: 'Arial', size: 10, italic: true, color: { argb: 'FF475569' } };
+        ws.mergeCells('A3:J3'); ws.getCell('A3').value = 'Chênh lệch = SL thực tế − Tồn hệ thống (+ thừa, − thiếu). Ô SL thực tế để trống = chưa đếm. Giá trị lệch tính theo giá sỉ.';
+        ws.getCell('A3').alignment = { horizontal: 'center' }; ws.getCell('A3').font = { name: 'Arial', size: 9, color: { argb: 'FF64748B' } };
+        var head = ['STT', 'Tên sản phẩm', 'Nhóm', 'ĐVT', 'Tồn hệ thống', 'SL thực tế', 'Chênh lệch', 'Đơn giá (giá sỉ)', 'Giá trị chênh lệch', 'Ghi chú'];
+        var hr = ws.getRow(5); head.forEach(function (h, i) { hr.getCell(i + 1).value = h; });
+        hr.height = 24;
+        hr.eachCell(function (c) { c.font = { name: 'Arial', bold: true, color: { argb: 'FFFFFFFF' }, size: 11 }; c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } }; c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }; c.border = border; });
+        var first = 6, rn = first - 1, dataRows = [], lastGroup = null, seq = 0;
+        rows.forEach(function (r) {
+            if (r.group !== lastGroup) {
+                lastGroup = r.group; seq = 0; rn++;
+                ws.mergeCells('A' + rn + ':J' + rn);
+                var gc = ws.getCell('A' + rn);
+                gc.value = '  ' + r.group;
+                gc.font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FF' + gColor(r.group).replace('#', '').toUpperCase() } };
+                gc.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } };
+                gc.alignment = { vertical: 'middle' }; gc.border = border;
+                ws.getRow(rn).height = 20;
+            }
+            rn++; seq++;
+            var row = ws.getRow(rn); dataRows.push(rn);
+            row.getCell(1).value = seq;
+            row.getCell(2).value = r.name;
+            row.getCell(3).value = gLabel(r.group);
+            row.getCell(4).value = r.unit;
+            row.getCell(5).value = r.sys;
+            row.getCell(6).value = isCounted(r) ? parseFloat(r.counted) : null;
+            row.getCell(7).value = { formula: 'IF(F' + rn + '="","",F' + rn + '-E' + rn + ')', result: isCounted(r) ? diffOf(r) : '' };
+            row.getCell(8).value = r.price || 0;
+            var dd = diffOf(r);
+            row.getCell(9).value = { formula: 'IF(G' + rn + '="","",G' + rn + '*H' + rn + ')', result: dd === null ? '' : Math.round(dd * r.price) };
+            row.getCell(10).value = r.note || '';
+            row.eachCell({ includeEmpty: true }, function (c, col) {
+                if (col > 10) return;
+                c.border = border; c.font = { name: 'Arial', size: 10 };
+                c.alignment = { vertical: 'middle', horizontal: (col === 2 || col === 10) ? 'left' : (col === 3 || col === 4 || col === 1 ? 'center' : 'right'), wrapText: col === 10 };
+            });
+            row.getCell(2).font = { name: 'Arial', size: 10, bold: true };
+            row.getCell(6).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEF9C3' } };
+            row.getCell(6).font = { name: 'Arial', size: 10, bold: true };
+        });
+        var last = rn;
+        dataRows.forEach(function (rr) {
+            var xr = ws.getRow(rr);
+            xr.getCell(5).numFmt = '#,##0.###'; xr.getCell(6).numFmt = '#,##0.###';
+            xr.getCell(7).numFmt = '+#,##0.###;[Red]-#,##0.###;0';
+            xr.getCell(8).numFmt = '#,##0'; xr.getCell(9).numFmt = '#,##0;[Red]-#,##0';
+        });
+        var tr = ws.getRow(last + 1);
+        tr.getCell(2).value = 'TỔNG CỘNG';
+        tr.getCell(5).value = { formula: 'SUM(E' + first + ':E' + last + ')' };
+        tr.getCell(6).value = { formula: 'SUM(F' + first + ':F' + last + ')' };
+        tr.getCell(7).value = { formula: 'SUM(G' + first + ':G' + last + ')' };
+        tr.getCell(9).value = { formula: 'SUM(I' + first + ':I' + last + ')' };
+        for (var c = 1; c <= 10; c++) { var cell = tr.getCell(c); cell.font = { name: 'Arial', bold: true, size: 10 }; cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2E8F0' } }; cell.border = border; if (c >= 5) cell.alignment = { horizontal: 'right' }; }
+        tr.getCell(5).numFmt = '#,##0.###'; tr.getCell(6).numFmt = '#,##0.###'; tr.getCell(7).numFmt = '+#,##0.###;[Red]-#,##0.###;0'; tr.getCell(9).numFmt = '#,##0;[Red]-#,##0';
+        ws.addConditionalFormatting({ ref: 'G' + first + ':G' + last, rules: [
+            { type: 'cellIs', operator: 'greaterThan', formulae: [0], style: { font: { color: { argb: 'FF2563EB' }, bold: true }, fill: { type: 'pattern', pattern: 'solid', bgColor: { argb: 'FFDBEAFE' } } } },
+            { type: 'cellIs', operator: 'lessThan', formulae: [0], style: { font: { color: { argb: 'FFDC2626' }, bold: true }, fill: { type: 'pattern', pattern: 'solid', bgColor: { argb: 'FFFEE2E2' } } } }
+        ] });
+        [[1, 6], [2, 38], [3, 12], [4, 9], [5, 14], [6, 14], [7, 15], [8, 16], [9, 18], [10, 28]].forEach(function (w) { ws.getColumn(w[0]).width = w[1]; });
+        ws.autoFilter = { from: 'A5', to: 'J' + last };
+        ws.headerFooter.oddFooter = '&LKiểm kê kho&RTrang &P / &N';
+        // Sheet 2: chỉ các dòng lệch (giá trị tĩnh, tiện in / gửi)
+        var diffs = rows.filter(function (r) { var x = diffOf(r); return x !== null && x !== 0; });
+        var w2 = wb.addWorksheet('Chỉ dòng lệch', { views: [{ state: 'frozen', ySplit: 3 }], pageSetup: { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0 } });
+        w2.mergeCells('A1:H1'); w2.getCell('A1').value = 'CÁC SẢN PHẨM CHÊNH LỆCH – ' + dateStr; w2.getCell('A1').font = { name: 'Arial', size: 14, bold: true }; w2.getCell('A1').alignment = { horizontal: 'center' };
+        var h2 = ['STT', 'Tên sản phẩm', 'ĐVT', 'Tồn hệ thống', 'SL thực tế', 'Chênh lệch', 'Giá trị chênh lệch', 'Ghi chú'];
+        var r3 = w2.getRow(3); h2.forEach(function (h, i) { r3.getCell(i + 1).value = h; });
+        r3.eachCell(function (c) { c.font = { name: 'Arial', bold: true, color: { argb: 'FFFFFFFF' } }; c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } }; c.alignment = { horizontal: 'center', vertical: 'middle' }; c.border = border; });
+        var totVal = 0;
+        diffs.forEach(function (r, i) {
+            var x = diffOf(r), v = Math.round(x * r.price); totVal += v;
+            var rw = w2.getRow(4 + i);
+            [i + 1, r.name, r.unit, r.sys, parseFloat(r.counted), x, v, r.note || ''].forEach(function (val, k) { rw.getCell(k + 1).value = val; });
+            rw.eachCell({ includeEmpty: true }, function (c, col) { if (col > 8) return; c.border = border; c.font = { name: 'Arial', size: 10 }; c.alignment = { horizontal: (col === 2 || col === 8) ? 'left' : (col <= 3 ? 'center' : 'right'), vertical: 'middle' }; });
+            rw.getCell(6).font = { name: 'Arial', size: 10, bold: true, color: { argb: x > 0 ? 'FF2563EB' : 'FFDC2626' } };
+            rw.getCell(7).font = { name: 'Arial', size: 10, bold: true, color: { argb: v > 0 ? 'FF2563EB' : 'FFDC2626' } };
+        });
+        if (diffs.length) {
+            var t2 = w2.getRow(4 + diffs.length); t2.getCell(2).value = 'TỔNG GIÁ TRỊ CHÊNH LỆCH'; t2.getCell(7).value = totVal;
+            for (var k = 1; k <= 8; k++) { var cc = t2.getCell(k); cc.font = { name: 'Arial', bold: true }; cc.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2E8F0' } }; cc.border = border; }
+        } else { w2.mergeCells('A4:H4'); w2.getCell('A4').value = 'Không có chênh lệch (hoặc chưa nhập số thực tế).'; w2.getCell('A4').alignment = { horizontal: 'center' }; w2.getCell('A4').font = { name: 'Arial', italic: true, color: { argb: 'FF64748B' } }; }
+        [[1, 6], [2, 38], [3, 9], [4, 14], [5, 14], [6, 15], [7, 18], [8, 28]].forEach(function (w) { w2.getColumn(w[0]).width = w[1]; });
+        diffs.forEach(function (r, i) {
+            var xr2 = w2.getRow(4 + i);
+            xr2.getCell(4).numFmt = '#,##0.###'; xr2.getCell(5).numFmt = '#,##0.###';
+            xr2.getCell(6).numFmt = '+#,##0.###;[Red]-#,##0.###'; xr2.getCell(7).numFmt = '+#,##0;[Red]-#,##0';
+        });
+        if (diffs.length) w2.getRow(4 + diffs.length).getCell(7).numFmt = '+#,##0;[Red]-#,##0';
+        try {
+            var buf = await wb.xlsx.writeBuffer();
+            var blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            var a = document.createElement('a'), ts = nowVN();
+            a.href = URL.createObjectURL(blob);
+            a.download = 'Kiem_ke_kho_' + ts.getUTCFullYear() + '-' + pad(ts.getUTCMonth() + 1) + '-' + pad(ts.getUTCDate()) + '_' + pad(ts.getUTCHours()) + pad(ts.getUTCMinutes()) + '.xlsx';
+            document.body.appendChild(a); a.click();
+            setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+        } catch (e) { console.error(e); api.toast('error', 'Không xuất được Excel', (e && e.message) || String(e)); }
+    };
+})();
+</script>
+<style id="pm-chamcong-boxed-cells">
+/* Tiêu đề "TÍNH LƯƠNG THÁNG" bị chìm (chữ xanh đậm trên nền xanh): đưa về chữ trắng như các bảng khác */
+#chamcong-salary-card [data-gb] h3, #chamcong-salary-card [data-gb] .lucide, #chamcong-salary-card [data-gb] [data-lucide="wallet-cards"] { color:#fff !important; text-shadow:0 1px 3px rgba(0,0,0,.45); opacity:1 !important; }
+/* Bảng lương & bảng Part-time: MỌI giá trị đều nằm trong "ô" có khung bo tròn như ô chấm công / tăng ca (kể cả ô trống) */
+#chamcong-salary-table td.cc-boxed, #chamcong-parttime-table td.cc-boxed { padding:4px 5px !important; }
+.cc-box { display:block; box-sizing:border-box; width:100%; min-height:32px; line-height:22px; padding:4px 9px; text-align:inherit; font-weight:700; color:#0f172a;
+  background:#f1f5f9; border:1.5px solid #cbd5e1; border-radius:10px; box-shadow:inset 0 1px 2px rgba(15,23,42,.05); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#chamcong-salary-foot .cc-box { background:#e0f2fe; border-color:#7dd3fc; color:#0c4a6e; font-weight:900; }
+#chamcong-salary-body td:last-child .cc-box, #chamcong-salary-body td:nth-last-child(2) .cc-box { background:#dcfce7; border-color:#86efac; color:#14532d; font-weight:900; }
+html.dark .cc-box { background:#0f172a; border-color:#334155; color:#e2e8f0; box-shadow:none; }
+html.dark #chamcong-salary-foot .cc-box { background:#082f49; border-color:#075985; color:#bae6fd; }
+html.dark #chamcong-salary-body td:last-child .cc-box, html.dark #chamcong-salary-body td:nth-last-child(2) .cc-box { background:#052e1f; border-color:#166534; color:#bbf7d0; }
+@media print { .cc-box { border:0 !important; background:transparent !important; box-shadow:none !important; padding:0 !important; } }
+</style>
+<script id="pm-chamcong-boxed-cells">
+/* Bọc giá trị chỉ-đọc của bảng lương / Part-time vào "ô" (span.cc-box). textContent không đổi nên in/xuất vẫn đúng; tự bọc lại khi bảng vẽ lại. */
+(function () {
+    'use strict';
+    var SEL = '#chamcong-salary-body td, #chamcong-salary-foot td, #chamcong-parttime-body td';
+    var timer = null;
+    function wrap() {
+        [].forEach.call(document.querySelectorAll(SEL), function (td) {
+            if (td.colSpan > 1 || td.cellIndex === 0) return;                    // bỏ cột STT và ô gộp (nhãn "TỔNG")
+            if (td.querySelector('input,button,select,textarea,.cc-box')) return; // ô nhập liệu / nút giữ nguyên
+            td.classList.add('cc-boxed');
+            td.innerHTML = '<span class="cc-box">' + td.innerHTML + '</span>';
+        });
+    }
+    function schedule() { clearTimeout(timer); timer = setTimeout(wrap, 40); }
+    function init() {
+        ['chamcong-salary-body', 'chamcong-salary-foot', 'chamcong-parttime-body'].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el && !el.__ccObs) { el.__ccObs = new MutationObserver(schedule); el.__ccObs.observe(el, { childList: true, subtree: true }); }
+        });
+        wrap();
+    }
+    document.addEventListener('DOMContentLoaded', init);
+    window.addEventListener('load', init);
+    init();
+})();
+</script>
 </body>
 </html>
 
@@ -33932,6 +34540,19 @@ html.dark .v56-tb th{background:#1e293b;color:#94a3b8}
         document.body.appendChild(o);
         return o;
     }
+    // Cầu nối cho trang Kiểm Kê: dùng lại đúng cách lấy tồn hệ thống và cách lưu & điều chỉnh tồn kho đã có
+    window.__kkApi = {
+        esc: esc, fmt: fmt, r3: r3, products: products, groupOf: groupOf, GCOLOR: GCOLOR, GLABEL: GLABEL,
+        sysQty: sysQty, getPending: getPending, toast: toast,
+        save: function (rows, note, skipConfirm) {
+            window.__kkSkipConfirm = !!skipConfirm;
+            window.__kkAnchor = true;
+            KK.rows = rows.map(function (r) { return { name: r.name, unit: r.unit, group: r.group, sys: r.sys, counted: r.counted }; });
+            kkOverlay();
+            $('kk-note').value = note || '';
+            return window.__kkSave().finally(function () { window.__kkSkipConfirm = false; window.__kkAnchor = false; });
+        }
+    };
     window.__kkClose = function () { var o = $('kk-overlay'); if (o) o.style.display = 'none'; };
     window.openKiemKeKho = async function () {
         if (!products().length) { try { await updateProductDropdowns(); } catch (e) { } }
@@ -33995,14 +34616,32 @@ html.dark .v56-tb th{background:#1e293b;color:#94a3b8}
         try {
             /* lấy lại tồn hệ thống NGAY LÚC LƯU - nếu trong lúc đếm có bán/nhập thì điều chỉnh về đúng số đếm */
             var pend = await getPending();
+            /* NEO VÀO SỔ SÁCH: chênh lệch GHI TRONG PHIẾU (diff) phải tính so với tồn mà nút "Sửa tồn kho" (trang Quản Lý) sẽ dựng lại
+               (= nhập - xuất + hoàn trả + các phiếu kiểm kê trước). Nếu tính so với số đang hiển thị mà số này đã lệch sổ sách thì
+               sau khi bấm "Sửa tồn kho" tồn sẽ bị quay về số sai. cd = chênh lệch dùng để cộng/trừ bộ đếm tồn kho đang hiển thị. */
+            var ledger = null, ledgerNorm = {};
+            if (window.__kkAnchor) {
+                try {
+                    Swal.fire({ title: 'Đang đối chiếu sổ sách...', text: 'Đọc lịch sử nhập/xuất để tính chênh lệch chính xác, vui lòng đợi vài giây.', allowOutsideClick: false, showConfirmButton: false, didOpen: function () { Swal.showLoading(); } });
+                    ledger = await window.__ledgerStockMap(true);
+                    Swal.close();
+                    Object.keys(ledger).forEach(function (n) { var k = normKey(n); ledgerNorm[k] = (ledgerNorm[k] || 0) + ledger[n]; });
+                } catch (e) {
+                    try { Swal.close(); } catch (e2) { }
+                    console.error(e);
+                    return toast('error', 'Chưa điều chỉnh được', 'Không đọc được lịch sử nhập/xuất để đối chiếu sổ sách (' + ((e && e.message) || e) + '). Tồn kho chưa bị thay đổi, vui lòng thử lại.');
+                }
+            }
             var items = counted.map(function (r) {
                 var sys = sysQty(r.name, pend), c = r3(parseFloat(r.counted));
-                return { name: r.name, unit: r.unit, group: r.group, system: sys, counted: c, diff: r3(c - sys) };
+                var cd = r3(c - sys), L = sys;
+                if (ledger) { L = (ledger[r.name] != null) ? ledger[r.name] : (ledgerNorm[normKey(r.name)] || 0); L = r3(L); }
+                return { name: r.name, unit: r.unit, group: r.group, system: L, counted: c, diff: r3(c - L), shown: sys, cd: cd };
             });
-            var diffs = items.filter(function (i) { return Math.abs(i.diff) >= 0.0005; });
-            var plus = 0, minus = 0; diffs.forEach(function (i) { if (i.diff > 0) plus += i.diff; else minus += -i.diff; });
+            var diffs = items.filter(function (i) { return Math.abs(i.cd) >= 0.0005; });
+            var plus = 0, minus = 0; diffs.forEach(function (i) { if (i.cd > 0) plus += i.cd; else minus += -i.cd; });
             var rowsHtml = diffs.slice(0, 12).map(function (i) { return '<tr><td style="text-align:left;padding:2px 6px">' + esc(i.name) + '</td><td style="padding:2px 6px">' + fmt(i.system) + ' → <b>' + fmt(i.counted) + '</b></td><td style="padding:2px 6px;font-weight:800;color:' + (i.diff > 0 ? '#2563eb' : '#dc2626') + '">' + (i.diff > 0 ? '+' : '') + fmt(i.diff) + '</td></tr>'; }).join('');
-            var res = await Swal.fire({
+            var res = window.__kkSkipConfirm ? { isConfirmed: true } : await Swal.fire({
                 icon: 'question', title: 'Lưu kiểm kê?',
                 html: '<div style="font-size:13px;margin-bottom:6px">Đã đếm <b>' + items.length + '</b> SP, lệch <b>' + diffs.length + '</b> SP' + (diffs.length ? ' (+' + fmt(plus) + ' / −' + fmt(minus) + ')' : '') + '.<br>' + (diffs.length ? 'Tồn kho sẽ được điều chỉnh về đúng số đã đếm.' : 'Không có chênh lệch, chỉ lưu lại biên bản kiểm kê.') + '</div>' +
                     (rowsHtml ? '<table style="width:100%;font-size:12.5px">' + rowsHtml + '</table>' : '') + (diffs.length > 12 ? '<div style="font-size:12px;margin-top:4px">... và ' + (diffs.length - 12) + ' dòng nữa</div>' : ''),
@@ -34015,7 +34654,7 @@ html.dark .v56-tb th{background:#1e293b;color:#94a3b8}
                 var ref = null;
                 try { var m = (window.__stockCounterRefByNormalizedName || {})[normKey(i.name)]; if (m && m.ref) ref = m.ref; } catch (e) { }
                 if (!ref) ref = getStockRef(i.name);
-                batch.set(ref, { name: i.name, qty: inc(i.diff), updatedAt: ts() }, { merge: true });
+                batch.set(ref, { name: i.name, qty: inc(i.cd), updatedAt: ts() }, { merge: true });
             });
             var u = null; try { u = getCurrentUser(); } catch (e) { }
             var stRef = db.collection('stocktakes').doc();
@@ -34025,6 +34664,7 @@ html.dark .v56-tb th{background:#1e293b;color:#94a3b8}
             });
             await batch.commit();
             try { ghiLog('Kho Hàng', 'Kiểm kê', 'Kiểm kê kho', 'Đếm ' + items.length + ' SP, lệch ' + diffs.length + ' SP (+' + r3(plus) + ' / −' + r3(minus) + ')' + (($('kk-note').value || '').trim() ? ' - ' + $('kk-note').value.trim() : '')); } catch (e) { }
+            window.__kkLastSaved = Date.now();
             window.__kkClose();
             await Swal.fire({ icon: 'success', title: 'Đã lưu kiểm kê', text: diffs.length ? ('Đã điều chỉnh tồn kho cho ' + diffs.length + ' sản phẩm.') : 'Không có chênh lệch.', timer: 2200, showConfirmButton: false });
             try { if (typeof loadInventory === 'function') loadInventory(); } catch (e) { }
