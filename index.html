@@ -7731,9 +7731,9 @@ function renderChamCongTable(type, days) {
             '</div>' +
             '</td>' +
             cellsHtml +
-            '<td class="' + tdBase + ' p-1 text-center font-bold dark:text-white">' + total + '</td>' +
+            '<td class="' + tdBase + ' p-1 text-center font-bold dark:text-white pm-celled"><span class="pm-cell pm-total">' + total + '</span></td>' +
             '<td class="' + tdBase + ' p-1 text-center font-semibold dark:text-white"><input type="text" inputmode="decimal" value="' + (rate ? Number(rate).toLocaleString('vi-VN') : '') + '" placeholder="0" class="w-full min-w-[55px] text-center bg-transparent outline-none focus:bg-blue-50 dark:focus:bg-slate-800 dark:text-white" onchange="updateChamCongRate(\'' + type + '\', ' + idx + ', this.value)"></td>' +
-            '<td class="' + tdBase + ' p-1 text-right font-bold dark:text-white">' + '' + '</td>' +
+            '<td class="' + tdBase + ' p-1 text-right font-bold dark:text-white pm-celled"><span class="pm-cell pm-money">' + (thanhTien ? Number(thanhTien).toLocaleString('vi-VN') : '') + '</span></td>' +
             '<td class="' + tdBase + ' p-1 text-center">' +
             '<button onclick="removeChamCongEmployee(\'' + type + '\', ' + idx + ')" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>' +
             '</td>' +
@@ -8083,7 +8083,7 @@ function updateSalaryComputedDOM() {
         totals.overtime += ot.amount; totals.hours += ot.hours;
         totals.bonus += bonus; totals.allowance += allowance;
         totals.bh += legal.bhDeduction; totals.deduction += legal.deduction; totals.advance += legal.advance; totals.net += legal.net;
-        const set = (cls,text) => { const el=tr.querySelector('.'+cls); if(el){ const b=el.querySelector('.cc-box'); (b||el).textContent=text; } };
+        const set = (cls,text) => { const el=tr.querySelector('.'+cls); if(el){ const b=el.querySelector('.pm-cell'); (b||el).textContent=text; } };
         set('salary-base', formatSalaryMoney(base)+' đ');
         set('salary-ot-amount', formatSalaryMoney(ot.amount)+' đ');
         set('salary-gross', formatSalaryMoney(legal.gross)+' đ');
@@ -8097,7 +8097,7 @@ function updateSalaryComputedDOM() {
     setId('chamcong-tong-thuc-linh',formatSalaryMoney(totals.net)+' đ');
     const foot=document.getElementById('chamcong-salary-foot');
     if(foot){
-        const setTotal=(col,text)=>{const el=foot.querySelector('[data-total-col=\"'+col+'\"]');if(el){const b=el.querySelector('.cc-box');(b||el).textContent=text;}};
+        const setTotal=(col,text)=>{const el=foot.querySelector('[data-total-col=\"'+col+'\"]');if(el){const b=el.querySelector('.pm-cell');(b||el).textContent=text;}};
         setTotal('4',formatGio(totals.days));
         setTotal('5','');
         setTotal('6',formatSalaryMoney(totals.salary)+' đ');
@@ -33068,103 +33068,132 @@ html.dark #page-stocktake .st-foot{background:#0b1220;border-color:#1e293b;color
         var wb = new ExcelJS.Workbook();
         wb.creator = 'POS Pro'; wb.created = new Date();
         wb.calcProperties = { fullCalcOnLoad: true };
-        var ws = wb.addWorksheet('Kiểm kê', { views: [{ state: 'frozen', ySplit: 5 }], pageSetup: { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0 } });
-        var thin = { style: 'thin', color: { argb: 'FFCBD5E1' } }, border = { top: thin, left: thin, bottom: thin, right: thin };
+        var ws = wb.addWorksheet('Kiểm kê', { views: [{ state: 'frozen', ySplit: 5 }], pageSetup: { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0, printTitlesRow: '5:5' } });
+        // Khung bảng RÕ RÀNG: đường kẻ xám đậm quanh mọi ô
+        var ln = { style: 'thin', color: { argb: 'FF475569' } };
+        var border = { top: ln, left: ln, bottom: ln, right: ln };
+        var fill = function (argb) { return { type: 'pattern', pattern: 'solid', fgColor: { argb: argb } }; };
         var d = nowVN(), dateStr = pad(d.getUTCDate()) + '/' + pad(d.getUTCMonth() + 1) + '/' + d.getUTCFullYear() + ' ' + pad(d.getUTCHours()) + ':' + pad(d.getUTCMinutes());
         var user = ''; try { var u = getCurrentUser(); user = u ? (u.displayName || u.username || '') : ''; } catch (e) { }
         ws.mergeCells('A1:J1'); ws.getCell('A1').value = 'BIÊN BẢN KIỂM KÊ KHO';
-        ws.getCell('A1').font = { name: 'Arial', size: 16, bold: true, color: { argb: 'FF0F172A' } }; ws.getCell('A1').alignment = { horizontal: 'center', vertical: 'middle' }; ws.getRow(1).height = 28;
+        ws.getCell('A1').font = { name: 'Arial', size: 18, bold: true, color: { argb: 'FF1E3A8A' } }; ws.getCell('A1').alignment = { horizontal: 'center', vertical: 'middle' }; ws.getRow(1).height = 32;
         ws.mergeCells('A2:J2'); ws.getCell('A2').value = 'Thời điểm lập: ' + dateStr + (user ? '   |   Người lập: ' + user : '') + (ST.group !== 'ALL' ? '   |   Nhóm: ' + gLabel(ST.group) : '   |   Tất cả sản phẩm');
         ws.getCell('A2').alignment = { horizontal: 'center' }; ws.getCell('A2').font = { name: 'Arial', size: 10, italic: true, color: { argb: 'FF475569' } };
-        ws.mergeCells('A3:J3'); ws.getCell('A3').value = 'Chênh lệch = SL thực tế − Tồn hệ thống (+ thừa, − thiếu). Ô SL thực tế để trống = chưa đếm. Giá trị lệch tính theo giá sỉ.';
+        ws.mergeCells('A3:J3'); ws.getCell('A3').value = 'Chênh lệch = SL thực tế − Tồn hệ thống (+ thừa, − thiếu). Ô SL thực tế để trống = chưa đếm. Giá trị chênh lệch tính theo giá sỉ.';
         ws.getCell('A3').alignment = { horizontal: 'center' }; ws.getCell('A3').font = { name: 'Arial', size: 9, color: { argb: 'FF64748B' } };
-        var head = ['STT', 'Tên sản phẩm', 'Nhóm', 'ĐVT', 'Tồn hệ thống', 'SL thực tế', 'Chênh lệch', 'Đơn giá (giá sỉ)', 'Giá trị chênh lệch', 'Ghi chú'];
-        var hr = ws.getRow(5); head.forEach(function (h, i) { hr.getCell(i + 1).value = h; });
-        hr.height = 24;
-        hr.eachCell(function (c) { c.font = { name: 'Arial', bold: true, color: { argb: 'FFFFFFFF' }, size: 11 }; c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } }; c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }; c.border = border; });
+        // Tiêu đề cột: MỖI NHÓM CỘT MỘT MÀU NỀN (chữ trắng đậm)
+        var heads = [
+            ['STT', 'FF1E40AF'], ['Tên sản phẩm', 'FF1E40AF'], ['Nhóm', 'FF1E40AF'], ['ĐVT', 'FF1E40AF'],
+            ['Tồn hệ thống', 'FF0369A1'], ['SL thực tế', 'FFB45309'], ['Chênh lệch', 'FFBE123C'],
+            ['Đơn giá (giá sỉ)', 'FF047857'], ['Giá trị chênh lệch', 'FF047857'], ['Ghi chú', 'FF6D28D9']
+        ];
+        var hr = ws.getRow(5); hr.height = 30;
+        heads.forEach(function (h, i) {
+            var c = hr.getCell(i + 1);
+            c.value = h[0];
+            c.font = { name: 'Arial', bold: true, size: 11, color: { argb: 'FFFFFFFF' } };
+            c.fill = fill(h[1]);
+            c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+            c.border = { top: { style: 'medium', color: { argb: 'FF0F172A' } }, left: ln, right: ln, bottom: { style: 'medium', color: { argb: 'FF0F172A' } } };
+        });
         var first = 6, rn = first - 1, dataRows = [], lastGroup = null, seq = 0;
+        var isInt = function (v) { return Math.abs(v - Math.round(v)) < 1e-9; };
         rows.forEach(function (r) {
             if (r.group !== lastGroup) {
                 lastGroup = r.group; seq = 0; rn++;
                 ws.mergeCells('A' + rn + ':J' + rn);
-                var gc = ws.getCell('A' + rn);
+                var gc = ws.getCell('A' + rn), gcol = gColor(r.group).replace('#', '').toUpperCase();
                 gc.value = '  ' + r.group;
-                gc.font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FF' + gColor(r.group).replace('#', '').toUpperCase() } };
-                gc.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } };
-                gc.alignment = { vertical: 'middle' }; gc.border = border;
-                ws.getRow(rn).height = 20;
+                gc.font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FF' + gcol } };
+                gc.fill = fill('FFEEF2FF');
+                gc.alignment = { vertical: 'middle' };
+                gc.border = { top: { style: 'thin', color: { argb: 'FF475569' } }, bottom: { style: 'thin', color: { argb: 'FF475569' } }, left: { style: 'thick', color: { argb: 'FF' + gcol } }, right: ln };
+                ws.getRow(rn).height = 22;
             }
             rn++; seq++;
             var row = ws.getRow(rn); dataRows.push(rn);
+            var dd = diffOf(r), counted = isCounted(r);
             row.getCell(1).value = seq;
             row.getCell(2).value = r.name;
             row.getCell(3).value = gLabel(r.group);
             row.getCell(4).value = r.unit;
             row.getCell(5).value = r.sys;
-            row.getCell(6).value = isCounted(r) ? parseFloat(r.counted) : null;
-            row.getCell(7).value = { formula: 'IF(F' + rn + '="","",F' + rn + '-E' + rn + ')', result: isCounted(r) ? diffOf(r) : '' };
+            row.getCell(6).value = counted ? parseFloat(r.counted) : null;
+            row.getCell(7).value = { formula: 'IF(F' + rn + '="","",F' + rn + '-E' + rn + ')', result: counted ? dd : '' };
             row.getCell(8).value = r.price || 0;
-            var dd = diffOf(r);
             row.getCell(9).value = { formula: 'IF(G' + rn + '="","",G' + rn + '*H' + rn + ')', result: dd === null ? '' : Math.round(dd * r.price) };
             row.getCell(10).value = r.note || '';
-            row.eachCell({ includeEmpty: true }, function (c, col) {
-                if (col > 10) return;
-                c.border = border; c.font = { name: 'Arial', size: 10 };
-                c.alignment = { vertical: 'middle', horizontal: (col === 2 || col === 10) ? 'left' : (col === 3 || col === 4 || col === 1 ? 'center' : 'right'), wrapText: col === 10 };
-            });
+            row.height = 20;
+            for (var c = 1; c <= 10; c++) {
+                var cell = row.getCell(c);
+                cell.border = border; cell.font = { name: 'Arial', size: 10 };
+                cell.alignment = { vertical: 'middle', horizontal: (c === 2 || c === 10) ? 'left' : (c <= 4 ? 'center' : 'right'), wrapText: c === 10 };
+                if (seq % 2 === 0) cell.fill = fill('FFF8FAFC');
+            }
             row.getCell(2).font = { name: 'Arial', size: 10, bold: true };
-            row.getCell(6).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEF9C3' } };
+            // SỐ LƯỢNG: không dùng định dạng có dấu thập phân thừa (tránh hiện "47,") - số nguyên hiện nguyên, số lẻ hiện đúng phần lẻ
+            row.getCell(1).numFmt = '0';
+            row.getCell(5).numFmt = isInt(r.sys) ? '#,##0' : '#,##0.###';
+            row.getCell(6).numFmt = counted && !isInt(parseFloat(r.counted)) ? '#,##0.###' : '#,##0';
+            row.getCell(7).numFmt = 'General';
+            row.getCell(8).numFmt = '#,##0';
+            row.getCell(9).numFmt = '#,##0;[Red]-#,##0';
+            row.getCell(6).fill = fill('FFFEF9C3');
             row.getCell(6).font = { name: 'Arial', size: 10, bold: true };
         });
         var last = rn;
-        dataRows.forEach(function (rr) {
-            var xr = ws.getRow(rr);
-            xr.getCell(5).numFmt = '#,##0.###'; xr.getCell(6).numFmt = '#,##0.###';
-            xr.getCell(7).numFmt = '+#,##0.###;[Red]-#,##0.###;0';
-            xr.getCell(8).numFmt = '#,##0'; xr.getCell(9).numFmt = '#,##0;[Red]-#,##0';
-        });
-        var tr = ws.getRow(last + 1);
+        // Tô màu cột Chênh lệch chỉ khi LÀ SỐ (ô trống do công thức không bị tô nhầm)
+        ws.addConditionalFormatting({ ref: 'G' + first + ':G' + last, rules: [
+            { type: 'expression', formulae: ['AND(ISNUMBER(G' + first + '),G' + first + '>0)'], style: { font: { color: { argb: 'FF1D4ED8' }, bold: true }, fill: { type: 'pattern', pattern: 'solid', bgColor: { argb: 'FFDBEAFE' } } } },
+            { type: 'expression', formulae: ['AND(ISNUMBER(G' + first + '),G' + first + '<0)'], style: { font: { color: { argb: 'FFB91C1C' }, bold: true }, fill: { type: 'pattern', pattern: 'solid', bgColor: { argb: 'FFFEE2E2' } } } }
+        ] });
+        var tr = ws.getRow(last + 1); tr.height = 24;
         tr.getCell(2).value = 'TỔNG CỘNG';
         tr.getCell(5).value = { formula: 'SUM(E' + first + ':E' + last + ')' };
         tr.getCell(6).value = { formula: 'SUM(F' + first + ':F' + last + ')' };
         tr.getCell(7).value = { formula: 'SUM(G' + first + ':G' + last + ')' };
         tr.getCell(9).value = { formula: 'SUM(I' + first + ':I' + last + ')' };
-        for (var c = 1; c <= 10; c++) { var cell = tr.getCell(c); cell.font = { name: 'Arial', bold: true, size: 10 }; cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2E8F0' } }; cell.border = border; if (c >= 5) cell.alignment = { horizontal: 'right' }; }
-        tr.getCell(5).numFmt = '#,##0.###'; tr.getCell(6).numFmt = '#,##0.###'; tr.getCell(7).numFmt = '+#,##0.###;[Red]-#,##0.###;0'; tr.getCell(9).numFmt = '#,##0;[Red]-#,##0';
-        ws.addConditionalFormatting({ ref: 'G' + first + ':G' + last, rules: [
-            { type: 'cellIs', operator: 'greaterThan', formulae: [0], style: { font: { color: { argb: 'FF2563EB' }, bold: true }, fill: { type: 'pattern', pattern: 'solid', bgColor: { argb: 'FFDBEAFE' } } } },
-            { type: 'cellIs', operator: 'lessThan', formulae: [0], style: { font: { color: { argb: 'FFDC2626' }, bold: true }, fill: { type: 'pattern', pattern: 'solid', bgColor: { argb: 'FFFEE2E2' } } } }
-        ] });
-        [[1, 6], [2, 38], [3, 12], [4, 9], [5, 14], [6, 14], [7, 15], [8, 16], [9, 18], [10, 28]].forEach(function (w) { ws.getColumn(w[0]).width = w[1]; });
-        ws.autoFilter = { from: 'A5', to: 'J' + last };
+        for (var cc = 1; cc <= 10; cc++) {
+            var tc = tr.getCell(cc);
+            tc.font = { name: 'Arial', bold: true, size: 11, color: { argb: 'FF0C4A6E' } }; tc.fill = fill('FFBAE6FD');
+            tc.border = { top: { style: 'medium', color: { argb: 'FF0F172A' } }, bottom: { style: 'medium', color: { argb: 'FF0F172A' } }, left: ln, right: ln };
+            tc.alignment = { vertical: 'middle', horizontal: cc >= 5 ? 'right' : (cc === 2 ? 'left' : 'center') };
+        }
+        tr.getCell(5).numFmt = '#,##0.###;-#,##0.###;0'; tr.getCell(6).numFmt = '#,##0.###;-#,##0.###;0'; tr.getCell(7).numFmt = 'General'; tr.getCell(9).numFmt = '#,##0;[Red]-#,##0';
+        // định dạng gọn: tổng toàn số nguyên thì không cần phần lẻ -> dùng General cho cột SL tổng
+        tr.getCell(5).numFmt = 'General'; tr.getCell(6).numFmt = 'General';
+        [[1, 6], [2, 40], [3, 12], [4, 9], [5, 14], [6, 14], [7, 14], [8, 16], [9, 19], [10, 28]].forEach(function (w) { ws.getColumn(w[0]).width = w[1]; });
         ws.headerFooter.oddFooter = '&LKiểm kê kho&RTrang &P / &N';
-        // Sheet 2: chỉ các dòng lệch (giá trị tĩnh, tiện in / gửi)
+        // Sheet 2: chỉ các dòng lệch
         var diffs = rows.filter(function (r) { var x = diffOf(r); return x !== null && x !== 0; });
-        var w2 = wb.addWorksheet('Chỉ dòng lệch', { views: [{ state: 'frozen', ySplit: 3 }], pageSetup: { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0 } });
-        w2.mergeCells('A1:H1'); w2.getCell('A1').value = 'CÁC SẢN PHẨM CHÊNH LỆCH – ' + dateStr; w2.getCell('A1').font = { name: 'Arial', size: 14, bold: true }; w2.getCell('A1').alignment = { horizontal: 'center' };
-        var h2 = ['STT', 'Tên sản phẩm', 'ĐVT', 'Tồn hệ thống', 'SL thực tế', 'Chênh lệch', 'Giá trị chênh lệch', 'Ghi chú'];
-        var r3 = w2.getRow(3); h2.forEach(function (h, i) { r3.getCell(i + 1).value = h; });
-        r3.eachCell(function (c) { c.font = { name: 'Arial', bold: true, color: { argb: 'FFFFFFFF' } }; c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } }; c.alignment = { horizontal: 'center', vertical: 'middle' }; c.border = border; });
+        var w2 = wb.addWorksheet('Chỉ dòng lệch', { views: [{ state: 'frozen', ySplit: 3 }], pageSetup: { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0, printTitlesRow: '3:3' } });
+        w2.mergeCells('A1:H1'); w2.getCell('A1').value = 'CÁC SẢN PHẨM CHÊNH LỆCH – ' + dateStr; w2.getCell('A1').font = { name: 'Arial', size: 15, bold: true, color: { argb: 'FFB91C1C' } }; w2.getCell('A1').alignment = { horizontal: 'center', vertical: 'middle' }; w2.getRow(1).height = 28;
+        var h2 = [['STT', 'FF1E40AF'], ['Tên sản phẩm', 'FF1E40AF'], ['ĐVT', 'FF1E40AF'], ['Tồn hệ thống', 'FF0369A1'], ['SL thực tế', 'FFB45309'], ['Chênh lệch', 'FFBE123C'], ['Giá trị chênh lệch', 'FF047857'], ['Ghi chú', 'FF6D28D9']];
+        var r3h = w2.getRow(3); r3h.height = 28;
+        h2.forEach(function (h, i) { var c = r3h.getCell(i + 1); c.value = h[0]; c.font = { name: 'Arial', bold: true, size: 11, color: { argb: 'FFFFFFFF' } }; c.fill = fill(h[1]); c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }; c.border = { top: { style: 'medium', color: { argb: 'FF0F172A' } }, left: ln, right: ln, bottom: { style: 'medium', color: { argb: 'FF0F172A' } } }; });
         var totVal = 0;
         diffs.forEach(function (r, i) {
             var x = diffOf(r), v = Math.round(x * r.price); totVal += v;
-            var rw = w2.getRow(4 + i);
+            var rw = w2.getRow(4 + i); rw.height = 20;
             [i + 1, r.name, r.unit, r.sys, parseFloat(r.counted), x, v, r.note || ''].forEach(function (val, k) { rw.getCell(k + 1).value = val; });
-            rw.eachCell({ includeEmpty: true }, function (c, col) { if (col > 8) return; c.border = border; c.font = { name: 'Arial', size: 10 }; c.alignment = { horizontal: (col === 2 || col === 8) ? 'left' : (col <= 3 ? 'center' : 'right'), vertical: 'middle' }; });
-            rw.getCell(6).font = { name: 'Arial', size: 10, bold: true, color: { argb: x > 0 ? 'FF2563EB' : 'FFDC2626' } };
-            rw.getCell(7).font = { name: 'Arial', size: 10, bold: true, color: { argb: v > 0 ? 'FF2563EB' : 'FFDC2626' } };
+            for (var c = 1; c <= 8; c++) {
+                var cell = rw.getCell(c); cell.border = border; cell.font = { name: 'Arial', size: 10 };
+                cell.alignment = { horizontal: (c === 2 || c === 8) ? 'left' : (c <= 3 ? 'center' : 'right'), vertical: 'middle' };
+                if (i % 2 === 1) cell.fill = fill('FFF8FAFC');
+            }
+            rw.getCell(1).numFmt = '0';
+            rw.getCell(4).numFmt = isInt(r.sys) ? '#,##0' : '#,##0.###';
+            rw.getCell(5).numFmt = isInt(parseFloat(r.counted)) ? '#,##0' : '#,##0.###';
+            rw.getCell(6).numFmt = 'General'; rw.getCell(7).numFmt = '#,##0;[Red]-#,##0';
+            rw.getCell(6).font = { name: 'Arial', size: 10, bold: true, color: { argb: x > 0 ? 'FF1D4ED8' : 'FFB91C1C' } };
+            rw.getCell(7).font = { name: 'Arial', size: 10, bold: true, color: { argb: v > 0 ? 'FF1D4ED8' : 'FFB91C1C' } };
         });
         if (diffs.length) {
-            var t2 = w2.getRow(4 + diffs.length); t2.getCell(2).value = 'TỔNG GIÁ TRỊ CHÊNH LỆCH'; t2.getCell(7).value = totVal;
-            for (var k = 1; k <= 8; k++) { var cc = t2.getCell(k); cc.font = { name: 'Arial', bold: true }; cc.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2E8F0' } }; cc.border = border; }
+            var t2 = w2.getRow(4 + diffs.length); t2.height = 24; t2.getCell(2).value = 'TỔNG GIÁ TRỊ CHÊNH LỆCH'; t2.getCell(7).value = totVal;
+            for (var k = 1; k <= 8; k++) { var cc2 = t2.getCell(k); cc2.font = { name: 'Arial', bold: true, size: 11, color: { argb: 'FF0C4A6E' } }; cc2.fill = fill('FFBAE6FD'); cc2.border = { top: { style: 'medium', color: { argb: 'FF0F172A' } }, bottom: { style: 'medium', color: { argb: 'FF0F172A' } }, left: ln, right: ln }; }
+            t2.getCell(7).numFmt = '#,##0;[Red]-#,##0'; t2.getCell(7).alignment = { horizontal: 'right' };
         } else { w2.mergeCells('A4:H4'); w2.getCell('A4').value = 'Không có chênh lệch (hoặc chưa nhập số thực tế).'; w2.getCell('A4').alignment = { horizontal: 'center' }; w2.getCell('A4').font = { name: 'Arial', italic: true, color: { argb: 'FF64748B' } }; }
-        [[1, 6], [2, 38], [3, 9], [4, 14], [5, 14], [6, 15], [7, 18], [8, 28]].forEach(function (w) { w2.getColumn(w[0]).width = w[1]; });
-        diffs.forEach(function (r, i) {
-            var xr2 = w2.getRow(4 + i);
-            xr2.getCell(4).numFmt = '#,##0.###'; xr2.getCell(5).numFmt = '#,##0.###';
-            xr2.getCell(6).numFmt = '+#,##0.###;[Red]-#,##0.###'; xr2.getCell(7).numFmt = '+#,##0;[Red]-#,##0';
-        });
-        if (diffs.length) w2.getRow(4 + diffs.length).getCell(7).numFmt = '+#,##0;[Red]-#,##0';
+        [[1, 6], [2, 40], [3, 9], [4, 14], [5, 14], [6, 14], [7, 19], [8, 28]].forEach(function (w) { w2.getColumn(w[0]).width = w[1]; });
         try {
             var buf = await wb.xlsx.writeBuffer();
             var blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -33181,18 +33210,23 @@ html.dark #page-stocktake .st-foot{background:#0b1220;border-color:#1e293b;color
 /* Tiêu đề "TÍNH LƯƠNG THÁNG" bị chìm (chữ xanh đậm trên nền xanh): đưa về chữ trắng như các bảng khác */
 #chamcong-salary-card [data-gb] h3, #chamcong-salary-card [data-gb] .lucide, #chamcong-salary-card [data-gb] [data-lucide="wallet-cards"] { color:#fff !important; text-shadow:0 1px 3px rgba(0,0,0,.45); opacity:1 !important; }
 /* Bảng lương & bảng Part-time: MỌI giá trị đều nằm trong "ô" có khung bo tròn như ô chấm công / tăng ca (kể cả ô trống) */
-#chamcong-salary-table td.cc-boxed, #chamcong-parttime-table td.cc-boxed { padding:4px 5px !important; }
-.cc-box { display:block; box-sizing:border-box; width:100%; min-height:32px; line-height:22px; padding:4px 9px; text-align:inherit; font-weight:700; color:#0f172a;
+#chamcong-salary-table td.pm-celled, #chamcong-parttime-table td.pm-celled { padding:4px 5px !important; }
+.pm-cell { display:block; box-sizing:border-box; width:100%; min-height:32px; line-height:22px; padding:4px 9px; text-align:inherit; font-weight:700; color:#0f172a;
   background:#f1f5f9; border:1.5px solid #cbd5e1; border-radius:10px; box-shadow:inset 0 1px 2px rgba(15,23,42,.05); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-#chamcong-salary-foot .cc-box { background:#e0f2fe; border-color:#7dd3fc; color:#0c4a6e; font-weight:900; }
-#chamcong-salary-body td:last-child .cc-box, #chamcong-salary-body td:nth-last-child(2) .cc-box { background:#dcfce7; border-color:#86efac; color:#14532d; font-weight:900; }
-html.dark .cc-box { background:#0f172a; border-color:#334155; color:#e2e8f0; box-shadow:none; }
-html.dark #chamcong-salary-foot .cc-box { background:#082f49; border-color:#075985; color:#bae6fd; }
-html.dark #chamcong-salary-body td:last-child .cc-box, html.dark #chamcong-salary-body td:nth-last-child(2) .cc-box { background:#052e1f; border-color:#166534; color:#bbf7d0; }
-@media print { .cc-box { border:0 !important; background:transparent !important; box-shadow:none !important; padding:0 !important; } }
+#chamcong-salary-foot .pm-cell { background:#e0f2fe; border-color:#7dd3fc; color:#0c4a6e; font-weight:900; }
+#chamcong-salary-body td:last-child .pm-cell, #chamcong-salary-body td:nth-last-child(2) .pm-cell { background:#dcfce7; border-color:#86efac; color:#14532d; font-weight:900; }
+html.dark .pm-cell { background:#0f172a; border-color:#334155; color:#e2e8f0; box-shadow:none; }
+html.dark #chamcong-salary-foot .pm-cell { background:#082f49; border-color:#075985; color:#bae6fd; }
+html.dark #chamcong-salary-body td:last-child .pm-cell, html.dark #chamcong-salary-body td:nth-last-child(2) .pm-cell { background:#052e1f; border-color:#166534; color:#bbf7d0; }
+@media print { .pm-cell { border:0 !important; background:transparent !important; box-shadow:none !important; padding:0 !important; } }
+#chamcong-attendance-table td.pm-celled, #chamcong-overtime-table td.pm-celled { padding:3px 4px !important; }
+.pm-cell.pm-total { text-align:center; background:#eff6ff; border-color:#93c5fd; color:#1d4ed8; font-weight:900; font-size:14px; }
+.pm-cell.pm-money { text-align:right; background:#f8fafc; border-color:#cbd5e1; color:#0f172a; font-weight:800; }
+html.dark .pm-cell.pm-total { background:#0b1b3a; border-color:#1d4ed8; color:#93c5fd; }
+html.dark .pm-cell.pm-money { background:#0f172a; }
 </style>
 <script id="pm-chamcong-boxed-cells">
-/* Bọc giá trị chỉ-đọc của bảng lương / Part-time vào "ô" (span.cc-box). textContent không đổi nên in/xuất vẫn đúng; tự bọc lại khi bảng vẽ lại. */
+/* Bọc giá trị chỉ-đọc của bảng lương / Part-time vào "ô" (span.pm-cell). textContent không đổi nên in/xuất vẫn đúng; tự bọc lại khi bảng vẽ lại. */
 (function () {
     'use strict';
     var SEL = '#chamcong-salary-body td, #chamcong-salary-foot td, #chamcong-parttime-body td';
@@ -33200,9 +33234,9 @@ html.dark #chamcong-salary-body td:last-child .cc-box, html.dark #chamcong-salar
     function wrap() {
         [].forEach.call(document.querySelectorAll(SEL), function (td) {
             if (td.colSpan > 1 || td.cellIndex === 0) return;                    // bỏ cột STT và ô gộp (nhãn "TỔNG")
-            if (td.querySelector('input,button,select,textarea,.cc-box')) return; // ô nhập liệu / nút giữ nguyên
-            td.classList.add('cc-boxed');
-            td.innerHTML = '<span class="cc-box">' + td.innerHTML + '</span>';
+            if (td.querySelector('input,button,select,textarea,.pm-cell')) return; // ô nhập liệu / nút giữ nguyên
+            td.classList.add('pm-celled');
+            td.innerHTML = '<span class="pm-cell">' + td.innerHTML + '</span>';
         });
     }
     function schedule() { clearTimeout(timer); timer = setTimeout(wrap, 40); }
