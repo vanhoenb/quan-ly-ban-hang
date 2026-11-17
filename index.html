@@ -26387,6 +26387,7 @@ async function sxLoadStages() {
         if (sxNorm(st.name) !== 'nấu') continue;
         const up = {};
         if (String(st.nlMau || '').trim() === SX_OLD_NAU_TPL.trim()) up.nlMau = SX_TPL_NAU;
+        else if (String(st.nlMau || '').trim() && String(st.nlMau).trim() !== ' ' && !sxNauRecipeOk(st.nlMau)) up.nlMau = SX_TPL_NAU;   // công thức Nấu lưu sai (mỡ/thịt...) -> đưa về công thức chuẩn 1 mẻ
         if (st.ctTu === 'Xay NL') up.ctTu = ' ';
         if (String(st.ketQuaMau || '').trim() === SX_OLD_NAU_KQ) up.ketQuaMau = SX_DEFAULT_KETQUA['Nấu'];
         if (Object.keys(up).length) {
@@ -26512,12 +26513,27 @@ async function sxMoveStage(id, dir) {
     } catch (e) { showAlert('Lỗi đổi thứ tự: ' + e.message); }
 }
 // Mẫu in sẵn của công đoạn. Chưa có hoặc để rỗng -> dùng mẫu mặc định; muốn để trống hẳn thì lưu 1 dấu cách.
+// Công thức 1 MẺ NẤU chuẩn: thịt nạc vai 7 Kg; mỡ 1,5 Kg (mỡ lá + mỡ khổ, chia thế nào cũng được miễn đủ 1,5);
+// hành ta 0,25; mắm nêm 1; riu đỏ 0,3. Nếu công thức Nấu lưu trong Danh mục sai các số này (VD mỡ chỉ 0,65 Kg/mẻ)
+// thì chọn "2, 3... mẻ" sẽ ra sai -> tự dùng công thức chuẩn thay cho bản sai.
+function sxNauRecipeOk(tpl) {
+    const m = {};
+    String(tpl || '').split('\n').forEach(line => {
+        const p = sxParseNLLine(line.trim());
+        const n = sxKgNum(p.kg);
+        if (p.name && isFinite(n)) m[sxNorm(p.name)] = (m[sxNorm(p.name)] || 0) + n;
+    });
+    const eq = (a, b) => Math.abs((a || 0) - b) < 0.001;
+    return eq(m['thịt nạc vai'], 7) && eq((m['mỡ lá'] || 0) + (m['mỡ khổ'] || 0), 1.5)
+        && eq(m['hành ta'], 0.25) && eq(m['mắm nêm'], 1) && eq(m['riu đỏ'], 0.3);
+}
 function sxStageField(name, field) {
     const defs = { nlMau: SX_DEFAULT_TEMPLATES, nguoiMau: SX_DEFAULT_NGUOI, ketQuaMau: SX_DEFAULT_KETQUA }[field] || {};
     const st = (window.__sxStages || []).find(x => x.name === name);
     const v = st ? st[field] : undefined;
     if (v === ' ') return '';
     if (v === undefined || v === null || v === '') return defs[name] || '';
+    if (field === 'nlMau' && sxNorm(name) === 'nấu' && !sxNauRecipeOk(v)) return defs[name] || v;
     return v;
 }
 
@@ -27301,27 +27317,27 @@ async function sxPickNL(row) {
     const baseLines = isNau ? sxPackLines(sxStageField(row.stage, 'nlMau')).map(sxParseNLLine).filter(x => x.name && x.kg !== '' && isFinite(sxKgNum(x.kg))) : [];
     baseLines.forEach(b => { if (!items.some(it => sxNorm(it.name) === sxNorm(b.name))) items.push({ name: b.name, unit: b.unit || 'Kg', checked: false, kg: '' }); });
     let meSel = row.soMe ? String(row.soMe) : '';
-    const meChip = 'padding:6px 0;min-width:40px;border:1px solid #cbd5e1;border-radius:10px;font-weight:800;font-size:14px;color:#0f172a;background:#f8fafc;cursor:pointer';
+    const meChip = 'padding:5px 0;min-width:36px;border:1px solid #cbd5e1;border-radius:10px;font-weight:800;font-size:14px;color:#0f172a;background:#f8fafc;cursor:pointer';
     const meHtml = (isNau && baseLines.length)
         ? '<div style="text-align:left;margin-bottom:10px;padding:8px;border:2px dashed #f59e0b;border-radius:12px;background:#fffbeb">'
-            + '<div style="font-weight:900;font-size:13px;color:#b45309">🍲 SỐ MẺ NẤU <span style="font-weight:600;color:#64748b">(1 mẻ = ' + escapeHtml(baseLines.map(b => b.name + ' ' + b.kg + ' ' + (b.unit || 'Kg')).join(', ')) + ')</span></div>'
-            + '<div id="sxme-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">' + Array.from({ length: 20 }, (_, i) => '<button type="button" class="sxme-chip" data-n="' + (i + 1) + '" style="' + meChip + '">' + (i + 1) + '</button>').join('') + '</div>'
-            + '<input id="sxme-n" type="number" min="0" step="any" placeholder="Hoặc tự nhập số mẻ (VD 2.5)" style="width:100%;margin-top:8px;padding:8px;border:1px solid #cbd5e1;border-radius:10px;color:#0f172a">'
+            + '<div style="font-weight:900;font-size:13px;color:#b45309">🍲 SỐ MẺ NẤU <span style="font-weight:600;color:#64748b;font-size:11px">(1 mẻ = ' + escapeHtml(baseLines.map(b => b.name + ' ' + b.kg + ' ' + (b.unit || 'Kg')).join(', ')) + ')</span></div>'
+            + '<div id="sxme-chips" style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px">' + Array.from({ length: 10 }, (_, i) => '<button type="button" class="sxme-chip" data-n="' + (i + 1) + '" style="' + meChip + '">' + (i + 1) + '</button>').join('')
+            + '<input id="sxme-n" type="number" min="0" step="any" placeholder="Số mẻ khác (VD 12)" style="width:150px;margin-left:8px;padding:6px 10px;border:2px solid #f59e0b;border-radius:10px;color:#0f172a;font-size:13px;font-weight:700;background:#fff"></div>'
             + '<div id="sxme-info" style="margin-top:6px;font-size:12px;font-weight:700;color:#475569"></div></div>'
         : '';
     const rowsHtml = items.map((it, k) =>
-        '<label class="sxnl-row" data-n="' + escapeHtml(it.name.toLowerCase()) + '" style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #e5e7eb;text-align:left">'
+        '<label class="sxnl-row" data-n="' + escapeHtml(it.name.toLowerCase()) + '" style="display:flex;align-items:center;gap:8px;padding:4px 2px;border-bottom:1px solid #e5e7eb;text-align:left">'
         + '<input type="checkbox" class="sxnl-chk" data-k="' + k + '"' + (it.checked ? ' checked' : '') + ' style="width:18px;height:18px">'
         + '<span style="flex:1;font-size:14px">' + escapeHtml(it.name) + '</span>'
-        + '<input type="number" step="any" min="0" class="sxnl-kg" data-k="' + k + '" value="' + escapeHtml(String(it.kg).replace(',', '.')) + '" placeholder="Kg" style="width:84px;padding:4px;border:1px solid #cbd5e1;border-radius:8px;color:#0f172a">'
+        + '<input type="number" step="any" min="0" class="sxnl-kg" data-k="' + k + '" value="' + escapeHtml(String(it.kg).replace(',', '.')) + '" placeholder="Kg" style="width:74px;padding:3px 4px;border:1px solid #cbd5e1;border-radius:8px;color:#0f172a;font-size:13px">'
         + '<span style="width:34px;font-size:12px;color:#64748b">' + escapeHtml(it.unit) + '</span></label>').join('');
     const r = await Swal.fire({
         title: 'Nguyên liệu: ' + row.stage,
         html: meHtml + '<input id="sxnl-q" class="swal2-input" style="width:100%;margin:0 0 8px" placeholder="Tìm nguyên liệu...">'
-            + '<div style="max-height:44vh;overflow:auto">' + (rowsHtml || '<div style="color:#64748b;font-size:13px">Danh mục nguyên liệu đang trống.</div>') + '</div>'
+            + '<div style="max-height:46vh;overflow:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:24px;align-content:start">' + (rowsHtml || '<div style="color:#64748b;font-size:13px">Danh mục nguyên liệu đang trống.</div>') + '</div>'
             + '<input id="sxnl-extra" class="swal2-input" style="width:100%;margin:10px 0 0" placeholder="Nguyên liệu khác (VD: Mắm nêm : 2 Kg)">',
         showCancelButton: true, confirmButtonText: 'Lưu', cancelButtonText: 'Hủy',
-        width: 560,
+        width: 'min(1040px, 96vw)',
         didOpen: popup => {
             // Số mẻ: bấm số hoặc gõ số -> nhân công thức 1 mẻ vào ô Kg của từng nguyên liệu
             const applyMe = n => {
@@ -27343,6 +27359,7 @@ async function sxPickNL(row) {
             const meIn = popup.querySelector('#sxme-n');
             if (meIn) meIn.addEventListener('input', () => applyMe(meIn.value));
             if (meSel) popup.querySelectorAll('.sxme-chip').forEach(c => { if (parseFloat(c.dataset.n) === parseFloat(meSel)) { c.style.background = '#f59e0b'; c.style.color = '#fff'; } });
+            if (meSel && meIn && parseFloat(meSel) > 10) meIn.value = meSel;   // số mẻ > 10 nhập tay: hiện lại trong ô
             // Ô tìm kiếm: chỉ ẩn/hiện dòng (dòng đã tích vẫn được lưu dù đang bị ẩn)
             const q = popup.querySelector('#sxnl-q');
             if (q) q.addEventListener('input', () => {
@@ -27356,9 +27373,12 @@ async function sxPickNL(row) {
         },
         preConfirm: () => {
             const lines = [];
-            document.querySelectorAll('.sxnl-chk').forEach(chk => {
+            // CHỈ đọc trong khung chọn nguyên liệu: bảng bên dưới cũng có ô .sxnl-kg[data-k] cùng tên nên trước đây
+            // dòng 1, 2 (VD Mỡ khổ, Mỡ lá) bị đọc nhầm giá trị cũ của bảng thay vì số vừa tính theo số mẻ.
+            const pop = Swal.getPopup() || document;
+            pop.querySelectorAll('.sxnl-chk').forEach(chk => {
                 if (!chk.checked) return;
-                const k = +chk.dataset.k, kgEl = document.querySelector('.sxnl-kg[data-k="' + k + '"]');
+                const k = +chk.dataset.k, kgEl = pop.querySelector('.sxnl-kg[data-k="' + k + '"]');
                 const kg = kgEl ? kgEl.value.trim() : '';
                 lines.push(items[k].name + ' : ' + (kg || '……') + ' ' + items[k].unit);
             });
