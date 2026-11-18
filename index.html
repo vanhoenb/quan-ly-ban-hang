@@ -33272,6 +33272,20 @@ html.dark .pm-cell.pm-money { background:#0f172a; }
     init();
 })();
 </script>
+<style id="pm-chamcong-equal-height">
+/* Chấm công, tăng ca, part-time, bảng lương: MỌI ô nhập / ô số / ô chữ cao đúng bằng nhau (38px) - không còn ô cao ô thấp */
+html body #chamcong-attendance-table td input, html body #chamcong-attendance-table td select,
+html body #chamcong-overtime-table td input,   html body #chamcong-overtime-table td select,
+html body #chamcong-parttime-table td input,   html body #chamcong-parttime-table td select,
+html body #chamcong-salary-table td input,     html body #chamcong-salary-table td select {
+    height:38px !important; min-height:38px !important; max-height:38px !important; box-sizing:border-box !important;
+    padding-top:0 !important; padding-bottom:0 !important; line-height:normal !important; margin:0 !important;
+}
+html body #chamcong-attendance-table .cc-box, html body #chamcong-overtime-table .cc-box { height:38px !important; min-height:38px !important; box-sizing:border-box !important; }
+html body .pm-cell { height:38px !important; min-height:38px !important; max-height:38px !important; line-height:34px !important; padding:0 9px !important; box-sizing:border-box !important; display:block; }
+html body #chamcong-attendance-table td, html body #chamcong-overtime-table td, html body #chamcong-parttime-table td,
+html body #chamcong-salary-table tbody td, html body #chamcong-salary-table tfoot td { vertical-align:middle !important; padding-top:4px !important; padding-bottom:4px !important; }
+</style>
 </body>
 </html>
 
