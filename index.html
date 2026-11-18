@@ -4167,12 +4167,12 @@ document.addEventListener('DOMContentLoaded', function () {
             <h3 data-gb="violet" class="-mx-3 md:-mx-4 -mt-3 md:-mt-4 mb-2 md:mb-3 px-3 md:px-4 py-2.5 rounded-t-[23px] bg-violet-600 dark:bg-violet-700 text-white font-black text-[10px] md:text-xs uppercase tracking-widest">Tỷ trọng doanh thu theo nhóm</h3>
             <div class="h-[180px] md:h-[220px] w-full"><canvas id="revenueShareChart"></canvas></div>
         </div>
-        <div class="bg-white dark:bg-slate-900 p-3 md:p-4 rounded-3xl border border-rose-100 dark:border-rose-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] flex flex-col">
-            <div data-gb="rose" class="flex items-center justify-between gap-2 -mx-3 md:-mx-4 -mt-3 md:-mt-4 mb-2 md:mb-3 px-3 md:px-4 py-2.5 rounded-t-[23px] bg-rose-600 dark:bg-rose-700">
-                <h3 class="text-[10px] md:text-xs font-black text-white uppercase tracking-widest">Cảnh báo kho hàng</h3>
-                <button onclick="showPage('page-inventory')" class="text-[10px] font-bold text-white/90 hover:text-white underline whitespace-nowrap">Xem kho</button>
+        <div id="home-agenda-card" class="bg-white dark:bg-slate-900 p-3 md:p-4 rounded-3xl border border-sky-100 dark:border-sky-950/60 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] flex flex-col">
+            <div class="flex items-center justify-between gap-2 -mx-3 md:-mx-4 -mt-3 md:-mt-4 mb-2 md:mb-3 px-3 md:px-4 py-2.5 rounded-t-[23px]" style="background:linear-gradient(135deg,#0ea5e9,#2563eb)">
+                <h3 class="text-[10px] md:text-xs font-black text-white uppercase tracking-widest">📅 Lịch &amp; ghi chú</h3>
+                <button onclick="openHomeAgendaPage()" class="text-[10px] font-bold text-white/90 hover:text-white underline whitespace-nowrap">Xem lịch</button>
             </div>
-            <div id="stock-alert-wrap" class="w-full overflow-y-auto h-[180px] md:h-[220px]"><div id="stock-alert-body" class="text-[12px] text-slate-500 dark:text-slate-400 p-2">Đang kiểm tra kho…</div></div>
+            <div id="stock-alert-wrap" class="w-full overflow-y-auto custom-scrollbar h-[180px] md:h-[220px]"><div id="home-agenda-body" class="text-[12px] text-slate-500 dark:text-slate-400 p-2">Đang tải lịch…</div></div>
         </div>
     </div>
 
@@ -31247,6 +31247,9 @@ document.addEventListener('DOMContentLoaded', function () {
         // Đồng bộ lại danh sách ghi chú ở khung "DANH MỤC LỊCH"
         if (typeof renderNotesList === 'function')
             renderNotesList();
+        // Khung "Lịch & ghi chú" ở Trang chủ dùng chung dữ liệu này (không đọc thêm Firestore)
+        if (typeof window.renderHomeAgenda === 'function')
+            window.renderHomeAgenda();
     });
 });
 // ================= GIAO DIỆN AGENDA CHO DI ĐỘNG (LỊCH CÔNG VIỆC) =================
@@ -33286,6 +33289,107 @@ html body .pm-cell { height:38px !important; min-height:38px !important; max-hei
 html body #chamcong-attendance-table td, html body #chamcong-overtime-table td, html body #chamcong-parttime-table td,
 html body #chamcong-salary-table tbody td, html body #chamcong-salary-table tfoot td { vertical-align:middle !important; padding-top:4px !important; padding-bottom:4px !important; }
 </style>
+<style id="pm-home-agenda-css">
+#home-agenda-body .ha-sec { margin:8px 2px 4px; font-size:10px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; color:#64748b; display:flex; align-items:center; gap:6px; }
+#home-agenda-body .ha-sec:first-child { margin-top:2px; }
+#home-agenda-body .ha-sec b { background:#e2e8f0; color:#334155; border-radius:99px; padding:0 7px; font-size:10px; }
+#home-agenda-body .ha-sec.late { color:#dc2626; } #home-agenda-body .ha-sec.late b { background:#fee2e2; color:#b91c1c; }
+#home-agenda-body .ha-sec.today { color:#059669; } #home-agenda-body .ha-sec.today b { background:#d1fae5; color:#047857; }
+#home-agenda-body .ha-row { display:flex; align-items:flex-start; gap:8px; padding:6px 8px; margin-bottom:4px; border-radius:10px; cursor:pointer; background:#f8fafc; border:1px solid #e2e8f0; border-left:4px solid var(--c,#4285F4); transition:transform .12s, box-shadow .12s; }
+#home-agenda-body .ha-row:hover { transform:translateX(2px); box-shadow:0 2px 8px rgba(15,23,42,.12); }
+#home-agenda-body .ha-row.late { background:#fef2f2; border-color:#fecaca; border-left-color:#dc2626; }
+#home-agenda-body .ha-row.today { background:#ecfdf5; border-color:#a7f3d0; }
+#home-agenda-body .ha-date { flex:0 0 auto; min-width:58px; font-size:10.5px; font-weight:900; color:#334155; line-height:1.3; }
+#home-agenda-body .ha-date small { display:block; font-weight:700; color:#64748b; font-size:10px; }
+#home-agenda-body .ha-row.late .ha-date { color:#b91c1c; } #home-agenda-body .ha-row.today .ha-date { color:#047857; }
+#home-agenda-body .ha-title { flex:1; min-width:0; font-size:12px; font-weight:700; color:#0f172a; line-height:1.3; word-break:break-word; }
+#home-agenda-body .ha-empty { text-align:center; padding:28px 8px; color:#94a3b8; font-size:12px; font-style:italic; }
+html.dark #home-agenda-body .ha-row { background:#0f172a; border-color:#1e293b; border-left-color:var(--c,#4285F4); }
+html.dark #home-agenda-body .ha-row.late { background:#2a1216; border-color:#7f1d1d; border-left-color:#ef4444; }
+html.dark #home-agenda-body .ha-row.today { background:#052e22; border-color:#065f46; }
+html.dark #home-agenda-body .ha-date { color:#e2e8f0; } html.dark #home-agenda-body .ha-date small { color:#94a3b8; }
+html.dark #home-agenda-body .ha-title { color:#f1f5f9; }
+html.dark #home-agenda-body .ha-sec { color:#94a3b8; } html.dark #home-agenda-body .ha-sec b { background:#1e293b; color:#cbd5e1; }
+</style>
+<script id="pm-home-agenda-js">
+/* ===== Trang chủ: khung "Lịch & ghi chú" - lấy từ tab Lịch & Ghi Chú (collection calendar_events, đã có sẵn trong bộ nhớ nên không đọc thêm) ===== */
+(function () {
+    'use strict';
+    var WD = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+    function esc(t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+    function pad(n) { return String(n).padStart(2, '0'); }
+    function todayKey() { return new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 10); }   // ngày hiện tại theo giờ Việt Nam
+    function dayNum(key) { var p = key.split('-'); return Math.round(Date.UTC(+p[0], +p[1] - 1, +p[2]) / 86400000); }
+    function cleanTitle(t) { return String(t || '').replace(/^\s*[✓✔✅☑]\s*/, '').replace(/\s*\(đã xong\)\s*$/i, '').trim(); }
+    function timeOf(ev) { if (ev.allDay || !ev.startStr || ev.startStr.length < 16) return ''; return ev.startStr.slice(11, 16); }
+
+    window.renderHomeAgenda = function () {
+        var box = document.getElementById('home-agenda-body');
+        if (!box) return;
+        if (!window.calendar || typeof window.calendar.getEvents !== 'function') { box.innerHTML = '<div class="ha-empty">Đang tải lịch…</div>'; return; }
+        var tk = todayKey(), t0 = dayNum(tk);
+        var late = [], now = [], soon = [], notes = [];
+        window.calendar.getEvents().forEach(function (ev) {
+            if (ev.classNames && ev.classNames.indexOf('event-done') >= 0) return;      // việc đã xong không hiện
+            if (ev.extendedProps && ev.extendedProps.status === 'done') return;
+            var key = ev.startStr ? ev.startStr.slice(0, 10) : '';
+            var it = { ev: ev, key: key, time: timeOf(ev) };
+            if (!key) notes.push(it);
+            else if (key < tk) late.push(it);
+            else if (key === tk) now.push(it);
+            else soon.push(it);
+        });
+        var byTime = function (a, b) { return (a.key + a.time) < (b.key + b.time) ? -1 : 1; };
+        late.sort(byTime); now.sort(byTime); soon.sort(byTime);
+        if (!late.length && !now.length && !soon.length && !notes.length) { box.innerHTML = '<div class="ha-empty">Chưa có lịch hoặc ghi chú nào.<br>Bấm "Xem lịch" để thêm.</div>'; return; }
+        function dateLabel(it, kind) {
+            var p = it.key.split('-'), d = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])), wd = WD[d.getUTCDay()];
+            var diff = dayNum(it.key) - t0, big, small;
+            if (kind === 'late') { big = 'Quá ' + (-diff) + ' ngày'; small = p[2] + '/' + p[1]; }
+            else if (kind === 'today') { big = 'Hôm nay'; small = it.time || 'Cả ngày'; }
+            else if (diff === 1) { big = 'Ngày mai'; small = wd + (it.time ? ' ' + it.time : ''); }
+            else { big = p[2] + '/' + p[1]; small = wd + (diff <= 14 ? ' · ' + diff + ' ngày nữa' : '') + (it.time ? ' ' + it.time : ''); }
+            return big + '<small>' + small + '</small>';
+        }
+        function row(it, kind) {
+            var c = it.ev.backgroundColor || '#4285F4';
+            var date = it.key ? '<div class="ha-date">' + dateLabel(it, kind) + '</div>' : '<div class="ha-date">Ghi chú<small>không ngày</small></div>';
+            return '<div class="ha-row ' + (kind === 'late' || kind === 'today' ? kind : '') + '" style="--c:' + esc(c) + '" onclick="openHomeAgendaEvent(\'' + esc(it.ev.id) + '\')">' + date + '<div class="ha-title">' + esc(cleanTitle(it.ev.title)) + '</div></div>';
+        }
+        var sec = function (cls, label, arr, kind) { return arr.length ? '<div class="ha-sec ' + cls + '">' + label + ' <b>' + arr.length + '</b></div>' + arr.map(function (x) { return row(x, kind); }).join('') : ''; };
+        box.innerHTML = sec('late', 'Quá hạn', late, 'late') + sec('today', 'Hôm nay', now, 'today') + sec('', 'Sắp tới', soon, 'soon') + sec('', 'Ghi chú (không ngày)', notes, 'note');
+    };
+
+    window.openHomeAgendaPage = function () {
+        if (typeof showPage === 'function') showPage('page-LichCongViec');
+        if (typeof switchLichCVTab === 'function') setTimeout(function () { switchLichCVTab('calendar'); }, 50);
+    };
+
+    // Bấm 1 mục: xem nhanh ngay tại Trang chủ - đánh dấu xong hoặc mở trang Lịch
+    window.openHomeAgendaEvent = function (id) {
+        var ev = window.calendar && window.calendar.getEventById(id);
+        if (!ev) return;
+        var key = ev.startStr ? ev.startStr.slice(0, 10).split('-').reverse().join('/') : 'Không ngày';
+        var tm = timeOf(ev);
+        Swal.fire({
+            title: esc(cleanTitle(ev.title)), html: '<div style="font-size:14px;color:#475569">📅 ' + key + (tm ? ' · ' + tm : '') + '</div>',
+            showDenyButton: true, showCancelButton: true,
+            confirmButtonText: '✓ Đã xong', denyButtonText: 'Mở trang Lịch', cancelButtonText: 'Đóng',
+            confirmButtonColor: '#059669', denyButtonColor: '#2563eb'
+        }).then(function (r) {
+            if (r.isConfirmed) {
+                try { selectedEvent = ev; markDone(); } catch (e) { console.error(e); }
+            } else if (r.isDenied) window.openHomeAgendaPage();
+        });
+    };
+
+    function start() { window.renderHomeAgenda(); }
+    document.addEventListener('DOMContentLoaded', start);
+    window.addEventListener('load', start);
+    setInterval(window.renderHomeAgenda, 60000);     // sang ngày mới thì nhãn "Hôm nay / Quá hạn" tự đổi
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) window.renderHomeAgenda(); });
+})();
+</script>
 </body>
 </html>
 
