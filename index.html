@@ -4340,6 +4340,10 @@ document.addEventListener('DOMContentLoaded', function () {
                             <input type="text" id="searchReceiptInput" list="prod-list" onkeyup="filterReceipts()" placeholder="Nhập số phiếu hoặc tên sản phẩm..." class="w-full p-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-white rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
                             <datalist id="prod-list"></datalist>
                         </div>
+
+                        <div id="imp-export-wrap">
+                            <button type="button" id="btn-export-receipts" onclick="exportReceiptsExcel()" title="Xuất Excel các phiếu nhập trong khoảng Từ ngày - Đến ngày" class="w-full p-2 rounded-lg text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm active:scale-95 transition-all whitespace-nowrap flex items-center justify-center gap-1.5">📥 Xuất Excel</button>
+                        </div>
                     </div>
                 </div>
 
@@ -13920,6 +13924,106 @@ async function filterReceipts() {
         leftBody.innerHTML = '<tr><td class="p-4 text-center text-slate-400 text-sm">Không tìm thấy phiếu nào</td></tr>';
     }
 }
+// ===== XUẤT EXCEL DANH SÁCH PHIẾU NHẬP =====
+// Xuất các phiếu nhập trong khoảng Từ ngày - Đến ngày (có thể chọn cả năm: 01/01 -> 31/12).
+// Đọc thẳng từ Firestore theo khoảng ngày nên KHÔNG phụ thuộc tháng đang hiển thị trong danh sách.
+// Nếu ô Tìm kiếm đang có chữ thì chỉ xuất các phiếu khớp (số phiếu hoặc tên sản phẩm).
+// Mỗi dòng sản phẩm của phiếu là 1 dòng Excel (lặp lại ngày/số phiếu/loại) để lọc, cộng tổng cho tiện.
+async function exportReceiptsExcel() {
+    const fromVal = (document.getElementById('filter-date-from') || {}).value || '';
+    const toVal = (document.getElementById('filter-date-to') || {}).value || '';
+    const keyword = ((document.getElementById('searchReceiptInput') || {}).value || '').trim().toLowerCase();
+    if (!fromVal || !toVal) {
+        Swal.fire({ icon: 'warning', title: 'Thông báo', text: 'Vui lòng chọn Từ ngày và Đến ngày!' });
+        return;
+    }
+    if (fromVal > toVal) {
+        Swal.fire({ icon: 'warning', title: 'Thông báo', text: 'Từ ngày không được lớn hơn Đến ngày!' });
+        return;
+    }
+    const btn = document.getElementById('btn-export-receipts');
+    if (btn) { btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed'); }
+    Swal.fire({ title: 'Đang xử lý...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+    try {
+        const snap = await getDocsByDate('receipts', fromVal, toVal);
+        let list = snap.docs.map(d => {
+            const x = d.data() || {};
+            return {
+                displayId: x.id || '',
+                date: toReportDate(x.date),
+                type: x.type || 'Nhập mới',
+                dateStatus: x.dateStatus || null,
+                vendor: x.vendor || '',
+                note: x.note || '',
+                isReturn: x.isReturn === true || x.manualReturn === true,
+                items: Array.isArray(x.items) ? x.items : []
+            };
+        });
+        if (keyword) {
+            list = list.filter(r => String(r.displayId).toLowerCase().includes(keyword) ||
+                r.items.some(it => String(it.name || '').toLowerCase().includes(keyword)));
+        }
+        list.sort((a, b) => ((a.date ? a.date.getTime() : 0) - (b.date ? b.date.getTime() : 0)) || String(a.displayId).localeCompare(String(b.displayId)));
+        if (list.length === 0) {
+            Swal.close();
+            Swal.fire({ icon: 'info', title: 'Không có dữ liệu', text: 'Không có phiếu nhập nào trong khoảng ngày đã chọn' + (keyword ? ' (khớp từ khóa "' + keyword + '")' : '') + '.' });
+            return;
+        }
+        const typeLabel = (r) => {
+            if (r.isReturn) return 'Hoàn trả';
+            if (r.type === 'Nhập đổi' && r.dateStatus === 'expired') return 'Đổi date - hết hạn (huỷ)';
+            if (r.type === 'Nhập đổi' && r.dateStatus === 'mixed') return 'Đổi date (2 loại)';
+            if (r.type === 'Nhập đổi') return 'Đổi date';
+            return 'Nhập mới';
+        };
+        const border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet('Phiếu nhập kho');
+        const titleRow = sheet.addRow(['DANH SÁCH PHIẾU NHẬP KHO']);
+        titleRow.font = { size: 16, bold: true };
+        sheet.mergeCells('A1:H1');
+        titleRow.alignment = { horizontal: 'center' };
+        sheet.addRow(['Từ ngày: ' + formatDateToDDMMYYYY(fromVal) + ' - Đến ngày: ' + formatDateToDDMMYYYY(toVal) + (keyword ? '   |   Tìm kiếm: ' + keyword : '')]);
+        sheet.addRow([]);
+        const headerRow = sheet.addRow(['Ngày nhập', 'Số phiếu', 'Loại nhập', 'Khách / Nhà cung cấp', 'Tên sản phẩm', 'ĐVT', 'Số lượng', 'Ghi chú']);
+        headerRow.eachCell((cell) => {
+            cell.font = { bold: true };
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } };
+            cell.border = border;
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        });
+        list.forEach(r => {
+            const dateStr = r.date ? r.date.toLocaleDateString('vi-VN', { timeZone: APP_TIME_ZONE }) : '';
+            const base = [dateStr, r.displayId, typeLabel(r), r.vendor];
+            const rows = r.items.length ? r.items : [{}];
+            rows.forEach(it => {
+                const row = sheet.addRow([...base, it.name || '', it.unit || '', it.name ? (parseFloat(it.qty) || 0) : '', it.note || r.note || '']);
+                row.eachCell({ includeEmpty: true }, (cell, col) => {
+                    cell.border = border;
+                    if (col === 1 || col === 2 || col === 6) cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                    if (col === 7) cell.alignment = { horizontal: 'right', vertical: 'middle' };
+                });
+            });
+        });
+        sheet.addRow([]);
+        const sumRow = sheet.addRow(['Tổng số phiếu:', list.length]);
+        sumRow.font = { bold: true };
+        sheet.columns = [{ width: 14 }, { width: 14 }, { width: 24 }, { width: 28 }, { width: 38 }, { width: 10 }, { width: 12 }, { width: 30 }];
+        sheet.views = [{ state: 'frozen', ySplit: 4 }];
+        sheet.autoFilter = { from: { row: 4, column: 1 }, to: { row: 4, column: 8 } };
+        await saveExcelFile(workbook, 'Danh_Sach_Phieu_Nhap_' + fromVal + '_den_' + toVal);
+        Swal.close();
+        Swal.fire({ icon: 'success', title: 'Đã xuất ' + list.length + ' phiếu nhập!', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+    }
+    catch (e) {
+        console.error(e);
+        Swal.close();
+        Swal.fire('Lỗi', 'Không xuất được file Excel: ' + e.message, 'error');
+    }
+    finally {
+        if (btn) { btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); }
+    }
+}
 // Tự động tính ngày đầu/cuối tháng khi chọn tháng
 function setDateRangeForMonth(monthValue) {
     if (!monthValue)
@@ -18852,7 +18956,7 @@ function renderHeldOrdersBar() {
         lucide.createIcons();
 }
 //==================================================================
-//===================== SỬA PHIẾU XUẤT (CHỈ TRONG NGÀY) ===========
+//===================== SỬA PHIẾU XUẤT (MỌI NGÀY - CHỈ ADMIN) ===========
 //==================================================================
 // Cho phép sửa lại 1 phiếu bán hàng ĐÃ LƯU (chỉ trong ngày lập phiếu): chuyển sang trang
 // Bán Hàng, điền sẵn khách hàng + giỏ hàng đúng như phiếu cũ, cho sửa thoải mái (đổi khách,
@@ -18874,9 +18978,13 @@ async function editInvoiceFromHistory(docId) {
             saleDateObj.getFullYear() === now.getFullYear() &&
             saleDateObj.getMonth() === now.getMonth() &&
             saleDateObj.getDate() === now.getDate();
-        if (!isSameDay) {
-            Swal.fire('Không thể sửa', 'Chỉ có thể sửa đầy đủ phiếu được lập trong ngày hôm nay. (Admin có thể dùng nút "Sửa thông tin / ghi chú" cho phiếu ngày cũ.)', 'warning');
-            return;
+        {
+            // Chỉ tài khoản Admin mới được sửa phiếu (mọi ngày).
+            const _cuEditFull = (typeof getCurrentUser === 'function') ? getCurrentUser() : null;
+            if (!_cuEditFull || _cuEditFull.role !== 'admin') {
+                Swal.fire('Không có quyền', 'Chỉ tài khoản Admin mới được sửa phiếu.', 'warning');
+                return;
+            }
         }
         // Bật "chế độ sửa" TRƯỚC khi chuyển trang - để case 'page-sell' trong showPage()
         // biết mà KHÔNG tự sinh số phiếu mới đè lên số phiếu gốc đang sửa.
@@ -21033,8 +21141,9 @@ async function viewInvoiceDetails(docId) {
             saleDateObj.getDate() === now.getDate();
         const _curUserForEdit = (typeof getCurrentUser === 'function') ? getCurrentUser() : null;
         const isAdminUser = !!(_curUserForEdit && _curUserForEdit.role === 'admin');
-        const editButtonHtml = isSameDay
-            ? "<button onclick=\"Swal.close(); editInvoiceFromHistory('" + docId + "')\" class=\"bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5 mt-2 w-full\">\u270F\uFE0F S\u1EEDa phi\u1EBFu n\u00E0y</button>" : (isAdminUser ? "<button onclick=\"Swal.close(); adminEditPastInvoiceInfo('" + docId + "')\" class=\"bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5 mt-2 w-full\">✏️ Sửa thông tin / ghi chú (Admin)</button><p class=\"text-center text-[11px] text-slate-400 dark:text-slate-500 italic mt-1\">Phiếu của ngày cũ: Admin chỉ sửa được thông tin &amp; ghi chú, không sửa được sản phẩm / số lượng</p>" : "<p class=\"text-center text-[11px] text-slate-400 dark:text-slate-500 italic mt-2\">Ch\u1EC9 c\u00F3 th\u1EC3 s\u1EEDa phi\u1EBFu \u0111\u01B0\u1EE3c l\u1EADp trong ng\u00E0y h\u00F4m nay</p>");
+        const editButtonHtml = isAdminUser
+            ? "<button onclick=\"Swal.close(); editInvoiceFromHistory('" + docId + "')\" class=\"bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5 mt-2 w-full\">✏️ Sửa phiếu này</button>"
+            : "<p class=\"text-center text-[11px] text-slate-400 dark:text-slate-500 italic mt-2\">Chỉ Admin mới được sửa phiếu</p>";
         Swal.fire({
             title: "Chi ti\u1EBFt phi\u1EBFu: " + (data.id || docId) + "" + (data.hasReturns ? ' ↩️' : '') + "", // Dùng data.id theo tên field trong ảnh
             html: "\n                " + returnsHtml + "\n                <div class=\"text-left mb-4\">\n                    <p><b>Kh\u00E1ch h\u00E0ng:</b> " + customerName + "</p>\n                    <p><b>Ng\u00E0y xu\u1EA5t:</b> " + dateStr + "</p>\n                    <p><b>T\u1ED5ng c\u1ED9ng:</b> " + Number(total).toLocaleString() + " VN\u0110</p>\n                </div>\n                " + itemsHtml + "\n                <div class=\"grid grid-cols-2 gap-2 mt-4\">\n                    <button onclick=\"Swal.close(); reprintSale('" + docId + "')\" class=\"bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5\">\uD83D\uDDA8\uFE0F In l\u1EA1i</button>\n                    <button onclick=\"Swal.close(); shareSaleZalo('" + docId + "')\" class=\"bg-sky-500 hover:bg-sky-600 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5\">\uD83D\uDCAC Chia s\u1EBB Zalo</button>\n                </div>\n                " + editButtonHtml + "\n                <div class=\"grid grid-cols-2 gap-2 mt-2\">\n                    <button onclick=\"Swal.close(); openReturnModal('" + docId + "')\" class=\"bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5\">\u21A9\uFE0F Tr\u1EA3 h\u00E0ng</button>\n                    <button onclick=\"Swal.close(); deleteSale('" + docId + "')\" class=\"bg-red-600 hover:bg-red-700 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5\">\uD83D\uDDD1\uFE0F X\u00F3a phi\u1EBFu n\u00E0y</button>\n                </div>\n                <button onclick=\"Swal.close()\" class=\"bg-slate-600 hover:bg-slate-700 text-white py-2 rounded-xl text-sm font-bold w-full mt-2\">\u0110\u00F3ng</button>\n            ",
@@ -33295,20 +33404,13 @@ html body #chamcong-salary-table tbody td, html body #chamcong-salary-table tfoo
 #home-agenda-body .ha-sec b { background:#e2e8f0; color:#334155; border-radius:99px; padding:0 7px; font-size:10px; }
 #home-agenda-body .ha-sec.late { color:#dc2626; } #home-agenda-body .ha-sec.late b { background:#fee2e2; color:#b91c1c; }
 #home-agenda-body .ha-sec.today { color:#059669; } #home-agenda-body .ha-sec.today b { background:#d1fae5; color:#047857; }
-#home-agenda-body .ha-row { display:flex; align-items:flex-start; gap:8px; padding:6px 8px; margin-bottom:4px; border-radius:10px; cursor:pointer; background:#f8fafc; border:1px solid #e2e8f0; border-left:4px solid var(--c,#4285F4); transition:transform .12s, box-shadow .12s; }
-#home-agenda-body .ha-row:hover { transform:translateX(2px); box-shadow:0 2px 8px rgba(15,23,42,.12); }
-#home-agenda-body .ha-row.late { background:#fef2f2; border-color:#fecaca; border-left-color:#dc2626; }
-#home-agenda-body .ha-row.today { background:#ecfdf5; border-color:#a7f3d0; }
-#home-agenda-body .ha-date { flex:0 0 auto; min-width:58px; font-size:10.5px; font-weight:900; color:#334155; line-height:1.3; }
-#home-agenda-body .ha-date small { display:block; font-weight:700; color:#64748b; font-size:10px; }
-#home-agenda-body .ha-row.late .ha-date { color:#b91c1c; } #home-agenda-body .ha-row.today .ha-date { color:#047857; }
-#home-agenda-body .ha-title { flex:1; min-width:0; font-size:12px; font-weight:700; color:#0f172a; line-height:1.3; word-break:break-word; }
+/* Thẻ ghi chú giống thẻ trong tab Lịch & Ghi chú (FullCalendar): nền đặc theo màu của lịch, chữ trắng, bo 6px, nổi 3D. */
+#home-agenda-body .ha-row { display:flex; align-items:flex-start; gap:8px; padding:6px 10px; margin:4px 3px 6px; border-radius:6px; cursor:pointer; background:var(--c,#4285F4); border:none; color:#fff; box-shadow:0 4px 6px rgba(0,0,0,.2), inset 0 -2px 0 rgba(0,0,0,.15); transition:all .2s ease; }
+#home-agenda-body .ha-row:hover { transform:translateY(-3px); box-shadow:0 6px 10px rgba(0,0,0,.3), inset 0 -2px 0 rgba(0,0,0,.15); filter:brightness(1.05); }
+#home-agenda-body .ha-date { flex:0 0 auto; min-width:58px; font-size:10.5px; font-weight:900; color:#fff; line-height:1.3; }
+#home-agenda-body .ha-date small { display:block; font-weight:700; color:rgba(255,255,255,.85); font-size:10px; }
+#home-agenda-body .ha-title { flex:1; min-width:0; font-size:13px; font-weight:500; color:#fff; line-height:1.3; word-break:break-word; }
 #home-agenda-body .ha-empty { text-align:center; padding:28px 8px; color:#94a3b8; font-size:12px; font-style:italic; }
-html.dark #home-agenda-body .ha-row { background:#0f172a; border-color:#1e293b; border-left-color:var(--c,#4285F4); }
-html.dark #home-agenda-body .ha-row.late { background:#2a1216; border-color:#7f1d1d; border-left-color:#ef4444; }
-html.dark #home-agenda-body .ha-row.today { background:#052e22; border-color:#065f46; }
-html.dark #home-agenda-body .ha-date { color:#e2e8f0; } html.dark #home-agenda-body .ha-date small { color:#94a3b8; }
-html.dark #home-agenda-body .ha-title { color:#f1f5f9; }
 html.dark #home-agenda-body .ha-sec { color:#94a3b8; } html.dark #home-agenda-body .ha-sec b { background:#1e293b; color:#cbd5e1; }
 </style>
 <script id="pm-home-agenda-js">
@@ -33975,10 +34077,12 @@ html.dark .imp-cn{color:#f1f5f9}
 }
 </style>
 <style id="imp-v21-css">
+#imp-export-wrap{grid-column:1/-1}
 /* v21: (1) Danh sách phiếu nhập: Tháng / Từ ngày / Đến ngày / Tìm kiếm cùng 1 dòng.
         (2) Tab Nhập kho cao hơn (lấp phần trống phía dưới); nút Thêm vào giỏ / Lưu nhập kho luôn cố định ở đáy khung. */
 @media (min-width:768px){
-  #page-import.imp-tab-ds #panel-import-filter{grid-template-columns:minmax(140px,1fr) minmax(140px,1fr) minmax(140px,1fr) minmax(220px,1.8fr);align-items:end}
+  #page-import.imp-tab-ds #panel-import-filter{grid-template-columns:minmax(140px,1fr) minmax(140px,1fr) minmax(140px,1fr) minmax(220px,1.8fr) auto;align-items:end}
+  #page-import.imp-tab-ds #imp-export-wrap{grid-column:auto}
   #page-import.imp-tab-ds #panel-import-filter > div.col-span-3{grid-column:auto!important}
 }
 @media (min-width:1024px){
