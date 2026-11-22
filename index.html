@@ -27696,11 +27696,24 @@ function nkGioNhanHtml(base, value) {
         + nkHM24Html(base + '-t', v.slice(11, 16), "nkSyncGioNhan('" + base + "')", true) + '</div>';
 }
 function nkSyncGioNhan(base) {
+    window.__nkGioNhanAuto = window.__nkGioNhanAuto || {};
+    window.__nkGioNhanAuto[base] = false;   // người dùng đã chỉnh tay ô ngày/giờ
     const d = (document.getElementById(base + '-d') || {}).value || '', hm = nkGetHM(base + '-t');
     let v = '';
     if (d || hm) v = (d || formatISODateVN(new Date())) + 'T' + (hm || '06:00');
     const hidden = document.getElementById(base);
     if (hidden) hidden.value = v;
+}
+// Điền sẵn NGÀY GIỜ HIỆN TẠI (giờ Việt Nam) vào ô Giờ nhận hàng. Chưa chỉnh tay thì ô tự cập nhật theo giờ và
+// khi lưu phiếu dùng đúng thời điểm lưu (để mở app qua đêm không bị dính ngày hôm trước); bấm sửa ngày/giờ thì giữ đúng giá trị đã chọn.
+window.__nkGioNhanAuto = window.__nkGioNhanAuto || {};
+function nkFillGioNhanNow(base) {
+    const v = nkToVNInput(new Date());
+    if (!v) return;
+    const d = document.getElementById(base + '-d'); if (d) d.value = v.slice(0, 10);
+    nkSetHM(base + '-t', v.slice(11, 16));
+    const hidden = document.getElementById(base); if (hidden) hidden.value = v;
+    window.__nkGioNhanAuto[base] = true;
 }
 function nkResetGioNhan(base) {
     const d = document.getElementById(base + '-d'); if (d) d.value = '';
@@ -27708,7 +27721,13 @@ function nkResetGioNhan(base) {
     const hidden = document.getElementById(base); if (hidden) hidden.value = '';
 }
 (function () {
-    const init = () => { const b = document.getElementById('in-gio-nhan-box'); if (b) b.innerHTML = nkGioNhanHtml('in-gio-nhan', ''); };
+    const init = () => {
+        const b = document.getElementById('in-gio-nhan-box');
+        if (b) { b.innerHTML = nkGioNhanHtml('in-gio-nhan', ''); nkFillGioNhanNow('in-gio-nhan'); }
+        const refresh = () => { if (window.__nkGioNhanAuto['in-gio-nhan'] && document.getElementById('in-gio-nhan-d')) nkFillGioNhanNow('in-gio-nhan'); };
+        setInterval(refresh, 30000);
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+    };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
 // ---- Giờ nhận hàng (phiếu nhập nguyên liệu): nhập 'YYYY-MM-DDTHH:MM' theo GIỜ VIỆT NAM ----
@@ -30333,10 +30352,11 @@ async function openHistoryModal(nccName) {
             const d = doc.data() || {};
             const soPhieu = String(d.soPhieu || doc.id || 'Chưa rõ số phiếu');
             const dt = toDate(d.timestamp || d.date) || toDate(d.ngayHd) || new Date(0);
-            if (!importMap.has(soPhieu)) {
-                importMap.set(soPhieu, { soPhieu, date: dt, soHd: d.soHd || '', ngayHd: d.ngayHd || '', items: [], total: 0 });
+            const mapKey = soPhieu + '|' + nlDayKey(dt);
+            if (!importMap.has(mapKey)) {
+                importMap.set(mapKey, { soPhieu, dayKey: nlDayKey(dt), date: dt, soHd: d.soHd || '', ngayHd: d.ngayHd || '', items: [], total: 0 });
             }
-            const g = importMap.get(soPhieu);
+            const g = importMap.get(mapKey);
             if (dt.getTime() < g.date.getTime()) g.date = dt;
             if (!g.soHd && d.soHd) g.soHd = d.soHd;
             if (!g.ngayHd && d.ngayHd) g.ngayHd = d.ngayHd;
@@ -30428,7 +30448,7 @@ async function openHistoryModal(nccName) {
                     const escapedNo = escapeHtml(p.soPhieu);
                     const escapedJsNo = String(p.soPhieu).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
                     const escapedJsNcc = String(nccName).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-                    colHtml += '<button type="button" data-so-phieu="' + escapedNo.toLowerCase() + '" onclick="showSupplierImportDetail(\'' + escapedJsNo + '\', \'' + escapedJsNcc + '\')" class="w-full grid grid-cols-[1.1fr_1fr_1.2fr] gap-2 items-center text-left px-3 py-3 mb-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 hover:bg-blue-50 dark:hover:bg-slate-800 hover:border-blue-300 dark:hover:border-blue-700 transition-colors">' +
+                    colHtml += '<button type="button" data-so-phieu="' + escapedNo.toLowerCase() + '" onclick="showSupplierImportDetail(\'' + escapedJsNo + '\', \'' + escapedJsNcc + '\', \'' + p.dayKey + '\')" class="w-full grid grid-cols-[1.1fr_1fr_1.2fr] gap-2 items-center text-left px-3 py-3 mb-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 hover:bg-blue-50 dark:hover:bg-slate-800 hover:border-blue-300 dark:hover:border-blue-700 transition-colors">' +
                         '<span class="font-black text-indigo-700 dark:text-indigo-300 truncate">' + escapedNo + '</span>' +
                         '<span class="text-sm text-slate-600 dark:text-slate-300">' + dateNcc(p.date) + '</span>' +
                         '<span class="font-black text-right text-slate-800 dark:text-slate-100 whitespace-nowrap">' + moneyNcc(p.total) + '</span>' +
@@ -30477,10 +30497,11 @@ async function openHistoryModal(nccName) {
 
 // Xem chi tiết một phiếu nhập từ lịch sử NCC. Danh sách chính chỉ hiển thị
 // số phiếu/ngày/tổng tiền để gọn; chi tiết nguyên liệu chỉ tải khi người dùng bấm phiếu.
-async function showSupplierImportDetail(soPhieu, nccName) {
+async function showSupplierImportDetail(soPhieu, nccName, dayKey) {
     try {
         const snapshot = await db.collection('material_imports').where('soPhieu', '==', soPhieu).get();
         const items = [];
+        const rawItems = [];
         let total = 0;
         let dateValue = null;
         let soHd = '';
@@ -30488,6 +30509,14 @@ async function showSupplierImportDetail(soPhieu, nccName) {
         snapshot.forEach(doc => {
             const d = doc.data() || {};
             if (String(d.ncc || '') !== String(nccName || '')) return;
+            if (dayKey) {
+                // Chỉ lấy các dòng của đúng NGÀY được bấm (phiếu khác ngày trùng số không bị gộp vào)
+                const _ts = d.timestamp || d.date || d.ngayHd;
+                let _dt = _ts && typeof _ts.toDate === 'function' ? _ts.toDate() : (_ts ? new Date(_ts) : new Date(0));
+                if (Number.isNaN(_dt.getTime())) _dt = new Date(0);
+                if (nlDayKey(_dt) !== dayKey) return;
+            }
+            rawItems.push(Object.assign({}, d, { __id: doc.id }));
             const amount = Number(d.thanhTien) || ((Number(d.sl) || 0) * (Number(d.donGia) || 0));
             items.push({ tenNL: d.tenNL || 'Nguyên liệu', sl: Number(d.sl) || 0, donGia: Number(d.donGia) || 0, thanhTien: amount });
             total += amount;
@@ -30510,6 +30539,7 @@ async function showSupplierImportDetail(soPhieu, nccName) {
             '<td class="p-2.5 text-right">' + (Number(i.donGia) || 0).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + '</td>' +
             '<td class="p-2.5 text-right font-bold">' + (Number(i.thanhTien) || 0).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + '</td>' +
         '</tr>').join('');
+        const gid = nlRegisterGroup({ soPhieu, ncc: nccName, ngay: toDateDetail(dateValue), items: rawItems, tongTien: total });
         const content = '<div class="space-y-3 max-h-[72vh] overflow-y-auto">' +
             '<div class="rounded-xl border-2 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 p-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">' +
                 '<div><span class="text-slate-500 dark:text-slate-400">Ngày nhập:</span> <b>' + dateText + '</b></div>' +
@@ -30524,8 +30554,8 @@ async function showSupplierImportDetail(soPhieu, nccName) {
                 '</table>' +
             '</div>' +
             '<div class="flex flex-wrap gap-2">' +
-                '<button onclick="editImportReceipt(\'' + String(soPhieu).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-bold">✏️ Sửa phiếu</button>' +
-                '<button onclick="deleteDoc(\'material_imports\', \'' + String(soPhieu).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-sm font-bold">🗑️ Xóa cả phiếu</button>' +
+                '<button onclick="editImportReceipt(\'' + gid + '\')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-bold">✏️ Sửa phiếu</button>' +
+                '<button onclick="deleteDoc(\'material_imports\', \'' + String(soPhieu).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\', \'' + gid + '\')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-sm font-bold">🗑️ Xóa cả phiếu</button>' +
                 '<button onclick="openHistoryModal(\'' + String(nccName).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')" class="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-sm font-bold">← Quay lại lịch sử NCC</button>' +
             '</div>' +
         '</div>';
@@ -30672,7 +30702,7 @@ async function addNCC() {
     loadAllData();
 }
 // Hàm xóa đa năng cho mọi collection
-async function deleteDoc(col, soPhieu) {
+async function deleteDoc(col, soPhieu, gid) {
     if (typeof canUserDelete === 'function' && !canUserDelete()) {
         if (typeof Swal !== 'undefined')
             Swal.fire({ icon: 'warning', title: 'Không có quyền', text: 'Bạn không có quyền xóa dữ liệu. Vui lòng liên hệ Admin.' });
@@ -30686,6 +30716,10 @@ async function deleteDoc(col, soPhieu) {
     // Trước đây (bản vá trước) chỉ CẢNH BÁO rồi vẫn cho xóa - không nhất quán và rủi ro mất
     // dấu vết công nợ hơn.
     let confirmText = "Xác nhận xóa phiếu nhập " + soPhieu + " và trừ nợ NCC?";
+    const _nlGrp = (col === 'material_imports' && gid) ? (window.__nlGroups || {})[gid] : null;
+    if (_nlGrp && _nlGrp.ngay instanceof Date) {
+        confirmText = "Xác nhận xóa phiếu nhập " + soPhieu + " ngày " + _nlGrp.ngay.toLocaleDateString('vi-VN', { timeZone: APP_TIME_ZONE }) + " (" + _nlGrp.items.length + " dòng) và trừ nợ NCC?";
+    }
     if (col === 'suppliers') {
         const nccInfo = (window.allSuppliersData || {})[soPhieu];
         const nccDebt = Number(nccInfo?.debt) || 0;
@@ -30700,7 +30734,15 @@ async function deleteDoc(col, soPhieu) {
     try {
         if (col === 'material_imports') {
             // 1. Tìm tất cả các dòng có chung soPhieu
-            const snapshot = await db.collection('material_imports').where('soPhieu', '==', soPhieu).get();
+            // Nếu có nhóm phiếu (số phiếu + ngày + NCC) thì chỉ xoá ĐÚNG các dòng của nhóm đó, không đụng phiếu ngày khác trùng số.
+            let snapshot;
+            if (_nlGrp && _nlGrp.items.length && _nlGrp.items.every(it => it.__id)) {
+                const got = await Promise.all(_nlGrp.items.map(it => db.collection('material_imports').doc(it.__id).get()));
+                const existing = got.filter(d => d.exists);
+                snapshot = { empty: existing.length === 0, size: existing.length, docs: existing, forEach: (fn) => existing.forEach(fn) };
+            } else {
+                snapshot = await db.collection('material_imports').where('soPhieu', '==', soPhieu).get();
+            }
             if (snapshot.empty)
                 return showAlert("Không tìm thấy dữ liệu phiếu!");
             let totalPhiếu = 0;
@@ -30778,16 +30820,23 @@ async function addNL() {
  */
 // Hàm tự động tạo số phiếu (Ví dụ: NL01, NL02...)
 async function generateInvoiceNumber() {
-    const snap = await db.collection('material_imports').orderBy('soPhieu', 'desc').limit(1).get();
-    let nextNum = 1;
-    if (!snap.empty) {
-        const lastDoc = snap.docs[0].data();
-        const lastNum = parseInt(lastDoc.soPhieu.replace('NL', '')) || 0;
-        nextNum = lastNum + 1;
+    // SỬA LỖI TRÙNG SỐ PHIẾU: trước đây lấy phiếu "lớn nhất" bằng orderBy('soPhieu','desc') - đây là so sánh CHỮ,
+    // nên từ phiếu thứ 100 trở đi "NL99" vẫn đứng trên "NL100" -> lần nào cũng ra lại NL100, mọi phiếu mới trùng số
+    // với nhau và bị danh sách gộp chung vào 1 phiếu (ngày mới nhất). Giờ lấy số lớn nhất theo SỐ.
+    const numOf = (v) => parseInt(String(v || '').replace(/\D/g, ''), 10) || 0;
+    let maxNum = 0, foundNumField = false;
+    try {
+        // Phiếu mới lưu kèm trường số soPhieuNum -> chỉ cần đọc 1 dòng lớn nhất (đúng thứ tự số).
+        const snapNum = await db.collection('material_imports').orderBy('soPhieuNum', 'desc').limit(1).get();
+        if (!snapNum.empty) { maxNum = Number(snapNum.docs[0].data().soPhieuNum) || 0; foundNumField = true; }
+    } catch (e) { console.warn('Không đọc được soPhieuNum, quét toàn bộ để tìm số lớn nhất:', e); }
+    if (!foundNumField) {
+        // Dữ liệu cũ chưa có soPhieuNum: quét 1 lần lấy số lớn nhất theo SỐ (sau khi lưu phiếu đầu tiên sẽ không phải quét nữa).
+        const all = await db.collection('material_imports').get();
+        all.forEach(d => { const n = numOf(d.data().soPhieu); if (n > maxNum) maxNum = n; });
     }
-    // Format thành NL01, NL02...
-    const newId = 'NL' + nextNum.toString().padStart(2, '0');
-    document.getElementById('in-so-phieu').value = newId;
+    // Format thành NL01, NL02... NL100, NL101...
+    document.getElementById('in-so-phieu').value = 'NL' + (maxNum + 1).toString().padStart(2, '0');
 }
 // Thêm nguyên liệu vào giỏ của phiếu Nhập nguyên liệu
 // Tự điền đơn giá nhập gần nhất khi chọn nguyên liệu. Ô giá vẫn có thể sửa tay.
@@ -30909,14 +30958,15 @@ async function saveFullInvoice() {
     // TẠO TIMESTAMP CHUNG CHO CẢ PHIẾU (để filterNhapKho lọc đúng)
     // Giờ nhận hàng: nếu người dùng chọn thì dùng đúng giờ đó (nhập máy sau vẫn vào đúng ngày/giờ nhận)
     const gioNhanInput = document.getElementById('in-gio-nhan');
-    const gioNhanTay = !!(gioNhanInput && nkFromVNInput(gioNhanInput.value));
-    const now = (gioNhanInput && nkFromVNInput(gioNhanInput.value)) || new Date();
+    const gioNhanAuto = !!(window.__nkGioNhanAuto && window.__nkGioNhanAuto['in-gio-nhan']);   // ô đang để sẵn "bây giờ", chưa chỉnh tay
+    const gioNhanTay = !gioNhanAuto && !!(gioNhanInput && nkFromVNInput(gioNhanInput.value));
+    const now = (!gioNhanAuto && gioNhanInput && nkFromVNInput(gioNhanInput.value)) || new Date();
     // 2-3. Lưu toàn bộ phiếu + cập nhật công nợ trong MỘT batch để tránh trạng thái chỉ lưu được một phần dòng.
     if (cartNL.length + 1 > 500) throw new Error('Phiếu có quá nhiều dòng, không thể lưu trong một lần.');
     const batch = db.batch();
     cartNL.forEach(item => {
         const rowRef = db.collection('material_imports').doc();
-        batch.set(rowRef, { soPhieu: soPhieu, ncc: nccName, nccId: nccId, soHd: document.getElementById('in-so-hd').value, ngayHd: document.getElementById('in-ngay-hd').value, tenNL: item.nl, sl: item.sl, donGia: item.gia, thanhTien: item.thanhTien, tinhTrang: item.tinhTrang || '', timestamp: now, gioNhanTay: gioNhanTay, phuongTien: ((document.getElementById('in-phuong-tien') || {}).value || '').trim(), syncStatus: 'synced', syncPending: false, syncMode: 'normal', syncAt: firebase.firestore.FieldValue.serverTimestamp() });
+        batch.set(rowRef, { soPhieu: soPhieu, soPhieuNum: (parseInt(String(soPhieu).replace(/\D/g, ''), 10) || 0), ncc: nccName, nccId: nccId, soHd: document.getElementById('in-so-hd').value, ngayHd: document.getElementById('in-ngay-hd').value, tenNL: item.nl, sl: item.sl, donGia: item.gia, thanhTien: item.thanhTien, tinhTrang: item.tinhTrang || '', timestamp: now, gioNhanTay: gioNhanTay, phuongTien: ((document.getElementById('in-phuong-tien') || {}).value || '').trim(), syncStatus: 'synced', syncPending: false, syncMode: 'normal', syncAt: firebase.firestore.FieldValue.serverTimestamp() });
     });
     batch.update(nccDoc.ref, { debt: firebase.firestore.FieldValue.increment(totalInvoice) });
     await batch.commit();
@@ -30925,7 +30975,7 @@ async function saveFullInvoice() {
     document.getElementById('gio-hang-nl').innerHTML = '';
     document.getElementById('in-so-hd').value = '';
     document.getElementById('in-ngay-hd').value = '';
-    nkResetGioNhan('in-gio-nhan');
+    nkFillGioNhanNow('in-gio-nhan');
     if (document.getElementById('in-phuong-tien')) document.getElementById('in-phuong-tien').value = '';
     document.getElementById('sel-ncc-nhap').value = 'Chọn NCC';
     // TRƯỚC ĐÂY dùng showAlert() - hộp thoại chặn trang gây "giật/rung" trên điện thoại.
@@ -30982,6 +31032,18 @@ function capNhatNgayTheoThangNhapKho() {
     document.getElementById('dateEndNhapKho').value = formatInputDate(lastDay);
     filterNhapKho();
 }
+// ---- Nhóm phiếu nhập nguyên liệu: 1 phiếu = (số phiếu + NGÀY + NCC) ----
+// Trước đây chỉ gom theo số phiếu nên các phiếu bị trùng số (lỗi đánh số cũ) bị gộp chung vào 1 dòng/1 ngày.
+window.__nlGroups = {};
+window.__nlGidSeq = 0;
+function nlDayKey(d) {
+    try { return d.toLocaleDateString('en-CA', { timeZone: APP_TIME_ZONE }); } catch (e) { return ''; }
+}
+function nlRegisterGroup(g) {
+    const gid = 'G' + (++window.__nlGidSeq);
+    window.__nlGroups[gid] = g;
+    return gid;
+}
 // Lọc danh sách phiếu Nhập nguyên liệu theo khoảng ngày
 async function filterNhapKho(options = {}) {
     const startEl = document.getElementById('dateStartNhapKho');
@@ -31015,20 +31077,22 @@ async function filterNhapKho(options = {}) {
             // Lọc thủ công nếu snapshot là toàn bộ database
             if (dateObj >= startDate && dateObj <= endDate) {
                 const id = data.soPhieu || "Chưa rõ số phiếu";
-                if (!grouped[id]) {
-                    grouped[id] = { soPhieu: id, ngay: dateObj, ncc: data.ncc || "Chưa có NCC", items: [], tongTien: 0, syncStatus: data.syncStatus || null, syncPending: data.syncPending === true, syncMode: data.syncMode || null, syncReason: data.syncReason || '', syncError: data.syncError || '' };
+                const gKey = id + '|' + nlDayKey(dateObj) + '|' + (data.ncc || '');
+                if (!grouped[gKey]) {
+                    grouped[gKey] = { soPhieu: id, ngay: dateObj, ncc: data.ncc || "Chưa có NCC", items: [], tongTien: 0, syncStatus: data.syncStatus || null, syncPending: data.syncPending === true, syncMode: data.syncMode || null, syncReason: data.syncReason || '', syncError: data.syncError || '' };
                 }
-                grouped[id].items.push(data);
-                grouped[id].tongTien += (parseFloat(data.thanhTien) || 0);
+                grouped[gKey].items.push(Object.assign({}, data, { __id: doc.id }));
+                grouped[gKey].tongTien += (parseFloat(data.thanhTien) || 0);
             }
         });
-        window.phieuData = grouped;
+        window.phieuData = {};
+        Object.values(grouped).forEach(g => { g.gid = nlRegisterGroup(g); window.phieuData[g.gid] = g; });
         const keys = Object.values(grouped);
         if (keys.length === 0) {
             listBody.innerHTML = "<tr><td colspan='4' class='text-center p-4'>Không có dữ liệu trong khoảng này</td></tr>";
             return;
         }
-        let htmlRows = keys.map(p => "\n    <tr>\n        <td colspan=\"4\" class=\"p-1\">\n            <div onclick=\"xemChiTietPhieu('" + p.soPhieu + "')\" class=\"flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2 cursor-pointer transition-all hover:-translate-y-0.5\n                        shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] text-[12px]\" style=\"border-left-color:#a3e635 !important; border-right-color:#a3e635 !important;\">\n                <div class=\"flex items-center justify-between gap-2 md:contents\">\n                    <div class=\"flex items-center gap-2 min-w-0 md:contents\">\n                        <span class=\"font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap md:w-[18%] md:px-3\">" + p.soPhieu + "</span>\n                        " + syncStatusBadgeHtml(p) + "\n                        <span class=\"text-slate-500 dark:text-slate-400 whitespace-nowrap md:w-[17%] md:px-3\">" + (p.ngay instanceof Date ? p.ngay.toLocaleDateString('vi-VN', { timeZone: APP_TIME_ZONE }) : "---") + "</span>\n                    </div>\n                    <span class=\"font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap md:hidden\">" + p.tongTien.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + " \u0111</span>\n                </div>\n                <div class=\"flex items-center justify-between gap-2 mt-1.5 pt-1.5 md:mt-0 md:pt-0 border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700 md:contents\">\n                    <span class=\"text-slate-700 dark:text-slate-200 truncate md:w-[45%] md:px-3 md:order-3\">" + p.ncc + "</span>\n                    <span class=\"hidden md:block md:w-[20%] md:pl-2 md:pr-4 md:text-right md:order-4 font-bold text-slate-800 dark:text-slate-100\">" + p.tongTien.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + " \u0111</span>\n                </div>\n            </div>\n        </td>\n    </tr>\n").join('');
+        let htmlRows = keys.map(p => "\n    <tr>\n        <td colspan=\"4\" class=\"p-1\">\n            <div onclick=\"xemChiTietPhieu('" + p.gid + "')\" class=\"flex flex-col md:flex-row md:items-center gap-1.5 md:gap-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-r-4 rounded-lg p-2.5 md:p-2 cursor-pointer transition-all hover:-translate-y-0.5\n                        shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] text-[12px]\" style=\"border-left-color:#a3e635 !important; border-right-color:#a3e635 !important;\">\n                <div class=\"flex items-center justify-between gap-2 md:contents\">\n                    <div class=\"flex items-center gap-2 min-w-0 md:contents\">\n                        <span class=\"font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap md:w-[18%] md:px-3\">" + p.soPhieu + "</span>\n                        " + syncStatusBadgeHtml(p) + "\n                        <span class=\"text-slate-500 dark:text-slate-400 whitespace-nowrap md:w-[17%] md:px-3\">" + (p.ngay instanceof Date ? p.ngay.toLocaleDateString('vi-VN', { timeZone: APP_TIME_ZONE }) : "---") + "</span>\n                    </div>\n                    <span class=\"font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap md:hidden\">" + p.tongTien.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + " \u0111</span>\n                </div>\n                <div class=\"flex items-center justify-between gap-2 mt-1.5 pt-1.5 md:mt-0 md:pt-0 border-t md:border-t-0 border-dashed border-slate-200 dark:border-slate-700 md:contents\">\n                    <span class=\"text-slate-700 dark:text-slate-200 truncate md:w-[45%] md:px-3 md:order-3\">" + p.ncc + "</span>\n                    <span class=\"hidden md:block md:w-[20%] md:pl-2 md:pr-4 md:text-right md:order-4 font-bold text-slate-800 dark:text-slate-100\">" + p.tongTien.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + " \u0111</span>\n                </div>\n            </div>\n        </td>\n    </tr>\n").join('');
         listBody.innerHTML = htmlRows;
         if (typeof lucide !== 'undefined')
             lucide.createIcons();
@@ -31039,17 +31103,18 @@ async function filterNhapKho(options = {}) {
     }
 }
 // Xem chi tiết 1 phiếu nhập nguyên liệu (mở modal)
-function xemChiTietPhieu(soPhieu) {
-    const p = window.phieuData[soPhieu];
+function xemChiTietPhieu(ref) {
+    const p = (window.__nlGroups || {})[ref] || (window.phieuData || {})[ref];
     if (!p) {
-        console.error("Không tìm thấy dữ liệu cho phiếu: " + soPhieu);
+        console.error("Không tìm thấy dữ liệu cho phiếu: " + ref);
         return;
     }
+    const soPhieu = p.soPhieu;
     // Xây dựng chuỗi HTML với cột Đơn giá
     let rows = p.items.map(i => {
         return "<tr>\n            <td class=\"p-2 border\">" + i.tenNL + "</td>\n            <td class=\"p-2 border text-center\">" + i.sl + "</td>\n            <td class=\"p-2 border text-right\">" + (i.donGia || 0).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</td>\n            <td class=\"p-2 border text-right font-bold\">" + (i.thanhTien || 0).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</td>\n        </tr>";
     }).join('');
-    let content = "\n        <table class=\"w-full text-xs border-collapse\">\n            <thead class=\"bg-gray-100\">\n                <tr>\n                    <th class=\"p-2 border\">NL</th>\n                    <th class=\"p-2 border\">SL</th>\n                    <th class=\"p-2 border\">\u0110\u01A1n gi\u00E1</th>\n                    <th class=\"p-2 border\">Th\u00E0nh ti\u1EC1n</th>\n                </tr>\n            </thead>\n            <tbody>\n                " + rows + "\n            </tbody>\n        </table>\n        <div class=\"grid grid-cols-3 gap-2 mt-4\">\n            <button onclick=\"document.getElementById('popup-ncc').classList.add('hidden'); editImportReceipt('" + soPhieu + "')\" class=\"bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5\">\n                \u270F\uFE0F S\u1EEDa phi\u1EBFu\n            </button>\n            <button onclick=\"document.getElementById('popup-ncc').classList.add('hidden'); deleteDoc('material_imports', '" + soPhieu + "')\" class=\"bg-red-600 hover:bg-red-700 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5\">\n                <i data-lucide=\"trash-2\" class=\"w-4 h-4\"></i> X\u00F3a c\u1EA3 phi\u1EBFu\n            </button>\n            <button onclick=\"document.getElementById('popup-ncc').classList.add('hidden')\" class=\"bg-slate-600 hover:bg-slate-700 text-white py-2 rounded-xl text-sm font-bold\">\u0110\u00F3ng</button>\n        </div>\n    ";
+    let content = "\n        <table class=\"w-full text-xs border-collapse\">\n            <thead class=\"bg-gray-100\">\n                <tr>\n                    <th class=\"p-2 border\">NL</th>\n                    <th class=\"p-2 border\">SL</th>\n                    <th class=\"p-2 border\">\u0110\u01A1n gi\u00E1</th>\n                    <th class=\"p-2 border\">Th\u00E0nh ti\u1EC1n</th>\n                </tr>\n            </thead>\n            <tbody>\n                " + rows + "\n            </tbody>\n        </table>\n        <div class=\"grid grid-cols-3 gap-2 mt-4\">\n            <button onclick=\"document.getElementById('popup-ncc').classList.add('hidden'); editImportReceipt('" + ref + "')\" class=\"bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5\">\n                \u270F\uFE0F S\u1EEDa phi\u1EBFu\n            </button>\n            <button onclick=\"document.getElementById('popup-ncc').classList.add('hidden'); deleteDoc('material_imports', '" + soPhieu + "', '" + ref + "')\" class=\"bg-red-600 hover:bg-red-700 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5\">\n                <i data-lucide=\"trash-2\" class=\"w-4 h-4\"></i> X\u00F3a c\u1EA3 phi\u1EBFu\n            </button>\n            <button onclick=\"document.getElementById('popup-ncc').classList.add('hidden')\" class=\"bg-slate-600 hover:bg-slate-700 text-white py-2 rounded-xl text-sm font-bold\">\u0110\u00F3ng</button>\n        </div>\n    ";
     showPopup("Chi tiết phiếu: " + soPhieu, content, true);
     if (typeof lucide !== 'undefined')
         lucide.createIcons();
@@ -31066,12 +31131,13 @@ function xemChiTietPhieu(soPhieu) {
 // cũ của phiếu rồi ghi lại đúng các dòng hiện có trong form - giữ nguyên NGÀY GIỜ gốc của
 // phiếu (không đổi ngày ghi nhận, chỉ đổi nội dung).
 window.__editImportRows = [];
-async function editImportReceipt(soPhieu) {
-    const p = window.phieuData[soPhieu];
+async function editImportReceipt(ref) {
+    const p = (window.__nlGroups || {})[ref] || (window.phieuData || {})[ref];
     if (!p) {
         showAlert("Không tìm thấy dữ liệu phiếu!");
         return;
     }
+    const soPhieu = p.soPhieu;
     // Nạp danh sách NCC + Nguyên liệu để làm dropdown (dùng chung nguồn với form nhập mới)
     const [nccSnap, nlSnap] = await Promise.all([
         db.collection('suppliers').get(),
@@ -31230,10 +31296,15 @@ async function saveEditedImportReceipt(soPhieu, oldData, newData) {
         const newNccId = newNccDoc.id;
         const newTotal = newData.rows.reduce((s, r) => s + (r.sl * r.donGia), 0);
         // Xoá dòng cũ + ghi dòng mới + điều chỉnh công nợ trong MỘT batch.
-        const oldSnap = await db.collection('material_imports').where('soPhieu', '==', soPhieu).get();
-        if (oldSnap.size + newData.rows.length + 2 > 500) throw new Error('Phiếu có quá nhiều dòng để sửa trong một lần.');
+        // Chỉ xoá ĐÚNG các dòng của phiếu đang sửa (theo id dòng), không xoá theo số phiếu vì có thể còn phiếu NGÀY KHÁC trùng số.
+        let oldRefs = (oldData.items || []).filter(it => it && it.__id).map(it => db.collection('material_imports').doc(it.__id));
+        if (!oldRefs.length) {
+            const oldSnap = await db.collection('material_imports').where('soPhieu', '==', soPhieu).get();
+            oldRefs = oldSnap.docs.map(d => d.ref);
+        }
+        if (oldRefs.length + newData.rows.length + 2 > 500) throw new Error('Phiếu có quá nhiều dòng để sửa trong một lần.');
         const batch = db.batch();
-        oldSnap.docs.forEach(doc => batch.delete(doc.ref));
+        oldRefs.forEach(r => batch.delete(r));
         if (oldNccId && oldNccId !== newNccId) {
             batch.update(db.collection('suppliers').doc(oldNccId), { debt: firebase.firestore.FieldValue.increment(-oldTotal) });
             batch.update(newNccDoc.ref, { debt: firebase.firestore.FieldValue.increment(newTotal) });
@@ -31242,7 +31313,7 @@ async function saveEditedImportReceipt(soPhieu, oldData, newData) {
         }
         newData.rows.forEach(row => {
             const rowRef = db.collection('material_imports').doc();
-            batch.set(rowRef, { soPhieu, ncc: newData.nccName, nccId: newNccId, soHd: newData.soHd, ngayHd: newData.ngayHd, tenNL: row.tenNL, sl: row.sl, donGia: row.donGia, thanhTien: row.sl * row.donGia, tinhTrang: row.tinhTrang || '', timestamp: originalTimestamp, gioNhanTay: gioNhanTayNew, phuongTien: newData.phuongTien || '', syncStatus: 'synced', syncPending: false, syncMode: 'normal', syncAt: firebase.firestore.FieldValue.serverTimestamp() });
+            batch.set(rowRef, { soPhieu, soPhieuNum: (parseInt(String(soPhieu).replace(/\D/g, ''), 10) || 0), ncc: newData.nccName, nccId: newNccId, soHd: newData.soHd, ngayHd: newData.ngayHd, tenNL: row.tenNL, sl: row.sl, donGia: row.donGia, thanhTien: row.sl * row.donGia, tinhTrang: row.tinhTrang || '', timestamp: originalTimestamp, gioNhanTay: gioNhanTayNew, phuongTien: newData.phuongTien || '', syncStatus: 'synced', syncPending: false, syncMode: 'normal', syncAt: firebase.firestore.FieldValue.serverTimestamp() });
         });
         await batch.commit();
         Swal.close();
