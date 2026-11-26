@@ -4820,6 +4820,10 @@ document.addEventListener('DOMContentLoaded', function () {
         
 <!-- TRANG KIỂM KÊ KHO (báo cáo kiểm kê: tên + tồn hệ thống từ Kho Hàng, nhập SL thực tế, chênh lệch, xuất Excel) -->
 <div id="page-stocktake" class="hidden space-y-4 p-2 md:p-6 w-full">
+    <div class="flex flex-wrap gap-2 pm-tabs" id="st-tabbar">
+        <button type="button" id="st-tab-baocao" class="cust-tab" onclick="showPage('page-report')">📊 Báo cáo</button>
+        <button type="button" class="cust-tab on" onclick="showPage('page-stocktake')">📋 Kiểm kê kho</button>
+    </div>
     <div class="flex flex-wrap items-end justify-between gap-3">
         <div>
             <h2 data-pt class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">KIỂM KÊ KHO</h2>
@@ -5601,6 +5605,11 @@ document.addEventListener('DOMContentLoaded', function () {
        
 		<!-- PHẦN 6: BÁO CÁO -->
 <div id="page-report" class="hidden p-2 md:p-8 space-y-6 md:space-y-8 dark:bg-slate-950 min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-300">
+    <!-- Kiểm kê kho được đưa vào đây: bấm tab "Kiểm kê kho" để mở trang Kiểm kê -->
+    <div class="flex flex-wrap gap-2 pm-tabs" id="rp-tabbar">
+        <button type="button" class="cust-tab on" onclick="showPage('page-report')">📊 Báo cáo</button>
+        <button type="button" id="rp-tab-kiemke" class="cust-tab" onclick="showPage('page-stocktake')">📋 Kiểm kê kho</button>
+    </div>
     <div class="border-b pb-4 md:pb-6">
         <h2 data-pt class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">TRUNG TÂM BÁO CÁO</h2>
         <p class="text-slate-500 mt-1 text-sm md:text-base">Xuất dữ liệu chi tiết phục vụ đối soát và quản lý kho</p>
@@ -17801,7 +17810,7 @@ async function quickAdd(productName, event, fromCamera) {
     const stockRemaining = Math.max(0, Number(getCachedStockQty(productName) || 0));
     const currentItems = (sellCart || []).filter(item => item && !item.isShipping && item.name === productName);
     const existingTotal = currentItems.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
-    const desiredTotal = existingTotal + 1;
+    let desiredTotal = existingTotal + 1;
     // Khi đang SỬA hóa đơn, currentStockMap đã trừ cả số lượng của phiếu cũ đang nằm trong giỏ.
     // Vì vậy phải cộng lại số lượng gốc của chính phiếu đang sửa để biết tổng số SP có thể đặt
     // trong giỏ. Ví dụ: kho còn 15, phiếu cũ đã bán 15, mở sửa -> map còn 0; được phép tăng
@@ -17814,11 +17823,16 @@ async function quickAdd(productName, event, fromCamera) {
     // và, nếu đang sửa, cộng lại số lượng gốc của phiếu để kiểm tra đúng tổng tồn thực có thể dùng.
     const stockForThisCart = stockRemaining + existingTotal + editingOriginalQty;
 
-    if (stockForThisCart <= 0 || desiredTotal > stockForThisCart + 1e-9) {
+    // SỬA V65: tồn lẻ (vd 0,5 Kg) vẫn bán được. Mỗi lần bấm cộng 1 đơn vị; nếu phần tồn còn lại
+    // < 1 thì cộng đúng phần còn lại (0,5). Chỉ báo "không đủ tồn" khi phần còn lại thực sự = 0.
+    const remainingToAdd = Math.round((stockForThisCart - existingTotal) * 1e6) / 1e6;
+    if (stockForThisCart <= 0 || remainingToAdd <= 1e-9) {
         if (!fromCamera) Swal.fire({ icon:'warning', title:'Không đủ tồn kho', text:'Sản phẩm ' + productName + ' chỉ còn ' + stockRemaining.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + ' ' + (p.unit || '') + '.' });
         return false;
     }
+    const addStep = Math.min(1, remainingToAdd);
 
+    desiredTotal = existingTotal + addStep;
     const globalPriceTypeEl = document.getElementById('global-price-type');
     const priceType = globalPriceTypeEl ? globalPriceTypeEl.value : 'retail';
     const price = priceType === 'wholesale' ? (p.wholesale || 0) : (p.retail || 0);
@@ -17826,20 +17840,20 @@ async function quickAdd(productName, event, fromCamera) {
     let targetItem = null;
     if (forceNew) {
         targetItem = {
-            id: Date.now() + Math.random(), name: p.name, unit: p.unit || 'Cái', qty: 1,
-            price: parseFloat(price), note:'', total: parseFloat(price), lotKey:'FEFO',
+            id: Date.now() + Math.random(), name: p.name, unit: p.unit || 'Cái', qty: addStep,
+            price: parseFloat(price), note:'', total: parseFloat(price) * addStep, lotKey:'FEFO',
             selectedLot:null, lotAllocations:[], priceType
         };
         sellCart.push(targetItem);
     } else {
         targetItem = sellCart.find(item => item && item.name === productName && !item.isShipping);
         if (targetItem) {
-            targetItem.qty = (Number(targetItem.qty) || 0) + 1;
+            targetItem.qty = Math.round(((Number(targetItem.qty) || 0) + addStep) * 1e6) / 1e6;
             targetItem.total = targetItem.qty * targetItem.price;
         } else {
             targetItem = {
-                id: Date.now() + Math.random(), name:p.name, unit:p.unit || 'Cái', qty:1,
-                price:parseFloat(price), note:'', total:parseFloat(price), lotKey:'FEFO',
+                id: Date.now() + Math.random(), name:p.name, unit:p.unit || 'Cái', qty:addStep,
+                price:parseFloat(price), note:'', total:parseFloat(price) * addStep, lotKey:'FEFO',
                 selectedLot:null, lotAllocations:[], priceType
             };
             sellCart.push(targetItem);
@@ -36228,8 +36242,9 @@ html:not(.dark) body #page-home .home-charts-grid > div:not(#_a):not(#_b):not(#_
   html:not(.dark) body #sidebar#sidebar > div.mt-2 { border-top-color:rgba(255,255,255,.14) !important; }
   html body #sidebar#sidebar .rail-user { width:auto !important; padding:0 !important; border:0 !important; background:transparent !important; box-shadow:none !important; justify-content:center; cursor:pointer; }
   html body #sidebar#sidebar .rail-user > svg, html body #sidebar#sidebar .rail-user > i { display:none !important; }
-  html body #sidebar#sidebar .rail-avatar { display:grid; place-items:center; width:40px; height:40px; border-radius:50%; font-size:13px; font-weight:800; color:#fff;
-    background:linear-gradient(135deg,#fb923c,#f43f5e); box-shadow:0 4px 0 #9f1239, 0 8px 12px -4px rgba(244,63,94,.6), inset 0 1px 0 rgba(255,255,255,.4); }
+  html body #sidebar#sidebar .rail-avatar { --tc:#f97316; display:grid; place-items:center; width:46px; height:46px; border-radius:0; background:transparent; box-shadow:none;
+    font:900 32px/1 Inter,system-ui,sans-serif; color:color-mix(in srgb, var(--tc) 50%, #ffffff);
+    filter:drop-shadow(0 1px 0 color-mix(in srgb, var(--tc) 52%, #000000)) drop-shadow(0 1px 0 color-mix(in srgb, var(--tc) 52%, #000000)) drop-shadow(0 1px 0 color-mix(in srgb, var(--tc) 52%, #000000)) drop-shadow(0 5px 5px rgba(0,0,0,.45)) drop-shadow(0 0 9px color-mix(in srgb, var(--tc) 70%, transparent)); }
   html body #sidebar#sidebar .rail-hide { display:none !important; }
 }
 </style>
@@ -36268,7 +36283,12 @@ html:not(.dark) body #page-home .home-charts-grid > div:not(#_a):not(#_b):not(#_
         var nav = sb.querySelector('nav'); if (nav) nav.addEventListener('scroll', hide);
         // ô avatar: 2 chữ cái đầu của tên đang đăng nhập
         var lab = document.getElementById('current-user-label'), av = document.getElementById('rail-avatar');
-        function syncAv() { if (!lab || !av) return; var n = (lab.textContent || '').split('(')[0].trim(); av.textContent = (n && n !== '—') ? n.slice(0, 2).toUpperCase() : '?'; }
+        function initialOf(name) {      // "Hoè" -> H ; "Đặng T Huyền" -> H (tên là từ cuối) ; "NVH" (viết tắt in hoa) -> H
+            var w = name.trim().split(/\s+/).filter(Boolean); if (!w.length || name.trim() === '—') return '?';
+            var last = w[w.length - 1], ch = (last.length > 1 && last === last.toUpperCase()) ? last.charAt(last.length - 1) : last.charAt(0);
+            return ch.toUpperCase();
+        }
+        function syncAv() { if (!lab || !av) return; av.textContent = initialOf((lab.textContent || '').split('(')[0]); }
         syncAv();
         if (lab && window.MutationObserver) new MutationObserver(syncAv).observe(lab, { childList: true, characterData: true, subtree: true });
         // Admin đổi mật khẩu ở trang Quản Lý. Nhân viên không vào được trang đó nên bấm vào avatar để tự đổi mật khẩu.
@@ -36303,5 +36323,68 @@ html:not(.dark) body #page-home .home-charts-grid > div:not(#_a):not(#_b):not(#_
   html body #inv-top-grid button:hover::before { filter:brightness(1.08); }
   html body #inv-top-grid button:active { transform:translateY(1px) !important; }
   html body #inv-top-grid button:active::before { border-bottom-width:2px; }
+}
+</style>
+
+<style id="pm-home-header-css">
+/* ===== TRANG CHỦ: KHỐI "BẢNG ĐIỀU KHIỂN" bo tròn thành thẻ kính cho cân với thẻ menu bên trái (máy tính >= 768px) ===== */
+@media (min-width: 768px) {
+  /* bỏ dải nền chữ nhật chạy ngang phía sau thẻ (chỉ còn thẻ bo tròn) */
+  html body #home-sticky-top#home-sticky-top { padding-top:10px !important; padding-bottom:8px !important; border:0 !important;
+    background:transparent !important; box-shadow:none !important; -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
+  html body #home-sticky-top#home-sticky-top > div:first-child { border-radius:28px !important; padding:10px 22px !important; border:1px solid rgba(148,163,184,.45) !important;
+    background:linear-gradient(180deg, #ffffff, #eef3fa) !important;
+    box-shadow:0 14px 30px -16px rgba(15,23,42,.42), inset 0 1px 0 rgba(255,255,255,.95) !important; }
+  html.dark body #home-sticky-top#home-sticky-top > div:first-child { border-color:rgba(255,255,255,.12) !important;
+    background:linear-gradient(180deg, #1a2640, #0b1122) !important;
+    box-shadow:0 14px 30px -16px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.08) !important; }
+}
+</style>
+
+<style id="pm-kiemke-css">
+/* Kiểm kê kho nằm trong mục Báo Cáo: ẩn mục "Kiểm Kê" riêng ở menu trái và menu "Thêm" trên điện thoại */
+#sidebar nav > button[data-navbtn-pc="page-stocktake"] { display:none !important; }
+#more-menu-list button[onclick*="page-stocktake"] { display:none !important; }
+</style>
+<script id="pm-kiemke-js">
+(function () {
+    'use strict';
+    // Đang ở trang Kiểm kê thì tô sáng mục "Báo Cáo" (menu trái và thanh điều hướng điện thoại)
+    function wrapNav(name) {
+        var o = window[name]; if (typeof o !== 'function' || o.__kk) return;
+        var w = function (pageId) { return o.call(this, pageId === 'page-stocktake' ? 'page-report' : pageId); };
+        w.__kk = true; window[name] = w;
+    }
+    wrapNav('updateSidebarActivePC'); wrapNav('updateMobileNavActive');
+    // Chỉ hiện tab nếu tài khoản có quyền vào trang đó (Kiểm kê dùng quyền của Kho hàng, Báo cáo có quyền riêng)
+    function can(perm) {
+        try { var u = window.getCurrentUser && window.getCurrentUser(); if (!u) return true; return u.role === 'admin' || (u.permissions || []).indexOf(perm) > -1; }
+        catch (e) { return true; }
+    }
+    function setShown(id, show) {
+        var el = document.getElementById(id); if (!el) return;
+        if (show) el.style.removeProperty('display'); else el.style.setProperty('display', 'none', 'important');
+    }
+    function applyPerm() { setShown('rp-tab-kiemke', can('page-inventory')); setShown('st-tab-baocao', can('page-report')); }
+    var orig = window.showPage;
+    if (typeof orig === 'function' && !orig.__kk) {
+        var w = function (pageId) {
+            var r = orig.apply(this, arguments);
+            if (pageId === 'page-report' || pageId === 'page-stocktake') { try { applyPerm(); } catch (e) {} }
+            return r;
+        };
+        w.__kk = true; window.showPage = w;
+    }
+})();
+</script>
+
+<style id="pm-page-title-css">
+/* ===== ĐỒNG BỘ TIÊU ĐỀ CÁC TRANG: thẻ kính bo tròn giống khối "Bảng điều khiển" (máy tính >= 768px) ===== */
+@media (min-width: 768px) {
+  html body main > [id^="page-"]:not(#page-home) { padding-top:10px !important; }
+  html body main > [id^="page-"]:not(#page-home) h2[data-pt] { display:block; padding:12px 26px !important; margin:0 0 12px !important; border-radius:28px; border:1px solid rgba(148,163,184,.45);
+    background:linear-gradient(180deg, #ffffff, #eef3fa); box-shadow:0 14px 30px -16px rgba(15,23,42,.42), inset 0 1px 0 rgba(255,255,255,.95); }
+  html.dark body main > [id^="page-"]:not(#page-home) h2[data-pt] { border-color:rgba(255,255,255,.12);
+    background:linear-gradient(180deg, #1a2640, #0b1122); box-shadow:0 14px 30px -16px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.08); }
 }
 </style>
