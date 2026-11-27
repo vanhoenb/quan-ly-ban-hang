@@ -4674,7 +4674,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     <input type="text" id="hdn-note" placeholder="Ghi chú đơn hàng..." class="col-span-3 md:col-span-3 w-full min-w-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg px-2 py-1.5 text-xs dark:text-white">
                     <!-- Chỉ hiện khi chọn Bán Sỉ: tích để HIỆN cột "Giá bán đề xuất" trên hóa đơn nháp -->
                     <label id="hdn-sug-wrap" style="display:none" class="col-span-3 md:col-span-12 items-center gap-1 text-[11px] font-bold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
-                        <input type="checkbox" id="hdn-show-sug" checked class="w-3.5 h-3.5 rounded"> Hiện cột "Giá bán đề xuất" trên hóa đơn (khi chọn giá sỉ)
+                        <input type="checkbox" id="hdn-show-sug" checked class="w-3.5 h-3.5 rounded"> Hiện thêm cột bên cạnh giá sỉ (khi chọn giá sỉ):
+                        <select id="hdn-sug-mode" title="Chọn nội dung cột thêm trên hóa đơn" class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 rounded-lg px-1.5 py-1 text-[11px] font-bold dark:text-white"><option value="suggested">Giá bán đề xuất</option><option value="retail">Giá lẻ</option></select>
                     </label>
                 </div>
             </div>
@@ -4743,9 +4744,13 @@ document.addEventListener('DOMContentLoaded', function () {
             <!-- Tìm SP + chọn loại giá tính Thành tiền -->
             <div class="p-2.5 md:p-4 border-b border-slate-200 dark:border-slate-700 flex flex-col md:flex-row gap-2 shrink-0">
                 <input type="text" id="bg-search" placeholder="🔍 Tìm tên sản phẩm..." onkeyup="filterBaoGiaModal()" class="flex-1 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-xs md:text-sm dark:text-white">
-                <select id="bg-price-type" class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-xs md:text-sm dark:text-white" onchange="calcBaoGiaPreview()">
+                <select id="bg-price-type" class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-xs md:text-sm dark:text-white" onchange="updateBgSugToggle(); calcBaoGiaPreview()">
                     <option value="wholesale">Tính thành tiền theo: Giá sỉ</option>
                     <option value="retail">Tính thành tiền theo: Giá lẻ</option>
+                </select>
+                <select id="bg-sug-mode" title="Chọn nội dung cột thứ 2 trên phiếu báo giá (chỉ khi chọn giá sỉ)" class="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 rounded-xl text-xs md:text-sm dark:text-white">
+                    <option value="suggested">Cột thêm: Giá bán đề xuất</option>
+                    <option value="retail">Cột thêm: Giá lẻ</option>
                 </select>
             </div>
 
@@ -15257,6 +15262,7 @@ function openHoaDonNhapModal(prefill) {
     document.getElementById('hdn-note').value = prefill ? (prefill.note || '') : '';
     document.getElementById('hdn-price-type').value = prefill ? (prefill.priceType || 'retail') : 'retail';
     { const sg = document.getElementById('hdn-show-sug'); if (sg) sg.checked = !prefill || prefill.showSuggested !== false; }
+    { const sm = document.getElementById('hdn-sug-mode'); if (sm) sm.value = (prefill && prefill.sugMode === 'retail') ? 'retail' : 'suggested'; }
     updateHdnSugToggle();
     document.getElementById('hdn-vat').value = String(prefill ? (prefill.vatRate || 0) : 0);
     document.getElementById('hdn-search').value = '';
@@ -15438,6 +15444,10 @@ function updateHdnSugToggle() {
     const t = (document.getElementById('hdn-price-type') || {}).value;
     if (w) w.style.display = (t === 'wholesale') ? 'flex' : 'none';
 }
+function getHdnSugMode() {
+    const sm = document.getElementById('hdn-sug-mode');
+    return (sm && sm.value === 'retail') ? 'retail' : 'suggested';
+}
 function getHdnShowSuggested() {
     const t = (document.getElementById('hdn-price-type') || {}).value;
     const sg = document.getElementById('hdn-show-sug');
@@ -15528,7 +15538,8 @@ async function saveHoaDonNhap(action) {
     try {
         let maHoaDonNhap;
         const showSuggested = getHdnShowSuggested();
-        const payload = { customer, address, phone, invoiceDate, paymentMethod, note, priceType, showSuggested, vatRate, items, total, draft: true, noDate: !invoiceDate, updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
+        const sugMode = getHdnSugMode();
+        const payload = { customer, address, phone, invoiceDate, paymentMethod, note, priceType, showSuggested, sugMode, vatRate, items, total, draft: true, noDate: !invoiceDate, updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
         if (isEditing) {
             maHoaDonNhap = window.__editingHoaDonNhapMa || '';
             await db.collection('sale_invoice_drafts').doc(window.__editingHoaDonNhapId).update(payload);
@@ -15538,7 +15549,7 @@ async function saveHoaDonNhap(action) {
         }
         Swal.close();
         showAlert(isEditing ? 'Đã cập nhật hóa đơn nháp!' : 'Đã lưu hóa đơn nháp!');
-        const printData = { receiptId: maHoaDonNhap, customer, address, phone, note, items, vatRate, dateObj: invoiceDate ? parseHoaDonNhapDate(invoiceDate) : null, isDraft: true, priceType, showSuggested };
+        const printData = { receiptId: maHoaDonNhap, customer, address, phone, note, items, vatRate, dateObj: invoiceDate ? parseHoaDonNhapDate(invoiceDate) : null, isDraft: true, priceType, showSuggested, sugMode };
         if (action === 'print') renderHoaDonTemplate(printData, 'print');
         else if (action === 'share') renderHoaDonTemplate(printData, 'share');
         closeHoaDonNhapModal();
@@ -15587,12 +15598,12 @@ function editSavedHoaDonNhap(id) {
 function reprintSavedHoaDonNhap(id) {
     const q=window.__hoaDonNhapHistoryCache.find(x=>x.id===id); if(!q)return;
     const dateObj=q.noDate ? null : (q.invoiceDate ? parseHoaDonNhapDate(q.invoiceDate) : (q.date&&typeof q.date.toDate==='function'?q.date.toDate():new Date()));
-    renderHoaDonTemplate({receiptId:q.maHoaDonNhap,customer:q.customer,address:q.address,phone:q.phone,note:q.note,items:q.items||[],vatRate:q.vatRate||0,dateObj,isDraft:true,priceType:q.priceType||'',showSuggested:q.showSuggested},'print');
+    renderHoaDonTemplate({receiptId:q.maHoaDonNhap,customer:q.customer,address:q.address,phone:q.phone,note:q.note,items:q.items||[],vatRate:q.vatRate||0,dateObj,isDraft:true,priceType:q.priceType||'',showSuggested:q.showSuggested,sugMode:q.sugMode},'print');
 }
 function shareSavedHoaDonNhap(id) {
     const q=window.__hoaDonNhapHistoryCache.find(x=>x.id===id); if(!q)return;
     const dateObj=q.noDate ? null : (q.invoiceDate ? parseHoaDonNhapDate(q.invoiceDate) : (q.date&&typeof q.date.toDate==='function'?q.date.toDate():new Date()));
-    renderHoaDonTemplate({receiptId:q.maHoaDonNhap,customer:q.customer,address:q.address,phone:q.phone,note:q.note,items:q.items||[],vatRate:q.vatRate||0,dateObj,isDraft:true,priceType:q.priceType||'',showSuggested:q.showSuggested},'share');
+    renderHoaDonTemplate({receiptId:q.maHoaDonNhap,customer:q.customer,address:q.address,phone:q.phone,note:q.note,items:q.items||[],vatRate:q.vatRate||0,dateObj,isDraft:true,priceType:q.priceType||'',showSuggested:q.showSuggested,sugMode:q.sugMode},'share');
 }
 async function deleteSavedHoaDonNhap(id) {
     if (typeof canUserDelete==='function' && !canUserDelete()) { Swal.fire({icon:'warning',title:'Không có quyền',text:'Bạn không có quyền xóa dữ liệu. Vui lòng liên hệ Admin.'}); return; }
@@ -15686,6 +15697,8 @@ function openBaoGiaModal(prefill) {
     document.getElementById('bg-address').value = prefill ? (prefill.address || '') : '';
     document.getElementById('bg-phone').value = prefill ? (prefill.phone || '') : '';
     document.getElementById('bg-price-type').value = prefill ? (prefill.priceType || 'retail') : 'wholesale';
+    { const sm = document.getElementById('bg-sug-mode'); if (sm) sm.value = (prefill && prefill.sugMode === 'retail') ? 'retail' : 'suggested'; }
+    updateBgSugToggle();
     document.getElementById('bg-search').value = '';
     const titleEl = document.getElementById('bg-modal-title');
     if (titleEl)
@@ -15818,6 +15831,16 @@ function collectBaoGiaItems() {
 // chia sẻ Zalo). Nếu đang ở CHẾ ĐỘ SỬA (window.__editingBaoGiaId có giá trị) thì CẬP
 // NHẬT đúng bản ghi cũ, giữ nguyên số báo giá, thay vì tạo báo giá mới + tốn thêm 1 số
 // thứ tự. ---
+// Chỉ hiện ô chọn "Cột thêm" khi tính theo giá sỉ (giá lẻ thì cột này để trống)
+function updateBgSugToggle() {
+    const t = (document.getElementById('bg-price-type') || {}).value;
+    const sm = document.getElementById('bg-sug-mode');
+    if (sm) sm.style.display = (t === 'wholesale') ? '' : 'none';
+}
+function getBgSugMode() {
+    const sm = document.getElementById('bg-sug-mode');
+    return (sm && sm.value === 'retail') ? 'retail' : 'suggested';
+}
 async function saveBaoGia(action) {
     const items = collectBaoGiaItems();
     if (!items.length) {
@@ -15830,6 +15853,7 @@ async function saveBaoGia(action) {
     const phone = document.getElementById('bg-phone').value || '';
     let total = 0;
     items.forEach(i => { total += i.qty * (priceType === 'wholesale' ? i.wholesale : i.retail); });
+    const sugMode = getBgSugMode();
     const isEditing = !!window.__editingBaoGiaId;
     const d = new Date();
     showLoading();
@@ -15838,7 +15862,7 @@ async function saveBaoGia(action) {
         if (isEditing) {
             maBaoGia = window.__editingBaoGiaMa || '';
             await db.collection('quotations').doc(window.__editingBaoGiaId).update({
-                customer, address, phone, priceType, items, total,
+                customer, address, phone, priceType, sugMode, items, total,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
         }
@@ -15850,7 +15874,7 @@ async function saveBaoGia(action) {
             const nextNum = (counterSnap.exists ? parseInt(counterSnap.data().maxNum || 0) : 0) + 1;
             maBaoGia = 'BG' + String(nextNum).padStart(2, '0');
             await db.collection('quotations').add({
-                maBaoGia, customer, address, phone, priceType, items, total,
+                maBaoGia, customer, address, phone, priceType, sugMode, items, total,
                 date: firebase.firestore.FieldValue.serverTimestamp()
             });
             try {
@@ -15864,7 +15888,7 @@ async function saveBaoGia(action) {
         }
         Swal.close();
         showAlert(isEditing ? 'Đã cập nhật báo giá thành công!' : 'Đã lưu báo giá thành công!');
-        const printData = { maBaoGia, customer, address, phone, priceType, items, total, dateObj: d };
+        const printData = { maBaoGia, customer, address, phone, priceType, sugMode, items, total, dateObj: d };
         if (action === 'print') {
             fillAndPrintBaoGia(printData);
         }
@@ -15882,8 +15906,11 @@ async function saveBaoGia(action) {
 // --- ĐIỀN DỮ LIỆU VÀO MẪU BÁO GIÁ (dùng chung tiêu đề công ty với mẫu hoá đơn) - CHỈ đổ
 // dữ liệu vào #print-area-baogia, KHÔNG tự in/chia sẻ - dùng chung cho cả in (
 // fillAndPrintBaoGia) lẫn chia sẻ Zalo (shareBaoGiaToZalo) để không lặp code. ---
-function populateBaoGiaPrintArea({ maBaoGia, customer, address, phone, priceType, items, total, dateObj }) {
+function populateBaoGiaPrintArea({ maBaoGia, customer, address, phone, priceType, sugMode, items, total, dateObj }) {
     const d = dateObj || new Date();
+    // Tiêu đề cột thứ 2: "Giá bán đề xuất" (mặc định) hoặc "Giá lẻ" tùy lựa chọn khi chọn giá sỉ
+    const bgSugIsRetail = sugMode === 'retail';
+    { const bgTh = document.querySelectorAll('#print-area-baogia thead th')[5]; if (bgTh) { const dv = bgTh.querySelector('div') || bgTh; dv.textContent = bgSugIsRetail ? 'Giá lẻ' : 'Giá bán đề xuất'; } }
     // Dùng lại đúng logo công ty đã có sẵn ở mẫu hoá đơn - không phải lưu thêm 1 bản ảnh
     // logo nữa cho mẫu báo giá.
     const srcLogo = document.querySelector('#print-area img');
@@ -15953,7 +15980,7 @@ function populateBaoGiaPrintArea({ maBaoGia, customer, address, phone, priceType
             // biệt đang báo giá theo Sỉ hay Lẻ. Giờ: chọn Giá SỈ -> lấy đúng trường Giá bán đề
             // xuất riêng (i.suggestedRetail, thêm ở Kho Hàng); chọn Giá LẺ -> để TRỐNG cột này.
             const suggestedDisplay = priceType === 'wholesale'
-                ? Number(i.suggestedRetail || 0).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE })
+                ? Number(bgSugIsRetail ? (i.retail || 0) : (i.suggestedRetail || 0)).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE })
                 : '';
             rowsHtml += "<tr>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + stt++ + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:left;\">" + escapeHtml(i.name == null ? '' : i.name) + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + i.unit + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + qtyDisplay + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + Number(i.wholesale).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + suggestedDisplay + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;font-weight:bold;\">" + subTotalDisplay + "</div></td>\n            </tr>";
         });
@@ -16041,7 +16068,7 @@ function editSavedBaoGia(docId) {
     closeBaoGiaHistoryModal();
     openBaoGiaModal({
         id: q.id, maBaoGia: q.maBaoGia, customer: q.customer, address: q.address,
-        phone: q.phone, priceType: q.priceType, items: q.items || []
+        phone: q.phone, priceType: q.priceType, sugMode: q.sugMode, items: q.items || []
     });
 }
 function reprintSavedBaoGia(docId) {
@@ -16051,7 +16078,7 @@ function reprintSavedBaoGia(docId) {
     const dateObj = (q.date && typeof q.date.toDate === 'function') ? q.date.toDate() : new Date();
     fillAndPrintBaoGia({
         maBaoGia: q.maBaoGia, customer: q.customer, address: q.address, phone: q.phone,
-        priceType: q.priceType, items: q.items || [], total: q.total || 0, dateObj
+        priceType: q.priceType, sugMode: q.sugMode, items: q.items || [], total: q.total || 0, dateObj
     });
 }
 function shareSavedBaoGiaToZalo(docId) {
@@ -16061,7 +16088,7 @@ function shareSavedBaoGiaToZalo(docId) {
     const dateObj = (q.date && typeof q.date.toDate === 'function') ? q.date.toDate() : new Date();
     shareBaoGiaToZalo({
         maBaoGia: q.maBaoGia, customer: q.customer, address: q.address, phone: q.phone,
-        priceType: q.priceType, items: q.items || [], total: q.total || 0, dateObj
+        priceType: q.priceType, sugMode: q.sugMode, items: q.items || [], total: q.total || 0, dateObj
     });
 }
 async function deleteSavedBaoGia(docId) {
@@ -18515,7 +18542,7 @@ function buildGroupedInvoiceItemsHtml(items, renderRow, colSpan = 9) {
     });
     return html;
 }
-function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items, vatRate, dateObj, isDraft = false, priceType = '', showSuggested = true }, action = 'print') {
+function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items, vatRate, dateObj, isDraft = false, priceType = '', showSuggested = true, sugMode = 'suggested' }, action = 'print') {
     const blankDate = (dateObj === null);
     // Hóa đơn nháp chỉ tích chọn SP, KHÔNG nhập số lượng nào: in dạng gọn - ẩn cột Thuế%/Tiền thuế (cột
     // Thành tiền rộng ra), ẩn dòng Thành tiền trước thuế + Tiền thuế GTGT, để trống Số phiếu.
@@ -18600,8 +18627,9 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
         const prodSrc = (window.allProductCache && window.allProductCache.length) ? window.allProductCache : (window.allProducts || []);
         const sugMap = {};
         normalItems.forEach(i => {
-            let v = Number(i.suggestedRetail) || 0;
-            if (!v) { const pr = prodSrc.find(x => x.name === i.name); v = pr ? (Number(pr.suggestedRetail) || 0) : 0; }
+            const sugField = sugMode === 'retail' ? 'retail' : 'suggestedRetail';
+            let v = Number(i[sugField]) || 0;
+            if (!v) { const pr = prodSrc.find(x => x.name === i.name); v = pr ? (Number(pr[sugField]) || 0) : 0; }
             sugMap[i.name] = v;
         });
         const printTable = elItems.closest('table');
@@ -18615,7 +18643,7 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
                     const th = ths[4].cloneNode(true);
                     th.setAttribute('data-sug', '1');
                     th.style.display = '';
-                    const dv = th.querySelector('div'); if (dv) dv.textContent = 'Giá bán đề xuất'; else th.textContent = 'Giá bán đề xuất';
+                    const dv = th.querySelector('div'); const sugTitle = sugMode === 'retail' ? 'Giá lẻ' : 'Giá bán đề xuất'; if (dv) dv.textContent = sugTitle; else th.textContent = sugTitle;
                     ths[4].after(th);
                 }
                 // Sau khi chèn cột: Thuế% / Tiền thuế dịch sang vị trí 7,8 khi có cột đề xuất
@@ -18628,8 +18656,8 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
             if (headRow) {
                 const W = !isDraft ? null : (showSug
                     ? (taxHidden
-                        ? { 'STT': 5, 'Tên hàng': 33, 'ĐVT': 7, 'SL': 7, 'Đơn giá': 12, 'Giá bán đề xuất': 10, 'Thành tiền': 16, 'Ghi chú': 10 }
-                        : { 'STT': 4, 'Tên hàng': 27, 'ĐVT': 6, 'SL': 6, 'Đơn giá': 10, 'Giá bán đề xuất': 9, 'Thành tiền': 14, 'Thuế%': 6, 'Tiền thuế': 9, 'Ghi chú': 9 })
+                        ? { 'STT': 5, 'Tên hàng': 33, 'ĐVT': 7, 'SL': 7, 'Đơn giá': 12, 'Giá bán đề xuất': 10, 'Giá lẻ': 10, 'Thành tiền': 16, 'Ghi chú': 10 }
+                        : { 'STT': 4, 'Tên hàng': 27, 'ĐVT': 6, 'SL': 6, 'Đơn giá': 10, 'Giá bán đề xuất': 9, 'Giá lẻ': 9, 'Thành tiền': 14, 'Thuế%': 6, 'Tiền thuế': 9, 'Ghi chú': 9 })
                     : (taxHidden
                         ? { 'STT': 5, 'Tên hàng': 36, 'ĐVT': 8, 'SL': 8, 'Đơn giá': 14, 'Thành tiền': 17, 'Ghi chú': 12 }
                         : null));
