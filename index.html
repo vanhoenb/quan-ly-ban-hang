@@ -4686,6 +4686,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
                 <!-- Thanh bấm theo nhóm hàng (giống trang Kho hàng) -->
                 <div id="hdn-grp-bar"></div>
+                <!-- Tiền ship (giống trang Bán hàng) -->
+                <div id="hdn-ship-bar" class="flex flex-wrap items-center gap-1.5"></div>
             </div>
             <div class="flex-1 overflow-y-auto p-2.5 md:p-4">
                 <table class="min-w-full text-left text-[11px] md:text-sm border-collapse">
@@ -15170,6 +15172,7 @@ window.hdnSwapMap = window.hdnSwapMap || {};
 window.hdnSwapQtyMap = window.hdnSwapQtyMap || {};
 window.hdnPriceOverride = window.hdnPriceOverride || {};
 window.hdnNoteMap = window.hdnNoteMap || {};
+window.hdnShipList = window.hdnShipList || []; // danh sách tiền ship (mỗi phần tử là 1 số tiền)
 window.hdnGroupFilter = window.hdnGroupFilter || 'ALL';
 const HDN_GRP_LABEL = { 'THỊT CHƯNG MẮM TÉP': 'TCMT', 'MẮM TÉP RIU ĐỎ': 'Mắm tép', 'QUẢ BÙI KỲ LÃO': 'Quả bùi', 'CƠM CHÁY': 'Cơm cháy', 'TRÀ HOA VÀNG': 'Trà hoa vàng', 'RUỐC CÁ': 'Ruốc cá', 'BÁNH DỨA': 'Bánh dứa', 'CÁC LOẠI HỘP TÚI': 'Hộp túi', 'KHÁC': 'Khác' };
 const HDN_GRP_COLOR = { 'THỊT CHƯNG MẮM TÉP': '#c026d3', 'MẮM TÉP RIU ĐỎ': '#e11d48', 'QUẢ BÙI KỲ LÃO': '#059669', 'CƠM CHÁY': '#d97706', 'TRÀ HOA VÀNG': '#ca8a04', 'RUỐC CÁ': '#0891b2', 'BÁNH DỨA': '#4f46e5', 'CÁC LOẠI HỘP TÚI': '#65a30d', 'KHÁC': '#6b7280' };
@@ -15221,8 +15224,10 @@ function openHoaDonNhapModal(prefill) {
     window.hdnSwapQtyMap = {};
     window.hdnPriceOverride = {};
     window.hdnNoteMap = {};
+    window.hdnShipList = [];
     window.hdnGroupFilter = 'ALL';
     (prefill && prefill.items || []).forEach(i => {
+        if (i && i.isShipping) { window.hdnShipList.push((Number(i.price) || 0) * (Number(i.qty) || 1)); return; }
         if (i.note && (!i.dateSwap || !window.hdnNoteMap[i.name])) window.hdnNoteMap[i.name] = String(i.note);
         // Mỗi SP có thể có 2 dòng đã lưu: 1 dòng bán thường + 1 dòng Đổi date (dateSwap)
         if (i.dateSwap) {
@@ -15418,7 +15423,9 @@ function calcHoaDonNhapPreview() {
         if (window.hdnSelectedMap[item.name]) { count++; if (qty > 0) subtotal += qty * getHoaDonNhapPrice(item, priceType); }
         if (window.hdnSwapMap[item.name]) count++;
     });
-    const total = subtotal + subtotal * vatRate / 100;
+    const shipTotal = (window.hdnShipList || []).reduce((a, b) => a + (Number(b) || 0), 0);
+    const total = subtotal + subtotal * vatRate / 100 + shipTotal; // ship KHÔNG chịu VAT
+    renderHdnShipBar();
     const c = document.getElementById('hdn-count-selected');
     const t = document.getElementById('hdn-preview-total');
     const pn = document.getElementById('hdn-price-note');
@@ -15449,7 +15456,46 @@ function collectHoaDonNhapItems() {
     });
     const normal = source.filter(item => !!window.hdnSelectedMap[item.name]).map(item => mk(item, Number(window.hdnQtyMap[item.name] || 0), false));
     const swap = source.filter(item => !!window.hdnSwapMap[item.name]).map(item => mk(item, Number(window.hdnSwapQtyMap[item.name] || 0), true));
-    return normal.concat(swap);
+    const ships = (window.hdnShipList || []).filter(v => Number(v) > 0).map(v => ({
+        name: 'Tiền ship', unit: '', qty: 1, price: Number(v), vat: 0, taxAmount: 0, note: '', total: Number(v), isShipping: true
+    }));
+    return normal.concat(ships, swap);
+}
+
+// --- TIỀN SHIP cho hóa đơn nháp (giống trang Bán hàng): cộng vào tổng, KHÔNG chịu VAT, không trừ kho ---
+function renderHdnShipBar() {
+    const bar = document.getElementById('hdn-ship-bar'); if (!bar) return;
+    const list = window.hdnShipList || [];
+    let h = '<button type="button" onclick="addHdnShippingFee()" class="px-2.5 py-1 rounded-lg text-xs font-bold border border-sky-300 text-sky-700 bg-sky-50 dark:bg-slate-950">🚚 + Thêm Ship</button>';
+    list.forEach((v, idx) => {
+        h += '<span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-sky-100 text-sky-800 border border-sky-300">🚚 Ship ' + Number(v).toLocaleString('vi-VN') + 'đ <button type="button" onclick="removeHdnShippingFee(' + idx + ')" title="Xóa dòng ship này" class="text-red-500 font-black px-1">✕</button></span>';
+    });
+    bar.innerHTML = h;
+}
+function removeHdnShippingFee(idx) {
+    (window.hdnShipList || []).splice(idx, 1);
+    calcHoaDonNhapPreview();
+}
+async function addHdnShippingFee() {
+    const PRESETS = [10000, 15000, 20000, 30000, 50000];
+    const presetsHtml = PRESETS.map(v => '<button type="button" onclick="document.getElementById(\'swal-hdn-ship-amount\').value=\'' + v + '\'" class="px-3 py-1.5 rounded-lg bg-sky-100 hover:bg-sky-200 text-sky-700 text-xs font-bold">' + v.toLocaleString('vi-VN') + 'đ</button>').join('');
+    const { value: amount } = await Swal.fire({
+        title: '🚚 Thêm tiền Ship',
+        html: '<div class="text-left space-y-3"><div class="flex flex-wrap gap-2 justify-center">' + presetsHtml + '</div><div><label class="text-xs font-bold text-slate-500">Số tiền ship (đ)</label><input id="swal-hdn-ship-amount" type="number" min="0" step="1000" class="swal2-input !m-0 !w-full" placeholder="VD: 25000"></div></div>',
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'Thêm vào hóa đơn',
+        cancelButtonText: 'Hủy',
+        confirmButtonColor: '#0284c7',
+        preConfirm: () => {
+            const v = parseFloat(document.getElementById('swal-hdn-ship-amount').value);
+            if (!v || v <= 0) { Swal.showValidationMessage('Vui lòng nhập số tiền ship lớn hơn 0!'); return false; }
+            return v;
+        }
+    });
+    if (!amount) return;
+    window.hdnShipList.push(amount);
+    calcHoaDonNhapPreview();
 }
 async function nextHoaDonNhapNumber() {
     const ref = db.collection('app_meta').doc('sale_draft_counter');
@@ -15464,7 +15510,7 @@ async function nextHoaDonNhapNumber() {
 }
 async function saveHoaDonNhap(action) {
     const items = collectHoaDonNhapItems();
-    if (!items.length) { showAlert('Vui lòng tích chọn hoặc nhập số lượng cho ít nhất 1 sản phẩm!'); return; }
+    if (!items.filter(i => !i.isShipping).length) { showAlert('Vui lòng tích chọn hoặc nhập số lượng cho ít nhất 1 sản phẩm!'); return; }
     const customer = document.getElementById('hdn-customer').value || '';
     const address = document.getElementById('hdn-address').value || '';
     const phone = document.getElementById('hdn-phone').value || '';
@@ -15473,8 +15519,9 @@ async function saveHoaDonNhap(action) {
     const note = document.getElementById('hdn-note').value || '';
     const priceType = (document.getElementById('hdn-price-type') || {}).value || 'retail';
     const vatRate = parseFloat((document.getElementById('hdn-vat') || {}).value) || 0;
-    const subtotal = items.filter(i => !i.dateSwap).reduce((sum,i)=>sum + Number(i.qty||0)*Number(i.price||0),0);
-    const total = subtotal + subtotal * vatRate / 100;
+    const subtotal = items.filter(i => !i.dateSwap && !i.isShipping).reduce((sum,i)=>sum + Number(i.qty||0)*Number(i.price||0),0);
+    const shipTotal = items.filter(i => i.isShipping).reduce((sum,i)=>sum + Number(i.qty||0)*Number(i.price||0),0);
+    const total = subtotal + subtotal * vatRate / 100 + shipTotal;
     const isEditing = !!window.__editingHoaDonNhapId;
     const d = new Date();
     showLoading();
@@ -18472,7 +18519,7 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
     const blankDate = (dateObj === null);
     // Hóa đơn nháp chỉ tích chọn SP, KHÔNG nhập số lượng nào: in dạng gọn - ẩn cột Thuế%/Tiền thuế (cột
     // Thành tiền rộng ra), ẩn dòng Thành tiền trước thuế + Tiền thuế GTGT, để trống Số phiếu.
-    const noQtyMode = !!isDraft && (items || []).length > 0 && (items || []).filter(i => !i.dateSwap).every(i => !(Number(i.qty) > 0));
+    const noQtyMode = !!isDraft && (items || []).filter(i => !i.isShipping).length > 0 && (items || []).filter(i => !i.dateSwap && !i.isShipping).every(i => !(Number(i.qty) > 0));
     // Hóa đơn nháp: chỉ khi CHỌN thuế (>0%) mới hiện cột Thuế/Tiền thuế + 2 dòng Thành tiền trước thuế/Tiền thuế GTGT; thuế = 0 thì ẩn hết.
     const taxHidden = noQtyMode || (!!isDraft && !(Number(vatRate) > 0));
     const d = dateObj || new Date();
