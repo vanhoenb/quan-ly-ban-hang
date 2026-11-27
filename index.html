@@ -4923,6 +4923,7 @@ document.addEventListener('DOMContentLoaded', function () {
                        onkeyup="filterProducts()" 
                        class="w-1/4 p-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 text-sm dark:text-white">
                 <button type="button" onclick="addShippingFeeToCart()" title="Thêm tiền ship - không tính vào tồn kho, không tính thuế" class="shrink-0 bg-sky-500 hover:bg-sky-600 text-white px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap">🚚 Ship</button>
+
             </div>
 
             <div id="scanner-container" class="hidden fixed inset-0 z-[9999] bg-black bg-opacity-95 p-4 flex flex-col justify-center items-center">
@@ -5044,7 +5045,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         <span id="sell-disc-amount"></span>
                     </div>
                     <div class="sell-total-card">
-                        <div class="sell-card-title">Tổng thanh toán</div>
+                        <div class="sell-card-title" id="cart-total-title">Tổng thanh toán</div>
                         <span id="cart-total-display" class="text-xl font-black text-red-500">0 đ</span>
                     </div>
                 </div>
@@ -13562,13 +13563,13 @@ function receiptTypeBadgeHtml(type, dateStatus, vendor, isReturn) {
         tagHtml = '<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-400 whitespace-nowrap">↩️ Hoàn trả</span>';
     }
     else if (type === 'Nhập đổi' && dateStatus === 'expired') {
-        tagHtml = '<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400 whitespace-nowrap">🗑 Hết hạn — huỷ</span>';
+        tagHtml = '<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400 whitespace-nowrap">🗑 Đổi date - hỏng, không nhập kho</span>';
     }
     else if (type === 'Nhập đổi' && dateStatus === 'mixed') {
         tagHtml = '<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400 whitespace-nowrap">🔄 Đổi date (2 loại)</span>';
     }
     else if (type === 'Nhập đổi') {
-        tagHtml = '<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400 whitespace-nowrap">🔄 Đổi date</span>';
+        tagHtml = '<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400 whitespace-nowrap">🔄 Đổi date - nhập lại kho</span>';
     }
     else {
         tagHtml = '<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400 whitespace-nowrap">🆕 Nhập mới</span>';
@@ -14007,9 +14008,9 @@ async function exportReceiptsExcel() {
         }
         const typeLabel = (r) => {
             if (r.isReturn) return 'Hoàn trả';
-            if (r.type === 'Nhập đổi' && r.dateStatus === 'expired') return 'Đổi date - hết hạn (huỷ)';
+            if (r.type === 'Nhập đổi' && r.dateStatus === 'expired') return 'Đổi date - hỏng, không nhập kho';
             if (r.type === 'Nhập đổi' && r.dateStatus === 'mixed') return 'Đổi date (2 loại)';
-            if (r.type === 'Nhập đổi') return 'Đổi date';
+            if (r.type === 'Nhập đổi') return 'Đổi date - nhập lại kho';
             return 'Nhập mới';
         };
         const border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
@@ -15516,16 +15517,47 @@ async function addHdnShippingFee() {
     window.hdnShipList.push(amount);
     calcHoaDonNhapPreview();
 }
-async function nextHoaDonNhapNumber() {
-    const ref = db.collection('app_meta').doc('sale_draft_counter');
-    let result = 1;
-    await db.runTransaction(async tx => {
-        const snap = await tx.get(ref);
-        const next = (snap.exists ? Number(snap.data().maxNum || 0) : 0) + 1;
-        tx.set(ref, { maxNum: next, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
-        result = next;
+// Số HĐ nháp: bình thường lấy từ bộ đếm trên Firestore (cần READ). Khi hết READ thì cấp số tạm
+// từ bộ nhớ máy (số lớn nhất đã biết + 1) để vẫn LƯU được (ghi không cần READ). Khi READ có lại,
+// bộ đếm Firestore tự nhảy lên tối thiểu bằng số đã cấp tạm nên không bị trùng trên máy này.
+function __hdnLocalMax() {
+    let m = 0;
+    try { m = Math.max(m, parseInt(localStorage.getItem('hdn_local_max') || '0', 10) || 0); } catch (_) { }
+    (window.__hoaDonNhapHistoryCache || []).forEach(q => {
+        const n = parseInt(String(q.maHoaDonNhap || '').replace(/\D/g, ''), 10);
+        if (n > m) m = n;
     });
-    return 'HDN' + String(result).padStart(2,'0');
+    return m;
+}
+function __hdnRememberMax(n) {
+    try { if (n > (parseInt(localStorage.getItem('hdn_local_max') || '0', 10) || 0)) localStorage.setItem('hdn_local_max', String(n)); } catch (_) { }
+}
+async function nextHoaDonNhapNumber() {
+    const _blocked = e => typeof isFirestoreReadBlockedError === 'function' && isFirestoreReadBlockedError(e);
+    if (!window.__firestoreReadUnavailable) {
+        const ref = db.collection('app_meta').doc('sale_draft_counter');
+        let result = 1;
+        try {
+            const localMax = __hdnLocalMax();
+            await db.runTransaction(async tx => {
+                const snap = await tx.get(ref);
+                const serverMax = snap.exists ? Number(snap.data().maxNum || 0) : 0;
+                const next = Math.max(serverMax, localMax) + 1;
+                tx.set(ref, { maxNum: next, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+                result = next;
+            });
+            __hdnRememberMax(result);
+            return 'HDN' + String(result).padStart(2, '0');
+        } catch (err) {
+            if (!_blocked(err))
+                throw err;
+            if (typeof window.__markFirestoreReadUnavailable === 'function')
+                window.__markFirestoreReadUnavailable(err, ['sales']);
+        }
+    }
+    const offlineNext = __hdnLocalMax() + 1;
+    __hdnRememberMax(offlineNext);
+    return 'HDN' + String(offlineNext).padStart(2, '0');
 }
 async function saveHoaDonNhap(action) {
     const items = collectHoaDonNhapItems();
@@ -15554,7 +15586,13 @@ async function saveHoaDonNhap(action) {
             await db.collection('sale_invoice_drafts').doc(window.__editingHoaDonNhapId).update(payload);
         } else {
             maHoaDonNhap = await nextHoaDonNhapNumber();
-            await db.collection('sale_invoice_drafts').add({ ...payload, maHoaDonNhap, date: firebase.firestore.FieldValue.serverTimestamp() });
+            const newRef = await db.collection('sale_invoice_drafts').add({ ...payload, maHoaDonNhap, date: firebase.firestore.FieldValue.serverTimestamp() });
+            // Đưa ngay vào bộ nhớ danh sách để xem lại được kể cả khi đang hết READ
+            try {
+                const { updatedAt: _u, ...plain } = payload;
+                window.__hoaDonNhapHistoryCache = window.__hoaDonNhapHistoryCache || [];
+                window.__hoaDonNhapHistoryCache.unshift({ ...plain, id: newRef.id, maHoaDonNhap, date: { toDate: () => d } });
+            } catch (_) { }
         }
         Swal.close();
         showAlert(isEditing ? 'Đã cập nhật hóa đơn nháp!' : 'Đã lưu hóa đơn nháp!');
@@ -15576,11 +15614,19 @@ async function openHoaDonNhapHistoryModal() {
     const search = document.getElementById('hdn-history-search');
     if (search) search.value = '';
     try {
+        if (window.__firestoreReadUnavailable && (window.__hoaDonNhapHistoryCache || []).length) {
+            renderHoaDonNhapHistoryList(window.__hoaDonNhapHistoryCache);
+            return;
+        }
         const snap = await db.collection('sale_invoice_drafts').orderBy('date','desc').limit(200).get();
         window.__hoaDonNhapHistoryCache = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
         renderHoaDonNhapHistoryList(window.__hoaDonNhapHistoryCache);
     } catch (err) {
         console.error('Lỗi tải hóa đơn nháp:', err);
+        if ((window.__hoaDonNhapHistoryCache || []).length && typeof isFirestoreReadBlockedError === 'function' && isFirestoreReadBlockedError(err)) {
+            renderHoaDonNhapHistoryList(window.__hoaDonNhapHistoryCache);
+            return;
+        }
         if (list) list.innerHTML = '<p class="text-center text-sm text-red-500 py-6">Lỗi khi tải danh sách hóa đơn nháp!</p>';
     }
     if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -16450,6 +16496,27 @@ async function addSellToCart(productName, qty = 1, priceType = 'retail') {
 
     // Không hiện thông báo mỗi lần thêm SP vào giỏ; tránh làm chậm thao tác bán.
 }
+// --- TRẢ HÀNG NGAY TRONG GIỎ BÁN HÀNG (chọn ở nút tròn nhỏ cạnh ô Ghi chú của từng dòng, cùng chỗ với Đổi date) ---
+// Dòng trả hàng có SỐ LƯỢNG ÂM (qty < 0) nên tiền tự TRỪ vào đơn (mua thêm hàng mới thì tự đối trừ,
+// tổng âm = phải hoàn tiền cho khách). Hai loại:
+//  - returnStatus 'ok'  (còn tốt): dòng hàng thường có qty âm -> kho CỘNG LẠI đúng số lượng trả
+//    (mọi đường lưu/xóa/sửa đều trừ kho theo qty nên qty âm tự cộng kho); VAT cũng được giảm theo.
+//  - returnStatus 'bad' (hỏng/hết hạn): đánh dấu thêm isShipping:true để KHÔNG đụng tới kho và VAT,
+//    chỉ trừ tiền (giống cơ chế dòng Ship).
+// Bản IN chỉ hiện "Trả hàng" / "Đổi date" (không kèm nhập lại kho / hỏng, không nhập kho).
+// Ghi chú đầy đủ vẫn lưu trong hóa đơn để hiện ở báo cáo, trang Bán hàng, Nhập kho.
+function __printShortNote(n) {
+    n = String(n == null ? '' : n);
+    if (/^\s*Trả hàng/i.test(n)) return 'Trả hàng';
+    if (/^\s*Đổi date/i.test(n)) return 'Đổi date';
+    return n;
+}
+function syncCartTotalTitle(grand) {
+    const t = document.getElementById('cart-total-title');
+    if (t) t.textContent = grand < 0 ? 'Hoàn trả khách' : 'Tổng thanh toán';
+    const d = document.getElementById('cart-total-display');
+    if (d) d.style.color = grand < 0 ? '#e11d48' : '';
+}
 // --- TIỀN SHIP: thêm vào giỏ hàng giống 1 dòng sản phẩm, nhưng KHÔNG kiểm tra/trừ tồn kho
 // (không có NXT), và KHÔNG tính thuế/VAT dù hoá đơn có bật thuế (xem updateGrandTotal,
 // saveAndPrint, updateExistingSale - đều loại trừ item có isShipping:true khỏi phần tính
@@ -16513,7 +16580,7 @@ function renderSellCart() {
         { l: 'border-cyan-400', chip: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-300' }
     ];
     body.innerHTML = sellCart.map((i, index) => {
-        const rowBg = i.isShipping
+        const rowBg = i.returnLine ? 'bg-rose-50 dark:bg-rose-500/10' : i.isShipping
             ? 'bg-sky-50 dark:bg-sky-500/10'
             : i.dateSwapStatus === 'expired'
                 ? 'bg-red-50 dark:bg-red-500/10'
@@ -16521,13 +16588,13 @@ function renderSellCart() {
                     ? 'bg-amber-50 dark:bg-amber-500/10'
                     : (index % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50 dark:bg-slate-800/70');
         const c = accentColors[index % accentColors.length];
-        return "\n    <tr class=\"" + rowBg + " border-b-2 border-gray-200 dark:border-slate-700 " + c.l + " border-l-4 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors\">\n        <td class=\"p-2 w-[120px] md:w-1/4\">\n            <div class=\"w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-left font-bold break-words text-[11px] p-1.5\">" + (i.isShipping ? '🚚 ' : '') + "" + escapeHtml(i.name == null ? '' : i.name) + "</div>" + "\n        </td>\n        \n        <td class=\"p-2 w-[60px] md:w-[50px]\">" +
-            (i.isShipping
+        return "\n    <tr class=\"" + rowBg + " border-b-2 border-gray-200 dark:border-slate-700 " + c.l + " border-l-4 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors\">\n        <td class=\"p-2 w-[120px] md:w-1/4\">\n            <div class=\"w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-left font-bold break-words text-[11px] p-1.5\">" + (i.returnLine ? '↩ Trả hàng: ' : (i.isShipping ? '🚚 ' : '')) + "" + escapeHtml(i.name == null ? '' : i.name) + "</div>" + "\n        </td>\n        \n        <td class=\"p-2 w-[60px] md:w-[50px]\">" +
+            (i.returnLine ? ("<input type=\"number\" value=\"" + Math.abs(i.qty) + "\" step=\"any\" title=\"Số lượng khách trả\" class=\"w-full border border-rose-300 bg-rose-50 dark:bg-slate-950 dark:text-white rounded-lg text-center font-bold text-xs p-1.5 outline-none\" onchange=\"updateCartItem(" + index + ", 'qty', this.value)\">") : i.isShipping
                 ? "<div class=\"w-full text-center text-[10px] font-bold text-gray-400 p-1.5\">-</div>" : "<input type=\"number\" value=\"" + i.qty + "\" step=\"any\" class=\"w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-center font-bold text-xs p-1.5 focus:ring-2 focus:ring-blue-400 outline-none\" \n                   onchange=\"updateCartItem(" + index + ", 'qty', this.value)\">") + "\n        </td>\n        \n        <td class=\"p-2 w-[90px] md:w-[70px]\">" +
             (i.dateSwap
                 ? "<div class=\"w-full text-center text-[10px] font-bold text-gray-400 p-1.5\">\u0110\u1ED5i date</div>" : "<input type=\"number\" value=\"" + i.price + "\" class=\"w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-right text-xs p-1.5 focus:ring-2 focus:ring-blue-400 outline-none\" onchange=\"updateCartItem(" + index + ", 'price', this.value)\">") + "\n        </td>\n        \n        <!-- G\u1ED9p chung 1 \u00F4: \u00F4 nh\u1EADp ghi ch\u00FA + n\u00FAt ch\u1ECDn tr\u1EA1ng th\u00E1i \"\u0110\u1ED5i date\" l\u1ED3ng ngay b\u00EAn\n             trong g\u00F3c ph\u1EA3i (kh\u00F4ng c\u00F2n 2 khung t\u00E1ch r\u1EDDi nh\u01B0 tr\u01B0\u1EDBc) - v\u1EEBa g\u00F5 ghi ch\u00FA v\u1EEBa\n             ch\u1ECDn tr\u1EA1ng th\u00E1i ngay tr\u00EAn c\u00F9ng 1 \u00F4, kh\u00F4ng t\u1ED1n th\u00EAm ch\u1ED7. N\u00FAt ch\u1ECDn \u0111\u01B0\u1EE3c v\u1EBD R\u00D5\n             th\u00E0nh 1 \u00F4 vu\u00F4ng bo g\u00F3c c\u00F3 vi\u1EC1n + n\u1EC1n ri\u00EAng (gi\u1ED1ng 1 n\u00FAt b\u1EA5m th\u1EADt s\u1EF1), kh\u00F4ng\n             c\u00F2n l\u00E0 icon \"tr\u00F4i n\u1ED5i\" m\u1EDD nh\u1EA1t kh\u00F3 nh\u1EADn ra nh\u01B0 tr\u01B0\u1EDBc - b\u1EA5m v\u00E0o m\u1EDF ra v\u1EABn th\u1EA5y\n             \u0111\u1EE7 ch\u1EEF \"B\u00ECnh th\u01B0\u1EDDng/C\u00F2n h\u1EA1n/H\u1EBFt h\u1EA1n\". D\u00F2ng \"Ti\u1EC1n ship\" KH\u00D4NG c\u00F3 l\u1EF1a ch\u1ECDn \u0110\u1ED5i\n             date (kh\u00F4ng \u00E1p d\u1EE5ng), ch\u1EC9 hi\u1EC7n nh\u00E3n \"Kh\u00F4ng t\u00EDnh thu\u1EBF/kho\" cho r\u00F5. -->\n        <td class=\"p-2 w-[130px] md:w-24\">" +
-            (i.isShipping
-                ? "<div class=\"w-full text-center text-[9px] font-bold text-sky-500 p-1.5 leading-tight\">Kh\u00F4ng t\u00EDnh<br>thu\u1EBF/kho</div>" : "<div class=\"relative w-full\">\n                <input type=\"text\" value=\"" + (i.note || '') + "\" placeholder=\"Ghi ch\u00FA...\" \n                       class=\"w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-xs p-1.5 pr-8 focus:ring-2 focus:ring-blue-400 outline-none\" \n                       onchange=\"updateCartItem(" + index + ", 'note', this.value)\">\n                <select class=\"absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 rounded-md border shadow-sm text-[12px] leading-none outline-none cursor-pointer appearance-none text-center p-0 flex items-center justify-center transition-colors " + (i.dateSwapStatus === 'expired' ? 'bg-red-100 border-red-300 text-red-600 dark:bg-red-500/20 dark:border-red-500/50' : (i.dateSwap ? 'bg-amber-100 border-amber-300 text-amber-600 dark:bg-amber-500/20 dark:border-amber-500/50' : 'bg-slate-200 border-slate-300 text-slate-500 dark:bg-slate-700 dark:border-slate-600 hover:bg-slate-300 dark:hover:bg-slate-600')) + "\" \n                        onchange=\"setCartDateSwap(" + index + ", this.value)\" \n                        title=\"B\u1EA5m \u0111\u1EC3 ch\u1ECDn: B\u00ECnh th\u01B0\u1EDDng / C\u00F2n h\u1EA1n / H\u1EBFt h\u1EA1n (\u0111ang: " + (i.dateSwapStatus === 'expired' ? 'Hết hạn' : (i.dateSwap ? 'Còn hạn' : 'Bình thường')) + ")\">\n                    <option value=\"\" " + (!i.dateSwap ? 'selected' : '') + ">\u2796 B\u00ECnh th\u01B0\u1EDDng</option>\n                    <option value=\"ok\" " + (i.dateSwapStatus === 'ok' ? 'selected' : '') + ">\uD83D\uDD04 C\u00F2n h\u1EA1n</option>\n                    <option value=\"expired\" " + (i.dateSwapStatus === 'expired' ? 'selected' : '') + ">\u26D4 H\u1EBFt h\u1EA1n</option>\n                </select>\n            </div>") + ("\n        </td>\n        \n        <td class=\"p-2 w-[90px] md:w-20\">\n            <div class=\"w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 rounded-lg text-right font-black text-[11px] p-1.5 " + c.chip.split(' ').filter(x => x.includes('text-')).join(' ') + "\">" + i.total.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</div>\n        </td>\n        \n        <td class=\"p-2 w-[40px] md:w-8\">\n            <button onclick=\"removeSellItem(" + index + ")\" class=\"w-full h-full min-h-[30px] flex items-center justify-center border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 rounded-lg text-red-500 hover:bg-red-500 hover:text-white font-bold transition-colors\">\u2715</button>\n        </td>\n    </tr>\n");
+            (i.isShipping && !i.returnLine
+                ? "<div class=\"w-full text-center text-[9px] font-bold text-sky-500 p-1.5 leading-tight\">Kh\u00F4ng t\u00EDnh<br>thu\u1EBF/kho</div>" : "<div class=\"relative w-full\">\n                <input type=\"text\" value=\"" + (i.note || '') + "\" placeholder=\"Ghi ch\u00FA...\" \n                       class=\"w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 dark:text-white rounded-lg text-xs p-1.5 pr-8 focus:ring-2 focus:ring-blue-400 outline-none " + ((i.returnLine && i.returnStatus === 'bad') || i.dateSwapStatus === 'expired' ? 'text-red-600 font-bold' : '') + "\" \n                       onchange=\"updateCartItem(" + index + ", 'note', this.value)\">\n                <select class=\"absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 rounded-md border shadow-sm text-[12px] leading-none outline-none cursor-pointer appearance-none text-center p-0 flex items-center justify-center transition-colors " + (i.returnLine && i.returnStatus === 'bad' ? 'bg-red-100 border-red-300 text-red-600 dark:bg-red-500/20 dark:border-red-500/50' : i.returnLine ? 'bg-rose-100 border-rose-300 text-rose-600 dark:bg-rose-500/20 dark:border-rose-500/50' : i.dateSwapStatus === 'expired' ? 'bg-red-100 border-red-300 text-red-600 dark:bg-red-500/20 dark:border-red-500/50' : (i.dateSwap ? 'bg-amber-100 border-amber-300 text-amber-600 dark:bg-amber-500/20 dark:border-amber-500/50' : 'bg-slate-200 border-slate-300 text-slate-500 dark:bg-slate-700 dark:border-slate-600 hover:bg-slate-300 dark:hover:bg-slate-600')) + "\" \n                        onchange=\"setCartDateSwap(" + index + ", this.value)\" \n                        title=\"B\u1EA5m \u0111\u1EC3 ch\u1ECDn: B\u00ECnh th\u01B0\u1EDDng / \u0110\u1ED5i date / Tr\u1EA3 h\u00E0ng (\u0111ang: " + (i.returnLine ? (i.returnStatus === 'ok' ? 'Trả hàng - nhập lại kho' : 'Trả hàng - không nhập kho') : (i.dateSwapStatus === 'expired' ? 'Đổi date - hỏng, không nhập kho' : (i.dateSwap ? 'Đổi date - nhập lại kho' : 'Bình thường'))) + ")\">\n                    <option value=\"\" " + (!i.dateSwap && !i.returnLine ? 'selected' : '') + ">\u2796 B\u00ECnh th\u01B0\u1EDDng</option>\n                    <option value=\"ok\" " + (i.dateSwapStatus === 'ok' ? 'selected' : '') + ">\uD83D\uDD04 \u0110\u1ED5i date - nh\u1EADp l\u1EA1i kho</option>\n                    <option value=\"expired\" style=\"color:#dc2626\" " + (i.dateSwapStatus === 'expired' ? 'selected' : '') + ">\u26D4 \u0110\u1ED5i date - h\u1ECFng, kh\u00F4ng nh\u1EADp kho</option>\n                    <option value=\"ret_ok\" " + (i.returnLine && i.returnStatus === 'ok' ? 'selected' : '') + ">\u21A9\uFE0F Tr\u1EA3 h\u00E0ng - nh\u1EADp l\u1EA1i kho</option>\n                    <option value=\"ret_bad\" style=\"color:#dc2626\" " + (i.returnLine && i.returnStatus === 'bad' ? 'selected' : '') + ">\u21A9\uFE0F Tr\u1EA3 h\u00E0ng - h\u1ECFng, kh\u00F4ng nh\u1EADp kho</option>\n                </select>\n            </div>") + ("\n        </td>\n        \n        <td class=\"p-2 w-[90px] md:w-20\">\n            <div class=\"w-full border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 rounded-lg text-right font-black text-[11px] p-1.5 " + c.chip.split(' ').filter(x => x.includes('text-')).join(' ') + "\">" + i.total.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</div>\n        </td>\n        \n        <td class=\"p-2 w-[40px] md:w-8\">\n            <button onclick=\"removeSellItem(" + index + ")\" class=\"w-full h-full min-h-[30px] flex items-center justify-center border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-950 rounded-lg text-red-500 hover:bg-red-500 hover:text-white font-bold transition-colors\">\u2715</button>\n        </td>\n    </tr>\n");
     }).join('');
     updateGrandTotal();
 }
@@ -16539,23 +16606,48 @@ function setCartDateSwap(index, value) {
     const item = sellCart[index];
     if (!item)
         return;
-    if (value) {
+    // 1) Nếu dòng đang là "Trả hàng" thì hoàn về dòng bán thường trước (qty dương, bật lại kho/VAT)
+    if (item.returnLine) {
+        item.qty = Math.abs(parseFloat(item.qty) || 0);
+        item.returnLine = false;
+        item.returnStatus = null;
+        item.isShipping = false;
+        if (/^Trả hàng/.test(item.note || ''))
+            item.note = '';
+    }
+    // 2) Chọn "Trả hàng": số lượng chuyển sang ÂM (kho cộng lại / tiền trừ vào đơn)
+    if (value === 'ret_ok' || value === 'ret_bad') {
+        if (item.dateSwap) {
+            item.price = (item._prevPrice != null) ? item._prevPrice : item.price;
+            item.dateSwap = false;
+            item.dateSwapStatus = null;
+        }
+        item.qty = -Math.abs(parseFloat(item.qty) || 1);
+        item.returnLine = true;
+        item.returnStatus = value === 'ret_ok' ? 'ok' : 'bad';
+        item.isShipping = value === 'ret_bad'; // hàng hỏng: chỉ trừ tiền, không đụng kho/VAT
+        item.note = value === 'ret_ok' ? 'Trả hàng - nhập lại kho' : 'Trả hàng - không nhập kho';
+        item.total = item.qty * item.price;
+    }
+    else if (value) {
         if (!item.dateSwap)
             item._prevPrice = item.price;
         item.dateSwap = true;
         item.dateSwapStatus = value; // 'ok' | 'expired'
         item.price = 0;
         item.total = 0;
-        item.note = 'Đổi date';
+        item.note = value === 'expired' ? 'Đổi date - hỏng, không nhập kho' : 'Đổi date - nhập lại kho';
     }
     else {
         item.dateSwap = false;
         item.dateSwapStatus = null;
         item.price = (item._prevPrice != null) ? item._prevPrice : item.price;
         item.total = item.qty * item.price;
-        if ((item.note || '') === 'Đổi date')
+        if (/^Đổi date/.test(item.note || ''))
             item.note = '';
     }
+    if (typeof recomputeCurrentStock === 'function')
+        recomputeCurrentStock();
     renderSellCart();
     if (typeof updateCartTotalDisplay === 'function')
         updateCartTotalDisplay();
@@ -17929,7 +18021,7 @@ async function quickAdd(productName, event, fromCamera) {
         };
         sellCart.push(targetItem);
     } else {
-        targetItem = sellCart.find(item => item && item.name === productName && !item.isShipping);
+        targetItem = sellCart.find(item => item && item.name === productName && !item.isShipping && !item.returnLine);
         if (targetItem) {
             targetItem.qty = Math.round(((Number(targetItem.qty) || 0) + addStep) * 1e6) / 1e6;
             targetItem.total = targetItem.qty * targetItem.price;
@@ -18005,6 +18097,7 @@ function updateCartTotalDisplay() {
     const taxTotal = subTotal * (vatRate / 100);
     const grandTotal = subTotal + taxTotal + shippingTotal;
     totalDisplay.innerText = grandTotal.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + ' đ';
+    syncCartTotalTitle(grandTotal);
     // Đồng bộ thanh giỏ hàng nổi trên điện thoại (chỉ hiện khi giỏ hàng có ít nhất 1 món)
     const mobileBar = document.getElementById('mobile-cart-bar');
     if (mobileBar) {
@@ -18048,6 +18141,14 @@ async function updateCartItem(index, field, value) {
     const item = sellCart[index];
     if (field === 'qty') {
         const newQty = Math.max(0, parseFloat(value) || 0);
+        if (item.returnLine) {
+            // Dòng Trả hàng: ô SL hiển thị số dương, lưu nội bộ số ÂM. Không kiểm tra tồn.
+            if (newQty === 0) { const ri = sellCart.indexOf(item); if (ri > -1) sellCart.splice(ri, 1); }
+            else { item.qty = -newQty; item.total = item.qty * item.price; }
+            if (typeof recomputeCurrentStock === 'function') recomputeCurrentStock();
+            renderSellCart(); updateGrandTotal();
+            return;
+        }
         if (item.isShipping) { item.qty = newQty; item.total = item.qty * item.price; renderSellCart(); updateGrandTotal(); return; }
         try {
             const oldQty = Number(item.qty || 0);
@@ -18606,7 +18707,7 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
             const subTotal = i.qty * i.price;
             const taxAmount = subTotal * (vr / 100);
             taxableSubTotal += subTotal;
-            return "<tr>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + stt++ + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:left;\">" + (i.name || '') + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + (i.unit || 'Cái') + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;font-weight:bold;\">" + (Number(i.qty) > 0 ? i.qty : '') + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + i.price.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + (Number(i.qty) > 0 ? subTotal.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) : '') + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + vr + "%</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + taxAmount.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + (i.note || '&nbsp;') + "</div></td>\n            </tr>";
+            return "<tr>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + stt++ + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:left;\">" + (i.returnLine ? '↩ Trả hàng: ' : '') + (i.name || '') + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + (i.unit || 'Cái') + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;font-weight:bold;\">" + (Number(i.qty) > 0 || i.returnLine ? i.qty : '') + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + i.price.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + (Number(i.qty) > 0 || i.returnLine ? subTotal.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) : '') + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + vr + "%</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + taxAmount.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + (__printShortNote(i.note) || '&nbsp;') + "</div></td>\n            </tr>";
         }, 9);
         // 1b. Render "Tiền ship" - vẫn hiện đúng giá/thành tiền thật (khác với dòng Đổi date
         // luôn = 0), CỘNG vào tổng thanh toán, nhưng KHÔNG chịu thuế VAT (luôn 0%/0đ ở đây
@@ -18614,7 +18715,7 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
         shippingItems.forEach(i => {
             const subTotal = i.qty * i.price;
             shippingSubTotal += subTotal;
-            html += "<tr>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + stt++ + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:left;\">\uD83D\uDE9A " + (i.name || 'Tiền ship') + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">-</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;font-weight:bold;\">" + i.qty + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + i.price.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + subTotal.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">0%</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">0</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + (i.note || '&nbsp;') + "</div></td>\n            </tr>";
+            html += "<tr>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + stt++ + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:left;\">" + (i.returnLine ? '↩ Trả hàng: ' + (i.name || '') : '\uD83D\uDE9A ' + (i.name || 'Tiền ship')) + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">-</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;font-weight:bold;\">" + i.qty + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + i.price.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + subTotal.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">0%</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">0</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + (__printShortNote(i.note) || '&nbsp;') + "</div></td>\n            </tr>";
         });
         // 2. Render nhóm sản phẩm có ghi chú date xuống dưới (KHÔNG TÍNH TIỀN - GIÁ VÀ THÀNH TIỀN = 0)
         if (changeDateItems.length > 0) {
@@ -18624,7 +18725,7 @@ function renderHoaDonTemplate({ receiptId, customer, address, phone, note, items
                 const subTotal = 0;
                 const taxAmount = 0;
                 // subTotalAll không cộng thêm tiền của nhóm này
-                html += "<tr>\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + stt++ + "</div></td>\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:left;\">" + (i.name || '') + "</div></td>\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + (i.unit || 'Cái') + "</div></td>\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;font-weight:bold;\">" + i.qty + "</div></td>\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + itemPrice.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</div></td>\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + subTotal.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</div></td>\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + vr + "%</div></td>\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + taxAmount.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</div></td>\n                    <td style=\"padding: 7px 8px; color: #d9534f; font-weight: bold;\"><div style=\"height:100%;text-align:center;\">" + (i.note || '&nbsp;') + "</div></td>\n                </tr>";
+                html += "<tr>\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + stt++ + "</div></td>\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:left;\">" + (i.name || '') + "</div></td>\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + (i.unit || 'Cái') + "</div></td>\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;font-weight:bold;\">" + i.qty + "</div></td>\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + itemPrice.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</div></td>\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + subTotal.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</div></td>\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + vr + "%</div></td>\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + taxAmount.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</div></td>\n                    <td style=\"padding: 7px 8px; color: #d9534f; font-weight: bold;\"><div style=\"height:100%;text-align:center;\">" + (__printShortNote(i.note) || '&nbsp;') + "</div></td>\n                </tr>";
             });
         }
         elItems.innerHTML = html;
@@ -18821,7 +18922,7 @@ function renderXuatKhoTemplate({ receiptId, customer, address, phone, note, item
                     ? '<td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">' + salePrice.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + '</div></td>' +
                       '<td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">' + (salePrice > 0 ? suggestedRetail : 0).toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + '</div></td>' /* Đơn giá chỉnh về 0 (tặng) => Giá bán đề xuất cũng = 0 */
                     : '<td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">' + salePrice.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + '</div></td>';
-                html += "<tr>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + stt++ + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:left;\">" + (i.name || '') + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + (i.unit || 'Cái') + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;font-weight:bold;\">" + i.qty + "</div></td>\n                " + priceCells + "\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + thanhTien.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + (i.note || '&nbsp;') + "</div></td>\n            </tr>";
+                html += "<tr>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + stt++ + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:left;\">" + (i.returnLine ? '↩ Trả hàng: ' : '') + (i.name || '') + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + (i.unit || 'Cái') + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;font-weight:bold;\">" + i.qty + "</div></td>\n                " + priceCells + "\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + thanhTien.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</div></td>\n                <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + (__printShortNote(i.note) || '&nbsp;') + "</div></td>\n            </tr>";
             });
         });
         // 2. Render nhóm sản phẩm có ghi chú date xuống dưới (KHÔNG TÍNH TIỀN - GIÁ VÀ THÀNH TIỀN = 0)
@@ -18833,7 +18934,7 @@ function renderXuatKhoTemplate({ receiptId, customer, address, phone, note, item
                 const priceCellsDate = exportPriceType === 'wholesale'
                     ? '<td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">0</div></td><td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">0</div></td>'
                     : '<td style="padding: 7px 8px;"><div style="height:100%;text-align:center;">0</div></td>';
-                html += "<tr>\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + stt++ + "</div></td>\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:left;\">" + (i.name || '') + "</div></td>\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + (i.unit || 'Cái') + "</div></td>\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;font-weight:bold;\">" + i.qty + "</div></td>\n                    " + priceCellsDate + "\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + thanhTien.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</div></td>\n                    <td style=\"padding: 7px 8px; color: #d9534f; font-weight: bold;\"><div style=\"height:100%;text-align:center;\">" + (i.note || '&nbsp;') + "</div></td>\n                </tr>";
+                html += "<tr>\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + stt++ + "</div></td>\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:left;\">" + (i.name || '') + "</div></td>\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + (i.unit || 'Cái') + "</div></td>\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;font-weight:bold;\">" + i.qty + "</div></td>\n                    " + priceCellsDate + "\n                    <td style=\"padding: 7px 8px;\"><div style=\"height:100%;text-align:center;\">" + thanhTien.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + "</div></td>\n                    <td style=\"padding: 7px 8px; color: #d9534f; font-weight: bold;\"><div style=\"height:100%;text-align:center;\">" + (__printShortNote(i.note) || '&nbsp;') + "</div></td>\n                </tr>";
             });
         }
         xkItemsEl.innerHTML = html;
@@ -19124,7 +19225,8 @@ async function editInvoiceFromHistory(docId) {
                 // mặt trừ kho thì 2 loại này giờ được tính giống nhau); dòng "Tiền ship" sẽ bị
                 // hiểu nhầm thành sản phẩm thật, bị tính thuế và bị trừ kho sai.
                 dateSwap: !!i.dateSwap, dateSwapStatus: i.dateSwapStatus || null,
-                isShipping: !!i.isShipping
+                isShipping: !!i.isShipping,
+                returnLine: !!i.returnLine, returnStatus: i.returnStatus || null
             };
         });
         // Điền lại thông tin khách hàng / thanh toán / ghi chú / thuế / số phiếu (giữ nguyên)
@@ -21202,8 +21304,37 @@ async function saveAndPrint() {
 //==================================================================
 async function viewInvoiceDetails(docId) {
     try {
-        const doc = await db.collection('sales').doc(docId).get();
-        const data = doc.data();
+        // Khi hết READ (hoặc mất mạng): dùng dữ liệu phiếu đã có sẵn trong bộ nhớ của trang Lịch sử,
+        // không đọc lại Firestore. Chỉ đọc lại khi READ bình thường để có dữ liệu mới nhất.
+        const _isBlocked = e => typeof isFirestoreReadBlockedError === 'function' && isFirestoreReadBlockedError(e);
+        let data = null;
+        if (!window.__firestoreReadUnavailable) {
+            try {
+                const doc = await db.collection('sales').doc(docId).get();
+                data = doc.exists ? doc.data() : null;
+            } catch (readErr) {
+                if (!_isBlocked(readErr))
+                    throw readErr;
+                if (typeof window.__markFirestoreReadUnavailable === 'function')
+                    window.__markFirestoreReadUnavailable(readErr, ['sales']);
+            }
+        }
+        if (!data) {
+            data = (window.__saleDataCache && window.__saleDataCache[docId]) || (window.allSales || []).find(s => s.id === docId) || null;
+            if (!data && typeof getDocFromLocalCache === 'function') {
+                try {
+                    const localSnap = await getDocFromLocalCache(db.collection('sales').doc(docId));
+                    if (localSnap && localSnap.data) data = localSnap.data();
+                } catch (_) { /* không có trong bộ nhớ cục bộ */ }
+            }
+        }
+        if (!data)
+            throw new Error('Hệ thống đang hết lượt đọc (READ) và phiếu này chưa có trong bộ nhớ. Hãy mở lại Lịch sử hóa đơn khi READ có lại.');
+        // Chuẩn hóa ngày về dạng có toDate() (bản cache có thể là {__ts}/Date/chuỗi)
+        if (data.date && typeof data.date.toDate !== 'function') {
+            const _dv = data.date.__ts || (data.date.seconds ? data.date.seconds * 1000 : data.date);
+            data = { ...data, date: { toDate: () => new Date(_dv) } };
+        }
         window.__saleDataCache = window.__saleDataCache || {};
         window.__saleDataCache[docId] = JSON.parse(JSON.stringify(data, (k,v)=>{
             if (v && typeof v.toDate === 'function') return {__ts:v.toDate().toISOString()};
@@ -21227,7 +21358,9 @@ async function viewInvoiceDetails(docId) {
         // này từng có trả hàng, kèm nút "Hoàn tác" cho từng lần (phòng khi bấm nhầm).
         let returnsHtml = '';
         if (data.hasReturns) {
-            const returnsSnap = await db.collection('returns').where('originalInvoiceId', '==', docId).get();
+            let returnsSnap = { docs: [] };
+            try { returnsSnap = await db.collection('returns').where('originalInvoiceId', '==', docId).get(); }
+            catch (_) { /* hết READ: bỏ qua danh sách trả hàng, vẫn xem được phiếu */ }
             const returnDocs = returnsSnap.docs
                 .map(d => ({ id: d.id, ...d.data() }))
                 .sort((a, b) => (b.date?.toDate ? b.date.toDate() : 0) - (a.date?.toDate ? a.date.toDate() : 0));
@@ -21548,12 +21681,12 @@ async function reprintSale(docId) {
                 });
                 const netItems = (data.items || [])
                     .map(it => {
-                    if (it.dateSwap || !returnedQtyByName[it.name])
+                    if (it.dateSwap || it.returnLine || !returnedQtyByName[it.name])
                         return it;
                     const newQty = Math.round(((parseFloat(it.qty) || 0) - returnedQtyByName[it.name]) * 100) / 100;
                     return { ...it, qty: newQty };
                 })
-                    .filter(it => it.dateSwap || (parseFloat(it.qty) || 0) > 0.000001);
+                    .filter(it => it.dateSwap || it.returnLine || (parseFloat(it.qty) || 0) > 0.000001);
                 const vatRate = parseFloat(data.vatRate) || 0;
                 // SỬA LỖI: TRƯỚC ĐÂY tính thuế trên CẢ dòng "Tiền Ship" (isShipping:true) -
                 // không nhất quán với mọi nơi khác (Tiền Ship luôn không chịu thuế VAT). Giờ
@@ -21838,12 +21971,13 @@ async function deleteSale(docId) {
 
         const remainingReturnedByName = { ...returnedQtyByName };
         const itemsToRestore = items.map(it => {
+            if (it.returnLine) return { ...it }; // dòng Trả hàng (qty âm): giữ nguyên để hoàn tác đúng chiều
             const origQty = parseFloat(it.qty) || 0;
             const alreadyReturned = remainingReturnedByName[it.name] || 0;
             const used = Math.min(origQty, alreadyReturned);
             remainingReturnedByName[it.name] = alreadyReturned - used;
             return { ...it, qty: origQty - used };
-        }).filter(it => it.qty > 0.000001 && !it.isShipping);
+        }).filter(it => (it.returnLine || it.qty > 0.000001) && !it.isShipping);
 
         let linkedAutoReceipts = [];
         const linkedOkItems = [];
@@ -22724,6 +22858,7 @@ function updateGrandTotal() {
     const totalDisplay = document.getElementById('cart-total-display');
     if (totalDisplay) {
         totalDisplay.innerText = grandTotal.toLocaleString('vi-VN', { timeZone: APP_TIME_ZONE }) + ' đ';
+        syncCartTotalTitle(grandTotal);
     }
 }
 // Hàm lọc hóa đơn theo ngày tháng
@@ -24112,10 +24247,10 @@ function receiptTypeLabelPlain(type, dateStatus, isReturn) {
     if (type !== 'Nhập đổi')
         return 'Nhập mới';
     if (dateStatus === 'expired')
-        return 'Đổi date — Hết hạn (huỷ)';
+        return 'Đổi date — Hỏng, không nhập kho';
     if (dateStatus === 'mixed')
         return 'Đổi date (còn hạn + hết hạn)';
-    return 'Đổi date — Còn hạn';
+    return 'Đổi date — Nhập lại kho';
 }
 function printReceiptsById(docIds) {
     if (!docIds || !docIds.length)
@@ -31869,7 +32004,7 @@ window.runStockReportReconciliation = async function () {
             if(sidStored&&saleMap[sidStored])issue.push(['danger','Trùng số hóa đơn',sidStored]);
             if(saleMap[sidDoc]&&saleMap[sidDoc]!==d.id)issue.push(['danger','Trùng ID hóa đơn',sidDoc]);
             saleMap[sidStored]=d.id;saleMap[sidDoc]=d.id;
-            (x.items||[]).forEach(it=>{const k=norm(it.name);if(!k||it.isShipping)return;const q=num(it.qty);if(q<=0)issue.push(['danger','SL bán không hợp lệ',sid+' / '+(it.name||'')+' = '+q]);const m=ensure(k);m.out+=q;m.sales++;if(it.dateSwap)m.dateOut+=q;});
+            (x.items||[]).forEach(it=>{const k=norm(it.name);if(!k||it.isShipping)return;const q=num(it.qty);if(q<=0&&!it.returnLine)issue.push(['danger','SL bán không hợp lệ',sid+' / '+(it.name||'')+' = '+q]);const m=ensure(k);m.out+=q;m.sales++;if(it.dateSwap)m.dateOut+=q;});
             if(x.dateSwapSyncNeeded===true)issue.push(['warn','Đổi date chưa đồng bộ',sid]);
         });
         const linkedReturnReceipts=new Set();receiptsSnap.forEach(d=>{const x=d.data()||{};if(x.isReturn===true){linkedReturnReceipts.add(d.id);if(x.id)linkedReturnReceipts.add(String(x.id));}});
