@@ -3701,6 +3701,9 @@ html.glass.dark .choices.is-open .choices__inner {
                 <i data-lucide="log-in"></i> <span>Đăng nhập</span>
             </button>
         </form>
+        <button type="button" id="login-bio-btn" class="lg-btn hidden" style="margin-top:12px;background:rgba(255,255,255,.14);" onclick="loginWithBiometric()">
+            <i data-lucide="fingerprint"></i> <span>Đăng nhập bằng vân tay / khuôn mặt</span>
+        </button>
         <p class="lg-foot">Phiên bản v85 · Đăng nhập lại mỗi lần mở để bảo mật</p>
     </div>
   </div>
@@ -3972,6 +3975,12 @@ document.addEventListener('DOMContentLoaded', function () {
         <button onclick="openChangePasswordForm()" class="rail-hide w-full text-left px-2.5 py-1.5 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[2px] bg-slate-100 dark:bg-slate-950/50 border-slate-300 dark:border-slate-800 hover:bg-slate-200 dark:hover:bg-slate-900/60 shadow-[0_1px_2px_rgba(0,0,0,0.08)] text-slate-700 dark:text-slate-300">
             <i data-lucide="key-round" class="w-5 h-5 shrink-0"></i> 
             <span class="sidebar-text text-xs font-medium">Đổi mật khẩu</span>
+        </button>
+
+        <!-- Nút Vân tay / Khuôn mặt -->
+        <button onclick="manageBiometricLogin()" class="rail-hide w-full text-left px-2.5 py-1.5 rounded-lg flex items-center gap-2.5 transition-all duration-150 transform hover:-translate-y-[1px] active:translate-y-[1px] border-b-[2px] bg-slate-100 dark:bg-slate-950/50 border-slate-300 dark:border-slate-800 hover:bg-slate-200 dark:hover:bg-slate-900/60 shadow-[0_1px_2px_rgba(0,0,0,0.08)] text-slate-700 dark:text-slate-300">
+            <i data-lucide="fingerprint" class="w-5 h-5 shrink-0"></i>
+            <span class="sidebar-text text-xs font-medium">Vân tay / Khuôn mặt</span>
         </button>
 
         <!-- Nút Đăng xuất -->
@@ -6687,6 +6696,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 <i data-lucide="key-round" class="w-3.5 h-3.5"></i> Đổi ngay
             </button>
         </div>
+        <div class="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-800 rounded-2xl p-3 flex flex-col gap-2 items-center text-center">
+            <p class="font-bold text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-1.5 justify-center">
+                <i data-lucide="fingerprint" class="w-3.5 h-3.5"></i> Vân tay / Khuôn mặt
+            </p>
+            <button id="btn-bio-login-ql" onclick="manageBiometricLogin()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white px-2 py-2 rounded-xl font-bold text-xs transition-all duration-75 border-b-[3px] border-emerald-700 hover:-translate-y-0.5 active:translate-y-[1px] active:border-b-[1px] shadow-md flex items-center gap-1.5 justify-center">
+                <i data-lucide="fingerprint" class="w-3.5 h-3.5"></i> Bật / Tắt
+            </button>
+        </div>
     </div>
 
 
@@ -7340,6 +7357,7 @@ async function handleLogin(event) {
         setAppVisible(true);
         applyPermissionsToUI(userObj);
         goToFirstAllowedPage(userObj);
+        setTimeout(() => { try { offerBiometricSetup(userObj); } catch (_) { } }, 900);
     }
     catch (e) {
         errEl.textContent = e.message || 'Đăng nhập thất bại!';
@@ -10388,6 +10406,166 @@ function toggleLoginPassword() {
         lucide.createIcons();
     input.focus();
 }
+// ===== ĐĂNG NHẬP BẰNG VÂN TAY / KHUÔN MẶT (WebAuthn - dùng khóa sinh trắc học có sẵn của điện thoại) =====
+// Cách hoạt động: sau khi đăng nhập bằng mật khẩu, bật tính năng -> điện thoại tạo 1 khóa gắn với vân tay/khuôn mặt.
+// Lần sau bấm "Đăng nhập bằng vân tay / khuôn mặt" -> điện thoại yêu cầu quét sinh trắc học; đúng thì vào luôn.
+// Dữ liệu vân tay/khuôn mặt KHÔNG rời khỏi điện thoại và phần mềm không lưu mật khẩu. Chỉ chạy khi mở bằng https://.
+const BIO_STORE_KEY = 'pos_bio_creds_v1';
+function __bioLoad() { try { return JSON.parse(localStorage.getItem(BIO_STORE_KEY) || '{}') || {}; } catch (_) { return {}; } }
+function __bioSave(m) { try { localStorage.setItem(BIO_STORE_KEY, JSON.stringify(m)); } catch (_) { } }
+function __b64u(buf) {
+    const b = new Uint8Array(buf); let str = '';
+    for (let i = 0; i < b.length; i++) str += String.fromCharCode(b[i]);
+    return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function __b64uToBuf(t) {
+    t = String(t).replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '=';
+    const bin = atob(t); const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out.buffer;
+}
+function __bioSupported() {
+    return !!(window.PublicKeyCredential && navigator.credentials && window.isSecureContext &&
+        (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1'));
+}
+async function __bioAvailable() {
+    if (!__bioSupported()) return false;
+    try { return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable(); } catch (_) { return false; }
+}
+function __bioPickUsername() {
+    const m = __bioLoad();
+    const typed = ((document.getElementById('login-username') || {}).value || '').trim().toLowerCase();
+    if (typed) return typed;
+    const remembered = (typeof getRememberedUsername === 'function' ? getRememberedUsername() : '') || '';
+    if (remembered && m[remembered]) return remembered;
+    const keys = Object.keys(m);
+    return keys.length === 1 ? keys[0] : '';
+}
+async function refreshBiometricButton() {
+    const btn = document.getElementById('login-bio-btn');
+    if (!btn) return;
+    const u = __bioPickUsername();
+    const ok = !!(u && __bioLoad()[u]) && await __bioAvailable();
+    btn.classList.toggle('hidden', !ok);
+    btn.dataset.user = ok ? u : '';
+}
+function __bioErrorText(e, action) {
+    const n = e && e.name;
+    if (n === 'NotAllowedError' || n === 'AbortError') return 'Bạn đã hủy hoặc quét không thành công. Hãy thử lại, hoặc đăng nhập bằng mật khẩu.';
+    if (n === 'SecurityError') return 'Cần mở phần mềm bằng đường link https:// (không mở file trực tiếp) mới dùng được vân tay / khuôn mặt.';
+    if (n === 'NotSupportedError') return 'Thiết bị hoặc trình duyệt này chưa hỗ trợ vân tay / khuôn mặt.';
+    return 'Không thể ' + action + ': ' + ((e && e.message) || 'lỗi không xác định');
+}
+async function enableBiometricFor(userObj) {
+    const cred = await navigator.credentials.create({
+        publicKey: {
+            challenge: crypto.getRandomValues(new Uint8Array(32)),
+            rp: { name: 'POS Pro', id: location.hostname },
+            user: { id: new TextEncoder().encode('pos:' + userObj.username), name: userObj.username, displayName: userObj.displayName || userObj.username },
+            pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+            authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'discouraged' },
+            timeout: 60000,
+            attestation: 'none'
+        }
+    });
+    if (!cred) throw new Error('Không tạo được khóa sinh trắc học.');
+    const m = __bioLoad();
+    m[userObj.username] = { id: __b64u(cred.rawId), at: Date.now(), user: userObj };
+    __bioSave(m);
+    try { localStorage.removeItem('pos_bio_declined_' + userObj.username); } catch (_) { }
+}
+async function offerBiometricSetup(userObj) {
+    if (!userObj || !(await __bioAvailable())) return;
+    if (__bioLoad()[userObj.username]) return;
+    let declined = false;
+    try { declined = localStorage.getItem('pos_bio_declined_' + userObj.username) === '1'; } catch (_) { }
+    if (declined) return;
+    const r = await Swal.fire({
+        icon: 'question',
+        title: 'Đăng nhập nhanh bằng vân tay / khuôn mặt?',
+        text: 'Lần sau mở phần mềm trên thiết bị này, chỉ cần quét vân tay hoặc khuôn mặt, không phải gõ mật khẩu.',
+        showCancelButton: true, showDenyButton: true,
+        confirmButtonText: 'Bật ngay', denyButtonText: 'Không hỏi lại', cancelButtonText: 'Để sau'
+    });
+    if (r.isDenied) { try { localStorage.setItem('pos_bio_declined_' + userObj.username, '1'); } catch (_) { } return; }
+    if (!r.isConfirmed) return;
+    try {
+        await enableBiometricFor(userObj);
+        Swal.fire({ icon: 'success', title: 'Đã bật đăng nhập vân tay / khuôn mặt', timer: 1800, showConfirmButton: false });
+    } catch (e) { Swal.fire('Chưa bật được', __bioErrorText(e, 'bật'), 'warning'); }
+}
+async function manageBiometricLogin() {
+    const cur = getCurrentUser();
+    if (!cur) return;
+    if (!__bioSupported()) {
+        Swal.fire('Chưa dùng được', 'Vân tay / khuôn mặt chỉ hoạt động khi mở phần mềm bằng đường link https:// (không mở file trực tiếp từ máy).', 'info');
+        return;
+    }
+    if (!(await __bioAvailable())) {
+        Swal.fire('Thiết bị chưa hỗ trợ', 'Thiết bị này chưa cài khóa màn hình bằng vân tay / khuôn mặt (hoặc Windows Hello). Hãy cài trong phần Cài đặt của thiết bị rồi thử lại.', 'info');
+        return;
+    }
+    const m = __bioLoad();
+    if (m[cur.username]) {
+        const r = await Swal.fire({ icon: 'question', title: 'Tắt đăng nhập vân tay / khuôn mặt?', text: 'Thiết bị này sẽ phải đăng nhập bằng mật khẩu như cũ.', showCancelButton: true, confirmButtonText: 'Tắt', cancelButtonText: 'Giữ nguyên' });
+        if (r.isConfirmed) {
+            delete m[cur.username]; __bioSave(m);
+            Swal.fire({ icon: 'success', title: 'Đã tắt', timer: 1200, showConfirmButton: false });
+        }
+        return;
+    }
+    try {
+        await enableBiometricFor(cur);
+        Swal.fire({ icon: 'success', title: 'Đã bật đăng nhập vân tay / khuôn mặt', text: 'Lần sau bấm nút "Đăng nhập bằng vân tay / khuôn mặt" ở màn hình đăng nhập.', timer: 2500, showConfirmButton: false });
+    } catch (e) { Swal.fire('Chưa bật được', __bioErrorText(e, 'bật'), 'warning'); }
+}
+async function loginWithBiometric() {
+    const btn = document.getElementById('login-bio-btn');
+    const username = (btn && btn.dataset.user) || __bioPickUsername();
+    const m = __bioLoad();
+    const rec = m[username];
+    const errEl = document.getElementById('login-error');
+    if (errEl) errEl.classList.add('hidden');
+    if (!rec) return;
+    const showErr = msg => { if (errEl) { errEl.textContent = msg; errEl.classList.remove('hidden'); } };
+    if (btn) { btn.disabled = true; btn.classList.add('opacity-60'); }
+    try {
+        const assertion = await navigator.credentials.get({
+            publicKey: {
+                challenge: crypto.getRandomValues(new Uint8Array(32)),
+                allowCredentials: [{ type: 'public-key', id: __b64uToBuf(rec.id), transports: ['internal'] }],
+                userVerification: 'required',
+                timeout: 60000,
+                rpId: location.hostname
+            }
+        });
+        if (!assertion) throw new Error('Không xác thực được vân tay / khuôn mặt.');
+        // Xác thực xong -> nạp lại tài khoản (kiểm tra còn hoạt động + quyền mới nhất)
+        let userObj = null;
+        try {
+            const doc = await db.collection('app_users').doc(username).get();
+            if (!doc.exists) { delete m[username]; __bioSave(m); throw new Error('Tài khoản không còn tồn tại.'); }
+            const data = doc.data();
+            if (data.active === false) throw new Error('Tài khoản đã bị khóa. Vui lòng liên hệ Admin.');
+            userObj = { username: doc.id, displayName: data.displayName || doc.id, role: data.role || 'staff', permissions: data.permissions || [], canDelete: data.canDelete === true };
+            rec.user = userObj; __bioSave(m);
+        } catch (readErr) {
+            const blocked = typeof isFirestoreReadBlockedError === 'function' && isFirestoreReadBlockedError(readErr);
+            if (blocked && rec.user) userObj = rec.user; // hết READ: dùng thông tin đã lưu lần trước
+            else throw readErr;
+        }
+        setCurrentUser(userObj);
+        setRememberedUsername(username);
+        document.getElementById('login-screen').style.display = 'none';
+        setAppVisible(true);
+        applyPermissionsToUI(userObj);
+        goToFirstAllowedPage(userObj);
+    } catch (e) {
+        showErr((e && (e.name === 'NotAllowedError' || e.name === 'AbortError' || e.name === 'SecurityError' || e.name === 'NotSupportedError')) ? __bioErrorText(e, 'đăng nhập') : ((e && e.message) || 'Đăng nhập bằng vân tay / khuôn mặt thất bại!'));
+    } finally {
+        if (btn) { btn.disabled = false; btn.classList.remove('opacity-60'); }
+    }
+}
 // --- KHỞI ĐỘNG HỆ THỐNG ĐĂNG NHẬP ---
 async function initAuthSystem() {
     await ensureDefaultAdmin();
@@ -10400,6 +10578,11 @@ async function initAuthSystem() {
         if (el)
             el.value = rememberedUser;
     }
+    try {
+        const _ue = document.getElementById('login-username');
+        if (_ue && !_ue.__bioBound) { _ue.addEventListener('input', () => refreshBiometricButton()); _ue.__bioBound = true; }
+        refreshBiometricButton();
+    } catch (_) { }
     if (typeof lucide !== 'undefined')
         lucide.createIcons();
     setTimeout(() => {
